@@ -68,12 +68,12 @@ Python toolkit for SHIELDHIT and Fluka
 Installation
 ============
 
-::
+Official version ::
 
     pip install pymchelper
 
 
-:: Development version
+Development version ::
 
     pip install -i https://testpypi.python.org/pypi pymchelper
 
