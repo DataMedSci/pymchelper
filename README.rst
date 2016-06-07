@@ -32,11 +32,11 @@ Overview
     :target: https://readthedocs.org/projects/pymchelper
     :alt: Documentation Status
 
-.. |travis| image:: https://travis-ci.org/grzanka/pymchelper.svg?branch=master
+.. |travis| image:: https://travis-ci.org/DataMedSci/pymchelper.svg?branch=master
     :alt: Travis-CI Build Status
-    :target: https://travis-ci.org/grzanka/pymchelper
+    :target: https://travis-ci.org/DataMedSci/pymchelper
 
-.. |appveyor| image:: https://ci.appveyor.com/api/projects/status/github/grzanka/pymchelper?branch=master&svg=true
+.. |appveyor| image:: https://ci.appveyor.com/api/projects/status/github/DataMedSci/pymchelper?branch=master&svg=true
     :alt: Appveyor Build Status
     :target: https://ci.appveyor.com/project/grzanka/pymchelper
 
