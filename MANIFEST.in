@@ -1,0 +1,21 @@
+  include *.rst
+  include *.txt
+  include *.py
+  include LICENSE
+  include requirements.txt
+  include tests/requirements-test.txt
+  recursive-include docs *.py
+  recursive-include docs *.rst
+  recursive-include pymchelper *.py
+  recursive-include tests *.py
+  include versioneer.py
+  include pymchelper/_version.py
+
+  exclude .gitkeep
+  exclude .gitconfig
+  exclude tox.ini
+  exclude .travis.yml
+  exclude appveyor.yml
+  prune .travis
+  prune install_deps.sh
+

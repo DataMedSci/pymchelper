@@ -1,0 +1,105 @@
+language: python
+
+cache:
+  directories:
+  - ~/.cache/pip
+  - ~/.pyenv
+
+before_cache:
+  - rm -f $HOME/.cache/pip/log/debug.log
+
+matrix:
+    include:
+        - os: linux
+          python: 2.7
+          env: TOXENV=py27
+        - os: linux
+          python: 3.2
+          env: TOXENV=py32 VENVVER="<14.0.0" PIPVER="<8.0.0"
+        - os: linux
+          python: 3.3
+          env: TOXENV=py33
+        - os: linux
+          python: 3.4
+          env: TOXENV=py34
+        - os: linux
+          python: 3.5
+          env: TOXENV=py35
+        - os: linux
+          python: 3.5-dev
+          env: TOXENV=py35
+        - os: linux
+          python: nightly
+          env: TOXENV=py36
+        - os: linux
+          python: 3.4
+          env: TOXENV=docs
+        - os: linux
+          python: 2.7
+          env: TOXENV=pep8
+        - os: linux
+          python: 3.4
+          env: TOXENV=pep8
+        - os: linux
+          python: 3.4
+          env:
+            - TOXENV=packaging
+            - PYPIUSER=grzanka
+            #  pypi secured password (PYPIPASS variable), you need to update it to your own if you want to use it
+            - secure: "PYPI_PASS_ENCRYPTED_TO_BE_REPLACED"
+            - PYPITESTUSER=grzanka
+            #  pypitest secured password (PYPITESTPASS variable), you need to update it to your own if you want to use it
+            - secure: "PYPITEST_PASS_ENCRYPTED_TO_BE_REPLACED"
+            #  Code Climate secured token (CODECLIMATE_REPO_TOKEN variable), you need to update it to your own if you want to use it
+            - secure: "CODE_CLIMATE_TOKEN_TO_BE_REPLACED"
+        - os: osx
+          language: generic
+          env: TOXENV=py35
+        - os: osx
+          language: generic
+          env: TOXENV=py34
+        - os: osx
+          language: generic
+          env: TOXENV=py33
+        - os: osx
+          language: generic
+          env: TOXENV=py32 VENVVER="<14.0.0" PIPVER="<8.0.0"
+        - os: osx
+          language: generic
+          env: TOXENV=py27
+#    uncomment and adjust if you want to allow some failures
+#    allow_failures:
+#        - os: osx
+#          language: generic
+#          env: TOXENV=py27
+
+# travis-ci runs by default on ancient Ubuntu 12.04 (precise)
+# following options will give us Ubuntu 14.04 (trusty)
+sudo: required
+dist: trusty
+
+before_install:
+  - PYTHON_VERSION="py3"
+  - if [[ $TOXENV == "py27" ]]; then PYTHON_VERSION="py2" ; fi
+  - sudo bash ./install_deps.sh $PYTHON_VERSION
+
+install:
+  - if [[ $TRAVIS_OS_NAME == "linux" ]]; then travis_wait bash ./.travis/install_linux.sh ; fi
+  - if [[ $TRAVIS_OS_NAME == "osx" ]]; then travis_wait 60 bash ./.travis/install_osx.sh ; fi
+
+# if scipy is used, then installation from pip last longer than 10min, thus we add travis_wait
+script:
+  - if [[ $TRAVIS_OS_NAME == "linux" ]]; then travis_wait tox --notest && tox -- -n 8 ; fi
+  - if [[ $TRAVIS_OS_NAME == "osx" ]]; then travis_wait bash ./.travis/run_osx.sh ; fi
+
+after_success:
+  # deploy to both servers: test and normal
+  - if [[ $TRAVIS_PULL_REQUEST == "false" ]] && [[ $TRAVIS_OS_NAME == "linux" ]] && [[ $TOXENV == "packaging" ]]; then bash .travis/deploy_package.sh pypitest ; fi
+  # send coverage data
+  - if [[ $TRAVIS_PULL_REQUEST == "false" ]] && [[ $TRAVIS_OS_NAME == "linux" ]] && [[ $TOXENV == "packaging" ]]; then bash .travis/send_coverage.sh pypitest ; fi
+  # deploy to normal if tag is present
+  - if [[ $TRAVIS_TAG != "" ]] && [[ $TOXENV == "packaging" ]]; then bash .travis/deploy_package.sh pypi ; fi
+
+notifications:
+  email:
+    - grzanka@agh.edu.pl

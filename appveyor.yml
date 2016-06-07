@@ -1,0 +1,104 @@
+# based on https://github.com/audreyr/cookiecutter/blob/master/appveyor.yml
+
+# validation page for appveyor config: https://ci.appveyor.com/tools/validate-yaml
+
+# http://timcera.bitbucket.org/posts/appveyor_finally.html
+# https://github.com/ogrisel/python-winbuilder
+# http://tjelvarolsson.com/blog/how-to-continuously-test-your-python-code-on-windows-using-appveyor/
+
+environment:
+  matrix:
+    - platform: x86
+      PYTHON: "C:\\Python27"
+      PYTHON_VERSION: "2.7"
+
+    - platform: x64
+      PYTHON: "C:\\Python34"
+      PYTHON_VERSION: "3.4"
+
+#    - platform: x64
+#      PYTHON: "C:\\Python27-x64"
+#      TOX_ENV: "py27"
+
+#    - platform: x64
+#      PYTHON: "C:\\Python27-x64"
+#      TOX_ENV: "py27"
+
+#  temporarily disabled as Appveyor seems to have broken config of Python 3.3
+#    - PYTHON: "C:\\Python33"
+#      TOX_ENV: "py33"
+#
+#    - PYTHON: "C:\\Python33-x64"
+#      TOX_ENV: "py33"
+
+#    - platform: x86
+#      PYTHON: "C:\\Python34"
+#      TOX_ENV: "py34"
+#
+#    - platform: x64
+#      PYTHON: "C:\\Python34-x64"
+#      TOX_ENV: "py34"
+#
+#    - platform: x86
+#      PYTHON: "C:\\Python35"
+#      TOX_ENV: "py35"
+#
+#    - platform: x64
+#      PYTHON: "C:\\Python35-x64"
+#      TOX_ENV: "py35"
+#
+#    - platform: x64
+#      PYTHON: "C:\\Python34-x64"
+#      TOX_ENV: "docs"
+#
+#    - platform: x64
+#      PYTHON: "C:\\Python34-x64"
+#      TOX_ENV: "packaging"
+#
+#    - platform: x64
+#      PYTHON: "C:\\Python27-x64"
+#      TOX_ENV: "py3pep8"
+#
+#    - platform: x64
+#      PYTHON: "C:\\Python34-x64"
+#      TOX_ENV: "pep8"
+
+# until we fix code of example project, lets allow failure here
+#matrix:
+#  allow_failures:
+#      - TOX_ENV: "py27"
+#      - TOX_ENV: "py33"
+
+
+init:
+  - set PATH=%PYTHON%;%PYTHON%\Scripts;%PATH%
+  - "git config --system http.sslcainfo \"C:\\Program Files\\Git\\mingw64\\ssl\\certs\\ca-bundle.crt\""
+  - python -V
+  - "%PYTHON%/python -c \"import struct;print(8 * struct.calcsize(\'P\'))\""
+
+install:
+  - set MINICONDAPATH=C:\Miniconda
+  - ps: If ($env:Platform -Match "x64") {$env:MINICONDAPATH="C:\Miniconda-x64"}
+  - set PATH=%MINICONDAPATH%\Scripts;%PATH%
+  - conda config --set always_yes yes --set changeps1 no
+  - conda update -q conda
+  - conda create -q --name python%PYTHON_VERSION% python=%PYTHON_VERSION%
+  - activate python%PYTHON_VERSION%
+  - python -V
+  - conda install -q --name python%PYTHON_VERSION% setuptools wheel numpy scipy
+  - pip install -r tests/requirements-test.txt
+  - pip install -r requirements.txt
+
+before_test:
+  - python -c "import numpy as np;print(np.version.version)"
+  - python -c "import scipy as sp;print(sp.version.version)"
+  - python %MINICONDAPATH%\envs\python%PYTHON_VERSION%\scripts\versioneer install
+
+build: false
+
+after_test:
+  # This step builds your wheels.
+  - python setup.py bdist_wheel
+
+test_script:
+  - py.test
