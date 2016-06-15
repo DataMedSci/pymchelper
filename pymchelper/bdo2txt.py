@@ -24,7 +24,8 @@ import numpy as np
 # !! - IDET(6) : Z of particle to be scored
 # !! - IDET(7) : A of particle to be scored (only integers here)
 # !! - IDET(8) : Detector material parameter
-# !! - IDET(9) : Number of energy/amu (or LET) differential bins, negative if log.
+# !! - IDET(9) : Number of energy/amu (or LET) differential bins,
+#                   negative if log.
 # !! - IDET(10): Type of differential scoring, either LET, E/amu or polar angle
 # !! - IDET(11): Starting zone of scoring for zone scoring
 # !!
@@ -77,7 +78,9 @@ class SHBinaryReader:
         detector.particle = idet[0][3]
 
         try:
-            detector.geotyp = SHGeoType[header['geotyp'][0].decode('ascii').strip().lower()]
+            detector.geotyp = SHGeoType[
+                header['geotyp'][0].decode('ascii').strip().lower()
+            ]
         except Exception:
             detector.geotyp = SHGeoType.unknown
         detector.nstat = header['nstat'][0]
@@ -95,20 +98,24 @@ class SHBinaryReader:
     def read_payload(self, detector):
         print("Reading data:", self.filename)
 
-        if detector.geotyp == SHGeoType.unknown or detector.dettyp == SHDetType.unknown:
+        if detector.geotyp == SHGeoType.unknown \
+                or detector.dettyp == SHDetType.unknown:
             detector.data = []
             return
 
         # next read the data:
-        record_dtype = np.dtype([('trash', ('S158')), ('bin2', ('<f8'), detector.rec_size)])
+        record_dtype = np.dtype([
+            ('trash', ('S158')), ('bin2', ('<f8'), detector.rec_size)
+        ])
         record = np.fromfile(self.filename, record_dtype, count=-1)
         detector.data = record['bin2'][:][0]
         if detector.dimension == 0:
             detector.data = [detector.data]
 
         # normalize result if we need that.
-        if detector.dettyp not in (
-                SHDetType.dlet, SHDetType.tlet, SHDetType.avg_energy, SHDetType.avg_beta, SHDetType.material):
+        if detector.dettyp not in (SHDetType.dlet, SHDetType.tlet,
+                                   SHDetType.avg_energy, SHDetType.avg_beta,
+                                   SHDetType.material):
             detector.data /= np.float64(detector.nstat)
 
         detector.counter = 1
@@ -211,19 +218,20 @@ class SHFortranWriter:
 
     def write(self, det):
         from fortranformatter import format_d, format_e
-        data = np.transpose([list(det.x), list(det.y), list(det.z), det.v])
         header = "#   DETECTOR OUTPUT\n"
         ax = self._axis_name(det.geotyp, 0)
         ay = self._axis_name(det.geotyp, 1)
         az = self._axis_name(det.geotyp, 2)
-        header += "#   {:s} BIN:{:6d} {:s} BIN:{:6d} {:s} BIN:{:6d}\n".format(ax, det.nx, ay, det.ny, az, det.nz)
-        header += "#   JPART:{:6d} DETECTOR TYPE:{:s}\n".format(det.particle, str(det.dettyp).ljust(10))
-        header += "#   {:s} START:{:s}".format(ax, format_d(10, 3, det.xmin)) + \
-                  " {:s} START:{:s}".format(ay, format_d(10, 3, det.ymin)) + \
-                  " {:s} START:{:s}".format(az, format_d(10, 3, det.zmin)) + "\n"
-        header += "#   {:s} END  :{:s}".format(ax, format_d(10, 3, det.xmax)) + \
-                  " {:s} END  :{:s}".format(ay, format_d(10, 3, det.ymax)) + \
-                  " {:s} END  :{:s}".format(az, format_d(10, 3, det.zmax)) + "\n"
+        header += "#   {:s} BIN:{:6d} {:s} BIN:{:6d} {:s} BIN:{:6d}\n".format(
+            ax, det.nx, ay, det.ny, az, det.nz)
+        header += "#   JPART:{:6d} DETECTOR TYPE:{:s}\n".format(
+            det.particle, str(det.dettyp).ljust(10))
+        header += "#   {:s} START:{:s}".format(ax, format_d(10, 3, det.xmin))
+        header += " {:s} START:{:s}".format(ay, format_d(10, 3, det.ymin))
+        header += " {:s} START:{:s}\n".format(az, format_d(10, 3, det.zmin))
+        header += "#   {:s} END  :{:s}".format(ax, format_d(10, 3, det.xmax))
+        header += " {:s} END  :{:s}".format(ay, format_d(10, 3, det.ymax))
+        header += " {:s} END  :{:s}\n".format(az, format_d(10, 3, det.zmax))
         header += "#   PRIMARIES:" + format_d(10, 3, det.nstat) + "\n"
         with open(self.filename, 'w') as fout:
             print("Writing: " + self.filename)
@@ -233,8 +241,10 @@ class SHFortranWriter:
                 y = float('nan') if np.isnan(y) else y
                 z = float('nan') if np.isnan(z) else z
                 v = float('nan') if np.isnan(v) else v
-                tmp = format_e(14, 7, x) + " " + format_e(14, 7, y) + " " + format_e(14, 7, z) + " " + format_e(23, 16,
-                                                                                                                v) + "\n"
+                tmp = format_e(14, 7, x) + " " + \
+                    format_e(14, 7, y) + " " + \
+                    format_e(14, 7, z) + " " + \
+                    format_e(23, 16, v) + "\n"
                 fout.write(tmp)
 
 
@@ -244,7 +254,8 @@ class SHPlotDataWriter:
 
     def write(self, detector):
         print("Writing: " + self.filename)
-        axis_values = [list(detector.axis_values(i, plotting_order=True)) for i in range(detector.dimension)]
+        axis_values = [list(detector.axis_values(i, plotting_order=True))
+                       for i in range(detector.dimension)]
         fmt = "%g" + " %g" * detector.dimension
         data = np.transpose(axis_values + [detector.data])
         np.savetxt(self.filename, data, fmt=fmt, delimiter=' ')
@@ -274,8 +285,11 @@ splot '{data_filename}' with pm3d
         if detector.dimension in (1, 2):
             with open(self.script_filename, 'w') as script_file:
                 print("Writing: " + self.script_filename)
-                script_file.write(self.header.format(plot_filename=self.plot_filename))
-                script_file.write(self.plotting_command[detector.dimension].format(data_filename=self.data_filename))
+                script_file.write(
+                    self.header.format(plot_filename=self.plot_filename))
+                plt_cmd = self.plotting_command[detector.dimension]
+                script_file.write(
+                    plt_cmd.format(data_filename=self.data_filename))
 
 
 class SHImageWriter:
@@ -411,18 +425,24 @@ class SHDetect:
         result = ""
         result += "data" + str(self.data[0].shape) + "\n"
         result += "nstat = {:d}\n".format(self.nstat)
-        result += "X {:g} - {:g} ({:d} items)\n".format(self.xmin, self.xmax, self.nx)
-        result += "Y {:g} - {:g} ({:d} items)\n".format(self.ymin, self.ymax, self.ny)
-        result += "Z {:g} - {:g} ({:d} items)\n".format(self.zmin, self.zmax, self.nz)
+        result += "X {:g} - {:g} ({:d} items)\n".format(
+            self.xmin, self.xmax, self.nx)
+        result += "Y {:g} - {:g} ({:d} items)\n".format(
+            self.ymin, self.ymax, self.ny)
+        result += "Z {:g} - {:g} ({:d} items)\n".format(
+            self.zmin, self.zmax, self.nz)
         result += "dettyp {:s}\n".format(self.dettyp.name)
         result += "counter of files {:d}\n".format(self.counter)
         result += "dimension {:d}\n".format(self.dimension)
         result += "Xs {:d}\n".format(len(list(self.x)))
-        result += "Xp {:d}\n".format(len(list(self.axis_values(0, plotting_order=True))))
+        result += "Xp {:d}\n".format(
+            len(list(self.axis_values(0, plotting_order=True))))
         result += "Ys {:d}\n".format(len(list(self.y)))
-        result += "Yp {:d}\n".format(len(list(self.axis_values(1, plotting_order=True))))
+        result += "Yp {:d}\n".format(
+            len(list(self.axis_values(1, plotting_order=True))))
         result += "Zs {:d}\n".format(len(list(self.z)))
-        result += "Zp {:d}\n".format(len(list(self.axis_values(2, plotting_order=True))))
+        result += "Zp {:d}\n".format(
+            len(list(self.axis_values(2, plotting_order=True))))
         result += "V {:d}\n".format(len(list(self.data)))
         return result
 
@@ -494,9 +514,12 @@ class SHDetect:
     def is_valid(self):
         valid_counters = self.nx > 0 and self.ny > 0 and self.nz > 0
         data_exists = self.data is not None
-        borders_correct = self.xmax >= self.xmin and self.ymax >= self.ymin and self.zmax >= self.zmin
+        borders_correct = self.xmax >= self.xmin \
+            and self.ymax >= self.ymin \
+            and self.zmax >= self.zmin
         nstat_correct = self.nstat > 0
-        return valid_counters and data_exists and borders_correct and nstat_correct
+        return valid_counters and data_exists \
+            and borders_correct and nstat_correct
 
     # 0,1,2,3
     @property
@@ -509,10 +532,12 @@ class SHDetect:
     @property
     def _axes_plotting_order(self):
         axis_data = list(enumerate((self.nx, self.ny, self.nz)))
-        return tuple(i for i, ax in sorted(axis_data, key=lambda x: x[1], reverse=True))
+        sorted_data = sorted(axis_data, key=lambda x: x[1], reverse=True)
+        return tuple(i for i, ax in sorted_data)
 
 
-def merge_list(input_file_list, output_file, conv_names=[SHConverters.standard.name], nan=False):
+def merge_list(input_file_list, output_file,
+               conv_names=[SHConverters.standard.name], nan=False):
     first = SHDetect()
     first.read(input_file_list[0])
 
@@ -533,8 +558,8 @@ def merge_list(input_file_list, output_file, conv_names=[SHConverters.standard.n
     first.save(output_file, conv_names)
 
 
-def merge_many(input_file_list, conv_names=[SHConverters.standard.name], nan=False):
-    sources_list = []
+def merge_many(input_file_list,
+               conv_names=[SHConverters.standard.name], nan=False):
 
     core_names_dict = defaultdict(list)
     for name in input_file_list:
@@ -549,11 +574,19 @@ def merge_many(input_file_list, conv_names=[SHConverters.standard.name], nan=Fal
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument("inputfile", help='input filename, file list or pattern', type=str)
-    parser.add_argument("outputfile", help='output filename', nargs='?')
-    parser.add_argument("--many", help='merge data from various sources, discovering the name', action="store_true")
-    parser.add_argument("--nan", help='ignore NaN in averaging', action="store_true")
-    parser.add_argument("--converter", help='converters', default=[SHConverters.standard.name],
+    parser.add_argument("inputfile",
+                        help='input filename, file list or pattern', type=str)
+    parser.add_argument("outputfile",
+                        help='output filename', nargs='?')
+    parser.add_argument("--many",
+                        help='automatically merge data from various sources',
+                        action="store_true")
+    parser.add_argument("--nan",
+                        help='ignore NaN in averaging',
+                        action="store_true")
+    parser.add_argument("--converter",
+                        help='converters',
+                        default=[SHConverters.standard.name],
                         choices=SHConverters.__members__.keys(), nargs='+')
     args = parser.parse_args()
 

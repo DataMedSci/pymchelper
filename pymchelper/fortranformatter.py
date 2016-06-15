@@ -2,7 +2,7 @@ PROC_MIN_FIELD_WIDTH = 46
 PROC_DECIMAL_CHAR = '.'
 PROC_NO_LEADING_BLANK = False
 
-import math
+# based on https://bitbucket.org/brendanarnold/py-fortranformat
 
 
 def _swapchar(s, ind, newch):
@@ -101,21 +101,27 @@ def _compose_float_string(w, e, d, state, val, ftype):
     zero_flag = (tmp == 0)
     # === DTOA === (macro)
     # write the tmp value to the string buffer
-    # sprintf seems to allow negative number of decimal places, need to correct for this
+    # sprintf seems to allow negative number of decimal places,
+    # need to correct for this
     if ndigits <= 0:
         fmt = "%+-#{:d}e".format(PROC_MIN_FIELD_WIDTH)
     else:
         fmt = "%+-#{:d}.{:d}e".format(PROC_MIN_FIELD_WIDTH, ndigits - 1)
     buff = fmt % tmp
     # === WRITE_FLOAT === (macro)
-    return _output_float(w, d, e, state, ftype, buff, sign_bit, zero_flag, ndigits, edigits)
+    return _output_float(w, d, e, state,
+                         ftype, buff, sign_bit,
+                         zero_flag, ndigits, edigits)
 
 
-def _output_float(w, d, e, state, ft, buff, sign_bit, zero_flag, ndigits, edigits):
+def _output_float(w, d, e, state,
+                  ft, buff, sign_bit,
+                  zero_flag, ndigits, edigits):
     # nbefore - number of digits before the decimal point
     # nzero - number of zeros after the decimal point
     # nafter - number of digits after the decimal point
-    # nzero_real - number of zeros after the decimal point regardles of the precision
+    # nzero_real - number of zeros after the decimal point
+    #               regardles of the precision
 
     # Some hacks to change None to -1 (C convention)
     if w is None:
@@ -143,14 +149,16 @@ def _output_float(w, d, e, state, ft, buff, sign_bit, zero_flag, ndigits, edigit
     if ft in ['E', 'D']:
         i = state['scale']
         if (d <= 0) and (i == 0):
-            raise Exception("Precision not greater than zero in format specifier 'E' or 'D'")
+            raise Exception("Precision not greater "
+                            "than zero in format specifier 'E' or 'D'")
         if (i <= -d) or (i >= (d + 2)):
-            raise Exception("Scale factor out of range in format specifier 'E' or 'D'")
+            raise Exception("Scale factor out of range "
+                            "in format specifier 'E' or 'D'")
         if not zero_flag:
             ex = ex - i
         if i < 0:
             nbefore = 0
-            nzero = -i;
+            nzero = -i
             nafter = d + i
         elif i > 0:
             nbefore = i
@@ -164,9 +172,9 @@ def _output_float(w, d, e, state, ft, buff, sign_bit, zero_flag, ndigits, edigit
     # Round the value
     if (nbefore + nafter) == 0:
         ndigits = 0
-        if (nzero_real == d) and (int(digits[0]) >= 5):  # n.b. character comparison not very pythonic!
+        if (nzero_real == d) and (int(digits[0]) >= 5):
             # We rounded to zero but shouldn't have
-            nzero = nzero - 1
+            nzero -= 1
             nafter = 1
             digits = '1' + digits[1:]
             ndigits = 1
@@ -175,7 +183,7 @@ def _output_float(w, d, e, state, ft, buff, sign_bit, zero_flag, ndigits, edigit
         i = ndigits
         if int(digits[i]) >= 5:
             # Propagate the carry
-            i = i - 1
+            i -= 1
             while i >= 0:
                 digit = int(digits[i])
                 if digit != 9:
@@ -183,23 +191,23 @@ def _output_float(w, d, e, state, ft, buff, sign_bit, zero_flag, ndigits, edigit
                     break
                 else:
                     digits = _swapchar(digits, i, '0')
-                i = i - 1
+                i -= 1
             # Did the carry overflow?
             if i < 0:
                 digits = '1' + digits
                 if ft == 'F':
                     if nzero > 0:
-                        nzero = nzero - 1
-                        nafter = nafter + 1
+                        nzero -= 1
+                        nafter += 1
                     else:
-                        nbefore = nbefore + 1
+                        nbefore += 1
                 elif ft == 'EN':
-                    nbefore = nbefore + 1
+                    nbefore += 1
                     if nbefore == 4:
                         nbefore = 1
-                        ex = ex + 3
+                        ex += 3
                 else:
-                    ex = ex + 1
+                    ex += 1
     # Calculate the format of the exponent field
     if expchar is not None:
         # i = abs(ex)
@@ -224,12 +232,13 @@ def _output_float(w, d, e, state, ft, buff, sign_bit, zero_flag, ndigits, edigit
                 edigits = e + 2
     else:
         edigits = 0
-    # Zero values always output as positive, even if the value was egative before rounding
+    # Zero values always output as positive,
+    # even if the value was egative before rounding
     i = 0
     while i < ndigits:
         if digits[i] != '0':
             break
-        i = i + 1
+        i += 1
     if i == ndigits:
         # The output is zero so set sign accordingly
         sign = _calculate_sign(state, False)
@@ -239,25 +248,25 @@ def _output_float(w, d, e, state, ft, buff, sign_bit, zero_flag, ndigits, edigit
     # Work out how much padding is needed
     nblanks = w - (nbefore + nzero + nafter + edigits + 1)
     if sign != '':
-        nblanks = nblanks - 1
+        nblanks -= 1
     # Check value fits in specified width
     if (nblanks < 0) or (edigits == -1):
         return '*' * w
     # See if we have space for a zero before the decimal point
     if (nbefore == 0) and (nblanks > 0):
         leadzero = True
-        nblanks = nblanks - 1
+        nblanks -= 1
     else:
         leadzero = False
     out = ''
     # Pad to full field width
     if nblanks > 0:  # dtp->u.p.no_leading_blank
-        out = out + ' ' * nblanks
+        out += ' ' * nblanks
     # Attach the sign
-    out = out + sign
+    out += sign
     # Add the lead zero if necessary
     if leadzero:
-        out = out + '0'
+        out += '0'
     # Output portion before the decimal point padded with zeros
     if nbefore > 0:
         if nbefore > ndigits:
@@ -266,14 +275,14 @@ def _output_float(w, d, e, state, ft, buff, sign_bit, zero_flag, ndigits, edigit
             ndigits = 0
         else:
             i = nbefore
-            out = out + digits[:i]
+            out += digits[:i]
             digits = digits[i:]
-            ndigits = ndigits - i
+            ndigits -= i
     # Output the decimal point
-    out = out + PROC_DECIMAL_CHAR
+    out += PROC_DECIMAL_CHAR
     # Output the leading zeros after the decimal point
     if nzero > 0:
-        out = out + ('0' * nzero)
+        out += '0' * nzero
     # Output the digits after the decimal point, padded with zeros
     if nafter > 0:
         if nafter > ndigits:
@@ -283,27 +292,29 @@ def _output_float(w, d, e, state, ft, buff, sign_bit, zero_flag, ndigits, edigit
         zeros = '0' * (nafter - i)
         out = out + digits[:i] + zeros
         digits = digits[nafter:]
-        ndigits = ndigits - nafter
+        ndigits -= nafter
     # Output the exponent
     if expchar is not None:
         if expchar != ' ':
-            out = out + expchar
-            edigits = edigits - 1
+            out += expchar
+            edigits -= 1
         fmt = '%+0' + str(edigits) + 'd'
         tmp_buff = fmt % ex
-        out = out + tmp_buff
+        out += tmp_buff
     return out
 
 
 def format_d(w, d, val):
     e = None
     ftype = 'D'
-    state = {'blanks_as_zeros': False, 'incl_plus': False, 'position': 0, 'scale': 0, 'halt_if_no_vals': False}
+    state = {'blanks_as_zeros': False, 'incl_plus': False,
+             'position': 0, 'scale': 0, 'halt_if_no_vals': False}
     return _compose_float_string(w, e, d, state, val, ftype)
 
 
 def format_e(w, d, val):
     e = None
     ftype = 'E'
-    state = {'blanks_as_zeros': False, 'incl_plus': False, 'position': 0, 'scale': 0, 'halt_if_no_vals': False}
+    state = {'blanks_as_zeros': False, 'incl_plus': False,
+             'position': 0, 'scale': 0, 'halt_if_no_vals': False}
     return _compose_float_string(w, e, d, state, val, ftype)
