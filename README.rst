@@ -78,6 +78,10 @@ Development version ::
     pip install -i https://testpypi.python.org/pypi pymchelper
 
 
+of directly from GIT::
+
+    pip install versioneer
+    pip install git+https://github.com/DataMedSci/pymchelper.git
 
 Documentation
 =============
