@@ -573,7 +573,7 @@ def merge_many(input_file_list,
         merge_list(group_with_same_core, core_name + ".txt", conv_names, nan)
 
 
-def main(args):
+def main(args=sys.argv[1:]):
     parser = argparse.ArgumentParser()
     parser.add_argument("inputfile",
                         help='input filename, file list or pattern', type=str)
