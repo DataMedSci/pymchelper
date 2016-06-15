@@ -1,6 +1,4 @@
 import unittest
-import os
-import sys
 from pymchelper import bdo2txt
 
 
