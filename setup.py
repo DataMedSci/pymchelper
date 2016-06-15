@@ -53,8 +53,8 @@ setuptools.setup(
     ],
     entry_points={
         'console_scripts': [
-            'run_pymchelper=' + \
-            'pymchelper.run_pymchelper:main',
+            'bdo2txt=' + \
+            'pymchelper.bdo2txt:main',
         ],
     },
     cmdclass=versioneer.get_cmdclass(),
