@@ -6,6 +6,7 @@
 #
 #
 # Niels Bassler 2012
+import sys
 import argparse
 import glob
 from collections import namedtuple, defaultdict
@@ -572,7 +573,7 @@ def merge_many(input_file_list,
         merge_list(group_with_same_core, core_name + ".txt", conv_names, nan)
 
 
-if __name__ == '__main__':
+def main(args):
     parser = argparse.ArgumentParser()
     parser.add_argument("inputfile",
                         help='input filename, file list or pattern', type=str)
@@ -588,7 +589,7 @@ if __name__ == '__main__':
                         help='converters',
                         default=[SHConverters.standard.name],
                         choices=SHConverters.__members__.keys(), nargs='+')
-    args = parser.parse_args()
+    args = parser.parse_args(args)
 
     # TODO add filename discovery
 
@@ -603,3 +604,8 @@ if __name__ == '__main__':
         merge_many(files, args.converter, args.nan)
     else:
         merge_list(files, args.outputfile, args.converter, args.nan)
+
+    return 0
+
+if __name__ == '__main__':
+    sys.exit(main(sys.argv[1:]))
