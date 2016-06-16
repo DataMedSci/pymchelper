@@ -22,17 +22,11 @@ cat <<pypirc >${PYPIRC}
 [distutils]
 index-servers =
     pypi
-    pypitest
 
 [pypi]
 repository: https://pypi.python.org/pypi
 username: ${PYPIUSER}
 password: ${PYPIPASS}
-
-[pypitest]
-repository: https://testpypi.python.org/pypi
-username: ${PYPITESTUSER}
-password: ${PYPITESTPASS}
 pypirc
 
 if [ ! -e "${PYPIRC}" ]; then

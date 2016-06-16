@@ -72,16 +72,13 @@ Official version ::
 
     pip install pymchelper
 
-
-Development version ::
-
-    pip install -i https://testpypi.python.org/pypi pymchelper
-
-
-of directly from GIT::
+Development version directly from GIT::
 
     pip install versioneer
     pip install git+https://github.com/DataMedSci/pymchelper.git
+
+In case you don't have administrator rights, add --user flag to pip command.
+In this situation converter will be probably installed in ~/.local/bin directory.
 
 Documentation
 =============
