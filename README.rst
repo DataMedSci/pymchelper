@@ -86,7 +86,13 @@ of directly from GIT::
 Documentation
 =============
 
-https://pymchelper.readthedocs.io/
+
+Execute::
+
+    bdo2txt --help
+
+
+More on https://pymchelper.readthedocs.io/
 
 
 Features
