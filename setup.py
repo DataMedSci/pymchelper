@@ -3,9 +3,16 @@ from pkg_resources import parse_version
 
 
 def pip_command_output(pip_args):
+    '''
+    Get output (as a string) from pip command
+    :param pip_args: list o pip switches to pass
+    :return: string with results
+    '''
     import sys
     import pip
     from io import StringIO
+    # as pip will write to stdout we use some nasty hacks
+    # to substitute system stdout with our own
     old_stdout = sys.stdout
     sys.stdout = mystdout = StringIO()
     pip.main(pip_args)
@@ -16,6 +23,10 @@ def pip_command_output(pip_args):
 
 
 def setup_versioneer():
+    '''
+    Generate (temporarily) versioneer.py file in project root directory
+    :return:
+    '''
     try:
         # assume versioneer.py was generated using "versioneer install" command
         import versioneer
@@ -49,16 +60,24 @@ def setup_versioneer():
 
 
 def clean_cache():
+    '''
+    Python won't realise that new module has appeared in the runtime
+    We need to clean the cache of module finders. Hacking again
+    :return:
+    '''
     import importlib
-    try: # Python ver < 3.3
-      vermod = importlib.import_module("versioneer")
-      globals()["versioneer"] = vermod
+    try:  # Python ver < 3.3
+        vermod = importlib.import_module("versioneer")
+        globals()["versioneer"] = vermod
     except ImportError:
-      importlib.invalidate_caches()
-
+        importlib.invalidate_caches()
 
 
 def get_version():
+    '''
+    Get project version (using versioneer)
+    :return:
+    '''
     setup_versioneer()
     clean_cache()
     import versioneer
@@ -71,6 +90,10 @@ def get_version():
 
 
 def get_cmdclass():
+    '''
+    Get setuptools command class
+    :return:
+    '''
     setup_versioneer()
     clean_cache()
     import versioneer
@@ -79,6 +102,7 @@ def get_cmdclass():
 
 with open('README.rst') as readme_file:
     readme = readme_file.read()
+
 
 setuptools.setup(
     name='pymchelper',
