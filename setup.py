@@ -107,9 +107,9 @@ with open('README.rst') as readme_file:
 setuptools.setup(
     name='pymchelper',
     version=get_version(),
-    packages=['pymchelper'],
+    packages=setuptools.find_packages(),
     url='https://github.com/DataMedSci/pymchelper',
-    license='GPL',
+    license='MIT',
     author='Leszek Grzanka',
     author_email='grzanka@agh.edu.pl',
     description='Python toolkit for SHIELDHIT and Fluka',
@@ -143,5 +143,9 @@ setuptools.setup(
             'pymchelper.bdo2txt:main',
         ],
     },
+    install_requires=[
+        'enum34',
+        'numpy'
+    ],
     cmdclass=get_cmdclass()
 )
