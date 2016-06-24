@@ -218,7 +218,7 @@ class SHFortranWriter:
         self.filename = filename
 
     def write(self, det):
-        from fortranformatter import format_d, format_e
+        from pymchelper.fortranformatter import format_d, format_e
         header = "#   DETECTOR OUTPUT\n"
         ax = self._axis_name(det.geotyp, 0)
         ay = self._axis_name(det.geotyp, 1)
