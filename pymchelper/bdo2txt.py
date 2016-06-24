@@ -111,7 +111,7 @@ class SHBinaryReader:
         record = np.fromfile(self.filename, record_dtype, count=-1)
         detector.data = record['bin2'][:][0]
         if detector.dimension == 0:
-            detector.data = [detector.data]
+            detector.data = np.asarray([detector.data])
 
         # normalize result if we need that.
         if detector.dettyp not in (SHDetType.dlet, SHDetType.tlet,
