@@ -43,6 +43,7 @@ class SHConverters(IntEnum):
     plotdata = 1
     gnuplot = 2
     image = 3
+    tripcube = 4
 
 
 class SHBinaryReader:
@@ -323,6 +324,14 @@ class SHImageWriter:
             plt.close()
 
 
+class SHTripCubeWriter:
+    def __init__(self, filename):
+        self.plot_filename = filename + ".dos"
+
+    def write(self, detector):
+        pass
+
+
 class SHDetType(IntEnum):
     unknown = 0
     energy = 1
@@ -358,6 +367,7 @@ class SHGeoType(IntEnum):
     dcylz = 10
     dmshz = 11
     trace = 13
+    voxscore = 14
 
     def __str__(self):
         return self.name.upper()
