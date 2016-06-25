@@ -331,10 +331,17 @@ class SHTripCubeWriter:
     def write(self, detector):
         from pytrip import dos
         cube = dos.DosCube()
-        cube.create_empty_cube(1.0, detector.nx, detector.ny, detector.ny,
-                               pixel_size=(detector.xmax-detector.xmin) / detector.nx,
-                               slice_distance=(detector.zmax - detector.zmin) / detector.nz)
-        cube.cube = detector.data.reshape(detector.nx,detector.ny,detector.nz)
+        pixel_size_x = (detector.xmax - detector.xmin) / detector.nx
+        pixel_size_z = (detector.zmax - detector.zmin) / detector.nz
+        cube.create_empty_cube(1.0,
+                               detector.nx,
+                               detector.ny,
+                               detector.ny,
+                               pixel_size=pixel_size_x,
+                               slice_distance=pixel_size_z)
+        cube.cube = detector.data.reshape(detector.nx,
+                                          detector.ny,
+                                          detector.nz)
         cube.write(self.output_corename)
 
 
