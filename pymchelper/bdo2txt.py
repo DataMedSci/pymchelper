@@ -326,11 +326,16 @@ class SHImageWriter:
 
 class SHTripCubeWriter:
     def __init__(self, filename):
-        self.plot_filename = filename + ".dos"
+        self.output_corename = filename
 
     def write(self, detector):
         from pytrip import dos
-        cube = dos()
+        cube = dos.DosCube()
+        cube.create_empty_cube(1.0, detector.nx, detector.ny, detector.ny,
+                               pixel_size=(detector.xmax-detector.xmin) / detector.nx,
+                               slice_distance=(detector.zmax - detector.zmin) / detector.nz)
+        cube.cube = detector.data.reshape(detector.nx,detector.ny,detector.nz)
+        cube.write(self.output_corename)
 
 
 class SHDetType(IntEnum):
@@ -427,7 +432,8 @@ class SHDetect:
             SHConverters.standard: SHFortranWriter,
             SHConverters.gnuplot: SHGnuplotDataWriter,
             SHConverters.plotdata: SHPlotDataWriter,
-            SHConverters.image: SHImageWriter
+            SHConverters.image: SHImageWriter,
+            SHConverters.tripcube: SHTripCubeWriter
         }
         for conv_name in conv_names:
             writer = _converter_mapping[SHConverters[conv_name]](filename)
