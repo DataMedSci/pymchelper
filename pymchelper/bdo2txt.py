@@ -329,7 +329,8 @@ class SHTripCubeWriter:
         self.plot_filename = filename + ".dos"
 
     def write(self, detector):
-        pass
+        from pytrip import dos
+        cube = dos()
 
 
 class SHDetType(IntEnum):
