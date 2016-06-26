@@ -451,7 +451,6 @@ class SHDetect:
         }
         for conv_name in conv_names:
             writer = _converter_mapping[SHConverters[conv_name]](filename)
-            print(SHConverters[conv_name], SHConverters.image)
             if SHConverters[conv_name] == SHConverters.image:
                 writer.set_colormap(colormap)
             writer.write(self)
