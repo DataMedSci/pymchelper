@@ -297,6 +297,12 @@ splot '{data_filename}' with pm3d
 class SHImageWriter:
     def __init__(self, filename):
         self.plot_filename = filename + ".png"
+        self.colormap = SHImageWriter.default_colormap
+
+    default_colormap = 'gnuplot2'
+
+    def set_colormap(self, colormap):
+        self.colormap = colormap
 
     def write(self, detector):
         import matplotlib
@@ -318,7 +324,7 @@ class SHImageWriter:
                 ylist = np.asarray(list(ydata)).reshape(xn, yn)
                 zlist = detector.v.reshape(xn, yn)
 
-                plt.pcolormesh(xlist, ylist, zlist, cmap='YlOrRd')
+                plt.pcolormesh(xlist, ylist, zlist, cmap=self.colormap)
                 plt.colorbar()
             plt.savefig(self.plot_filename)
             plt.close()
@@ -434,7 +440,8 @@ class SHDetect:
         self.nstat += sum(det.nstat for det in other_detectors)
         self.counter += len(other_detectors)
 
-    def save(self, filename, conv_names=[SHConverters.standard.name]):
+    def save(self, filename, conv_names=[SHConverters.standard.name],
+             colormap=SHImageWriter.default_colormap):
         _converter_mapping = {
             SHConverters.standard: SHFortranWriter,
             SHConverters.gnuplot: SHGnuplotDataWriter,
@@ -444,6 +451,9 @@ class SHDetect:
         }
         for conv_name in conv_names:
             writer = _converter_mapping[SHConverters[conv_name]](filename)
+            print(SHConverters[conv_name], SHConverters.image)
+            if SHConverters[conv_name] == SHConverters.image:
+                writer.set_colormap(colormap)
             writer.write(self)
 
     def __str__(self):
@@ -562,7 +572,9 @@ class SHDetect:
 
 
 def merge_list(input_file_list, output_file,
-               conv_names=[SHConverters.standard.name], nan=False):
+               conv_names=[SHConverters.standard.name],
+               nan=False,
+               colormap=SHImageWriter.default_colormap):
     first = SHDetect()
     first.read(input_file_list[0])
 
@@ -580,12 +592,13 @@ def merge_list(input_file_list, output_file,
         first.average_with_nan(other_detectors)
     else:
         first.data /= np.float64(first.counter)
-    first.save(output_file, conv_names)
+    first.save(output_file, conv_names, colormap)
 
 
 def merge_many(input_file_list,
-               conv_names=[SHConverters.standard.name], nan=False):
-
+               conv_names=[SHConverters.standard.name],
+               nan=False,
+               colormap=SHImageWriter.default_colormap):
     core_names_dict = defaultdict(list)
     for name in input_file_list:
         if name.endswith(".bdo"):
@@ -594,7 +607,8 @@ def merge_many(input_file_list,
                 core_name = name[:-8]
             core_names_dict[core_name].append(name)
     for core_name, group_with_same_core in core_names_dict.items():
-        merge_list(group_with_same_core, core_name + ".txt", conv_names, nan)
+        merge_list(group_with_same_core, core_name + ".txt",
+                   conv_names, nan, colormap)
 
 
 def main(args=sys.argv[1:]):
@@ -613,6 +627,10 @@ def main(args=sys.argv[1:]):
                         help='converters',
                         default=[SHConverters.standard.name],
                         choices=SHConverters.__members__.keys(), nargs='+')
+    parser.add_argument("--colormap",
+                        help='color map for image converter',
+                        default=SHImageWriter.default_colormap,
+                        type=str)
     args = parser.parse_args(args)
 
     # TODO add filename discovery
@@ -625,9 +643,10 @@ def main(args=sys.argv[1:]):
         args.outputfile = files[0][:-3] + "txt"
 
     if args.many:
-        merge_many(files, args.converter, args.nan)
+        merge_many(files, args.converter, args.nan, args.colormap)
     else:
-        merge_list(files, args.outputfile, args.converter, args.nan)
+        merge_list(files, args.outputfile, args.converter, args.nan,
+                   args.colormap)
 
     return 0
 
