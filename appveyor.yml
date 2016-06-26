@@ -85,7 +85,7 @@ install:
   - conda create -q --name python%PYTHON_VERSION% python=%PYTHON_VERSION%
   - activate python%PYTHON_VERSION%
   - python -V
-  - conda install -q --name python%PYTHON_VERSION% setuptools wheel numpy scipy
+  - conda install -q --name python%PYTHON_VERSION% setuptools wheel numpy
   - pip install -r tests/requirements-test.txt
   - pip install -r requirements.txt
 

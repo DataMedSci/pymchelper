@@ -146,7 +146,6 @@ setuptools.setup(
     install_requires=[
         'enum34',
         'numpy',
-        'pytrip98'
     ],
     cmdclass=get_cmdclass()
 )
