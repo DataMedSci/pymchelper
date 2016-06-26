@@ -318,7 +318,7 @@ class SHImageWriter:
                 ylist = np.asarray(list(ydata)).reshape(xn, yn)
                 zlist = detector.v.reshape(xn, yn)
 
-                plt.pcolormesh(xlist, ylist, zlist, cmap='YlOrRd')
+                plt.pcolormesh(xlist, ylist, zlist, cmap='gnuplot2')
                 plt.colorbar()
             plt.savefig(self.plot_filename)
             plt.close()
