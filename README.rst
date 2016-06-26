@@ -82,6 +82,14 @@ In this situation converter will be probably installed in ``~/.local/bin`` direc
 
 To be able to use ``tripcube`` converter install also ``pytrip98`` Python package using ``pip``.
 
+To upgrade, type::
+
+    pip install -U pymchelper
+
+To uninstall, simply use::
+
+    pip uninstall pymchelper
+
 Documentation
 =============
 
