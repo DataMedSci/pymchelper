@@ -43,6 +43,7 @@ class SHConverters(IntEnum):
     plotdata = 1
     gnuplot = 2
     image = 3
+    tripcube = 4
 
 
 class SHBinaryReader:
@@ -323,6 +324,27 @@ class SHImageWriter:
             plt.close()
 
 
+class SHTripCubeWriter:
+    def __init__(self, filename):
+        self.output_corename = filename
+
+    def write(self, detector):
+        from pytrip import dos
+        cube = dos.DosCube()
+        pixel_size_x = (detector.xmax - detector.xmin) / detector.nx
+        pixel_size_z = (detector.zmax - detector.zmin) / detector.nz
+        cube.create_empty_cube(1.0,
+                               detector.nx,
+                               detector.ny,
+                               detector.ny,
+                               pixel_size=pixel_size_x,
+                               slice_distance=pixel_size_z)
+        cube.cube = detector.data.reshape(detector.nx,
+                                          detector.ny,
+                                          detector.nz)
+        cube.write(self.output_corename)
+
+
 class SHDetType(IntEnum):
     unknown = 0
     energy = 1
@@ -358,6 +380,7 @@ class SHGeoType(IntEnum):
     dcylz = 10
     dmshz = 11
     trace = 13
+    voxscore = 14
 
     def __str__(self):
         return self.name.upper()
@@ -416,7 +439,8 @@ class SHDetect:
             SHConverters.standard: SHFortranWriter,
             SHConverters.gnuplot: SHGnuplotDataWriter,
             SHConverters.plotdata: SHPlotDataWriter,
-            SHConverters.image: SHImageWriter
+            SHConverters.image: SHImageWriter,
+            SHConverters.tripcube: SHTripCubeWriter
         }
         for conv_name in conv_names:
             writer = _converter_mapping[SHConverters[conv_name]](filename)
