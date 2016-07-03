@@ -2,10 +2,6 @@
 
 # validation page for appveyor config: https://ci.appveyor.com/tools/validate-yaml
 
-# http://timcera.bitbucket.org/posts/appveyor_finally.html
-# https://github.com/ogrisel/python-winbuilder
-# http://tjelvarolsson.com/blog/how-to-continuously-test-your-python-code-on-windows-using-appveyor/
-
 environment:
   matrix:
     - platform: x86
