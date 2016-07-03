@@ -92,7 +92,7 @@ script:
 after_success:
   # send coverage data
   - if [[ $TRAVIS_PULL_REQUEST == "false" ]] && [[ $TRAVIS_OS_NAME == "linux" ]] && [[ $TOXENV == "packaging" ]]; then bash .travis/send_coverage.sh ; fi
-  # deploy to normal if tag is present
+  # deploy to normal pypi server if tag is present
   - if [[ $TRAVIS_TAG != "" ]] && [[ $TOXENV == "packaging" ]]; then bash .travis/deploy_package.sh pypi ; fi
 
 notifications:

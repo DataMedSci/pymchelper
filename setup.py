@@ -44,19 +44,27 @@ def setup_versioneer():
             # probably versioneer is installed in some user directory
 
             # query pip for list of files in versioneer package
+            # line below is equivalen to putting result of
+            #  "pip show -f versioneer" command to string output
             output = pip_command_output(["show", "-f", "versioneer"])
 
             # now we parse the results
-            main_path = [x[len("Location: "):] for x in output.split('\n')
-                         if x.startswith("Location")][0]
-            bin_path = [x[len("  "):] for x in output.split('\n')
-                        if x.endswith("/versioneer")][0]
-
-            # exe_path is absolute path to versioneer binary
             import os
+            # find absolute path where *versioneer package* was installed
+            # and store it in main_path
+            main_path = [x[len("Location: "):] for x in output.splitlines()
+                         if x.startswith("Location")][0]
+            # find path relative to main_path where
+            # *versioneer binary* was installed
+            bin_path = [x[len("  "):] for x in output.splitlines()
+                        if x.endswith(os.path.sep + "versioneer")][0]
+
+            # exe_path is absolute path to *versioneer binary*
             exe_path = os.path.join(main_path, bin_path)
             # call versioneer install to generate versioneer.py
-            subprocess.check_output([exe_path, "install"])
+            # line below is equivalent to running in terminal
+            # "python versioneer install"
+            subprocess.check_output(["python", exe_path, "install"])
 
 
 def clean_cache():
@@ -76,7 +84,7 @@ def clean_cache():
 def get_version():
     '''
     Get project version (using versioneer)
-    :return:
+    :return: string containing version
     '''
     setup_versioneer()
     clean_cache()
