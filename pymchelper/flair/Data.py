@@ -153,7 +153,7 @@ class Usrxxx:
             raise IOError("Invalid USRxxx file")
 
         if over1b > 0:
-            self.ncase = long(self.ncase) + long(over1b) * 1000000000
+            self.ncase = int(self.ncase) + int(over1b) * 1000000000
 
         self.title = title.strip()
         self.time = time.strip()
