@@ -1,11 +1,5 @@
 #!/usr/bin/env python
 
-#############################################################
-#
-# Python class for reading binary SH output format.
-#
-#
-# Niels Bassler 2012
 import sys
 import argparse
 import glob
@@ -611,6 +605,7 @@ def merge_many(input_file_list,
 
 
 def main(args=sys.argv[1:]):
+    import pymchelper
     parser = argparse.ArgumentParser()
     parser.add_argument("inputfile",
                         help='input filename, file list or pattern', type=str)
@@ -630,6 +625,9 @@ def main(args=sys.argv[1:]):
                         help='color map for image converter',
                         default=SHImageWriter.default_colormap,
                         type=str)
+    parser.add_argument('--version',
+                        action='version',
+                        version=pymchelper.__version__)
     args = parser.parse_args(args)
 
     # TODO add filename discovery
