@@ -53,10 +53,10 @@
 # Author:	Vasilis.Vlachoudis@cern.ch
 # Date:	14-May-2004
 
+import string
+
 __author__ = "Vasilis Vlachoudis"
 __email__ = "Vasilis.Vlachoudis@cern.ch"
-
-import string
 
 _letters_digits = string.ascii_letters + string.digits
 _letters_digits_symbol = _letters_digits + "_."
@@ -65,9 +65,9 @@ _letters_digits_symbol = _letters_digits + "_."
 # abbrev
 def abbrev(information, info, l=0):
     """
-	return true if the info is an abbreviation of information
-	with minimum length l
-	"""
+    return true if the info is an abbreviation of information
+    with minimum length l
+    """
     if l > 0:
         length = l
     else:
@@ -81,9 +81,10 @@ def abbrev(information, info, l=0):
 
 # center
 def center(s, l, pad=' '):
-    if l <= 0: return ""
+    if l <= 0:
+        return ""
 
-    i = l - len(s);
+    i = l - len(s)
     if i == 0:
         return s
     elif i < 0:
@@ -130,8 +131,8 @@ def datatype(str, check="N"):
 # insert
 def insert(new, target, n, pad=" "):
     """
-	insert new string to target as position n padded with pad characters
-	"""
+    insert new string to target as position n padded with pad characters
+    """
     if n == 0:
         return new + target
     elif n > len(target):
@@ -153,13 +154,13 @@ def left(str, length, pad=" "):
 def translate(str, tableo=None, tablei=None, pad=" "):
     """translate string"""
     # If neither input nor output tables, uppercase.
-    if tableo == None and tablei == None:
+    if tableo is None and tablei is None:
         return str.upper()
 
-    if tableo == None:
+    if tableo is None:
         tableo = xrange(0, 255)
 
-    if tablei == None:
+    if tablei is None:
         tablei = xrange(0, 255)
 
     # The input table defaults to all characters.
@@ -182,13 +183,15 @@ def reverse(str):
 # verify
 def verify(str, ref, match=0, start=0):
     """
-	return the index of the first character in string that
-	is not also in reference. if "Match" is given, then return
-	the result index of the first character in string that is in reference
-	"""
+    return the index of the first character in string that
+    is not also in reference. if "Match" is given, then return
+    the result index of the first character in string that is in reference
+    """
 
-    if start < 0: start = 0
-    if start >= len(str): return -1
+    if start < 0:
+        start = 0
+    if start >= len(str):
+        return -1
 
     for i in range(start, len(str)):
         found = ref.find(str[i]) == -1
@@ -202,26 +205,30 @@ def xrange(start, stop):
     return string.join([chr(x) for x in range(start, stop + 1)], "")
 
 
-# isnum - return true if string is number
 def _isnum(str):
+    """true if string is number"""
     str = str.strip()
 
     # accept one sign
     i = 0
     l = len(str)
 
-    if l == 0: return False
+    if l == 0:
+        return False
 
-    if str[i] == '-' or str[i] == '+': i += 1
+    if str[i] == '-' or str[i] == '+':
+        i += 1
 
     # skip spaces after sign
-    while i < l and str[i].isspace(): i += 1
+    while i < l and str[i].isspace():
+        i += 1
 
     # accept many digits
     if i < l and '0' <= str[i] <= '9':
         i += 1
         F = 1
-        while i < l and '0' <= str[i] <= '9': i += 1
+        while i < l and '0' <= str[i] <= '9':
+            i += 1
     else:
         F = 0
 
@@ -231,31 +238,38 @@ def _isnum(str):
 
         # accept many digits
         if i < l and '0' <= str[i] <= '9':
-            while i < l and '0' <= str[i] <= '9': i += 1
+            while i < l and '0' <= str[i] <= '9':
+                i += 1
         else:
-            if not F: return False
+            if not F:
+                return False
     else:
-        if not F: return False
+        if not F:
+            return False
 
     # accept one e/E/d/D
-    if i < l and (str[i] == 'e' or str[i] == 'E' or str[i] == 'd' or str[i] == 'D'):
+    if i < l and (str[i] == 'e' or str[i] == 'E' or
+                  str[i] == 'd' or str[i] == 'D'):
         i += 1
         # accept one sign
-        if i < l and (str[i] == '-' or str[i] == '+'): i += 1
+        if i < l and (str[i] == '-' or str[i] == '+'):
+            i += 1
 
         # accept many digits
         if i < l and '0' <= str[i] <= '9':
-            while i < l and '0' <= str[i] <= '9': i += 1
+            while i < l and '0' <= str[i] <= '9':
+                i += 1
         else:
             return False
 
-    if i != l: return False
+    if i != l:
+        return False
 
     return True
 
 
 if __name__ == "__main__":
-    from log import say
+    from pymchelper.flair.common.log import say
 
     say("abbrev")
     assert abbrev('information', 'info', 4)
@@ -331,10 +345,7 @@ if __name__ == "__main__":
     assert insert("abc", "def", 5, '*') == "def**abc"
 
     say("translate")
-    #	assert translate("Foo Bar"), "FOO BAR"
     assert translate("Foo Bar", "", "") == "Foo Bar"
-    #	assert translate("Foo Bar","") == "       "
-    #	assert translate("Foo Bar",None,None,'*') == "*******"
     assert translate("Foo Bar", xrange(1, 255)) == "Gpp!Cbs"
     assert translate("", "klasjdf", "woieruw") == ""
     assert translate("foobar", "abcdef", "fedcba") == "aooefr"

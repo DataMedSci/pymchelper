@@ -54,14 +54,15 @@
 # Date:	15-May-2004
 from __future__ import generators
 
+import math
+import random
+
+import pymchelper.flair.common.rexx as rexx
+
+
 __author__ = "Vasilis Vlachoudis"
 __email__ = "Vasilis.Vlachoudis@cern.ch"
 
-import math
-import cmath
-from math import *
-import pymchelper.flair.common.rexx as rexx
-import random
 
 # Accuracy for comparison operators
 _accuracy = 1E-15
@@ -71,7 +72,8 @@ _format = "%12g"
 
 
 # -------------------------------------------------------------------------------
-def Cmp0(x): return abs(x) < _accuracy
+def Cmp0(x):
+    return abs(x) < _accuracy
 
 
 # -------------------------------------------------------------------------------
@@ -94,7 +96,13 @@ def frange(start, stop, step):
 # limit in number within a range
 # -------------------------------------------------------------------------------
 def limit(min_, num, max_):
-    """limit a number within a specific range"""
+    '''
+    limit a number within a specific range
+    :param min_:
+    :param num:
+    :param max_:
+    :return:
+    '''
     return max(min(num, max_), min_)
 
 
@@ -118,7 +126,7 @@ def d2s(ang, fmt=""):
         neg = ""
 
     ang = round(ang * 360000) / 100
-    SS = "%05.2f" % (fmod(ang, 60))
+    SS = "%05.2f" % (math.fmod(ang, 60))
     ang = int(ang / 60.0)
     MM = "%02d" % (ang % 60)
     HH = neg + str(ang / 60)
@@ -139,8 +147,8 @@ def d2s(ang, fmt=""):
 # -------------------------------------------------------------------------------
 def format(number, length=10, useExp=False, useD=False):
     """
-	Format a number to fit in the minimum space given by length
-	"""
+    Format a number to fit in the minimum space given by length
+    """
 
     _MAXLEN = 22
 
@@ -154,7 +162,8 @@ def format(number, length=10, useExp=False, useD=False):
         number = repr(number).upper()
     else:
         number = str(number).strip().upper()
-        if not rexx.datatype(number, "N"): return number
+        if not rexx.datatype(number, "N"):
+            return number
 
     if useD:
         number = number.replace("E", "D")
@@ -166,7 +175,8 @@ def format(number, length=10, useExp=False, useD=False):
     if len(number) < length:
         hasExp = (number.find(expE) >= 0)
         if useExp:
-            if hasExp: return number
+            if hasExp:
+                return number
         elif number.find(".") >= 0 or hasExp:
             return number
 
@@ -176,7 +186,8 @@ def format(number, length=10, useExp=False, useD=False):
         else:
             return "0.0"
 
-    if length < 5 or length > _MAXLEN: raise Exception("Format invalid length")
+    if length < 5 or length > _MAXLEN:
+        raise Exception("Format invalid length")
 
     # Dissect the number. It is in the normal Rexx format.
     try:
@@ -237,35 +248,37 @@ def format(number, length=10, useExp=False, useD=False):
         r = integer[_MAXLEN]
         integer = integer[0:_MAXLEN]
         if r >= '5':
-            integer = str(long(integer) + 1)
+            integer = str(int(integer) + 1)
             if len(integer) > lint:
                 exponent += 1
                 if len(integer) > _MAXLEN:
                     integer = integer[0:_MAXLEN]
 
     # Now the number is described by:
-    #	sgn 0.integer "E" exponent
+    #   sgn 0.integer "E" exponent
 
     # Make space for sign
-    if sgn: length -= 1
+    if sgn:
+        length -= 1
 
     while True:
         # Minimum length representation of a number
         # Length = Length of integer
-        #	    + 1 for Dot if needed (no exponent)
-        #	    + (2-4) for exponent
-        #	exponent can be in the following forms
-        #		nothing if dot can placed inside integer
-        #		E#	2
-        #		E##	3
-        #		E-#	3
-        #		E-##	4
-        #	integer is given as  0.integer
+        #       + 1 for Dot if needed (no exponent)
+        #       + (2-4) for exponent
+        #  exponent can be in the following forms
+        #       nothing if dot can placed inside integer
+        #       E# 2
+        #       E## 3
+        #       E-# 3
+        #       E-## 4
+        #   integer is given as  0.integer
         # say("\ninteger=",integer,len(integer),length)
         # say("exponent=",exponent)
         lint = len(integer)
         if useExp:
-            mNum = "%s%s%d" % (rexx.insert(".", integer, 1), expE, exponent - 1)
+            mNum = "%s%s%d" % (rexx.insert(".", integer, 1),
+                               expE, exponent - 1)
         elif exponent == -2:
             mNum = ".00%s" % (integer)
         elif exponent == -1:
@@ -286,7 +299,8 @@ def format(number, length=10, useExp=False, useD=False):
         elif exponent > lint and exponent + 1 < length:
             mNum = "%s%s." % (integer, "0" * (exponent - lint))
         else:
-            mNum = "%s%s%d" % (rexx.insert(".", integer, 1), expE, exponent - 1)
+            mNum = "%s%s%d" % (rexx.insert(".", integer, 1),
+                               expE, exponent - 1)
 
         diff = len(mNum) - length
         if diff <= 0:
@@ -300,7 +314,8 @@ def format(number, length=10, useExp=False, useD=False):
 
         if r >= '5':
             lint = len(integer)
-            if lint == 0: integer = 0
+            if lint == 0:
+                integer = 0
             integer = str(int(integer) + 1)
             if len(integer) > lint:
                 exponent += 1
@@ -316,7 +331,8 @@ def format(number, length=10, useExp=False, useD=False):
             else:
                 return "0.0"
 
-    if sgn: mNum = "-%s" % (mNum)
+    if sgn:
+        mNum = "-%s" % (mNum)
     return mNum
 
 
@@ -359,7 +375,7 @@ class Vector(list):
     # ----------------------------------------------------------------------
     def __init__(self, x=3, *args):
         """Create a new vector,
-		Vector(size), Vector(list), Vector(x,y,z,...)"""
+        Vector(size), Vector(list), Vector(x,y,z,...)"""
 
         if isinstance(x, int) and not args:
             for i in range(x):
@@ -377,7 +393,8 @@ class Vector(list):
         """Set vector"""
         self[0] = x
         self[1] = y
-        if z: self[2] = z
+        if z:
+            self[2] = z
 
     # ----------------------------------------------------------------------
     def __repr__(self):
@@ -386,7 +403,8 @@ class Vector(list):
     # ----------------------------------------------------------------------
     def eq(self, v, acc=_accuracy):
         """Test for equality with vector v within accuracy"""
-        if len(self) != len(v): return False
+        if len(self) != len(v):
+            return False
         s2 = 0.0
         for i in range(len(self)):
             s2 += (self[i] - v[i]) ** 2
@@ -501,14 +519,14 @@ class Vector(list):
         s = 0.0
         for i in range(len(self)):
             s += self[i] ** 2
-        return sqrt(s)
+        return math.sqrt(s)
 
     __abs__ = length
 
     # ----------------------------------------------------------------------
     def arg(self):
         """return vector angle"""
-        return atan2(self[1], self[0])
+        return math.atan2(self[1], self[0])
 
     # ----------------------------------------------------------------------
     def norm(self):
@@ -567,12 +585,13 @@ class Vector(list):
 
     # ----------------------------------------------------------------------
     def direction(self, zero=_accuracy):
-        """return containing the direction if normalized with any of the axis"""
+        """return containing the direction
+        if normalized with any of the axis"""
 
         v = self.clone()
         l = v.norm()
-        if abs(l) <= zero: return "O"
-
+        if abs(l) <= zero:
+            return "O"
         if abs(v[0] - 1.0) < zero:
             return "X"
         elif abs(v[0] + 1.0) < zero:
@@ -596,10 +615,10 @@ class Vector(list):
     # @param th polar angle in radians
     # ----------------------------------------------------------------------
     def setPolar(self, ma, ph, th):
-        sf = sin(ph)
-        cf = cos(ph)
-        st = sin(th)
-        ct = cos(th)
+        sf = math.sin(ph)
+        cf = math.cos(ph)
+        st = math.sin(th)
+        ct = math.cos(th)
         self[0] = ma * st * cf
         self[1] = ma * st * sf
         self[2] = ma * ct
@@ -610,7 +629,7 @@ class Vector(list):
     def phi(self):
         if Cmp0(self.x()) and Cmp0(self.y()):
             return 0.0
-        return atan2(self.y(), self.x())
+        return math.atan2(self.y(), self.x())
 
     # ----------------------------------------------------------------------
     # @return the polar angle.
@@ -618,13 +637,13 @@ class Vector(list):
     def theta(self):
         if Cmp0(self.x()) and Cmp0(self.y()) and Cmp0(self.z()):
             return 0.0
-        return atan2(self.perp(), self.z())
+        return math.atan2(self.perp(), self.z())
 
     # ----------------------------------------------------------------------
     # @return cosine of the polar angle.
     # ----------------------------------------------------------------------
     def cosTheta(self):
-        ptot = length()
+        ptot = self.length()
         if Cmp0(ptot):
             return 1.0
         else:
@@ -635,14 +654,14 @@ class Vector(list):
     #   (R^2 in cylindrical coordinate system).
     # ----------------------------------------------------------------------
     def perp2(self):
-        return self.x() * self.x() + self.y() * self.y();
+        return self.x() * self.x() + self.y() * self.y()
 
     # ----------------------------------------------------------------------
     # @return the transverse component
     # (R in cylindrical coordinate system).
     # ----------------------------------------------------------------------
     def perp(self):
-        return sqrt(self.perp2())
+        return math.sqrt(self.perp2())
 
 
 # -------------------------------------------------------------------------------
@@ -659,9 +678,9 @@ Vector.Z = Vector(0.0, 0.0, 1.0)
 # -------------------------------------------------------------------------------
 def random3D():
     cosTheta = 2.0 * random.random() - 1.0
-    sinTheta = sqrt(1.0 - cosTheta ** 2)
-    phi = 2.0 * pi * random.random()
-    return Vector(cos(phi) * sinTheta, sin(phi) * sinTheta, cosTheta)
+    sinTheta = math.sqrt(1.0 - cosTheta ** 2)
+    phi = 2.0 * math.pi * random.random()
+    return Vector(math.cos(phi) * sinTheta, math.sin(phi) * sinTheta, cosTheta)
 
 
 # ------------------------------------------------------------------------------
@@ -694,13 +713,13 @@ class Matrix(list):
     # ----------------------------------------------------------------------
     def __init__(self, rows=4, cols=-1, type=0):
         """
-		Matrix(rows=4, cols=-1, type=0|1)
-		if rows is integer then
-			Create a matrix rows x cols either
-			zero(type=0) or unary(type=1)
-		elif rows is a list of lists
-			create a matrix from a double-list
-		"""
+        Matrix(rows=4, cols=-1, type=0|1)
+        if rows is integer then
+            Create a matrix rows x cols either
+            zero(type=0) or unary(type=1)
+        elif rows is a list of lists
+            create a matrix from a double-list
+        """
         if isinstance(rows, list):
             lst = rows
             self.rows = len(lst)
@@ -716,8 +735,10 @@ class Matrix(list):
                 for i in range(self.rows):
                     self[i] = [lst[i]]
         else:
-            if rows < 2: raise Exception("Array size too small")
-            if cols < 0: cols = rows
+            if rows < 2:
+                raise Exception("Array size too small")
+            if cols < 0:
+                cols = rows
             self.rows = rows
             self.cols = cols
             self += [[]] * rows
@@ -749,7 +770,7 @@ class Matrix(list):
     @staticmethod
     def translate(x, y=0.0, z=0.0):
         """m = Matrix.translate(x,y,z|vector)
-		@return a translation matrix"""
+        @return a translation matrix"""
         m = Matrix(4, type=1)
         if isinstance(x, list) or isinstance(x, tuple):
             m[0][3] = x[0]
@@ -765,10 +786,12 @@ class Matrix(list):
     @staticmethod
     def scale(sx, sy=None, sz=None):
         """m = Matrix.scale(scale|vector)
-		   @return a scaling matrix"""
+           @return a scaling matrix"""
         m = Matrix(4, type=1)
-        if sy is None: sy = sx
-        if sz is None: sz = sx
+        if sy is None:
+            sy = sx
+        if sz is None:
+            sz = sx
         if isinstance(sx, list) or isinstance(sx, tuple):
             m[0][0] = sx[0]
             m[1][1] = sx[1]
@@ -807,9 +830,11 @@ class Matrix(list):
                 self[0][i] = X[i]
                 self[1][i] = Y[i]
                 self[2][i] = Z[i]
-                if T is not None and self.rows == 4: self[i][3] = T[i]
+                if T is not None and self.rows == 4:
+                    self[i][3] = T[i]
         else:
-            raise Exception("Matrix.make() works only on Matrix(3x3) or Matrix(4x4)")
+            raise Exception("Matrix.make() works only "
+                            "on Matrix(3x3) or Matrix(4x4)")
 
     # ----------------------------------------------------------------------
     def __str__(self):
@@ -877,23 +902,23 @@ class Matrix(list):
 
     # ----------------------------------------------------------------------
     # Create a rotation matrix around one axis
-    #	X = 0
-    #	Y = 1
-    #	Z = 2
+    #   X = 0
+    #   Y = 1
+    #   Z = 2
     # or an arbitrary vector
     # ----------------------------------------------------------------------
     def rotate(self, angle, axis):
         """Add rotation elements to the matrix around one axis
-		Axis X=0, Y=1, Z=2, or an arbitrary one given by vector axis"""
+        Axis X=0, Y=1, Z=2, or an arbitrary one given by vector axis"""
         self.unary()
 
-        c = cos(angle)
-        s = sin(angle)
+        c = math.cos(angle)
+        s = math.sin(angle)
 
         if isinstance(axis, int):
             m1 = ((axis + 1) % 3) + 1
             m2 = m1 % 3
-            m1 = m1 - 1
+            m1 -= 1
 
             self[m1][m1] = c
             self[m2][m2] = c
@@ -947,17 +972,17 @@ class Matrix(list):
     def getEulerRotation(self):
         # ROTX(x) * ROTY(y) * ROTZ(z)
         #  cos(z)*cos(y)
-        #			sin(z)*cos(y)
-        #						-sin(y)
+        #  sin(z)*cos(y)
+        #        -sin(y)
         # -sin(z)*cos(x)+cos(z)*sin(y)*sin(x)
-        #			cos(z)*cos(x)+sin(z)*sin(y)*sin(x)
-        #						cos(y)*sin(x)
+        #  cos(z)*cos(x)+sin(z)*sin(y)*sin(x)
+        #                       cos(y)*sin(x)
         #  sin(z)*sin(x)+cos(z)*sin(y)*cos(x)
-        #			-cos(z)*sin(x)+sin(z)*sin(y)*cos(x)
-        #						cos(y)*cos(x)
-        rx = atan2(self[1][2], self[2][2])
-        ry = -asin(self[0][2])
-        rz = atan2(self[0][1], self[0][0])
+        # -cos(z)*sin(x)+sin(z)*sin(y)*cos(x)
+        #                       cos(y)*cos(x)
+        rx = math.atan2(self[1][2], self[2][2])
+        ry = -math.asin(self[0][2])
+        rz = math.atan2(self[0][1], self[0][0])
         return rx, ry, rz
 
     # ----------------------------------------------------------------------
@@ -965,12 +990,12 @@ class Matrix(list):
     def eulerRotation(rx, ry, rz):
         # ROTX(x) * ROTY(y) * ROTZ(z)
         m = Matrix(4, type=1)
-        cx = cos(rx)
-        cy = cos(ry)
-        cz = cos(rz)
-        sx = sin(rx)
-        sy = sin(ry)
-        sz = sin(rz)
+        cx = math.cos(rx)
+        cy = math.cos(ry)
+        cz = math.cos(rz)
+        sx = math.sin(rx)
+        sy = math.sin(ry)
+        sz = math.sin(rz)
 
         row = m[0]
         row[0] = cz * cy
@@ -1031,7 +1056,7 @@ class Matrix(list):
     # ----------------------------------------------------------------------
     def __mul__(self, B):
         """Multiply two matrices or vector
-		   A.__mul__(B|vec) <==> A*B or A*vec"""
+           A.__mul__(B|vec) <==> A*B or A*vec"""
         if isinstance(B, Matrix):  # has to be a matrix of same cxN * Nxr
             if self.cols != B.rows:
                 raise Exception("arrays don't have the correct dimensions")
@@ -1111,9 +1136,12 @@ class Matrix(list):
         if self.rows == 2:
             return self[0][0] * self[1][1] - self[1][0] * self[0][1]
         elif self.rows == 3:
-            return self[0][0] * (self[1][1] * self[2][2] - self[2][1] * self[1][2]) \
-                   - self[0][1] * (self[1][0] * self[2][2] - self[2][0] * self[1][2]) \
-                   + self[0][2] * (self[1][0] * self[2][1] - self[2][0] * self[1][1])
+            return self[0][0] * (self[1][1] * self[2][2] -
+                                 self[2][1] * self[1][2]) \
+                - self[0][1] * (self[1][0] * self[2][2] -
+                                self[2][0] * self[1][2]) \
+                + self[0][2] * (self[1][0] * self[2][1] -
+                                self[2][0] * self[1][1])
 
         M = self.clone()
         s = 1.0
@@ -1126,11 +1154,12 @@ class Matrix(list):
                 if abs(M[j][i]) > ma:
                     ma = abs(M[j][i])
                     k = j
-            if ma < eps: return 0.0
+            if ma < eps:
+                return 0.0
 
             # swap rows i,k
             if i != k:
-                s = -s;  # Change sign of determinate
+                s = -s  # Change sign of determinate
                 for j in range(n):
                     d = M[i][j]
                     M[i][j] = M[k][j]
@@ -1138,7 +1167,8 @@ class Matrix(list):
 
             # make all the following rows with zero at the i column
             for j in range(i + 1, n):
-                if abs(M[j][i]) < _accuracy: continue
+                if abs(M[j][i]) < _accuracy:
+                    continue
                 d = - M[i][i] / M[j][i]
                 s *= d
                 for k in range(i, n):
@@ -1253,25 +1283,28 @@ class Quaternion(list):
         elif isinstance(a, Matrix):
             tr = a[0][0] + a[1][1] + a[2][2] + 1.0  # trace of matrix
             if tr > 0:
-                S = sqrt(tr) * 2.0  # S=4*qw
+                S = math.sqrt(tr) * 2.0  # S=4*qw
                 qw = 0.25 * S
                 qx = (a[2][1] - a[1][2]) / S
                 qy = (a[0][2] - a[2][0]) / S
                 qz = (a[1][0] - a[0][1]) / S
             elif a[0][0] > a[1][1] and a[0][0] > a[2][2]:
-                S = sqrt(1.0 + a[0][0] - a[1][1] - a[2][2]) * 2.0  # S=4*qx
+                # S=4*qx
+                S = math.sqrt(1.0 + a[0][0] - a[1][1] - a[2][2]) * 2.0
                 qx = 0.25 * S
                 qy = (a[0][1] + a[1][0]) / S
                 qz = (a[0][2] + a[2][0]) / S
                 qw = (a[2][1] - a[1][2]) / S
             elif a[1][1] > a[2][2]:
-                S = sqrt(1.0 + a[1][1] - a[0][0] - a[2][2]) * 2.0  # S=4*qy
+                # S=4*qy
+                S = math.sqrt(1.0 + a[1][1] - a[0][0] - a[2][2]) * 2.0
                 qx = (a[0][1] + a[1][0]) / S
                 qy = 0.25 * S
                 qz = (a[1][2] + a[2][1]) / S
                 qw = (a[0][2] - a[2][0]) / S
             else:
-                S = sqrt(1.0 + a[2][2] - a[0][0] - a[1][1]) * 2.0  # S=4*qz
+                # S=4*qz
+                S = math.sqrt(1.0 + a[2][2] - a[0][0] - a[1][1]) * 2.0
                 qx = (a[0][2] + a[2][0]) / S
                 qy = (a[1][2] + a[2][1]) / S
                 qz = 0.25 * S
@@ -1279,11 +1312,11 @@ class Quaternion(list):
             self.extend([qx, qy, qz, qw])
 
         elif isinstance(a, Vector) and isinstance(b, float):
-            s = sin(b / 2.0) / a.length()
+            s = math.sin(b / 2.0) / a.length()
             self.append(a[0] * s)
             self.append(a[1] * s)
             self.append(a[2] * s)
-            self.append(cos(b / 2.0))
+            self.append(math.cos(b / 2.0))
 
         else:
             self.extend([a, b, c, d])
@@ -1295,7 +1328,8 @@ class Quaternion(list):
     # ----------------------------------------------------------------------
     def norm(self):
         """normalize quaternion"""
-        mag = sqrt(self[0] ** 2 + self[1] ** 2 + self[2] ** 2 + self[3] ** 2)
+        mag = math.sqrt(self[0] ** 2 + self[1] ** 2 +
+                        self[2] ** 2 + self[3] ** 2)
         self[0] /= mag
         self[1] /= mag
         self[2] /= mag
@@ -1386,7 +1420,8 @@ def gauss(A, B):
                 j = i
                 ap = api
 
-        if j != k: p[k], p[j] = p[j], p[k]  # Swap values
+        if j != k:
+            p[k], p[j] = p[j], p[k]  # Swap values
 
         for i in range(k + 1, n):
             z = A[p[i]][k] / A[p[k]][k]
@@ -1410,10 +1445,11 @@ def gauss(A, B):
 # -------------------------------------------------------------------------------
 def solveOverDetermined(A, B, W=None):
     """Solve the overdetermined linear system defined by the matrices A,B
-		such as A*X = B
-	Optionally a weight can be specified"""
+        such as A*X = B
+    Optionally a weight can be specified"""
     if A.rows < A.cols:
-        raise Exception("solveOverDetermined: A matrix has more columns than rows")
+        raise Exception("solveOverDetermined: "
+                        "A matrix has more columns than rows")
     AT = A.transpose()
     if W:
         Wd = Matrix.diagonal(W)
@@ -1430,9 +1466,9 @@ def solveOverDetermined(A, B, W=None):
 # -------------------------------------------------------------------------------
 def linear(X, Y):
     """
-	Solve linear regression y = ax + b
-	@return a,b,r
-	"""
+    Solve linear regression y = ax + b
+    @return a,b,r
+    """
     Sx = Sy = Sx2 = Sy2 = Sxy = 0.0
     for x, y in zip(X, Y):
         Sx += x
@@ -1445,7 +1481,8 @@ def linear(X, Y):
     try:
         b = (Sxy - Sx * Sy / n) / (Sx2 - Sx * Sx / n)
         a = Sy / n - b * Sx / n
-        r = (Sxy - Sx * Sy / n) / sqrt(Sx2 - Sx * Sx / n) * sqrt(Sy2 - Sy * Sy / n)
+        r = (Sxy - Sx * Sy / n) / math.sqrt(Sx2 - Sx * Sx / n) * \
+            math.sqrt(Sy2 - Sy * Sy / n)
         return a, b, r
 
     except ZeroDivisionError:
@@ -1461,7 +1498,7 @@ def linear(X, Y):
 #   pivakes, dnladn pivakes me mndevika ola ta stoixeia ektos tns
 #   kyrias diagwvioy, va exoyv sav idiotimes ta diagwvia stoixeia.
 #   Me tov metasxnmatismo.
-#	      T			      T
+#         T                       T
 #      A1 = R1 (f) A R1(f),    A2 = R2 (f) A1 R2(f)
 #   metaballoyme syvexws tov pivaka A, mexris otoy to a8roisma olwv
 #   twv mn diagwviwv stoixeiwv f8asei mia ka8orismevn timn tns eklogns
@@ -1475,21 +1512,21 @@ def linear(X, Y):
 #      epi8ymntn timn. Eav vai tote ta diagwvia stoixeia eivai oi
 #      proseggiseis twv idiotimwv, eav oxi tote epistrefoyme sto 1.
 #      px.     |  1 -2 -1 |
-#	   A = | -2  1 -1 |
-#	       | -1 -1 2.5|
+#          A = | -2  1 -1 |
+#              | -1 -1 2.5|
 #      apolyto megisto A(1,2) = -2
 #      Ypologizoyme tnv gwvia f, co=cos(f), si=sin(f) kai kavoyme tov
 #      metasxnmatismo
-#	   | co -si  0 |   |  1 -2 -1 |   |  co  si  0 |
+#          | co -si  0 |   |  1 -2 -1 |   |  co  si  0 |
 #      A = | si  co  0 | x | -2  1 -1 | x | -si  co  0 |
-#	   |  0   0  1 |   | -1 -1 2.5|   |   0   0  1 |
+#          |  0   0  1 |   | -1 -1 2.5|   |   0   0  1 |
 #
 #
 #      Oi parametroi tns roytivas eivai oi e3ns:
-#	 A     - pivakas tetragwvikos
-#	 eps   - akribeia (a8roisma tetragwvwv)
-#	 check - av prepei va elejei tnv symmetria toy arxikoy pivaka
-#		 n oxi
+#    A     - pivakas tetragwvikos
+#    eps   - akribeia (a8roisma tetragwvwv)
+#    check - av prepei va elejei tnv symmetria toy arxikoy pivaka
+#        n oxi
 # -------------------------------------------------------------------------------
 def eigenvalues(M, eps=_accuracy, check=False):
     """Return eigen values and eigen vectors of a symmetric matrix"""
@@ -1497,7 +1534,8 @@ def eigenvalues(M, eps=_accuracy, check=False):
 
     # elegxos av eivai symmetrikos o pivakas
     if check:
-        if n != M.cols: return None
+        if n != M.cols:
+            return None
         for i in range(n):
             for j in range(i, n):
                 if M[i][j] != M[j][i]:
@@ -1513,16 +1551,17 @@ def eigenvalues(M, eps=_accuracy, check=False):
     # kavovika 8a prepei meta apo merikes prospa8eies va tov aporiptei
     while True:
         # Bnma 1. Avazntnsn toy apolytws megistoy mn diagwvioy stoixeioy
-        p = 0;
-        q = 1;
+        p = 0
+        q = 1
         el = abs(A[p][q])
         for i in range(1, n):
             for j in range(i):
                 if abs(A[i][j]) > el:
                     el = abs(A[i][j])
-                    p = i;
+                    p = i
                     q = j
-            if el == 0: break
+            if el == 0:
+                break
 
         # Ftiaxvei ta R, RT
         for i in range(n):
@@ -1530,23 +1569,24 @@ def eigenvalues(M, eps=_accuracy, check=False):
                 R[i][j] = RT[i][j] = (i == j)
 
         # Bnma 2. Prosdiorizei tnv gwvia f, cosf kai sinf
-        fi = (A[q][q] - A[p][p]) / (2 * A[p][q])
-        t = 1 / (fi + sqrt(fi * fi + 1))
-        if fi < 0: t = -t
-        co = 1 / sqrt(1 + t * t)
-        si = t / sqrt(1 + t * t)
+        fi = (A[q][q] - A[p][p]) / (2.0 * A[p][q])
+        t = 1.0 / (fi + math.sqrt(fi * fi + 1.0))
+        if fi < 0:
+            t = -t
+        co = 1.0 / math.sqrt(1.0 + t * t)
+        si = t / math.sqrt(1.0 + t * t)
 
         R[p][p] = R[q][q] = co
         RT[p][p] = RT[q][q] = co
 
-        R[p][q] = si;
+        R[p][q] = si
         R[q][p] = -si
-        RT[p][q] = -si;
+        RT[p][q] = -si
         RT[q][p] = si
 
         # Bnma 3. metasxnmatismos Ai+1 = Rt * Ai * R
-        #	  ka8os kai to ginomeno Rn*...*R2*R1 that
-        #	  gives us the eigenvectors
+        #  ka8os kai to ginomeno Rn*...*R2*R1 that
+        #  gives us the eigenvectors
         if V is None:
             V = R.clone()
         else:
@@ -1582,7 +1622,8 @@ def eigenvalues(M, eps=_accuracy, check=False):
         zw1 /= n
 
         # Exit condition
-        if zw1 <= eps: break
+        if zw1 <= eps:
+            break
     return ([A[i][i] for i in range(n)], V.T())
 
 
@@ -1681,20 +1722,21 @@ def xpermutations(items):
 # -------------------------------------------------------------------------------
 # Conversion between rectangular and polar coordinates
 # Usage:
-#	real, real = rect(real, real [, deg=False])
-#	real, real = polar(real, real [, deg=False])
+#  real, real = rect(real, real [, deg=False])
+#  real, real = polar(real, real [, deg=False])
 # Normally, rect() and polar() uses radian for angle; but,
 # if deg=True specified, degree is used instead.
 # -------------------------------------------------------------------------------
 # radian if deg=False; degree if deg=True
 def rect(r, w, deg=False):
     """
-	Convert from polar (r,w) to rectangular (x,y)
-	    x = r cos(w)
-	    y = r sin(w)
-	"""
-    if deg: w = radians(w)
-    return r * cos(w), r * sin(w)
+    Convert from polar (r,w) to rectangular (x,y)
+        x = r cos(w)
+        y = r sin(w)
+    """
+    if deg:
+        w = math.radians(w)
+    return r * math.cos(w), r * math.sin(w)
 
 
 # -------------------------------------------------------------------------------
@@ -1702,44 +1744,15 @@ def rect(r, w, deg=False):
 # -------------------------------------------------------------------------------
 def polar(x, y, deg=False):
     """
-	Convert from rectangular (x,y) to polar (r,w)
-	    r = sqrt(x^2 + y^2)
-	    w = arctan(y/x) = [-pi,pi] = [-180,180]
-	"""
+    Convert from rectangular (x,y) to polar (r,w)
+        r = sqrt(x^2 + y^2)
+        w = arctan(y/x) = [-pi,pi] = [-180,180]
+    """
     if deg:
-        return hypot(x, y), degrees(atan2(y, x))
+        return math.hypot(x, y), math.degrees(math.atan2(y, x))
     else:
-        return hypot(x, y), atan2(y, x)
+        return math.hypot(x, y), math.atan2(y, x)
 
-
-# -------------------------------------------------------------------------------
-# Quadratic equation: x^2 + ax + b = 0 (or ax^2 + bx + c = 0)
-#    Solve quadratic equation with real coefficients
-#
-# Usage
-#    number, number = quadratic(real, real [, real])
-#
-# Normally, x^2 + ax + b = 0 is assumed with the 2 coefficients # as
-# arguments; but, if 3 arguments are present, then ax^2 + bx + c = 0 is assumed.
-# -------------------------------------------------------------------------------
-# def quadratic(a, b, c=None):
-#	"""
-#	x^2 + ax + b = 0 (or ax^2 + bx + c = 0)
-#	By substituting x = y-t and t = a/2,
-#	the equation reduces to y^2 + (b-t^2) = 0
-#	which has easy solution
-#	y = +/- sqrt(t^2-b)
-#	"""
-#	if c: # (ax^2 + bx + c = 0)
-#		a, b = b / float(a), c / float(a)
-#	t = a / 2.0
-#	r = t**2 - b
-#	if r >= 0: # real roots
-#		y1 = sqrt(r)
-#	else: # complex roots
-#		y1 = cmath.sqrt(r)
-#	y2 = -y1
-#	return y1 - t, y2 - t
 
 def quadratic(b, c, eps=_accuracy):
     D = b * b - 4.0 * c
@@ -1751,9 +1764,9 @@ def quadratic(b, c, eps=_accuracy):
             return None, None
     else:
         if b > 0.0:
-            bD = -b - sqrt(D)
+            bD = -b - math.sqrt(D)
         else:
-            bD = -b + sqrt(D)
+            bD = -b + math.sqrt(D)
         return 0.5 * bD, 2.0 * c / bD
 
 
@@ -1778,14 +1791,14 @@ def cubic(a, b, c, d=None, eps=_accuracy):
     R2 = R ** 2
     Q3 = Q ** 3
     if R2 < Q3:  # the cubic has 3 real solutions
-        theta = acos(R / sqrt(Q3))
-        sqrt_Q = sqrt(Q)
-        x1 = -2. * sqrt_Q * cos(theta / 3.) - a / 3.
-        x2 = -2. * sqrt_Q * cos((theta + 2. * pi) / 3.) - a / 3.
-        x3 = -2. * sqrt_Q * cos((theta - 2. * pi) / 3.) - a / 3.
+        theta = math.acos(R / math.sqrt(Q3))
+        sqrt_Q = math.sqrt(Q)
+        x1 = -2. * sqrt_Q * math.cos(theta / 3.) - a / 3.
+        x2 = -2. * sqrt_Q * math.cos((theta + 2. * math.pi) / 3.) - a / 3.
+        x3 = -2. * sqrt_Q * math.cos((theta - 2. * math.pi) / 3.) - a / 3.
         return x1, x2, x3
 
-    A = -copysign(1.0, R) * (abs(R) + sqrt(R2 - Q3)) ** (1. / 3.)
+    A = -math.copysign(1.0, R) * (abs(R) + math.sqrt(R2 - Q3)) ** (1. / 3.)
     if abs(A) > eps:
         B = Q / A
     else:
@@ -1828,7 +1841,8 @@ def fitPlane(xyz):
     Vz = Sz2 / n - Sz ** 2
 
     # Count zero variances
-    nv = int(abs(Vx) <= _accuracy) + int(abs(Vy) <= _accuracy) + int(abs(Vz) <= _accuracy)
+    nv = int(abs(Vx) <= _accuracy) + int(abs(Vy) <= _accuracy) + \
+        int(abs(Vz) <= _accuracy)
     if nv > 1:
         return None
     elif nv == 1:
@@ -1881,10 +1895,10 @@ def fitPlane(xyz):
 # -------------------------------------------------------------------------------
 def polyeval(a, x):
     """
-	p(x) = polyeval(a, x)
-	     = a[0] + a[1]x + a[2]x^2 +...+ a[n-1]x^{n-1} + a[n]x^n
-	     = a[0] + x(a[1] + x(a[2] +...+ x(a[n-1] + a[n]x)...)
-	"""
+    p(x) = polyeval(a, x)
+         = a[0] + a[1]x + a[2]x^2 +...+ a[n-1]x^{n-1} + a[n]x^n
+         = a[0] + x(a[1] + x(a[2] +...+ x(a[n-1] + a[n]x)...)
+    """
     p = 0
     a.reverse()
     for coef in a:
@@ -1898,10 +1912,10 @@ def polyeval(a, x):
 # -------------------------------------------------------------------------------
 def polyderiv(a):
     """
-	p'(x) = polyderiv(a)
-	      = b[0] + b[1]x + b[2]x^2 +...+ b[n-2]x^{n-2} + b[n-1]x^{n-1}
-	where b[i] = (i+1)a[i+1]
-	"""
+    p'(x) = polyderiv(a)
+          = b[0] + b[1]x + b[2]x^2 +...+ b[n-2]x^{n-2} + b[n-1]x^{n-1}
+    where b[i] = (i+1)a[i+1]
+    """
     b = []
     for i in range(1, len(a)):
         b.append(i * a[i])
@@ -1915,12 +1929,12 @@ def polyderiv(a):
 # -------------------------------------------------------------------------------
 def polyreduce(a, root):
     """
-	Given x = r is a root of n'th degree polynomial p(x) = (x-r)q(x),
-	divide p(x) by linear factor (x-r) using the same algorithm as
-	polynomial evaluation. Then, return the (n-1)'th degree quotient
-	q(x) = polyreduce(a, r)
-	     = c[0] + c[1]x + c[2]x^2 +...+ c[n-2]x^{n-2} + c[n-1]x^{n-1}
-	"""
+    Given x = r is a root of n'th degree polynomial p(x) = (x-r)q(x),
+    divide p(x) by linear factor (x-r) using the same algorithm as
+    polynomial evaluation. Then, return the (n-1)'th degree quotient
+    q(x) = polyreduce(a, r)
+         = c[0] + c[1]x + c[2]x^2 +...+ c[n-2]x^{n-2} + c[n-1]x^{n-1}
+    """
     c, p = [], 0
     a.reverse()
     for coef in a:
@@ -1936,8 +1950,8 @@ def polyreduce(a, root):
 # -------------------------------------------------------------------------------
 def int2roman(num):
     """
-	Convert an integer to Roman numeral
-	"""
+    Convert an integer to Roman numeral
+    """
     if not isinstance(num, int):
         raise TypeError("expected integer, got %s" % type(input))
 
@@ -1945,7 +1959,8 @@ def int2roman(num):
         raise ValueError("Argument must be between 1 and 3999")
 
     ints = (1000, 900, 500, 400, 100, 90, 50, 40, 10, 9, 5, 4, 1)
-    nums = ('M', 'CM', 'D', 'CD', 'C', 'XC', 'L', 'XL', 'X', 'IX', 'V', 'IV', 'I')
+    nums = ('M', 'CM', 'D', 'CD', 'C', 'XC',
+            'L', 'XL', 'X', 'IX', 'V', 'IV', 'I')
     result = ""
     for i in range(len(ints)):
         count = int(num / ints[i])
@@ -1959,8 +1974,8 @@ def int2roman(num):
 # -------------------------------------------------------------------------------
 def roman2int(roman):
     """
-	convert a roman string to integer
-	"""
+    convert a roman string to integer
+    """
     if not isinstance(roman, str):
         raise TypeError("expected string, got %s" % type(roman))
     roman = roman.upper()
@@ -1968,7 +1983,7 @@ def roman2int(roman):
     ints = (1000, 500, 100, 50, 10, 5, 1)
     places = []
     for c in roman:
-        if not c in nums:
+        if c not in nums:
             raise ValueError("input is not a valid roman numeral: %s" % roman)
     for i in range(len(roman)):
         c = roman[i]
@@ -1983,7 +1998,8 @@ def roman2int(roman):
             pass
         places.append(value)
     sum = 0
-    for n in places: sum += n
+    for n in places:
+        sum += n
 
     # Easiest test for validity...
     if int2roman(sum) == roman:
@@ -1994,9 +2010,7 @@ def roman2int(roman):
 
 # ===============================================================================
 if __name__ == "__main__":
-    import sys
-    import pdb
-    from log import say
+    from pymchelper.flair.common.log import say
 
     for i in range(4, 50):
         num = "-1e-%d" % (i)
@@ -2033,18 +2047,6 @@ if __name__ == "__main__":
     say(format(w, 22))
     say(format(a, 22))
     say(Vector.Y.direction(0.0000001))
-    # for i in range(100000):
-    #	v = random3D()
-    #	d1 = v.direction(0.001)
-    #	d2 = v.olddir(0.001)
-    #	if d1!="N": say(d1, d2)
-    #	#if d1!=d2:
-    #	#	say(d1, d2, v)
-    # for i in frange(0.0,1.0,0.1):
-    #	say(i)
-    # say("-------")
-    # for i in frange(1.0,0.0,-0.1):
-    #	say(i)
     a = Vector(range(5))
     a.norm()
     say("a=", a, "len(a)=", a.length())
@@ -2056,7 +2058,7 @@ if __name__ == "__main__":
 
     M = Matrix(4)
     a = Vector(0.1, 0.2, 0.3)
-    M.rotate(radians(45.0), a)
+    M.rotate(math.radians(45.0), a)
     say("M\n", M)
     say("a=", a)
     say("M*a=", M * a)
@@ -2077,19 +2079,23 @@ if __name__ == "__main__":
 
     say()
     say("Permutations of 'love'")
-    for p in xpermutations(['l', 'o', 'v', 'e']): say(''.join(p))
+    for p in xpermutations(['l', 'o', 'v', 'e']):
+        say(''.join(p))
 
     say()
     say("Combinations of 2 letters from 'love'")
-    for c in xcombinations(['l', 'o', 'v', 'e'], 2): say(''.join(c))
+    for c in xcombinations(['l', 'o', 'v', 'e'], 2):
+        say(''.join(c))
 
     say()
     say("Unique Combinations of 2 letters from 'love'")
-    for uc in xuniqueCombinations(['l', 'o', 'v', 'e'], 2): say(''.join(uc))
+    for uc in xuniqueCombinations(['l', 'o', 'v', 'e'], 2):
+        say(''.join(uc))
 
     say()
     say("Selections of 2 letters from 'love'")
-    for s in xselections(['l', 'o', 'v', 'e'], 2): say(''.join(s))
+    for s in xselections(['l', 'o', 'v', 'e'], 2):
+        say(''.join(s))
 
     say()
     say(map(''.join, list(xpermutations('done'))))
@@ -2098,4 +2104,5 @@ if __name__ == "__main__":
     say("cubic(x^3-3x^2-10x+24=0)=", cubic(-3.0, -10.0, 24.0))
 
     say()
-    for i in range(1, 51): say(i, int2roman(i))
+    for i in range(1, 51):
+        say(i, int2roman(i))

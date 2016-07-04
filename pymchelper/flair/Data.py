@@ -60,18 +60,14 @@ import re
 import math
 import struct
 
-import pymchelper.flair.common.fortran as fortran
-import pymchelper.flair.common.bmath as bmath
-from pymchelper.flair.common.log import say
-
-try:
-    from cStringIO import StringIO
-except ImportError:
-    from io import StringIO
 try:
     import numpy
 except ImportError:
     numpy = None
+
+import pymchelper.flair.common.fortran as fortran
+import pymchelper.flair.common.bmath as bmath
+from pymchelper.flair.common.log import say
 
 __author__ = "Vasilis Vlachoudis"
 __email__ = "Vasilis.Vlachoudis@cern.ch"
@@ -733,114 +729,6 @@ class Mgdraw:
         self.data = struct.unpack(fmt, data)
         return ncase
 
-
-# ===============================================================================
-# 1D data from tab.lis format
-# ===============================================================================
-class Data1D:
-    def __init__(self, n, name=None):
-        self.idx = n
-        self.name = name
-        self.xlow = []
-        self.xhigh = []
-        self.value = []
-        self.error = []
-
-
-# ===============================================================================
-# Tablis format
-# ===============================================================================
-def tabLis(filename, detector):
-    f = open(filename, 'r')
-    raw_data = f.read()  # read whole file as a single line
-    f.close()
-
-    # split in to chunks (detector data)
-    raw_data = raw_data.split(' # Detector n:  ')
-    if raw_data[0] == '':
-        del raw_data[0]  # delete blank header
-
-    part = StringIO(raw_data[detector])  # convert to file object
-    name = part.readline().split()[1]
-
-    # use the fact that it's a file object to make reading the data easy
-    x_bin_min, x_bin_max, x_vals, x_err = \
-        numpy.loadtxt(part, unpack=True, skiprows=1)
-
-    # return the columns and detector name
-    return name, x_bin_min, x_bin_max, x_vals, x_err
-
-
-# ===============================================================================
-class TabLis:
-    def __init__(self, filename):
-        self.filename = filename
-
-    # ----------------------------------------------------------------------
-    def read(self, filename=None):  # , onlyheader=True):
-        if filename is not None:
-            self.filename = filename
-
-        self.data = []
-
-        try:
-            f = open(self.filename, "r")
-        except IOError:
-            return None
-
-        det = 0
-        ind = 1
-        half = 0
-        block = 1
-        lastind = 0
-
-        name = "Detector"
-        blockname = ""
-        blockspresent = False
-
-        first = None
-        for line in f:
-            # line = line.strip()
-            if line == "\n":
-                half += 1
-                if half == 2:
-                    half = 0
-                    ind += 1
-
-            elif line.find("#") >= 0:
-                m = _detectorPattern.match(line)
-                if m:
-                    name = m.group(1)
-                    p = name.find("(")
-                    if p > 0:
-                        name = name[:p]
-                    name = name.strip()
-                    entry = "%d %s" % (ind, name)
-                    self.det.insert(END, entry)
-                    lastind = ind
-                    if not first:
-                        first = entry
-                    half = 0
-                    block = 0
-                    blockspresent = False
-                    continue
-
-                m = _blockPattern.match(line)
-                if m:
-                    blockname = m.group(1)
-                    blockspresent = True
-                    half = 1
-                    continue
-
-                if lastind != ind:
-                    self.det.insert(END, "%d %s" % (ind, line[1:].strip()))
-                    lastind = ind
-
-            else:
-                if half == 1:
-                    block += 1
-                half = 0
-        f.close()
 
 # ===============================================================================
 if __name__ == "__main__":

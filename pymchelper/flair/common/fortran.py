@@ -55,20 +55,21 @@
 # Author:	Vasilis.Vlachoudis@cern.ch
 # Date:	24-Oct-2006
 
+import struct
+
 __author__ = "Vasilis Vlachoudis"
 __email__ = "Vasilis.Vlachoudis@cern.ch"
 
-import struct
 
-
-# -------------------------------------------------------------------------------
-# Skip a fortran block from a binary file
-# @param f file to read from
-# @return size, None for EOF
-# -------------------------------------------------------------------------------
 def skip(f):
+    """
+    Skip a fortran block from a binary file
+    :param f: file to read from
+    :return: size, None for EOF
+    """
     blen = f.read(4)
-    if len(blen) == 0: return 0
+    if len(blen) == 0:
+        return 0
     (size,) = struct.unpack("=i", blen)
     f.seek(size, 1)
     blen2 = f.read(4)
@@ -77,14 +78,15 @@ def skip(f):
     return size
 
 
-# -------------------------------------------------------------------------------
-# Read a fortran structure from a binary file
-# @param f file to read from
-# @return data, None for EOF
-# -------------------------------------------------------------------------------
 def read(f):
+    """
+    Read a fortran structure from a binary file
+    :param f: file to read from
+    :return: data, None for EOF
+    """
     blen = f.read(4)
-    if len(blen) == 0: return None
+    if len(blen) == 0:
+        return None
     (size,) = struct.unpack("=i", blen)
     data = f.read(size)
     blen2 = f.read(4)
@@ -93,13 +95,13 @@ def read(f):
     return data
 
 
-# -------------------------------------------------------------------------------
-# Write a block of data (string) to file as a fortran block
-# @param f	file to write to
-# @param d	data to write
-# @return output of last write statement
-# -------------------------------------------------------------------------------
 def write(f, d):
+    """
+    Write a block of data (string) to file as a fortran block
+    :param f: file to write to
+    :param d: data to write
+    :return: output of last write statement
+    """
     f.write(struct.pack("=i", len(d)))
     f.write(d)
     return f.write(struct.pack("=i", len(d)))
