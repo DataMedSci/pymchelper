@@ -147,7 +147,7 @@ setuptools.setup(
     ],
     entry_points={
         'console_scripts': [
-            'bdo2txt=' + \
+            'convertmc=' + \
             'pymchelper.bdo2txt:main',
         ],
     },
