@@ -8,14 +8,12 @@ set -o pipefail # Return value of a pipeline as the value of the last command to
                 # exit with a non-zero status, or zero if all commands in the
                 # pipeline exit successfully.
 
-pip install -rrequirements.txt
-pip install coverage
-pip install codeclimate-test-reporter
-pip install pytest-cov
-
-python -V
-py.test --cov
-
-set +x
-codeclimate-test-reporter
-set -x
+PROJDIR=`pwd`
+TMPDIR=`mktemp -d`
+cd $TMPDIR
+mkdir convertmc
+cp -r $PROJDIR/pymchelper convertmc
+python3 -m zipapp convertmc -p "/usr/bin/env python3" -m 'pymchelper.bdo2txt:main'
+chmod 755 convertmc.pyz
+cp convertmc.pyz $PROJDIR
+cd -
