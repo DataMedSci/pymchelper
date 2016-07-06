@@ -45,5 +45,6 @@ pip install wheel
 python setup.py bdist_wheel
 
 # upload the package to pypi repository
-pip install twine
+pip install -U twine
+twine --version
 twine upload -r $PYPIREPO dist/*
