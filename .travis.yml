@@ -41,7 +41,7 @@ matrix:
           python: 3.4
           env: TOXENV=pep8
         - os: linux
-          python: 3.4
+          python: 3.5
           env:
             - TOXENV=packaging
             - PYPIUSER=grzanka
