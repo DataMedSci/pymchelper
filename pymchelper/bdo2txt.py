@@ -428,6 +428,7 @@ class SHGeoType(IntEnum):
     dmshz = 11
     trace = 13
     voxscore = 14
+    geomap = 15
 
     def __str__(self):
         return self.name.upper()
