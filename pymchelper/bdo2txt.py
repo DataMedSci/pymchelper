@@ -409,6 +409,9 @@ class SHDetType(IntEnum):
     pet = 15
     dletg = 16
     tletg = 17
+    zone = 18
+    medium = 19
+    rho = 20
 
     def __str__(self):
         return self.name.upper().replace('_', '-')
