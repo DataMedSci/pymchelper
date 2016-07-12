@@ -234,7 +234,7 @@ class FlukaBinaryReader:
         # TODO read detector type
         detector.dettyp = SHDetType.unknown
 
-        detector.data = fdata
+        detector.data = np.array(fdata)
 
 
 class SHBinaryWriter:
@@ -596,9 +596,9 @@ class SHDetect:
     def is_valid(self):
         valid_counters = self.nx > 0 and self.ny > 0 and self.nz > 0
         data_exists = self.data is not None
-        borders_correct = self.xmax >= self.xmin \
-            and self.ymax >= self.ymin \
-            and self.zmax >= self.zmin
+        borders_correct = self.xmax >= self.xmin and\
+            self.ymax >= self.ymin and\
+            self.zmax >= self.zmin
         nstat_correct = self.nstat > 0
         return valid_counters and data_exists \
             and borders_correct and nstat_correct
@@ -653,6 +653,10 @@ def merge_many(input_file_list,
             if name[-8:-4].isdigit() and len(name[-8:-4]) == 4:
                 core_name = name[:-8]
             core_names_dict[core_name].append(name)
+        elif "_fort." in name:
+            core_name = name[-2:]
+            core_names_dict[core_name].append(name)
+
     for core_name, group_with_same_core in core_names_dict.items():
         merge_list(group_with_same_core, core_name + ".txt",
                    conv_names, nan, colormap)
