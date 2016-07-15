@@ -46,23 +46,54 @@ class SHBinaryReader:
 
     def read_header(self, detector):
         print("Reading header:", self.filename)
+
+        detector.tripdose = 0.0
+        detector.tripntot = -1
+
         # effective read
-        # first figure out the length.
+        # first figure out if this is a VOXSCORE card
         header_dtype = np.dtype([('fo1', '<i4'),
-                                 ('geotyp', 'S10'),
-                                 ('fo2', '<i4'),
-                                 ('fo3', '<i4'),
-                                 ('nstat', '<i4'),
-                                 ('fo4', '<i4'),
-                                 ('fo5', '<i4'),
-                                 ('det', ('<f8', 8)),
-                                 ('fo6', '<i4'),
-                                 ('fo7', '<i4'),
-                                 ('idet', ('<i4'), 11),
-                                 ('fo8', '<i4'),
-                                 ('reclen', '<i4')])
+                                 ('geotyp', 'S10')])
+        header = np.fromfile(self.filename, header_dtype, count=1)
+
+        if header['geotyp'] == 'VOXSCORE':
+            header_dtype = np.dtype([('fo1', '<i4'),
+                                     ('geotyp', 'S10'),
+                                     ('fo2', '<i4'),  # nstat
+                                     ('tds', '<f4'),  # tripdose
+                                     ('tnt', '<i8'),  # tripntot
+                                     ('fo3', '<i4'),
+                                     ('nstat', '<i4'),
+                                     ('fo4', '<i4'),
+                                     ('fo5', '<i4'),
+                                     ('det', ('<f8', 8)),
+                                     ('fo6', '<i4'),
+                                     ('fo7', '<i4'),
+                                     ('idet', ('<i4'), 11),
+                                     ('fo8', '<i4'),
+                                     ('reclen', '<i4')])
+        else:
+
+            # first figure out the length.
+            header_dtype = np.dtype([('fo1', '<i4'),
+                                     ('geotyp', 'S10'),
+                                     ('fo2', '<i4'),
+                                     ('fo3', '<i4'),
+                                     ('nstat', '<i4'),
+                                     ('fo4', '<i4'),
+                                     ('fo5', '<i4'),
+                                     ('det', ('<f8', 8)),
+                                     ('fo6', '<i4'),
+                                     ('fo7', '<i4'),
+                                     ('idet', '<i4', 11),
+                                     ('fo8', '<i4'),
+                                     ('reclen', '<i4')])
         header = np.fromfile(self.filename, header_dtype, count=1)
         detector.rec_size = header['reclen'][0] // 8
+
+        if header['geotyp'] == 'VOXSCORE':
+            detector.tripdose = header['tds']
+            detector.tripntot = header['tnt']
 
         idet = header['idet']
 
@@ -389,6 +420,12 @@ class SHTripCubeWriter:
         cube.cube = detector.data.reshape(detector.nx,
                                           detector.ny,
                                           detector.nz)
+        if detector.tripdose >= 0.0 and detector.tripntot > 0:
+            cube.cube = (cube.cube * detector.tripntot * 1.602e-10) /\
+                detector.tripdose * 1000.0
+        else:
+            cube.cube = (cube.cube / cube.cube.max()) * 1200.0
+
         cube.write(self.output_corename)
 
 
