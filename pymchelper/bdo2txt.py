@@ -56,24 +56,23 @@ class SHBinaryReader:
                                  ('geotyp', 'S10')])
         header = np.fromfile(self.filename, header_dtype, count=1)
 
-        if header['geotyp'] == 'VOXSCORE':
+        if 'VOXSCORE' in header['geotyp'][0].decode('ascii'):
             header_dtype = np.dtype([('fo1', '<i4'),
                                      ('geotyp', 'S10'),
                                      ('fo2', '<i4'),  # nstat
-                                     ('tds', '<f4'),  # tripdose
-                                     ('tnt', '<i8'),  # tripntot
                                      ('fo3', '<i4'),
                                      ('nstat', '<i4'),
-                                     ('fo4', '<i4'),
-                                     ('fo5', '<i4'),
+                                     ('tds', '<f4'),  # tripdose
+                                     ('tnt', '<i8'),  # tripntot
+                                     ('fo4', '<i8'),
+                                     ('fo5', '<i8'),
                                      ('det', ('<f8', 8)),
-                                     ('fo6', '<i4'),
-                                     ('fo7', '<i4'),
-                                     ('idet', ('<i4'), 11),
+                                     ('fo6', '<i8'),
+                                     ('fo7', '<i8'),
+                                     ('idet', '<i4', 11),
                                      ('fo8', '<i4'),
                                      ('reclen', '<i4')])
         else:
-
             # first figure out the length.
             header_dtype = np.dtype([('fo1', '<i4'),
                                      ('geotyp', 'S10'),
@@ -91,7 +90,7 @@ class SHBinaryReader:
         header = np.fromfile(self.filename, header_dtype, count=1)
         detector.rec_size = header['reclen'][0] // 8
 
-        if header['geotyp'] == 'VOXSCORE':
+        if 'VOXSCORE' in header['geotyp'][0].decode('ascii'):
             detector.tripdose = header['tds']
             detector.tripntot = header['tnt']
 
@@ -112,13 +111,17 @@ class SHBinaryReader:
             detector.geotyp = SHGeoType.unknown
         detector.nstat = header['nstat'][0]
 
-        detector.xmin = header['det'][0][0]
-        detector.ymin = header['det'][0][1]
-        detector.zmin = header['det'][0][2]
+        shift = 0
+        if 'VOXSCORE' in header['geotyp'][0].decode('ascii'):
+            shift = 1
+            # TODO to be investigated
+        detector.xmin = header['det'][0][0 + shift]
+        detector.ymin = header['det'][0][1 + shift]
+        detector.zmin = header['det'][0][2 + shift]
 
-        detector.xmax = header['det'][0][3]
-        detector.ymax = header['det'][0][4]
-        detector.zmax = header['det'][0][5]
+        detector.xmax = header['det'][0][3 + shift]
+        detector.ymax = header['det'][0][4 + shift]
+        detector.zmax = header['det'][0][5 + shift]
 
         detector.dettyp = SHDetType(idet[0][4])
 
