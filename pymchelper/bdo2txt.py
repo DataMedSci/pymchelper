@@ -417,7 +417,7 @@ class SHTripCubeWriter:
         cube.create_empty_cube(1.0,
                                detector.nx,
                                detector.ny,
-                               detector.ny,
+                               detector.nz,
                                pixel_size=pixel_size_x,
                                slice_distance=pixel_size_z)
         cube.cube = detector.data.reshape(detector.nx,
