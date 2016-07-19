@@ -3,7 +3,7 @@ import unittest
 from pymchelper import bdo2txt
 
 
-class TestFunMethod(unittest.TestCase):
+class TestCall(unittest.TestCase):
     def test_help(self):
         try:
             bdo2txt.main(["--help"])

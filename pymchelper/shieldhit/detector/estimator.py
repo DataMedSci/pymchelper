@@ -19,3 +19,10 @@ class SHGeoType(IntEnum):
 
     def __str__(self):
         return self.name.upper()
+
+# TODO to implement:
+#  - allowed detectors (+ differential detectors)
+#  - reading from string (detect.dat format)
+#  - saving to string (detect.dat format)
+#  - combine with particle type
+#  - compibe with geometry type
