@@ -1,13 +1,12 @@
 #!/usr/bin/env python
 
-import sys
-import argparse
 import glob
+import sys
 from collections import namedtuple, defaultdict
-from enum import IntEnum
 
+import argparse
 import numpy as np
-
+from enum import IntEnum
 
 # !! - DET/IDET list of detector attributes from detect.dat (DET for float)
 # !!
@@ -30,6 +29,8 @@ import numpy as np
 # !! - DET(8)  : stop differential grid
 # !!
 # !! - BIN(*)  : 10**8 large array holding results. Accessed using pointers.
+from pymchelper.shieldhit.detector.detector import SHDetType
+from pymchelper.shieldhit.detector.estimator import SHGeoType
 
 
 class SHConverters(IntEnum):
@@ -430,51 +431,6 @@ class SHTripCubeWriter:
             cube.cube = (cube.cube / cube.cube.max()) * 1200.0
 
         cube.write(self.output_corename)
-
-
-class SHDetType(IntEnum):
-    unknown = 0
-    energy = 1
-    fluence = 2
-    crossflu = 3
-    letflu = 4
-    dose = 5
-    dlet = 6
-    tlet = 7
-    avg_energy = 8
-    avg_beta = 9
-    material = 10
-    alanine = 13
-    counter = 14
-    pet = 15
-    dletg = 16
-    tletg = 17
-    zone = 18
-    medium = 19
-    rho = 20
-
-    def __str__(self):
-        return self.name.upper().replace('_', '-')
-
-
-class SHGeoType(IntEnum):
-    unknown = 0
-    zone = 1
-    cyl = 2
-    msh = 3
-    plane = 4
-    dzone = 5
-    dcyl = 6
-    dmsh = 7
-    dplane = 8
-    dcylz = 10
-    dmshz = 11
-    trace = 13
-    voxscore = 14
-    geomap = 15
-
-    def __str__(self):
-        return self.name.upper()
 
 
 class SHDetect:
