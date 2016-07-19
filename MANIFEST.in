@@ -8,6 +8,8 @@
   recursive-include docs *.rst
   recursive-include pymchelper *.py
   recursive-include tests *.py
+  recursive-include tests *.bdo
+  recursive-include tests *.png
   include versioneer.py
   include pymchelper/_version.py
 
@@ -19,3 +21,4 @@
   prune .travis
   prune install_deps.sh
   prune make_single_executable.sh
+
