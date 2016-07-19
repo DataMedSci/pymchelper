@@ -4,3 +4,4 @@ pytest-capturelog
 pytest-timeout
 pytest-xdist
 tox
+matplotlib
