@@ -1,3 +1,7 @@
+from pymchelper.shieldhit.detector.geometry import Zone, Plane
+from pymchelper.shieldhit.particle import SHParticleType
+
+
 class CardLine:
     comment = "*----0---><----1---><----2---><----3---><----4---><----5---><----6--->"
     no_of_elements = 7
@@ -20,6 +24,8 @@ class CardLine:
         if len(str(n)) > CardLine.element_length:
             raise Exception("Element [{:s}] should have {:d}, not {:d} elements".format(
                 str(n), CardLine.element_length, len(str(n))))
+        if n is None:
+            n = ""
         padding = " " * (CardLine.element_length - len(str(n)))
         result = padding + str(n)
         return result
@@ -29,6 +35,8 @@ class CardLine:
         if len(s) > CardLine.element_length:
             raise Exception("Element [{:s}] should have {:d}, not {:d} elements".format(s, CardLine.element_length, len(
                 s)))
+        if s is None:
+            s = ""
         padding = " " * (CardLine.element_length - len(s))
         return padding + s
 
@@ -43,6 +51,29 @@ class CardLine:
 class EstimatorWriter:
     @classmethod
     def write(self, estimator):
+        if estimator.particle_type == SHParticleType.heavy_ion:
+            tmp_heavy_ion = ["", estimator.heavy_ion_type.z, estimator.heavy_ion_type.a, "", "", "", ""]
+            data_heavy_ion = [CardLine.any_to_element(d) for d in tmp_heavy_ion]
+        if type(estimator.geometry) is Zone:
+            data1_any = [
+                estimator.estimator, estimator.geometry.start, estimator.geometry.stop, "",
+                estimator.particle_type.value, estimator.detector_type, estimator.filename
+            ]
+            data1 = [CardLine.any_to_element(d) for d in data1_any]
+            if estimator.particle_type == SHParticleType.heavy_ion:
+                return CardLine(data1), CardLine(data_heavy_ion)
+            return CardLine(data1)
+        if type(estimator.geometry) is Plane:
+            data1_any = [
+                estimator.estimator, estimator.geometry.point_x, estimator.geometry.point_y, estimator.geometry.point_z,
+                estimator.geometry.normal_x, estimator.geometry.normal_y, estimator.geometry.normal_z
+            ]
+            data1 = [CardLine.any_to_element(d) for d in data1_any]
+            data2_any = ["", "", "", "", estimator.particle_type.value, estimator.detector_type, estimator.filename]
+            data2 = [CardLine.any_to_element(d) for d in data2_any]
+            if estimator.particle_type == SHParticleType.heavy_ion:
+                return CardLine(data1), CardLine(data2), CardLine(data_heavy_ion)
+            return CardLine(data1), CardLine(data2)
         data1_any = [
             estimator.estimator, estimator.geometry.axis[0].start, estimator.geometry.axis[1].start,
             estimator.geometry.axis[2].start, estimator.geometry.axis[0].stop, estimator.geometry.axis[1].stop,
@@ -53,6 +84,8 @@ class EstimatorWriter:
                      estimator.geometry.axis[2].nbins, estimator.particle_type.value, estimator.detector_type,
                      estimator.filename]
         data2 = [CardLine.any_to_element(d) for d in data2_any]
+        if estimator.particle_type == SHParticleType.heavy_ion:
+            return CardLine(data1), CardLine(data2), CardLine(data_heavy_ion)
         return CardLine(data1), CardLine(data2)
 
 

@@ -37,12 +37,12 @@ class SHParticleType(IntEnum):
 class SHHeavyIonType:
     particle_type = SHParticleType.heavy_ion
 
-    def __init__(self, a, z):
-        self.a = a
-        self.z = z
+    def __init__(self):
+        self.a = 0
+        self.z = 0
 
     def __str__(self):
         result = str(self.particle_type)
-        result += "_{:d}".format(self.a)
-        result += "^{:d}".format(self.z)
+        result += "_{:d}".format(self.z)
+        result += "^{:d}".format(self.a)
         return result

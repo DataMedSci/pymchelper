@@ -3,7 +3,7 @@ from pymchelper.shieldhit.detector.detector import SHDetType
 from pymchelper.shieldhit.detector.estimator import SHGeoType, SHEstimator
 from pymchelper.shieldhit.detector.fortran_card import CardLine, \
     EstimatorWriter
-from pymchelper.shieldhit.detector.geometry import CarthesianMesh, CylindricalMesh
+from pymchelper.shieldhit.detector.geometry import CarthesianMesh, CylindricalMesh, Zone, Plane
 from pymchelper.shieldhit.particle import SHParticleType, SHHeavyIonType
 
 
@@ -33,7 +33,9 @@ class TestSHParticle(unittest.TestCase):
         self.assertEqual(p_proton, SHParticleType.proton)
         self.assertEqual(str(p_proton), "proton")
 
-        p_carbon_ion = SHHeavyIonType(6, 12)
+        p_carbon_ion = SHHeavyIonType()
+        p_carbon_ion.z = 6
+        p_carbon_ion.a = 12
         self.assertEqual(p_carbon_ion.particle_type, SHParticleType.heavy_ion)
         self.assertEqual(str(p_carbon_ion), "heavy-ion_6^12")
 
@@ -109,7 +111,7 @@ class TestEstimatorWriter(unittest.TestCase):
         self.assertEqual(str(line1), ref_line1)
         self.assertEqual(str(line2), ref_line2)
 
-    def test_write_msh(self):
+    def test_write_cyl(self):
         estimator = SHEstimator()
         estimator.estimator = SHGeoType.cyl
         estimator.geometry = CylindricalMesh()
@@ -131,6 +133,23 @@ class TestEstimatorWriter(unittest.TestCase):
         self.assertEqual(str(line1), ref_line1)
         self.assertEqual(str(line2), ref_line2)
 
+        estimator.detector_type = SHDetType.avg_beta
+        estimator.particle_type = SHParticleType.proton
+        ref_line2 = "                   1         1       300         2  AVG-BETA    ex_cyl"
+        line1, line2 = EstimatorWriter.write(estimator)
+        self.assertEqual(str(line1), ref_line1)
+        self.assertEqual(str(line2), ref_line2)
+
+        estimator.particle_type = SHParticleType.heavy_ion
+        estimator.heavy_ion_type.a = 12
+        estimator.heavy_ion_type.z = 6
+        ref_line2 = "                   1         1       300        25  AVG-BETA    ex_cyl"
+        ref_line3 = "                   6        12                                        "
+        line1, line2, line3 = EstimatorWriter.write(estimator)
+        self.assertEqual(str(line1), ref_line1)
+        self.assertEqual(str(line2), ref_line2)
+        self.assertEqual(str(line3), ref_line3)
+
     def test_write_geomap(self):
         estimator = SHEstimator()
         estimator.estimator = SHGeoType.geomap
@@ -150,6 +169,63 @@ class TestEstimatorWriter(unittest.TestCase):
         line1, line2 = EstimatorWriter.write(estimator)
         ref_line1 = "    GEOMAP      -1.0     -25.0     -15.0       1.0      25.0      35.0"
         ref_line2 = "                   1        50        50         0      ZONE  ex_yzzon"
+        self.assertEqual(str(line1), ref_line1)
+        self.assertEqual(str(line2), ref_line2)
+
+        estimator.detector_type = SHDetType.medium
+        line1, line2 = EstimatorWriter.write(estimator)
+        ref_line2 = "                   1        50        50         0    MEDIUM  ex_yzzon"
+        self.assertEqual(str(line1), ref_line1)
+        self.assertEqual(str(line2), ref_line2)
+
+        estimator.detector_type = SHDetType.rho
+        line1, line2 = EstimatorWriter.write(estimator)
+        ref_line2 = "                   1        50        50         0       RHO  ex_yzzon"
+        self.assertEqual(str(line1), ref_line1)
+        self.assertEqual(str(line2), ref_line2)
+
+    def test_write_zone(self):
+        estimator = SHEstimator()
+        estimator.estimator = SHGeoType.zone
+        estimator.geometry = Zone()
+        estimator.geometry.start = 1
+        estimator.detector_type = SHDetType.dose
+        estimator.particle_type = SHParticleType.all
+        estimator.filename = "DH_dose"
+        line1 = EstimatorWriter.write(estimator)
+        ref_line1 = "      ZONE         1                            -1      DOSE   DH_dose"
+        self.assertEqual(str(line1), ref_line1)
+
+        estimator.geometry.stop = 300
+        line1 = EstimatorWriter.write(estimator)
+        ref_line1 = "      ZONE         1       300                  -1      DOSE   DH_dose"
+        self.assertEqual(str(line1), ref_line1)
+
+        estimator.particle_type = SHParticleType.heavy_ion
+        estimator.heavy_ion_type.a = 12
+        estimator.heavy_ion_type.z = 6
+        line1, line2 = EstimatorWriter.write(estimator)
+        ref_line1 = "      ZONE         1       300                  25      DOSE   DH_dose"
+        ref_line2 = "                   6        12                                        "
+        self.assertEqual(str(line1), ref_line1)
+        self.assertEqual(str(line2), ref_line2)
+
+    def test_write_plane(self):
+        estimator = SHEstimator()
+        estimator.estimator = SHGeoType.plane
+        estimator.geometry = Plane()
+        estimator.geometry.point_x = 0.0
+        estimator.geometry.point_y = 0.0
+        estimator.geometry.point_z = 0.0
+        estimator.geometry.normal_x = 0.0
+        estimator.geometry.normal_y = 0.0
+        estimator.geometry.normal_z = 1.0
+        estimator.detector_type = SHDetType.counter
+        estimator.particle_type = SHParticleType.all
+        estimator.filename = "NB_count1"
+        line1, line2 = EstimatorWriter.write(estimator)
+        ref_line1 = "     PLANE       0.0       0.0       0.0       0.0       0.0       1.0"
+        ref_line2 = "                                                -1   COUNTER NB_count1"
         self.assertEqual(str(line1), ref_line1)
         self.assertEqual(str(line2), ref_line2)
 

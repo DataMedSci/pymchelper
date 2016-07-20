@@ -3,7 +3,7 @@ import logging
 from pymchelper.shieldhit.detector.detector import SHDetType
 from pymchelper.shieldhit.detector.estimator_type import SHGeoType
 from pymchelper.shieldhit.detector.geometry import Geometry
-from pymchelper.shieldhit.particle import SHParticleType
+from pymchelper.shieldhit.particle import SHParticleType, SHHeavyIonType
 
 logger = logging.getLogger(__name__)
 
@@ -29,6 +29,7 @@ class SHEstimator:
     def __init__(self):
         self.estimator = SHGeoType.unknown
         self.particle_type = SHParticleType.unknown
+        self.heavy_ion_type = SHHeavyIonType()
         self.detector_type = SHDetType.unknown
         self.geometry = Geometry()
         self.filename = ""

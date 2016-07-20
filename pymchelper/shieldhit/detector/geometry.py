@@ -49,3 +49,33 @@ class CylindricalMesh(Geometry):
 
     def __str__(self):
         return "cylindrical"
+
+
+class Zone():
+    def __init__(self):
+        self.start = None
+        self.stop = None
+
+    @staticmethod
+    def allowed_estimators():
+        return SHGeoType.zone, SHGeoType.dzone
+
+    def __str__(self):
+        return "zone"
+
+
+class Plane():
+    def __init__(self):
+        self.point_x = None
+        self.point_y = None
+        self.point_z = None
+        self.normal_x = None
+        self.normal_y = None
+        self.normal_z = None
+
+    @staticmethod
+    def allowed_estimators():
+        return SHGeoType.plane, SHGeoType.dplane
+
+    def __str__(self):
+        return "plane"
