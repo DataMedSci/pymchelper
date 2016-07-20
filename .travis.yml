@@ -58,9 +58,6 @@ matrix:
           env: TOXENV=py33
         - os: osx
           language: generic
-          env: TOXENV=py32 VENVVER="<14.0.0" PIPVER="<8.0.0"
-        - os: osx
-          language: generic
           env: TOXENV=py27
 #    uncomment and adjust if you want to allow some failures
 #    allow_failures:
