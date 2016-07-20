@@ -1,9 +1,10 @@
 import os
 import unittest
 from pymchelper import bdo2txt
+from examples import generate_detect_shieldhit
 
 
-class TestCall(unittest.TestCase):
+class TestCallMain(unittest.TestCase):
     def test_help(self):
         try:
             bdo2txt.main(["--help"])
@@ -29,6 +30,12 @@ class TestCall(unittest.TestCase):
         bdo_files = [f for f in files if f.endswith(".bdo")]
         self.assertGreater(len(files), 4)
         self.assertEqual(len(png_files), len(bdo_files))
+
+
+class TestCallExample(unittest.TestCase):
+    def test_help(self):
+        generate_detect_shieldhit.main()
+        self.assertTrue(os.path.isfile("detect.dat"))
 
 
 if __name__ == '__main__':
