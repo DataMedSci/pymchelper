@@ -53,8 +53,7 @@ class SHBinaryReader:
 
         # effective read
         # first figure out if this is a VOXSCORE card
-        header_dtype = np.dtype([('fo1', '<i4'),
-                                 ('geotyp', 'S10')])
+        header_dtype = np.dtype([('fo1', '<i4'), ('geotyp', 'S10')])
         header = np.fromfile(self.filename, header_dtype, count=1)
 
         if 'VOXSCORE' in header['geotyp'][0].decode('ascii'):
@@ -75,19 +74,10 @@ class SHBinaryReader:
                                      ('reclen', '<i4')])
         else:
             # first figure out the length.
-            header_dtype = np.dtype([('fo1', '<i4'),
-                                     ('geotyp', 'S10'),
-                                     ('fo2', '<i4'),
-                                     ('fo3', '<i4'),
-                                     ('nstat', '<i4'),
-                                     ('fo4', '<i4'),
-                                     ('fo5', '<i4'),
-                                     ('det', ('<f8', 8)),
-                                     ('fo6', '<i4'),
-                                     ('fo7', '<i4'),
-                                     ('idet', '<i4', 11),
-                                     ('fo8', '<i4'),
-                                     ('reclen', '<i4')])
+            header_dtype = np.dtype([('fo1', '<i4'), ('geotyp', 'S10'), ('fo2', '<i4'), ('fo3', '<i4'),
+                                     ('nstat', '<i4'), ('fo4', '<i4'), ('fo5', '<i4'), ('det',
+                                                                                        ('<f8', 8)), ('fo6', '<i4'),
+                                     ('fo7', '<i4'), ('idet', '<i4', 11), ('fo8', '<i4'), ('reclen', '<i4')])
         header = np.fromfile(self.filename, header_dtype, count=1)
         detector.rec_size = header['reclen'][0] // 8
 
@@ -105,9 +95,7 @@ class SHBinaryReader:
         detector.particle = idet[0][3]
 
         try:
-            detector.geotyp = SHGeoType[
-                header['geotyp'][0].decode('ascii').strip().lower()
-            ]
+            detector.geotyp = SHGeoType[header['geotyp'][0].decode('ascii').strip().lower()]
         except Exception:
             detector.geotyp = SHGeoType.unknown
         detector.nstat = header['nstat'][0]
@@ -129,23 +117,19 @@ class SHBinaryReader:
     def read_payload(self, detector):
         print("Reading data:", self.filename)
 
-        if detector.geotyp == SHGeoType.unknown \
-                or detector.dettyp == SHDetType.unknown:
+        if detector.geotyp == SHGeoType.unknown or detector.dettyp == SHDetType.unknown:
             detector.data = []
             return
 
         # next read the data:
-        record_dtype = np.dtype([
-            ('trash', ('S158')), ('bin2', ('<f8'), detector.rec_size)
-        ])
+        record_dtype = np.dtype([('trash', ('S158')), ('bin2', ('<f8'), detector.rec_size)])
         record = np.fromfile(self.filename, record_dtype, count=-1)
         detector.data = record['bin2'][:][0]
         if detector.dimension == 0:
             detector.data = np.asarray([detector.data])
 
         # normalize result if we need that.
-        if detector.dettyp not in (SHDetType.dlet, SHDetType.tlet,
-                                   SHDetType.avg_energy, SHDetType.avg_beta,
+        if detector.dettyp not in (SHDetType.dlet, SHDetType.tlet, SHDetType.avg_energy, SHDetType.avg_beta,
                                    SHDetType.material):
             detector.data /= np.float64(detector.nstat)
 
@@ -300,10 +284,8 @@ class SHFortranWriter:
         ax = self._axis_name(det.geotyp, 0)
         ay = self._axis_name(det.geotyp, 1)
         az = self._axis_name(det.geotyp, 2)
-        header += "#   {:s} BIN:{:6d} {:s} BIN:{:6d} {:s} BIN:{:6d}\n".format(
-            ax, det.nx, ay, det.ny, az, det.nz)
-        header += "#   JPART:{:6d} DETECTOR TYPE:{:s}\n".format(
-            det.particle, str(det.dettyp).ljust(10))
+        header += "#   {:s} BIN:{:6d} {:s} BIN:{:6d} {:s} BIN:{:6d}\n".format(ax, det.nx, ay, det.ny, az, det.nz)
+        header += "#   JPART:{:6d} DETECTOR TYPE:{:s}\n".format(det.particle, str(det.dettyp).ljust(10))
         header += "#   {:s} START:{:s}".format(ax, format_d(10, 3, det.xmin))
         header += " {:s} START:{:s}".format(ay, format_d(10, 3, det.ymin))
         header += " {:s} START:{:s}\n".format(az, format_d(10, 3, det.zmin))
@@ -332,8 +314,7 @@ class SHPlotDataWriter:
 
     def write(self, detector):
         print("Writing: " + self.filename)
-        axis_values = [list(detector.axis_values(i, plotting_order=True))
-                       for i in range(detector.dimension)]
+        axis_values = [list(detector.axis_values(i, plotting_order=True)) for i in range(detector.dimension)]
         fmt = "%g" + " %g" * detector.dimension
         data = np.transpose(axis_values + [detector.data])
         np.savetxt(self.filename, data, fmt=fmt, delimiter=' ')
@@ -363,11 +344,9 @@ splot '{data_filename}' with pm3d
         if detector.dimension in (1, 2):
             with open(self.script_filename, 'w') as script_file:
                 print("Writing: " + self.script_filename)
-                script_file.write(
-                    self.header.format(plot_filename=self.plot_filename))
+                script_file.write(self.header.format(plot_filename=self.plot_filename))
                 plt_cmd = self.plotting_command[detector.dimension]
-                script_file.write(
-                    plt_cmd.format(data_filename=self.data_filename))
+                script_file.write(plt_cmd.format(data_filename=self.data_filename))
 
 
 class SHImageWriter:
@@ -415,15 +394,9 @@ class SHTripCubeWriter:
         cube = dos.DosCube()
         pixel_size_x = (detector.xmax - detector.xmin) / detector.nx
         pixel_size_z = (detector.zmax - detector.zmin) / detector.nz
-        cube.create_empty_cube(1.0,
-                               detector.nx,
-                               detector.ny,
-                               detector.nz,
-                               pixel_size=pixel_size_x,
-                               slice_distance=pixel_size_z)
-        cube.cube = detector.data.reshape(detector.nx,
-                                          detector.ny,
-                                          detector.nz)
+        cube.create_empty_cube(
+            1.0, detector.nx, detector.ny, detector.nz, pixel_size=pixel_size_x, slice_distance=pixel_size_z)
+        cube.cube = detector.data.reshape(detector.nx, detector.ny, detector.nz)
         if detector.tripdose >= 0.0 and detector.tripntot > 0:
             cube.cube = (cube.cube * detector.tripntot * 1.602e-10) /\
                 detector.tripdose * 1000.0
@@ -484,8 +457,7 @@ class SHDetect:
         self.nstat += sum(det.nstat for det in other_detectors)
         self.counter += len(other_detectors)
 
-    def save(self, filename, conv_names=[SHConverters.standard.name],
-             colormap=SHImageWriter.default_colormap):
+    def save(self, filename, conv_names=[SHConverters.standard.name], colormap=SHImageWriter.default_colormap):
         _converter_mapping = {
             SHConverters.standard: SHFortranWriter,
             SHConverters.gnuplot: SHGnuplotDataWriter,
@@ -503,24 +475,18 @@ class SHDetect:
         result = ""
         result += "data" + str(self.data[0].shape) + "\n"
         result += "nstat = {:d}\n".format(self.nstat)
-        result += "X {:g} - {:g} ({:d} items)\n".format(
-            self.xmin, self.xmax, self.nx)
-        result += "Y {:g} - {:g} ({:d} items)\n".format(
-            self.ymin, self.ymax, self.ny)
-        result += "Z {:g} - {:g} ({:d} items)\n".format(
-            self.zmin, self.zmax, self.nz)
+        result += "X {:g} - {:g} ({:d} items)\n".format(self.xmin, self.xmax, self.nx)
+        result += "Y {:g} - {:g} ({:d} items)\n".format(self.ymin, self.ymax, self.ny)
+        result += "Z {:g} - {:g} ({:d} items)\n".format(self.zmin, self.zmax, self.nz)
         result += "dettyp {:s}\n".format(self.dettyp.name)
         result += "counter of files {:d}\n".format(self.counter)
         result += "dimension {:d}\n".format(self.dimension)
         result += "Xs {:d}\n".format(len(list(self.x)))
-        result += "Xp {:d}\n".format(
-            len(list(self.axis_values(0, plotting_order=True))))
+        result += "Xp {:d}\n".format(len(list(self.axis_values(0, plotting_order=True))))
         result += "Ys {:d}\n".format(len(list(self.y)))
-        result += "Yp {:d}\n".format(
-            len(list(self.axis_values(1, plotting_order=True))))
+        result += "Yp {:d}\n".format(len(list(self.axis_values(1, plotting_order=True))))
         result += "Zs {:d}\n".format(len(list(self.z)))
-        result += "Zp {:d}\n".format(
-            len(list(self.axis_values(2, plotting_order=True))))
+        result += "Zp {:d}\n".format(len(list(self.axis_values(2, plotting_order=True))))
         result += "V {:d}\n".format(len(list(self.data)))
         return result
 
@@ -614,7 +580,8 @@ class SHDetect:
         return tuple(i for i, ax in sorted_data)
 
 
-def merge_list(input_file_list, output_file,
+def merge_list(input_file_list,
+               output_file,
                conv_names=[SHConverters.standard.name],
                nan=False,
                colormap=SHImageWriter.default_colormap):
@@ -654,34 +621,25 @@ def merge_many(input_file_list,
             core_names_dict[core_name].append(name)
 
     for core_name, group_with_same_core in core_names_dict.items():
-        merge_list(group_with_same_core, core_name + ".txt",
-                   conv_names, nan, colormap)
+        merge_list(group_with_same_core, core_name + ".txt", conv_names, nan, colormap)
 
 
 def main(args=sys.argv[1:]):
     import pymchelper
     parser = argparse.ArgumentParser()
-    parser.add_argument("inputfile",
-                        help='input filename, file list or pattern', type=str)
-    parser.add_argument("outputfile",
-                        help='output filename', nargs='?')
-    parser.add_argument("--many",
-                        help='automatically merge data from various sources',
-                        action="store_true")
-    parser.add_argument("--nan",
-                        help='ignore NaN in averaging',
-                        action="store_true")
-    parser.add_argument("--converter",
-                        help='converters',
-                        default=[SHConverters.standard.name],
-                        choices=SHConverters.__members__.keys(), nargs='+')
-    parser.add_argument("--colormap",
-                        help='color map for image converter',
-                        default=SHImageWriter.default_colormap,
-                        type=str)
-    parser.add_argument('--version',
-                        action='version',
-                        version=pymchelper.__version__)
+    parser.add_argument("inputfile", help='input filename, file list or pattern', type=str)
+    parser.add_argument("outputfile", help='output filename', nargs='?')
+    parser.add_argument("--many", help='automatically merge data from various sources', action="store_true")
+    parser.add_argument("--nan", help='ignore NaN in averaging', action="store_true")
+    parser.add_argument(
+        "--converter",
+        help='converters',
+        default=[SHConverters.standard.name],
+        choices=SHConverters.__members__.keys(),
+        nargs='+')
+    parser.add_argument(
+        "--colormap", help='color map for image converter', default=SHImageWriter.default_colormap, type=str)
+    parser.add_argument('--version', action='version', version=pymchelper.__version__)
     args = parser.parse_args(args)
 
     # TODO add filename discovery
@@ -696,10 +654,10 @@ def main(args=sys.argv[1:]):
     if args.many:
         merge_many(files, args.converter, args.nan, args.colormap)
     else:
-        merge_list(files, args.outputfile, args.converter, args.nan,
-                   args.colormap)
+        merge_list(files, args.outputfile, args.converter, args.nan, args.colormap)
 
     return 0
+
 
 if __name__ == '__main__':
     sys.exit(main(sys.argv[1:]))

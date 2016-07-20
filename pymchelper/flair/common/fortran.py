@@ -70,7 +70,7 @@ def skip(f):
     blen = f.read(4)
     if len(blen) == 0:
         return 0
-    (size,) = struct.unpack("=i", blen)
+    (size, ) = struct.unpack("=i", blen)
     f.seek(size, 1)
     blen2 = f.read(4)
     if blen != blen2:
@@ -87,7 +87,7 @@ def read(f):
     blen = f.read(4)
     if len(blen) == 0:
         return None
-    (size,) = struct.unpack("=i", blen)
+    (size, ) = struct.unpack("=i", blen)
     data = f.read(size)
     blen2 = f.read(4)
     if blen != blen2:

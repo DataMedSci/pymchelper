@@ -109,14 +109,10 @@ def _compose_float_string(w, e, d, state, val, ftype):
         fmt = "%+-#{:d}.{:d}e".format(PROC_MIN_FIELD_WIDTH, ndigits - 1)
     buff = fmt % tmp
     # === WRITE_FLOAT === (macro)
-    return _output_float(w, d, e, state,
-                         ftype, buff, sign_bit,
-                         zero_flag, ndigits, edigits)
+    return _output_float(w, d, e, state, ftype, buff, sign_bit, zero_flag, ndigits, edigits)
 
 
-def _output_float(w, d, e, state,
-                  ft, buff, sign_bit,
-                  zero_flag, ndigits, edigits):
+def _output_float(w, d, e, state, ft, buff, sign_bit, zero_flag, ndigits, edigits):
     # nbefore - number of digits before the decimal point
     # nzero - number of zeros after the decimal point
     # nafter - number of digits after the decimal point
@@ -149,11 +145,9 @@ def _output_float(w, d, e, state,
     if ft in ['E', 'D']:
         i = state['scale']
         if (d <= 0) and (i == 0):
-            raise Exception("Precision not greater "
-                            "than zero in format specifier 'E' or 'D'")
+            raise Exception("Precision not greater " "than zero in format specifier 'E' or 'D'")
         if (i <= -d) or (i >= (d + 2)):
-            raise Exception("Scale factor out of range "
-                            "in format specifier 'E' or 'D'")
+            raise Exception("Scale factor out of range " "in format specifier 'E' or 'D'")
         if not zero_flag:
             ex = ex - i
         if i < 0:
@@ -307,14 +301,12 @@ def _output_float(w, d, e, state,
 def format_d(w, d, val):
     e = None
     ftype = 'D'
-    state = {'blanks_as_zeros': False, 'incl_plus': False,
-             'position': 0, 'scale': 0, 'halt_if_no_vals': False}
+    state = {'blanks_as_zeros': False, 'incl_plus': False, 'position': 0, 'scale': 0, 'halt_if_no_vals': False}
     return _compose_float_string(w, e, d, state, val, ftype)
 
 
 def format_e(w, d, val):
     e = None
     ftype = 'E'
-    state = {'blanks_as_zeros': False, 'incl_plus': False,
-             'position': 0, 'scale': 0, 'halt_if_no_vals': False}
+    state = {'blanks_as_zeros': False, 'incl_plus': False, 'position': 0, 'scale': 0, 'halt_if_no_vals': False}
     return _compose_float_string(w, e, d, state, val, ftype)
