@@ -1,28 +1,53 @@
-from enum import IntEnum
+import logging
+
+from pymchelper.shieldhit.detector.detector import SHDetType
+from pymchelper.shieldhit.detector.estimator_type import SHGeoType
+from pymchelper.shieldhit.detector.geometry import Geometry
+from pymchelper.shieldhit.particle import SHParticleType
+
+logger = logging.getLogger(__name__)
 
 
-class SHGeoType(IntEnum):
-    unknown = 0
-    zone = 1
-    cyl = 2
-    msh = 3
-    plane = 4
-    dzone = 5
-    dcyl = 6
-    dmsh = 7
-    dplane = 8
-    dcylz = 10
-    dmshz = 11
-    trace = 13
-    voxscore = 14
-    geomap = 15
+class SHEstimator:
+    allowed_detectors = {
+        SHGeoType.unknown: (),
+        SHGeoType.zone: (SHDetType(i + 1) for i in
+                         range(SHDetType.tletg - 1)),
+        SHGeoType.cyl: (SHDetType(i + 1) for i in
+                        range(SHDetType.tletg - 1)),
+        SHGeoType.msh: (SHDetType(i + 1) for i in
+                        range(SHDetType.tletg - 1)),
+        SHGeoType.plane: (SHDetType(i + 1) for i in
+                          range(SHDetType.tletg - 1)),
+        SHGeoType.dzone: (SHDetType(i + 1) for i in
+                          range(SHDetType.tletg - 1)),
+        SHGeoType.dcyl: (SHDetType(i + 1) for i in
+                         range(SHDetType.tletg - 1)),
+        SHGeoType.dmsh: (SHDetType(i + 1) for i in
+                         range(SHDetType.tletg - 1)),
+        SHGeoType.dplane: (SHDetType(i + 1) for i in
+                           range(SHDetType.tletg - 1)),
+        SHGeoType.dcylz: (SHDetType(i + 1) for i in
+                          range(SHDetType.tletg - 1)),
+        SHGeoType.dmshz: (SHDetType(i + 1) for i in
+                          range(SHDetType.tletg - 1)),
+        SHGeoType.trace: (SHDetType.unknown,),
+        SHGeoType.voxscore: (SHDetType(i + 1) for i in
+                             range(SHDetType.tletg - 1)),
+        SHGeoType.geomap: (SHDetType.zone, SHDetType.medium, SHDetType.rho),
+    }
 
-    def __str__(self):
-        return self.name.upper()
+    def __init__(self):
+        self.estimator = SHGeoType.unknown
+        self.particle_type = SHParticleType.unknown
+        self.detector_type = SHDetType.unknown
+        self.geometry = Geometry()
+        self.filename = ""
 
-# TODO to implement:
-#  - allowed detectors (+ differential detectors)
-#  - reading from string (detect.dat format)
-#  - saving to string (detect.dat format)
-#  - combine with particle type
-#  - compibe with geometry type
+    def is_valid(self):
+        if self.estimator not in self.geometry.allowed_estimators():
+            logger.error("{:s} is not a valid estimator for {:s} "
+                         "geometry".format(self.estimator, self.geometry))
+            return False
+
+        return True
