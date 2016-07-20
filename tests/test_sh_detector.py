@@ -3,7 +3,7 @@ from pymchelper.shieldhit.detector.detector import SHDetType
 from pymchelper.shieldhit.detector.estimator import SHGeoType, SHEstimator
 from pymchelper.shieldhit.detector.fortran_card import CardLine, \
     EstimatorWriter
-from pymchelper.shieldhit.detector.geometry import CarthesianMesh
+from pymchelper.shieldhit.detector.geometry import CarthesianMesh, CylindricalMesh
 from pymchelper.shieldhit.particle import SHParticleType, SHHeavyIonType
 
 
@@ -46,20 +46,15 @@ class TestSHParticle(unittest.TestCase):
 class TestFortranCard(unittest.TestCase):
     def test_create_string(self):
         comment = CardLine.comment
-        self.assertEqual(len(comment),
-                         CardLine.no_of_elements * CardLine.element_length)
+        self.assertEqual(len(comment), CardLine.no_of_elements * CardLine.element_length)
 
-        self.assertEqual(CardLine.string_to_element(""),
-                         " " * CardLine.element_length)
+        self.assertEqual(CardLine.string_to_element(""), " " * CardLine.element_length)
 
-        self.assertEqual(CardLine.string_to_element("  "),
-                         " " * CardLine.element_length)
+        self.assertEqual(CardLine.string_to_element("  "), " " * CardLine.element_length)
 
-        self.assertEqual(CardLine.string_to_element(" abc"),
-                         "       abc")
+        self.assertEqual(CardLine.string_to_element(" abc"), "       abc")
 
-        self.assertEqual(CardLine.string_to_element("0123456789"),
-                         "0123456789")
+        self.assertEqual(CardLine.string_to_element("0123456789"), "0123456789")
 
         try:
             CardLine.string_to_element("0123456789a")
@@ -67,32 +62,23 @@ class TestFortranCard(unittest.TestCase):
             self.assertIsInstance(e, Exception)
 
     def test_create_number(self):
-        self.assertEqual(CardLine.number_to_element(""),
-                         " " * CardLine.element_length)
+        self.assertEqual(CardLine.number_to_element(""), " " * CardLine.element_length)
 
-        self.assertEqual(CardLine.number_to_element(0),
-                         "         0")
+        self.assertEqual(CardLine.number_to_element(0), "         0")
 
-        self.assertEqual(CardLine.number_to_element(123),
-                         "       123")
+        self.assertEqual(CardLine.number_to_element(123), "       123")
 
-        self.assertEqual(CardLine.number_to_element(-123),
-                         "      -123")
+        self.assertEqual(CardLine.number_to_element(-123), "      -123")
 
-        self.assertEqual(CardLine.number_to_element(0.0),
-                         "       0.0")
+        self.assertEqual(CardLine.number_to_element(0.0), "       0.0")
 
-        self.assertEqual(CardLine.number_to_element(1.),
-                         "       1.0")
+        self.assertEqual(CardLine.number_to_element(1.), "       1.0")
 
-        self.assertEqual(CardLine.number_to_element(-2.),
-                         "      -2.0")
+        self.assertEqual(CardLine.number_to_element(-2.), "      -2.0")
 
-        self.assertEqual(CardLine.number_to_element(-1. / 2.0),
-                         "      -0.5")
+        self.assertEqual(CardLine.number_to_element(-1. / 2.0), "      -0.5")
 
-        self.assertEqual(CardLine.number_to_element(1234567890),
-                         "1234567890")
+        self.assertEqual(CardLine.number_to_element(1234567890), "1234567890")
 
         try:
             CardLine.number_to_element(12345678900)
@@ -101,7 +87,7 @@ class TestFortranCard(unittest.TestCase):
 
 
 class TestEstimatorWriter(unittest.TestCase):
-    def test_write(self):
+    def test_write_msh(self):
         estimator = SHEstimator()
         estimator.estimator = SHGeoType.msh
         estimator.geometry = CarthesianMesh()
@@ -118,12 +104,55 @@ class TestEstimatorWriter(unittest.TestCase):
         estimator.particle_type = SHParticleType.all
         estimator.filename = "ex_zmsh"
         line1, line2 = EstimatorWriter.write(estimator)
-        ref_line1 = "       MSH      -5.0      -5.0       0.0" \
-                    "       5.0       5.0      30.0"
-        ref_line2 = "                   1         1       300" \
-                    "        -1    ENERGY   ex_zmsh"
+        ref_line1 = "       MSH      -5.0      -5.0       0.0       5.0       5.0      30.0"
+        ref_line2 = "                   1         1       300        -1    ENERGY   ex_zmsh"
         self.assertEqual(str(line1), ref_line1)
         self.assertEqual(str(line2), ref_line2)
+
+    def test_write_msh(self):
+        estimator = SHEstimator()
+        estimator.estimator = SHGeoType.cyl
+        estimator.geometry = CylindricalMesh()
+        estimator.geometry.axis[0].start = 0.0
+        estimator.geometry.axis[1].start = 0.0
+        estimator.geometry.axis[2].start = 0.0
+        estimator.geometry.axis[0].stop = 10.0
+        estimator.geometry.axis[1].stop = 7.0
+        estimator.geometry.axis[2].stop = 30.0
+        estimator.geometry.axis[0].nbins = 1
+        estimator.geometry.axis[1].nbins = 1
+        estimator.geometry.axis[2].nbins = 300
+        estimator.detector_type = SHDetType.energy
+        estimator.particle_type = SHParticleType.all
+        estimator.filename = "ex_cyl"
+        line1, line2 = EstimatorWriter.write(estimator)
+        ref_line1 = "       CYL       0.0       0.0       0.0      10.0       7.0      30.0"
+        ref_line2 = "                   1         1       300        -1    ENERGY    ex_cyl"
+        self.assertEqual(str(line1), ref_line1)
+        self.assertEqual(str(line2), ref_line2)
+
+    def test_write_geomap(self):
+        estimator = SHEstimator()
+        estimator.estimator = SHGeoType.geomap
+        estimator.geometry = CarthesianMesh()
+        estimator.geometry.axis[0].start = -1.0
+        estimator.geometry.axis[1].start = -25.0
+        estimator.geometry.axis[2].start = -15.0
+        estimator.geometry.axis[0].stop = 1.0
+        estimator.geometry.axis[1].stop = 25.0
+        estimator.geometry.axis[2].stop = 35.0
+        estimator.geometry.axis[0].nbins = 1
+        estimator.geometry.axis[1].nbins = 50
+        estimator.geometry.axis[2].nbins = 50
+        estimator.detector_type = SHDetType.zone
+        estimator.particle_type = SHParticleType.unknown
+        estimator.filename = "ex_yzzon"
+        line1, line2 = EstimatorWriter.write(estimator)
+        ref_line1 = "    GEOMAP      -1.0     -25.0     -15.0       1.0      25.0      35.0"
+        ref_line2 = "                   1        50        50         0      ZONE  ex_yzzon"
+        self.assertEqual(str(line1), ref_line1)
+        self.assertEqual(str(line2), ref_line2)
+
 
 if __name__ == '__main__':
     unittest.main()

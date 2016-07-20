@@ -1,6 +1,5 @@
 class CardLine:
-    comment = "*----0---><----1---><----2---><----3--->" \
-              "<----4---><----5---><----6--->"
+    comment = "*----0---><----1---><----2---><----3---><----4---><----5---><----6--->"
     no_of_elements = 7
     element_length = 10
 
@@ -9,8 +8,8 @@ class CardLine:
             raise Exception("Line should have {:d}, not {:d} elements".format(self.no_of_elements, len(string_data)))
         for element in string_data:
             if len(element) != self.element_length:
-                raise Exception("Element [{:s}] should have {:d}, "
-                                "not {:d} elements".format(element, self.element_length, len(element)))
+                raise Exception("Element [{:s}] should have {:d}, not {:d} elements".format(
+                    element, self.element_length, len(element)))
         self.data = string_data
 
     def __str__(self):
@@ -19,8 +18,8 @@ class CardLine:
     @staticmethod
     def number_to_element(n):
         if len(str(n)) > CardLine.element_length:
-            raise Exception("Element [{:s}] should have {:d}, "
-                            "not {:d} elements".format(str(n), CardLine.element_length, len(str(n))))
+            raise Exception("Element [{:s}] should have {:d}, not {:d} elements".format(
+                str(n), CardLine.element_length, len(str(n))))
         padding = " " * (CardLine.element_length - len(str(n)))
         result = padding + str(n)
         return result
@@ -28,8 +27,8 @@ class CardLine:
     @staticmethod
     def string_to_element(s):
         if len(s) > CardLine.element_length:
-            raise Exception("Element [{:s}] should have {:d}, "
-                            "not {:d} elements".format(s, CardLine.element_length, len(s)))
+            raise Exception("Element [{:s}] should have {:d}, not {:d} elements".format(s, CardLine.element_length, len(
+                s)))
         padding = " " * (CardLine.element_length - len(s))
         return padding + s
 
