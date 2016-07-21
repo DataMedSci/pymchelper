@@ -11,6 +11,7 @@
   recursive-include tests *.bdo
   recursive-include tests *.png
   recursive-include tests *.dat
+  recursive-include tests *.sh
   include versioneer.py
   include pymchelper/_version.py
 
