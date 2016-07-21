@@ -36,7 +36,7 @@ class EstimatorWriter:
         if estimator.particle_type == SHParticleType.heavy_ion:
             tmp_heavy_ion = ["", estimator.heavy_ion_type.z, estimator.heavy_ion_type.a, "", "", "", ""]
             data_heavy_ion = [CardLine.any_to_element(d) for d in tmp_heavy_ion]
-        if type(estimator.geometry) is Zone:
+        if isinstance(estimator.geometry, Zone):
             data1_any = [
                 estimator.estimator, estimator.geometry.start, estimator.geometry.stop, "",
                 estimator.particle_type.value, estimator.detector_type, estimator.filename
@@ -45,7 +45,7 @@ class EstimatorWriter:
             if estimator.particle_type == SHParticleType.heavy_ion:
                 return CardLine(data1), CardLine(data_heavy_ion)
             return CardLine(data1)
-        if type(estimator.geometry) is Plane:
+        if isinstance(estimator.geometry, Plane):
             data1_any = [
                 estimator.estimator, estimator.geometry.point_x, estimator.geometry.point_y, estimator.geometry.point_z,
                 estimator.geometry.normal_x, estimator.geometry.normal_y, estimator.geometry.normal_z

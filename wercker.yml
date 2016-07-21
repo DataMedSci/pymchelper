@@ -37,6 +37,8 @@ build:
 
     # A step that executes `pip install` command.
     - pip-install
+        requirements_file: "requirements.txt"
+        extra_args: "-rtests/requirements-test.txt"
 
     # # This pip-install clears the local wheel cache
     # - pip-install:
@@ -49,3 +51,7 @@ build:
         code: |
           echo "python version $(python --version) running"
           echo "pip version $(pip --version) running"
+    - script:
+        name: test
+        code: |
+          tox -e py27
