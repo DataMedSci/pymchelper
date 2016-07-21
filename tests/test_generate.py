@@ -33,7 +33,9 @@ class TestGenerated(unittest.TestCase):
     def test_standard(self):
         for est in ("cyl", "geomap", "msh", "plane", "zone"):
             outdir = os.path.join("tests", "res", "shieldhit", "generated", est)
-            for infile in glob.glob(os.path.join(outdir, "*.bdo")):
+            bdo_files = glob.glob(os.path.join(outdir, "*.bdo"))
+            self.assertGreater(len(bdo_files), 0)
+            for infile in bdo_files:
                 fd, outfile = tempfile.mkstemp()
                 os.close(fd)
                 os.remove(outfile)
@@ -46,7 +48,9 @@ class TestGenerated(unittest.TestCase):
     def test_plotdata(self):
         for est in ("cyl", "geomap", "msh", "plane", "zone"):
             outdir = os.path.join("tests", "res", "shieldhit", "generated", est)
-            for infile in glob.glob(os.path.join(outdir, "*.bdo")):
+            bdo_files = glob.glob(os.path.join(outdir, "*.bdo"))
+            self.assertGreater(len(bdo_files), 0)
+            for infile in bdo_files:
                 fd, outfile = tempfile.mkstemp()
                 os.close(fd)
                 os.remove(outfile)
@@ -60,7 +64,9 @@ class TestGenerated(unittest.TestCase):
         allowed_patterns = ("_x_", "_y_", "_z_", "_xy_", "_yz_", "_xz_")
         for est in ("cyl", "geomap", "msh", "plane", "zone"):
             outdir = os.path.join("tests", "res", "shieldhit", "generated", est)
-            for infile in glob.glob(os.path.join(outdir, "*.bdo")):
+            bdo_files = glob.glob(os.path.join(outdir, "*.bdo"))
+            self.assertGreater(len(bdo_files), 0)
+            for infile in bdo_files:
                 will_produce_output = False
                 for pattern in allowed_patterns:
                     if pattern in os.path.basename(infile):
@@ -79,7 +85,9 @@ class TestGenerated(unittest.TestCase):
     def test_get_object(self):
         for est in ("cyl", "geomap", "msh", "plane", "zone"):
             outdir = os.path.join("tests", "res", "shieldhit", "generated", est)
-            for infile in glob.glob(os.path.join(outdir, "*.bdo")):
+            bdo_files = glob.glob(os.path.join(outdir, "*.bdo"))
+            self.assertGreater(len(bdo_files), 0)
+            for infile in bdo_files:
                 det = SHDetect()
                 det.read(infile)
                 if det.geotyp == SHGeoType.zone:

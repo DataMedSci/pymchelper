@@ -294,10 +294,7 @@ def generate_plane():
     part_types = OrderedDict({"al": SHParticleType.all, "p": SHParticleType.proton, "n": SHParticleType.neutron})
 
     # possible detector types and associated names
-    det_types = OrderedDict({"en": SHDetType.energy,
-                             "fl": SHDetType.fluence,
-                             "aen": SHDetType.avg_energy,
-                             "bet": SHDetType.avg_beta})
+    det_types = OrderedDict({"cnt": SHDetType.counter})
 
     # possible geometries and associated names
     geometries_dict = plane_geometries()
