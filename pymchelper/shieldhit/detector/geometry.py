@@ -2,11 +2,14 @@ from pymchelper.shieldhit.detector.estimator_type import SHGeoType
 
 
 class Axis:
-    def __init__(self):
-        self.name = ""
-        self.start = None
-        self.stop = None
-        self.nbins = None
+    def __init__(self, name="", start=None, stop=None, nbins=None):
+        self.name = name
+        self.set(start=start, stop=stop, nbins=nbins)
+
+    def set(self, start=None, stop=None, nbins=None):
+        self.start = start
+        self.stop = stop
+        self.nbins = nbins
 
 
 class Geometry:
@@ -16,6 +19,9 @@ class Geometry:
     @staticmethod
     def allowed_estimators():
         return ()
+
+    def set_axis(self, axis_no, start=None, stop=None, nbins=None):
+        self.axis[axis_no].set(start=start, stop=stop, nbins=nbins)
 
     def __str__(self):
         return "general"
@@ -51,7 +57,7 @@ class CylindricalMesh(Geometry):
         return "cylindrical"
 
 
-class Zone():
+class Zone:
     def __init__(self):
         self.start = None
         self.stop = None
@@ -64,14 +70,20 @@ class Zone():
         return "zone"
 
 
-class Plane():
+class Plane:
     def __init__(self):
-        self.point_x = None
-        self.point_y = None
-        self.point_z = None
-        self.normal_x = None
-        self.normal_y = None
-        self.normal_z = None
+        self.set_point()
+        self.set_normal()
+
+    def set_point(self, x=None, y=None, z=None):
+        self.point_x = x
+        self.point_y = y
+        self.point_z = z
+
+    def set_normal(self, x=None, y=None, z=None):
+        self.normal_x = x
+        self.normal_y = y
+        self.normal_z = z
 
     @staticmethod
     def allowed_estimators():

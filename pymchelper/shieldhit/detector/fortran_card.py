@@ -3,6 +3,9 @@ from pymchelper.shieldhit.particle import SHParticleType
 
 
 class CardLine:
+    """
+    Represents single line of detect.dat file
+    """
     comment = "*----0---><----1---><----2---><----3---><----4---><----5---><----6--->"
     no_of_elements = 7
     element_length = 10
@@ -31,8 +34,17 @@ class CardLine:
 
 
 class EstimatorWriter:
-    @classmethod
-    def write(self, estimator):
+    """
+    Helper class. Gives textual representation of Estimator objects.
+    """
+
+    @staticmethod
+    def get_lines(estimator):
+        """
+        Converts estimator to CardLine objects
+        :param estimator: valid estimator object
+        :return: tuple of CardLine objects
+        """
         if estimator.particle_type == SHParticleType.heavy_ion:
             tmp_heavy_ion = ["", estimator.heavy_ion_type.z, estimator.heavy_ion_type.a, "", "", "", ""]
             data_heavy_ion = [CardLine.any_to_element(d) for d in tmp_heavy_ion]
@@ -70,6 +82,22 @@ class EstimatorWriter:
             return CardLine(data1), CardLine(data2), CardLine(data_heavy_ion)
         return CardLine(data1), CardLine(data2)
 
+    @staticmethod
+    def get_text(estimator, add_comment=False):
+        """
+        Converts Estimator to text
+        :param estimator: valid Estimator object
+        :param add_comment: if True, prepends textual representation with comment line
+        :return: text representation (set of text lines) of Estimator
+        """
+        code_lines = EstimatorWriter.get_lines(estimator)
+        result = ""
+        if add_comment:
+            result = CardLine.comment + "\n"
+        result += "\n".join(map(str, code_lines)) + "\n"
+        return result
+
 
 class EstimatorReader:
     pass
+    # TODO to be implemented

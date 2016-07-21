@@ -10,6 +10,15 @@ from pymchelper.shieldhit.detector.geometry import CarthesianMesh
 from pymchelper.shieldhit.particle import SHParticleType
 
 
+def geomap_geometries():
+    pass
+#    nbins = 100
+
+
+def generate_geomap():
+    pass
+
+
 def main(args=sys.argv[1:]):
     """
     Compose programatically detect.dat SHIELDHIT-12A input file
@@ -27,9 +36,15 @@ def main(args=sys.argv[1:]):
     # for every combination of particle and detector type, making it error prone
     estimator.estimator = SHGeoType.msh
     estimator.geometry = CarthesianMesh()
-    estimator.geometry.set_axis(axis_no=0, start=-5.0, stop=5.0, nbins=1)
-    estimator.geometry.set_axis(axis_no=1, start=-5.0, stop=5.0, nbins=1)
-    estimator.geometry.set_axis(axis_no=2, start=0.0, stop=30.0, nbins=300)
+    estimator.geometry.axis[0].start = -5.0
+    estimator.geometry.axis[1].start = -5.0
+    estimator.geometry.axis[2].start = 0.0
+    estimator.geometry.axis[0].stop = 5.0
+    estimator.geometry.axis[1].stop = 5.0
+    estimator.geometry.axis[2].stop = 30.0
+    estimator.geometry.axis[0].nbins = 1
+    estimator.geometry.axis[1].nbins = 1
+    estimator.geometry.axis[2].nbins = 300
 
     # possible detector types and associated names
     det_types = {SHDetType.energy: "en", SHDetType.fluence: "fl"}
