@@ -1,0 +1,43 @@
+
+          DISTRIBUTIONS INSIDE TARGET.
+ INP. NO.  IONIZ+RECL     RECOIL     RESIDUAL     NO.  TSUM_PI0                          ABSORBED/CUT OFF PARTICLES                            INTERACTIONS
+ ZONE MED   LOSS(MEV)      (MEV)    EXCITATION    PI0   (MEV)        PI+     K+    MU-    MU+     PROT    DEUT    TRIT     HE3    ALPH     ELSC    INEL    FISS
+   1   1   0.110052E+07  0.543965E+02  0.0000E+00     18  0.1214E+04       0      0      0      0      859      83      31      27     258      450     816       0
+   2   1   0.109959E+07  0.780137E+02  0.1729E+02      3  0.6311E+02       0      0      0      0     1365     103      25      36     311      609    1149       0
+   3   1   0.115253E+07  0.991582E+02  0.0000E+00      3  0.1112E+03       0      0      0      0     1687      96      31      44     378      679    1206       0
+   41000   0.000000E+00  0.000000E+00  0.0000E+00      0  0.0000E+00       0      0      0      0        0       0       0       0       0        0       0       0
+   5   0   0.000000E+00  0.000000E+00  0.0000E+00      0  0.0000E+00       0      0      0      0        0       0       0       0       0        0       0       0
+  SUMM:    0.335264E+07  0.231568E+03  0.1729E+02     24  0.1388E+04       0      0      0      0     3911     282      87     107     947     1738    3171       0
+
+     Contribution to energy deposition from primary
+     and secondary ions separately.
+ ZONE MED         TOTAL   Prim(GEN0)   Scnd(GEN1)   Thrd(GEN2)   GEN2+3+...   Prot_GEN>0
+   1   1   0.110052E+07 0.937533E+06 0.145183E+06 0.161005E+05 0.178059E+05 0.553492E+05
+   2   1   0.109959E+07 0.695662E+06 0.319838E+06 0.723376E+05 0.840877E+05 0.118340E+06
+   3   1   0.115253E+07 0.559552E+06 0.429771E+06 0.133787E+06 0.163205E+06 0.143306E+06
+   41000   0.000000E+00 0.000000E+00 0.000000E+00 0.000000E+00 0.000000E+00 0.000000E+00
+   5   0   0.000000E+00 0.000000E+00 0.000000E+00 0.000000E+00 0.000000E+00 0.000000E+00
+     SUM:  0.335264E+07 0.219275E+07 0.894792E+06 0.222226E+06 0.265098E+06 0.316994E+06
+
+     Distribution of PET isotopes over target zones
+ ZONE  MED     C10     C11     N13     O13     O14     O15
+    1    1      10      22       7       4       8      47
+    2    1      11      32      22       2       5      90
+    3    1      29     108      27       0      10      93
+    4 1000       0       0       0       0       0       0
+    5    0       0       0       0       0       0       0
+   SUM ==>      50     162      56       6      23     230
+
+ RESIDUAL NUCLEI (A,Z)-DISTRIBUTION. A0(Z) IS THE BETHA STABILITY CURVE.
+                     DISPOSITION OF  A  RELATIVE  A0(Z):
+                        -4    -3    -2    -1     0     1     2
+ He (Z=  2,A0=  4):      0     0     0     0     0     0     1
+ Li (Z=  3,A0=  6):      0     0     0     0    33    25     3
+ Be (Z=  4,A0=  8):      0     0     0    50     0    28    17
+  B (Z=  5,A0= 10):      0     0     0     0    79    90    11
+  C (Z=  6,A0= 12):      0     0    50   162   459    83    32
+  N (Z=  7,A0= 15):      0     0    56   180   265     2     0
+  O (Z=  8,A0= 17):      6    23   230   618     0     0     0
+  F (Z=  9,A0= 19):      2     0     0     0     0     0     0
+ NUMBER OF NUCLEI  INSIDE DISTRIBUTION IS       2505
+ NUMBER OF NUCLEI OUTSIDE DISTRIBUTION IS          0

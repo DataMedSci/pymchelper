@@ -1,0 +1,15 @@
+
+--- INPUT DATA FOR SHIELD TRANSPORT CALCULATION ---
+     TYPE of incident particle/nucleus     :          25
+     Incident ENERGY, SigmaT0 (MeV)/(MeV/A):     391.000       0.000
+     Beam SPOT SHAPE, SigmaX, SigmaY (cm)  :       0.000       0.000
+     Beam DIRECTION, theta, phi (rad)      :   0.000E+00   0.000E+00
+     Beam DIVERGENCE, divX, divY (mrad)    :   0.000E+00   0.000E+00
+     Beam FOCUS distance (cm)              :   0.000E+00
+     Monte Carlo STATistics                :        3000
+     Neutron transport CUTOFF energy (MeV) :  0.0000E+00
+     Nucleus-projectile TYPE (A,Z)       : 25( 12, 6)
+
+
+Scoring of secondary neutrons below 14.5 intofor028 is disabled. (Enable with MAKELN card.)
+END OF SOURN

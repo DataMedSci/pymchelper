@@ -224,12 +224,12 @@ class TestEstimatorWriter(unittest.TestCase):
         estimator.detector_type = SHDetType.dose
         estimator.particle_type = SHParticleType.all
         estimator.filename = "DH_dose"
-        line1 = EstimatorWriter.get_lines(estimator)
+        line1, = EstimatorWriter.get_lines(estimator)
         ref_line1 = "ZONE               1                            -1      DOSE   DH_dose"
         self.assertEqual(str(line1), ref_line1)
 
         estimator.geometry.stop = 300
-        line1 = EstimatorWriter.get_lines(estimator)
+        line1, = EstimatorWriter.get_lines(estimator)
         ref_line1 = "ZONE               1       300                  -1      DOSE   DH_dose"
         self.assertEqual(str(line1), ref_line1)
 

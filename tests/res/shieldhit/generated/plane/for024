@@ -1,0 +1,93 @@
+
+ *** SHIELD-HIT12A-beta *** Copyright (c) 2016
+ Institute of Nuclear Research RAS, Moscow, Russia and
+ Dept. of Physics and Astronomy, Aarhus University, Aarhus, Denmark and
+ Dept. of Experimental Clinical Oncology Aarhus University Hospital, Aarhus, Denmark.
+
+ SHIELD-HIT12A Version X.Y.Z
+ Build date: Tue Jun 21 16:29:42 CEST 2016
+
+--- PARAMETERS of the SHIELD hA- and AA-GENERATOR ---
+     Using default PARLEV() parameters.
+
+--- CG-GEOMETRY INPUT FILE ---
+*---><---><--------><------------------------------------------------>      
+    0    0           H2O 30 cm cylinder, r=10                               
+*---><---><--------><--------><--------><--------><--------><-------->      
+  RCC    1       0.0       0.0       0.0       0.0       0.0      10.0      
+                10.0                                                        
+*---><---><--------><--------><--------><--------><--------><-------->      
+  RCC    2       0.0       0.0      10.0       0.0       0.0      10.0      
+                10.0                                                        
+*---><---><--------><--------><--------><--------><--------><-------->      
+  RCC    3       0.0       0.0      20.0       0.0       0.0      10.0      
+                10.0                                                        
+*---><---><--------><------------------------------------------------>      
+  RCC    4       0.0       0.0      -5.0       0.0       0.0      35.0      
+                15.0                                                        
+*---><---><--------><------------------------------------------------>      
+  RCC    5       0.0       0.0     -10.0       0.0       0.0      40.0      
+                20.0                                                        
+*---><---><--------><------------------------------------------------>      
+  END                                                                       
+  001          +1                                                           
+  002          +2                                                           
+  003          +3                                                           
+  004          +4     -3     -2     -1                                      
+  005          +5     -4                                                    
+  END                                                                       
+    1    2    3    4    5                                                   
+    1    1    1 1000    0                                                   
+                                                                            
+
+--- INPUT DATA FOR SHIELD TRANSPORT CALCULATION ---
+     TYPE of incident particle/nucleus     :          25
+     Incident ENERGY, SigmaT0 (MeV)/(MeV/A):     391.000       0.000
+     Beam SPOT SHAPE, SigmaX, SigmaY (cm)  :       0.000       0.000
+     Beam DIRECTION, theta, phi (rad)      :   0.000E+00   0.000E+00
+     Beam DIVERGENCE, divX, divY (mrad)    :   0.000E+00   0.000E+00
+     Beam FOCUS distance (cm)              :   0.000E+00
+     Monte Carlo STATistics                :        3000
+     Neutron transport CUTOFF energy (MeV) :  0.0000E+00
+     Flags writefile: ynnnnnnnnnnn
+     Nucleus-projectile TYPE (A,Z)       : 25( 12, 6)
+
+  Straggling and scattering parameters:
+     DeltaE/E for straggling, DELE         :       0.050
+     Min. step for straggling DEMIN (MeV/u):       0.025
+     VAVILOV/LANDAU energy straggling selected
+     MOLIERE multiple scattering selected
+
+     NUCLEAR reactions are switched ON
+
+     Random seed IXFIRS                    :    89736501
+
+--- MEDIA COMPOSITION ---
+     Total number of media found           :           1
+
+     MEDIUM NUMBER  1
+     (no title given)                                                      
+       Medium state                        :           2
+       ICRU ID (0 = none specified)        :         276
+       Number of elements in medium        :           2
+       Density                             : 0.10000E+01 g/cm**3
+       Average <Z/A>                       :    0.555079
+       Average excitation potential I      :      75.321 eV
+       Radiation length                    :      36.083 cm
+       Elemental composition:
+         NCL  Z         A      Rho      I   Concentration   Partial density
+                           g/cm**3     eV     10**27/cm**3          g/cm**3
+       --------------------------------------------------------------------
+           1  1.   1.0080   0.0808   19.2     0.66852E-04       0.11189E+00
+           8  8.  15.9994   1.5680  106.0     0.33428E-04       0.88811E+00
+       --------------------------------------------------------------------
+ RANSHI INITIALIZED WITH SEED    89736501
+
+          CUTOFF ENERGIES for charged particles transport.
+                 P     PI-     PI+  Anti P      K-      K+     MU-     MU+
+     DFLT:   0.025   0.025   0.025   0.025   0.025   0.025   0.025   0.025
+     USER:   0.025   0.025   0.025   0.025   0.025   0.025   0.025   0.025
+             DEUTR  TRITON     He3   Alpha HEV*ION
+     DFLT:   0.025   0.025   0.025   0.025   0.025
+     USER:   0.025   0.025   0.025   0.025   0.025
+END OF TITLES
