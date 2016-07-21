@@ -19,7 +19,6 @@ class CardLine:
             self.data = [" " * CardLine.element_length] * CardLine.no_of_elements
         else:
             for element in data:
-                print(element.__class__, element)
                 if isinstance(element, SHGeoType):
                     elem_string = CardLine.any_to_element(element, align_right=False)
                 else:
@@ -64,7 +63,7 @@ class EstimatorWriter:
             ]
             if estimator.particle_type == SHParticleType.heavy_ion:
                 return CardLine(data1), CardLine(data_heavy_ion)
-            return CardLine(data1)
+            return (CardLine(data1),)
         if isinstance(estimator.geometry, Plane):
             data1 = [
                 estimator.estimator, estimator.geometry.point_x, estimator.geometry.point_y, estimator.geometry.point_z,
