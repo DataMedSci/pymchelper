@@ -30,6 +30,19 @@ class TestGenerated(unittest.TestCase):
     #         png_files = [f for f in files if f.endswith(".png")]
     #         self.assertGreater(len(png_files), 1)
 
+    def test_standard(self):
+        for est in ("cyl", "geomap", "msh", "plane", "zone"):
+            outdir = os.path.join("tests", "res", "shieldhit", "generated", est)
+            for infile in glob.glob(os.path.join(outdir, "*.bdo")):
+                fd, outfile = tempfile.mkstemp()
+                os.close(fd)
+                os.remove(outfile)
+                bdo2txt.main([infile, outfile])
+                saved_file = outfile
+                self.assertTrue(os.path.isfile(saved_file))
+                self.assertGreater(os.path.getsize(saved_file), 0)
+                os.remove(saved_file)
+
     def test_plotdata(self):
         for est in ("cyl", "geomap", "msh", "plane", "zone"):
             outdir = os.path.join("tests", "res", "shieldhit", "generated", est)
@@ -43,18 +56,25 @@ class TestGenerated(unittest.TestCase):
                 self.assertGreater(os.path.getsize(saved_file), 0)
                 os.remove(saved_file)
 
-    # def test_image(self):
-    #     for est in ("cyl", "geomap", "msh", "plane", "zone"):
-    #         outdir = os.path.join("tests", "res", "shieldhit", "generated", est)
-    #         for infile in glob.glob(os.path.join(outdir, "*.bdo")):
-    #             fd, outfile = tempfile.mkstemp()
-    #             os.close(fd)
-    #             os.remove(outfile)
-    #             bdo2txt.main([infile, outfile, "--converter", "image"])
-    #             saved_file = outfile + ".png"
-    #             self.assertTrue(os.path.isfile(saved_file))
-    #             self.assertGreater(os.path.getsize(saved_file), 0)
-    #             os.remove(saved_file)
+    def test_image(self):
+        allowed_patterns = ("_x_", "_y_", "_z_", "_xy_", "_yz_", "_xz_")
+        for est in ("cyl", "geomap", "msh", "plane", "zone"):
+            outdir = os.path.join("tests", "res", "shieldhit", "generated", est)
+            for infile in glob.glob(os.path.join(outdir, "*.bdo")):
+                will_produce_output = False
+                for pattern in allowed_patterns:
+                    if pattern in os.path.basename(infile):
+                        will_produce_output = True
+                if will_produce_output:
+                    for options in ([], ["--colormap", "gnuplot2"]):
+                        fd, outfile = tempfile.mkstemp()
+                        os.close(fd)
+                        os.remove(outfile)
+                        bdo2txt.main([infile, outfile, "--converter", "image"] + options)
+                        saved_file = outfile + ".png"
+                        self.assertTrue(os.path.isfile(saved_file))
+                        self.assertGreater(os.path.getsize(saved_file), 0)
+                        os.remove(saved_file)
 
     def test_get_object(self):
         for est in ("cyl", "geomap", "msh", "plane", "zone"):
