@@ -50,40 +50,40 @@ class TestFortranCard(unittest.TestCase):
         comment = CardLine.comment
         self.assertEqual(len(comment), CardLine.no_of_elements * CardLine.element_length)
 
-        self.assertEqual(CardLine.string_to_element(""), " " * CardLine.element_length)
+        self.assertEqual(CardLine.any_to_element(""), " " * CardLine.element_length)
 
-        self.assertEqual(CardLine.string_to_element("  "), " " * CardLine.element_length)
+        self.assertEqual(CardLine.any_to_element("  "), " " * CardLine.element_length)
 
-        self.assertEqual(CardLine.string_to_element(" abc"), "       abc")
+        self.assertEqual(CardLine.any_to_element(" abc"), "       abc")
 
-        self.assertEqual(CardLine.string_to_element("0123456789"), "0123456789")
+        self.assertEqual(CardLine.any_to_element("0123456789"), "0123456789")
 
         try:
-            CardLine.string_to_element("0123456789a")
+            CardLine.any_to_element("0123456789a")
         except Exception as e:
             self.assertIsInstance(e, Exception)
 
     def test_create_number(self):
-        self.assertEqual(CardLine.number_to_element(""), " " * CardLine.element_length)
+        self.assertEqual(CardLine.any_to_element(""), " " * CardLine.element_length)
 
-        self.assertEqual(CardLine.number_to_element(0), "         0")
+        self.assertEqual(CardLine.any_to_element(0), "         0")
 
-        self.assertEqual(CardLine.number_to_element(123), "       123")
+        self.assertEqual(CardLine.any_to_element(123), "       123")
 
-        self.assertEqual(CardLine.number_to_element(-123), "      -123")
+        self.assertEqual(CardLine.any_to_element(-123), "      -123")
 
-        self.assertEqual(CardLine.number_to_element(0.0), "       0.0")
+        self.assertEqual(CardLine.any_to_element(0.0), "       0.0")
 
-        self.assertEqual(CardLine.number_to_element(1.), "       1.0")
+        self.assertEqual(CardLine.any_to_element(1.), "       1.0")
 
-        self.assertEqual(CardLine.number_to_element(-2.), "      -2.0")
+        self.assertEqual(CardLine.any_to_element(-2.), "      -2.0")
 
-        self.assertEqual(CardLine.number_to_element(-1. / 2.0), "      -0.5")
+        self.assertEqual(CardLine.any_to_element(-1. / 2.0), "      -0.5")
 
-        self.assertEqual(CardLine.number_to_element(1234567890), "1234567890")
+        self.assertEqual(CardLine.any_to_element(1234567890), "1234567890")
 
         try:
-            CardLine.number_to_element(12345678900)
+            CardLine.any_to_element(12345678900)
         except Exception as e:
             self.assertIsInstance(e, Exception)
 

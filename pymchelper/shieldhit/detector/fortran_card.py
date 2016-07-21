@@ -20,32 +20,14 @@ class CardLine:
         return "".join(self.data)
 
     @staticmethod
-    def number_to_element(n):
-        if len(str(n)) > CardLine.element_length:
+    def any_to_element(s):
+        if len(str(s)) > CardLine.element_length:
             raise Exception("Element [{:s}] should have {:d}, not {:d} elements".format(
-                str(n), CardLine.element_length, len(str(n))))
-        if n is None:
-            n = ""
-        padding = " " * (CardLine.element_length - len(str(n)))
-        result = padding + str(n)
-        return result
-
-    @staticmethod
-    def string_to_element(s):
-        if len(s) > CardLine.element_length:
-            raise Exception("Element [{:s}] should have {:d}, not {:d} elements".format(s, CardLine.element_length, len(
-                s)))
+                str(s), CardLine.element_length, len(str(s))))
         if s is None:
             s = ""
-        padding = " " * (CardLine.element_length - len(s))
-        return padding + s
-
-    @staticmethod
-    def any_to_element(a):
-        if type(a) is str:
-            return CardLine.string_to_element(a)
-        else:
-            return CardLine.number_to_element(a)
+        padding = " " * (CardLine.element_length - len(str(s)))
+        return padding + str(s)
 
 
 class EstimatorWriter:
