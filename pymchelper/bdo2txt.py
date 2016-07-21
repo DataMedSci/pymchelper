@@ -640,21 +640,21 @@ def main(args=sys.argv[1:]):
     parser.add_argument(
         "--colormap", help='color map for image converter', default=SHImageWriter.default_colormap, type=str)
     parser.add_argument('--version', action='version', version=pymchelper.__version__)
-    args = parser.parse_args(args)
+    parsed_args = parser.parse_args(args)
 
     # TODO add filename discovery
 
-    files = sorted(glob.glob(args.inputfile))
+    files = sorted(glob.glob(parsed_args.inputfile))
     if not files:
-        print('File does not exist: ' + args.inputfile)
+        print('File does not exist: ' + parsed_args.inputfile)
 
-    if args.outputfile is None:
-        args.outputfile = files[0][:-3] + "txt"
+    if parsed_args.outputfile is None:
+        parsed_args.outputfile = files[0][:-3] + "txt"
 
-    if args.many:
-        merge_many(files, args.converter, args.nan, args.colormap)
+    if parsed_args.many:
+        merge_many(files, parsed_args.converter, parsed_args.nan, parsed_args.colormap)
     else:
-        merge_list(files, args.outputfile, args.converter, args.nan, args.colormap)
+        merge_list(files, parsed_args.outputfile, parsed_args.converter, parsed_args.nan, parsed_args.colormap)
 
     return 0
 
