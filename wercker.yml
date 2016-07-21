@@ -25,6 +25,13 @@ build:
   # Read more about steps on our dev center:
   # http://devcenter.wercker.com/docs/steps/index.html
   steps:
+
+    - script:
+        name: install
+        code: |
+          sudo apt-get update
+          sudo apt-get install -qq -y --no-install-recommends libfreetype6-dev pkg-config
+
     # A step that sets up the python virtual environment
     - virtualenv:
         name: setup virtual environment
@@ -36,7 +43,7 @@ build:
     #     python_location: /usr/bin/python3.2
 
     # A step that executes `pip install` command.
-    - pip-install
+    - pip-install:
         requirements_file: "requirements.txt"
         extra_args: "-rtests/requirements-test.txt"
 

@@ -18,6 +18,7 @@
   exclude tox.ini
   exclude .travis.yml
   exclude appveyor.yml
+  exclude wercker.yml
   prune .travis
   prune install_deps.sh
   prune make_single_executable.sh
