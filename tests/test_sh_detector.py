@@ -106,7 +106,7 @@ class TestEstimatorWriter(unittest.TestCase):
         estimator.particle_type = SHParticleType.all
         estimator.filename = "ex_zmsh"
         line1, line2 = EstimatorWriter.get_lines(estimator)
-        ref_line1 = "       MSH      -5.0      -5.0       0.0       5.0       5.0      30.0"
+        ref_line1 = "MSH             -5.0      -5.0       0.0       5.0       5.0      30.0"
         ref_line2 = "                   1         1       300        -1    ENERGY   ex_zmsh"
         self.assertEqual(str(line1), ref_line1)
         self.assertEqual(str(line2), ref_line2)
@@ -128,7 +128,7 @@ class TestEstimatorWriter(unittest.TestCase):
         estimator.particle_type = SHParticleType.all
         estimator.filename = "ex_cyl"
         line1, line2 = EstimatorWriter.get_lines(estimator)
-        ref_line1 = "       CYL       0.0       0.0       0.0      10.0       7.0      30.0"
+        ref_line1 = "CYL              0.0       0.0       0.0      10.0       7.0      30.0"
         ref_line2 = "                   1         1       300        -1    ENERGY    ex_cyl"
         self.assertEqual(str(line1), ref_line1)
         self.assertEqual(str(line2), ref_line2)
@@ -161,7 +161,7 @@ class TestEstimatorWriter(unittest.TestCase):
         estimator.particle_type = SHParticleType.all
         estimator.filename = "ex_cyl"
         line1, line2 = EstimatorWriter.get_lines(estimator)
-        ref_line1 = "       CYL       0.0       0.0       0.0      10.0       7.0      30.0"
+        ref_line1 = "CYL              0.0       0.0       0.0      10.0       7.0      30.0"
         ref_line2 = "                   1         1       300        -1    ENERGY    ex_cyl"
         self.assertEqual(str(line1), ref_line1)
         self.assertEqual(str(line2), ref_line2)
@@ -183,7 +183,7 @@ class TestEstimatorWriter(unittest.TestCase):
         estimator.particle_type = SHParticleType.unknown
         estimator.filename = "ex_yzzon"
         line1, line2 = EstimatorWriter.get_lines(estimator)
-        ref_line1 = "    GEOMAP      -1.0     -25.0     -15.0       1.0      25.0      35.0"
+        ref_line1 = "GEOMAP          -1.0     -25.0     -15.0       1.0      25.0      35.0"
         ref_line2 = "                   1        50        50         0      ZONE  ex_yzzon"
         self.assertEqual(str(line1), ref_line1)
         self.assertEqual(str(line2), ref_line2)
@@ -211,7 +211,7 @@ class TestEstimatorWriter(unittest.TestCase):
         estimator.particle_type = SHParticleType.unknown
         estimator.filename = "ex_yzzon"
         line1, line2 = EstimatorWriter.get_lines(estimator)
-        ref_line1 = "    GEOMAP      -1.0     -25.0     -15.0       1.0      25.0      35.0"
+        ref_line1 = "GEOMAP          -1.0     -25.0     -15.0       1.0      25.0      35.0"
         ref_line2 = "                   1        50        50         0      ZONE  ex_yzzon"
         self.assertEqual(str(line1), ref_line1)
         self.assertEqual(str(line2), ref_line2)
@@ -225,19 +225,19 @@ class TestEstimatorWriter(unittest.TestCase):
         estimator.particle_type = SHParticleType.all
         estimator.filename = "DH_dose"
         line1 = EstimatorWriter.get_lines(estimator)
-        ref_line1 = "      ZONE         1                            -1      DOSE   DH_dose"
+        ref_line1 = "ZONE               1                            -1      DOSE   DH_dose"
         self.assertEqual(str(line1), ref_line1)
 
         estimator.geometry.stop = 300
         line1 = EstimatorWriter.get_lines(estimator)
-        ref_line1 = "      ZONE         1       300                  -1      DOSE   DH_dose"
+        ref_line1 = "ZONE               1       300                  -1      DOSE   DH_dose"
         self.assertEqual(str(line1), ref_line1)
 
         estimator.particle_type = SHParticleType.heavy_ion
         estimator.heavy_ion_type.a = 12
         estimator.heavy_ion_type.z = 6
         line1, line2 = EstimatorWriter.get_lines(estimator)
-        ref_line1 = "      ZONE         1       300                  25      DOSE   DH_dose"
+        ref_line1 = "ZONE               1       300                  25      DOSE   DH_dose"
         ref_line2 = "                   6        12                                        "
         self.assertEqual(str(line1), ref_line1)
         self.assertEqual(str(line2), ref_line2)
@@ -256,7 +256,7 @@ class TestEstimatorWriter(unittest.TestCase):
         estimator.particle_type = SHParticleType.all
         estimator.filename = "NB_count1"
         line1, line2 = EstimatorWriter.get_lines(estimator)
-        ref_line1 = "     PLANE       0.0       0.0       0.0       0.0       0.0       1.0"
+        ref_line1 = "PLANE            0.0       0.0       0.0       0.0       0.0       1.0"
         ref_line2 = "                                                -1   COUNTER NB_count1"
         self.assertEqual(str(line1), ref_line1)
         self.assertEqual(str(line2), ref_line2)
@@ -271,7 +271,7 @@ class TestEstimatorWriter(unittest.TestCase):
         estimator.particle_type = SHParticleType.proton
         estimator.filename = "NB_count2"
         line1, line2 = EstimatorWriter.get_lines(estimator)
-        ref_line1 = "     PLANE       0.0       0.0       0.0       0.0       0.0       1.0"
+        ref_line1 = "PLANE            0.0       0.0       0.0       0.0       0.0       1.0"
         ref_line2 = "                                                 2   COUNTER NB_count2"
         self.assertEqual(str(line1), ref_line1)
         self.assertEqual(str(line2), ref_line2)

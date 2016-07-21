@@ -1,5 +1,6 @@
 import argparse
 import sys
+from collections import OrderedDict
 from itertools import product
 
 # import necessary code pieces from pymchelper
@@ -23,7 +24,7 @@ def geomap_geometries():
     dy = 1.0
     dz = 1.0
 
-    result = {}
+    result = OrderedDict()
 
     # 0-D
     geometry = CarthesianMesh()
@@ -89,7 +90,7 @@ def generate_geomap():
     estimator.particle_type = SHParticleType.unknown
 
     # possible detector types and associated names
-    det_types = {"zon": SHDetType.zone, "rho": SHDetType.rho, "med": SHDetType.medium}
+    det_types = OrderedDict({"zon": SHDetType.zone, "rho": SHDetType.rho, "med": SHDetType.medium})
 
     # possible geometries and associated names
     geometries_dict = geomap_geometries()
@@ -113,6 +114,7 @@ def main(args=sys.argv[1:]):
 
     # open detector.dat file for writing
     with open(parsed_args.outputfile, "w") as f:
+        f.write(CardLine.credits + "\n")
         f.write(geomap_text)
         f.write(CardLine.comment + "\n")
 

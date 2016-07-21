@@ -39,6 +39,7 @@ def main(args=sys.argv[1:]):
 
     # open detector.dat file for writing
     with open("detect.dat", "w") as f:
+        f.write(CardLine.credits + "\n")
 
         # loop over all combinations of detector and particle types
         # output filename will be composed from associated detector and particle names
