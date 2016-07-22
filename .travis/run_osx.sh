@@ -12,7 +12,7 @@ if [[ $TOXENV == py27* ]] ;
 then
     PATH="$HOME/Library/Python/2.7/bin:$PATH"
     tox --notest
-    tox -- -n 4
+    tox -- -n 1
 else
     pyenv exec tox --notest -e $TOXENV
     pyenv exec tox -- -n 1
