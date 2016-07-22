@@ -120,7 +120,7 @@ setuptools.setup(
     license='MIT',
     author='Leszek Grzanka',
     author_email='grzanka@agh.edu.pl',
-    description='Python toolkit for SHIELDHIT and Fluka',
+    description='Python toolkit for SHIELD-HIT12A and Fluka',
     long_description=readme + '\n',
     classifiers=[
         # How mature is this project? Common values are
