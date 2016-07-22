@@ -8,6 +8,10 @@
   recursive-include docs *.rst
   recursive-include pymchelper *.py
   recursive-include tests *.py
+  recursive-include tests *.bdo
+  recursive-include tests *.png
+  recursive-include tests *.dat
+  recursive-include tests *.sh
   include versioneer.py
   include pymchelper/_version.py
 
@@ -16,6 +20,7 @@
   exclude tox.ini
   exclude .travis.yml
   exclude appveyor.yml
+  exclude wercker.yml
   prune .travis
   prune install_deps.sh
   prune make_single_executable.sh

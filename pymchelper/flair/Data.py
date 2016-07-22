@@ -55,7 +55,6 @@
 # Author:	Vasilis.Vlachoudis@cern.ch
 # Date:	24-Oct-2006
 
-
 import re
 import math
 import struct
@@ -72,10 +71,8 @@ from pymchelper.flair.common.log import say
 __author__ = "Vasilis Vlachoudis"
 __email__ = "Vasilis.Vlachoudis@cern.ch"
 
-_detectorPattern = re.compile(r"^ ?# ?Detector ?n?:\s*\d*\s*(.*)\s*",
-                              re.MULTILINE)
-_blockPattern = re.compile(r"^ ?# ?Block ?n?:\s*\d*\s*(.*)\s*",
-                           re.MULTILINE)
+_detectorPattern = re.compile(r"^ ?# ?Detector ?n?:\s*\d*\s*(.*)\s*", re.MULTILINE)
+_blockPattern = re.compile(r"^ ?# ?Block ?n?:\s*\d*\s*(.*)\s*", re.MULTILINE)
 
 
 # -------------------------------------------------------------------------------
@@ -479,13 +476,10 @@ class Usrbdx(Usrxxx):
             say("2way   : ", det.twoway)
             say("Fluence: ", det.fluence)
             say("LowNeu : ", det.lowneu)
-            say("Energy : [", det.elow, "..", det.ehigh, "] ne=",
-                det.ne, "de=", det.de)
+            say("Energy : [", det.elow, "..", det.ehigh, "] ne=", det.ne, "de=", det.de)
             if det.lowneu:
-                say("LOWNeut : [", det.egroup[-1], "..",
-                    det.egroup[0], "] ne=", det.ngroup)
-            say("Angle  : [", det.alow, "..", det.ahigh, "] na=",
-                det.na, "da=", det.da)
+                say("LOWNeut : [", det.egroup[-1], "..", det.egroup[0], "] ne=", det.ngroup)
+            say("Angle  : [", det.alow, "..", det.ahigh, "] na=", det.na, "da=", det.da)
             say("Total  : ", det.total, "+/-", det.totalerror)
 
 
@@ -605,12 +599,9 @@ class Usrbin(Usrxxx):
             say("Title  : ", bin.name)
             say("Type   : ", bin.type)
             say("Score  : ", bin.score)
-            say("X      : [", bin.xlow, "-", bin.xhigh, "] x",
-                bin.nx, "dx=", bin.dx)
-            say("Y      : [", bin.ylow, "-", bin.yhigh, "] x",
-                bin.ny, "dy=", bin.dy)
-            say("Z      : [", bin.zlow, "-", bin.zhigh, "] x",
-                bin.nz, "dz=", bin.dz)
+            say("X      : [", bin.xlow, "-", bin.xhigh, "] x", bin.nx, "dx=", bin.dx)
+            say("Y      : [", bin.ylow, "-", bin.yhigh, "] x", bin.ny, "dy=", bin.dy)
+            say("Z      : [", bin.zlow, "-", bin.zhigh, "] x", bin.nz, "dz=", bin.dz)
             say("L      : ", bin.lntzer)
             say("bk     : ", bin.bk)
             say("b2     : ", bin.b2)
@@ -728,7 +719,6 @@ class Mgdraw:
         fmt = "=" + ("i8f" * npflka)
         self.data = struct.unpack(fmt, data)
         return ncase
-
 
 # ===============================================================================
 if __name__ == "__main__":

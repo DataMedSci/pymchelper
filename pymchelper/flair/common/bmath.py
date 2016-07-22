@@ -59,10 +59,8 @@ import random
 
 import pymchelper.flair.common.rexx as rexx
 
-
 __author__ = "Vasilis Vlachoudis"
 __email__ = "Vasilis.Vlachoudis@cern.ch"
-
 
 # Accuracy for comparison operators
 _accuracy = 1E-15
@@ -277,8 +275,7 @@ def format(number, length=10, useExp=False, useD=False):
         # say("exponent=",exponent)
         lint = len(integer)
         if useExp:
-            mNum = "%s%s%d" % (rexx.insert(".", integer, 1),
-                               expE, exponent - 1)
+            mNum = "%s%s%d" % (rexx.insert(".", integer, 1), expE, exponent - 1)
         elif exponent == -2:
             mNum = ".00%s" % (integer)
         elif exponent == -1:
@@ -299,8 +296,7 @@ def format(number, length=10, useExp=False, useD=False):
         elif exponent > lint and exponent + 1 < length:
             mNum = "%s%s." % (integer, "0" * (exponent - lint))
         else:
-            mNum = "%s%s%d" % (rexx.insert(".", integer, 1),
-                               expE, exponent - 1)
+            mNum = "%s%s%d" % (rexx.insert(".", integer, 1), expE, exponent - 1)
 
         diff = len(mNum) - length
         if diff <= 0:
@@ -407,8 +403,8 @@ class Vector(list):
             return False
         s2 = 0.0
         for i in range(len(self)):
-            s2 += (self[i] - v[i]) ** 2
-        return s2 <= acc ** 2
+            s2 += (self[i] - v[i])**2
+        return s2 <= acc**2
 
     def __eq__(self, v):
         return self.eq(v)
@@ -497,8 +493,7 @@ class Vector(list):
     def cross(self, v):
         """Cross product of 2 vectors"""
         if len(self) == 3:
-            return Vector(self[1] * v[2] - self[2] * v[1],
-                          self[2] * v[0] - self[0] * v[2],
+            return Vector(self[1] * v[2] - self[2] * v[1], self[2] * v[0] - self[0] * v[2],
                           self[0] * v[1] - self[1] * v[0])
         elif len(self) == 2:
             return self[0] * v[1] - self[1] * v[0]
@@ -510,7 +505,7 @@ class Vector(list):
         """Return length squared of vector"""
         s = 0.0
         for i in range(len(self)):
-            s += self[i] ** 2
+            s += self[i]**2
         return s
 
     # ----------------------------------------------------------------------
@@ -518,7 +513,7 @@ class Vector(list):
         """Return length of vector"""
         s = 0.0
         for i in range(len(self)):
-            s += self[i] ** 2
+            s += self[i]**2
         return math.sqrt(s)
 
     __abs__ = length
@@ -663,7 +658,6 @@ class Vector(list):
     def perp(self):
         return math.sqrt(self.perp2())
 
-
 # -------------------------------------------------------------------------------
 # Basic 3D Vectors
 # -------------------------------------------------------------------------------
@@ -678,7 +672,7 @@ Vector.Z = Vector(0.0, 0.0, 1.0)
 # -------------------------------------------------------------------------------
 def random3D():
     cosTheta = 2.0 * random.random() - 1.0
-    sinTheta = math.sqrt(1.0 - cosTheta ** 2)
+    sinTheta = math.sqrt(1.0 - cosTheta**2)
     phi = 2.0 * math.pi * random.random()
     return Vector(math.cos(phi) * sinTheta, math.sin(phi) * sinTheta, cosTheta)
 
@@ -833,8 +827,7 @@ class Matrix(list):
                 if T is not None and self.rows == 4:
                     self[i][3] = T[i]
         else:
-            raise Exception("Matrix.make() works only "
-                            "on Matrix(3x3) or Matrix(4x4)")
+            raise Exception("Matrix.make() works only " "on Matrix(3x3) or Matrix(4x4)")
 
     # ----------------------------------------------------------------------
     def __str__(self):
@@ -1169,7 +1162,7 @@ class Matrix(list):
             for j in range(i + 1, n):
                 if abs(M[j][i]) < _accuracy:
                     continue
-                d = - M[i][i] / M[j][i]
+                d = -M[i][i] / M[j][i]
                 s *= d
                 for k in range(i, n):
                     M[j][k] = M[i][k] + d * M[j][k]
@@ -1257,7 +1250,6 @@ class Matrix(list):
                 s -= self[i][j] * col[j]
             col[i] = s / self[i][i]
 
-
 # -------------------------------------------------------------------------------
 # Basic Matrices
 # -------------------------------------------------------------------------------
@@ -1328,8 +1320,7 @@ class Quaternion(list):
     # ----------------------------------------------------------------------
     def norm(self):
         """normalize quaternion"""
-        mag = math.sqrt(self[0] ** 2 + self[1] ** 2 +
-                        self[2] ** 2 + self[3] ** 2)
+        mag = math.sqrt(self[0]**2 + self[1]**2 + self[2]**2 + self[3]**2)
         self[0] /= mag
         self[1] /= mag
         self[2] /= mag
@@ -1448,8 +1439,7 @@ def solveOverDetermined(A, B, W=None):
         such as A*X = B
     Optionally a weight can be specified"""
     if A.rows < A.cols:
-        raise Exception("solveOverDetermined: "
-                        "A matrix has more columns than rows")
+        raise Exception("solveOverDetermined: " "A matrix has more columns than rows")
     AT = A.transpose()
     if W:
         Wd = Matrix.diagonal(W)
@@ -1786,10 +1776,10 @@ def cubic(a, b, c, d=None, eps=_accuracy):
         a, b, c = b / float(a), c / float(a), d / float(a)
 
     Q = (a * a - 3.0 * b) / 9.0
-    R = (2. * a ** 3 - 9. * a * b + 27. * c) / 54.
+    R = (2. * a**3 - 9. * a * b + 27. * c) / 54.
 
-    R2 = R ** 2
-    Q3 = Q ** 3
+    R2 = R**2
+    Q3 = Q**3
     if R2 < Q3:  # the cubic has 3 real solutions
         theta = math.acos(R / math.sqrt(Q3))
         sqrt_Q = math.sqrt(Q)
@@ -1798,7 +1788,7 @@ def cubic(a, b, c, d=None, eps=_accuracy):
         x3 = -2. * sqrt_Q * math.cos((theta - 2. * math.pi) / 3.) - a / 3.
         return x1, x2, x3
 
-    A = -math.copysign(1.0, R) * (abs(R) + math.sqrt(R2 - Q3)) ** (1. / 3.)
+    A = -math.copysign(1.0, R) * (abs(R) + math.sqrt(R2 - Q3))**(1. / 3.)
     if abs(A) > eps:
         B = Q / A
     else:
@@ -1806,10 +1796,10 @@ def cubic(a, b, c, d=None, eps=_accuracy):
 
     return (A + B) - a / 3., None, None
 
-
 # imaginary roots
 # x2 = -(A+B)/2 - a/3 + i*sqrt(3)*(A-B)
 # x3 = -(A+B)/2 - a/3 - i*sqrt(3)*(A-B)
+
 
 # -------------------------------------------------------------------------------
 # Fit a plane to a set of points using least square fitting
@@ -1824,9 +1814,9 @@ def fitPlane(xyz):
         Sy += y
         Sz += z
 
-        Sx2 += x ** 2
-        Sy2 += y ** 2
-        Sz2 += z ** 2
+        Sx2 += x**2
+        Sy2 += y**2
+        Sz2 += z**2
 
         Sxy += x * y
         Syz += y * z
@@ -1836,9 +1826,9 @@ def fitPlane(xyz):
     Sx /= n
     Sy /= n
     Sz /= n
-    Vx = Sx2 / n - Sx ** 2
-    Vy = Sy2 / n - Sy ** 2
-    Vz = Sz2 / n - Sz ** 2
+    Vx = Sx2 / n - Sx**2
+    Vy = Sy2 / n - Sy**2
+    Vz = Sz2 / n - Sz**2
 
     # Count zero variances
     nv = int(abs(Vx) <= _accuracy) + int(abs(Vy) <= _accuracy) + \
@@ -1959,8 +1949,7 @@ def int2roman(num):
         raise ValueError("Argument must be between 1 and 3999")
 
     ints = (1000, 900, 500, 400, 100, 90, 50, 40, 10, 9, 5, 4, 1)
-    nums = ('M', 'CM', 'D', 'CD', 'C', 'XC',
-            'L', 'XL', 'X', 'IX', 'V', 'IV', 'I')
+    nums = ('M', 'CM', 'D', 'CD', 'C', 'XC', 'L', 'XL', 'X', 'IX', 'V', 'IV', 'I')
     result = ""
     for i in range(len(ints)):
         count = int(num / ints[i])
@@ -2006,7 +1995,6 @@ def roman2int(roman):
         return sum
     else:
         raise ValueError('input is not a valid roman numeral: %s' % roman)
-
 
 # ===============================================================================
 if __name__ == "__main__":
@@ -2066,10 +2054,7 @@ if __name__ == "__main__":
 
     say(d2s(dms(1, 2, 3.006)))
 
-    M = Matrix([[1.0, -2.0, -3.0, 1.0],
-                [-2.0, 1.0, -2.0, -1.0],
-                [-3.0, -2.0, 2.0, 2.0],
-                [1.0, -1.0, 2.0, 3.0]])
+    M = Matrix([[1.0, -2.0, -3.0, 1.0], [-2.0, 1.0, -2.0, -1.0], [-3.0, -2.0, 2.0, 2.0], [1.0, -1.0, 2.0, 3.0]])
     say("M=\n", M)
     say("det(M)=", M.det())
     v, u = eigenvalues(M)

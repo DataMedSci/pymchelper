@@ -248,8 +248,7 @@ def _isnum(str):
             return False
 
     # accept one e/E/d/D
-    if i < l and (str[i] == 'e' or str[i] == 'E' or
-                  str[i] == 'd' or str[i] == 'D'):
+    if i < l and (str[i] == 'e' or str[i] == 'E' or str[i] == 'd' or str[i] == 'D'):
         i += 1
         # accept one sign
         if i < l and (str[i] == '-' or str[i] == '+'):
