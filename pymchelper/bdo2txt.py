@@ -128,6 +128,9 @@ class SHBinaryReader:
         if detector.dimension == 0:
             detector.data = np.asarray([detector.data])
 
+        if detector.geotyp == SHGeoType.plane:
+            detector.data = np.asarray([detector.data])
+
         # normalize result if we need that.
         if detector.dettyp not in (SHDetType.dlet, SHDetType.tlet, SHDetType.avg_energy, SHDetType.avg_beta,
                                    SHDetType.material):
