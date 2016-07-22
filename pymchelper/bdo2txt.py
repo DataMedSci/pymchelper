@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import glob
+import logging
 import sys
 from collections import namedtuple, defaultdict
 
@@ -32,6 +33,8 @@ from enum import IntEnum
 from pymchelper.shieldhit.detector.detector import SHDetType
 from pymchelper.shieldhit.detector.estimator import SHGeoType
 
+logger = logging.getLogger(__name__)
+
 
 class SHConverters(IntEnum):
     standard = 0
@@ -46,7 +49,7 @@ class SHBinaryReader:
         self.filename = filename
 
     def read_header(self, detector):
-        print("Reading header:", self.filename)
+        logger.info("Reading header: " + self.filename)
 
         detector.tripdose = 0.0
         detector.tripntot = -1
@@ -115,7 +118,7 @@ class SHBinaryReader:
         detector.dettyp = SHDetType(idet[0][4])
 
     def read_payload(self, detector):
-        print("Reading data:", self.filename)
+        logger.info("Reading data: " + self.filename)
 
         if detector.geotyp == SHGeoType.unknown or detector.dettyp == SHDetType.unknown:
             detector.data = []
@@ -221,12 +224,10 @@ class FlukaBinaryReader:
         usr = Usrbin(self.filename)
         usr.say()  # file,title,time,weight,ncase,nbatch
         for i in range(len(usr.detector)):
-            print("-" * 20, "Detector number %i" % i, "-" * 20)
+            logger.debug("-" * 20 + (" Detector number %i " % i) + "-" * 20)
             usr.say(i)  # details for each detector
         data = usr.readData(0)
-        print("len(data):", len(data))
         fdata = unpackArray(data)
-        print("len(fdata):", len(fdata))
 
         # TODO read detector type
         detector.det = "FLUKA"
@@ -297,7 +298,7 @@ class SHFortranWriter:
         header += " {:s} END  :{:s}\n".format(az, format_d(10, 3, det.zmax))
         header += "#   PRIMARIES:" + format_d(10, 3, det.nstat) + "\n"
         with open(self.filename, 'w') as fout:
-            print("Writing: " + self.filename)
+            logger.info("Writing: " + self.filename)
             fout.write(header)
             for x, y, z, v in zip(det.x, det.y, det.z, det.data):
                 x = float('nan') if np.isnan(x) else x
@@ -316,7 +317,7 @@ class SHPlotDataWriter:
         self.filename = filename + ".dat"
 
     def write(self, detector):
-        print("Writing: " + self.filename)
+        logger.info("Writing: " + self.filename)
         axis_values = [list(detector.axis_values(i, plotting_order=True)) for i in range(detector.dimension)]
         fmt = "%g" + " %g" * detector.dimension
         data = np.transpose(axis_values + [detector.data])
@@ -346,7 +347,7 @@ splot '{data_filename}' with pm3d
     def write(self, detector):
         if detector.dimension in (1, 2):
             with open(self.script_filename, 'w') as script_file:
-                print("Writing: " + self.script_filename)
+                logger.info("Writing: " + self.script_filename)
                 script_file.write(self.header.format(plot_filename=self.plot_filename))
                 plt_cmd = self.plotting_command[detector.dimension]
                 script_file.write(plt_cmd.format(data_filename=self.data_filename))
@@ -369,7 +370,7 @@ class SHImageWriter:
         xdata = detector.axis_values(0, plotting_order=True)
 
         if detector.dimension in (1, 2):
-            print("Writing: " + self.plot_filename)
+            logger.info("Writing: " + self.plot_filename)
             if detector.dimension == 1:
                 plt.plot(list(xdata), detector.v)
             elif detector.dimension == 2:
@@ -627,9 +628,31 @@ def merge_many(input_file_list,
         merge_list(group_with_same_core, core_name + ".txt", conv_names, nan, colormap)
 
 
+def set_logger_level(args):
+    if args.quiet:
+        if args.quiet == 1:
+            level = "WARNING"
+        if args.quiet == 2:
+            level = "ERROR"
+        else:
+            level = "CRITICAL"
+    elif args.verbose:
+        level = "DEBUG"
+    else:
+        level = "INFO"
+    logging.basicConfig(level=level)
+
+
 def main(args=sys.argv[1:]):
     import pymchelper
     parser = argparse.ArgumentParser()
+    parser.add_argument(
+        '-v',
+        '--verbose',
+        action='count',
+        default=0,
+        help='Give more output. Option is additive, and can be used up to 3 times')
+    parser.add_argument('-q', '--quiet', action='count', default=0, help='Be silent')
     parser.add_argument("inputfile", help='input filename, file list or pattern', type=str)
     parser.add_argument("outputfile", help='output filename', nargs='?')
     parser.add_argument("--many", help='automatically merge data from various sources', action="store_true")
@@ -642,14 +665,16 @@ def main(args=sys.argv[1:]):
         nargs='+')
     parser.add_argument(
         "--colormap", help='color map for image converter', default=SHImageWriter.default_colormap, type=str)
-    parser.add_argument('--version', action='version', version=pymchelper.__version__)
+    parser.add_argument('-V', '--version', action='version', version=pymchelper.__version__)
     parsed_args = parser.parse_args(args)
+
+    set_logger_level(parsed_args)
 
     # TODO add filename discovery
 
     files = sorted(glob.glob(parsed_args.inputfile))
     if not files:
-        print('File does not exist: ' + parsed_args.inputfile)
+        logger.error('File does not exist: ' + parsed_args.inputfile)
 
     if parsed_args.outputfile is None:
         parsed_args.outputfile = files[0][:-3] + "txt"
