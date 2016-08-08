@@ -117,32 +117,34 @@ class SHBinaryReader:
 
         detector.dettyp = SHDetType(idet[0][4])
         detector.id = idet[0][4]
-    
+
+        detector.geotyp_name = header['geotyp'][0].decode('ascii').strip().lower()
         # set units : detector.units are [x,y,z,v,data,detector_title]
         detector.units = [""]*6
-        detector.units[0:4] = get_estimator_units(geotyp)
-        detector.units[4:6] = get_detector_unit(detector.id,geotyp)
-
-    def get_estimator_units(geotyp):
-        if geotyp == "MSH":
+        detector.units[0:4] = self.get_estimator_units(detector.geotyp_name)
+        detector.units[4:6] = self.get_detector_unit(detector.id,detector.geotyp_name)
+        detector.title = detector.units[5]
+        
+    def get_estimator_units(self,geotyp):
+        if geotyp == "msh":
             return "cm","cm","cm","(nil)"
-        if geotyp == "DMSH":
+        if geotyp == "dmsh":
             return "cm","cm","cm","#/MeV"
-        if geotyp == "CYL":
+        if geotyp == "cyk":
             return "cm","cm","radians","(nil)"
-        if geotyp == "DCYL":
+        if geotyp == "dcyl":
             return "cm","cm","radians","#/MeV"
-        if geotyp == "ZONE":
+        if geotyp == "zone":
             return "zone number","(nil)","(nil)","(nil)"
-        if geotyp == "VOXSCORE":
+        if geotyp == "voxscore":
             return "cm","cm","cm","(nil)"
-        if geotyp == "GEOMAP":
+        if geotyp == "geomap":
             return "cm","cm","cm","(nil)"
-        if geotyp == "PLANE":
+        if geotyp == "plane":
             return "cm","cm","cm","(nil)" # fix me later
         return "(nil)","(nil)","(nil)","(nil)"
     
-    def get_detector_unit(id,geotyp):
+    def get_detector_unit(self,id,geotyp):
         if id == 0: return "(nil)","None"
         if id == 1: return "MeV/primary", "Energy" 
         if id == 2: return" cm^-2/primary", "Fluence"
@@ -150,7 +152,7 @@ class SHBinaryReader:
         if id == 4:
             return" MeV/cm", "LET fluence"
         if id == 5: 
-            if geotyp == "ZONE":
+            if geotyp == "zone":
                 return" MeV/primary", "Dose*volume"
             else:
                 return" MeV/g/primary", "Dose"
@@ -162,7 +164,7 @@ class SHBinaryReader:
         if id == 11: return "(nil)", "Material number"
         if id == 12: return "(nil)", "DDD"
         if id == 13:
-            if geotyp == "ZONE":
+            if geotyp == "zone":
                 return "MeV/primary", "Alanine RE*Dose*volume"
             else:
                 return "MeV/g/primary", "Alanine RE*Dose"
@@ -418,6 +420,9 @@ class SHImageWriter:
 
     default_colormap = 'gnuplot2'
 
+    def make_label(self,unit,name):
+        return name+" "+"["+unit+"]"
+
     def set_colormap(self, colormap):
         self.colormap = colormap
 
@@ -431,8 +436,8 @@ class SHImageWriter:
             logger.info("Writing: " + self.plot_filename)
             if detector.dimension == 1:
                 plt.plot(list(xdata), detector.v)
-                plt.xlabel(detector.units[0])
-                plt.ylabel(detector.units[5])
+                plt.xlabel(self.make_label(detector.units[0],""))
+                plt.ylabel(self.make_label(detector.units[4],detector.title))
             elif detector.dimension == 2:
                 ydata = detector.axis_values(1, plotting_order=True)
 
@@ -447,10 +452,11 @@ class SHImageWriter:
                 plt.colorbar()
                 plt.xlabel(detector.units[0])
                 plt.ylabel(detector.units[1])
-                plt.zlabel(detector.units[5])
+                plt.zlabel(detector.units[4])
             plt.savefig(self.plot_filename)
             plt.close()
 
+            
 
 class SHTripCubeWriter:
     def __init__(self, filename):
