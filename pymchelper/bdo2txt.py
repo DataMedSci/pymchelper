@@ -140,7 +140,7 @@ class SHBinaryReader:
         return _geotyp_units.get(geotyp, _default_units)
 
     @staticmethod
-    def get_detector_unit(id, geotyp):
+    def get_detector_unit(detector_type, geotyp):
         if geotyp == SHGeoType.zone:
             dose_units = (" MeV/primary", "Dose*volume", ),
             alanine_units = ("MeV/primary", "Alanine RE*Dose*volume", ),
@@ -171,7 +171,7 @@ class SHBinaryReader:
             SHDetType.medium: ("(dimensionless)", "Medium#", ),
             SHDetType.rho: ("g/cm^3", "Density"),  # RHO
         }
-        return _detector_units.get(id, ("(nil)", "(nil)",))
+        return _detector_units.get(detector_type, ("(nil)", "(nil)",))
 
     def read_payload(self, detector):
         logger.info("Reading data: " + self.filename)
