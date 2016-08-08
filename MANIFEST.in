@@ -24,3 +24,5 @@
   prune .travis
   prune install_deps.sh
   prune make_single_executable.sh
+include versioneer.py
+include pymchelper/_version.py

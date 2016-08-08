@@ -116,7 +116,65 @@ class SHBinaryReader:
         detector.zmax = header['det'][0][5 + shift]
 
         detector.dettyp = SHDetType(idet[0][4])
+        detector.id = idet[0][4]
+    
+        # set units : detector.units are [x,y,z,v,data,detector_title]
+        detector.units = [""]*6
+        detector.units[0:4] = get_estimator_units(geotyp)
+        detector.units[4:6] = get_detector_unit(detector.id,geotyp)
 
+    def get_estimator_units(geotyp):
+        if geotyp == "MSH":
+            return "cm","cm","cm","(nil)"
+        if geotyp == "DMSH":
+            return "cm","cm","cm","#/MeV"
+        if geotyp == "CYL":
+            return "cm","cm","radians","(nil)"
+        if geotyp == "DCYL":
+            return "cm","cm","radians","#/MeV"
+        if geotyp == "ZONE":
+            return "zone number","(nil)","(nil)","(nil)"
+        if geotyp == "VOXSCORE":
+            return "cm","cm","cm","(nil)"
+        if geotyp == "GEOMAP":
+            return "cm","cm","cm","(nil)"
+        if geotyp == "PLANE":
+            return "cm","cm","cm","(nil)" # fix me later
+        return "(nil)","(nil)","(nil)","(nil)"
+    
+    def get_detector_unit(id,geotyp):
+        if id == 0: return "(nil)","None"
+        if id == 1: return "MeV/primary", "Energy" 
+        if id == 2: return" cm^-2/primary", "Fluence"
+        if id == 3: return" cm^-2/primary", "Planar fluence"
+        if id == 4:
+            return" MeV/cm", "LET fluence"
+        if id == 5: 
+            if geotyp == "ZONE":
+                return" MeV/primary", "Dose*volume"
+            else:
+                return" MeV/g/primary", "Dose"
+        if id == 6: return "MeV/cm", "dose-averaged LET"
+        if id == 7: return "MeV/cm", "track-averaged LET"
+        if id == 8: return "MeV", "Average energy"
+        if id == 9: return "(dimensionless)", "Average beta"
+        if id == 10: return "(nil)", "SPC"
+        if id == 11: return "(nil)", "Material number"
+        if id == 12: return "(nil)", "DDD"
+        if id == 13:
+            if geotyp == "ZONE":
+                return "MeV/primary", "Alanine RE*Dose*volume"
+            else:
+                return "MeV/g/primary", "Alanine RE*Dose"
+        if id == 14: return "/primary", "Particle counter"
+        if id == 15: return "/primary", "PET isotopes"
+        if id == 16: return "MeV/cm", "dose-averaged LET"
+        if id == 17: return "MeV/cm", "track-averaged LET"
+        if id == 18: return "(dimensionless)", "Zone#"
+        if id == 19: return "(dimensionless)", "Medium#" 
+        if id == 20: return "g/cm^3" # RHO
+        return "(nil)","(nil)"
+        
     def read_payload(self, detector):
         logger.info("Reading data: " + self.filename)
 
