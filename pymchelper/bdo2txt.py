@@ -174,7 +174,7 @@ class SHBinaryReader:
         if id == 19: return "(dimensionless)", "Medium#" 
         if id == 20: return "g/cm^3" # RHO
         return "(nil)","(nil)"
-        
+
     def read_payload(self, detector):
         logger.info("Reading data: " + self.filename)
 
@@ -431,6 +431,8 @@ class SHImageWriter:
             logger.info("Writing: " + self.plot_filename)
             if detector.dimension == 1:
                 plt.plot(list(xdata), detector.v)
+                plt.xlabel(detector.units[0])
+                plt.ylabel(detector.units[5])
             elif detector.dimension == 2:
                 ydata = detector.axis_values(1, plotting_order=True)
 
@@ -443,6 +445,9 @@ class SHImageWriter:
 
                 plt.pcolormesh(xlist, ylist, zlist, cmap=self.colormap)
                 plt.colorbar()
+                plt.xlabel(detector.units[0])
+                plt.ylabel(detector.units[1])
+                plt.zlabel(detector.units[5])
             plt.savefig(self.plot_filename)
             plt.close()
 
