@@ -1,6 +1,6 @@
 import unittest
 
-from pymchelper.shieldhit.detector.detector import SHDetType
+from pymchelper.shieldhit.detector.detector_type import SHDetType
 from pymchelper.shieldhit.detector.estimator import SHGeoType, SHEstimator
 from pymchelper.shieldhit.detector.fortran_card import CardLine, EstimatorWriter
 from pymchelper.shieldhit.detector.geometry import CarthesianMesh, CylindricalMesh, Zone, Plane

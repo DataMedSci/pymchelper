@@ -6,8 +6,7 @@ import sys
 
 import argparse
 
-from pymchelper.detector import merge_list, merge_many
-from pymchelper.readers.shieldhit import SHConverters
+from pymchelper.detector import merge_list, merge_many, SHConverters
 from pymchelper.writers.plots import SHImageWriter
 
 logger = logging.getLogger(__name__)

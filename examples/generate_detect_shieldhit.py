@@ -2,7 +2,7 @@ import sys
 from itertools import product
 
 # import necessary code pieces from pymchelper
-from pymchelper.shieldhit.detector.detector import SHDetType
+from pymchelper.shieldhit.detector.detector_type import SHDetType
 from pymchelper.shieldhit.detector.estimator import SHEstimator
 from pymchelper.shieldhit.detector.estimator_type import SHGeoType
 from pymchelper.shieldhit.detector.fortran_card import EstimatorWriter, CardLine

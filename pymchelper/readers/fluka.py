@@ -2,8 +2,9 @@ import logging
 
 import numpy as np
 
-from pymchelper.shieldhit.detector.detector import SHDetType
+from pymchelper.shieldhit.detector.detector_type import SHDetType
 from pymchelper.shieldhit.detector.estimator_type import SHGeoType
+from pymchelper.flair.Data import Usrbin, unpackArray
 
 logger = logging.getLogger(__name__)
 
@@ -13,7 +14,6 @@ class FlukaBinaryReader:
         self.filename = filename
 
     def read(self, detector):
-        from pymchelper.flair.Data import Usrbin, unpackArray
         usr = Usrbin(self.filename)
         usr.say()  # file,title,time,weight,ncase,nbatch
         for i in range(len(usr.detector)):

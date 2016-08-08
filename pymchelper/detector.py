@@ -2,10 +2,11 @@ import logging
 from collections import namedtuple, defaultdict
 
 import numpy as np
+from enum import IntEnum
 
 from pymchelper.readers.fluka import FlukaBinaryReader
-from pymchelper.readers.shieldhit import SHFortranReader, SHBinaryReader, SHConverters
-from pymchelper.shieldhit.detector.detector import SHDetType
+from pymchelper.readers.shieldhit import SHTextReader, SHBinaryReader
+from pymchelper.shieldhit.detector.detector_type import SHDetType
 from pymchelper.shieldhit.detector.estimator_type import SHGeoType
 from pymchelper.writers.plots import SHImageWriter, SHGnuplotDataWriter, SHPlotDataWriter
 from pymchelper.writers.shieldhit import SHFortranWriter
@@ -13,30 +14,31 @@ from pymchelper.writers.trip98 import SHTripCubeWriter
 
 logger = logging.getLogger(__name__)
 
-# !! - DET/IDET list of detector attributes from detect.dat (DET for float)
-# !!
-# !! - IDET(1) : Number of bins in first dimension. x or r or zones
-# !! - IDET(2) : Number of bins in snd dimension, y or theta
-# !! - IDET(3) : Number of bins in thrd dimension, z
-# !! - IDET(4) : Particle type requested for scoring
-# !! - IDET(5) : Detector type (see INITDET)
-# !! - IDET(6) : Z of particle to be scored
-# !! - IDET(7) : A of particle to be scored (only integers here)
-# !! - IDET(8) : Detector material parameter
-# !! - IDET(9) : Number of energy/amu (or LET) differential bins,
-#                   negative if log.
-# !! - IDET(10): Type of differential scoring, either LET, E/amu or polar angle
-# !! - IDET(11): Starting zone of scoring for zone scoring
-# !!
-# !! - DET(1-3): start positions for x y z or r theta z
-# !! - DET(4-6): stop positions for x y z or r theta z
-# !! - DET(7)  : start differential grid
-# !! - DET(8)  : stop differential grid
-# !!
-# !! - BIN(*)  : 10**8 large array holding results. Accessed using pointers.
+
+class SHConverters(IntEnum):
+    """
+    Available converters
+    """
+    standard = 0
+    plotdata = 1
+    gnuplot = 2
+    image = 3
+    tripcube = 4
+
+
+_converter_mapping = {
+    SHConverters.standard: SHFortranWriter,
+    SHConverters.gnuplot: SHGnuplotDataWriter,
+    SHConverters.plotdata: SHPlotDataWriter,
+    SHConverters.image: SHImageWriter,
+    SHConverters.tripcube: SHTripCubeWriter
+}
 
 
 class Detector:
+    """
+    Holds data read from single estimator
+    """
     data = None
     nstat = -1
 
@@ -60,7 +62,12 @@ class Detector:
     counter = -1
 
     def read(self, filename):
-        reader = SHFortranReader(filename)
+        """
+        Reads binary file with. Automatically discovers which reader should be used.
+        :param filename: binary file name
+        :return: none
+        """
+        reader = SHTextReader(filename)
         if filename.endswith(".bdo"):
             reader = SHBinaryReader(filename)
         # find better way to discover if file comes from Fluka
@@ -70,12 +77,23 @@ class Detector:
         self.counter = 1
 
     def append(self, other_detector):
+        """
+        Append data from other detector (assuming the same estimator).
+        Values are added, not averaged.
+        :param other_detector:
+        :return:
+        """
         # TODO add compatibility check
         self.data += other_detector.data
         self.nstat += other_detector.nstat
         self.counter += 1
 
     def average_with_nan(self, other_detectors):
+        """
+        Average (not add) data with other detector, excluding malformed data (NaN) from averaging.
+        :param other_detectors:
+        :return:
+        """
         # TODO add compatibility check
         l = [det.data for det in other_detectors]
         l.append(self.data)
@@ -84,13 +102,13 @@ class Detector:
         self.counter += len(other_detectors)
 
     def save(self, filename, conv_names=[SHConverters.standard.name], colormap=SHImageWriter.default_colormap):
-        _converter_mapping = {
-            SHConverters.standard: SHFortranWriter,
-            SHConverters.gnuplot: SHGnuplotDataWriter,
-            SHConverters.plotdata: SHPlotDataWriter,
-            SHConverters.image: SHImageWriter,
-            SHConverters.tripcube: SHTripCubeWriter
-        }
+        """
+        Save data to the file, using list of converters
+        :param filename:
+        :param conv_names:
+        :param colormap:
+        :return:
+        """
         for conv_name in conv_names:
             writer = _converter_mapping[SHConverters[conv_name]](filename)
             if SHConverters[conv_name] == SHConverters.image:
@@ -211,6 +229,17 @@ def merge_list(input_file_list,
                conv_names=[SHConverters.standard.name],
                nan=False,
                colormap=SHImageWriter.default_colormap):
+    """
+    Takes set of input file names, containing data from the same estimator.
+    All input files are read and data is filled (and summed) into detector structure.
+    Finally data stored in detector is averaged and saved to output file.
+    :param input_file_list: list of input files
+    :param output_file: name of output file
+    :param conv_names: list of converter names
+    :param nan: if true, invalid values (NaN) will be excluded from averaging
+    :param colormap: name of colormap, valid only for image converter
+    :return: none
+    """
     first = Detector()
     first.read(input_file_list[0])
 
@@ -235,6 +264,17 @@ def merge_many(input_file_list,
                conv_names=[SHConverters.standard.name],
                nan=False,
                colormap=SHImageWriter.default_colormap):
+    """
+    Takes set of input file names, belonging to possibly different estimators.
+    Input files are grouped according to the estimators and for each group
+    merging is performed, as in @merge_list method.
+    Output file name is automatically generated.
+    :param input_file_list: list of input files
+    :param conv_names: list of converter names
+    :param nan: if true, invalid values (NaN) will be excluded from averaging
+    :param colormap: name of colormap, valid only for image converter
+    :return: none
+    """
     core_names_dict = defaultdict(list)
     for name in input_file_list:
         if name.endswith(".bdo"):
