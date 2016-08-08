@@ -118,64 +118,60 @@ class SHBinaryReader:
         detector.dettyp = SHDetType(idet[0][4])
         detector.id = idet[0][4]
 
-        detector.geotyp_name = header['geotyp'][0].decode('ascii').strip().lower()
         # set units : detector.units are [x,y,z,v,data,detector_title]
-        detector.units = [""]*6
-        detector.units[0:4] = self.get_estimator_units(detector.geotyp_name)
-        detector.units[4:6] = self.get_detector_unit(detector.id,detector.geotyp_name)
+        detector.units = [""] * 6
+        detector.units[0:4] = SHBinaryReader.get_estimator_units(detector.geotyp)
+        detector.units[4:6] = SHBinaryReader.get_detector_unit(detector.id, detector.geotyp)
         detector.title = detector.units[5]
-        
-    def get_estimator_units(self,geotyp):
-        if geotyp == "msh":
-            return "cm","cm","cm","(nil)"
-        if geotyp == "dmsh":
-            return "cm","cm","cm","#/MeV"
-        if geotyp == "cyk":
-            return "cm","cm","radians","(nil)"
-        if geotyp == "dcyl":
-            return "cm","cm","radians","#/MeV"
-        if geotyp == "zone":
-            return "zone number","(nil)","(nil)","(nil)"
-        if geotyp == "voxscore":
-            return "cm","cm","cm","(nil)"
-        if geotyp == "geomap":
-            return "cm","cm","cm","(nil)"
-        if geotyp == "plane":
-            return "cm","cm","cm","(nil)" # fix me later
-        return "(nil)","(nil)","(nil)","(nil)"
-    
-    def get_detector_unit(self,id,geotyp):
-        if id == 0: return "(nil)","None"
-        if id == 1: return "MeV/primary", "Energy" 
-        if id == 2: return" cm^-2/primary", "Fluence"
-        if id == 3: return" cm^-2/primary", "Planar fluence"
-        if id == 4:
-            return" MeV/cm", "LET fluence"
-        if id == 5: 
-            if geotyp == "zone":
-                return" MeV/primary", "Dose*volume"
-            else:
-                return" MeV/g/primary", "Dose"
-        if id == 6: return "MeV/cm", "dose-averaged LET"
-        if id == 7: return "MeV/cm", "track-averaged LET"
-        if id == 8: return "MeV", "Average energy"
-        if id == 9: return "(dimensionless)", "Average beta"
-        if id == 10: return "(nil)", "SPC"
-        if id == 11: return "(nil)", "Material number"
-        if id == 12: return "(nil)", "DDD"
-        if id == 13:
-            if geotyp == "zone":
-                return "MeV/primary", "Alanine RE*Dose*volume"
-            else:
-                return "MeV/g/primary", "Alanine RE*Dose"
-        if id == 14: return "/primary", "Particle counter"
-        if id == 15: return "/primary", "PET isotopes"
-        if id == 16: return "MeV/cm", "dose-averaged LET"
-        if id == 17: return "MeV/cm", "track-averaged LET"
-        if id == 18: return "(dimensionless)", "Zone#"
-        if id == 19: return "(dimensionless)", "Medium#" 
-        if id == 20: return "g/cm^3" # RHO
-        return "(nil)","(nil)"
+
+    @staticmethod
+    def get_estimator_units(geotyp):
+        _geotyp_units = {
+            SHGeoType.msh: ("cm", "cm", "cm", "(nil)",),
+            SHGeoType.dmsh: ("cm", "cm", "cm", "#/MeV",),
+            SHGeoType.cyl: ("cm", "cm", "radians", "(nil)",),
+            SHGeoType.dcyl: ("cm", "cm", "radians", "#/MeV",),
+            SHGeoType.zone: ("zone number", "(nil)", "(nil)", "(nil)",),
+            SHGeoType.voxscore: ("cm", "cm", "cm", "(nil)",),
+            SHGeoType.geomap: ("cm", "cm", "cm", "(nil)",),
+            SHGeoType.plane: ("cm", "cm", "cm", "(nil)",),  # TODO fix me later
+        }
+        _default_units = ("(nil)", "(nil)", "(nil)", "(nil)")
+        return _geotyp_units.get(geotyp, _default_units)
+
+    @staticmethod
+    def get_detector_unit(id, geotyp):
+        if geotyp == SHGeoType.zone:
+            dose_units = (" MeV/primary", "Dose*volume", ),
+            alanine_units = ("MeV/primary", "Alanine RE*Dose*volume", ),
+        else:
+            dose_units = (" MeV/g/primary",
+                          "Dose", ),
+            alanine_units = ("MeV/g/primary",
+                             "Alanine RE*Dose", ),
+
+        _detector_units = {
+            SHDetType.unknown: ("(nil)", "None", ),
+            SHDetType.energy: ("MeV/primary", "Energy", ),
+            SHDetType.fluence: (" cm^-2/primary", "Fluence", ),
+            SHDetType.crossflu: (" cm^-2/primary", "Planar fluence", ),
+            SHDetType.letflu: (" MeV/cm", "LET fluence", ),
+            SHDetType.dose: dose_units,
+            SHDetType.dlet: ("MeV/cm", "dose-averaged LET", ),
+            SHDetType.tlet: ("MeV/cm", "track-averaged LET", ),
+            SHDetType.avg_energy: ("MeV", "Average energy", ),
+            SHDetType.avg_beta: ("(dimensionless)", "Average beta", ),
+            SHDetType.material: ("(nil)", "Material number", ),
+            SHDetType.alanine: alanine_units,
+            SHDetType.counter: ("/primary", "Particle counter", ),
+            SHDetType.pet: ("/primary", "PET isotopes", ),
+            SHDetType.dletg: ("MeV/cm", "dose-averaged LET", ),
+            SHDetType.tletg: ("MeV/cm", "track-averaged LET", ),
+            SHDetType.zone: ("(dimensionless)", "Zone#", ),
+            SHDetType.medium: ("(dimensionless)", "Medium#", ),
+            SHDetType.rho: ("g/cm^3", "Density"),  # RHO
+        }
+        return _detector_units.get(id, ("(nil)", "(nil)",))
 
     def read_payload(self, detector):
         logger.info("Reading data: " + self.filename)
@@ -420,8 +416,8 @@ class SHImageWriter:
 
     default_colormap = 'gnuplot2'
 
-    def make_label(self,unit,name):
-        return name+" "+"["+unit+"]"
+    def make_label(self, unit, name):
+        return name + " " + "[" + unit + "]"
 
     def set_colormap(self, colormap):
         self.colormap = colormap
@@ -436,8 +432,8 @@ class SHImageWriter:
             logger.info("Writing: " + self.plot_filename)
             if detector.dimension == 1:
                 plt.plot(list(xdata), detector.v)
-                plt.xlabel(self.make_label(detector.units[0],""))
-                plt.ylabel(self.make_label(detector.units[4],detector.title))
+                plt.xlabel(self.make_label(detector.units[0], ""))
+                plt.ylabel(self.make_label(detector.units[4], detector.title))
             elif detector.dimension == 2:
                 ydata = detector.axis_values(1, plotting_order=True)
 
@@ -449,14 +445,13 @@ class SHImageWriter:
                 zlist = detector.v.reshape(xn, yn)
 
                 plt.pcolormesh(xlist, ylist, zlist, cmap=self.colormap)
-                plt.colorbar()
+                cbar = plt.colorbar()
+                cbar.set_label(detector.units[4], rotation=270)
                 plt.xlabel(detector.units[0])
                 plt.ylabel(detector.units[1])
-                plt.zlabel(detector.units[4])
             plt.savefig(self.plot_filename)
             plt.close()
 
-            
 
 class SHTripCubeWriter:
     def __init__(self, filename):
