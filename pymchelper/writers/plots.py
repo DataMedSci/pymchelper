@@ -53,6 +53,9 @@ class SHImageWriter:
 
     default_colormap = 'gnuplot2'
 
+    def make_label(self, unit, name):
+        return name + " " + "[" + unit + "]"
+
     def set_colormap(self, colormap):
         self.colormap = colormap
 
@@ -66,6 +69,8 @@ class SHImageWriter:
             logger.info("Writing: " + self.plot_filename)
             if detector.dimension == 1:
                 plt.plot(list(xdata), detector.v)
+                plt.xlabel(self.make_label(detector.units[0], ""))
+                plt.ylabel(self.make_label(detector.units[4], detector.title))
             elif detector.dimension == 2:
                 ydata = detector.axis_values(1, plotting_order=True)
 
@@ -77,6 +82,9 @@ class SHImageWriter:
                 zlist = detector.v.reshape(xn, yn)
 
                 plt.pcolormesh(xlist, ylist, zlist, cmap=self.colormap)
-                plt.colorbar()
+                cbar = plt.colorbar()
+                cbar.set_label(detector.units[4], rotation=270)
+                plt.xlabel(detector.units[0])
+                plt.ylabel(detector.units[1])
             plt.savefig(self.plot_filename)
             plt.close()
