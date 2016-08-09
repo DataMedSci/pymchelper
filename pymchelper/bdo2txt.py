@@ -145,10 +145,8 @@ class SHBinaryReader:
             dose_units = (" MeV/primary", "Dose*volume", ),
             alanine_units = ("MeV/primary", "Alanine RE*Dose*volume", ),
         else:
-            dose_units = (" MeV/g/primary",
-                          "Dose", ),
-            alanine_units = ("MeV/g/primary",
-                             "Alanine RE*Dose", ),
+            dose_units = (" MeV/g/primary", "Dose", ),
+            alanine_units = ("MeV/g/primary", "Alanine RE*Dose", ),
 
         _detector_units = {
             SHDetType.unknown: ("(nil)", "None", ),
@@ -169,7 +167,7 @@ class SHBinaryReader:
             SHDetType.tletg: ("MeV/cm", "track-averaged LET", ),
             SHDetType.zone: ("(dimensionless)", "Zone#", ),
             SHDetType.medium: ("(dimensionless)", "Medium#", ),
-            SHDetType.rho: ("g/cm^3", "Density"),  # RHO
+            SHDetType.rho: ("g/cm^3", "Density"),
         }
         return _detector_units.get(detector_type, ("(nil)", "(nil)",))
 
