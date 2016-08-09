@@ -126,6 +126,11 @@ class SHBinaryReader:
 
     @staticmethod
     def get_estimator_units(geotyp):
+        """
+        TODO
+        :param geotyp:
+        :return:
+        """
         _geotyp_units = {
             SHGeoType.msh: ("cm", "cm", "cm", "(nil)",),
             SHGeoType.dmsh: ("cm", "cm", "cm", "#/MeV",),
@@ -141,6 +146,12 @@ class SHBinaryReader:
 
     @staticmethod
     def get_detector_unit(detector_type, geotyp):
+        """
+        TODO
+        :param detector_type:
+        :param geotyp:
+        :return:
+        """
         if geotyp == SHGeoType.zone:
             dose_units = (" MeV/primary", "Dose*volume", ),
             alanine_units = ("MeV/primary", "Alanine RE*Dose*volume", ),
