@@ -75,7 +75,7 @@ ls -al dist/*.whl
 # make single executable called convertmc.pyz:
 # - containing modules from wheel package
 # - executing bdo2txt:main function
-make_zipapp 'convertmc' 'pymchelper.bdo2txt:main'
+make_zipapp 'convertmc' 'pymchelper.run:main'
 
 # check if single executable can be called
 test_zipapp `pwd`/'convertmc.pyz'

@@ -1,6 +1,6 @@
 import logging
 
-from pymchelper.shieldhit.detector.detector import SHDetType
+from pymchelper.shieldhit.detector.detector_type import SHDetType
 from pymchelper.shieldhit.detector.estimator_type import SHGeoType
 from pymchelper.shieldhit.detector.geometry import Geometry
 from pymchelper.shieldhit.particle import SHParticleType, SHHeavyIonType

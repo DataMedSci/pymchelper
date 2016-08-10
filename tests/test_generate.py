@@ -4,9 +4,9 @@ import unittest
 import glob
 import logging
 
-from pymchelper import bdo2txt
-from pymchelper.bdo2txt import SHDetect
-from pymchelper.shieldhit.detector.detector import SHDetType
+from pymchelper import run
+from pymchelper.detector import Detector
+from pymchelper.shieldhit.detector.detector_type import SHDetType
 from pymchelper.shieldhit.detector.estimator_type import SHGeoType
 from pymchelper.shieldhit.particle import SHParticleType
 
@@ -35,7 +35,7 @@ class TestGenerated(unittest.TestCase):
         for est in ("cyl", "msh", "plane", "zone"):
             logger.info("Estimator: " + est)
             outdir = os.path.join(self.many_dir, est)
-            bdo2txt.main(["--many", os.path.join(outdir, "*.bdo"), "--converter", "plotdata"])
+            run.main(["--many", os.path.join(outdir, "*.bdo"), "--converter", "plotdata"])
             files = os.listdir(outdir)
             png_files = [f for f in files if f.endswith(".dat")]
             self.assertGreater(len(png_files), 4)
@@ -51,7 +51,7 @@ class TestGenerated(unittest.TestCase):
                 fd, outfile = tempfile.mkstemp()
                 os.close(fd)
                 os.remove(outfile)
-                bdo2txt.main([infile, outfile])
+                run.main([infile, outfile])
                 saved_file = outfile
                 self.assertTrue(os.path.isfile(saved_file))
                 self.assertGreater(os.path.getsize(saved_file), 0)
@@ -68,7 +68,7 @@ class TestGenerated(unittest.TestCase):
                 fd, outfile = tempfile.mkstemp()
                 os.close(fd)
                 os.remove(outfile)
-                bdo2txt.main([infile, outfile, "--converter", "plotdata"])
+                run.main([infile, outfile, "--converter", "plotdata"])
                 saved_file = outfile + ".dat"
                 self.assertTrue(os.path.isfile(saved_file))
                 self.assertGreater(os.path.getsize(saved_file), 0)
@@ -92,7 +92,7 @@ class TestGenerated(unittest.TestCase):
                         fd, outfile = tempfile.mkstemp()
                         os.close(fd)
                         os.remove(outfile)
-                        bdo2txt.main([infile, outfile, "--converter", "image"] + options)
+                        run.main([infile, outfile, "--converter", "image"] + options)
                         saved_file = outfile + ".png"
                         self.assertTrue(os.path.isfile(saved_file))
                         self.assertGreater(os.path.getsize(saved_file), 0)
@@ -106,7 +106,7 @@ class TestGenerated(unittest.TestCase):
             self.assertGreater(len(bdo_files), 0)
             for infile in bdo_files:
                 logger.info("Input file: " + infile)
-                det = SHDetect()
+                det = Detector()
                 det.read(infile)
                 if det.geotyp == SHGeoType.zone:
                     self.assertIn(det.nx, (1, 2, 3))

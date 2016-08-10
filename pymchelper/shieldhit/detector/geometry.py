@@ -2,6 +2,11 @@ from pymchelper.shieldhit.detector.estimator_type import SHGeoType
 
 
 class Axis:
+    """
+    Represents named sequence of nbins numbers, with known start and end position.
+    Can be used as container to describe scoring geometry along one of the axis.
+    """
+
     def __init__(self, name="", start=None, stop=None, nbins=None):
         self.name = name
         self.set(start=start, stop=stop, nbins=nbins)
@@ -13,21 +18,43 @@ class Axis:
 
 
 class Geometry:
+    """
+    Base class for all types of scoring geometries. Holds information about three axes.
+    Three axis are used to allow scoring up to 3 dimensions.
+    Lower number of dimensions (i.e. scoring on square) are achieved by setting nbins=1 in the axis.
+    """
+
     def __init__(self):
         self.axis = (Axis(), Axis(), Axis())
 
     @staticmethod
     def allowed_estimators():
+        """
+        :return: List of compatible estimators for this scoring geometry.
+        """
         return ()
 
     def set_axis(self, axis_no, start=None, stop=None, nbins=None):
-        self.axis[axis_no].set(start=start, stop=stop, nbins=nbins)
+        """
+        Fill axis data
+        :param axis_no: integer number, from 0 to 2, specifies axis number
+        :param start: start position
+        :param stop:  stop position
+        :param nbins: number of elements
+        :return: None
+        """
+        if axis_no in range(len(self.axis)):
+            self.axis[axis_no].set(start=start, stop=stop, nbins=nbins)
 
     def __str__(self):
         return "general"
 
 
 class CarthesianMesh(Geometry):
+    """
+    Carthesian mesh along X,Y and Z axis
+    """
+
     def __init__(self):
         Geometry.__init__(self)
         self.axis[0].name = "X"
@@ -43,6 +70,10 @@ class CarthesianMesh(Geometry):
 
 
 class CylindricalMesh(Geometry):
+    """
+    Cylindrical mesh along R, PHI and Z axis
+    """
+
     def __init__(self):
         Geometry.__init__(self)
         self.axis[0].name = "R"
@@ -58,6 +89,10 @@ class CylindricalMesh(Geometry):
 
 
 class Zone:
+    """
+    Zone scoring geometry - start and stop
+    """
+
     def __init__(self):
         self.start = None
         self.stop = None
@@ -71,6 +106,10 @@ class Zone:
 
 
 class Plane:
+    """
+    Plane scoring geometry
+    """
+
     def __init__(self):
         self.set_point()
         self.set_normal()

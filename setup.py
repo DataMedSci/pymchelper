@@ -3,11 +3,11 @@ from pkg_resources import parse_version
 
 
 def pip_command_output(pip_args):
-    '''
+    """
     Get output (as a string) from pip command
     :param pip_args: list o pip switches to pass
     :return: string with results
-    '''
+    """
     import sys
     import pip
     from io import StringIO
@@ -23,10 +23,10 @@ def pip_command_output(pip_args):
 
 
 def setup_versioneer():
-    '''
+    """
     Generate (temporarily) versioneer.py file in project root directory
     :return:
-    '''
+    """
     try:
         # assume versioneer.py was generated using "versioneer install" command
         import versioneer
@@ -68,11 +68,11 @@ def setup_versioneer():
 
 
 def clean_cache():
-    '''
+    """
     Python won't realise that new module has appeared in the runtime
     We need to clean the cache of module finders. Hacking again
     :return:
-    '''
+    """
     import importlib
     try:  # Python ver < 3.3
         vermod = importlib.import_module("versioneer")
@@ -82,10 +82,10 @@ def clean_cache():
 
 
 def get_version():
-    '''
+    """
     Get project version (using versioneer)
     :return: string containing version
-    '''
+    """
     setup_versioneer()
     clean_cache()
     import versioneer
@@ -98,10 +98,10 @@ def get_version():
 
 
 def get_cmdclass():
-    '''
+    """
     Get setuptools command class
     :return:
-    '''
+    """
     setup_versioneer()
     clean_cache()
     import versioneer
@@ -148,7 +148,7 @@ setuptools.setup(
     entry_points={
         'console_scripts': [
             'convertmc=' + \
-            'pymchelper.bdo2txt:main',
+            'pymchelper.run:main',
         ],
     },
     install_requires=[

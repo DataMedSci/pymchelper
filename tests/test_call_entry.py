@@ -1,30 +1,30 @@
 import os
 import unittest
-from pymchelper import bdo2txt
+from pymchelper import run
 from examples import generate_detect_shieldhit
 
 
 class TestCallMain(unittest.TestCase):
     def test_help(self):
         try:
-            bdo2txt.main(["--help"])
+            run.main(["--help"])
         except SystemExit as e:
             self.assertEqual(e.code, 0)
 
     def test_version(self):
         try:
-            bdo2txt.main(["--version"])
+            run.main(["--version"])
         except SystemExit as e:
             self.assertEqual(e.code, 0)
 
     def test_noarg(self):
         try:
-            bdo2txt.main([])
+            run.main([])
         except SystemExit as e:
             self.assertEqual(e.code, 2)
 
     def test_many(self):
-        bdo2txt.main(["--many", "tests/res/shieldhit/single/*.bdo", "--converter", "image"])
+        run.main(["--many", "tests/res/shieldhit/single/*.bdo", "--converter", "image"])
         files = os.listdir("tests/res/shieldhit/single")
         png_files = [f for f in files if f.endswith(".png")]
         bdo_files = [f for f in files if f.endswith(".bdo")]
