@@ -6,9 +6,9 @@ PROC_NO_LEADING_BLANK = False
 
 
 def _swapchar(s, ind, newch):
-    '''
+    """
     Helper function to make chars in a string mutableish
-    '''
+    """
     if 0 < ind >= len(s):
         raise IndexError('index out of range')
     return s[:ind] + newch + s[ind + 1:]
@@ -65,11 +65,11 @@ def _compose_inf_string(w, ftype, sign_bit):
 
 
 def _compose_float_string(w, e, d, state, val, ftype):
-    '''
+    """
     Adapted from code in glibfortran which is written in C so is somwhat
     'bit-pushy' in nature. Writes the value to an initial string (buffer)
     and then pulls the subsequent strings from that
-    '''
+    """
     if (d < 0) or (d is None):
         raise Exception('Unspecified precision')
     # Make sure they are ints
@@ -113,6 +113,20 @@ def _compose_float_string(w, e, d, state, val, ftype):
 
 
 def _output_float(w, d, e, state, ft, buff, sign_bit, zero_flag, ndigits, edigits):
+    """
+    TODO
+    :param w:
+    :param d:
+    :param e:
+    :param state:
+    :param ft:
+    :param buff:
+    :param sign_bit:
+    :param zero_flag:
+    :param ndigits:
+    :param edigits:
+    :return:
+    """
     # nbefore - number of digits before the decimal point
     # nzero - number of zeros after the decimal point
     # nafter - number of digits after the decimal point
@@ -299,6 +313,13 @@ def _output_float(w, d, e, state, ft, buff, sign_bit, zero_flag, ndigits, edigit
 
 
 def format_d(w, d, val):
+    """
+    TODO
+    :param w:
+    :param d:
+    :param val:
+    :return:
+    """
     e = None
     ftype = 'D'
     state = {'blanks_as_zeros': False, 'incl_plus': False, 'position': 0, 'scale': 0, 'halt_if_no_vals': False}
@@ -306,6 +327,13 @@ def format_d(w, d, val):
 
 
 def format_e(w, d, val):
+    """
+    TODO
+    :param w:
+    :param d:
+    :param val:
+    :return:
+    """
     e = None
     ftype = 'E'
     state = {'blanks_as_zeros': False, 'incl_plus': False, 'position': 0, 'scale': 0, 'halt_if_no_vals': False}
