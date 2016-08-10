@@ -7,7 +7,9 @@ logger = logging.getLogger(__name__)
 
 class SHPlotDataWriter:
     def __init__(self, filename):
-        self.filename = filename + ".dat"
+        self.filename = filename
+        if not self.filename.endswith(".dat"):
+            self.filename += ".dat"
 
     def write(self, detector):
         logger.info("Writing: " + self.filename)
@@ -19,15 +21,22 @@ class SHPlotDataWriter:
 
 class SHGnuplotDataWriter:
     def __init__(self, filename):
-        self.data_filename = filename + ".dat"
-        self.script_filename = filename + ".plot"
-        self.plot_filename = filename + ".png"
+        self.data_filename = filename
+        self.script_filename = filename
+        self.plot_filename = filename
 
-    header = """set term png
+        if not self.plot_filename.endswith(".png"):
+            self.plot_filename += ".png"
+        if not self.script_filename.endswith(".plot"):
+            self.script_filename += ".plot"
+        if not self.data_filename.endswith(".dat"):
+            self.data_filename += ".dat"
+
+    _header = """set term png
 set output \"{plot_filename}\"
 """
 
-    plotting_command = {
+    _plotting_command = {
         1: """plot './{data_filename}' w l
         """,
         2: """set pm3d interpolate 0,0
@@ -41,14 +50,16 @@ splot '{data_filename}' with pm3d
         if detector.dimension in (1, 2):
             with open(self.script_filename, 'w') as script_file:
                 logger.info("Writing: " + self.script_filename)
-                script_file.write(self.header.format(plot_filename=self.plot_filename))
-                plt_cmd = self.plotting_command[detector.dimension]
+                script_file.write(self._header.format(plot_filename=self.plot_filename))
+                plt_cmd = self._plotting_command[detector.dimension]
                 script_file.write(plt_cmd.format(data_filename=self.data_filename))
 
 
 class SHImageWriter:
     def __init__(self, filename):
-        self.plot_filename = filename + ".png"
+        self.plot_filename = filename
+        if not self.plot_filename.endswith(".png"):
+            self.plot_filename += ".png"
         self.colormap = SHImageWriter.default_colormap
 
     default_colormap = 'gnuplot2'
