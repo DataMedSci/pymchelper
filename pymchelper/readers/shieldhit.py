@@ -85,14 +85,14 @@ class SHBinaryReader:
             detector.tripdose = header['tds']
             detector.tripntot = header['tnt']
 
-        idet = header['idet']
+        idet = header['idet'][0]
 
-        detector.nx = idet[0][0]
-        detector.ny = idet[0][1]
-        detector.nz = idet[0][2]
+        detector.nx = idet[0]
+        detector.ny = idet[1]
+        detector.nz = idet[2]
 
         detector.det = header['det']
-        detector.particle = idet[0][3]
+        detector.particle = idet[3]
 
         try:
             detector.geotyp = SHGeoType[header['geotyp'][0].decode('ascii').strip().lower()]
@@ -100,20 +100,27 @@ class SHBinaryReader:
             detector.geotyp = SHGeoType.unknown
         detector.nstat = header['nstat'][0]
 
-        shift = 0
-        if 'VOXSCORE' in header['geotyp'][0].decode('ascii'):
-            shift = 1
-            # TODO to be investigated
-        detector.xmin = header['det'][0][0 + shift]
-        detector.ymin = header['det'][0][1 + shift]
-        detector.zmin = header['det'][0][2 + shift]
+        if detector.geotyp not in (SHGeoType.zone, SHGeoType.dzone):
+            shift = 0
+            if 'VOXSCORE' in header['geotyp'][0].decode('ascii'):
+                shift = 1  # TODO to be investigated
+            detector.xmin = header['det'][0][0 + shift]
+            detector.ymin = header['det'][0][1 + shift]
+            detector.zmin = header['det'][0][2 + shift]
 
-        detector.xmax = header['det'][0][3 + shift]
-        detector.ymax = header['det'][0][4 + shift]
-        detector.zmax = header['det'][0][5 + shift]
+            detector.xmax = header['det'][0][3 + shift]
+            detector.ymax = header['det'][0][4 + shift]
+            detector.zmax = header['det'][0][5 + shift]
+        else:
+            detector.xmin = idet[10]
+            detector.xmax = detector.xmin + detector.nx - 1
+            detector.ymin = 0.0
+            detector.ymax = 0.0
+            detector.zmin = 0.0
+            detector.zmax = 0.0
 
-        detector.dettyp = SHDetType(idet[0][4])
-        detector.id = idet[0][4]
+        detector.dettyp = SHDetType(idet[4])
+        detector.id = idet[4]
 
         # set units : detector.units are [x,y,z,v,data,detector_title]
         detector.units = [""] * 6
