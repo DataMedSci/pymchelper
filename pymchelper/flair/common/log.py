@@ -69,7 +69,6 @@ def set_log(l):
 
 
 def say(*kw):
-    global _log
     txt = " ".join(map(str, kw))
     if _log:
         _log(txt)
