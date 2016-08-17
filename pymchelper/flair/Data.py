@@ -93,7 +93,9 @@ class Usrxxx:
         self.reset()
         if filename is None:
             return
-        self.readHeader(filename)
+        f = self.readHeader(filename)
+        if f is not None and not f.closed:
+            f.close()
 
     # ----------------------------------------------------------------------
     def reset(self):
@@ -121,6 +123,8 @@ class Usrxxx:
         # Read header
         data = fortran.read(f)
         if data is None:
+            if not f.closed:
+                f.close()
             raise IOError("Invalid USRxxx file")
         size = len(data)
         over1b = 0
@@ -142,6 +146,8 @@ class Usrxxx:
              self.ncase, over1b, self.nbatch) = \
                 struct.unpack("=80s32sfiii", data)
         else:
+            if not f.closed:
+                f.close()
             raise IOError("Invalid USRxxx file")
 
         if over1b > 0:
@@ -234,6 +240,8 @@ class Resnuclei(Usrxxx):
                 break
 
             if size != 38:
+                if not f.closed:
+                    f.close()
                 raise IOError("Invalid RESNUCLEi file header size=%d" % (size))
 
             # Parse header
@@ -375,6 +383,8 @@ class Usrbdx(Usrxxx):
                         fortran.skip(f)
                 break
             if size != 78:
+                if not f.closed:
+                    f.close()
                 raise IOError("Invalid USRBDX file")
 
             # Parse header
@@ -502,6 +512,8 @@ class Usrbin(Usrxxx):
                 self.statpos = f.tell()
                 break
             if size != 86:
+                if not f.closed:
+                    f.close()
                 raise IOError("Invalid USRBIN file")
 
             # Parse header

@@ -91,6 +91,8 @@ def read(f):
     data = f.read(size)
     blen2 = f.read(4)
     if blen != blen2:
+        if not f.closed:
+            f.close()
         raise IOError("Reading fortran block")
     return data
 
