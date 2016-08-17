@@ -101,7 +101,7 @@ class Detector:
         self.nstat += sum(det.nstat for det in other_detectors)
         self.counter += len(other_detectors)
 
-    def save(self, filename, conv_names=[SHConverters.standard.name], colormap=SHImageWriter.default_colormap):
+    def save(self, filename, conv_names=(SHConverters.standard.name,), colormap=SHImageWriter.default_colormap):
         """
         Save data to the file, using list of converters
         :param filename:
@@ -135,7 +135,7 @@ class Detector:
         return result
 
     @staticmethod
-    def _running_index_i(p, j_max, k_max):
+    def _running_index_i(p, _, k_max):
         return p % k_max
 
     @staticmethod
@@ -226,7 +226,7 @@ class Detector:
 
 def merge_list(input_file_list,
                output_file,
-               conv_names=[SHConverters.standard.name],
+               conv_names=(SHConverters.standard.name,),
                nan=False,
                colormap=SHImageWriter.default_colormap):
     """
@@ -261,7 +261,7 @@ def merge_list(input_file_list,
 
 
 def merge_many(input_file_list,
-               conv_names=[SHConverters.standard.name],
+               conv_names=(SHConverters.standard.name,),
                nan=False,
                colormap=SHImageWriter.default_colormap):
     """
