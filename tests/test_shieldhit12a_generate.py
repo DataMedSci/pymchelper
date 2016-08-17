@@ -15,7 +15,7 @@ import tests.res.shieldhit.generated.generate_detect as gen
 logger = logging.getLogger(__name__)
 
 
-class TestGenerate(unittest.TestCase):
+class TestSHGenerate(unittest.TestCase):
     def test_create(self):
         outdir = os.path.join("tests", "res", "shieldhit", "generated")
         gen.main([outdir])
@@ -25,7 +25,7 @@ class TestGenerate(unittest.TestCase):
             self.assertTrue(os.path.isfile(outfile))
 
 
-class TestGenerated(unittest.TestCase):
+class TestSHGenerated(unittest.TestCase):
 
     main_dir = os.path.join("tests", "res", "shieldhit", "generated")
     single_dir = os.path.join(main_dir, "single")

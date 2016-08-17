@@ -23,7 +23,7 @@ class TestCallMain(unittest.TestCase):
         except SystemExit as e:
             self.assertEqual(e.code, 2)
 
-    def test_many(self):
+    def test_many_shield(self):
         run.main(["--many", "tests/res/shieldhit/single/*.bdo", "--converter", "image"])
         files = os.listdir("tests/res/shieldhit/single")
         png_files = [f for f in files if f.endswith(".png")]
