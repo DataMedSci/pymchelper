@@ -24,3 +24,6 @@
   prune .travis
   prune install_deps.sh
   prune make_single_executable.sh
+  prune tests/res/shieldhit/converter
+  prune tests/res/shieldhit/converter/bdo2txt
+  prune tests/res/shieldhit/converter/bdo2txt.exe
