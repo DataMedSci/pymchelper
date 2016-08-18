@@ -1419,10 +1419,6 @@ class Card:
         self.prop = None  # User properties
         self.input = None  # input class holding card
         self.tag = tag  # card tag
-        if len(what) == 7:
-            print("dupa wolowa", what)
-        # if what[0].startswith('BERY'):
-        #     print("BER")
         self._what = what
         self._sign = []
         self._extra = extra
@@ -5174,8 +5170,6 @@ class Input:
 
             # Check for obsolete cards
             tag = card.tag
-            if tag == 'ASSIGNMA':
-                print('dupa')
             if tag in ("ACCURACY", "OUTLEVEL", "EGSCUT", "EGSFIX", "EGSFLUO", "EGSRAY", "EGS", "LANDAU"):
                 if card.enable:
                     say("WARNING: Disabling obsolete card: %s" % (tag))
