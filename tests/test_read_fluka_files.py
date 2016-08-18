@@ -3,6 +3,7 @@ import unittest
 import logging
 
 from pymchelper.flair.Data import Usrbin, unpackArray, Usrbdx, Resnuclei, Usrxxx
+import pymchelper.flair.Input as Input
 
 logger = logging.getLogger(__name__)
 
@@ -16,7 +17,7 @@ class TestDefaultConverter(unittest.TestCase):
             usr.say(i)  # details for each detector
         data = usr.readData(0)
         fdata = unpackArray(data)
-        print(fdata.shape)
+        print(len(fdata), fdata[0:10])
 
     def check(self, rel_path):
         try:
@@ -70,6 +71,18 @@ class TestDefaultConverter(unittest.TestCase):
             rel_path = os.path.join(self.main_dir, filename)
             print("\n\nopening", rel_path)
             self.check(rel_path)
+
+
+    def test_load_input(self):
+        Input.init()
+        input = Input.Input()
+        input.read(os.path.join(self.main_dir,"proton.inp"))
+        try:
+            rndcard = input.cards["RANDOMIZ"][0]
+            rndcard.setWhat(2, 5723)
+        except:
+            print("No RANDOMIZe card found")
+        input.write("test2.inp")
 
 
 if __name__ == '__main__':
