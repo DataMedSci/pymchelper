@@ -385,10 +385,13 @@ def utfWrite(f, s):
 
 #-------------------------------------------------------------------------------
 def utfWriteln(f, s):
-    try:
-        f.write(s.decode('ascii') + "\n")
-    except (UnicodeDecodeError, UnicodeEncodeError):
-        f.write(s.encode("utf-8") + "\n")
+    if sys.version_info > (3, 0):
+        f.write(s + "\n")
+    else:
+        try:
+            f.write(s.decode('ascii') + "\n")
+        except (UnicodeDecodeError, UnicodeEncodeError):
+            f.write(s.encode("utf-8") + "\n")
 
 
 #-------------------------------------------------------------------------------
@@ -2602,7 +2605,7 @@ class Card:
 
         s = self._toStr(fmt, prefix)
         #if not self.enable and self.info.disableComment: s = "*"+s
-        if isinstance(s, unicode):
+        if isinstance(s, unicode) and sys.version_info < (3, 0):
             return s.encode('utf-8')
         else:
             return s
@@ -3286,8 +3289,6 @@ class Input:
             elif tag == "LATTICE":
                 self._parseLattice(what)
 
-            if tag == '  BH1':
-                print( "[" + tag + '] BH1', tag == '  BH1')
             # Add current card
             self._addCard(Card(tag, what, self._comment, extra))
         return False
@@ -3883,7 +3884,7 @@ class Input:
 		and separate everything with comma ,"""
         line = re.sub(" *[;:/,] *", ",", line.strip())
         what = re.sub(" +", ",", line).split(',')
-        return map(_str2num, what)
+        return list(map(_str2num, what))
 
     #-----------------------------------------------------------------------
     # Parse needed whats
