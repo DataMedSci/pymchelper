@@ -6254,7 +6254,7 @@ def init(filename=None):
     # Create flair tags
     FLAIR_TAGS = [x.tag for x in CardInfo._db.values() if "Flair" in x.group]
     FLAIR_TAGS.sort()
-#    FLAIR_TAGS.remove("!coffee")
+    #    FLAIR_TAGS.remove("!coffee")
 
     # Object tags = Flair tags + ROT-DEFI
     OBJECT_TAGS = FLAIR_TAGS[:]

@@ -112,83 +112,90 @@
 # Date:	18-May-2004
 
 __author__ = "Vasilis Vlachoudis"
-__email__  = "Vasilis.Vlachoudis@cern.ch"
+__email__ = "Vasilis.Vlachoudis@cern.ch"
+
 
 class CSGException(Exception):
-	pass
+    pass
+
 
 MAXEXPR = 10000
 
+
 # ----------------------------------------------------------------------
 def tokenize(expr):
-	"""return a list of expression tokens"""
-	lst = []
-	for l in expr.splitlines():
-		l = l.strip()
-		if len(l) == 0: continue
-		if l[0] == '*': continue	# Skip comments
-		l = l.replace("+", " + ")
-		l = l.replace("-", " - ")
-		l = l.replace("#", " # ")
-		l = l.replace("|", " | ")
-		l = l.replace("(", " ( ")
-		l = l.replace(")", " ) ")
-		lst.extend(l.split())
-	return lst
+    """return a list of expression tokens"""
+    lst = []
+    for l in expr.splitlines():
+        l = l.strip()
+        if len(l) == 0: continue
+        if l[0] == '*': continue  # Skip comments
+        l = l.replace("+", " + ")
+        l = l.replace("-", " - ")
+        l = l.replace("#", " # ")
+        l = l.replace("|", " | ")
+        l = l.replace("(", " ( ")
+        l = l.replace(")", " ) ")
+        lst.extend(l.split())
+    return lst
+
 
 # ----------------------------------------------------------------------
 def splitZones(expr):
-	"""split a tokenized expression into zones"""
-	zones = []
-	zone  = []
-	depth = 0
-	for token in expr:
-		if token=="|" and depth==0:
-			if zone:
-				zones.append(zone)
-				zone = []
-			continue
+    """split a tokenized expression into zones"""
+    zones = []
+    zone = []
+    depth = 0
+    for token in expr:
+        if token == "|" and depth == 0:
+            if zone:
+                zones.append(zone)
+                zone = []
+            continue
 
-		elif token == "(":
-			depth += 1
+        elif token == "(":
+            depth += 1
 
-		elif token == ")":
-			depth -= 1
-			if depth<0:
-				raise CSGException("Too many closing parenthesis")
+        elif token == ")":
+            depth -= 1
+            if depth < 0:
+                raise CSGException("Too many closing parenthesis")
 
-		zone.append(token)
+        zone.append(token)
 
-	if zone: zones.append(zone)
-	return zones
+    if zone: zones.append(zone)
+    return zones
+
 
 # ----------------------------------------------------------------------
 def toString(expr):
-	"""return a string version of a tokenize expression"""
-	s    = ""
-	prev = "("
-	for token in expr:
-		if prev == "(":
-			s += token
-		elif token == "|":
-			s += " | "
-		elif token in ("+", "-"):
-			s += " %s"%(token)
-		else:
-			s += token
-		prev = token
-	return s
+    """return a string version of a tokenize expression"""
+    s = ""
+    prev = "("
+    for token in expr:
+        if prev == "(":
+            s += token
+        elif token == "|":
+            s += " | "
+        elif token in ("+", "-"):
+            s += " %s" % (token)
+        else:
+            s += token
+        prev = token
+    return s
+
 
 # ----------------------------------------------------------------------
 def check(expr):
-	"""check depth of an rpn expression"""
-	depth = 0
-	for token in expr:
-		if token in ("+", "-", "|"):
-			depth -= 1
-		else:
-			depth += 1
-	return depth == 1
+    """check depth of an rpn expression"""
+    depth = 0
+    for token in expr:
+        if token in ("+", "-", "|"):
+            depth -= 1
+        else:
+            depth += 1
+    return depth == 1
+
 
 # ----------------------------------------------------------------------
 # Subroutine:	exp2rpn
@@ -266,76 +273,72 @@ def check(expr):
 #                      1 2 3 4 5 6 7
 # ----------------------------------------------------------------------
 def exp2rpn(expr):
-	"""Replace expression list expr to rpn format"""
-	#              Operator In Out
-	priorities = {	"(" : [ 99,  0],
-			"|" : [  1,  2],
-			"+" : [  3,  4],
-			"-" : [  3,  4],
-			")" : [  0, 99],
-			" " : [101,100]}
-	stack = []
-	newproduct = 1
-	i = 0
-	m = 0
-	while i<len(expr):
-		tcur = expr[i]
-		# Check for special leading chars
-		if newproduct and (tcur=='|' or tcur=='+'):
-			newproduct = (tcur=='|')
-			i += 1
-			continue
+    """Replace expression list expr to rpn format"""
+    #              Operator In Out
+    priorities = {"(": [99, 0], "|": [1, 2], "+": [3, 4], "-": [3, 4], ")": [0, 99], " ": [101, 100]}
+    stack = []
+    newproduct = 1
+    i = 0
+    m = 0
+    while i < len(expr):
+        tcur = expr[i]
+        # Check for special leading chars
+        if newproduct and (tcur == '|' or tcur == '+'):
+            newproduct = (tcur == '|')
+            i += 1
+            continue
 
-		if newproduct and tcur=='-':
-			expr.insert(i,'*')	# insert space in ith position
-			tcur = '@'      # Universe
+        if newproduct and tcur == '-':
+            expr.insert(i, '*')  # insert space in ith position
+            tcur = '@'  # Universe
 
-		newproduct = (tcur=='(' or tcur=='|')
+        newproduct = (tcur == '(' or tcur == '|')
 
-		# Find priorities
-		try:
-			prio = priorities[tcur]
-		except KeyError:
-			prio = priorities[" "]
+        # Find priorities
+        try:
+            prio = priorities[tcur]
+        except KeyError:
+            prio = priorities[" "]
 
-		ip = prio[0]
-		op = prio[1]
+        ip = prio[0]
+        op = prio[1]
 
-		# Remove from the stack everything with higher priority
-		while len(stack)>0 and ip<stack[-1][1]:
-			if stack[-1][0] != '(':
-				expr[m] = stack.pop()[0]
-				m = m+1
-			else:
-				stack.pop()
+        # Remove from the stack everything with higher priority
+        while len(stack) > 0 and ip < stack[-1][1]:
+            if stack[-1][0] != '(':
+                expr[m] = stack.pop()[0]
+                m = m + 1
+            else:
+                stack.pop()
 
-		# Push it into the stack
-		if tcur!=')':
-			stack.append([tcur, op])
-		else:
-			# Should be an opening parenthesis
-			if len(stack)==0:
-				raise CSGException("Unbalanced parenthesis")
-			stack.pop()
+        # Push it into the stack
+        if tcur != ')':
+            stack.append([tcur, op])
+        else:
+            # Should be an opening parenthesis
+            if len(stack) == 0:
+                raise CSGException("Unbalanced parenthesis")
+            stack.pop()
 
-		#say("RPN=",expr[0:m])
-		#say("STK=",stack)
-		#print
+        #say("RPN=",expr[0:m])
+        #say("STK=",stack)
+        #print
 
-		i += 1
+        i += 1
 
-	# Empty Stack
-	while len(stack)>0:
-		if stack[-1][0]=='(':
-			raise CSGException("Unbalanced parenthesis")
+    # Empty Stack
+    while len(stack) > 0:
+        if stack[-1][0] == '(':
+            raise CSGException("Unbalanced parenthesis")
 
-		if m>=len(expr): expr.append("")
-		expr[m] = stack.pop()[0]
-		m = m+1
+        if m >= len(expr): expr.append("")
+        expr[m] = stack.pop()[0]
+        m = m + 1
 
-	# Delete unwanted items
-	for i in range(len(expr)-1,m-1,-1):
-		del expr[i]
+    # Delete unwanted items
+    for i in range(len(expr) - 1, m - 1, -1):
+        del expr[i]
+
 
 # ----------------------------------------------------------------------
 # Subroutine:	rpnorm
@@ -351,24 +354,25 @@ def exp2rpn(expr):
 # operator starting from the right-most one, until no rule is found.
 # ----------------------------------------------------------------------
 def rpnorm(expr):
-	# Loop until there is no any extra change needed
+    # Loop until there is no any extra change needed
 
-	# Scan to find the first operators
-	changed = 1
-	while changed:
-		changed = 0
-		i = len(expr)-1
-		while i>=4:
-			tx = expr[i]
-			if tx in ('+', '-', '|'):
-				l = len(expr)
-				rule = _rpnrule(expr,i)
-				if rule>0:
-					changed = 1
-					i += len(expr)-l+1
-			i -= 1
-			if len(expr) > MAXEXPR:
-				raise CSGException("Expansion failed. Too many terms")
+    # Scan to find the first operators
+    changed = 1
+    while changed:
+        changed = 0
+        i = len(expr) - 1
+        while i >= 4:
+            tx = expr[i]
+            if tx in ('+', '-', '|'):
+                l = len(expr)
+                rule = _rpnrule(expr, i)
+                if rule > 0:
+                    changed = 1
+                    i += len(expr) - l + 1
+            i -= 1
+            if len(expr) > MAXEXPR:
+                raise CSGException("Expansion failed. Too many terms")
+
 
 # ----------------------------------------------------------------------
 # Subroutine:	_subTerms
@@ -386,29 +390,30 @@ def rpnorm(expr):
 # RPN ...... | expr-left | expr-right | op | .......
 #           Lowleft      LowRight  op-1 ntx
 # ----------------------------------------------------------------------
-def _subTerms(expr,n):
+def _subTerms(expr, n):
 
-	nop = 0
-	lowRight = 0
-	lowLeft  = 0
+    nop = 0
+    lowRight = 0
+    lowLeft = 0
 
-	while n>=0:
-		t = expr[n]
-		if t=='+' or t=='-' or t=='|':
-			nop += 1
-		else:
-			nop -= 1
+    while n >= 0:
+        t = expr[n]
+        if t == '+' or t == '-' or t == '|':
+            nop += 1
+        else:
+            nop -= 1
 
-		n = n-1
-		if nop==0:
-			if lowRight==0:
-				lowRight = n+1
-				nop      = nop+1
-				continue
-			else:
-				lowLeft = n+1
-				return lowLeft,lowRight
-	return lowLeft,lowRight
+        n = n - 1
+        if nop == 0:
+            if lowRight == 0:
+                lowRight = n + 1
+                nop = nop + 1
+                continue
+            else:
+                lowLeft = n + 1
+                return lowLeft, lowRight
+    return lowLeft, lowRight
+
 
 # ----------------------------------------------------------------------
 # Subroutine:	rpnrule
@@ -439,182 +444,183 @@ def _subTerms(expr,n):
 # 10. (X|Y)+Z -> (X+Z)|(Y+Z)            X Y | Z +  ->  X Z + Y Z + |
 # X,Y, and Z here match both primitives or sub-expressions.
 # ----------------------------------------------------------------------
-def _rpnrule(expr,n):
-	# Reset rule
-	rule = 0
+def _rpnrule(expr, n):
+    # Reset rule
+    rule = 0
 
-	# Top-most operator
-	op  = expr[n]
-	if op!='+' and op!='-' and op!='|': return rule
+    # Top-most operator
+    op = expr[n]
+    if op != '+' and op != '-' and op != '|': return rule
 
-	# Right operator
-	rop = expr[n-1]
+    # Right operator
+    rop = expr[n - 1]
 
-	# Find left and right sub-trees
-	ll,lr = _subTerms(expr,n)
+    # Find left and right sub-trees
+    ll, lr = _subTerms(expr, n)
 
-	# Left operator
-	lop = ' '
-	if lr>0: lop = expr[lr-1]
+    # Left operator
+    lop = ' '
+    if lr > 0: lop = expr[lr - 1]
 
-	# Find Rule
-	if   op=="-" and rop=="|":
-		rule = 1
-	elif op=="+" and rop=="|":
-		rule = 2
-	elif op=="-" and rop=="+":
-		rule = 3
-	elif op=="+" and rop=="+":
-		rule = 4
-	elif op=="-" and rop=="-":
-		rule = 5
-	elif op=="+" and rop=="-":
-		rule = 6
-	elif op=="|" and rop=="|":
-		rule = 7
-	elif op=="+" and lop=="-":
-		rule = 8
-	elif op=="-" and lop=="|":
-		rule = 9
-	elif op=="+" and lop=="|":
-		rule = 10
-	else:
-		return rule
+    # Find Rule
+    if op == "-" and rop == "|":
+        rule = 1
+    elif op == "+" and rop == "|":
+        rule = 2
+    elif op == "-" and rop == "+":
+        rule = 3
+    elif op == "+" and rop == "+":
+        rule = 4
+    elif op == "-" and rop == "-":
+        rule = 5
+    elif op == "+" and rop == "-":
+        rule = 6
+    elif op == "|" and rop == "|":
+        rule = 7
+    elif op == "+" and lop == "-":
+        rule = 8
+    elif op == "-" and lop == "|":
+        rule = 9
+    elif op == "+" and lop == "|":
+        rule = 10
+    else:
+        return rule
 
-	# Find sub expressions X Y Z
-	if rule<=7:    # X op (Y rop Z)
-		Xu = lr-1
-		Xl = ll
+    # Find sub expressions X Y Z
+    if rule <= 7:  # X op (Y rop Z)
+        Xu = lr - 1
+        Xl = ll
 
-		ll,lr = _subTerms(expr,n-1)
-		Yu = lr-1
-		Yl = ll
-		Zu = n-2
-		Zl = lr
-	else:		    # (X lop Y) op Z
-		Zu = n-1
-		Zl = lr
-		L  = lr-1
-		ll,lr = _subTerms(expr,L)
-		Xu = lr-1
-		Xl = ll
-		Yu = L-1
-		Yl = lr
+        ll, lr = _subTerms(expr, n - 1)
+        Yu = lr - 1
+        Yl = ll
+        Zu = n - 2
+        Zl = lr
+    else:  # (X lop Y) op Z
+        Zu = n - 1
+        Zl = lr
+        L = lr - 1
+        ll, lr = _subTerms(expr, L)
+        Xu = lr - 1
+        Xl = ll
+        Yu = L - 1
+        Yl = lr
 
-	#say("Rule: ",rule)
-	#say("X[",Xl,Xu,"]=",expr[Xl:Xu+1])
-	#say("Y[",Yl,Yu,"]=",expr[Yl:Yu+1])
-	#say("Z[",Zl,Zu,"]=",expr[Zl:Zu+1])
-	#print
+    #say("Rule: ",rule)
+    #say("X[",Xl,Xu,"]=",expr[Xl:Xu+1])
+    #say("Y[",Yl,Yu,"]=",expr[Yl:Yu+1])
+    #say("Z[",Zl,Zu,"]=",expr[Zl:Zu+1])
+    #print
 
-	# Expand the rule
+    # Expand the rule
 
-	# 1. X-(Y|Z) -> (X-Y)-Z	 X Y Z | -  ->  X Y - Z -
-	if    rule==1:
-		# Leave X Y
-		# Insert a - operator after Y
-		expr.insert(Zl,"-")
-		# Chop length by 1
-		del expr[Zu+2]
-		# Change the last operator to -
-		expr[Zu+2] = '-'
+    # 1. X-(Y|Z) -> (X-Y)-Z	 X Y Z | -  ->  X Y - Z -
+    if rule == 1:
+        # Leave X Y
+        # Insert a - operator after Y
+        expr.insert(Zl, "-")
+        # Chop length by 1
+        del expr[Zu + 2]
+        # Change the last operator to -
+        expr[Zu + 2] = '-'
 
-	# 2. X+(Y|Z) -> (X+Y)|(X+Z)     X Y Z + |  ->  X Y + X Z + |
-	elif rule==2:
-		# Leave X Y
-		# Insert a + operator after Y
-		expr.insert(Zl,"+")
-		# Copy X after the + operator
-		to = Zl+1
-		expr[to:to] = expr[Xl:Xu+1]
-		Zu += Xu-Xl+2
-		# Change last 2 operators to + |
-		expr[Zu+1] = '+'
-		expr[Zu+2] = '|'
+    # 2. X+(Y|Z) -> (X+Y)|(X+Z)     X Y Z + |  ->  X Y + X Z + |
+    elif rule == 2:
+        # Leave X Y
+        # Insert a + operator after Y
+        expr.insert(Zl, "+")
+        # Copy X after the + operator
+        to = Zl + 1
+        expr[to:to] = expr[Xl:Xu + 1]
+        Zu += Xu - Xl + 2
+        # Change last 2 operators to + |
+        expr[Zu + 1] = '+'
+        expr[Zu + 2] = '|'
 
-	# 3. X-(Y+Z) -> (X-Y)|(X-Z)     X Y Z + -  ->  X Y - X Z - |
-	elif rule==3:
-		# Leave X Y
-		# Insert a - operator after Y
-		expr.insert(Zl,"-")
-		# Copy X after the - operator
-		to = Zl+1
-		expr[to:to] = expr[Xl:Xu+1]
-		Zu += Xu-Xl+2
-		# Change last 2 operators to - |
-		expr[Zu+1] = '-'
-		expr[Zu+2] = '|'
+    # 3. X-(Y+Z) -> (X-Y)|(X-Z)     X Y Z + -  ->  X Y - X Z - |
+    elif rule == 3:
+        # Leave X Y
+        # Insert a - operator after Y
+        expr.insert(Zl, "-")
+        # Copy X after the - operator
+        to = Zl + 1
+        expr[to:to] = expr[Xl:Xu + 1]
+        Zu += Xu - Xl + 2
+        # Change last 2 operators to - |
+        expr[Zu + 1] = '-'
+        expr[Zu + 2] = '|'
 
-	# 4. X+(Y+Z) -> (X+Y)+Z	 X Y Z + +  ->  X Y + Z +
-	elif rule==4:
-		# Leave X Y
-		# Insert a + operator after Y
-		expr.insert(Zl,"+")
-		# Chop length by 1
-		del expr[Zu+2]
-		# Change the last operator to +
-		expr[Zu+2] = '+'
+    # 4. X+(Y+Z) -> (X+Y)+Z	 X Y Z + +  ->  X Y + Z +
+    elif rule == 4:
+        # Leave X Y
+        # Insert a + operator after Y
+        expr.insert(Zl, "+")
+        # Chop length by 1
+        del expr[Zu + 2]
+        # Change the last operator to +
+        expr[Zu + 2] = '+'
 
-	# 5. X-(Y-Z) -> (X-Y)|(X+Z)     X Y Z - -  ->  X Y - X Z + |
-	elif rule==5:
-		# Leave X Y
-		# Insert a - operator after Y
-		expr.insert(Zl,"-")
-		# Copy X after the - operator
-		to = Zl+1
-		expr[to:to] = expr[Xl:Xu+1]
-		Zu += Xu-Xl+2
-		# Change last 2 operators to + |
-		expr[Zu+1] = '+'
-		expr[Zu+2] = '|'
+    # 5. X-(Y-Z) -> (X-Y)|(X+Z)     X Y Z - -  ->  X Y - X Z + |
+    elif rule == 5:
+        # Leave X Y
+        # Insert a - operator after Y
+        expr.insert(Zl, "-")
+        # Copy X after the - operator
+        to = Zl + 1
+        expr[to:to] = expr[Xl:Xu + 1]
+        Zu += Xu - Xl + 2
+        # Change last 2 operators to + |
+        expr[Zu + 1] = '+'
+        expr[Zu + 2] = '|'
 
-	# 6. X+(Y-Z) -> (X+Y)-Z	 X Y Z - +  ->  X Y + Z -
-	elif rule==6:
-		# Leave X Y
-		# Insert a + operator after Y
-		expr.insert(Zl,"+")
-		# Chop length by 1
-		del expr[Zu+2]
-		# Change the last operator to -
-		expr[Zu+2] = '-'
+    # 6. X+(Y-Z) -> (X+Y)-Z	 X Y Z - +  ->  X Y + Z -
+    elif rule == 6:
+        # Leave X Y
+        # Insert a + operator after Y
+        expr.insert(Zl, "+")
+        # Chop length by 1
+        del expr[Zu + 2]
+        # Change the last operator to -
+        expr[Zu + 2] = '-'
 
-	# 7. X|(Y|Z) -> (X|Y)|Z	 X Y Z | |  ->  X Y | Z |
-	elif rule==7:
-		# Leave X Y
-		# Insert a | operator after Y
-		expr.insert(Zl,"|")
-		# Chop length by 1
-		del expr[Zu+2]
-		# Change the last operator to |
-		expr[Zu+2] = '|'
+    # 7. X|(Y|Z) -> (X|Y)|Z	 X Y Z | |  ->  X Y | Z |
+    elif rule == 7:
+        # Leave X Y
+        # Insert a | operator after Y
+        expr.insert(Zl, "|")
+        # Chop length by 1
+        del expr[Zu + 2]
+        # Change the last operator to |
+        expr[Zu + 2] = '|'
 
-	# 8. (X-Y)+Z -> (X+Z)-Y	 X Y - Z +  ->  X Z + Y -
-	elif rule==8:
-		# Leave X
-		# Copy "Z +" after X
-		L = Zu-Zl+2
-		to = Xu+1
-		expr[to:to] = expr[Zl:Zl+L]
-		# Delete old "Z +"
-		del expr[Zl+L:Zl+L+L]
+    # 8. (X-Y)+Z -> (X+Z)-Y	 X Y - Z +  ->  X Z + Y -
+    elif rule == 8:
+        # Leave X
+        # Copy "Z +" after X
+        L = Zu - Zl + 2
+        to = Xu + 1
+        expr[to:to] = expr[Zl:Zl + L]
+        # Delete old "Z +"
+        del expr[Zl + L:Zl + L + L]
 
-	# 9. (X|Y)-Z -> (X-Z)|(Y-Z)     X Y | Z -  ->  X Z - Y Z - |
-	#10. (X|Y)+Z -> (X+Z)|(Y+Z)     X Y | Z +  ->  X Z + Y Z + |
-	elif rule==9 or rule==10:
-		# Leave X
-		# Copy "Z -" or "Z +" after X
-		L = Zu-Zl+2
-		to = Xu+1
-		expr[to:to] = expr[Zl:Zu+2]
-		# Correct Z position
-		Zl += L
-		Zu += L
-		# Delete the | infront of Z
-		del expr[Zl-1]
-		# Add | at the end
-		expr.insert(Zu+1,"|")
+    # 9. (X|Y)-Z -> (X-Z)|(Y-Z)     X Y | Z -  ->  X Z - Y Z - |
+    #10. (X|Y)+Z -> (X+Z)|(Y+Z)     X Y | Z +  ->  X Z + Y Z + |
+    elif rule == 9 or rule == 10:
+        # Leave X
+        # Copy "Z -" or "Z +" after X
+        L = Zu - Zl + 2
+        to = Xu + 1
+        expr[to:to] = expr[Zl:Zu + 2]
+        # Correct Z position
+        Zl += L
+        Zu += L
+        # Delete the | infront of Z
+        del expr[Zl - 1]
+        # Add | at the end
+        expr.insert(Zu + 1, "|")
 
-	return rule
+    return rule
+
 
 # ----------------------------------------------------------------------
 # Subroutine:	rpn2exp
@@ -627,76 +633,76 @@ def _rpnrule(expr,n):
 # UNION or a product
 # ----------------------------------------------------------------------
 def rpn2exp(rpn):
-	zones = []
-	plus  = []
-	minus = []
+    zones = []
+    plus = []
+    minus = []
 
-	i=0
-	nstack = 0
-	endprod = 0
-	#say("RPN=",rpn)
-	#say("LEN=",len(rpn))
-	while i<len(rpn):
-		tx = rpn[i]
-		if tx=='+' or tx=='-' or tx=='|':
-			nstack -= 1
-		else:
-			# First term is always a plus
-			# .. peek then next operator to check for sign
-			if len(plus)==0 or rpn[i+1]=='+':
-				plus.append(tx)
-				lastPlus = 1
-			elif rpn[i+1]=='-':
-				minus.append(tx)
-				lastPlus = 0
-			nstack += 1
+    i = 0
+    nstack = 0
+    endprod = 0
+    #say("RPN=",rpn)
+    #say("LEN=",len(rpn))
+    while i < len(rpn):
+        tx = rpn[i]
+        if tx == '+' or tx == '-' or tx == '|':
+            nstack -= 1
+        else:
+            # First term is always a plus
+            # .. peek then next operator to check for sign
+            if len(plus) == 0 or rpn[i + 1] == '+':
+                plus.append(tx)
+                lastPlus = 1
+            elif rpn[i + 1] == '-':
+                minus.append(tx)
+                lastPlus = 0
+            nstack += 1
 
-		if nstack==0:
-			endprod = 1
-		elif nstack==3:
-			if lastPlus:
-				del plus[-1]
-			else:
-				del minus[-1]
-			i -= 2
-			endprod = 1
-		elif tx=='|':
-			i -= 2
-			endprod = 1
-		elif i==len(rpn)-1:
-			#say(*,"END i=ntx")
-			endprod = 1
+        if nstack == 0:
+            endprod = 1
+        elif nstack == 3:
+            if lastPlus:
+                del plus[-1]
+            else:
+                del minus[-1]
+            i -= 2
+            endprod = 1
+        elif tx == '|':
+            i -= 2
+            endprod = 1
+        elif i == len(rpn) - 1:
+            #say(*,"END i=ntx")
+            endprod = 1
 
-		if endprod:
-			optZone(plus,minus)
-			# remove None terms
-			plus  = filter(lambda x:x, plus)
-			minus = filter(lambda x:x, minus)
-			if len(plus)>0 or len(minus)>0:
-				zones.append((plus,minus))
-			plus    = []
-			minus   = []
-			nstack  = 0
-			endprod = 0
-		i += 1
+        if endprod:
+            optZone(plus, minus)
+            # remove None terms
+            plus = filter(lambda x: x, plus)
+            minus = filter(lambda x: x, minus)
+            if len(plus) > 0 or len(minus) > 0:
+                zones.append((plus, minus))
+            plus = []
+            minus = []
+            nstack = 0
+            endprod = 0
+        i += 1
 
+    # Remove duplicates of products
+    rmDoubles(zones)
 
-	# Remove duplicates of products
-	rmDoubles(zones)
+    # Reconstruct expression
+    expr = []
+    for plus, minus in zones:
+        if len(expr) > 0 and expr[-1] != "|": expr.append("|")
+        # Fill the new array
+        for j in plus:
+            expr.append("+")
+            expr.append(j)
+        for j in minus:
+            expr.append("-")
+            expr.append(j)
 
-	# Reconstruct expression
-	expr = []
-	for plus,minus in zones:
-		if len(expr)>0 and expr[-1]!="|": expr.append("|")
-		# Fill the new array
-		for j in plus:
-			expr.append("+")
-			expr.append(j)
-		for j in minus:
-			expr.append("-")
-			expr.append(j)
+    return expr
 
-	return expr
 
 # ----------------------------------------------------------------------
 # Subroutine:	optZone
@@ -713,41 +719,42 @@ def rpn2exp(rpn):
 # WARNING: It doesn't delete the term from the arrays but changes the
 # name to space.
 # ----------------------------------------------------------------------
-def optZone(plus,minus):
-	# Remove Universe @ from PLUS
-	# and
-	# remove duplicate terms A+A=A, A-A={}
-	for i in range(len(plus)):
-		if plus[i]=='@': plus[i]=None
+def optZone(plus, minus):
+    # Remove Universe @ from PLUS
+    # and
+    # remove duplicate terms A+A=A, A-A={}
+    for i in range(len(plus)):
+        if plus[i] == '@': plus[i] = None
 
-		if plus[i]!=None:
-			for j in range(i+1,len(plus)):
-				if plus[i]==plus[j]: plus[j]=None
-			for j in range(len(minus)):
-				if plus[i]==minus[j]:
-					# Remove everything
-					del plus[:]
-					del minus[:]
-					return
+        if plus[i] != None:
+            for j in range(i + 1, len(plus)):
+                if plus[i] == plus[j]: plus[j] = None
+            for j in range(len(minus)):
+                if plus[i] == minus[j]:
+                    # Remove everything
+                    del plus[:]
+                    del minus[:]
+                    return
 
-	# Discard product if universe @ exists in MINUS
-	# Check for duplicates in MINUS like -A-A=-A
-	for i in range(len(minus)):
-		if minus[i]=='@':
-			# Remove everything
-			del plus[:]
-			del minus[:]
-			return
-		if minus[i]!=None:
-			for j in range(i+1,len(minus)):
-				if minus[i]==minus[j]: minus[j]=None
+    # Discard product if universe @ exists in MINUS
+    # Check for duplicates in MINUS like -A-A=-A
+    for i in range(len(minus)):
+        if minus[i] == '@':
+            # Remove everything
+            del plus[:]
+            del minus[:]
+            return
+        if minus[i] != None:
+            for j in range(i + 1, len(minus)):
+                if minus[i] == minus[j]: minus[j] = None
 
-	# Perform the Geometrical optimization in the product
-	#call OptGeo(nplus,plus,nminus,minus)
+    # Perform the Geometrical optimization in the product
+    #call OptGeo(nplus,plus,nminus,minus)
 
-	# Peform a bubble sort on product terms
-	plus.sort()
-	minus.sort()
+    # Peform a bubble sort on product terms
+    plus.sort()
+    minus.sort()
+
 
 # ----------------------------------------------------------------------
 # Subroutine:	rmDoubles
@@ -757,35 +764,36 @@ def optZone(plus,minus):
 # Remove duplicates of products A+B|A+B|C+D  ->  A+B|C+D
 # ----------------------------------------------------------------------
 def rmDoubles(zones):
-	i = -1
-	while i<len(zones)-1:
-		i += 1
-		plus1, minus1 = zones[i]
-		j = i
-		while j<len(zones)-1:
-			j += 1
-			plus2, minus2 = zones[j]
+    i = -1
+    while i < len(zones) - 1:
+        i += 1
+        plus1, minus1 = zones[i]
+        j = i
+        while j < len(zones) - 1:
+            j += 1
+            plus2, minus2 = zones[j]
 
-			# Check if they are the same
-			if len(plus1)!=len(plus2) or len(minus1)!=len(minus2): continue
-			diffplus = -1
-			for k in range(len(plus1)):
-				if plus1[k] != plus2[k]:
-					diffplus = k
-					break
-			#if not same: continue
+            # Check if they are the same
+            if len(plus1) != len(plus2) or len(minus1) != len(minus2): continue
+            diffplus = -1
+            for k in range(len(plus1)):
+                if plus1[k] != plus2[k]:
+                    diffplus = k
+                    break
+            #if not same: continue
 
-			diffminus = -1
-			for k in range(len(minus1)):
-				if minus1[k] != minus2[k]:
-					diffminus = k
-					break
-			#if not same: continue
+            diffminus = -1
+            for k in range(len(minus1)):
+                if minus1[k] != minus2[k]:
+                    diffminus = k
+                    break
+            #if not same: continue
 
-			if diffplus==-1 and diffminus==-1:
-				del zones[j]
-				j -= 1
-				continue
+            if diffplus == -1 and diffminus == -1:
+                del zones[j]
+                j -= 1
+                continue
+
 
 # ----------------------------------------------------------------------
 # Subroutine:	split
@@ -795,43 +803,43 @@ def rmDoubles(zones):
 # Break products into lists
 # ----------------------------------------------------------------------
 def split(expr):
-	brk=[]
-	expr=expr[:]	# Make a copy of the expression
-	while 1:
-		try:
-			p = expr.index("|")
-			brk.append(expr[0:p])
-			del expr[0:p+1]
-		except:
-			brk.append(expr)
-			return brk
+    brk = []
+    expr = expr[:]  # Make a copy of the expression
+    while 1:
+        try:
+            p = expr.index("|")
+            brk.append(expr[0:p])
+            del expr[0:p + 1]
+        except:
+            brk.append(expr)
+            return brk
 
 # ----------
-if __name__=="__main__":
-	import sys, string, pprint
-	from log import say
+if __name__ == "__main__":
+    import sys, string, pprint
+    from log import say
 
-	expr = tokenize(string.join(sys.argv[1:]))
+    expr = tokenize(string.join(sys.argv[1:]))
 
-	say("Zones=")
-	pprint.pprint(splitZones(expr))
+    say("Zones=")
+    pprint.pprint(splitZones(expr))
 
-	say("ZoneString=")
-	pprint.pprint(map(toString, splitZones(expr)))
+    say("ZoneString=")
+    pprint.pprint(map(toString, splitZones(expr)))
 
-	say("ORG=",expr)
+    say("ORG=", expr)
 
-	exp2rpn(expr)
-	say("RPN=",expr)
+    exp2rpn(expr)
+    say("RPN=", expr)
 
-	rpnorm(expr)
-	say("RPNORM=",expr)
+    rpnorm(expr)
+    say("RPNORM=", expr)
 
-	expnorm = rpn2exp(expr)
-	say("NORM=",expnorm)
+    expnorm = rpn2exp(expr)
+    say("NORM=", expnorm)
 
-#	list = breakprod(expnorm)
-	expr = string.join(expnorm)
-	expr = expr.replace("+ ","+")
-	expr = expr.replace("- ","-")
-	say("EXP=",expr)
+    #	list = breakprod(expnorm)
+    expr = string.join(expnorm)
+    expr = expr.replace("+ ", "+")
+    expr = expr.replace("- ", "-")
+    say("EXP=", expr)
