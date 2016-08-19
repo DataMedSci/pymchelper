@@ -4,5 +4,5 @@ pytest-capturelog
 pytest-timeout
 pytest-xdist
 tox
-matplotlib<2.0 ; python_version >= '3.2' and python_version < '3.4'
+matplotlib<1.5.2 ; python_version >= '3.2' and python_version < '3.4'
 matplotlib ; python_version < '3.0' or python_version >= '3.4'
