@@ -2258,9 +2258,6 @@ class Card:
             else:
                 return self.intWhat(lst[0]), self.intWhat(lst[1]), lst[2]
 
-    # ----------------------------------------------------------------------
-    # Return a formated comment string
-    # ----------------------------------------------------------------------
     def commentStr(self):
         """return a comment string"""
         line = ""
@@ -5312,8 +5309,8 @@ class Input:
         -1: inactive - do not include any subsequent #if..
          0: false & active - include substitute #if..
          1: true  & active
-           2: false & active after else
-           3: true  & active after else
+         2: false & active after else
+         3: true  & active after else
         FIXME values do not WORK!
         :param activeDefines:
         :return: list of error cards

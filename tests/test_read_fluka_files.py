@@ -74,12 +74,56 @@ class TestDefaultConverter(unittest.TestCase):
 
     def test_load_input(self):
         Input.init()
+
+        # input useful functions:
+        #  - read/write : read/write an input file
+        #  - clone
+        # - checkFormat(card) FORMAT_FREE / FORMAT_SINGLE
+        # - addCard(card)
+        # - delCard(card)
+        # - delTag(tag) - delete all cards with specific tag
+        # - delGeometryCards
+        # - replaceCard(position, card)
+        # - convert2Names - Convert input to names and check for obsolete and/or non-valid cards
+        # - validate - ??
+        # - checkNumbering - ??
+        # - minimumInput
+        # - renumber
+        #
+        # Card useful functions:
+        # - __init__(self, tag, what=None, comment="", extra="")
+        # - clone
+        # - appendWhats(self, what, pos=None)
+        # - appendComment(self, comment):
+        # - validate(self, case=None):
+        # - convert(self, tonames=True)
+        # - whats(self), nwhats()
+        # - sdum
+        # - extra
+        # - comment
+        # - isGeo
+        # - type
+        # - tag
+        # - what(self, n)
+        # - setComment(self, comment="")
+        # - setWhats(self, whats)
+        # - setSdum(self, s)
+        # - setExtra(self, e)
+        # - setWhat(self, w, v)
+        # - units(self, absolute=True) units used by card
+        # - commentStr(self)
+        # - def toStr(self, fmt=None)
+        # - addZone(self, zone)
+
+        #
+
         for filename in os.listdir(self.main_dir):
             rel_path = os.path.join(self.main_dir, filename)
             if rel_path.endswith(".inp"):
                 logger.info("opening " + rel_path)
                 input = Input.Input()
                 input.read(rel_path)
+                input.convert2Names()
                 try:
                     rndcard = input.cards["RANDOMIZ"][0]
                     rndcard.setWhat(2, 5723)

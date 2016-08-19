@@ -1,7 +1,7 @@
 import os
 import unittest
 from pymchelper import run
-from examples import generate_detect_shieldhit
+from examples import generate_detect_shieldhit, generate_fluka_input
 
 
 class TestCallMain(unittest.TestCase):
@@ -25,7 +25,7 @@ class TestCallMain(unittest.TestCase):
 
     def test_many_shield(self):
         run.main(["--many", "tests/res/shieldhit/single/*.bdo", "--converter", "image"])
-        files = os.listdir("tests/res/shieldhit/single")
+        files = os.listdir(os.path.join("tests", "res", "shieldhit", "single"))
         png_files = [f for f in files if f.endswith(".png")]
         bdo_files = [f for f in files if f.endswith(".bdo")]
         self.assertGreater(len(files), 4)
@@ -33,9 +33,13 @@ class TestCallMain(unittest.TestCase):
 
 
 class TestCallExample(unittest.TestCase):
-    def test_help(self):
+    def test_shieldhit(self):
         generate_detect_shieldhit.main()
         self.assertTrue(os.path.isfile("detect.dat"))
+
+    def test_fluka(self):
+        generate_fluka_input.main()
+        self.assertTrue(os.path.isfile("fl_sim.inp"))
 
 
 if __name__ == '__main__':
