@@ -1,5 +1,3 @@
-# $Id: Input.py 3838 2016-06-27 09:42:03Z bnv $
-#
 # Copyright and User License
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Copyright Vasilis.Vlachoudis@cern.ch for the
@@ -51,8 +49,6 @@
 # THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH
 # DAMAGES.
 #
-# Author:	Vasilis.Vlachoudis@cern.ch
-# Date:	17-May-2004
 
 __author__ = "Vasilis Vlachoudis"
 __email__ = "Vasilis.Vlachoudis@cern.ch"
@@ -144,8 +140,7 @@ BODY_NOVXL_TAGS = None  # Without VOXELS
 FLAIR_TAGS = None
 OBJECT_TAGS = None
 TRANSFORM_TAGS = None
-DETECTOR_TAGS  = ("DETECT", "EVENTBIN","RESNUCLE","USRBDX", \
-    "USRBIN", "USRCOLL", "USRTRACK","USRYIELD")
+DETECTOR_TAGS = ("DETECT", "EVENTBIN", "RESNUCLE", "USRBDX", "USRBIN", "USRCOLL", "USRTRACK", "USRYIELD")
 NGROUPS = []
 
 # Preprocessor cards that increase or decrease the indent
@@ -164,13 +159,13 @@ ERROR = "error"
 _VOLUME = "@volume"
 
 
-#-------------------------------------------------------------------------------
-# flair vector returning a string with {} representation
 class Vector(bmath.Vector):
+    """flair vector returning a string with {} representation"""
+
     def __str__(self):
         return "{%s}" % (list.__str__(self)[1:-1])
 
-#-------------------------------------------------------------------------------
+
 _globalDict = {
     # Mathematical constants
     "fwhm": 2.0 * math.sqrt(2.0 * math.log(2.0)),
@@ -292,9 +287,6 @@ for name in dir(math):
     _globalDict[name] = getattr(math, name)
 
 
-#===============================================================================
-# Local Dictionary
-#===============================================================================
 class LocalDict(dict):
     """Implement the local dictionary"""
 
@@ -303,20 +295,16 @@ class LocalDict(dict):
         self.card = None
         self.clear()
 
-    # ----------------------------------------------------------------------
-    # Clear dictionary and set default variables
-    # ----------------------------------------------------------------------
     def clear(self):
+        """Clear dictionary and set default variables"""
         dict.clear(self)
         self["w"] = lambda w, s=self: s.card.numWhat(w)
         self["W"] = lambda w, s=self: s.card.evalWhat(w)
         self["b"] = lambda n, w, s=self: s.bodyWhat(n, w)
         self["C"] = lambda t, n, w, s=self: s.cardWhat(t, n, w)
 
-    # ----------------------------------------------------------------------
-    # Default getitem
-    # ----------------------------------------------------------------------
     def __getitem__(self, item):
+        """Default getitem"""
         try:
             return dict.__getitem__(self, item)
         except:
@@ -341,13 +329,11 @@ class LocalDict(dict):
             #return str(item)
             raise
 
-    # ----------------------------------------------------------------------
     def bodyWhat(self, name, what):
         bodies = self.input.cardsCache("bodies")
         body = bodies[name]
         return body.numWhat(what)
 
-    # ----------------------------------------------------------------------
     def cardWhat(self, tag, name, what):
         cards = self.input.cardsCache(tag)
         if cards is None:
@@ -373,17 +359,14 @@ class LocalDict(dict):
             return val
 
 
-#-------------------------------------------------------------------------------
-# Write in utf format if necessary
-#-------------------------------------------------------------------------------
 def utfWrite(f, s):
+    """Write in utf format if necessary"""
     try:
         f.write(s)
     except (UnicodeDecodeError, UnicodeEncodeError):
         f.write(s.encode("utf-8"))
 
 
-#-------------------------------------------------------------------------------
 def utfWriteln(f, s):
     if sys.version_info > (3, 0):
         f.write(s + "\n")
@@ -394,15 +377,12 @@ def utfWriteln(f, s):
             f.write(s.encode("utf-8") + "\n")
 
 
-#-------------------------------------------------------------------------------
 def writeln(f, s):
     f.write(s + "\n")
 
 
-#-------------------------------------------------------------------------------
-# Readline and convert it to unicode if necessary
-#-------------------------------------------------------------------------------
 def utfReadline(f):
+    """Readline and convert it to unicode if necessary"""
     line = f.readline()
     try:
         uline = line.decode("utf-8")
@@ -415,27 +395,20 @@ def utfReadline(f):
         return uline
 
 
-#-------------------------------------------------------------------------------
 def tagCmp(a, b):
     return cmp(a.tag, b.tag)
 
 
-#-------------------------------------------------------------------------------
 def isEvalStr(w):
     """return is the what string is an evaluated function"""
     return isinstance(w, str) and w != "" and w[0] in ("=", "$")
 
 
-#===============================================================================
-# Structures as placeholders
-#===============================================================================
 class LowNeutMaterial:
+    """Structures as placeholders"""
     pass
 
 
-#===============================================================================
-# CardInfo class
-#===============================================================================
 class CardInfo:
     _db = {}  # Card information dictionary
     _funcs = {}  # Caching compiled functions
@@ -487,9 +460,9 @@ class CardInfo:
     # ----------------------------------------------------------------------
     # Compile conditions
     # The code which is generated is in the form i.e.:
-    #	lambda x: x>0
+    # lambda x: x>0
     # and should be executed with:
-    #	eval(code)(x)
+    # eval(code)(x)
     # ----------------------------------------------------------------------
     def compileConditions(self, rng):
         # the switch condition is given by the f() fields and
@@ -564,11 +537,9 @@ class CardInfo:
         expr += "(" + ass + ")"
         return (whats, CardInfo._compileFunc(expr))
 
-    #-----------------------------------------------------------------------
-    # Compile or use pre-defined function
-    #-----------------------------------------------------------------------
     @staticmethod
     def _compileFunc(s):
+        """Compile or use pre-defined function"""
         try:
             return CardInfo._funcs[s]
         except:
@@ -576,19 +547,15 @@ class CardInfo:
             CardInfo._funcs[s] = c
             return c
 
-    # ----------------------------------------------------------------------
-    # Return name of compiled function (used for debugging)
-    # ----------------------------------------------------------------------
     @staticmethod
     def _compileFuncName(code):
+        """Return name of compiled function (used for debugging)"""
         for n, c in CardInfo._funcs.items():
             if code == c:
                 return n
 
-    # ----------------------------------------------------------------------
-    # Find card's range(case)
-    # ----------------------------------------------------------------------
     def findCase(self, card):
+        """Find card's range(case)"""
         if len(self.rangeCode) == 1: return 0
         for r, code in enumerate(self.rangeCode):
             # Check all 'f'-flags
@@ -609,10 +576,8 @@ class CardInfo:
                 return r
         return 0  # return default case
 
-    # ----------------------------------------------------------------------
-    # Validate card: return a list of failing variables.
-    # ----------------------------------------------------------------------
     def validate(self, card, case=None):
+        """Validate card: return a list of failing variables."""
         if self is CardInfo._db[None]:
             return ["Error card"]
 
@@ -4560,26 +4525,23 @@ class Input:
     def allcards(self):
         cl = self.cardlist[:]
         for voxel in self["VOXELS"]:
-            if voxel.ignore() or voxel["@voxel"] is None: continue
+            if voxel.ignore() or voxel["@voxel"] is None:
+                continue
             cl.extend(voxel["@voxel"].input.cardlist)
         return cl
 
-    #-----------------------------------------------------------------------
-    # Cache lists when they are requested
-    #-----------------------------------------------------------------------
     def cardsCache(self, tag, what=None):
+        """Cache lists when they are requested"""
         try:
             return self.cache[tag]
         except KeyError:
             if what is None:
                 lst = self.cardsSorted(tag)
             else:
-                lst = [x.what(what) \
-                 for x in self.cardsSorted(tag)]
+                lst = [x.what(what) for x in self.cardsSorted(tag)]
             self.cache[tag] = lst
             return lst
 
-    #-----------------------------------------------------------------------
     def clearCache(self, tag=None):
         if tag is not None:
             try:
@@ -4589,20 +4551,21 @@ class Input:
         else:
             self.cache.clear()
 
-    #-----------------------------------------------------------------------
-    # Find best position from the sorting order in the file
-    # search which card is closer to one we've asked
-    #-----------------------------------------------------------------------
     def bestPosition(self, tag):
+        """
+        Find best position from the sorting order in the file search which card is closer to one we've asked
+        :param tag:
+        :return:
+        """
         ci = CardInfo.get(tag)
-        if ci.tag[0] == "#": return None
+        if ci.tag[0] == "#":
+            return None
         cards = [x for x in self[tag] if x.notIgnore()]
         if cards:
             # Similar cards exists then add it after the last one
             pos = max([x._pos for x in cards]) + 1
             # but with indent=0
-            while pos<len(self.cardlist) and \
-                  (self.cardlist[pos].indent()>0 or self.cardlist[pos].tag == "#endif"):
+            while pos < len(self.cardlist) and (self.cardlist[pos].indent() > 0 or self.cardlist[pos].tag == "#endif"):
                 pos += 1
             return pos
 
@@ -4627,8 +4590,7 @@ class Input:
             pos = min([x._pos for x in mincl])
 
         # but with indent=0
-        while pos<len(self.cardlist) and \
-              (self.cardlist[pos].indent()>0 or self.cardlist[pos].tag == "#endif"):
+        while pos < len(self.cardlist) and (self.cardlist[pos].indent() > 0 or self.cardlist[pos].tag == "#endif"):
             pos += 1
 
         # skip backwards any START, STOP card
@@ -4638,11 +4600,15 @@ class Input:
 
         return pos
 
-    #-----------------------------------------------------------------------
-    # Add a card to list at position pos
-    # WARNING: renumber is False (on contrast with delCard, moveCard)
-    #-----------------------------------------------------------------------
     def addCard(self, card, pos=None, renumber=False):
+        """
+        Add a card to list at position pos
+        WARNING: renumber is False (on contrast with delCard, moveCard)
+        :param card:
+        :param pos:
+        :param renumber:
+        :return:
+        """
         card.input = self  # Keep input file link
 
         try:
@@ -4660,7 +4626,8 @@ class Input:
             self.cardlist.append(card)  # Global cardlist
             card._pos = len(self.cardlist) - 1
         else:
-            if pos > 0: prevCard = self.cardlist[pos - 1]
+            if pos > 0:
+                prevCard = self.cardlist[pos - 1]
             self.cardlist.insert(pos, card)
             card._pos = pos
 
@@ -4678,14 +4645,13 @@ class Input:
 
         if renumber:
             p = pos
-            if p is None: p = 0
+            if p is None:
+                p = 0
             self.renumber(p)
         self.setModified()
 
-    #-----------------------------------------------------------------------
-    # Delete card by position
-    #-----------------------------------------------------------------------
     def delCard(self, pos, renumber=True):
+        """Delete card by position"""
         card = self.cardlist[pos]
         card._pos = -1
         card.input = None
@@ -4693,18 +4659,18 @@ class Input:
 
         # Delete from the main list
         del self.cardlist[pos]
-        if renumber: self.renumber(pos)
+        if renumber:
+            self.renumber(pos)
 
         # Find tag list
         taglist = self.cards[tag]
         taglist.remove(card)
-        if len(taglist) == 0: del self.cards[tag]
+        if len(taglist) == 0:
+            del self.cards[tag]
         self.setModified()
 
-    #-----------------------------------------------------------------------
-    # Delete all cards with a specific tag
-    #-----------------------------------------------------------------------
     def delTag(self, tag, renumber=True):
+        """Delete all cards with a specific tag"""
         try:
             for card in self.cards[tag]:
                 card._pos = -1
@@ -4714,13 +4680,12 @@ class Input:
         except KeyError:
             return
 
-        if renumber: self.renumber()
+        if renumber:
+            self.renumber()
         self.setModified()
 
-    #-----------------------------------------------------------------------
-    # Delete geometry cards
-    #-----------------------------------------------------------------------
     def delGeometryCards(self):
+        """Delete geometry cards"""
         self.delTag("REGION", False)
         self.delTag("LATTICE", False)
         for tag in BODY_TAGS:
@@ -4731,10 +4696,8 @@ class Input:
         self.renumber()
         self.setModified()
 
-    #-----------------------------------------------------------------------
-    # Change card tag
-    #-----------------------------------------------------------------------
     def changeTag(self, card, newtag):
+        """Change card tag"""
         # Remove from previous list
         cl = self.cards[card.tag]
         cl.remove(card)
@@ -4751,21 +4714,17 @@ class Input:
         taglist.append(card)
         self.setModified()
 
-    #-----------------------------------------------------------------------
-    # Move card (src) at position (dest)
-    #-----------------------------------------------------------------------
     def moveCard(self, src, dest, renumber=True):
+        """Move card (src) at position (dest)"""
         card = self.cardlist[src]
         del self.cardlist[src]
-        if dest >= src: dest -= 1
+        if dest >= src:
+            dest -= 1
         self.cardlist.insert(dest, card)
         if renumber:
             self.renumber(min(dest, src), max(dest, src) + 1)
         self.setModified()
 
-    #-----------------------------------------------------------------------
-    # Replace card at position (pos) with card
-    #-----------------------------------------------------------------------
     def replaceCard(self, pos, card):
         """replace card at position (pos) with card"""
         # remember old card
@@ -4777,7 +4736,8 @@ class Input:
         # remove old from the taglist
         taglist = self.cards[old.tag]
         taglist.remove(old)
-        if len(taglist) == 0: del self.cards[old.tag]
+        if len(taglist) == 0:
+            del self.cards[old.tag]
 
         # add the new to the taglist
         try:
@@ -4792,15 +4752,13 @@ class Input:
 
         return old
 
-    #=======================================================================
-    # Transform a body card, using a 4x4 transformation matrix
-    #=======================================================================
     def _format(self, num):
-        if abs(num) < zero: return 0.0
+        if abs(num) < zero:
+            return 0.0
         return num
 
-    #-----------------------------------------------------------------------
     def transformBody(self, card, matrix):
+        """Transform a body card, using a 4x4 transformation matrix"""
         tag = card.tag
 
         if tag == "SPH":
@@ -4966,7 +4924,6 @@ class Input:
         card.setWhat(11, self._format(Z[1]))
         card.setWhat(12, self._format(Z[2]))
 
-    # ----------------------------------------------------------------------
     def _transformREC(self, card, matrix):
         point = matrix * card.bodyP()
         X = matrix.multNoTranslation(card.bodyX())
@@ -4985,7 +4942,6 @@ class Input:
         card.setWhat(11, self._format(Y[1]))
         card.setWhat(12, self._format(Y[2]))
 
-    # ----------------------------------------------------------------------
     def _transformInfEllCyl(self, card, matrix):
         center = matrix * card.bodyP()
         X = matrix.multNoTranslation(card.bodyX())
@@ -5014,15 +4970,14 @@ class Input:
                 card.setWhat(7, -2.0 * p.x() / rx2)
                 card.setWhat(8, -2.0 * p.y() / ry2)
                 card.setWhat(9, -2.0 * p.z() / rz2)
-                card.setWhat(10, -1.0 + p.x()**2/rx2 \
-                 + p.y()**2/ry2 + p.z()**2/rz2)
+                card.setWhat(10, -1.0 + p.x()**2 / rx2 + p.y()**2 / ry2 + p.z()**2 / rz2)
                 self._transformQUA(card, matrix)
             else:
                 # Transforming in REC
                 self.changeTag(card, "REC")
 
                 center -= Z * infinite
-                Z = 2.0 * infinite * Z
+                Z *= 2.0 * infinite
 
                 card.setWhat(1, self._format(center[0]))
                 card.setWhat(2, self._format(center[1]))
@@ -5136,19 +5091,12 @@ class Input:
 
         card.setWhat(10, self._format(AN[3][3]))
 
-    #=======================================================================
-    # Utilities
-    #=======================================================================
-    #-----------------------------------------------------------------------
-    # Scan for units
-    #-----------------------------------------------------------------------
     def scanUnits(self):
+        """Scan for units"""
         self.units.scan(self)
 
-    #-----------------------------------------------------------------------
-    # Convert input to names and check for obsolete and/or non-valid cards
-    #-----------------------------------------------------------------------
     def convert2Names(self):
+        """Convert input to names and check for obsolete and/or non-valid cards"""
         # Find materials for duplicate checking
         self.clearCache()
 
@@ -5167,7 +5115,8 @@ class Input:
                 matDict[n].append(i + 1)
 
         for card in self.cardlist:
-            if not card.enable: continue
+            if not card.enable:
+                continue
 
             # Check for obsolete cards
             tag = card.tag
@@ -5185,8 +5134,6 @@ class Input:
                 self.changeAllTags(tag, "USERWEIG")
             elif tag == "DUMPTHEM":
                 self.changeAllTags(tag, "USERDUMP")
-            #elif tag=="#ifdef":
-            #	self.changeAllTags(tag, "#if", False)
             elif tag == "MATERIAL":
                 index = matDict.get(card.sdum(), [])
                 if len(index) > 1:
@@ -5205,8 +5152,6 @@ class Input:
             if card.info is CardInfo.none():
                 say("ERROR: Invalid tag name on card.")
                 say(str(card))
-                #card.appendComment("Old card tag was: %s"%(card.tag))
-                #self.changeTag(card, ERROR)
                 if not card.tag:
                     self.changeTag(card, ERROR)
                 card.invalid = ["Invalid tag name"]
@@ -5223,21 +5168,19 @@ class Input:
                 say(str(card))
 
             # Convert card to names
-            if notflugg: card.convert(True)
+            if notflugg:
+                card.convert(True)
         self.setModified()
 
-    #-----------------------------------------------------------------------
-    # Validate all active cards
-    #-----------------------------------------------------------------------
     def validate(self):
+        """Validate all active cards"""
         for card in self.cardlist:
-            if card.ignore(): continue
+            if card.ignore():
+                continue
             card.validate()
 
-    #-----------------------------------------------------------------------
-    # Changing all cards tag from old to new
-    #-----------------------------------------------------------------------
     def changeAllTags(self, old, new, show=True):
+        """Changing all cards tag from old to new"""
         if show:
             say("WARNING: Changing card(s) %s to %s" % (old, new))
         try:
@@ -5250,10 +5193,8 @@ class Input:
             pass
         self.setModified()
 
-    #-----------------------------------------------------------------------
-    # Change name to all cards
-    #-----------------------------------------------------------------------
     def changeName(self, type, old, new):
+        """Change name to all cards"""
         # For bodies use special treatment
         if type == "bn":
             pat = re.compile(r"(\b%s\b)" % (re.escape(old)))
@@ -5273,10 +5214,8 @@ class Input:
                         card.setWhat(w, new)
         self.setModified()
 
-    #-----------------------------------------------------------------------
-    # Put the correct index to cards in the range given by fromPos:toPos
-    #-----------------------------------------------------------------------
     def renumber(self, fromPos=0, toPos=-1):
+        """Put the correct index to cards in the range given by fromPos:toPos"""
         cardlist = self.cardlist
         if toPos < 0 or toPos > len(cardlist):
             toPos = len(cardlist)
@@ -5295,17 +5234,17 @@ class Input:
             card = cardlist[i]
             card._pos = i
             tag = card.tag
-            if card.enable and tag in _INDENT_DEC: indent = max(0, indent - 1)
+            if card.enable and tag in _INDENT_DEC:
+                indent = max(0, indent - 1)
             card._indent = indent
-            if card.enable and tag in _INDENT_INC: indent += 1
+            if card.enable and tag in _INDENT_INC:
+                indent += 1
 
         self.setModified()
         self.checkNumbering()  # FIXME XXX (delete this)
 
-    #-----------------------------------------------------------------------
-    # Verify the internal order of the cards
-    #-----------------------------------------------------------------------
     def checkNumbering(self):
+        """Verify the internal order of the cards"""
         err = 0
         indent = 0
         for i, card in enumerate(self.cardlist):
@@ -5316,8 +5255,7 @@ class Input:
             if card.enable and card.tag in _INDENT_DEC:
                 indent = max(0, indent - 1)
             if card.enable and card.indent() != indent:
-                say("ERROR: Indent out of order pos=#%d card._indent=%d it should be %d"%\
-                 (i,card._indent,indent))
+                say("ERROR: Indent out of order pos=#%d card._indent=%d it should be %d" % (i, card._indent, indent))
                 say(str(card))
             if card.enable and card.tag in _INDENT_INC:
                 indent += 1
@@ -5328,23 +5266,23 @@ class Input:
             traceback.print_stack()
             self.renumber()
 
-    #-----------------------------------------------------------------------
-    # Pre-process all cards and set correspondingly the card.active flag
-    # nest[] contains the evaluation of the nesting
-    #	-1: inactive - do not include any subsequent #if..
-    #	 0: false & active - include substitute #if..
-    #	 1: true  & active
-    #        2: false & active after else
-    #        3: true  & active after else
-    # @return list of error cards
-    # FIXME values do not WORK!
-    #-----------------------------------------------------------------------
     def preprocess(self, activeDefines=None):
+        """
+        Pre-process all cards and set correspondingly the card.active flag
+        nest[] contains the evaluation of the nesting
+        -1: inactive - do not include any subsequent #if..
+         0: false & active - include substitute #if..
+         1: true  & active
+           2: false & active after else
+           3: true  & active after else
+        FIXME values do not WORK!
+        :param activeDefines:
+        :return: list of error cards
+        """
         self.clearCache()
         define = {}
         errors = []
         self.localDict.clear()
-        #if activeDefines exists and has something
         if activeDefines:
             useInputDefines = False
             for var, val in activeDefines:
@@ -5444,18 +5382,20 @@ class Input:
 
         return errors
 
-    #-----------------------------------------------------------------------
-    # Return the body properties as a dictionary of the active/enabled
-    # bodies
-    #-----------------------------------------------------------------------
     def bodyProperties(self):
+        """
+        Return the body properties as a dictionary of the active/enabled bodies
+        :return:
+        """
         translat = None
         transform = None
         expansion = None
 
         for card in self.cardlist:
-            if not card.isGeo(): continue
-            if card.ignore(): continue
+            if not card.isGeo():
+                continue
+            if card.ignore():
+                continue
             del card["@dx"]
             del card["@dy"]
             del card["@dz"]
@@ -5463,7 +5403,8 @@ class Input:
             del card["@transform"]
 
             if len(card.tag) == 3:
-                if card.tag == "END": break
+                if card.tag == "END":
+                    break
                 if translat:
                     card["@dx"] = translat.numWhat(1)
                     card["@dy"] = translat.numWhat(2)
@@ -5509,11 +5450,11 @@ class Input:
                         say(str(card))
                     expansion = None
 
-    #-----------------------------------------------------------------------
-    # Return the region properties as a dictionary of the active/enabled
-    # regions
-    #-----------------------------------------------------------------------
     def regionProperties(self):
+        """
+        Return the region properties as a dictionary of the active/enabled regions
+        :return:
+        """
         regionDict = {}
         regionList = []
         matList = self.materialList(icru=True)
@@ -5557,16 +5498,19 @@ class Input:
 
         # Input and voxel regions
         for region in self.cardsSorted("REGION"):
-            if region.name() == "&": continue
+            if region.name() == "&":
+                continue
             n += 1
             addRegion(region, region.sdum())
 
         # add last region
-        if regionList: regionDict["@LASTREG"] = regionList[-1]
+        if regionList:
+            regionDict["@LASTREG"] = regionList[-1]
 
         # Find transformations
         for card in self.cardsSorted("ROT-DEFI"):
-            if card.ignore(): continue
+            if card.ignore():
+                continue
             w1 = card.intWhat(1)
             if w1 < 1000:
                 (j, i) = divmod(w1, 100)
@@ -5579,13 +5523,13 @@ class Input:
         # Voxel assignmat if any
         hasVoxels = False
         for voxel in self["VOXELS"]:
-            if voxel.ignore() or voxel["@voxel"] is None: continue
+            if voxel.ignore() or voxel["@voxel"] is None:
+                continue
             hasVoxels = True
             for card in voxel["@voxel"].input["ASSIGNMA"]:
                 material = matDict.get(card.what(1))
                 if material is None:
-                    say("ERROR: Material %s is not defined #%d" \
-                     % (card.evalWhat(1),card.pos()+1))
+                    say("ERROR: Material %s is not defined #%d" % (card.evalWhat(1), card.pos() + 1))
                     say(str(card))
                     material = _defaultMaterials[0]  # Blackhole
                 region = regionDict.get(card.what(2))
@@ -5597,11 +5541,11 @@ class Input:
 
         # Check all assignmat
         for card in self.cardsSorted("ASSIGNMA"):
-            if card.ignore(): continue
+            if card.ignore():
+                continue
             material = matDict.get(card.evalWhat(1))
             if material is None:
-                say("ERROR: Material %s is not defined #%d" \
-                 % (card.evalWhat(1), card.pos()+1))
+                say("ERROR: Material %s is not defined #%d" % (card.evalWhat(1), card.pos() + 1))
                 say(str(card))
                 material = _defaultMaterials[0]  # Blackhole
 
@@ -5611,24 +5555,20 @@ class Input:
             if fromReg is None:
                 pat = _VOXELPAT.match(card.what(2))
                 if pat is None:
-                    say("ERROR: Region %s is not defined #%d"\
-                     % (card.what(2), card.pos()+1))
+                    say("ERROR: Region %s is not defined #%d" % (card.what(2), card.pos() + 1))
                     say(str(card))
                 continue
             fromReg = fromReg["@n"]
 
             try:
-                #w = card.what(3)
-                #if w == "@LASTREG":
-                #	toReg = len(regionList)
-                #else:
                 toReg = regionDict.get(card.evalWhat(3))
                 toReg = toReg["@n"]
             except:
                 toReg = fromReg
 
             step = card.intWhat(4)
-            if step == 0: step = 1
+            if step == 0:
+                step = 1
 
             for rg in range(fromReg, toReg + 1, step):
                 region = regionList[rg - 1]
@@ -5647,10 +5587,12 @@ class Input:
 
         # Check Biasing cards
         for card in self.cardsSorted("BIASING"):
-            if card.ignore(): continue
+            if card.ignore():
+                continue
 
             what1 = card.intWhat(1)
-            if what1 < 0: continue
+            if what1 < 0:
+                continue
 
             elif what1 == 1:
                 tag = "@biasingH"
@@ -5662,7 +5604,8 @@ class Input:
                 tag = "@biasingA"
 
             fromReg = regionDict.get(card.what(4))
-            if fromReg is None: continue
+            if fromReg is None:
+                continue
             fromReg = fromReg["@n"]
             try:
                 toReg = regionDict.get(card.what(5))
@@ -5680,10 +5623,12 @@ class Input:
 
         # Check Lattices
         for card in self.cardsSorted("LATTICE"):
-            if card.ignore(): continue
+            if card.ignore():
+                continue
 
             fromReg = regionDict.get(card.what(1))
-            if fromReg is None: continue
+            if fromReg is None:
+                continue
             fromReg = fromReg["@n"]
             try:
                 toReg = regionDict.get(card.what(2))
@@ -5705,24 +5650,22 @@ class Input:
                 region["@lattice"] = card
                 region["@rotdefi"] = rotdefi
 
-        # Check if all regions have material definition
-        #for region in regionList:
-        #	if region.get("@materialDefined") is None:
-        #		say("WARNING: Region %r is not assigned any material"\
-        #			%(region.sdum()))
         return regionList
 
-    #-----------------------------------------------------------------------
-    # Append to card's properties the additional value from tag's
-    # @param tag		cards to append the extra property
-    # @param proptag	cards from where to get the property
-    # @param prop		property name to add in cards
-    # @param valueWhat	which value to add as property
-    # @param fromWhat,toWhat,stepWhat	range of cards
-    # @param sdum		filter cards with the specific sdum
-    # @param func		apply a function to value
-    #-----------------------------------------------------------------------
     def addCardProperty(self, tag, proptag, prop, valueWhat, fromWhat, toWhat=-1, stepWhat=-1, sdum=None, func=None):
+        """
+        Append to card's properties the additional value from tag's
+        :param tag: cards to append the extra property
+        :param proptag: cards from where to get the property
+        :param prop: property name to add in cards
+        :param valueWhat: which value to add as property
+        :param fromWhat: range of cards
+        :param toWhat: range of cards
+        :param stepWhat: range of cards
+        :param sdum: filter cards with the specific sdum
+        :param func: apply a function to value
+        :return:
+        """
 
         # create a dictionary of cards for faster accessing
         cardlist = self.cardsSorted(tag)
@@ -5735,12 +5678,14 @@ class Input:
             card[prop] = 0.0
 
         for card in self.cardsSorted(proptag):
-            if sdum is not None and card.sdum() != sdum: continue
+            if sdum is not None and card.sdum() != sdum:
+                continue
             try:
                 from_ = dictionary[card.what(fromWhat)]["@n"]
             except:
                 continue
-            if from_ is None: continue
+            if from_ is None:
+                continue
             to_ = from_
             step = 1
             if toWhat >= 0:
@@ -5753,18 +5698,23 @@ class Input:
                     step = card.intWhat(stepWhat)
                 except:
                     pass
-            if step <= 0: step = 1
+            if step <= 0:
+                step = 1
 
             value = card.numWhat(valueWhat)
-            if func: value = func(value)
+            if func:
+                value = func(value)
 
             for c in cardlist[from_ - 1:to_:step]:
                 c[prop] = value
 
-    #-----------------------------------------------------------------------
-    # Convert material to name/number
-    #-----------------------------------------------------------------------
     def material(self, mat, toName):
+        """
+        Convert material to name/number
+        :param mat:
+        :param toName:
+        :return:
+        """
         lst = self.materialList(0, False, True)
         if toName:
             mat -= 1  # 1 based
@@ -5779,16 +5729,14 @@ class Input:
             except:
                 return 0
 
-    #-----------------------------------------------------------------------
-    # Return material list
-    #-----------------------------------------------------------------------
     def materialList(self, which=0, icru=False, assigned=False):
         lst = [m.sdum() for m in _defaultMaterials]
 
         # Add first voxel materials
         # FIXME maybe apply it on the card and not on the Input!!!!
         for voxel in self["VOXELS"]:
-            if voxel.ignore() or voxel["@voxel"] is None: continue
+            if voxel.ignore() or voxel["@voxel"] is None:
+                continue
             lst.extend([m.sdum() for m in voxel["@voxel"].input["MATERIAL"]])
 
         # Add user defined materials
@@ -5825,9 +5773,6 @@ class Input:
 
         return lst
 
-    #-----------------------------------------------------------------------
-    # Return material dictionary
-    #-----------------------------------------------------------------------
     def materialDict(self):
         matDict = {}
 
@@ -5841,7 +5786,8 @@ class Input:
 
         # Voxel materials
         for voxel in self["VOXELS"]:
-            if voxel.ignore() or voxel["@voxel"] is None: continue
+            if voxel.ignore() or voxel["@voxel"] is None:
+                continue
             for card in voxel["@voxel"].input["MATERIAL"]:
                 matDict[card.sdum()] = card
 
@@ -5851,9 +5797,6 @@ class Input:
 
         return matDict
 
-    #-----------------------------------------------------------------------
-    # material ZAID description
-    #-----------------------------------------------------------------------
     def materialZAID(self, material):
         # Check if it is a compound or a single material
 
@@ -5868,13 +5811,16 @@ class Input:
         # Compound search
         ZAID = []
         for compound in self["COMPOUND"]:
-            if compound.ignore(): continue
-            if compound.sdum() != material.sdum(): continue
+            if compound.ignore():
+                continue
+            if compound.sdum() != material.sdum():
+                continue
 
             for i in range(1, len(compound.whats()), 2):
                 frac = compound.numWhat(i)
                 mat = compound.what(i + 1)
-                if mat == "": continue
+                if mat == "":
+                    continue
                 if mat[0] == "-":
                     negative = True
                     mat = mat[1:]
@@ -5883,12 +5829,15 @@ class Input:
 
                 # Find material
                 for card in self["MATERIAL"]:
-                    if card.ignore(): continue
-                    if card.sdum() == mat: break
+                    if card.ignore():
+                        continue
+                    if card.sdum() == mat:
+                        break
                 else:
                     # Search default materials
                     for card in _defaultMaterials:
-                        if card.sdum() == mat: break
+                        if card.sdum() == mat:
+                            break
 
                 # Scan recursively
                 for za, f in self.materialZAID(card):
@@ -5902,13 +5851,17 @@ class Input:
                     ZAID.append((za, f))
         return ZAID
 
-    #-----------------------------------------------------------------------
-    # Convert region to name/number
-    #-----------------------------------------------------------------------
     def region(self, reg, toName):
+        """
+        Convert region to name/number
+        :param reg:
+        :param toName:
+        :return:
+        """
         # Regions removing continuation cards
         regions = [x for x in self.cardsSorted("REGION") if x.name() != "&"]
-        if len(regions) == 0: return None
+        if len(regions) == 0:
+            return None
 
         if toName:
             if reg <= 0 or reg > len(regions):
@@ -5920,18 +5873,14 @@ class Input:
             except:
                 return 0
 
-    #-----------------------------------------------------------------------
-    # @param idx		rotation to return
-    #			Can be prefixed with "-"
-    #			None to return a dictionary
-    # @param rotdefi	cached dictionary
-    # @param inv		return the inverse of the idx matrix.
-    #			Accepted even if idx is prefixed with "-"
-    # @return rotation matrix from a rot-defi cards or a dictionary with all
-    #         transformations
-    # FIXME I should combine the rotdefi with the self.cache!
-    #-----------------------------------------------------------------------
     def getTransformation(self, idx=None, rotdefi=None, inv=False):
+        """
+        FIXME I should combine the rotdefi with the self.cache!
+        :param idx:  rotation to return, Can be prefixed with "-", None to return a dictionary
+        :param rotdefi:  cached dictionary
+        :param inv: return the inverse of the idx matrix. Accepted even if idx is prefixed with "-"
+        :return: rotation matrix from a rot-defi cards or a dictionary with all transformations
+        """
         neg = False
         if isinstance(idx, str):
             if len(idx) > 0 and idx[0] == '-':
@@ -5948,13 +5897,15 @@ class Input:
             # Return dictionary of transformations
             rotdefi = {}
 
-        if inv: neg = not neg
+        if inv:
+            neg = not neg
 
         # Check if is cached
         if idx is not None:
             if rotdefi is not None:
                 matrix = rotdefi.get(idx)
-                if isinstance(matrix, int): matrix = rotdefi.get(matrix)
+                if isinstance(matrix, int):
+                    matrix = rotdefi.get(matrix)
                 if matrix is None:
                     return bmath.Matrix(4, type=1)
                 if neg:
@@ -5967,7 +5918,8 @@ class Input:
         last = 0
         # Scan transformations
         for card in self.cardsSorted("ROT-DEFI"):
-            if card.ignore(): continue
+            if card.ignore():
+                continue
 
             w1 = card.intWhat(1)
             if w1 < 1000:
@@ -5995,13 +5947,16 @@ class Input:
                         last = max(last, i)
                     rotdefi[i] = None
 
-                    if card.sdum() != "": rotdefi[card.sdum()] = i
+                    if card.sdum() != "":
+                        rotdefi[card.sdum()] = i
                     rotdefi["rot#%03d" % (i)] = i
 
             else:
-                if i != idx and card.sdum() != idx: continue
+                if i != idx and card.sdum() != idx:
+                    continue
 
-            if j == 0: j = 3
+            if j == 0:
+                j = 3
             theta = card.numWhat(2)
             phi = card.numWhat(3)
             x = card.numWhat(4)
@@ -6081,30 +6036,27 @@ class Input:
             voxel.loadVoxel()
 
 
-#===============================================================================
-# Internal Utilities
-#===============================================================================
-#-------------------------------------------------------------------------------
 def _str2num(w):
-    """Check if argument w is a valid fortran number and
-	return argument converted to a valid python number"""
+    """
+    Check if argument w is a valid fortran number and
+    return argument converted to a valid python number
+    """
     try:
         if len(w) > 1:
-            p = string.index("+-.0123456789", w[0])
-            p = string.index(".0123456789d DeE", w[1])
-            p = string.index(".0123456789", w[-1])
+            # TODO not used ?
+            # p = string.index("+-.0123456789", w[0])
+            # p = string.index(".0123456789d DeE", w[1])
+            # p = string.index(".0123456789", w[-1])
             we = w.replace("d", "E")
             we = we.replace("D", "E")
             we = we.replace(" ", "")
-            #return float(we)
             wn = float(we)
-            return we
+            return wn
         return float(w)
     except:
         return w
 
 
-#-------------------------------------------------------------------------------
 def _intWhat(what, n):
     try:
         return int(float(_str2num(what[n])))
@@ -6112,7 +6064,6 @@ def _intWhat(what, n):
         return 0
 
 
-#-------------------------------------------------------------------------------
 def _body2name(name):
     try:
         return BODY_PREFIX + str(int(name))
@@ -6120,23 +6071,25 @@ def _body2name(name):
         return str(name)
 
 
-#-------------------------------------------------------------------------------
 def _region2name(name):
     try:
         return REGION_PREFIX + str(int(name))
     except:
         pass
     name = str(name)
-    if _NAMEPAT.match(name): return name
+    if _NAMEPAT.match(name):
+        return name
     return REGION_PREFIX + name
 
 
-#-------------------------------------------------------------------------------
-# Initialize classes:
-#	CardInfo
-#	Particle
-#-------------------------------------------------------------------------------
 def init(filename=None):
+    """
+    Initialize classes:
+        CardInfo
+        Particle
+    :param filename:
+    :return:
+    """
     global _defaultMaterials, _defaultMatDict, _icruMaterials, _icruMatDict
     global _neutronGroups, _lowMaterials, _usermvax
     global NGROUPS, BODY_TAGS, BODY_NOVXL_TAGS, FLAIR_TAGS, OBJECT_TAGS, TRANSFORM_TAGS
@@ -6154,7 +6107,8 @@ def init(filename=None):
     for name in cardini.sections():
         # Ignore sections with lower case letters
         # it does not include the '#xxx' sections
-        if name[0].islower(): continue
+        if name[0].islower():
+            continue
 
         # name is complete, tag is only 8 characters max
         if len(name) > 8 and name[0] not in ("$", "#"):
@@ -6220,14 +6174,16 @@ def init(filename=None):
             if len(r) > 0:
                 empty = False
                 break
-        if empty: range_ = []
+        if empty:
+            range_ = []
 
         empty = True
         for a in assert_:
             if len(a) > 0:
                 empty = False
                 break
-        if empty: assert_ = []
+        if empty:
+            assert_ = []
 
         # append to CardInfo database
         cinfo = CardInfo(name, group, range_, extra, assert_, default, meaning)
@@ -6254,7 +6210,7 @@ def init(filename=None):
     # Create flair tags
     FLAIR_TAGS = [x.tag for x in CardInfo._db.values() if "Flair" in x.group]
     FLAIR_TAGS.sort()
-    #    FLAIR_TAGS.remove("!coffee")
+    FLAIR_TAGS.remove("!coffee")
 
     # Object tags = Flair tags + ROT-DEFI
     OBJECT_TAGS = FLAIR_TAGS[:]
@@ -6266,7 +6222,7 @@ def init(filename=None):
         if pid[:3] == "pid":
             tag, id = pid.split(".")
             mass = cardini.getfloat(section, "mass." + id)
-            comment = cardini.get(section, "comment." + id)
+            # comment = cardini.get(section, "comment." + id) #  TODO not used ?
             pdg = cardini.get(section, "pdg." + id)
             Particle.add(int(id), name, mass, pdg)
     Particle.makeLists()
@@ -6369,7 +6325,7 @@ def init(filename=None):
 
     del cardini
 
-#===============================================================================
+
 if __first:
     __first = False
     init()
@@ -6380,23 +6336,9 @@ if __name__ == "__main__":
     inp.read(sys.argv[1])
     inp.convert2Names()
     inp.regionProperties()
-    #	say(inp.materialList())
+    # say(inp.materialList())
     if len(sys.argv) >= 3:
-        #f = open(sys.argv[3],"w")
-        #inp.writeGeometry(f, FORMAT_FREE, FORMAT_FREE)
-        #f.close()
+        # f = open(sys.argv[3],"w")
+        # inp.writeGeometry(f, FORMAT_FREE, FORMAT_FREE)
+        # f.close()
         inp.write(sys.argv[2])
-
-#	import bz2
-#	f = bz2.BZ2File(sys.argv[2],'w')
-#	inp.dump(pickle.Pickler(f))
-#	f.close()
-
-#	f = bz2.BZ2File(sys.argv[2],'r')
-#	inp2 = Input()
-#	inp2.load(pickle.Unpickler(f))
-#	f.close()
-#say(inp.getTransformation(1))
-#say(inp.getTransformation("rot#001"))
-#print inp.getTransformation("CDQ4R1")
-#inp.write(sys.argv[2])
