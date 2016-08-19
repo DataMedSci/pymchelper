@@ -66,7 +66,8 @@ import pymchelper.flair.common.csg as csg
 from pymchelper.flair.common.log import say
 
 if sys.version_info > (3, 0):
-    from past.builtins import long, unicode
+    long = int
+    unicode = str
     IntType = int
     LongType = int
     FloatType = float
