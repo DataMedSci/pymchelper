@@ -4,6 +4,7 @@
   include LICENSE
   include requirements.txt
   include tests/requirements-test.txt
+  include tests/res/shieldhit/converter/bdo2txt
   recursive-include docs *.py
   recursive-include docs *.rst
   recursive-include pymchelper *.py

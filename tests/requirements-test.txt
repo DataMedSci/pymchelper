@@ -4,6 +4,7 @@ pytest-capturelog
 pytest-timeout
 pytest-xdist
 tox
-matplotlib==1.5.1 ; os_name == 'nt'
-matplotlib<2.0 ; python_version >= '3.2' and python_version < '3.4' and os_name != 'nt'
-matplotlib ; (python_version < '3.0' or python_version >= '3.4') and os_name != 'nt'
+# micro-language and markers (os_name, python_version) are descibed here: https://www.python.org/dev/peps/pep-0496/
+matplotlib==1.5.1 ; os_name == 'nt' or sys_platform == 'darwin' or sys_platform == 'Darwin'
+matplotlib<2.0 ; python_version >= '3.2' and python_version < '3.4' and os_name != 'nt' and sys_platform != 'darwin' or sys_platform != 'Darwin'
+matplotlib ; (python_version < '3.0' or python_version >= '3.4') and os_name != 'nt' and sys_platform != 'darwin' or sys_platform != 'Darwin'
