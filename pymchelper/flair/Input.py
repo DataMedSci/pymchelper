@@ -50,37 +50,41 @@
 # DAMAGES.
 #
 
-__author__ = "Vasilis Vlachoudis"
-__email__ = "Vasilis.Vlachoudis@cern.ch"
 
 import os
 import re
-import pdb
 import sys
 import time
 import math
 import struct
 import string
-from types import *
-from operator import attrgetter
+
+
+import pymchelper.flair.common.fortran as fortran
+import pymchelper.flair.common.bmath as bmath
+import pymchelper.flair.common.csg as csg
+from pymchelper.flair.common.log import say
 
 if sys.version_info > (3, 0):
     from past.builtins import long, unicode
+    IntType = int
+    LongType = int
+    FloatType = float
+    BooleanType = bool
+    StringType = bytes
+    UnicodeType = str
+else:
+    from types import IntType, LongType, FloatType, BooleanType, StringType, UnicodeType
 
 try:
     import ConfigParser
 except ImportError:
     import configparser as ConfigParser
 
-try:
-    import cPickle as pickle
-except ImportError:
-    import pickle
 
-import pymchelper.flair.common.fortran as fortran
-import pymchelper.flair.common.bmath as bmath
-import pymchelper.flair.common.csg as csg
-from pymchelper.flair.common.log import say
+__author__ = "Vasilis Vlachoudis"
+__email__ = "Vasilis.Vlachoudis@cern.ch"
+
 
 __first = True
 
@@ -283,7 +287,8 @@ _globalDict = {
 
 # Populate math functions on the local dict
 for name in dir(math):
-    if name[0] == "_": continue
+    if name[0] == "_":
+        continue
     _globalDict[name] = getattr(math, name)
 
 
@@ -312,7 +317,8 @@ class LocalDict(dict):
             defines = self.input.cardsCache("#define")
             # dummy linear search
             for define in defines:
-                if define.ignore(): continue
+                if define.ignore():
+                    continue
                 if define.sdum().strip() == item:
                     # Convert to int or float if possible
                     val = define.evalWhat(1)
@@ -323,7 +329,8 @@ class LocalDict(dict):
                         return f
                     except:
                         return val
-            if item not in _globalDict: return str(item)
+            if item not in _globalDict:
+                return str(item)
             # FIXME check for a card like BEAM(0,1)
             # if cards: return lambda n,w,t=item,s=self: s.cardWhat(t,n,w)
             # return str(item)
@@ -340,9 +347,10 @@ class LocalDict(dict):
             raise Exception("Card %s do not exist" % (tag))
         if isinstance(name, str):
             for card in cards:
-                if card.ignore(): continue
+                if card.ignore():
+                    continue
                 if card.sdum() == name:
-                    #	return card.numWhat(what)
+                    # return card.numWhat(what)
                     val = card.what(what)
             raise Exception("No card %s with sdum=%s found\n" % (tag, name))
         else:
@@ -389,14 +397,10 @@ def utfReadline(f):
     except (AttributeError, UnicodeDecodeError, UnicodeEncodeError):
         return line
     try:
-        sline = str(uline)
+        # sline = str(uline) # TODO never used ?
         return line
     except (AttributeError, UnicodeDecodeError, UnicodeEncodeError):
         return uline
-
-
-def tagCmp(a, b):
-    return cmp(a.tag, b.tag)
 
 
 def isEvalStr(w):
@@ -435,13 +439,15 @@ class CardInfo:
         self.rangeCode = []
         self.assertCode = []
         self.whats = []
-        if range_ is None: return
+        if range_ is None:
+            return
         nwhats = 0
         for r in range_:
             self.rangeCode.append(self.compileConditions(r))
             w = len(r)
             for j in range(len(r) - 1, -1, -1):
-                if r[j] != "-": break
+                if r[j] != "-":
+                    break
                 w -= 1
             nwhats = max(nwhats, w)
         self.nwhats = nwhats
@@ -482,7 +488,8 @@ class CardInfo:
             elif len(sdums) > 0:
                 s = "lambda x:x[:8] in ("
                 for i in sdums:
-                    if i == "-": i = ""
+                    if i == "-":
+                        i = ""
                     s += "\"%s\"," % (i)
                 s += ")"
                 code.append((0, 'f', CardInfo._compileFunc(s)))
@@ -503,19 +510,21 @@ class CardInfo:
 
         return code
 
-    # -----------------------------------------------------------------------
-    # Compile assert statement
-    # First detect all what references w(#) and replace them with:
-    #	w(#) -> c.numWhat(#)
-    #	W(#) -> c.what(#)
-    # identify all what-indexes to report as problems
-    # and request in the code that are not zero!
-    #
-    # finally compile the code
-    # example: w(8)>w(7)
-    #	lambda c: c.numWhat(7)==0 or c.numWhat(8)==0 or c.numWhat(8)>c.numWhat(7)
-    # -----------------------------------------------------------------------
     def compileAssert(self, assertStatement):
+        """
+        Compile assert statement
+        First detect all what references w(#) and replace them with:
+            w(#) -> c.numWhat(#)
+            W(#) -> c.what(#)
+        identify all what-indexes to report as problems
+        and request in the code that are not zero!
+
+        finally compile the code
+        example: w(8)>w(7)
+            lambda c: c.numWhat(7)==0 or c.numWhat(8)==0 or c.numWhat(8)>c.numWhat(7)
+        :param assertStatement:
+        :return:
+        """
         whatUsed = [False] * 21
         for match in _WNPAT.finditer(assertStatement):
             try:
@@ -556,19 +565,22 @@ class CardInfo:
 
     def findCase(self, card):
         """Find card's range(case)"""
-        if len(self.rangeCode) == 1: return 0
+        if len(self.rangeCode) == 1:
+            return 0
         for r, code in enumerate(self.rangeCode):
             # Check all 'f'-flags
             for w, f, c in code:
                 if f == 'f' and c:
                     v = card.evalWhat(w)
-                    if w > 0 and v == "": v = 0
+                    if w > 0 and v == "":
+                        v = 0
                     try:
                         v = int(float(v))
                     except:
                         pass
                     try:
-                        if not eval(c)(v): break
+                        if not eval(c)(v):
+                            break
                     except:
                         pass
             else:
@@ -581,11 +593,13 @@ class CardInfo:
         if self is CardInfo._db[None]:
             return ["Error card"]
 
-        if card.input is None: return [None]
+        if card.input is None:
+            return [None]
 
         if case is None:
             case = self.findCase(card)
-            if case is None: return [None]  # No case found!
+            if case is None:
+                return [None]  # No case found!
 
         # FIXME check special cases
         # 1. Regions check body names inside
@@ -599,7 +613,8 @@ class CardInfo:
         pb = []
         for w, f, c in self.rangeCode[case]:
             x = card.evalWhat(w)
-            if x == "": continue  # Use default
+            if x == "":
+                continue  # Use default
 
             if f == 'i':
                 try:
@@ -641,7 +656,8 @@ class CardInfo:
                         continue
 
             elif f == 'f':
-                if x == "" and w > 0: x = 0
+                if x == "" and w > 0:
+                    x = 0
                 try:
                     x = int(float(x))
                 except:
@@ -654,7 +670,8 @@ class CardInfo:
                         pb.append(w)
                 except:
                     if len(x) > 0:
-                        if x[0] == "-": x = x[1:]
+                        if x[0] == "-":
+                            x = x[1:]
                         if x not in Particle._db:
                             pb.append(w)
 
@@ -723,12 +740,14 @@ class CardInfo:
     # convert to names
     # ----------------------------------------------------------------------
     def toNames(self, card, case=None):
-        if card.input is None: return
+        if card.input is None:
+            return
 
         if case is None:
             case = self.findCase(card)
 
-        if case is None: return
+        if case is None:
+            return
         range_ = self.range[case]
 
         # Special cases
@@ -747,7 +766,8 @@ class CardInfo:
         for i in range(min(card.nwhats(), len(range_))):
             r = range_[i]
             w = card.what(i)
-            if w == "": continue
+            if w == "":
+                continue
             try:
                 aw = int(float(w))
             except:
@@ -810,7 +830,8 @@ class CardInfo:
                 if r == "spi":
                     # Special treatment for DISCARD and negative particle id's
                     if aw > 980:
-                        if aw < 1000: card.setSign(i, True)
+                        if aw < 1000:
+                            card.setSign(i, True)
                         aw = -abs(1000 - aw)
                         card.setAbsWhat(i, Particle.convert(aw, True))
                     else:
@@ -848,17 +869,19 @@ class CardInfo:
                         if detectors.index(name) == aw:
                             card.setWhat(i, name)
 
-    # ----------------------------------------------------------------------
-    # find
-    # @return list  - of references
-    #	  tuple - for a range
-    # ----------------------------------------------------------------------
     def find(self, target, case):
+        """
+        find
+        :param target:
+        :param case:
+        :return: list  - of references, tuple - for a range
+        """
         starget = "s" + target
 
         # Go through the various whats
         found = []
-        if case is None: return found
+        if case is None:
+            return found
         range_ = self.range[case]
         for i in range(len(range_)):
             r = range_[i]
@@ -962,7 +985,8 @@ class LogicalUnits:
         """Return first free unit"""
         for i in range(21, len(self.list)):
             u = self.list[i]
-            if u is None: return i
+            if u is None:
+                return i
 
     # -----------------------------------------------------------------------
     # FIXME needs optimisation, we should find all cards using units in the
@@ -971,9 +995,11 @@ class LogicalUnits:
     def scan(self, input):
         self.reset()
         for card in input.cardlist:
-            if card.tag == "OPEN": continue
+            if card.tag == "OPEN":
+                continue
             for u in card.units():
-                if u == 0: continue
+                if u == 0:
+                    continue
                 unit = self.get(u)
 
                 # check for a possible conflict!
@@ -1000,9 +1026,6 @@ class LogicalUnits:
             else:
                 self.assign(unit, u[1], card.extra())
 
-    # ----------------------------------------------------------------------
-    # Return a list of all units used
-    # ----------------------------------------------------------------------
     def filterList(self, card=None, bin=True):
         """Return a list of all units, filtered for a card"""
         lst = [("", "")]
@@ -1010,7 +1033,8 @@ class LogicalUnits:
             u = self.list[i]
 
             if u is not None and card is not None:
-                if u[1] != card: continue
+                if u[1] != card:
+                    continue
 
             if bin:
                 lst.append(("%02d ASC" % (i), i))
@@ -1077,7 +1101,8 @@ class Particle:
     # ----------------------------------------------------------------------
     @staticmethod
     def makeLists():
-        if len(Particle.list) > 0: return
+        if len(Particle.list) > 0:
+            return
 
         lastpar = Particle.convert("@LASTPAR", False)
 
@@ -1100,7 +1125,8 @@ class Particle:
         # Only real particles + generalized ones
         Particle.particles = Particle.list[:]
         for p in range(201, 228):
-            if p in (208, 211, 219, 220, 221, 222): continue
+            if p in (208, 211, 219, 220, 221, 222):
+                continue
             Particle.particles.append(Particle._db[p].name)
 
         # Sort
@@ -1130,10 +1156,12 @@ class Particle:
     # ----------------------------------------------------------------------
     @staticmethod
     def convert(pid, tonames=True):
-        """Convert particle from name to number
-		pid particle type
-		tonames True/False"""
-
+        """
+        Convert particle from name to number
+        particle type
+        :param tonames: True/False
+        :return:
+        """
         try:
             idx = int(pid)
             isInt = True
@@ -1146,10 +1174,8 @@ class Particle:
 
         if tonames:
             if isInt:
-                if idx <= -100: return str(pid)
-                #				if 988 <= idx <= 1012:
-                #					# Only for DISCARD card
-                #					idx = -abs(1000 - idx)
+                if idx <= -100:
+                    return str(pid)
                 try:
                     return Particle._db[idx].name
                 except:
@@ -1174,16 +1200,17 @@ class Particle:
         return Particle.listAll
 
 
-# ===============================================================================
-# Voxel class
-#	parse the voxel file and create fake cards for the
-#		materials, assignmats and corrfact
-#	that might be embedded in the voxel file
-# ===============================================================================
 class Voxel:
+    """
+    Voxel class
+        parse the voxel file and create fake cards for the
+            materials, assignmats and corrfact
+        that might be embedded in the voxel file
+    """
     def __init__(self, filename=None):
         self.cleanup()
-        if filename is not None: self.read(filename)
+        if filename is not None:
+            self.read(filename)
 
     # ----------------------------------------------------------------------
     # Clean up voxel structure
@@ -1300,8 +1327,6 @@ class Voxel:
                 roi, n = struct.unpack("=ii", record)
                 for j in range(n):
                     record = fortran.read(f)  # skip data
-        # except:
-        #	pass
 
         # Read embedded cards
         while True:
@@ -1309,9 +1334,10 @@ class Voxel:
                 record = fortran.read(f)
             except IOError:
                 break
-            if record is None: break
+            if record is None:
+                break
             if len(record) != 80:
-                say("Invalid voxel file. Wrong card found '%s'" % (record))
+                say("Invalid voxel file. Wrong card found '%s'" % record)
                 f.close()
                 return False
             tag = record[:8].strip()
@@ -1334,7 +1360,6 @@ class Voxel:
         f.close()
         return True
 
-    # ----------------------------------------------------------------------
     def __str__(self):
         return "Voxel\n" \
                "File:\t%s\n" \
@@ -1347,12 +1372,11 @@ class Voxel:
                   self.no, self.mo,
                   self.dx, self.dy, self.dz)
 
-    # ----------------------------------------------------------------------
-    # return a valid region name
-    # ----------------------------------------------------------------------
     @staticmethod
     def regionName(idx):
-        if idx == 0: return "VOXEL"
+        """return a valid region name"""
+        if idx == 0:
+            return "VOXEL"
         num = "%03d" % (idx)
         return "%s%s" % ("VOXEL" [:(8 - len(num))], num)
 
@@ -1368,15 +1392,13 @@ class Card:
     REGION = 2
     OBJECT = 3
 
-    # ----------------------------------------------------------------------
     def __init__(self, tag, what=None, comment="", extra=""):
-        """Initialise a fluka card
-		Each card contains a tag, whats, one multi-line comment and sometimes
-		some extra information
-		sdum=what[0]
-		continuation cards have multiple whats of 1+6*lines.
-		extra is used for TITLE, GEOBEGIN and REGION
-		"""
+        """
+        Initialise a fluka card
+        Each card contains a tag, whats, one multi-line comment and sometimes some extra information
+        sdum=what[0] continuation cards have multiple whats of 1+6*lines.
+        extra is used for TITLE, GEOBEGIN and REGION
+        """
 
         if what is None:
             what = [""]
@@ -1399,7 +1421,6 @@ class Card:
         self.setComment(comment)
         self.changeTag(tag, False)
 
-    # ----------------------------------------------------------------------
     def setModified(self):
         """set last time modified"""
         self._modified = time.time()
@@ -1413,13 +1434,13 @@ class Card:
         self.tag = tag
         # find card information from _cardInfo dictionary
         self.info = CardInfo.get(tag)
-        if self.info.name == ERROR: return
+        if self.info.name == ERROR:
+            return
 
         if len(tag) == 3 and "Geometry" in self.info.group:
             self._geo = True
         else:
-            self._geo = tag in ("REGION", "LATTICE", "VOXELS") or \
-                        tag[0] == "$"  # transform types
+            self._geo = tag in ("REGION", "LATTICE", "VOXELS") or tag[0] == "$"  # transform types
 
         if tag in BODY_TAGS:
             self._type = Card.BODY
@@ -1435,9 +1456,6 @@ class Card:
             self.setNWhats(self.info.nwhats)
         self.setModified()
 
-    # ----------------------------------------------------------------------
-    # Clone card
-    # ----------------------------------------------------------------------
     def clone(self):
         """clone card object"""
         card = Card(self.tag, self._what[:], self._comment, self._extra)
@@ -1447,16 +1465,11 @@ class Card:
             card.prop = self.prop.copy()  # Swallow copy
         return card
 
-    # ----------------------------------------------------------------------
-    # Copy properties from card
-    # ----------------------------------------------------------------------
     def copyProperties(self, card):
+        """Copy properties from card"""
         if card.prop:
             self.prop = card.prop.copy()  # Swallow copy
 
-    # ----------------------------------------------------------------------
-    # Append whats
-    # ----------------------------------------------------------------------
     def appendWhats(self, what, pos=None):
         """append what's"""
         if pos is None:
@@ -1468,47 +1481,43 @@ class Card:
                 pos += 1
         self.setModified()
 
-    # ----------------------------------------------------------------------
-    # Append comment
-    # ----------------------------------------------------------------------
     def appendComment(self, comment):
         """append comment"""
-        if len(comment) == 0: return
+        if len(comment) == 0:
+            return
         if self._comment == "":
             self.setComment(comment)
         else:
             self.setComment(self._comment + "\n" + comment)
         self.setModified()
 
-    # ----------------------------------------------------------------------
-    # test card against a filter-function
-    # Filter format  type [function] \n what \n value
-    #
-    # func: [type][function]
-    #	type:	i=int
-    #		f=float
-    #		s=string
-    #	function:
-    #		a=abs
-    # var:
-    #	0..9 = whats
-    #         *  = anywhere
-    #	  b  = body
-    #	  d  = detector
-    #	  s  = sdum
-    #         m  = material
-    #         p  = particle	(range if tuple)
-    #         r  = region		(range if tuple)
-    #	  t  = transformation
-    #         u  = unit
-    # val:
-    #	anything int, float or string
-    #
-    # case:
-    #        True for matching case
-    # ----------------------------------------------------------------------
     def test(self, func, var, val, case=False):
-        """check card against a filter function func"""
+        """
+        test card against a filter-function
+        Filter format  type [function] \n what \n value
+        func: [type][function]
+            type:	i=int
+                f=float
+                s=string
+            function:
+                a=abs
+        var:
+            0..9 = whats
+                *  = anywhere
+              b  = body
+              d  = detector
+              s  = sdum
+                m  = material
+                p  = particle	(range if tuple)
+                r  = region		(range if tuple)
+              t  = transformation
+                u  = unit
+        :param func:
+        :param var:
+        :param val: anything int, float or string
+        :param case: True for matching case
+        :return:
+        """
         if not case:
             try:
                 val = val.upper()
@@ -1518,17 +1527,25 @@ class Card:
         # Search everywhere
         if var == "*":
             if case:
-                if self.tag.find(val) >= 0: return True
-                if self._comment.find(val) >= 0: return True
-                if self._extra.find(val) >= 0: return True
+                if self.tag.find(val) >= 0:
+                    return True
+                if self._comment.find(val) >= 0:
+                    return True
+                if self._extra.find(val) >= 0:
+                    return True
                 for w in self._what:
-                    if str(w).find(val) >= 0: return True
+                    if str(w).find(val) >= 0:
+                        return True
             else:
-                if self.tag.upper().find(val) >= 0: return True
-                if self._comment.upper().find(val) >= 0: return True
-                if self._extra.upper().find(val) >= 0: return True
+                if self.tag.upper().find(val) >= 0:
+                    return True
+                if self._comment.upper().find(val) >= 0:
+                    return True
+                if self._extra.upper().find(val) >= 0:
+                    return True
                 for w in self._what:
-                    if str(w).upper().find(val) >= 0: return True
+                    if str(w).upper().find(val) >= 0:
+                        return True
             return False
 
         # Units
@@ -1545,14 +1562,17 @@ class Card:
             varlist = self.findType("pi")
             if isinstance(varlist, list):
                 # FIXME check for signed...
-                if not case: varlist = map(string.upper, varlist)
+                if not case:
+                    varlist = map(string.upper, varlist)
                 return val in varlist
             else:
                 part = Particle.convert(val, False)
                 part_from = Particle.convert(varlist[0], False)
-                if part_from == part: return True
+                if part_from == part:
+                    return True
                 part_to = Particle.convert(varlist[1], False)
-                if part_to == part: return True
+                if part_to == part:
+                    return True
                 part_step = varlist[2]
                 if part_from < part < part_to:
                     return ((part - part_from) % part_step) == 0
@@ -1568,15 +1588,18 @@ class Card:
             varlist = self.findType("ri")
             if isinstance(varlist, list):
                 # FIXME check for signed...
-                if not case: varlist = map(string.upper, varlist)
+                if not case:
+                    varlist = map(string.upper, varlist)
                 return val in varlist
             else:
                 # Check for a range
                 reg = self.input.region(val, False)
                 reg_from = self.input.region(varlist[0], False)
-                if reg_from == reg: return True
+                if reg_from == reg:
+                    return True
                 reg_to = self.input.region(varlist[1], False)
-                if reg_to == reg: return True
+                if reg_to == reg:
+                    return True
                 reg_step = varlist[2]
                 if reg_from < reg < reg_to:
                     return ((reg - reg_from) % reg_step) == 0
@@ -1592,14 +1615,17 @@ class Card:
             varlist = self.findType("mi")
             if isinstance(varlist, list):
                 # FIXME check for signed...
-                if not case: varlist = map(string.upper, varlist)
+                if not case:
+                    varlist = map(string.upper, varlist)
                 return val in varlist
             else:
                 mat = self.input.material(val, False)
                 mat_from = self.input.material(varlist[0], False)
-                if mat_from == mat: return True
+                if mat_from == mat:
+                    return True
                 mat_to = self.input.material(varlist[1], False)
-                if mat_to == mat: return True
+                if mat_to == mat:
+                    return True
                 mat_step = varlist[2]
                 if mat_from < mat < mat_to:
                     return ((mat - mat_from) % mat_step) == 0
@@ -1614,13 +1640,17 @@ class Card:
                 else:
                     return str(self.what(0)).upper() == val
             varlist = self.findType("ti")
-            if not case: varlist = map(string.upper, varlist)
-            if val in varlist: return True
+            if not case:
+                varlist = map(string.upper, varlist)
+            if val in varlist:
+                return True
             # Check also -val
             if isinstance(val, int) or isinstance(val, float):
-                if -val in varlist: return True
+                if -val in varlist:
+                    return True
             elif isinstance(val, str):
-                if "-%s" % (val) in varlist: return True
+                if "-%s" % (val) in varlist:
+                    return True
             return False
 
         # Detector
@@ -1634,17 +1664,21 @@ class Card:
             # FIXME ranges are not supported yet!
             varlist = list(self.findType("di"))
             varlist.extend(list(self.findType("bi")))
-            if not case: varlist = map(string.upper, varlist)
+            if not case:
+                varlist = map(string.upper, varlist)
             return val in varlist
 
         # Body
         elif var == "b":
-            if not self._geo: return
+            if not self._geo:
+                return
             if self.tag == "REGION":
                 opt = re.MULTILINE | re.DOTALL
-                if not case: opt |= re.I
+                if not case:
+                    opt |= re.I
                 return re.match(r".*\b%s\b.*" % (val), self._extra, opt) is not None
-            if len(self.tag) != 3: return False
+            if len(self.tag) != 3:
+                return False
             if case:
                 return str(self.what(0)) == val
             else:
@@ -1668,8 +1702,10 @@ class Card:
                 w = self.sdum()
             else:
                 w = str(self.what(var))
-            if len(w) > 0 and w[0] == '-': w = w[1:]
-            if not case: w = w.upper()
+            if len(w) > 0 and w[0] == '-':
+                w = w[1:]
+            if not case:
+                w = w.upper()
             return w == str(val)
 
         elif func == "s":
@@ -1730,8 +1766,10 @@ class Card:
         msg = ""
         displayed = []
         for e in self.invalid:
-            if e is None: continue
-            if e in displayed: continue  # skip multiple messages
+            if e is None:
+                continue
+            if e in displayed:
+                continue  # skip multiple messages
             displayed.append(e)
 
             try:
@@ -1739,16 +1777,15 @@ class Card:
             except:
                 lab = ""
 
-            if msg: msg += "\n"
+            if msg:
+                msg += "\n"
 
             if isinstance(e, str):
-                msg += "%s" % (e)
+                msg += "%s" % e
             elif lab:
-                msg += "What=%d  Label=%s  Type=%s: %s" \
-                       % (e, lab, range_[e], extra[e])
+                msg += "What=%d  Label=%s  Type=%s: %s" % (e, lab, range_[e], extra[e])
             else:
-                msg += "What=%d  Type=%s: %s" \
-                       % (e, range_[e], extra[e])
+                msg += "What=%d  Type=%s: %s" % (e, range_[e], extra[e])
         return msg
 
     # ----------------------------------------------------------------------
@@ -1794,13 +1831,6 @@ class Card:
     name = sdum
 
     # ----------------------------------------------------------------------
-    # Compare position
-    # ----------------------------------------------------------------------
-    @staticmethod
-    def cmpPos(a, b):
-        return cmp(a._pos, b._pos)
-
-    # ----------------------------------------------------------------------
     # Compare position - key
     # ----------------------------------------------------------------------
     @staticmethod
@@ -1825,7 +1855,8 @@ class Card:
     def absWhat(self, w):
         """return the absolute value of what[w]"""
         n = self.what(w)
-        if n == "" or n == 0.0: return n
+        if n == "" or n == 0.0:
+            return n
         try:
             return abs(float(n))
         except:
@@ -1872,7 +1903,8 @@ class Card:
         w = self.what(n)
         if isinstance(w, str) and w != "":
             if w[0] in ("=", "(", "[", "{"):
-                if self.input is None: return w
+                if self.input is None:
+                    return w
                 self.input.localDict.card = self
                 if w[0] == "=":
                     expr = w[1:]
@@ -1904,7 +1936,8 @@ class Card:
                 defines = self.input.cardsCache("#define")
                 # dummy linear search
                 for define in defines:
-                    if define.ignore(): continue
+                    if define.ignore():
+                        continue
                     if define.sdum() == var:
                         val = define.evalWhat(1)
                         # Convert to int or float if possible
@@ -2070,7 +2103,8 @@ class Card:
             s = self.sign(w)
             try:
                 v = abs(float(v))
-                if s: v = -v
+                if s:
+                    v = -v
 
             except:
                 if v[0] == "+" or v[0] == "-":
@@ -2079,7 +2113,8 @@ class Card:
                     else:
                         v = v[1:]
                 else:
-                    if s: v = "-" + v
+                    if s:
+                        v = "-" + v
 
         self.setWhat(w, v)
 
@@ -2088,7 +2123,8 @@ class Card:
     # Should not be used by the user... only in Layout.py
     # ----------------------------------------------------------------------
     def setSign(self, w, s):
-        if isEvalStr(self.what(w)): return
+        if isEvalStr(self.what(w)):
+            return
 
         if w >= len(self._sign):
             self._sign += [None] * (w - len(self._sign) + 1)
@@ -2096,10 +2132,12 @@ class Card:
         self._sign[w] = s
         n = self.what(w)
 
-        if n == "" or n == 0.0: return
+        if n == "" or n == 0.0:
+            return
         try:
             n = abs(float(n))
-            if s: n = -n
+            if s:
+                n = -n
         except:
             n = n.strip()
             if n[0] in ("+", "-"):
@@ -2108,7 +2146,8 @@ class Card:
                 else:
                     n = n[1:]
             else:
-                if s: n = "-" + n
+                if s:
+                    n = "-" + n
         self.setWhat(w, n)
 
     # ----------------------------------------------------------------------
@@ -2129,24 +2168,31 @@ class Card:
             except:
                 return False
 
-        if n == "": n = 0.0
+        if n == "":
+            n = 0.0
         try:
             n = float(n)
-            if n < 0.0: return True
-            if n > 0.0: return False
+            if n < 0.0:
+                return True
+            if n > 0.0:
+                return False
 
             if w < len(self._sign):
                 s = self._sign[w]
-                if s is not None: return s
+                if s is not None:
+                    return s
             return False
         except:
             n = n.strip()
-            if n[0] == "-": return True
-            if n[0] == "+": return False
+            if n[0] == "-":
+                return True
+            if n[0] == "+":
+                return False
 
             if w < len(self._sign):
                 s = self._sign[w]
-                if s is not None: return s
+                if s is not None:
+                    return s
             return False
 
     # ----------------------------------------------------------------------
@@ -2177,7 +2223,8 @@ class Card:
 
     # ----------------------------------------------------------------------
     def getProperty(self, t, default=None):
-        if self.prop is None: return default
+        if self.prop is None:
+            return default
         return self.prop.get(t, default)
 
     # ----------------------------------------------------------------------
@@ -2208,7 +2255,7 @@ class Card:
             if isinstance(lst, list):
                 return [self.intWhat(x) for x in lst]
             else:
-                return (self.intWhat(lst[0]), self.intWhat(lst[1]), lst[2])
+                return self.intWhat(lst[0]), self.intWhat(lst[1]), lst[2]
 
     # ----------------------------------------------------------------------
     # Return a formated comment string
@@ -2217,9 +2264,11 @@ class Card:
         """return a comment string"""
         line = ""
         for l in self._comment.splitlines():
-            if len(l) > 0: l = " " + l
+            if len(l) > 0:
+                l = " " + l
             line += "*%s\n" % (l.rstrip())
-        if self._comment != "" and self._comment[-1] == "\n": line += "*\n"
+        if self._comment != "" and self._comment[-1] == "\n":
+            line += "*\n"
         return line
 
     # ----------------------------------------------------------------------
@@ -2237,7 +2286,7 @@ class Card:
                 # use what to keep it as string
                 w = self.evalWhat(i, False)
                 try:
-                    num = float(w)  # Force to number
+                    # num = float(w)  # Force to number TODO not used ?
                     w = bmath.format(w, 22)
                 except:
                     if not w or w[0] != "$":
@@ -2265,13 +2314,14 @@ class Card:
             while i < imin:
                 w = self._what[i]
                 try:
-                    num = float(w)
+                    # num = float(w) # TODO not used ?
                     w = bmath.format(w, width)
                 except:
                     w = "0.0"
                 line += w.rjust(width)
                 i += 1
-            if i < len(self._what): line += "\n%s          " % (prefix)
+            if i < len(self._what):
+                line += "\n%s          " % (prefix)
         return line
 
     # ----------------------------------------------------------------------
@@ -2292,7 +2342,8 @@ class Card:
         first = True
         for l in expr.splitlines():
             l = l.rstrip()  # remove trailing spaces
-            if len(l) == 0: continue
+            if len(l) == 0:
+                continue
             while len(l) > maxlength:
                 for i in range(maxlength - 1, 1, -1):
                     if l[i] not in ('+', '-', '|', '(', ')', '#'):
@@ -2305,7 +2356,8 @@ class Card:
                         line += "\n%s" % (l[0:i])
                     l = l[i:]
                     break
-                if i <= 2: break
+                if i <= 2:
+                    break
             if first:
                 line += l
                 first = False
@@ -2335,7 +2387,8 @@ class Card:
             first = True
             for l in self._extra.splitlines():
                 l = l.rstrip()  # remove trailing spaces
-                if len(l) == 0: continue
+                if len(l) == 0:
+                    continue
                 while len(l) > 100:
                     for i in range(99, 1, -1):
                         if l[i] not in ('+', '-', '|', '(', ')', '#'):
@@ -2349,7 +2402,8 @@ class Card:
                                     % (l[0:i])
                         l = l[i:]
                         break
-                    if i <= 2: break
+                    if i <= 2:
+                        break
                 if first:
                     line += l
                     first = False
@@ -2381,10 +2435,12 @@ class Card:
                         orbefore = True
                         continue
                     else:
-                        if not orbefore: expr += "  "
+                        if not orbefore:
+                            expr += "  "
                         orbefore = False
                     sop = str(op).rjust(5)
-                    if len(sop) > 5: sop = sop[0:5]
+                    if len(sop) > 5:
+                        sop = sop[0:5]
                     expr += sop
                     nop += 1
                     if nop == 9:
@@ -2457,7 +2513,8 @@ class Card:
             ctag = self.tag.ljust(10)
         # Cards with no whats
         if nwhats <= 1:
-            if len(line) > 0: line += "\n"
+            if len(line) > 0:
+                line += "\n"
             line += ctag
             if nwhats == 1:
                 if fmt == FORMAT_FREE:
@@ -2472,7 +2529,8 @@ class Card:
                 cont_sdum = " &"
 
             while i < nwhats:
-                if len(line) > 0: line += "\n"
+                if len(line) > 0:
+                    line += "\n"
                 line += ctag
                 if fmt == FORMAT_FREE:
                     line += ", "
@@ -2485,7 +2543,7 @@ class Card:
                         w = str(w)
                     else:
                         try:
-                            num = float(w)
+                            # num = float(w) # TODO not used ?
                             w = bmath.format(w, width)
                         except:
                             pass
@@ -2500,7 +2558,8 @@ class Card:
                     sdum = str(self.evalWhat(0, False))
                 elif i > 6:
                     sdum = cont_sdum
-                    if sdum.strip() == "&": cont_sdum += "&"
+                    if sdum.strip() == "&":
+                        cont_sdum += "&"
                 first = False
 
                 # Do we need to pad with the line
@@ -2526,19 +2585,17 @@ class Card:
 
         elif self.tag == "GEOBEGIN":
             try:
-                iv = self.ivopt
+                self.ivopt
             except:
                 self.ivopt = 0
             try:
-                id = self.idbg
+                self.idbg
             except:
                 self.idbg = 0
             if fmt == FORMAT_FREE:
-                line += "\n%d,%d,%s" \
-                        % (self.ivopt, self.idbg, self._extra.rstrip())
+                line += "\n%d,%d,%s" % (self.ivopt, self.idbg, self._extra.rstrip())
             else:
-                line += "\n%5d%5d          %s" \
-                        % (self.ivopt, self.idbg, self._extra.rstrip())
+                line += "\n%5d%5d          %s" % (self.ivopt, self.idbg, self._extra.rstrip())
 
         elif self.tag == "PLOTGEOM":
             w6 = self.intWhat(6)
@@ -2634,15 +2691,17 @@ class Card:
             for n, v in prop:
                 self[n] = v
 
-    # ----------------------------------------------------------------------
-    # Return differences of the two cards as a list of integers
-    #       -3 = enable/disable
-    #	-2 = Comment
-    #	-1 = Extra
-    #	 0 = Sdum
-    #        1..n = What's
-    # ----------------------------------------------------------------------
     def diff(self, card):
+        """
+        Return differences of the two cards as a list of integers
+        -3 = enable/disable
+        -2 = Comment
+        -1 = Extra
+        0 = Sdum
+        1..n = What's
+        :param card:
+        :return:
+        """
         df = []
         if self.enable != card.enable:
             df.append(-3)
@@ -2683,8 +2742,7 @@ class Card:
             return bmath.Vector(self.numWhat(2), 0.0, self.numWhat(1))
         elif self.tag in ("ZCC", "ZEC"):
             return bmath.Vector(self.numWhat(1), self.numWhat(2), 0.0)
-        elif self.tag in ("BOX", "SPH", "RCC", "TRC", "WED", "REC", "ELL", "ARB") or \
-                        self.tag[0] == "!":
+        elif self.tag in ("BOX", "SPH", "RCC", "TRC", "WED", "REC", "ELL", "ARB") or self.tag[0] == "!":
             return bmath.Vector(self.numWhat(1), self.numWhat(2), self.numWhat(3))
         else:
             return None
@@ -2806,24 +2864,17 @@ class Card:
             self._extra = zone
         self.setModified()
 
-    # ----------------------------------------------------------------------
-    # Set a list of zones as expression
-    # ... removing empty zones
-    # ----------------------------------------------------------------------
     def setZones(self, zones):
+        """Set a list of zones as expression... removing empty zones"""
         self.setExtra(string.join([x for x in map(string.strip, zones) if x != ""], "\n| "))
 
-    # ----------------------------------------------------------------------
-    # Load voxel information
-    # ----------------------------------------------------------------------
     def loadVoxel(self):
-        if self.tag != "VOXELS": return
+        """Load voxel information"""
+        if self.tag != "VOXELS":
+            return
         self["@voxel"] = Voxel("%s.vxl" % (self.sdum().strip()))
 
 
-# ===============================================================================
-# Input class
-# ===============================================================================
 class Input:
     def __init__(self, filename=None):
         # Input file information
@@ -2861,12 +2912,10 @@ class Input:
         if filename is not None:
             self.read(filename)
 
-    # ----------------------------------------------------------------------
     def setModified(self):
         """set last time modified"""
         self._modified = time.time()
 
-    # ----------------------------------------------------------------------
     def clone(self):
         """return a clone of current input"""
         inp = Input()
@@ -2881,14 +2930,11 @@ class Input:
         inp.renumber()
         return inp
 
-    # ----------------------------------------------------------------------
     def __getitem__(self, item):
         return self.cards.get(item, [])
 
-    # ----------------------------------------------------------------------
-    # Create bare minimum input file
-    # ----------------------------------------------------------------------
     def minimumInput(self):
+        """Create bare minimum input file"""
         self.addCard(Card("GEOBEGIN", ["COMBNAME"]))
         self.addCard(Card("END"))
         self.addCard(Card("END"))
@@ -2896,10 +2942,8 @@ class Input:
         self.addCard(Card("STOP"), None)
         self.renumber()
 
-    # ----------------------------------------------------------------------
-    # Set as input/modified time the latest time from files
-    # ----------------------------------------------------------------------
     def setFileTime(self):
+        """Set as input/modified time the latest time from files"""
         for filename in self.filenames():
             try:
                 mtime = os.stat(filename).st_mtime
@@ -2907,10 +2951,8 @@ class Input:
             except OSError:
                 pass
 
-    # ----------------------------------------------------------------------
-    # Check if a new input file exists
-    # ----------------------------------------------------------------------
     def checkInputFile(self):
+        """Check if a new input file exists"""
         # FIXME Scan all #include cards
         for filename in self.filenames():
             try:
@@ -2920,21 +2962,19 @@ class Input:
                 pass
         return False
 
-    # -----------------------------------------------------------------------
-    # Return input filename
-    # -----------------------------------------------------------------------
     def filenames(self):
+        """Return input filename"""
         files = []
-        if self.filename: files.append(self.filename)
-        if self.geoFile: files.append(self.geoFile)
+        if self.filename:
+            files.append(self.filename)
+        if self.geoFile:
+            files.append(self.geoFile)
         files.extend([card.sdum() for card in self["#include"]])
         return files
 
-    # -----------------------------------------------------------------------
-    # open file and append it to the file handle list
-    # -----------------------------------------------------------------------
     def _openFile(self, filename, mode="r", tag=None, backup=True):
-        # check for infinite loop!
+        """open file and append it to the file handle list"""
+        # TODO check for infinite loop!
         if isinstance(filename, str) or isinstance(filename, unicode):
             for fn in self._files:
                 if fn.name == filename:
@@ -2965,18 +3005,16 @@ class Input:
         self._filesType.append(tag)
         return f
 
-    # -----------------------------------------------------------------------
     def _closeFile(self):
         if self._files:
             f = self._files.pop()
-            if f: f.close()
+            if f:
+                f.close()
             self._lineNo.pop()
             self._filesType.pop()
 
-    # -----------------------------------------------------------------------
-    # read line from the last opened file
-    # -----------------------------------------------------------------------
     def _readLine(self, closeinclude=True):
+        """read line from the last opened file"""
         while True:
             try:
                 self._lineNo[-1] += 1
@@ -2992,7 +3030,8 @@ class Input:
                     else:
                         return "#endinclude"
                 self._closeFile()
-                if len(self._files) == 0: return None
+                if len(self._files) == 0:
+                    return None
                 continue
 
             line = line.rstrip()
@@ -3642,7 +3681,7 @@ class Input:
             say("   Parsing Volumes")
         self.preprocess()
         lst = self["REGION"]
-        lst.sort(Card.cmpPos)
+        lst.sort(key=Card.cmpPos_key)
         regionList = [x for x in lst if not x.ignore() and x.sdum() != "&"]
 
         nlines, rem = divmod(len(regionList), 7)
@@ -3889,7 +3928,7 @@ class Input:
 
         del self._files[:]
         del self._lineNo[:]
-        if isinstance(filename, file):
+        if getattr(filename, 'read', None) is not None:
             self._files.append(filename)
             self._lineNo.append(0)
         else:
