@@ -4296,22 +4296,29 @@ class Input:
 
         if if0: f.write("#endif\n")
 
-    #-----------------------------------------------------------------------
-    # Write cards of that fulfill a given condition(lambda)
-    # with all the preprocessor cards around them
-    # FIXME Write also non empty blocks: #if .. #define/#undef .. #endif
-    #       Might end up in duplicate blocks when only #define/#undef
-    #       exist inside the geometry
-    # geolevel
-    #   -1 before defines
-    #    0 before geobegin
-    #    1 bodies and voxels
-    #    2 regions
-    #    3 lattices
-    #    4 after geoend
-    # from_ .. to_   (to_ is not included)
-    #-----------------------------------------------------------------------
     def writeCards(self, f, condition, format=None, geolevel=0, from_=0, to_=-1):
+        """
+        Write cards of that fulfill a given condition(lambda)
+        with all the preprocessor cards around them
+        FIXME Write also non empty blocks: #if .. #define/#undef .. #endif
+              Might end up in duplicate blocks when only #define/#undef
+              exist inside the geometry
+        geolevel
+          -1 before defines
+           0 before geobegin
+           1 bodies and voxels
+           2 regions
+           3 lattices
+           4 after geoend
+        from_ .. to_   (to_ is not included)
+        :param f:
+        :param condition:
+        :param format:
+        :param geolevel:
+        :param from_:
+        :param to_:
+        :return:
+        """
         nest = 0
         start = -1
         level = 0
@@ -4321,7 +4328,8 @@ class Input:
         if format is not None: fmt = format
 
         # Loop over all cards
-        if to_ == -1: to_ = len(self.cardlist)
+        if to_ == -1:
+            to_ = len(self.cardlist)
         for cid in range(from_, to_):
             card = self.cardlist[cid]
 
@@ -4336,7 +4344,8 @@ class Input:
 
             # Preprocessor nesting
             if card.enable and tag[0] == "#":
-                if writing: self.writeCard(f, card, fmt)
+                if writing:
+                    self.writeCard(f, card, fmt)
 
                 if tag in ("#if", "#ifdef", "#ifndef"):
                     if start < 0 and nest == 0:
@@ -4427,12 +4436,11 @@ class Input:
         for card in self.cardlist:
             card.dump(pickler)
 
-    # ----------------------------------------------------------------------
     def load(self, unpickler):
         """load input from unpickle"""
 
         # Input file information
-        version = unpickler.load()
+        # version = unpickler.load() # TODO not used ?
         self.filename = unpickler.load()
         self.geoFile = unpickler.load()
         self.geoOutFile = unpickler.load()
@@ -4446,24 +4454,26 @@ class Input:
                 break
             self.addCard(card)
 
-    #-----------------------------------------------------------------------
-    # Cards
-    #-----------------------------------------------------------------------
-    # Return cards of a specific tag sorted with _pos
-    # Possibilities on which:
-    #	0: enabled and active	(requires a call to preprocess before)
-    #	1: enabled
-    #	2: all
-    #
-    # Warning on REGION maybe the "&" you want to get rid off
-    #-----------------------------------------------------------------------
     def cardsSorted(self, tag, which=0):
+        """
+        Return cards of a specific tag sorted with _pos
+        Possibilities on which:
+            0: enabled and active	(requires a call to preprocess before)
+            1: enabled
+            2: all
+
+        Warning on REGION maybe the "&" you want to get rid off
+        :param tag:
+        :param which:
+        :return:
+        """
         if tag == "bodies":
             # Special case returns a dictionary...
             lst = {}
             for tag in BODY_TAGS:
                 for x in self[tag]:
-                    if x.notIgnore(): lst[x.name()] = x
+                    if x.notIgnore():
+                        lst[x.name()] = x
             if "VOXELS" in self.cards:
                 for card in self.cards["VOXELS"]:
                     if card.notIgnore():
@@ -4473,7 +4483,6 @@ class Input:
             # sort the list for faster processing
             cards = self[tag]
             cards.sort(key=Card.cmpPos_key)
-            #cards.sort(key=attrgetter("_pos"))
             if which == 0:
                 lst = [x for x in cards if x.notIgnore()]
             elif which == 1:
@@ -4496,12 +4505,14 @@ class Input:
                 for card in self.cardsSorted("ASSIGNMA", which):
                     if card.name() not in mats:
                         mat = _icruMatDict.get(card.name(), None)
-                        if mat: lst.append(mat)
+                        if mat:
+                            lst.append(mat)
 
             # Append or Insert voxel cards
             if tag in ("REGION", "ASSIGNMA", "MATERIAL", "COMPOUND", "CORRFACT"):
                 for voxel in self["VOXELS"]:
-                    if voxel.ignore() or voxel["@voxel"] is None: continue
+                    if voxel.ignore() or voxel["@voxel"] is None:
+                        continue
                     if tag == "REGION":
                         # add to the end
                         lst.extend(voxel["@voxel"].input["REGION"])
@@ -4519,10 +4530,8 @@ class Input:
                         lst[:0] = voxel["@voxel"].input["CORRFACT"]
         return lst
 
-    # ----------------------------------------------------------------------
-    # Return an extend list with all cards including the ones from the voxel
-    # ----------------------------------------------------------------------
     def allcards(self):
+        """Return an extend list with all cards including the ones from the voxel"""
         cl = self.cardlist[:]
         for voxel in self["VOXELS"]:
             if voxel.ignore() or voxel["@voxel"] is None:
