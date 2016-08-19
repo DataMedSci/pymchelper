@@ -1760,7 +1760,7 @@ class Card:
     # ----------------------------------------------------------------------
     # @return error message string
     # ----------------------------------------------------------------------
-    def errorMessage(self, labels=[]):
+    def errorMessage(self, labels=()):
         case = self.case()
         extra = self.info.extra[case]
         range_ = self.info.range[case]
@@ -6169,14 +6169,14 @@ def init(filename=None):
         extra = []
         assert_ = []
         for i in range(20):
-            n = "range.%d" % (i)
+            n = "range.%d" % i
             try:
                 rg = cardini.get(name, n).split()
             except:
                 break
             range_.append(rg)
 
-            n = "defaults.%d" % (i)
+            n = "defaults.%d" % i
             df = cardini.get(name, n).split()
             default.append(df)
 
