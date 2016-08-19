@@ -84,7 +84,7 @@ from pymchelper.flair.common.log import say
 
 __first = True
 
-#-------------------------------------------------------------------------------
+# -------------------------------------------------------------------------------
 # Activate untest developer code
 _developer = False
 _useQUA = True
@@ -99,10 +99,10 @@ _wPAT = re.compile(r"\bw\(")
 _WPAT = re.compile(r"\bW\(")
 _WNPAT = re.compile(r"\b([wW])\((-?\d+)\)")
 _ROTPAT = re.compile(r"^ROT?#(\d+)$", re.I)
-#_PRPPAT    = re.compile(r"^(#\w+)\b *(\w*)[ ,/;\\:] *(.*)$")
+# _PRPPAT    = re.compile(r"^(#\w+)\b *(\w*)[ ,/;\\:] *(.*)$")
 _PRPPAT = re.compile(r"^(#\w+)\b *([A-Za-z0-9_.@-]*) *(.*)$")
 
-#-------------------------------------------------------------------------------
+# -------------------------------------------------------------------------------
 # Configuration
 commentedCards = True  # Parse comments for disabled cards
 warnMultMat = False  # Warn user on multiple materials
@@ -111,7 +111,7 @@ warnMultMat = False  # Warn user on multiple materials
 zero = 1.0E-10
 infinite = 1.0E10
 
-#-------------------------------------------------------------------------------
+# -------------------------------------------------------------------------------
 # Global variables
 _defaultMaterials = []  # Default material list (cards)
 _defaultMatDict = {}
@@ -132,7 +132,7 @@ BODY_PREFIX = "B"
 REGION_PREFIX = "R"
 
 SCALE = "*...+....1....+....2....+....3....+....4....+....5....+....6....+....7....+....\n"
-#SCALE="*tag-----><----1---><---2----><---3----><---4----><---5----><---6----><--sdum--\n"
+# SCALE="*tag-----><----1---><---2----><---3----><---4----><---5----><---6----><--sdum--\n"
 REGSCALE = "*_..._____.._____.._____.._____.._____.._____.._____.._____.._____.._____\n"
 
 BODY_TAGS = None  # Including VOXELS
@@ -325,8 +325,8 @@ class LocalDict(dict):
                         return val
             if item not in _globalDict: return str(item)
             # FIXME check for a card like BEAM(0,1)
-            #if cards: return lambda n,w,t=item,s=self: s.cardWhat(t,n,w)
-            #return str(item)
+            # if cards: return lambda n,w,t=item,s=self: s.cardWhat(t,n,w)
+            # return str(item)
             raise
 
     def bodyWhat(self, name, what):
@@ -346,7 +346,7 @@ class LocalDict(dict):
                     val = card.what(what)
             raise Exception("No card %s with sdum=%s found\n" % (tag, name))
         else:
-            #return cards[name].numWhat(what)
+            # return cards[name].numWhat(what)
             val = cards[name].what(what)
 
         # return a float or int otherwise as is
@@ -492,7 +492,7 @@ class CardInfo:
         for w in rng:
             if len(w) > 4 and w[1] == "(":
                 s = "lambda x:%s" \
-                 % (w[2:-1].replace(',', ' or '))
+                    % (w[2:-1].replace(',', ' or '))
                 code.append((i, w[0], CardInfo._compileFunc(s)))
             elif w[0] == 'c':
                 s = "lambda x:len(str(x))<=%s" % (w[1:])
@@ -503,7 +503,7 @@ class CardInfo:
 
         return code
 
-    #-----------------------------------------------------------------------
+    # -----------------------------------------------------------------------
     # Compile assert statement
     # First detect all what references w(#) and replace them with:
     #	w(#) -> c.numWhat(#)
@@ -514,7 +514,7 @@ class CardInfo:
     # finally compile the code
     # example: w(8)>w(7)
     #	lambda c: c.numWhat(7)==0 or c.numWhat(8)==0 or c.numWhat(8)>c.numWhat(7)
-    #-----------------------------------------------------------------------
+    # -----------------------------------------------------------------------
     def compileAssert(self, assertStatement):
         whatUsed = [False] * 21
         for match in _WNPAT.finditer(assertStatement):
@@ -609,7 +609,7 @@ class CardInfo:
                         continue
                     x = xi
                 except:
-                    #x = 0
+                    # x = 0
                     pb.append(w)
                     continue
 
@@ -624,7 +624,7 @@ class CardInfo:
                     # the long type instead of float
                     card.setWhat(w, xi)
                 except:
-                    #x = 0
+                    # x = 0
                     pb.append(w)
                     continue
 
@@ -633,7 +633,7 @@ class CardInfo:
                     x = float(x)
                 except:
                     # Check if it is a fortran number with D or internal spaces
-                    #try: x = float(re.sub("[dD]","e",x.replace(" ","")))
+                    # try: x = float(re.sub("[dD]","e",x.replace(" ","")))
                     try:
                         x = float(re.sub("[dD]", "e", x))
                     except:
@@ -887,9 +887,9 @@ class CardInfo:
         return CardInfo._db[None]
 
 
-#===============================================================================
+# ===============================================================================
 # Logical Units
-#===============================================================================
+# ===============================================================================
 class LogicalUnits:
     def __init__(self):
         self.reset()
@@ -921,7 +921,7 @@ class LogicalUnits:
         self.list[18] = (False, "system", None)
         self.list[19] = (False, "DPMJET", None)
         self.list[20] = (False, "system", None)
-        #self.list[49] = (True,  "USERDUMP",	None)
+        # self.list[49] = (True,  "USERDUMP",	None)
 
     # ----------------------------------------------------------------------
     # Assign a new unit type
@@ -964,10 +964,10 @@ class LogicalUnits:
             u = self.list[i]
             if u is None: return i
 
-    #-----------------------------------------------------------------------
+    # -----------------------------------------------------------------------
     # FIXME needs optimisation, we should find all cards using units in the
     # CardInfo and search only those cards
-    #-----------------------------------------------------------------------
+    # -----------------------------------------------------------------------
     def scan(self, input):
         self.reset()
         for card in input.cardlist:
@@ -1021,9 +1021,9 @@ class LogicalUnits:
         return lst
 
 
-#===============================================================================
+# ===============================================================================
 # Particle class
-#===============================================================================
+# ===============================================================================
 class Particle:
     # Particles dictionary
     _db = {}
@@ -1174,12 +1174,12 @@ class Particle:
         return Particle.listAll
 
 
-#===============================================================================
+# ===============================================================================
 # Voxel class
 #	parse the voxel file and create fake cards for the
 #		materials, assignmats and corrfact
 #	that might be embedded in the voxel file
-#===============================================================================
+# ===============================================================================
 class Voxel:
     def __init__(self, filename=None):
         self.cleanup()
@@ -1203,8 +1203,8 @@ class Voxel:
         self.roiN = 0
         self.roiName = {}  # roi structure names
         self.roiColor = {}  # colors of rois
-        #self.roiComb = {}	# roi dictionary of combination of structures
-        #self.roiData = None	# roi structure data
+        # self.roiComb = {}	# roi dictionary of combination of structures
+        # self.roiData = None	# roi structure data
         self.input = Input()  # Input cards embedded in voxel file
         self.input.format = FORMAT_VOXEL  # Mark as voxel
 
@@ -1234,23 +1234,23 @@ class Voxel:
             return False
         if len(record) == 20:
             self.nx, self.ny, self.nz, self.no, self.mo = \
-             struct.unpack("=5i", record)
+                struct.unpack("=5i", record)
             self.roiN = 0
             roiPlanar = 0
         else:
             self.nx, self.ny, self.nz, self.no, self.mo, self.roiN, roiCombN, roiMaxLen, roiPlanar = \
-             struct.unpack("=9i", record)
+                struct.unpack("=9i", record)
 
         # Create voxel regions
         card = Card("REGION", ["VOXEL"])
-        #card["@id"] = 0
+        # card["@id"] = 0
         card["@type"] = REGION_VOXEL
         card.setExtra("+VOXEL")
         self.input.addCard(card)
 
         for i in range(self.no + 1):  # +1 to include organ 0
             card = Card("REGION", [Voxel.regionName(i + 1)])
-            #card["@id"] = i+1
+            # card["@id"] = i+1
             self.input.addCard(card)
             card["@type"] = REGION_VOXEL
 
@@ -1280,7 +1280,7 @@ class Voxel:
         # roiStruct
         if self.roiN > 0:
             # structures
-            #try:
+            # try:
             for i in range(1, self.roiN + 1):
                 record = fortran.read(f)
                 color, name = struct.unpack("=i64s", record)
@@ -1300,7 +1300,7 @@ class Voxel:
                 roi, n = struct.unpack("=ii", record)
                 for j in range(n):
                     record = fortran.read(f)  # skip data
-        #except:
+        # except:
         #	pass
 
         # Read embedded cards
@@ -1337,15 +1337,15 @@ class Voxel:
     # ----------------------------------------------------------------------
     def __str__(self):
         return "Voxel\n" \
-         "File:\t%s\n" \
-         "Title:\t%s\n" \
-         "nxyz:\t%d x %d x %d\n" \
-         "no,mo:\t%d\t%d\n" \
-         "dxyz:\t%g x %g %g\n" \
-         %(self.filename, self.title,
-          self.nx, self.ny, self.nz,
-          self.no, self.mo,
-          self.dx, self.dy, self.dz)
+               "File:\t%s\n" \
+               "Title:\t%s\n" \
+               "nxyz:\t%d x %d x %d\n" \
+               "no,mo:\t%d\t%d\n" \
+               "dxyz:\t%g x %g %g\n" \
+               % (self.filename, self.title,
+                  self.nx, self.ny, self.nz,
+                  self.no, self.mo,
+                  self.dx, self.dy, self.dz)
 
     # ----------------------------------------------------------------------
     # return a valid region name
@@ -1357,9 +1357,9 @@ class Voxel:
         return "%s%s" % ("VOXEL" [:(8 - len(num))], num)
 
 
-#===============================================================================
+# ===============================================================================
 # Card
-#===============================================================================
+# ===============================================================================
 class Card:
     """Base class for a fluka card"""
 
@@ -1419,7 +1419,7 @@ class Card:
             self._geo = True
         else:
             self._geo = tag in ("REGION", "LATTICE", "VOXELS") or \
-                 tag[0]=="$" # transform types
+                        tag[0] == "$"  # transform types
 
         if tag in BODY_TAGS:
             self._type = Card.BODY
@@ -1650,7 +1650,7 @@ class Card:
             else:
                 return str(self.what(0)).upper() == val
 
-        #if var is None: return False
+        # if var is None: return False
         if func == "ia":  # Absolute integer
             return abs(self.intWhat(var)) == int(val)
 
@@ -1745,10 +1745,10 @@ class Card:
                 msg += "%s" % (e)
             elif lab:
                 msg += "What=%d  Label=%s  Type=%s: %s" \
-                 % (e, lab, range_[e], extra[e])
+                       % (e, lab, range_[e], extra[e])
             else:
                 msg += "What=%d  Type=%s: %s" \
-                 % (e, range_[e], extra[e])
+                       % (e, range_[e], extra[e])
         return msg
 
     # ----------------------------------------------------------------------
@@ -1882,8 +1882,8 @@ class Card:
                 # replace any { to Vector( and } to )
                 expr = expr.replace("{", "Vector(")
                 expr = expr.replace("}", ")")
-                #expr = expr.replace("[[","Matrix(")
-                #expr = expr.replace("]]",")")
+                # expr = expr.replace("[[","Matrix(")
+                # expr = expr.replace("]]",")")
                 try:
                     value = eval(expr, _globalDict, self.input.localDict)
                 except:
@@ -1923,8 +1923,10 @@ class Card:
     # ----------------------------------------------------------------------
     def evalWhat0(self, n, dollar=True):
         w = self.evalWhat(n, dollar)
-        if w == "": return 0.
-        else: return w
+        if w == "":
+            return 0.
+        else:
+            return w
 
     # ----------------------------------------------------------------------
     # get card information
@@ -2072,8 +2074,10 @@ class Card:
 
             except:
                 if v[0] == "+" or v[0] == "-":
-                    if s: v = "-" + v[1:]
-                    else: v = v[1:]
+                    if s:
+                        v = "-" + v[1:]
+                    else:
+                        v = v[1:]
                 else:
                     if s: v = "-" + v
 
@@ -2099,8 +2103,10 @@ class Card:
         except:
             n = n.strip()
             if n[0] in ("+", "-"):
-                if s: n = "-" + n[1:]
-                else: n = n[1:]
+                if s:
+                    n = "-" + n[1:]
+                else:
+                    n = n[1:]
             else:
                 if s: n = "-" + n
         self.setWhat(w, n)
@@ -2340,7 +2346,7 @@ class Card:
                             first = False
                         else:
                             line += "\n               %s" \
-                             % (l[0:i])
+                                    % (l[0:i])
                         l = l[i:]
                         break
                     if i <= 2: break
@@ -2397,17 +2403,17 @@ class Card:
             if self.tag[0] == "#":
                 if self.nwhats() > 0:
                     return "%s %s" % \
-                     (ctag, string.join(
-                      [str(self.evalWhat(i,False))
-                       for i in range(0,self.nwhats())]))
+                           (ctag, string.join(
+                               [str(self.evalWhat(i, False))
+                                for i in range(0, self.nwhats())]))
                 else:
                     return ctag
             elif self.tag[0] == "$":
                 if self.nwhats() > 0:
                     return "%s %s" % \
-                     (ctag, string.join(
-                      [str(self.evalWhat0(i,False))
-                       for i in range(1,self.nwhats())]))
+                           (ctag, string.join(
+                               [str(self.evalWhat0(i, False))
+                                for i in range(1, self.nwhats())]))
                 else:
                     return ctag
         except IndexError:
@@ -2429,7 +2435,7 @@ class Card:
         # Number of whats
         nwhats = len(self._what)
         if self.tag == "PLOTGEOM":
-            #Another card with special treatment
+            # Another card with special treatment
             nwhats = min(6, nwhats)
         elif fmt == FORMAT_FREE:
             # Count real whats
@@ -2529,34 +2535,34 @@ class Card:
                 self.idbg = 0
             if fmt == FORMAT_FREE:
                 line += "\n%d,%d,%s" \
-                 % (self.ivopt, self.idbg, self._extra.rstrip())
+                        % (self.ivopt, self.idbg, self._extra.rstrip())
             else:
                 line += "\n%5d%5d          %s" \
-                 % (self.ivopt, self.idbg, self._extra.rstrip())
+                        % (self.ivopt, self.idbg, self._extra.rstrip())
 
         elif self.tag == "PLOTGEOM":
             w6 = self.intWhat(6)
             if w6 == 0 or w6 == 5:
                 line += "\n%s" % (self._extra)
                 line += "\n%10s%10s%10s%10s%10s%10s" \
-                 % (bmath.format(self.numWhat( 7), 10),
-                    bmath.format(self.numWhat( 8), 10),
-                    bmath.format(self.numWhat( 9), 10),
-                    bmath.format(self.numWhat(10), 10),
-                    bmath.format(self.numWhat(11), 10),
-                    bmath.format(self.numWhat(12), 10) )
+                        % (bmath.format(self.numWhat(7), 10),
+                           bmath.format(self.numWhat(8), 10),
+                           bmath.format(self.numWhat(9), 10),
+                           bmath.format(self.numWhat(10), 10),
+                           bmath.format(self.numWhat(11), 10),
+                           bmath.format(self.numWhat(12), 10))
                 line += "\n%10s%10s%10s%10s%10s%10s" \
-                 % (bmath.format(self.numWhat(13), 10),
-                    bmath.format(self.numWhat(14), 10),
-                    bmath.format(self.numWhat(15), 10),
-                    bmath.format(self.numWhat(16), 10),
-                    bmath.format(self.numWhat(17), 10),
-                    bmath.format(self.numWhat(18), 10) )
+                        % (bmath.format(self.numWhat(13), 10),
+                           bmath.format(self.numWhat(14), 10),
+                           bmath.format(self.numWhat(15), 10),
+                           bmath.format(self.numWhat(16), 10),
+                           bmath.format(self.numWhat(17), 10),
+                           bmath.format(self.numWhat(18), 10))
                 line += "\n%10s%10s%10s%10s" \
-                 % (bmath.format(self.numWhat(19), 10),
-                    bmath.format(self.numWhat(20), 10),
-                    bmath.format(self.numWhat(21), 10),
-                    bmath.format(self.numWhat(22), 10) )
+                        % (bmath.format(self.numWhat(19), 10),
+                           bmath.format(self.numWhat(20), 10),
+                           bmath.format(self.numWhat(21), 10),
+                           bmath.format(self.numWhat(22), 10))
         return line
 
     # ---------------------------------------------------------------------
@@ -2569,7 +2575,7 @@ class Card:
             prefix = ""
 
         s = self._toStr(fmt, prefix)
-        #if not self.enable and self.info.disableComment: s = "*"+s
+        # if not self.enable and self.info.disableComment: s = "*"+s
         if isinstance(s, unicode) and sys.version_info < (3, 0):
             return s.encode('utf-8')
         else:
@@ -2678,7 +2684,7 @@ class Card:
         elif self.tag in ("ZCC", "ZEC"):
             return bmath.Vector(self.numWhat(1), self.numWhat(2), 0.0)
         elif self.tag in ("BOX", "SPH", "RCC", "TRC", "WED", "REC", "ELL", "ARB") or \
-             self.tag[0] == "!":
+                        self.tag[0] == "!":
             return bmath.Vector(self.numWhat(1), self.numWhat(2), self.numWhat(3))
         else:
             return None
@@ -2815,9 +2821,9 @@ class Card:
         self["@voxel"] = Voxel("%s.vxl" % (self.sdum().strip()))
 
 
-#===============================================================================
+# ===============================================================================
 # Input class
-#===============================================================================
+# ===============================================================================
 class Input:
     def __init__(self, filename=None):
         # Input file information
@@ -2914,9 +2920,9 @@ class Input:
                 pass
         return False
 
-    #-----------------------------------------------------------------------
+    # -----------------------------------------------------------------------
     # Return input filename
-    #-----------------------------------------------------------------------
+    # -----------------------------------------------------------------------
     def filenames(self):
         files = []
         if self.filename: files.append(self.filename)
@@ -2924,9 +2930,9 @@ class Input:
         files.extend([card.sdum() for card in self["#include"]])
         return files
 
-    #-----------------------------------------------------------------------
+    # -----------------------------------------------------------------------
     # open file and append it to the file handle list
-    #-----------------------------------------------------------------------
+    # -----------------------------------------------------------------------
     def _openFile(self, filename, mode="r", tag=None, backup=True):
         # check for infinite loop!
         if isinstance(filename, str) or isinstance(filename, unicode):
@@ -2959,7 +2965,7 @@ class Input:
         self._filesType.append(tag)
         return f
 
-    #-----------------------------------------------------------------------
+    # -----------------------------------------------------------------------
     def _closeFile(self):
         if self._files:
             f = self._files.pop()
@@ -2967,9 +2973,9 @@ class Input:
             self._lineNo.pop()
             self._filesType.pop()
 
-    #-----------------------------------------------------------------------
+    # -----------------------------------------------------------------------
     # read line from the last opened file
-    #-----------------------------------------------------------------------
+    # -----------------------------------------------------------------------
     def _readLine(self, closeinclude=True):
         while True:
             try:
@@ -2995,21 +3001,24 @@ class Input:
             except (UnicodeDecodeError, UnicodeEncodeError, AttributeError):
                 return line
             try:
-                sline = str(uline)
+                # sline = str(uline) # TODO not used ?
                 return line
             except (UnicodeDecodeError, UnicodeEncodeError, AttributeError):
                 return uline
 
-    #-----------------------------------------------------------------------
+    # -----------------------------------------------------------------------
     # Read an input file
-    #-----------------------------------------------------------------------
+    # -----------------------------------------------------------------------
     def read(self, filename):
         """Open and read a fluka input file, return True if error"""
         self.filename = filename
         f = self._openFile(filename, "r")
-        if f is None: return True
-        if self.verbose: say("Reading input file", filename)
-        if self.parse(): return True
+        if f is None:
+            return True
+        if self.verbose:
+            say("Reading input file", filename)
+        if self.parse():
+            return True
         assert len(self._files) == 0
 
         # Process input
@@ -3018,13 +3027,14 @@ class Input:
         self.setFileTime()
         return False
 
-    #-----------------------------------------------------------------------
-    # #include card has been modified take appropriate action
-    # @return	True if #include has modified the input
-    #		False if nothing happened
-    #-----------------------------------------------------------------------
     def include(self, includecard):
-        if not includecard.enable: return False
+        """
+        include card has been modified take appropriate action
+        :param includecard:
+        :return: True if #include has modified the input, False if nothing happened
+        """
+        if not includecard.enable:
+            return False
 
         try:  # Check if file exist
             os.stat(includecard.sdum())
@@ -3043,18 +3053,21 @@ class Input:
                 level += 1
             elif card.tag == "#endinclude":
                 level -= 1
-                if level == 0: break
+                if level == 0:
+                    break
             toid += 1
 
         # If range is not empty then return
-        if toid - fromid > 1: return False
+        if toid - fromid > 1:
+            return False
 
         # Create a temporary input to load the included lines
         inp = Input()
         location = 0  # 0=input, 1=bodies, 2=regions
         for i in range(fromid):
             card = self.cardlist[i]
-            if not card.enable: continue
+            if not card.enable:
+                continue
             if card.tag == "FREE":
                 inp.format = FORMAT_FREE
 
@@ -3081,7 +3094,7 @@ class Input:
             elif card.tag == "GEOEND":
                 location = 0
 
-        f = inp._openFile(includecard.sdum(), "r")
+        # f = inp._openFile(includecard.sdum(), "r") # TODO never used
         if location == 0:
             inp.parse()
         elif location == 1:
@@ -3106,11 +3119,8 @@ class Input:
 
         return True
 
-    #-----------------------------------------------------------------------
-    # Import/parse a file including geometry
-    #-----------------------------------------------------------------------
     def parse(self):
-        """Import/parse a fluka file"""
+        """Import/parse a file including geometry"""
         tag = ""
         sdum = ""
         self._comment = ""  # current comment
@@ -3119,9 +3129,11 @@ class Input:
         self._cardEnable = True
         while True:
             line = self._readLine()
-            if line is None: return
+            if line is None:
+                return
             line = self._parseComment(line)
-            if line is None: continue
+            if line is None:
+                continue
 
             prev_tag = tag
             prev_sdum = sdum
@@ -3172,23 +3184,22 @@ class Input:
             # 3. Extra line readout
             if tag in ("TITLE", "OPEN", "!mesh"):
                 extra = self._readLine()
-                if extra is None: return
+                if extra is None:
+                    return
 
             # Handling of special cases needed for parsing
             # the rest of the file
             elif tag == "FREE":
                 if self._cardEnable:
                     self.format = FORMAT_FREE
-                #else:
-                #	self.commentFormat = FORMAT_FREE
-                if self.verbose: say("FREE: Input format changed to", self.format)
+                if self.verbose:
+                    say("FREE: Input format changed to", self.format)
 
             elif tag == "FIXED":
                 if self._cardEnable:
                     self.format = FORMAT_SINGLE
-                #else:
-                #	self.commentFormat = FORMAT_SINGLE
-                if self.verbose: say("FIXED: Input format changed to", self.format)
+                if self.verbose:
+                    say("FIXED: Input format changed to", self.format)
 
             elif tag == "GLOBAL" and self._cardEnable:
                 w4 = _intWhat(what, 4)
@@ -3199,23 +3210,20 @@ class Input:
 
             # Handle special card PLOTGEOM
             elif tag == "PLOTGEOM":
-                w6 = _intWhat(what, 6)
+                # w6 = _intWhat(what, 6) # TODO never used
                 if self._openFile("PLG.GFXINDAT", "r", tag) is None:
                     say("ERROR: cannot open file PLG.GFXINDAT")
                     continue
 
                 extra = self._readLine()
                 line = self._readLine()
-                what.extend([_str2num(line[x:x+10]) \
-                 for x in range(0, 60, 10)])
+                what.extend([_str2num(line[x:x + 10]) for x in range(0, 60, 10)])
 
                 line = self._readLine()
-                what.extend([_str2num(line[x:x+10]) \
-                 for x in range(0, 60, 10)])
+                what.extend([_str2num(line[x:x + 10]) for x in range(0, 60, 10)])
 
                 line = self._readLine()
-                what.extend([_str2num(line[x:x+10]) \
-                 for x in range(0, 40, 10)])
+                what.extend([_str2num(line[x:x + 10]) for x in range(0, 40, 10)])
 
             elif tag == "COMMENT":
                 # Add to comments the following lines
@@ -3246,8 +3254,8 @@ class Input:
                         raise Exception("Error parsing geometry")
                     self.geoOutFile = geoOutFile.strip()
 
-                if self.geoFile != "":
-                    fgeo = self._openFile(self.geoFile, "r", tag)
+                # if self.geoFile != "": # TODO never used
+                #     fgeo = self._openFile(self.geoFile, "r", tag)
                 self._parseGeometry(card)
                 continue
 
@@ -3258,23 +3266,22 @@ class Input:
             self._addCard(Card(tag, what, self._comment, extra))
         return False
 
-    #-----------------------------------------------------------------------
-    # Parse Geometry
-    #-----------------------------------------------------------------------
     def _parseGeometry(self, geobegin):
+        """Parse Geometry"""
         voxel = False
-        #self._cardEnable = True
+        # self._cardEnable = True
         while True:
             line = self._readLine()
             if line is None:
                 raise Exception("Error parsing geometry")
 
             line = self._parseComment(line)
-            if line is None: continue
+            if line is None:
+                continue
 
-            #line = line.rstrip()
+            # line = line.rstrip()
 
-            #if not self._cardEnable or line[0]=='#':
+            # if not self._cardEnable or line[0]=='#':
             if line[0] == '#':
                 tag, what = self._parseLine(line)
                 self._addCard(Card(tag, what, self._comment))
@@ -3293,10 +3300,6 @@ class Input:
                 except:
                     say("ERROR loading voxel file %s.vxl" % (card.sdum()))
                     say(sys.exc_info()[1])
-                # Read next line
-                #line = self._readLine()
-                #if line is None:
-                #	raise Exception("Error parsing geometry")
                 voxel = True
 
             else:
@@ -3321,30 +3324,14 @@ class Input:
         if idbg < 0 and self.geoFormat == FORMAT_SINGLE:
             self.geoFormat = FORMAT_DOUBLE
 
-        if self.verbose: say("GEOBEGIN: Geometry format:", self.geoFormat)
+        if self.verbose:
+            say("GEOBEGIN: Geometry format:", self.geoFormat)
         try:
             self._parseBodies()
             self._parseRegions()
             self._parseVolume()
         except:
             say(sys.exc_info()[0])
-
-        # Parse Lattices only on external file
-        #		if external:
-        #			while True:
-        #				self._lineNo += 1
-        #				line = utfReadline(fgeo)
-        #				if len(line)==0: break
-        #				line = self._parseComment(line)
-        #				if line is None: continue
-        #
-        #				tag, what = self._parseLine(line)
-        #				if tag == "LATTICE":
-        #					self._parseLattice(what)
-        #					self._addCard(Card(tag, what, self._comment))
-        #				else:
-        #					say("ERROR Unexpected card %s found in geometry"%(tag))
-        #					say(line)
 
         # Correct last body name to VOXEL
         if voxel and self.geoFormat != FORMAT_FREE:
@@ -3357,17 +3344,18 @@ class Input:
                     pass
             self.changeName("bn", _body2name(str(nbodies)), "VOXEL")
 
-    #-----------------------------------------------------------------------
-    # Parse bodies
-    #-----------------------------------------------------------------------
     def _parseBodies(self):
-        if self.verbose: say("   Parsing Bodies")
-        #pdb.set_trace()
+        """Parse bodies"""
+        if self.verbose:
+            say("   Parsing Bodies")
+        # pdb.set_trace()
         while True:
             line = self._readLine()
-            if line is None: return
+            if line is None:
+                return
             line = self._parseComment(line, False)
-            if line is None: continue
+            if line is None:
+                continue
 
             if line[0] == "#":
                 (tag, what) = self._parseLine(line)
@@ -3389,36 +3377,34 @@ class Input:
 
             info = CardInfo.get(tag)
             if info is None:
-                say("ERROR line %d: Unknown body type %s for %s" \
-                 % (self._lineNo[-1], tag, name))
+                say("ERROR line %d: Unknown body type %s for %s" % (self._lineNo[-1], tag, name))
                 say(line)
                 return
             needwhat = info.nwhats - 1
-            #self._whatNeeded(what, needwhat)
+            # self._whatNeeded(what, needwhat)
             # Read and parse needed whats
             while len(what) < needwhat:
                 line = self._readLine()
                 if line is None:
                     raise Exception("Error parsing geometry")
                 line = self._parseComment(line, False)
-                if line is None: continue
+                if line is None:
+                    continue
                 self._parseBodyLine(line, what)
             # delete extra whats if any
-            if len(what) > needwhat: del what[needwhat:]
+            if len(what) > needwhat:
+                del what[needwhat:]
             what.insert(0, name)
             self._addCard(Card(tag, what, self._comment))
 
-    #-----------------------------------------------------------------------
-    # Parse a body line
-    #-----------------------------------------------------------------------
     def _parseBodyLine(self, line, what):
+        """Parse a body line"""
         startWhat = len(what)
         if self.geoFormat == FORMAT_SINGLE:
             body = line[2:5].strip()
             name = line[5:10].strip()
             if startWhat > 0 and (len(body) > 0 or len(name) > 0):
-                raise Exception("Invalid body definition at line: " \
-                 +self._lineNo[-1])
+                raise Exception("Invalid body definition at line: " + self._lineNo[-1])
             for i in range(10, 61, 10):
                 w = line[i:i + 10].strip()
                 what.append(_str2num(w))
@@ -3427,8 +3413,7 @@ class Input:
             body = line[2:5].strip()
             name = line[5:10].strip()
             if startWhat > 0 and (len(body) > 0 or len(name) > 0):
-                raise Exception("Invalid body definition at line: "\
-                 +self._lineNo[-1])
+                raise Exception("Invalid body definition at line: " + self._lineNo[-1])
             for i in range(10, 55, 22):
                 w = line[i:i + 22].strip()
                 what.append(_str2num(w))
@@ -3438,7 +3423,8 @@ class Input:
             body = name = ""
             if startWhat == 0:
                 body = str(wlist[0])
-                if len(wlist) > 1: name = wlist[1]
+                if len(wlist) > 1:
+                    name = wlist[1]
                 i = 2
             else:
                 i = 0
@@ -3446,20 +3432,19 @@ class Input:
             for i in range(i, len(wlist)):
                 what.append(_str2num(wlist[i]))
 
-        return (body, name)
+        return body, name
 
-    #-----------------------------------------------------------------------
-    # Parse Regions
-    #-----------------------------------------------------------------------
     def _parseRegions(self):
-        if self.verbose: say("   Parsing Regions")
+        """Parse Regions"""
+        if self.verbose:
+            say("   Parsing Regions")
 
         name = ""
         neighbors = ""
         expstr = ""
         comment = ""
         self._comment = ""
-        card = None  # active card
+        # card = None  # active card # TODO never used ?
         _cardEnable = True
         prop = []
         regions = set()  # check for duplicate names in FIXED format
@@ -3471,7 +3456,8 @@ class Input:
                     self._addRegion(name, neighbors, comment, expstr, _cardEnable)
                 return
             line = self._parseComment(line, False)
-            if line is None: continue
+            if line is None:
+                continue
 
             if line[:6] == "GEOEND":
                 self._addRegion(name, neighbors, comment, expstr, _cardEnable)
@@ -3483,7 +3469,7 @@ class Input:
             if line[0] == "#":  # Parse defines
                 # Add current region if any
                 oldcomment = self._comment  # Save the comment
-                card = self._addRegion(name, neighbors, comment, expstr, _cardEnable)
+                # card = self._addRegion(name, neighbors, comment, expstr, _cardEnable) # TODO never used ?
                 # Possible region continuation
                 name = "&"
                 neighbors = 0
@@ -3515,7 +3501,7 @@ class Input:
                     if self._comment:
                         oldcomment = self._comment  # remember comment
                         # add region
-                        card = self._addRegion(name, neighbors, comment, expstr, _cardEnable)
+                        # card = self._addRegion(name, neighbors, comment, expstr, _cardEnable) # TODO never used ?
 
                         name = "&"  # continuation card
                         neighbors = 0
@@ -3537,7 +3523,7 @@ class Input:
                     thisProp = self._prop  # and properties
                     self._prop = prop  # restore old properties
                     # New region definition
-                    card = self._addRegion(name, neighbors, comment, expstr, _cardEnable)
+                    # card = self._addRegion(name, neighbors, comment, expstr, _cardEnable) # TODO never used ?
 
                     name = match.group(1)
                     neighbors = match.group(2)
@@ -3556,7 +3542,7 @@ class Input:
                     thisComment = self._comment
                     # Save previous region
                     self._addRegion(name, neighbors, comment, expstr, _cardEnable)
-                    level = len(self._files) - 1  # remember level
+                    # level = len(self._files) - 1  # remember level # TODO never used ?
                     if n == "END":
                         self._addEND()
                         return
@@ -3588,7 +3574,8 @@ class Input:
                     width = 9
                 else:
                     width = 7
-                if len(e) % width != 0: e += " " * (width - len(e) % width)
+                if len(e) % width != 0:
+                    e += " " * (width - len(e) % width)
 
                 for i in range(0, len(e), width):
                     orop = e[i:i + 2]
@@ -3598,9 +3585,8 @@ class Input:
                     body = e[i + 2:i + width].strip()
                     if body == "":
                         say("ERROR: Bad alignment in region definition: '%s'" % (name))
-                        raise Exception("Error parsing region %s: " \
-                         "Invalid bodyname found \"%s\" " \
-                         "column=%d"%(name, e[i+2:i+width], i+2))
+                        raise Exception("Error parsing region %s: Invalid bodyname found \"%s\" column=%d" %
+                                        (name, e[i + 2:i + width], i + 2))
                     sign = body[0]
                     if sign == "+" or sign == "-":
                         efree += " %s%s" % (sign, _body2name(body[1:]))
@@ -3612,13 +3598,12 @@ class Input:
                 else:
                     expstr += "\n" + efree  # Continue region
 
-    #-----------------------------------------------------------------------
     def _addEND(self):
         self._addCard(Card("END", [], self._comment))
 
-    #-----------------------------------------------------------------------
     def _addRegion(self, name, neighbors, comment, expstr, _cardEnable):
-        if name == "" or (name == "&" and expstr == ""): return None
+        if name == "" or (name == "&" and expstr == ""):
+            return None
         saveEnable = self._cardEnable
         self._cardEnable = _cardEnable
 
@@ -3629,14 +3614,14 @@ class Input:
 
         what = [name, neighbors]
         # XXX should not come where with expstr=""
-        if len(expstr) > 1 and expstr[0] == "\n": expstr = expstr[1:]
+        if len(expstr) > 1 and expstr[0] == "\n":
+            expstr = expstr[1:]
         card = Card("REGION", what, comment, expstr)
         card[_VOLUME] = ""
         self._addCard(card)
         self._cardEnable = saveEnable
         return card
 
-    #-----------------------------------------------------------------------
     def _parseLattice(self, what):
         sdum = what[0]
         if sdum != "":
@@ -3648,20 +3633,21 @@ class Input:
                     id = 1
                 what[0] = "Rot#%3d" % (id)
 
-    #-----------------------------------------------------------------------
-    # Parse Volume data if any
-    #-----------------------------------------------------------------------
     def _parseVolume(self):
-        if self.ivopt != 3: return
+        """Parse Volume data if any"""
+        if self.ivopt != 3:
+            return
         # Expect data in the format 7E10.5
-        if self.verbose: say("   Parsing Volumes")
+        if self.verbose:
+            say("   Parsing Volumes")
         self.preprocess()
         lst = self["REGION"]
         lst.sort(Card.cmpPos)
         regionList = [x for x in lst if not x.ignore() and x.sdum() != "&"]
 
         nlines, rem = divmod(len(regionList), 7)
-        if rem > 0: nlines += 1
+        if rem > 0:
+            nlines += 1
         nr = 0
         while nlines > 0:
             # peek next line
@@ -3669,7 +3655,8 @@ class Input:
             line = self._readLine()
             if line is None:
                 raise Exception("Error parsing geometry")
-            if len(line) == 0: continue
+            if len(line) == 0:
+                continue
             if line[0] in ("*", "G"):
                 # go back and exit
                 self._files[-1].seek(pos)
@@ -3681,18 +3668,18 @@ class Input:
                 nr += 1
             nlines -= 1
 
-    #-----------------------------------------------------------------------
-    # Parse a comment line
-    #-----------------------------------------------------------------------
     def _parseComment(self, line, check4Card=True):
+        """Parse a comment line"""
         line = line.rstrip()
-        if len(line) == 0: return None
+        if len(line) == 0:
+            return None
         if line[0] == "*":
             # if next character is not space
             # check if it is a valid card
             cstart = 1
             if line != "*":
-                if line[1] == " ": cstart = 2
+                if line[1] == " ":
+                    cstart = 2
 
                 if line[1:4] in ("...", "234", "===", "---", "***", "___", "_..", "+++", "_AA"):
                     cstart = 2
@@ -3783,22 +3770,25 @@ class Input:
                         return None
 
                     # if everything fails add it as comment
-                    if self._comment: self._comment += "\n"
+                    if self._comment:
+                        self._comment += "\n"
                     self._comment += line
                     return None
 
             elif p >= 0:
                 comment = line[p + 1:]
-                if self._comment: self._comment += "\n"
+                if self._comment:
+                    self._comment += "\n"
                 self._comment += comment
-                if p == 0: return None
+                if p == 0:
+                    return None
                 line = line[0:p]
 
             return line
 
-    #-----------------------------------------------------------------------
+    # -----------------------------------------------------------------------
     # Parse a single line to card, whats and sdum
-    #-----------------------------------------------------------------------
+    # -----------------------------------------------------------------------
     def _parseLine(self, line, enable=True):
         if line[0] == "$":
             what = self._parseFreeFormat(line)
@@ -3830,7 +3820,8 @@ class Input:
         else:
             what = self._parseFreeFormat(line)
             tag = what.pop(0)
-            if len(tag) > 8: tag = tag[0:8]
+            if len(tag) > 8:
+                tag = tag[0:8]
             if len(what) == 7:
                 sdum = what.pop()
             else:
@@ -3839,22 +3830,14 @@ class Input:
 
         return (tag, what)
 
-    #-----------------------------------------------------------------------
-    # Parse a free format line
-    # Remove unwanted characters from free format line and
-    # separate everything with comma ,
-    #-----------------------------------------------------------------------
     def _parseFreeFormat(self, line):
-        """Remove unwanted characters from a free format line
-		and separate everything with comma ,"""
+        """Remove unwanted characters from a free format line and separate everything with comma ,"""
         line = re.sub(" *[;:/,] *", ",", line.strip())
         what = re.sub(" +", ",", line).split(',')
         return list(map(_str2num, what))
 
-    #-----------------------------------------------------------------------
-    # Parse needed whats
-    #-----------------------------------------------------------------------
     def _whatNeeded(self, fgeo, what, needwhat):
+        """Parse needed whats"""
         # Read whats
         while len(what) < needwhat:
             self._lineNo += 1
@@ -3863,44 +3846,46 @@ class Input:
                 raise Exception("Error paring geometry")
 
             line = self._parseComment(line, False)
-            if line is None: continue
+            if line is None:
+                continue
 
             self._parseBodyLine(line, what)
 
         # delete extra whats if any
-        if len(what) > needwhat: del what[needwhat:]
+        if len(what) > needwhat:
+            del what[needwhat:]
 
-    #-----------------------------------------------------------------------
-    # Used internally while parsing to add a card
-    #-----------------------------------------------------------------------
     def _addCard(self, card):
+        """Used internally while parsing to add a card"""
         self._nwhats = card.nwhats()
 
         # Replace special whats with card whats
         for i, w in enumerate(self._cwhat):
-            if len(w) > 0: card.setWhat(i, w)
+            if len(w) > 0:
+                card.setWhat(i, w)
 
         # add properties if any
         for n, v in self._prop:
             card[n] = v
 
         self.addCard(card)
-        if not self._cardEnable: card.disable()
+        if not self._cardEnable:
+            card.disable()
 
         # Reset comment and special whats
         self._comment = ""
         del self._cwhat[:]
         del self._prop[:]
 
-    #-----------------------------------------------------------------------
     def writeWithInclude(self, filename, backup=True):
-        """Open and write the input to file (specified either by filename,
-		or by file pointer). Optionally use a different geometry
-		file and a different format"""
+        """Open and write the input to file (specified either by filename, or by file pointer).
+        Optionally use a different geometry file and a different format
+        # WARNING FIXME no testing is done for the correctness of the file"""
 
-        # WARNING FIXME no testing is done for the correctness of the file
-        if self.verbose: say("Writing input file", filename)
-        if len(self.cardlist) == 0: return True
+        if self.verbose:
+            say("Writing input file", filename)
+        if len(self.cardlist) == 0:
+            return True
 
         del self._files[:]
         del self._lineNo[:]
@@ -3966,10 +3951,12 @@ class Input:
 
             elif tag == "#include":
                 self.writeCard(self._files[-1], card, self.format)
-                if card.notIgnore(): self._openFile(card.what(0), "w", backup=backup)
+                if card.notIgnore():
+                    self._openFile(card.what(0), "w", backup=backup)
 
             elif tag == "#endinclude":
-                if card.notIgnore(): self._closeFile()
+                if card.notIgnore():
+                    self._closeFile()
 
             elif geolevel > 0:
                 if geolevel == 1 and tag == "REGION":
@@ -3989,7 +3976,8 @@ class Input:
                 elif card._geo:
                     self.writeCard(self._files[-1], card, self.geoFormat)
                 else:
-                    if tag == "GEOEND": geolevel = 0
+                    if tag == "GEOEND":
+                        geolevel = 0
                     if geoExternal:
                         self._closeFile()
                     self.writeCard(self._files[-1], card, self.format)
@@ -4003,16 +3991,14 @@ class Input:
         assert (len(self._files) == 0)
         return False
 
-    #-----------------------------------------------------------------------
-    # Write the input to a file
-    #-----------------------------------------------------------------------
     def write(self, filename, backup=True):
-        """Open and write the input to file (specified either by filename,
-		or by file pointer). Optionally use a different geometry
-		file and a different format"""
+        """Open and write the input to file (specified either by filename, or by file pointer).
+        Optionally use a different geometry file and a different format"""
 
-        if self.verbose: say("Writing input file", filename)
-        if len(self.cardlist) == 0: return True
+        if self.verbose:
+            say("Writing input file", filename)
+        if len(self.cardlist) == 0:
+            return True
 
         if "#include" in self.cards:
             self.writeWithInclude(filename, backup)
@@ -4020,14 +4006,11 @@ class Input:
 
         readfile = getattr(filename, 'read', None)
         if readfile is not None:
-            #print(filename, "is a path")
             finp = filename
         else:
             finp = self._openFile(filename, "w", backup=backup)
 
         # Expressions
-        exprNotGeo = lambda x: not x._geo
-
         # Start with single format as unknown
         self.format = FORMAT_SINGLE
         self.geoFormat = FORMAT_SINGLE
@@ -4072,7 +4055,7 @@ class Input:
         #    0 before geometry
         #    1 inside geometry
         #    2 after geometry
-        self.writeCards(finp, exprNotGeo, None, 0, 0, begin_)
+        self.writeCards(finp, lambda x: not x._geo, None, 0, 0, begin_)
 
         # if there is no geometry... then exit
         if begin_ == len(self.cardlist):
@@ -4087,7 +4070,7 @@ class Input:
             # Find first GEOEND
             geoend = self["GEOEND"][0]
             end_ = self.cardlist.index(geoend)
-            self.writeCards(finp, exprNotGeo, None, 1, begin_ + 1, end_)
+            self.writeCards(finp, lambda x: not x._geo, None, 1, begin_ + 1, end_)
         except:
             geoend = None
             end_ = len(self.cardlist)
@@ -4131,31 +4114,36 @@ class Input:
             # 4th Write geometry
             self.writeGeometry(fgeo, self.geoFormat)
 
-        if fgeo is not finp: self._closeFile()
+        if fgeo is not finp:
+            self._closeFile()
 
         # 6th. Write remaining cards including the GEOEND if any
         if geoend is None:
             geoend = Card("GEOEND")
             self.writeCard(finp, geoend, self.format)
-            self.writeCards(finp, exprNotGeo, None, 1, begin_ + 1)
+            self.writeCards(finp, lambda x: not x._geo, None, 1, begin_ + 1)
         else:
-            self.writeCards(finp, exprNotGeo, None, 2, end_)
+            self.writeCards(finp, lambda x: not x._geo, None, 2, end_)
 
         # Check for STOP at the end
         if self.cardlist[-1].tag != "STOP":
             self.writeCard(finp, Card("STOP"), self.format)
 
-        if finp is not filename: self._closeFile()
+        if finp is not filename:
+            self._closeFile()
 
         self.setFileTime()
         return False
 
-    # ----------------------------------------------------------------------
-    # Find current format
-    # FIXME #defines and state!
-    # ----------------------------------------------------------------------
     def checkFormat(self, card):
-        if not card.enable: return
+        """
+        Find current format
+        FIXME #defines and state!
+        :param card:
+        :return:
+        """
+        if not card.enable:
+            return
         tag = card.tag
         if tag == "FREE":
             self.format = FORMAT_FREE
@@ -4181,16 +4169,9 @@ class Input:
                 say("WARNING: Changing GEOBEGIN sdum=%s to COMBNAME" % (card.sdum()))
                 card.setSdum("COMBNAME")
             self.geoFormat = FORMAT_FREE
-            #if self.geoFormat == FORMAT_SINGLE:
-            #	if card.sdum()=="COMBNAME":
-            #		self.geoFormat = FORMAT_FREE
-            #	elif card.idbg < 0:
-            #		self.geoFormat = FORMAT_DOUBLE
 
-        #-----------------------------------------------------------------------
-        # Check COMPOUND cards for correct mixture
-        #-----------------------------------------------------------------------
     def checkCompound(self, card, all=False):
+        """Check COMPOUND cards for correct mixture"""
         # check sign of whats
         s1 = card.sign(1)
         s2 = card.sign(2)
@@ -4202,8 +4183,7 @@ class Input:
         for i in range(start, n, 2):
             j = i + 1
             if card.numWhat(i) != 0.0:
-                if card.sign(i)!=s1 or \
-                   card.sign(j)!=s2:
+                if card.sign(i) != s1 or card.sign(j) != s2:
                     say("ERROR: Inconsistent compound mixture (Check signs)")
                     say("	What(%d) = %s" % (i, str(card.what(i))))
                     say("	What(%d) = %s" % (j, str(card.what(j))))
@@ -4212,18 +4192,24 @@ class Input:
                 card.setSign(i, s1)
                 card.setSign(j, s2)
 
-    #-----------------------------------------------------------------------
-    # Write geometry only
-    #      preprocessor cards are written only when cards
-    #      are in the correct position
-    #-----------------------------------------------------------------------
     def writeGeometry(self, fgeo, geoFmt=None, fmt=None):
-        if geoFmt is None: geoFmt = self.geoFormat
+        """
+        Write geometry only
+             preprocessor cards are written only when cards
+             are in the correct position
+        :param fgeo:
+        :param geoFmt:
+        :param fmt:
+        :return:
+        """
+        if geoFmt is None:
+            geoFmt = self.geoFormat
 
-        geolevel = 1
+        # geolevel = 1 # TODO not used ?
 
         # Use the formating of the input
-        if fmt is None: fmt = self.format
+        if fmt is None:
+            fmt = self.format
 
         # 1st. Write bodies
         self.writeCards(fgeo, lambda x: x.tag in BODY_NOVXL_TAGS or x.tag[0] == "$", geoFmt, 1)
@@ -4261,23 +4247,24 @@ class Input:
         if ivopt == 3:
             line = ""
             for region in self.cardsSorted("REGION"):
-                if region.name() == "&": continue
+                if region.name() == "&":
+                    continue
                 vol = region.getProperty(_VOLUME, "")
-                if vol == "": vol = "1.0"
-                line += "%10s" % (bmath.format(vol, 10))
+                if vol == "":
+                    vol = "1.0"
+                line += "%10s" % bmath.format(vol, 10)
                 if len(line) == 70:
                     writeln(fgeo, line)
                     line = ""
-            if len(line) > 0: writeln(fgeo, line)
+            if len(line) > 0:
+                writeln(fgeo, line)
 
         # 3rd. Write lattices
         if "LATTICE" in self.cards:
             self.writeCards(fgeo, lambda x: x.tag == "LATTICE", fmt, 3)
 
-    #-----------------------------------------------------------------------
-    # write a single card
-    #-----------------------------------------------------------------------
     def writeCard(self, f, card, fmt):
+        """write a single card"""
         if not card.enable and (not card.info.disableComment or not commentedCards):
             if0 = True
             f.write("#if 0\n")
@@ -4287,14 +4274,16 @@ class Input:
         if card.comment() != "":
             utfWrite(f, card.commentStr())
         es = card.evalWhatStr()
-        if es != "": utfWrite(f, es)
+        if es != "":
+            utfWrite(f, es)
         s = card.toStr(fmt)
         try:
-            f.write("%s\n" % (s))
+            f.write("%s\n" % s)
         except (UnicodeDecodeError, UnicodeEncodeError):
-            f.write("%s\n" % (s.encode("utf-8")))
+            f.write("%s\n" % s.encode("utf-8"))
 
-        if if0: f.write("#endif\n")
+        if if0:
+            f.write("#endif\n")
 
     def writeCards(self, f, condition, format=None, geolevel=0, from_=0, to_=-1):
         """
@@ -4325,7 +4314,8 @@ class Input:
         writing = False
 
         # Force a fixed format
-        if format is not None: fmt = format
+        if format is not None:
+            fmt = format
 
         # Loop over all cards
         if to_ == -1:
