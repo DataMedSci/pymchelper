@@ -50,17 +50,16 @@
 # LIABILITY OR OTHERWISE, ARISING IN ANY WAY OUT OF THE USE OF
 # THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH
 # DAMAGES.
-#
-# Author:	Vasilis.Vlachoudis@cern.ch
-# Date:	10-Oct-2014
 
-import sys
+import logging
 
 __author__ = "Vasilis Vlachoudis"
 __email__ = "Vasilis.Vlachoudis@cern.ch"
 
 # -------------------------------------------------------------------------------
 _log = None
+
+logger = logging.getLogger(__name__)
 
 
 def set_log(l):
@@ -73,7 +72,7 @@ def say(*kw):
     if _log:
         _log(txt)
     else:
-        sys.stdout.write("%s\n" % (txt))
+        logger.info(txt)
 
 
 def null():

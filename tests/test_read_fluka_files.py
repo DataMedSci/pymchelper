@@ -10,6 +10,7 @@ logger = logging.getLogger(__name__)
 
 class TestDefaultConverter(unittest.TestCase):
     main_dir = os.path.join("tests", "res", "fluka")
+    generated_dir = os.path.join(main_dir, "generated")
 
     # def read_data(self, usr):
     #     for i in range(len(usr.detector)):
@@ -65,72 +66,27 @@ class TestDefaultConverter(unittest.TestCase):
     #     print("File ", rel_path, " cannot be opened")
     #     return
 
-    # def test_load_files(self):
-    #     # loop over all .bdo files in all subdirectories
-    #     for filename in os.listdir(self.main_dir):
-    #         rel_path = os.path.join(self.main_dir, filename)
-    #         print("\n\nopening", rel_path)
-    #         self.check(rel_path)
-
-    def test_load_input(self):
-        Input.init()
-
-        # input useful functions:
-        #  - read/write : read/write an input file
-        #  - clone
-        # - checkFormat(card) FORMAT_FREE / FORMAT_SINGLE
-        # - addCard(card)
-        # - delCard(card)
-        # - delTag(tag) - delete all cards with specific tag
-        # - delGeometryCards
-        # - replaceCard(position, card)
-        # - convert2Names - Convert input to names and check for obsolete and/or non-valid cards
-        # - validate - ??
-        # - checkNumbering - ??
-        # - minimumInput
-        # - renumber
-        #
-        # Card useful functions:
-        # - __init__(self, tag, what=None, comment="", extra="")
-        # - clone
-        # - appendWhats(self, what, pos=None)
-        # - appendComment(self, comment):
-        # - validate(self, case=None):
-        # - convert(self, tonames=True)
-        # - whats(self), nwhats()
-        # - sdum
-        # - extra
-        # - comment
-        # - isGeo
-        # - type
-        # - tag
-        # - what(self, n)
-        # - setComment(self, comment="")
-        # - setWhats(self, whats)
-        # - setSdum(self, s)
-        # - setExtra(self, e)
-        # - setWhat(self, w, v)
-        # - units(self, absolute=True) units used by card
-        # - commentStr(self)
-        # - def toStr(self, fmt=None)
-        # - addZone(self, zone)
-
-        #
-
+    def check_directory(self, dir_path):
         for filename in os.listdir(self.main_dir):
             rel_path = os.path.join(self.main_dir, filename)
             if rel_path.endswith(".inp"):
                 logger.info("opening " + rel_path)
                 input = Input.Input()
                 input.read(rel_path)
-                input.convert2Names()
-                try:
-                    rndcard = input.cards["RANDOMIZ"][0]
-                    rndcard.setWhat(2, 5723)
-                except:
-                    logger.error("No RANDOMIZe card found")
-                input.write(rel_path[:-3] + "new")
-                self.assertTrue(os.path.exists(rel_path[:-3] + "new"))
+
+                logger.info("checking if START setting is correct ")
+                self.assertGreater(int(input.cards["START"][0].whats()[1]), 100.0)
+
+                logger.info("checking if BEAM setting is correct ")
+                self.assertEqual(input.cards["BEAM"][0].sdum(), 'PROTON')
+
+                logger.info("checking if more than one USRBIN present")
+                self.assertGreater(len(input.cards["USRBIN"]), 1)
+
+    def test_load_input(self):
+        self.check_directory(self.main_dir)
+        self.check_directory(self.generated_dir)
+
 
 if __name__ == '__main__':
     unittest.main()

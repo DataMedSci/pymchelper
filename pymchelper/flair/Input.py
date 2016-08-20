@@ -50,6 +50,46 @@
 # DAMAGES.
 #
 
+# input useful functions:
+#  - read/write : read/write an input file
+#  - clone
+# - checkFormat(card) FORMAT_FREE / FORMAT_SINGLE
+# - addCard(card)
+# - delCard(card)
+# - delTag(tag) - delete all cards with specific tag
+# - delGeometryCards
+# - replaceCard(position, card)
+# - convert2Names - Convert input to names and check for obsolete and/or non-valid cards
+# - validate - ??
+# - checkNumbering - ??
+# - minimumInput
+# - renumber
+#
+# Card useful functions:
+# - __init__(self, tag, what=None, comment="", extra="")
+# - clone
+# - appendWhats(self, what, pos=None)
+# - appendComment(self, comment):
+# - validate(self, case=None):
+# - convert(self, tonames=True)
+# - whats(self), nwhats()
+# - sdum
+# - extra
+# - comment
+# - isGeo
+# - type
+# - tag
+# - what(self, n)
+# - setComment(self, comment="")
+# - setWhats(self, whats)
+# - setSdum(self, s)
+# - setExtra(self, e)
+# - setWhat(self, w, v)
+# - units(self, absolute=True) units used by card
+# - commentStr(self)
+# - def toStr(self, fmt=None)
+# - addZone(self, zone)
+
 
 import os
 import re
