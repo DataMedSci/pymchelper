@@ -73,8 +73,6 @@ class SHBinaryReader:
         if 'VOXSCORE' in header['geotyp'][0].decode('ascii'):
             detector.tripdose = header['tds'][0]
             detector.tripntot = header['tnt'][0]
-
-            print(detector.tripdose, detector.tripntot)
             
         # map 10-elements table to namedtuple, for easier access
         # here is description of IDET table, assuming fortran-style numbering (from 1)
@@ -222,10 +220,7 @@ class SHBinaryReader:
         if detector.dettyp not in (SHDetType.dlet, SHDetType.tlet, SHDetType.avg_energy, SHDetType.avg_beta,
                                    SHDetType.material):
             detector.data /= np.float64(detector.nstat)
-            print(detector.rec_size)
-            print(detector.data)
-            print(detector.nstat)
-            
+
         detector.counter = 1
 
     def read(self, detector):
