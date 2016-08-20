@@ -29,60 +29,91 @@ class SHFortranWriter:
 
     def __init__(self, filename):
         self.filename = filename
+        self.ax = ''
+        self.ay = ''
+        self.az = ''
 
-    def write(self, det):
-        from pymchelper.fortranformatter import format_d, format_e
-
-        # first line with detector geo type
+    @staticmethod
+    def _header_first_line(det):
+        """first line with detector geo type"""
+        result = "#   DETECTOR OUTPUT\n"
         if det.geotyp in (SHGeoType.plane, SHGeoType.dplane, ):
-            header = "#             DETECTOR OUTPUT PLANE/DPLANE\n"
+            result = "#             DETECTOR OUTPUT PLANE/DPLANE\n"
         elif det.geotyp in (SHGeoType.zone, SHGeoType.dzone, ):
-            header = "#             DETECTOR OUTPUT ZONE/DZONE\n"
+            result = "#             DETECTOR OUTPUT ZONE/DZONE\n"
         elif det.geotyp in (SHGeoType.msh, SHGeoType.dmsh, ):
-            header = "#   DETECTOR OUTPUT MSH/DMSH\n"
+            result = "#   DETECTOR OUTPUT MSH/DMSH\n"
         elif det.geotyp == SHGeoType.geomap:
-            header = "#   DETECTOR OUTPUT GEOMAP\n"
-        else:
-            header = "#   DETECTOR OUTPUT\n"
+            result = "#   DETECTOR OUTPUT GEOMAP\n"
+        return result
 
-        # next block - scoring object geometrical information
+    def _header_geometric_info(self, det):
+        """next block - scoring object geometrical information"""
+
+        from pymchelper.fortranformatter import format_d
+        result = ""
         if det.geotyp in (SHGeoType.plane, SHGeoType.dplane, ):
-            header += "#   PLANE point(X,Y,Z)         :"
-            header += "{:s}".format(format_d(10, 3, det.xmin))
-            header += "{:s}".format(format_d(10, 3, det.ymin))
-            header += "{:s}\n".format(format_d(10, 3, det.zmin))
-            header += "#   PLANE normal vect(Vx,Vy,Vz):"
-            header += "{:s}".format(format_d(10, 3, det.xmax))
-            header += "{:s}".format(format_d(10, 3, det.ymax))
-            header += "{:s}\n".format(format_d(10, 3, det.zmax))
+            result += "#   PLANE point(X,Y,Z)         :"
+            result += "{:s}".format(format_d(10, 3, det.xmin))
+            result += "{:s}".format(format_d(10, 3, det.ymin))
+            result += "{:s}\n".format(format_d(10, 3, det.zmin))
+            result += "#   PLANE normal vect(Vx,Vy,Vz):"
+            result += "{:s}".format(format_d(10, 3, det.xmax))
+            result += "{:s}".format(format_d(10, 3, det.ymax))
+            result += "{:s}\n".format(format_d(10, 3, det.zmax))
         elif det.geotyp in (SHGeoType.zone, SHGeoType.dzone, ):
-            header += "#   ZONE START:{:6d} ZONE END:{:6d}\n".format(int(det.xmin), int(det.xmax))
+            result += "#   ZONE START:{:6d} ZONE END:{:6d}\n".format(int(det.xmin), int(det.xmax))
         else:
-            ax = self._axis_name(det.geotyp, 0)
-            ay = self._axis_name(det.geotyp, 1)
-            az = self._axis_name(det.geotyp, 2)
-            header += "#   {:s} BIN:{:6d} {:s} BIN:{:6d} {:s} BIN:{:6d}\n".format(ax, det.nx, ay, det.ny, az, det.nz)
+            result += "#   {:s} BIN:{:6d} {:s} BIN:{:6d} {:s} BIN:{:6d}\n".format(self.ax, det.nx,
+                                                                                  self.ay, det.ny,
+                                                                                  self.az, det.nz)
+        return result
 
-        # scored value and optionally particle type
+    @staticmethod
+    def _header_scored_value(det):
+        """scored value and optionally particle type"""
+        result = ""
         if det.geotyp != SHGeoType.geomap:
-            header += "#   JPART:{:6d} DETECTOR TYPE: {:s}\n".format(det.particle, str(det.dettyp).ljust(10))
+            result += "#   JPART:{:6d} DETECTOR TYPE: {:s}\n".format(det.particle, str(det.dettyp).ljust(10))
         else:
             det_type_name = str(det.dettyp)
             if det.dettyp in (SHDetType.zone, SHDetType.medium, ):
                 det_type_name += "#"
-            header += "#                DETECTOR TYPE: {:s}\n".format(str(det_type_name).ljust(10))
+            result += "#                DETECTOR TYPE: {:s}\n".format(str(det_type_name).ljust(10))
+        return result
 
+    def _header_no_of_bins_and_prim(self, det):
+        from pymchelper.fortranformatter import format_d
+
+        header = ""
         # number of bins in each dimensions
         if det.geotyp not in (SHGeoType.plane, SHGeoType.dplane, SHGeoType.zone, SHGeoType.dzone):
-            header += "#   {:s} START:{:s}".format(ax, format_d(10, 3, det.xmin))
-            header += " {:s} START:{:s}".format(ay, format_d(10, 3, det.ymin))
-            header += " {:s} START:{:s}\n".format(az, format_d(10, 3, det.zmin))
-            header += "#   {:s} END  :{:s}".format(ax, format_d(10, 3, det.xmax))
-            header += " {:s} END  :{:s}".format(ay, format_d(10, 3, det.ymax))
-            header += " {:s} END  :{:s}\n".format(az, format_d(10, 3, det.zmax))
+            header += "#   {:s} START:{:s}".format(self.ax, format_d(10, 3, det.xmin))
+            header += " {:s} START:{:s}".format(self.ay, format_d(10, 3, det.ymin))
+            header += " {:s} START:{:s}\n".format(self.az, format_d(10, 3, det.zmin))
+            header += "#   {:s} END  :{:s}".format(self.ax, format_d(10, 3, det.xmax))
+            header += " {:s} END  :{:s}".format(self.ay, format_d(10, 3, det.ymax))
+            header += " {:s} END  :{:s}\n".format(self.az, format_d(10, 3, det.zmax))
 
         # number of primaries
         header += "#   PRIMARIES:" + format_d(10, 3, det.nstat) + "\n"
+
+        return header
+
+    def write(self, det):
+        from pymchelper.fortranformatter import format_e
+
+        self.ax = self._axis_name(det.geotyp, 0)
+        self.ay = self._axis_name(det.geotyp, 1)
+        self.az = self._axis_name(det.geotyp, 2)
+
+        header = self._header_first_line(det)
+
+        header += self._header_geometric_info(det)
+
+        header += self._header_scored_value(det)
+
+        header += self._header_no_of_bins_and_prim(det)
 
         # due to some bug in original bdo2txt converter, no header is generated for cylindrical mesh
         if det.geotyp in (SHGeoType.cyl, SHGeoType.dcyl, ):

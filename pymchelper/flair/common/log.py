@@ -63,13 +63,12 @@ __email__ = "Vasilis.Vlachoudis@cern.ch"
 _log = None
 
 
-def set(l):
+def set_log(l):
     global _log
     _log = l
 
 
 def say(*kw):
-    global _log
     txt = " ".join(map(str, kw))
     if _log:
         _log(txt)
@@ -77,5 +76,5 @@ def say(*kw):
         sys.stdout.write("%s\n" % (txt))
 
 
-def null(*kw):
+def null():
     pass

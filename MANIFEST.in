@@ -4,6 +4,7 @@
   include LICENSE
   include requirements.txt
   include tests/requirements-test.txt
+  include tests/res/shieldhit/converter/bdo2txt
   recursive-include docs *.py
   recursive-include docs *.rst
   recursive-include pymchelper *.py
@@ -12,9 +13,11 @@
   recursive-include tests *.png
   recursive-include tests *.dat
   recursive-include tests *.sh
-  include versioneer.py
-  include pymchelper/_version.py
-
+  recursive-include tests *.inp
+  recursive-include pymchelper *.db
+  recursive-include pymchelper *.ini
+  recursive-include pymchelper *.r
+  recursive-include tests *.exe
   exclude .gitkeep
   exclude .gitconfig
   exclude tox.ini
@@ -25,5 +28,3 @@
   prune install_deps.sh
   prune make_single_executable.sh
   prune tests/res/shieldhit/converter
-  prune tests/res/shieldhit/converter/bdo2txt
-  prune tests/res/shieldhit/converter/bdo2txt.exe

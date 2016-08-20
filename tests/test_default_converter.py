@@ -40,7 +40,7 @@ class TestDefaultConverter(unittest.TestCase):
     many_dir = os.path.join(main_dir, "many")
     bdo2txt_binary = shieldhit_binary()
 
-    def test_foo(self):
+    def test_shieldhit_files(self):
         # skip tests on MacOSX, as there is no suitable bdo2txt converter available yet
         if sys.platform.endswith('arwin'):
             return

@@ -59,11 +59,6 @@ import re
 import math
 import struct
 
-try:
-    import numpy
-except ImportError:
-    numpy = None
-
 import pymchelper.flair.common.fortran as fortran
 import pymchelper.flair.common.bmath as bmath
 from pymchelper.flair.common.log import say
@@ -98,7 +93,9 @@ class Usrxxx:
         self.reset()
         if filename is None:
             return
-        self.readHeader(filename)
+        f = self.readHeader(filename)
+        if f is not None and not f.closed:
+            f.close()
 
     # ----------------------------------------------------------------------
     def reset(self):
@@ -126,6 +123,8 @@ class Usrxxx:
         # Read header
         data = fortran.read(f)
         if data is None:
+            if not f.closed:
+                f.close()
             raise IOError("Invalid USRxxx file")
         size = len(data)
         over1b = 0
@@ -147,6 +146,8 @@ class Usrxxx:
              self.ncase, over1b, self.nbatch) = \
                 struct.unpack("=80s32sfiii", data)
         else:
+            if not f.closed:
+                f.close()
             raise IOError("Invalid USRxxx file")
 
         if over1b > 0:
@@ -180,7 +181,7 @@ class Usrxxx:
             return None
         f = open(self.file, "rb")
         f.seek(self.statpos)
-        for i in range(det):
+        for _ in range(det):
             fortran.skip(f)  # Detector Data
         data = fortran.read(f)
         f.close()
@@ -219,7 +220,7 @@ class Resnuclei(Usrxxx):
             self.evol = False
             self.irrdt = None
 
-        for i in range(1000):
+        for _ in range(1000):
             # Header
             data = fortran.read(f)
             if data is None:
@@ -239,6 +240,8 @@ class Resnuclei(Usrxxx):
                 break
 
             if size != 38:
+                if not f.closed:
+                    f.close()
                 raise IOError("Invalid RESNUCLEi file header size=%d" % (size))
 
             # Parse header
@@ -278,7 +281,7 @@ class Resnuclei(Usrxxx):
         if self.evol:
             fortran.skip(f)
 
-        for i in range(n):
+        for _ in range(n):
             fortran.skip(f)  # Detector Header & Data
             if self.evol:
                 fortran.skip(f)  # TDecay
@@ -354,7 +357,7 @@ class Usrbdx(Usrxxx):
         """Read boundary crossing detector information"""
         f = Usrxxx.readHeader(self, filename)
 
-        for i in range(1000):
+        for _ in range(1000):
             # Header
             data = fortran.read(f)
             if data is None:
@@ -380,6 +383,8 @@ class Usrbdx(Usrxxx):
                         fortran.skip(f)
                 break
             if size != 78:
+                if not f.closed:
+                    f.close()
                 raise IOError("Invalid USRBDX file")
 
             # Parse header
@@ -495,7 +500,7 @@ class Usrbin(Usrxxx):
         """Read USRBIN detector information"""
         f = Usrxxx.readHeader(self, filename)
 
-        for i in range(1000):
+        for _ in range(1000):
             # Header
             data = fortran.read(f)
             if data is None:
@@ -507,53 +512,55 @@ class Usrbin(Usrxxx):
                 self.statpos = f.tell()
                 break
             if size != 86:
+                if not f.closed:
+                    f.close()
                 raise IOError("Invalid USRBIN file")
 
             # Parse header
             header = struct.unpack("=i10siiffifffifffififff", data)
 
-            bin = Detector()
-            bin.nb = header[0]
-            bin.name = header[1].strip()
-            bin.type = header[2]
-            bin.score = header[3]
+            bin_det = Detector()
+            bin_det.nb = header[0]
+            bin_det.name = header[1].strip()
+            bin_det.type = header[2]
+            bin_det.score = header[3]
 
-            bin.xlow = float(bmath.format(header[4], 9, useD=False))
-            bin.xhigh = float(bmath.format(header[5], 9, useD=False))
-            bin.nx = header[6]
-            if bin.nx > 0 and bin.type not in (2, 12, 8, 18):
-                bin.dx = (bin.xhigh - bin.xlow) / float(bin.nx)
+            bin_det.xlow = float(bmath.format(header[4], 9, useD=False))
+            bin_det.xhigh = float(bmath.format(header[5], 9, useD=False))
+            bin_det.nx = header[6]
+            if bin_det.nx > 0 and bin_det.type not in (2, 12, 8, 18):
+                bin_det.dx = (bin_det.xhigh - bin_det.xlow) / float(bin_det.nx)
             else:
-                bin.dx = float(bmath.format(header[7], 9, useD=False))
+                bin_det.dx = float(bmath.format(header[7], 9, useD=False))
 
-            if bin.type in (1, 11):
-                bin.ylow = -math.pi
-                bin.yhigh = math.pi
+            if bin_det.type in (1, 11):
+                bin_det.ylow = -math.pi
+                bin_det.yhigh = math.pi
             else:
-                bin.ylow = float(bmath.format(header[8], 9, useD=False))
-                bin.yhigh = float(bmath.format(header[9], 9, useD=False))
-            bin.ny = header[10]
-            if bin.ny > 0 and bin.type not in (2, 12, 8, 18):
-                bin.dy = (bin.yhigh - bin.ylow) / float(bin.ny)
+                bin_det.ylow = float(bmath.format(header[8], 9, useD=False))
+                bin_det.yhigh = float(bmath.format(header[9], 9, useD=False))
+            bin_det.ny = header[10]
+            if bin_det.ny > 0 and bin_det.type not in (2, 12, 8, 18):
+                bin_det.dy = (bin_det.yhigh - bin_det.ylow) / float(bin_det.ny)
             else:
-                bin.dy = float(bmath.format(header[11], 9, useD=False))
+                bin_det.dy = float(bmath.format(header[11], 9, useD=False))
 
-            bin.zlow = float(bmath.format(header[12], 9, useD=False))
-            bin.zhigh = float(bmath.format(header[13], 9, useD=False))
-            bin.nz = header[14]
-            if bin.nz > 0 and bin.type not in (2, 12):  # 8=special with z=real
-                bin.dz = (bin.zhigh - bin.zlow) / float(bin.nz)
+            bin_det.zlow = float(bmath.format(header[12], 9, useD=False))
+            bin_det.zhigh = float(bmath.format(header[13], 9, useD=False))
+            bin_det.nz = header[14]
+            if bin_det.nz > 0 and bin_det.type not in (2, 12):  # 8=special with z=real
+                bin_det.dz = (bin_det.zhigh - bin_det.zlow) / float(bin_det.nz)
             else:
-                bin.dz = float(bmath.format(header[15], 9, useD=False))
+                bin_det.dz = float(bmath.format(header[15], 9, useD=False))
 
-            bin.lntzer = header[16]
-            bin.bk = header[17]
-            bin.b2 = header[18]
-            bin.tc = header[19]
+            bin_det.lntzer = header[16]
+            bin_det.bk = header[17]
+            bin_det.b2 = header[18]
+            bin_det.tc = header[19]
 
-            self.detector.append(bin)
+            self.detector.append(bin_det)
 
-            size = bin.nx * bin.ny * bin.nz * 4
+            size = bin_det.nx * bin_det.ny * bin_det.nz * 4
             if fortran.skip(f) != size:
                 raise IOError("Invalid USRBIN file")
         f.close()
@@ -647,7 +654,7 @@ class Mgdraw:
     # ----------------------------------------------------------------------
     # Read or skip next event from mgread structure
     # ----------------------------------------------------------------------
-    def readEvent(self, type=None):
+    def readEvent(self, e_type=None):
         # Read header
         data = fortran.read(self.hnd)
         if data is None:
@@ -661,19 +668,19 @@ class Mgdraw:
         self.nevent += 1
 
         if ndum > 0:
-            if type is None or type == 0:
+            if e_type is None or e_type == 0:
                 self.readTracking(ndum, mdum, jdum, edum, wdum)
             else:
                 fortran.skip(self.hnd)
             return 0
         elif ndum == 0:
-            if type is None or type == 1:
+            if e_type is None or e_type == 1:
                 self.readEnergy(mdum, jdum, edum, wdum)
             else:
                 fortran.skip(self.hnd)
             return 1
         else:
-            if type is None or type == 2:
+            if e_type is None or e_type == 2:
                 self.readSource(-ndum, mdum, jdum, edum, wdum)
             else:
                 fortran.skip(self.hnd)
