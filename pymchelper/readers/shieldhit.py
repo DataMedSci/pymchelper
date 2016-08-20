@@ -48,7 +48,7 @@ class SHBinaryReader:
                                      ('__fo8', '<i4'),    # 0xB2
                                      ('reclen', '<i4')])  # 0xB6
             # payload starts at 0xBA (186)
-            detector._payload_offset = 186
+            detector.payload_offset = 186
         else:
             # first figure out the length.
             header_dtype = np.dtype([('__fo1', '<i4'),
@@ -65,7 +65,7 @@ class SHBinaryReader:
                                      ('__fo8', '<i4'),
                                      ('reclen', '<i4')])
             # payload starts at 0x9E (158)
-            detector._payload_offset = 158
+            detector.payload_offset = 158
             
         header = np.fromfile(self.filename, header_dtype, count=1)
         detector.rec_size = header['reclen'][0] // 8
@@ -205,7 +205,7 @@ class SHBinaryReader:
             return
 
         # next read the data:
-        offset_str = "S"+str(detector._payload_offset)
+        offset_str = "S"+str(detector.payload_offset)
         record_dtype = np.dtype([('trash', offset_str), ('bin2', '<f8', detector.rec_size)])
         record = np.fromfile(self.filename, record_dtype, count=-1)
         # BIN(*)  : a large array holding results. Accessed using pointers.
