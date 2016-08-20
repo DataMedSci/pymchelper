@@ -1,7 +1,11 @@
 import os
 import unittest
+import logging
 from pymchelper import run
 from examples import generate_detect_shieldhit, generate_fluka_input
+from pymchelper.flair import Input
+
+logger = logging.getLogger(__name__)
 
 
 class TestCallMain(unittest.TestCase):
@@ -35,11 +39,35 @@ class TestCallMain(unittest.TestCase):
 class TestCallExample(unittest.TestCase):
     def test_shieldhit(self):
         generate_detect_shieldhit.main()
-        self.assertTrue(os.path.isfile("detect.dat"))
+        expected_filename = "detect.dat"
+
+        logger.info("checking presence of {:s} file".format(expected_filename))
+        self.assertTrue(os.path.isfile(expected_filename))
 
     def test_fluka(self):
         generate_fluka_input.main()
-        self.assertTrue(os.path.isfile("fl_sim.inp"))
+        expected_filename = "fl_sim.inp"
+
+        logger.info("checking presence of {:s} file".format(expected_filename))
+        self.assertTrue(os.path.isfile(expected_filename))
+
+        input = Input.Input()
+        input.read(expected_filename)
+
+        logger.info("checking presence of RANDOMIZ card")
+        self.assertIn("RANDOMIZ", input.cards)
+
+        logger.info("checking if there is only one RANDOMIZ card ")
+        self.assertEqual(len(input.cards["RANDOMIZ"]), 1)
+
+        logger.info("checking if RNG setting is correct ")
+        self.assertEqual(input.cards["RANDOMIZ"][0].whats()[2], 137)
+
+        logger.info("checking presence of USRBIN cards")
+        self.assertIn("USRBIN", input.cards)
+
+        logger.info("checking if there are 8 USRBIN cards")
+        self.assertEqual(len(input.cards["USRBIN"]), 2 * 4)
 
 
 if __name__ == '__main__':
