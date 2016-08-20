@@ -1,6 +1,6 @@
 versioneer
-pytest<3.0 ; python_version >= '3.2' and python_version < '3.3'# py 3.2
-pytest ; python_version < '3.0' and python_version >= '3.3'# py different than 3.2
+pytest<3.0 ; python_version >= '3.2' and python_version < '3.3'  # py 3.2
+pytest ; python_version < '3.0' and python_version >= '3.3'  # py different than 3.2
 pytest-capturelog
 pytest-timeout
 pytest-xdist
