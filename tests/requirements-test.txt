@@ -1,11 +1,12 @@
+# micro-language and markers are described here: https://www.python.org/dev/peps/pep-0496/
 versioneer
+# pytest v 3.0, released in 08.2016 doesn't work well with Python 3.2
 pytest<3.0 ; python_version >= '3.2' and python_version < '3.3'  # py 3.2
 pytest ; python_version < '3.0' and python_version >= '3.3'  # py different than 3.2
 pytest-capturelog
 pytest-timeout
 pytest-xdist
 tox
-# micro-language and markers (os_name, python_version) are descibed here: https://www.python.org/dev/peps/pep-0496/
-matplotlib==1.5.1 ; os_name == 'nt' or sys_platform == 'darwin' or sys_platform == 'Darwin'   # MacOSX and Windows
-matplotlib<2.0 ; python_version >= '3.2' and python_version < '3.4' and os_name != 'nt' and sys_platform != 'darwin' and sys_platform != 'Darwin'  # Linux py 3.2 and 3.3
-matplotlib ; (python_version < '3.0' or python_version >= '3.4') and os_name != 'nt' and sys_platform != 'darwin' and sys_platform != 'Darwin' # Linux py 2.7 , 3.4 and higher
+# matplotlib v 2.0, doesn't work well with Python 3.2 and 3.3
+matplotlib==1.5.1 ; python_version >= '3.2' and python_version < '3.4'  # py 3.2 and 3.3
+matplotlib ; python_version < '3.0' or python_version >= '3.4'  # py 2.7 , 3.4 and higher
