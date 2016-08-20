@@ -138,14 +138,14 @@ class SHBinaryReader:
         :return:
         """
         _geotyp_units = {
-            SHGeoType.msh: ("cm", "cm", "cm", "(nil)",),
-            SHGeoType.dmsh: ("cm", "cm", "cm", "#/MeV",),
-            SHGeoType.cyl: ("cm", "cm", "radians", "(nil)",),
-            SHGeoType.dcyl: ("cm", "cm", "radians", "#/MeV",),
-            SHGeoType.zone: ("zone number", "(nil)", "(nil)", "(nil)",),
-            SHGeoType.voxscore: ("cm", "cm", "cm", "(nil)",),
-            SHGeoType.geomap: ("cm", "cm", "cm", "(nil)",),
-            SHGeoType.plane: ("cm", "cm", "cm", "(nil)",),  # TODO fix me later
+            SHGeoType.msh: ("cm", "cm", "cm", "(nil)"),
+            SHGeoType.dmsh: ("cm", "cm", "cm", "#/MeV"),
+            SHGeoType.cyl: ("cm", "cm", "radians", "(nil)"),
+            SHGeoType.dcyl: ("cm", "cm", "radians", "#/MeV"),
+            SHGeoType.zone: ("zone number", "(nil)", "(nil)", "(nil)"),
+            SHGeoType.voxscore: ("cm", "cm", "cm", "(nil)"),
+            SHGeoType.geomap: ("cm", "cm", "cm", "(nil)"),
+            SHGeoType.plane: ("cm", "cm", "cm", "(nil)"),  # TODO fix me later
         }
         _default_units = ("(nil)", "(nil)", "(nil)", "(nil)")
         return _geotyp_units.get(geotyp, _default_units)
@@ -159,34 +159,34 @@ class SHBinaryReader:
         :return:
         """
         if geotyp == SHGeoType.zone:
-            dose_units = (" MeV/primary", "Dose*volume", ),
-            alanine_units = ("MeV/primary", "Alanine RE*Dose*volume", ),
+            dose_units = (" MeV/primary", "Dose*volume")
+            alanine_units = ("MeV/primary", "Alanine RE*Dose*volume")
         else:
-            dose_units = (" MeV/g/primary", "Dose", ),
-            alanine_units = ("MeV/g/primary", "Alanine RE*Dose", ),
+            dose_units = (" MeV/g/primary", "Dose")
+            alanine_units = ("MeV/g/primary", "Alanine RE*Dose")
 
         _detector_units = {
-            SHDetType.unknown: ("(nil)", "None", ),
-            SHDetType.energy: ("MeV/primary", "Energy", ),
-            SHDetType.fluence: (" cm^-2/primary", "Fluence", ),
-            SHDetType.crossflu: (" cm^-2/primary", "Planar fluence", ),
-            SHDetType.letflu: (" MeV/cm", "LET fluence", ),
+            SHDetType.unknown: ("(nil)", "None"),
+            SHDetType.energy: ("MeV/primary", "Energy"),
+            SHDetType.fluence: (" cm^-2/primary", "Fluence"),
+            SHDetType.crossflu: (" cm^-2/primary", "Planar fluence"),
+            SHDetType.letflu: (" MeV/cm", "LET fluence"),
             SHDetType.dose: dose_units,
-            SHDetType.dlet: ("MeV/cm", "dose-averaged LET", ),
-            SHDetType.tlet: ("MeV/cm", "track-averaged LET", ),
-            SHDetType.avg_energy: ("MeV", "Average energy", ),
-            SHDetType.avg_beta: ("(dimensionless)", "Average beta", ),
-            SHDetType.material: ("(nil)", "Material number", ),
+            SHDetType.dlet: ("MeV/cm", "dose-averaged LET"),
+            SHDetType.tlet: ("MeV/cm", "track-averaged LET"),
+            SHDetType.avg_energy: ("MeV", "Average energy"),
+            SHDetType.avg_beta: ("(dimensionless)", "Average beta"),
+            SHDetType.material: ("(nil)", "Material number"),
             SHDetType.alanine: alanine_units,
-            SHDetType.counter: ("/primary", "Particle counter", ),
-            SHDetType.pet: ("/primary", "PET isotopes", ),
-            SHDetType.dletg: ("MeV/cm", "dose-averaged LET", ),
-            SHDetType.tletg: ("MeV/cm", "track-averaged LET", ),
-            SHDetType.zone: ("(dimensionless)", "Zone#", ),
-            SHDetType.medium: ("(dimensionless)", "Medium#", ),
+            SHDetType.counter: ("/primary", "Particle counter"),
+            SHDetType.pet: ("/primary", "PET isotopes"),
+            SHDetType.dletg: ("MeV/cm", "dose-averaged LET"),
+            SHDetType.tletg: ("MeV/cm", "track-averaged LET"),
+            SHDetType.zone: ("(dimensionless)", "Zone#"),
+            SHDetType.medium: ("(dimensionless)", "Medium#"),
             SHDetType.rho: ("g/cm^3", "Density"),
         }
-        return _detector_units.get(detector_type, ("(nil)", "(nil)",))
+        return _detector_units.get(detector_type, ("(nil)", "(nil)"))
 
     def read_payload(self, detector):
         logger.info("Reading data: " + self.filename)
