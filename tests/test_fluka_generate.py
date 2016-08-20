@@ -1,7 +1,5 @@
 import os
-import tempfile
 import unittest
-import glob
 import logging
 
 import tests.res.fluka.generated.generate_input as gen
