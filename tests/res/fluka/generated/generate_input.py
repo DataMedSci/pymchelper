@@ -541,7 +541,7 @@ def main(args=sys.argv[1:]):
     parser.add_argument("outputdir", help='output directory', type=str)
     parsed_args = parser.parse_args(args)
 
-    logger.info("outputdir " + parsed_args.outdir)
+    logger.info("outputdir " + parsed_args.outputdir)
 
     # geomap_text = generate_geomap()
     # save_file(parsed_args.outputdir, "detect_geomap.dat", geomap_text)
