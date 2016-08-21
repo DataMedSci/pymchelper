@@ -74,7 +74,6 @@ class SHTripCubeWriter:
             cube.write(self.output_corename)
 
         else:
-            import sys
-            sys.stderr.write("ERROR: can only write dose- or ",
-                             "LET-type detectors to tripcube target.\n")
-            sys.exit(73)  # Exit configuration error
+            logger.error("Tripcube target is only allowed with dose- " +
+                         "or LET-type detectors.")
+            raise Exception("Illegal detector for tripcube.")
