@@ -1476,6 +1476,7 @@ class Card:
         # find card information from _cardInfo dictionary
         self.info = CardInfo.get(tag)
         if self.info.name == ERROR:
+            raise Exception("Incompatible tag \"{:s}\"".format(tag))
             return
 
         if len(tag) == 3 and "Geometry" in self.info.group:
@@ -3403,12 +3404,9 @@ class Input:
 
         if self.verbose:
             say("GEOBEGIN: Geometry format:", self.geoFormat)
-        try:
-            self._parseBodies()
-            self._parseRegions()
-            self._parseVolume()
-        except:
-            say(sys.exc_info()[0])
+        self._parseBodies()
+        self._parseRegions()
+        self._parseVolume()
 
         # Correct last body name to VOXEL
         if voxel and self.geoFormat != FORMAT_FREE:
@@ -3574,11 +3572,11 @@ class Input:
                     return
 
                 # Check for region continuation
-                elif line and string.find("+-|()", line[0]) >= 0:
+                elif line and line[0] in "+-|()":
                     if self._comment:
                         oldcomment = self._comment  # remember comment
                         # add region
-                        # card = self._addRegion(name, neighbors, comment, expstr, _cardEnable) # TODO never used ?
+                        self._addRegion(name, neighbors, comment, expstr, _cardEnable)
 
                         name = "&"  # continuation card
                         neighbors = 0
