@@ -3172,7 +3172,7 @@ class Input:
             elif card.tag == "GEOEND":
                 location = 0
 
-        # f = inp._openFile(includecard.sdum(), "r") # TODO never used
+        inp._openFile(includecard.sdum(), "r")
         if location == 0:
             inp.parse()
         elif location == 1:
@@ -3221,7 +3221,7 @@ class Input:
 
             # Handle card exceptions
             # 1. Continuation
-            if isinstance(sdum, str) and sdum.find("&") >= 0 and tag == prev_tag:
+            if isinstance(sdum, str) and ("&" in sdum) and tag == prev_tag:
                 # Find last card and append whats
                 try:
                     card = self.cards[tag][-1]
@@ -3332,8 +3332,8 @@ class Input:
                         raise Exception("Error parsing geometry")
                     self.geoOutFile = geoOutFile.strip()
 
-                # if self.geoFile != "": # TODO never used
-                #     fgeo = self._openFile(self.geoFile, "r", tag)
+                if self.geoFile != "":
+                    self._openFile(self.geoFile, "r", tag)
                 self._parseGeometry(card)
                 continue
 
@@ -3598,7 +3598,7 @@ class Input:
                     thisProp = self._prop  # and properties
                     self._prop = prop  # restore old properties
                     # New region definition
-                    # card = self._addRegion(name, neighbors, comment, expstr, _cardEnable) # TODO never used ?
+                    self._addRegion(name, neighbors, comment, expstr, _cardEnable)
 
                     name = match.group(1)
                     neighbors = match.group(2)

@@ -21,17 +21,17 @@ def generate_fluka_file(output_filename):
       - names instead of numbers are used as identifies of particles, materials and regions
 
     :param output_filename: output filename
-    :return: None
+    :return: generated Fluka object
     """
 
     # create empty input file object
-    input_file = Input.Input()
+    input_configuration = Input.Input()
 
     # add title
-    input_file.addCard(Card("TITLE", extra="proton beam simulation"))
+    input_configuration.addCard(Card("TITLE", extra="proton beam simulation"))
 
     # add default physics settings
-    input_file.addCard(Card("DEFAULTS", what=["HADROTHE"], comment="default physics settings for hadron therapy"))
+    input_configuration.addCard(Card("DEFAULTS", what=["HADROTHE"], comment="default physics for hadron therapy"))
 
     # add beam characteristics, see http://www.fluka.org/fluka.php?id=man_onl&sub=12
     beam = Card("BEAM", comment="beam characteristics")
@@ -41,36 +41,41 @@ def generate_fluka_file(output_filename):
     # The beam profile is assumed to be rectangular
     beam.setWhat(5, 2.0)  # WHAT(5) > 0.0 : If WHAT(6) > 0.0, beam width in y-direction in cm.
     # The beam profile is assumed to be rectangular.
-    input_file.addCard(Card("BEAM", what=["PROTON", -0.06, 0.0, 0.0, -2.0, -2.0], comment="beam source"))
+    input_configuration.addCard(Card("BEAM", what=["PROTON", -0.06, 0.0, 0.0, -2.0, -2.0], comment="beam source"))
 
     # add beam source position, see http://www.fluka.org/fluka.php?id=man_onl&sub=14
     beam_pos = Card("BEAMPOS", comment="beam source position")
     beam_pos.setWhat(1, 0.0)  # WHAT(1) = x-coordinate of the spot centre.
     beam_pos.setWhat(2, 0.0)  # WHAT(2) = y-coordinate of the spot centre.
     beam_pos.setWhat(3, -100.0)  # WHAT(3) = z-coordinate of the spot centre.
-    input_file.addCard(beam_pos)
+    input_configuration.addCard(beam_pos)
 
     # set geometry, in separate function
-    set_geometry(input_file)
+    set_geometry(input_configuration)
 
     # add scoring, in separate function
-    add_scoring(input_file)
+    add_scoring(input_configuration)
 
     # random number generator settings, see http://www.fluka.org/fluka.php?id=man_onl&sub=66
     rng_card = Card("RANDOMIZ")
     rng_card.setComment("random number generator settings")
     rng_card.setWhat(2, 137)  # Different numbers input as WHAT(2) will initialise different and independent
     # random number sequences, allowing the user to run several jobs in parallel for the same problem
-    input_file.addCard(rng_card)
+    input_configuration.addCard(rng_card)
 
     # number of particles to simulate, see http://www.fluka.org/fluka.php?id=man_onl&sub=73
     start_card = Card("START")
     start_card.setComment("number of particles to simulate")
     start_card.setWhat(1, 1000)  # WHAT(1) - maximum number of primary histories simulated in the run
-    input_file.addCard(start_card)
+    input_configuration.addCard(start_card)
+
+    # end of input configuration http://www.fluka.org/fluka.php?id=man_onl&sub=76
+    input_configuration.addCard(Card("STOP"))
 
     # write file to the disk
-    input_file.write(output_filename)
+    input_configuration.write(output_filename)
+
+    return input_configuration
 
 
 def set_geometry(input_file):
@@ -115,6 +120,9 @@ def set_geometry(input_file):
     target_rcc.setWhat(7, 5.0)  # WHAT(7) - radius (in free format)
     input_file.addCard(target_rcc)
 
+    # end of body region
+    input_file.addCard(Card("END"))
+
     # list of regions, see http://www.fluka.org/fluka.php?id=man_onl&sub=94
     # 1. outer black body region
     blk_body_zone = Card("REGION")
@@ -136,6 +144,13 @@ def set_geometry(input_file):
     target_zone.setSdum("Z_TARGET")
     target_zone.addZone('+target')
     input_file.addCard(target_zone)
+
+    # end of target region
+    input_file.addCard(Card("END"))
+
+    # geometry description ends here http://www.fluka.org/fluka.php?id=man_onl&sub=39
+    geo_end = Card("GEOEND", comment="geometry description ends here")
+    input_file.addCard(geo_end)
 
     # material assignment, see http://www.fluka.org/fluka.php?id=man_onl&sub=10
     blk_body_mat = Card("ASSIGNMA")
@@ -229,7 +244,7 @@ def add_scoring(input_file):
 
         # finally add generated cards to input structure
         input_file.addCard(card1)
-        input_file.addCard(card2)
+        card1.appendWhats(card2.whats()[1:])
 
 #
 # def zone_geometries():

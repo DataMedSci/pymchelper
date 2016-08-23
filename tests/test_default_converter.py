@@ -57,8 +57,9 @@ class TestDefaultConverter(unittest.TestCase):
                 logger.info("Creating directory {:s}".format(working_dir))
 
                 # generate output file with native SHIELD-HIT12A converter
-                ret_value = run_bdo2txt_binary(
-                    inputfile_rel_path, working_dir=working_dir, bdo2txt_path=self.bdo2txt_binary)
+                ret_value = run_bdo2txt_binary(inputfile_rel_path,
+                                               working_dir=working_dir,
+                                               bdo2txt_path=self.bdo2txt_binary)
                 self.assertEqual(ret_value, 0)
 
                 # assuming input name 1.bdo, output file will be called 1.txt
@@ -87,8 +88,8 @@ class TestDefaultConverter(unittest.TestCase):
                             logger.info(item)
                 self.assertTrue(comparison)
 
-                shutil.rmtree(working_dir)
                 logger.info("Removing directory {:s}".format(working_dir))
+                shutil.rmtree(working_dir)
 
 
 if __name__ == '__main__':
