@@ -83,10 +83,8 @@ install:
 script:
   - if [[ $TRAVIS_OS_NAME == "linux" ]]; then travis_wait tox --notest && tox -- -n 1 ; fi
   - if [[ $TRAVIS_OS_NAME == "osx" ]]; then travis_wait 60 bash ./.travis/run_osx.sh ; fi
-
-after_success:
- # deploy to normal pypi server if tag is present
-  - if [[ $TRAVIS_TAG != "" ]] && [[ $TOXENV == "packaging" ]]; then bash .travis/deploy_package.sh pypi ; fi
+# in case all previous commands in script section succeeded, run deploy (if tag is present)
+  - if [[ "$TRAVIS_TEST_RESULT" == "0" ]] && [[ $TRAVIS_TAG != "" ]] && [[ $TOXENV == "packaging" ]]; then bash .travis/deploy_package.sh pypi ; fi
 
 notifications:
   email:
