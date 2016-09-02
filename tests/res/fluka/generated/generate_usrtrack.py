@@ -1,9 +1,6 @@
-from collections import OrderedDict
 from itertools import product
 
 from pymchelper.flair.Input import Card
-
-from pymchelper.shieldhit.detector.geometry import CarthesianMesh
 
 
 def add_scoring_filters_track(input_file):
@@ -19,7 +16,7 @@ def add_scoring_filters_track(input_file):
                  "bp": "BEAMPART",
                  "d": "DOSE"}
 
-    mesh_types = { "1" : 1}
+    mesh_types = {"1": 1}
 
     # Fluka is using concept of output unit numbers, this is starting number,
     # for each new scorer will be decreased by one
