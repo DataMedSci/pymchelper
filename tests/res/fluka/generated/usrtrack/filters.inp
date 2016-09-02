@@ -34,20 +34,18 @@ USRTRACK         0.0    PROTON      -21.                              p_1
 USRTRACK         0.0  ALL-CHAR      -22.                              ac_1
 * scoring ENERGY on mesh 1
 USRTRACK         0.0    ENERGY      -23.                              e_1
-* scoring DOSE on mesh 1
-USRTRACK         0.0      DOSE      -24.                              d_1
 * scoring ALL-PART on mesh 1
-USRTRACK         0.0  ALL-PART      -25.                              ap_1
+USRTRACK         0.0  ALL-PART      -24.                              ap_1
 * scoring BEAMPART on mesh 1
-USRTRACK         0.0  BEAMPART      -26.                              bp_1
+USRTRACK         0.0  BEAMPART      -25.                              bp_1
 * scoring PHOTON on mesh 1
-USRTRACK         0.0    PHOTON      -27.                              ph_1
+USRTRACK         0.0    PHOTON      -26.                              ph_1
 * scoring ALL-NEUT on mesh 1
-USRTRACK         0.0  ALL-NEUT      -28.                              an_1
+USRTRACK         0.0  ALL-NEUT      -27.                              an_1
 * scoring NUCLEONS on mesh 1
-USRTRACK         0.0  NUCLEONS      -29.                              nuc_1
+USRTRACK         0.0  NUCLEONS      -28.                              nuc_1
 * scoring NEUTRON on mesh 1
-USRTRACK         0.0   NEUTRON      -30.                              n_1
+USRTRACK         0.0   NEUTRON      -29.                              n_1
 * random number generator settings
 RANDOMIZ                  137.
 * number of particles to simulate

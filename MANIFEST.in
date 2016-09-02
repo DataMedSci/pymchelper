@@ -18,6 +18,7 @@
   recursive-include pymchelper *.ini
   recursive-include pymchelper *.r
   recursive-include tests *.exe
+  recursive-include tests *_fort.*
   exclude .gitkeep
   exclude .gitconfig
   exclude tox.ini

@@ -13,8 +13,7 @@ def add_scoring_filters_track(input_file):
                  "an": "ALL-NEUT",
                  "nuc": "NUCLEONS",
                  "e": "ENERGY",
-                 "bp": "BEAMPART",
-                 "d": "DOSE"}
+                 "bp": "BEAMPART" }
 
     mesh_types = {"1": 1}
 
