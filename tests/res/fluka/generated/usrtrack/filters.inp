@@ -1,0 +1,55 @@
+TITLE
+proton beam simulation
+* default physics for hadron therapy
+DEFAULTS                                                              HADROTHE
+* beam characteristics
+BEAM           -0.12                           2.0       2.0          PROTON
+* beam source position
+BEAMPOS          0.0       0.0    -100.0
+* geometry description starts here
+GEOBEGIN                                                              COMBNAME
+    0    0          
+* black body sphere
+SPH blkbody    0.0 0.0 0.0 10000.0
+* air shpere
+SPH air        0.0 0.0 0.0 100.0
+* target cylinder
+RCC target     0.0 0.0 0.0 0.0 0.0 10.0 5.0
+END
+* outer black body region
+Z_BBODY      5 +blkbody -air
+* inner air region
+Z_AIR        5 +air -target
+* target region
+Z_TARGET     5 +target
+END
+* geometry description ends here
+GEOEND
+ASSIGNMA    BLCKHOLE   Z_BBODY
+ASSIGNMA         AIR     Z_AIR
+ASSIGNMA       WATER  Z_TARGET
+* scoring PROTON on mesh 1
+USRTRACK         0.0    PROTON      -21.                              p_1
+* scoring ALL-CHAR on mesh 1
+USRTRACK         0.0  ALL-CHAR      -22.                              ac_1
+* scoring ENERGY on mesh 1
+USRTRACK         0.0    ENERGY      -23.                              e_1
+* scoring DOSE on mesh 1
+USRTRACK         0.0      DOSE      -24.                              d_1
+* scoring ALL-PART on mesh 1
+USRTRACK         0.0  ALL-PART      -25.                              ap_1
+* scoring BEAMPART on mesh 1
+USRTRACK         0.0  BEAMPART      -26.                              bp_1
+* scoring PHOTON on mesh 1
+USRTRACK         0.0    PHOTON      -27.                              ph_1
+* scoring ALL-NEUT on mesh 1
+USRTRACK         0.0  ALL-NEUT      -28.                              an_1
+* scoring NUCLEONS on mesh 1
+USRTRACK         0.0  NUCLEONS      -29.                              nuc_1
+* scoring NEUTRON on mesh 1
+USRTRACK         0.0   NEUTRON      -30.                              n_1
+* random number generator settings
+RANDOMIZ                  137.
+* number of particles to simulate
+START          1000.
+STOP

@@ -7,6 +7,7 @@ import logging
 from tests.res.fluka.generated.generate_common import generate_fluka_file
 from tests.res.fluka.generated.generate_common import set_geometry
 from tests.res.fluka.generated.generate_usrbin import add_scoring_dimensions, add_scoring_filters
+from tests.res.fluka.generated.generate_usrtrack import add_scoring_filters_track
 
 logger = logging.getLogger(__name__)
 
@@ -42,8 +43,7 @@ def generate_resnuclei(dirname):
 def generate_usrtrack(dirname):
     if not os.path.exists(dirname):
         os.makedirs(dirname)
-    # TODO
-    pass
+    generate_fluka_file(os.path.join(dirname, "filters.inp"), set_geometry, add_scoring_filters_track)
 
 
 def main(args=sys.argv[1:]):
