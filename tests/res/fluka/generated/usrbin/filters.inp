@@ -1,0 +1,95 @@
+TITLE
+proton beam simulation
+* default physics for hadron therapy
+DEFAULTS                                                              HADROTHE
+* beam characteristics
+BEAM           -0.12                           2.0       2.0          PROTON
+* beam source position
+BEAMPOS          0.0       0.0    -100.0
+* geometry description starts here
+GEOBEGIN                                                              COMBNAME
+    0    0          
+* black body sphere
+SPH blkbody    0.0 0.0 0.0 10000.0
+* air shpere
+SPH air        0.0 0.0 0.0 100.0
+* target cylinder
+RCC target     0.0 0.0 0.0 0.0 0.0 10.0 5.0
+END
+* outer black body region
+Z_BBODY      5 +blkbody -air
+* inner air region
+Z_AIR        5 +air -target
+* target region
+Z_TARGET     5 +target
+END
+* geometry description ends here
+GEOEND
+ASSIGNMA    BLCKHOLE   Z_BBODY
+ASSIGNMA         AIR     Z_AIR
+ASSIGNMA       WATER  Z_TARGET
+* scoring PROTON on mesh z
+USRBIN           0.0    PROTON      -21.       1.0       1.0      30.0p_z
+USRBIN          -1.0      -1.0       0.0        1.        1.       10. &
+* scoring PROTON on mesh xy
+USRBIN           0.0    PROTON      -22.       2.0       2.0      16.0p_xy
+USRBIN          -2.0      -2.0      14.0       10.       10.        1. &
+* scoring ALL-CHAR on mesh z
+USRBIN           0.0  ALL-CHAR      -23.       1.0       1.0      30.0ac_z
+USRBIN          -1.0      -1.0       0.0        1.        1.       10. &
+* scoring ALL-CHAR on mesh xy
+USRBIN           0.0  ALL-CHAR      -24.       2.0       2.0      16.0ac_xy
+USRBIN          -2.0      -2.0      14.0       10.       10.        1. &
+* scoring ENERGY on mesh z
+USRBIN           0.0    ENERGY      -25.       1.0       1.0      30.0e_z
+USRBIN          -1.0      -1.0       0.0        1.        1.       10. &
+* scoring ENERGY on mesh xy
+USRBIN           0.0    ENERGY      -26.       2.0       2.0      16.0e_xy
+USRBIN          -2.0      -2.0      14.0       10.       10.        1. &
+* scoring DOSE on mesh z
+USRBIN           0.0      DOSE      -27.       1.0       1.0      30.0d_z
+USRBIN          -1.0      -1.0       0.0        1.        1.       10. &
+* scoring DOSE on mesh xy
+USRBIN           0.0      DOSE      -28.       2.0       2.0      16.0d_xy
+USRBIN          -2.0      -2.0      14.0       10.       10.        1. &
+* scoring ALL-PART on mesh z
+USRBIN           0.0  ALL-PART      -29.       1.0       1.0      30.0ap_z
+USRBIN          -1.0      -1.0       0.0        1.        1.       10. &
+* scoring ALL-PART on mesh xy
+USRBIN           0.0  ALL-PART      -30.       2.0       2.0      16.0ap_xy
+USRBIN          -2.0      -2.0      14.0       10.       10.        1. &
+* scoring BEAMPART on mesh z
+USRBIN           0.0  BEAMPART      -31.       1.0       1.0      30.0bp_z
+USRBIN          -1.0      -1.0       0.0        1.        1.       10. &
+* scoring BEAMPART on mesh xy
+USRBIN           0.0  BEAMPART      -32.       2.0       2.0      16.0bp_xy
+USRBIN          -2.0      -2.0      14.0       10.       10.        1. &
+* scoring PHOTON on mesh z
+USRBIN           0.0    PHOTON      -33.       1.0       1.0      30.0ph_z
+USRBIN          -1.0      -1.0       0.0        1.        1.       10. &
+* scoring PHOTON on mesh xy
+USRBIN           0.0    PHOTON      -34.       2.0       2.0      16.0ph_xy
+USRBIN          -2.0      -2.0      14.0       10.       10.        1. &
+* scoring ALL-NEUT on mesh z
+USRBIN           0.0  ALL-NEUT      -35.       1.0       1.0      30.0an_z
+USRBIN          -1.0      -1.0       0.0        1.        1.       10. &
+* scoring ALL-NEUT on mesh xy
+USRBIN           0.0  ALL-NEUT      -36.       2.0       2.0      16.0an_xy
+USRBIN          -2.0      -2.0      14.0       10.       10.        1. &
+* scoring NUCLEONS on mesh z
+USRBIN           0.0  NUCLEONS      -37.       1.0       1.0      30.0nuc_z
+USRBIN          -1.0      -1.0       0.0        1.        1.       10. &
+* scoring NUCLEONS on mesh xy
+USRBIN           0.0  NUCLEONS      -38.       2.0       2.0      16.0nuc_xy
+USRBIN          -2.0      -2.0      14.0       10.       10.        1. &
+* scoring NEUTRON on mesh z
+USRBIN           0.0   NEUTRON      -39.       1.0       1.0      30.0n_z
+USRBIN          -1.0      -1.0       0.0        1.        1.       10. &
+* scoring NEUTRON on mesh xy
+USRBIN           0.0   NEUTRON      -40.       2.0       2.0      16.0n_xy
+USRBIN          -2.0      -2.0      14.0       10.       10.        1. &
+* random number generator settings
+RANDOMIZ                  137.
+* number of particles to simulate
+START          1000.
+STOP
