@@ -37,7 +37,7 @@ def generate_fluka_file(output_filename):
     # The beam profile is assumed to be rectangular
     beam.setWhat(5, 2.0)  # WHAT(5) > 0.0 : If WHAT(6) > 0.0, beam width in y-direction in cm.
     # The beam profile is assumed to be rectangular.
-    input_configuration.addCard(Card("BEAM", what=["PROTON", -0.06, 0.0, 0.0, -2.0, -2.0], comment="beam source"))
+    input_configuration.addCard(beam)
 
     # add beam source position, see http://www.fluka.org/fluka.php?id=man_onl&sub=14
     beam_pos = Card("BEAMPOS", comment="beam source position")
