@@ -50,6 +50,46 @@
 # DAMAGES.
 #
 
+# input useful functions:
+#  - read/write : read/write an input file
+#  - clone
+# - checkFormat(card) FORMAT_FREE / FORMAT_SINGLE
+# - addCard(card)
+# - delCard(card)
+# - delTag(tag) - delete all cards with specific tag
+# - delGeometryCards
+# - replaceCard(position, card)
+# - convert2Names - Convert input to names and check for obsolete and/or non-valid cards
+# - validate - ??
+# - checkNumbering - ??
+# - minimumInput
+# - renumber
+#
+# Card useful functions:
+# - __init__(self, tag, what=None, comment="", extra="")
+# - clone
+# - appendWhats(self, what, pos=None)
+# - appendComment(self, comment):
+# - validate(self, case=None):
+# - convert(self, tonames=True)
+# - whats(self), nwhats()
+# - sdum
+# - extra
+# - comment
+# - isGeo
+# - type
+# - tag
+# - what(self, n)
+# - setComment(self, comment="")
+# - setWhats(self, whats)
+# - setSdum(self, s)
+# - setExtra(self, e)
+# - setWhat(self, w, v)
+# - units(self, absolute=True) units used by card
+# - commentStr(self)
+# - def toStr(self, fmt=None)
+# - addZone(self, zone)
+
 
 import os
 import re
@@ -1436,6 +1476,7 @@ class Card:
         # find card information from _cardInfo dictionary
         self.info = CardInfo.get(tag)
         if self.info.name == ERROR:
+            raise Exception("Incompatible tag \"{:s}\"".format(tag))
             return
 
         if len(tag) == 3 and "Geometry" in self.info.group:
@@ -3131,7 +3172,7 @@ class Input:
             elif card.tag == "GEOEND":
                 location = 0
 
-        # f = inp._openFile(includecard.sdum(), "r") # TODO never used
+        inp._openFile(includecard.sdum(), "r")
         if location == 0:
             inp.parse()
         elif location == 1:
@@ -3180,7 +3221,7 @@ class Input:
 
             # Handle card exceptions
             # 1. Continuation
-            if isinstance(sdum, str) and sdum.find("&") >= 0 and tag == prev_tag:
+            if isinstance(sdum, str) and ("&" in sdum) and tag == prev_tag:
                 # Find last card and append whats
                 try:
                     card = self.cards[tag][-1]
@@ -3291,8 +3332,8 @@ class Input:
                         raise Exception("Error parsing geometry")
                     self.geoOutFile = geoOutFile.strip()
 
-                # if self.geoFile != "": # TODO never used
-                #     fgeo = self._openFile(self.geoFile, "r", tag)
+                if self.geoFile != "":
+                    self._openFile(self.geoFile, "r", tag)
                 self._parseGeometry(card)
                 continue
 
@@ -3363,12 +3404,9 @@ class Input:
 
         if self.verbose:
             say("GEOBEGIN: Geometry format:", self.geoFormat)
-        try:
-            self._parseBodies()
-            self._parseRegions()
-            self._parseVolume()
-        except:
-            say(sys.exc_info()[0])
+        self._parseBodies()
+        self._parseRegions()
+        self._parseVolume()
 
         # Correct last body name to VOXEL
         if voxel and self.geoFormat != FORMAT_FREE:
@@ -3534,11 +3572,11 @@ class Input:
                     return
 
                 # Check for region continuation
-                elif line and string.find("+-|()", line[0]) >= 0:
+                elif line and line[0] in "+-|()":
                     if self._comment:
                         oldcomment = self._comment  # remember comment
                         # add region
-                        # card = self._addRegion(name, neighbors, comment, expstr, _cardEnable) # TODO never used ?
+                        self._addRegion(name, neighbors, comment, expstr, _cardEnable)
 
                         name = "&"  # continuation card
                         neighbors = 0
@@ -3560,7 +3598,7 @@ class Input:
                     thisProp = self._prop  # and properties
                     self._prop = prop  # restore old properties
                     # New region definition
-                    # card = self._addRegion(name, neighbors, comment, expstr, _cardEnable) # TODO never used ?
+                    self._addRegion(name, neighbors, comment, expstr, _cardEnable)
 
                     name = match.group(1)
                     neighbors = match.group(2)
