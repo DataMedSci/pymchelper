@@ -152,7 +152,6 @@ setuptools.setup(
         ],
     },
     install_requires=[
-        'enum34',
         'numpy',
     ],
     cmdclass=get_cmdclass()
