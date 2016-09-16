@@ -1,3 +1,5 @@
+# before commiting check this file here: https://lint.travis-ci.org/
+
 language: python
 
 cache:
@@ -82,7 +84,7 @@ install:
   - if [[ $TRAVIS_OS_NAME == "osx" ]]; then travis_wait 60 bash ./.travis/install_osx.sh ; fi
 
 script:
-  - if [[ $TRAVIS_OS_NAME == "linux" ]]; then travis_wait tox --notest && tox -- -n 8 ; fi
+  - if [[ $TRAVIS_OS_NAME == "linux" ]]; then travis_wait tox --notest && travis_retry tox -- -n 8 ; fi
   - if [[ $TRAVIS_OS_NAME == "osx" ]]; then travis_wait 60 bash ./.travis/run_osx.sh ; fi
 # in case all previous commands in script section succeeded, run deploy (if tag is present)
   - if [[ "$TRAVIS_TEST_RESULT" == "0" ]] && [[ $TRAVIS_TAG != "" ]] && [[ $TOXENV == "packaging" ]]; then bash .travis/deploy_package.sh pypi ; fi
