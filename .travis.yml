@@ -1,64 +1,66 @@
 language: python
 
-#cache:
-#  directories:
-#  - ~/.cache/pip
-#  - ~/.pyenv
-#
-#before_cache:
-#  - rm -f $HOME/.cache/pip/log/debug.log
+cache:
+  directories:
+  - ~/.cache/pip
+  - ~/.pyenv
+
+before_cache:
+  - rm -f $HOME/.cache/pip/log/debug.log
+
+env:
+  global:
+    - PYPIUSER=grzanka
+    #  pypi secured password (PYPIPASS variable), you need to update it to your own if you want to use it
+    - secure: "PzKcY692KOmkYIIVaPSLa5II+PSrfFslqau3UVycg8Dz6WYP4jOA/s3dKwU0siztQP85Vn7Jeb/k8W4TTBpU3TKVtwmoOl8DCFVsjfU+0+k2iDGuic9s6bew+ZK0iwbUJKuwhtvj0fk4AVkPI1nIw+/0Z2Lvr5F7GQp1NOFyYy1vF/12Oc9g+FJpmWW8nVtFsKxQzYob2356SHvS8K5IXr8NWtg0Y+HrPjNBEIkqKvDor+C3yKCKCtnmp2rTEXyy4okSFe36xhlJH6AvFwsWWTkPDzcJwPrTslytMSNWtg3dCL/ngwfQo8T1A+0jdHZ4SsUZtRLKwXlzJiOFk2xGGMkYMLW2RbV60RwjEsYoBICjghzdQEv2Oag9zjHi0i9Uq04VztqK8s6py7cECxMDasSF8P5TMq6KioTwBK7yR0p051YbZjOj3upBPOyP0in5J0mmVc6kGLf9P+7Gks4qYoD0qB2ZjDPqq0vIeaAy/25erbvjaUHVX8q/FgCl3Oz2yq9sorhXzZyVgjU0g5KW26jhDZmCZOztBzQ9JzZTiM8Ecf5aPdgsEyhjr5DEVWEgbWSJWMoq9zWGi4yCIprcknWI1SBgCZTZn+3lB8rnSdQVFChbJuDIRr7IYZKcX0y1JRqmTC/tIRX+3K1hCh0k7780zbVJlJWKpV1cfdMcSGY="
 
 matrix:
     include:
-#        - os: linux
-#          python: 2.7
-#          env: TOXENV=py27
-#        - os: linux
-#          python: 3.2
-#          env: TOXENV=py32 VENVVER="<14.0.0" PIPVER="<8.0.0"
-#        - os: linux
-#          python: 3.3
-#          env: TOXENV=py33
-#        - os: linux
-#          python: 3.4
-#          env: TOXENV=py34
-#        - os: linux
-#          python: 3.5
-#          env: TOXENV=py35
-#        - os: linux
-#          python: 3.5-dev
-#          env: TOXENV=py35
+        - os: linux
+          python: 2.7
+          env: TOXENV=py27
+        - os: linux
+          python: 3.2
+          env: TOXENV=py32 VENVVER="<14.0.0" PIPVER="<8.0.0"
+        - os: linux
+          python: 3.3
+          env: TOXENV=py33
+        - os: linux
+          python: 3.4
+          env: TOXENV=py34
+        - os: linux
+          python: 3.5
+          env: TOXENV=py35
+        - os: linux
+          python: 3.5-dev
+          env: TOXENV=py35
         - os: linux
           python: nightly
           env: TOXENV=py36
-#        - os: linux
-#          python: 3.4
-#          env: TOXENV=docs
-#        - os: linux
-#          python: 2.7
-#          env: TOXENV=pep8
-#        - os: linux
-#          python: 3.4
-#          env: TOXENV=pep8
-#        - os: linux
-#          python: 3.5
-#          env:
-#            - TOXENV=packaging
-#            - PYPIUSER=grzanka
-#            #  pypi secured password (PYPIPASS variable), you need to update it to your own if you want to use it
-#            - secure: "PzKcY692KOmkYIIVaPSLa5II+PSrfFslqau3UVycg8Dz6WYP4jOA/s3dKwU0siztQP85Vn7Jeb/k8W4TTBpU3TKVtwmoOl8DCFVsjfU+0+k2iDGuic9s6bew+ZK0iwbUJKuwhtvj0fk4AVkPI1nIw+/0Z2Lvr5F7GQp1NOFyYy1vF/12Oc9g+FJpmWW8nVtFsKxQzYob2356SHvS8K5IXr8NWtg0Y+HrPjNBEIkqKvDor+C3yKCKCtnmp2rTEXyy4okSFe36xhlJH6AvFwsWWTkPDzcJwPrTslytMSNWtg3dCL/ngwfQo8T1A+0jdHZ4SsUZtRLKwXlzJiOFk2xGGMkYMLW2RbV60RwjEsYoBICjghzdQEv2Oag9zjHi0i9Uq04VztqK8s6py7cECxMDasSF8P5TMq6KioTwBK7yR0p051YbZjOj3upBPOyP0in5J0mmVc6kGLf9P+7Gks4qYoD0qB2ZjDPqq0vIeaAy/25erbvjaUHVX8q/FgCl3Oz2yq9sorhXzZyVgjU0g5KW26jhDZmCZOztBzQ9JzZTiM8Ecf5aPdgsEyhjr5DEVWEgbWSJWMoq9zWGi4yCIprcknWI1SBgCZTZn+3lB8rnSdQVFChbJuDIRr7IYZKcX0y1JRqmTC/tIRX+3K1hCh0k7780zbVJlJWKpV1cfdMcSGY="
-#        - os: osx
-#          language: generic
-#          env: TOXENV=py35
-#        - os: osx
-#          language: generic
-#          env: TOXENV=py34
-#        - os: osx
-#          language: generic
-#          env: TOXENV=py33
-#        - os: osx
-#          language: generic
-#          env: TOXENV=py27
+        - os: linux
+          python: 3.4
+          env: TOXENV=docs
+        - os: linux
+          python: 2.7
+          env: TOXENV=pep8
+        - os: linux
+          python: 3.4
+          env: TOXENV=pep8
+        - os: linux
+          python: 3.5
+          env: TOXENV=packaging
+        - os: osx
+          language: generic
+          env: TOXENV=py35
+        - os: osx
+          language: generic
+          env: TOXENV=py34
+        - os: osx
+          language: generic
+          env: TOXENV=py33
+        - os: osx
+          language: generic
+          env: TOXENV=py27
 #    uncomment and adjust if you want to allow some failures
 #    allow_failures:
 #        - os: linux
@@ -79,9 +81,8 @@ install:
   - if [[ $TRAVIS_OS_NAME == "linux" ]]; then travis_wait bash ./.travis/install_linux.sh ; fi
   - if [[ $TRAVIS_OS_NAME == "osx" ]]; then travis_wait 60 bash ./.travis/install_osx.sh ; fi
 
-# if scipy is used, then installation from pip last longer than 10min, thus we add travis_wait
 script:
-  - if [[ $TRAVIS_OS_NAME == "linux" ]]; then travis_wait tox --notest && tox -- -n 1 ; fi
+  - if [[ $TRAVIS_OS_NAME == "linux" ]]; then travis_wait tox --notest && tox -- -n 8 ; fi
   - if [[ $TRAVIS_OS_NAME == "osx" ]]; then travis_wait 60 bash ./.travis/run_osx.sh ; fi
 # in case all previous commands in script section succeeded, run deploy (if tag is present)
   - if [[ "$TRAVIS_TEST_RESULT" == "0" ]] && [[ $TRAVIS_TAG != "" ]] && [[ $TOXENV == "packaging" ]]; then bash .travis/deploy_package.sh pypi ; fi
