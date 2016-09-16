@@ -2,7 +2,7 @@
 versioneer
 # pytest v 3.0, released in 08.2016 doesn't work well with Python 3.2
 pytest<3.0 ; python_version >= '3.2' and python_version < '3.3' or os_name == 'nt' # py 3.2
-pytest ; python_version < '3.0' and python_version >= '3.3' and os_name != 'nt' # py different than 3.2
+pytest ; (python_version < '3.0' or python_version >= '3.3') and os_name != 'nt' # py different than 3.2
 pytest-capturelog
 pytest-timeout
 pytest-xdist

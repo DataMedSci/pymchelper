@@ -9,8 +9,6 @@ set -o pipefail # Return value of a pipeline as the value of the last command to
                 # pipeline exit successfully.
 
 # check ubuntu version
-lsb_release -a
-
 pip install --upgrade virtualenv$VENVVER pip$PIPVER setuptools tox wheel
 
 if [[ $TOXENV == py32 ]];

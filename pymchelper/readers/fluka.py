@@ -51,3 +51,6 @@ class FlukaBinaryReader:
         detector.dettyp = SHDetType.unknown
 
         detector.data = np.array(fdata)
+
+        # set units : detector.units are [x,y,z,v,data,detector_title]
+        detector.units = [""] * 6

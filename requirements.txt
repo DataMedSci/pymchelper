@@ -1,2 +1,4 @@
+# micro-language and markers are described here: https://www.python.org/dev/peps/pep-0496/
 numpy>=1.10.4
-enum34
+# Enum structure has appeared in Python 3.4 (https://docs.python.org/3.4/library/enum.html), for older version a backport is needed
+enum34 ; python_version < '3.4'

@@ -217,7 +217,7 @@ class SHBinaryReader:
             return
 
         # next read the data:
-        offset_str = "S"+str(detector.payload_offset)
+        offset_str = "S" + str(detector.payload_offset)
         record_dtype = np.dtype([('trash', offset_str),
                                  ('bin2', '<f8', detector.rec_size)])
         record = np.fromfile(self.filename, record_dtype, count=-1)
