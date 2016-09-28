@@ -100,7 +100,7 @@ Under Linux the best way is to use your package manager.
 
 Under Windows the best way is to go to the webpage https://www.python.org/downloads/, download and run the installer.
 On the first screen we recommend to mark "Add Python to PATH". The result will be that you will be able to
-run python interpreter from command line as any other command.
+run python interpreter from command line as any other command. We recommend Windows users to use Python 3.5 or newer.
 
 Single file distribution
 ------------------------
@@ -117,6 +117,14 @@ After downloading the file, make sure it has executable bits set::
     $ chmod ugo+x convertmc
 
 When new version if released, replace downloaded file with newer one.
+
+Now you can start the application under Linux by typing in terminal::
+
+    $ convertmc --help
+
+Windows users can simply type::
+
+    $ convertmc.pyz --help
 
 As pymchelper doesn't have any mechanism of automatic updates,
 we recommend to use installation using **pip** tool, described below.
@@ -176,8 +184,8 @@ On some systems instructions mentioned below have to be prefixed with `sudo` com
 
 Under Windows the best way is to follow User installation method, described here: https://pip.pypa.io/en/stable/installing/
 
-pip package installation
-------------------------
+main application - pip package installation
+-------------------------------------------
 
 Now it is time to install **pymchelper** package.
 It consists of executable file called `convertmc` and bunch of necessary code files.
@@ -236,3 +244,19 @@ Now `convertmc` script should be installed for all users and can be invoked by t
 
 
     $ convertmc --help
+
+useful dependencies
+-------------------
+
+There are two converters which require additional dependencies.
+
+TODO
+::
+    $ pip install matplotlib
+
+TODO
+::
+
+    $ pip install pytrip98
+
+TODO
