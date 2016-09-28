@@ -21,6 +21,8 @@ In this situation converter will be probably installed in ``~/.local/bin`` direc
 
 To be able to use ``tripcube`` converter install also ``pytrip98`` Python package using ``pip``.
 
+For more detailed instruction, see `installation guide <INSTALL.rst>`__.
+
 Documentation
 =============
 
