@@ -176,9 +176,10 @@ It is better to wait until this issue: https://github.com/pytrip/pytrip/issues/8
 
 An example session on Ubuntu 16.04 which had python3 and pip3 previously installed:
 
-.. raw:: html
 
-    <a href="https://asciinema.org/a/a12nd9a9o6fhwpz5zm06nqrxi?autoplay=1" target="_blank"><img src="https://asciinema.org/a/a12nd9a9o6fhwpz5zm06nqrxi.png"  width="836"/></a>
+.. image:: https://asciinema.org/a/a12nd9a9o6fhwpz5zm06nqrxi.png
+   :width: 80%
+   :target: https://asciinema.org/a/a12nd9a9o6fhwpz5zm06nqrxi?autoplay=1
 
 Procedure for limited-control users
 -----------------------------------
