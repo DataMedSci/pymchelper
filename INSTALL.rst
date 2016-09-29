@@ -174,8 +174,13 @@ using following command:
 Right now the installation requires compilation of C extension which leads to complex compilation. Only for experts.
 It is better to wait until this issue: https://github.com/pytrip/pytrip/issues/89 is fixed.
 
-An example session on Ubuntu 16.04 which had python3 and pip3 previously installed:
+An example session on Windows 10 including Python installation:
 
+.. image:: docs/windows_install.gif
+   :width: 80%
+
+
+An example session on Ubuntu 16.04 which had python3 and pip3 previously installed:
 
 .. image:: https://asciinema.org/a/a12nd9a9o6fhwpz5zm06nqrxi.png
    :width: 80%
