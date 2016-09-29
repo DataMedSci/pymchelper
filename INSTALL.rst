@@ -5,23 +5,41 @@ Installation guide
 
 If you are familiar with python and pip tool, simply type following command to install the package::
 
-    $ pip install mcpartools
+    $ pip install pymchelper
+
+and::
+
+   $ pip install matplotlib
+   $ pip install pytrip98
+
+to get the recommended dependencies enabling `image` and `tripcube` converters respectively.
 
 If your are a less advanced user, read the rest of the page.
 
-Installation guide is divided in two phases: prerequisites (mainly Python installation) and main package installation.
+Installation guide is divided in three phases:
 
-There are two groups of users: administrators and regular ones.
-For regular users we assume that they can write files to their home directory, but not necessary elsewhere.
-We assume that Linux administrators can log in as root user, execute commands via ``sudo`` or
-have some other way to create files system-wide for all users.
+* prerequisites (mainly Python installation)
+* main package installation
+* recommended dependency installation
 
-We expect that **pymchelper** may also be used by regular users on Linux computing clusters.
-This is the reason why installation instruction is lengthy and detailed,
-explaining how to deal with lack of administrator rights.
+There are two groups of users: full-control (administrator) and limited-control (regular ones).
+It might sound strange, but if you own a PC with Windows or Linux installed and are the only user of it,
+then the full-control (administrator) instruction if for you.
+
+For limited users we assume that they can write files to their home directory, but not necessary elsewhere.
+An example of limited users are those who are using computing cluster. Typically the access to cluster
+is given to many users and none of them has administrator rights.
+
+This instruction is mainly targeted ar full-control users, trying to convert Monte Carlo results files
+on their own computers.
+
+Procedure for full-control users
+--------------------------------
+
+.. _`prerequisites for limited-control users (python)`:
 
 Prerequisites - python interpreter
-----------------------------------
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 First we need to check if Python interpreter is installed.
 Under Linux try if one of following commands (printing Python version) works::
@@ -42,8 +60,128 @@ If none of ``python`` and ``python3`` commands are present, then Python interpre
 
 We suggest to use the newest version available (from 3.x family).
 
-User installation
-~~~~~~~~~~~~~~~~~
+Under Linux the best way is to use your package manager.
+
+* ``apt-get install python3`` (python 3) or ``apt-get install python`` (python 2) for Debian and Ubuntu
+* ``dnf install python3`` (python 3) or ``dnf install python`` (python 2) for Fedora
+* ``yum install python3`` (python 3) or ``yum install python`` (python 2) for CentOS and SLC
+
+Under Windows the best way is to go to the webpage https://www.python.org/downloads/, download and run the installer.
+On the first screen we recommend to mark "Add Python to PATH". The result will be that you will be able to
+run python interpreter from command line as any other command. We recommend Windows users to use Python 3.5 or newer.
+
+.. _`single file distribution for limited-control users`:
+
+Single file distribution
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+**pymchelper** is shipped as a single file executable.
+It can be downloaded from https://github.com/DataMedSci/pymchelper/releases webpage using the web browser.
+Command line download for Linux can also be done (here an example with 0.3.6 version,
+newer versions should also be available)::
+
+    $ wget https://github.com/DataMedSci/pymchelper/releases/download/v0.3.6/convertmc.pyz -O convertmc
+
+We publish single file executable with .pyz extension, but it can be stripped for a convenience of Linux users.
+After downloading the file, make sure it has executable bits set::
+
+    $ chmod ugo+x convertmc
+
+When new version if released, replace downloaded file with newer one.
+
+Now you can start the application under Linux by typing in terminal::
+
+    $ ./convertmc --help
+
+Windows users can simply type::
+
+    $ convertmc.pyz --help
+
+As pymchelper doesn't have any mechanism of automatic updates,
+we recommend to use installation using **pip** tool, described below.
+It makes easy upgrade and uninstallation procedure.
+
+.. _`prerequisites for limited-control users (pip)`:
+
+Prerequisites - pip tool
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+**pip** is a tool for installing and managing Python packages.
+It downloads the packages from central Internet repository and installs them
+in a similar way as apps are downloaded on your smartphone by Google Play or Apple Store.
+
+Try the following commands (printing pip version)::
+
+    $ pip --version
+    $ pip3 --version
+
+In a similar way to python interpreter pip is a tool for Python 2 or 3,
+while pip3 works exclusively for Python 3.
+If none of these commands are present, then pip has to be installed.
+
+Follow the package installation for your system.
+On some systems instructions mentioned below have to be prefixed with `sudo` command.
+
+* ``apt-get install python3-pip`` (python 3) or ``apt-get install python-pip`` (python 2) for Debian and Ubuntu
+* ``dnf install python3-pip`` (python 3) or ``dnf install python-pip`` (python 2) for Fedora
+* ``yum install python3-pip`` (python 3) or ``yum install python-pip`` (python 2) for CentOS and SLC
+
+
+Under Windows the best way is to follow User installation method, described here: https://pip.pypa.io/en/stable/installing/
+
+
+main application - pip package installation
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Now it is time to install **pymchelper** package.
+It consists of executable file called `convertmc` and bunch of necessary code files.
+
+Administrator installation is very simple, but requires to save some files in system-wide directories (i.e. `/usr`).
+On some systems commands mentioned below have to be prefixed with `sudo` command::
+
+    $ pip install pymchelper
+
+To upgrade the **pymchelper** to newer version, simply type::
+
+    $ pip install --upgrade pymchelper
+
+To completely remove **pymchelper** from your system, use following command::
+
+    $ pip uninstall pymchelper
+
+Now `convertmc` script should be installed for all users and can be invoked by typing::
+
+
+    $ convertmc --help
+
+Recommended dependencies
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+There are two converters which require additional dependencies.
+
+``image`` converter (directly producing PNG images from MC data) needs matplotlib python library, which can be installed
+using following command:
+
+::
+    $ pip install matplotlib
+
+``tripcube`` converter (producing TRiP98 cube files from MC data) needs pytrip98 python library, which can be installed
+using following command:
+::
+
+    $ pip install pytrip98
+
+Right now the installation requires compilation of C extension which leads to complex compilation. Only for experts.
+It is better to wait until this issue: https://github.com/pytrip/pytrip/issues/89 is fixed.
+
+
+Procedure for limited-control users
+-----------------------------------
+
+Prerequisites - python interpreter
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+First take a look on `prerequisites for limited-control users (python)`_ to learn how to check if python is installed.
 
 In case Python is missing and you are regular user, the best would be contact somebody with administrator
 rights and ask to install Python interpreter in the system.
@@ -89,65 +227,17 @@ In a similar way python3.x can be installed.
 
 User installation for Windows is not covered by this document.
 
-Administrator installation
-~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-Under Linux the best way is to use your package manager.
-
-* ``apt-get install python3`` (python 3) or ``apt-get install python`` (python 2) for Debian and Ubuntu
-* ``dnf install python3`` (python 3) or ``dnf install python`` (python 2) for Fedora
-* ``yum install python3`` (python 3) or ``yum install python`` (python 2) for CentOS and SLC
-
-Under Windows the best way is to go to the webpage https://www.python.org/downloads/, download and run the installer.
-On the first screen we recommend to mark "Add Python to PATH". The result will be that you will be able to
-run python interpreter from command line as any other command. We recommend Windows users to use Python 3.5 or newer.
-
 Single file distribution
-------------------------
+~~~~~~~~~~~~~~~~~~~~~~~~
 
-**pymchelper** is shipped as a single file executable.
-It can be downloaded from https://github.com/DataMedSci/pymchelper/releases webpage using the web browser.
-Command line download for Linux can also be done (here an example with 0.3.6 version is found,
-newer versions should also be available)::
-
-    $ wget https://github.com/DataMedSci/pymchelper/releases/download/v0.3.6/convertmc.pyz -O convertmc
-
-After downloading the file, make sure it has executable bits set::
-
-    $ chmod ugo+x convertmc
-
-When new version if released, replace downloaded file with newer one.
-
-Now you can start the application under Linux by typing in terminal::
-
-    $ convertmc --help
-
-Windows users can simply type::
-
-    $ convertmc.pyz --help
-
-As pymchelper doesn't have any mechanism of automatic updates,
-we recommend to use installation using **pip** tool, described below.
-It makes easy upgrade and uninstallation procedure.
+Single file distribution is the same as for full-control users, see `single file distribution for limited-control users`_.
 
 Prerequisites - pip tool
-------------------------
+~~~~~~~~~~~~~~~~~~~~~~~~
 
-**pip** is a tool for installing and managing Python packages.
-It downloads the packages from central Internet repository and installs them
-in a similar way as apps are downloaded on your smartphone by Google Play or Apple Store.
+First take a look on `prerequisites for limited-control users (pip)`_ to learn how to check if pip is installed.
 
-Try the following commands (printing pip version)::
-
-    $ pip --version
-    $ pip3 --version
-
-In a similar way to python interpreter pip is a tool for Python 2 or 3,
-while pip3 works exclusively for Python 3.
 If none of these commands are present, then pip has to be installed.
-
-User installation
-~~~~~~~~~~~~~~~~~
 
 Follow the instruction from here https://pip.pypa.io/en/stable/installing/,
 mainly - download installation script using your web browser, or by typing in the terminal (in case using Linux)::
@@ -170,28 +260,11 @@ To install pip, simply type::
 
 Similar method can be used for Windows.
 
-
-Administrator installation
-~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-Follow the package installation for your system.
-On some systems instructions mentioned below have to be prefixed with `sudo` command.
-
-* ``apt-get install python3-pip`` (python 3) or ``apt-get install python-pip`` (python 2) for Debian and Ubuntu
-* ``dnf install python3-pip`` (python 3) or ``dnf install python-pip`` (python 2) for Fedora
-* ``yum install python3-pip`` (python 3) or ``yum install python-pip`` (python 2) for CentOS and SLC
-
-
-Under Windows the best way is to follow User installation method, described here: https://pip.pypa.io/en/stable/installing/
-
 main application - pip package installation
--------------------------------------------
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Now it is time to install **pymchelper** package.
 It consists of executable file called `convertmc` and bunch of necessary code files.
-
-User installation
-~~~~~~~~~~~~~~~~~
 
 User installation will put the **pymchelper** under some hidden directory (for Linux it will be `$HOME/.local`,
 for Windows it might be `%userprofile%\appdata\roaming\python\python35\Scripts` or other)
@@ -224,39 +297,23 @@ or for Windows::
 
     $ %userprofile%\appdata\roaming\python\python35\Scripts\convertmc --help
 
-Administrator installation
-~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Administrator installation is very simple, but requires to save some files in system-wide directories (i.e. `/usr`).
-On some systems commands mentioned below have to be prefixed with `sudo` command::
-
-    $ pip install pymchelper
-
-To upgrade the **pymchelper** to newer version, simply type::
-
-    $ pip install --upgrade pymchelper
-
-To completely remove **pymchelper** from your system, use following command::
-
-    $ pip uninstall pymchelper
-
-Now `convertmc` script should be installed for all users and can be invoked by typing::
-
-
-    $ convertmc --help
-
-useful dependencies
--------------------
+Recommended dependencies
+~~~~~~~~~~~~~~~~~~~~~~~~
 
 There are two converters which require additional dependencies.
 
-TODO
+``image`` converter (directly producing PNG images from MC data) needs matplotlib python library, which can be installed
+using following command:
+
 ::
-    $ pip install matplotlib
+    $ pip install matplotlib --user
 
-TODO
+``tripcube`` converter (producing TRiP98 cube files from MC data) needs pytrip98 python library, which can be installed
+using following command:
 ::
 
-    $ pip install pytrip98
+    $ pip install pytrip98 --user
 
-TODO
+Right now the installation requires compilation of C extension which leads to complex compilation. Only for experts.
+It is better to wait until this issue: https://github.com/pytrip/pytrip/issues/89 is fixed.
