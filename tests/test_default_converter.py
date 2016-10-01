@@ -25,7 +25,7 @@ def shieldhit_binary():
 
 
 def run_bdo2txt_binary(inputfile, working_dir, bdo2txt_path, silent=True):
-    logger.info("running" + bdo2txt_path + " " + inputfile)
+    logger.info("running: " + bdo2txt_path + " " + inputfile)
     with open(os.devnull, 'w') as shutup:
         if silent:
             retVal = subprocess.call(args=[bdo2txt_path, inputfile], stdout=shutup, stderr=shutup)
