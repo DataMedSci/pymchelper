@@ -1,4 +1,3 @@
-==========
 pymchelper
 ==========
 
@@ -12,9 +11,8 @@ pymchelper
         :target: https://readthedocs.org/projects/pymchelper/?badge=latest
         :alt: Documentation Status
 
-========
 Overview
-========
+--------
 
 .. start-badges
 
@@ -24,7 +22,7 @@ Overview
     * - docs
       - |docs|
     * - tests
-      - |travis| |appveyor|
+      - |travis| |appveyor| |codecov|
     * - package
       - |version| |downloads| |wheel| |supported-versions| |supported-implementations|
 
@@ -39,6 +37,10 @@ Overview
 .. |appveyor| image:: https://ci.appveyor.com/api/projects/status/github/DataMedSci/pymchelper?branch=master&svg=true
     :alt: Appveyor Build Status
     :target: https://ci.appveyor.com/project/grzanka/pymchelper
+
+.. |codecov| image:: https://codecov.io/gh/DataMedSci/pymchelper/branch/master/graph/badge.svg
+    :alt: Codecov Status
+    :target: https://codecov.io/gh/DataMedSci/pymchelper
 
 .. |version| image:: https://img.shields.io/pypi/v/pymchelper.svg?style=flat
     :alt: PyPI Package latest release
@@ -66,7 +68,7 @@ Python toolkit for SHIELD-HIT12A and Fluka
 
 
 Installation
-============
+------------
 
 Official version ::
 
