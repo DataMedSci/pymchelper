@@ -734,7 +734,7 @@ if __name__ == "__main__":
     say("=" * 80)
     usr = Usrbdx(sys.argv[1])
     usr.say()
-    for i in range(len(usr.detector)):
+    for i, _ in enumerate(usr.detector):
         say("-" * 50)
         usr.say(i)
         data = unpackArray(usr.readData(i))

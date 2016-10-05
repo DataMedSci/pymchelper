@@ -64,7 +64,8 @@ class SHImageWriter:
 
     default_colormap = 'gnuplot2'
 
-    def make_label(self, unit, name):
+    @staticmethod
+    def make_label(unit, name):
         return name + " " + "[" + unit + "]"
 
     def set_colormap(self, colormap):

@@ -4288,7 +4288,7 @@ class Input:
 
         # 1st. Write bodies
         self.writeCards(fgeo, lambda x: x.tag in BODY_NOVXL_TAGS or x.tag[0] == "$", geoFmt, 1)
-        ends = self.cards.get("END", None)
+        ends = self.cards.get("END")
         if ends:
             # write all END until the first active
             for lastEnd, card in enumerate(ends):
@@ -4569,7 +4569,7 @@ class Input:
                 # FIXME Must append at the end ONLY the icru that are assigned
                 for card in self.cardsSorted("ASSIGNMA", which):
                     if card.name() not in mats:
-                        mat = _icruMatDict.get(card.name(), None)
+                        mat = _icruMatDict.get(card.name())
                         if mat:
                             lst.append(mat)
 
