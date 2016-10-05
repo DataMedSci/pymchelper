@@ -171,14 +171,9 @@ using following command:
 
     $ pip install pytrip98
 
-Right now the installation requires compilation of C extension which leads to complex compilation. Only for experts.
-It is better to wait until this issue: https://github.com/pytrip/pytrip/issues/89 is fixed.
-
-An example session on Windows 10 including Python installation:
-
-.. image:: docs/windows_install.gif
-   :width: 80%
-
+To get more details on pytrip98 installation, go here: https://github.com/pytrip/pytrip/blob/master/INSTALL.rst
+Windows version of pytrip98 requires Python 3.5 and prior installation of scipy (we recommend downloading it manually
+from http://www.lfd.uci.edu/~gohlke/pythonlibs/#scipy and installing wheel file using pip).
 
 An example session on Ubuntu 16.04 which had python3 and pip3 previously installed:
 
@@ -272,7 +267,7 @@ To install pip, simply type::
 Similar method can be used for Windows.
 
 main application - pip package installation
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Now it is time to install **pymchelper** package.
 It consists of executable file called `convertmc` and bunch of necessary code files.
