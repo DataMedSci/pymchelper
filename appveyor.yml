@@ -61,9 +61,8 @@ install:
 # install usual requirements
   - pip install --upgrade -r tests/requirements-test.txt
   - pip install --upgrade -r requirements.txt
-# check numpy & scipy versions
+# check numpy version
   - python -c "import numpy as np;print(np.version.version)"
-  - python -c "import scipy as sp;print(sp.version.version)"
 # check python version
   - python -V
 # check 32 or 64 bit
@@ -83,6 +82,9 @@ test_script:
   - cd ..
 # install optional deps
   - pip install matplotlib
-  - pip install pytrip98
+# pytrip98 is available only for Python 3.5, lets install it together with deps
+  - ps: If ($env:PYTHON_VERSION -Match "3.5") {conda install -q --name python%PYTHON_VERSION% scipy}
+  - python -c "import scipy as sp;print(sp.version.version)"
+  - ps: If ($env:PYTHON_VERSION -Match "3.5") {pip install pytrip98}
 # run tests
   - py.test
