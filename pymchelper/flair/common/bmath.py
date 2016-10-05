@@ -143,7 +143,7 @@ def d2s(ang, fmt=""):
 # -------------------------------------------------------------------------------
 # Format a number to fit in the minimum space
 # -------------------------------------------------------------------------------
-def format(number, length=10, useExp=False, useD=False):
+def format_number(number, length=10, useExp=False, useD=False):
     """
     Format a number to fit in the minimum space given by length
     """
@@ -2002,38 +2002,38 @@ if __name__ == "__main__":
 
     for i in range(4, 50):
         num = "-1e-%d" % (i)
-        say(num, repr(float(num)), format(num, 10))
+        say(num, repr(float(num)), format_number(num, 10))
 
     digits = "1234567890123456789012345678"
     for i in range(len(digits)):
         num = digits[:i]
-        say("%02d %40s |%10s|" % (i, num, format(num, 10)))
+        say("%02d %40s |%10s|" % (i, num, format_number(num, 10)))
     say()
     for i in range(len(digits)):
         num = digits[:i] + ".123"
-        say("%02d %40s |%10s|" % (i, num, format(num, 10)))
+        say("%02d %40s |%10s|" % (i, num, format_number(num, 10)))
     say()
     for i in range(len(digits)):
         num = digits[:i] + ".1234567890"
-        say("%02d %40s |%10s|" % (i, num, format(num, 10)))
+        say("%02d %40s |%10s|" % (i, num, format_number(num, 10)))
     say()
     for i in range(len(digits)):
         num = "-" + digits[:i]
-        say("%02d %40s |%10s|" % (i, num, format(num, 10)))
+        say("%02d %40s |%10s|" % (i, num, format_number(num, 10)))
     say()
     for i in range(len(digits)):
         num = "-" + digits[:i] + ".123"
-        say("%02d %40s |%10s|" % (i, num, format(num, 10)))
+        say("%02d %40s |%10s|" % (i, num, format_number(num, 10)))
     say()
     for i in range(len(digits)):
         num = "-" + digits[:i] + ".1234567890"
-        say("%02d %40s |%10s|" % (i, num, format(num, 10)))
+        say("%02d %40s |%10s|" % (i, num, format_number(num, 10)))
 
     say(Vector.O)
     a = 1.2345678901234567890
     w = -1e-05
-    say(format(w, 22))
-    say(format(a, 22))
+    say(format_number(w, 22))
+    say(format_number(a, 22))
     say(Vector.Y.direction(0.0000001))
     a = Vector(range(5))
     a.norm()

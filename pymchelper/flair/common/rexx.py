@@ -158,10 +158,10 @@ def translate(str, tableo=None, tablei=None, pad=" "):
         return str.upper()
 
     if tableo is None:
-        tableo = xrange(0, 255)
+        tableo = xrange_string(0, 255)
 
     if tablei is None:
-        tablei = xrange(0, 255)
+        tablei = xrange_string(0, 255)
 
     # The input table defaults to all characters.
     dl = len(tablei) - len(tableo)
@@ -201,8 +201,8 @@ def verify(str, ref, match=0, start=0):
 
 
 # xrange
-def xrange(start, stop):
-    return string.join([chr(x) for x in range(start, stop + 1)], "")
+def xrange_string(start, stop):
+    return "".join([chr(x) for x in range(start, stop + 1)])
 
 
 def _isnum(str):
@@ -345,7 +345,7 @@ if __name__ == "__main__":
 
     say("translate")
     assert translate("Foo Bar", "", "") == "Foo Bar"
-    assert translate("Foo Bar", xrange(1, 255)) == "Gpp!Cbs"
+    assert translate("Foo Bar", xrange_string(1, 255)) == "Gpp!Cbs"
     assert translate("", "klasjdf", "woieruw") == ""
     assert translate("foobar", "abcdef", "fedcba") == "aooefr"
 

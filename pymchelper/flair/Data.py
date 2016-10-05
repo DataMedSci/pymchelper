@@ -525,33 +525,33 @@ class Usrbin(Usrxxx):
             bin_det.type = header[2]
             bin_det.score = header[3]
 
-            bin_det.xlow = float(bmath.format(header[4], 9, useD=False))
-            bin_det.xhigh = float(bmath.format(header[5], 9, useD=False))
+            bin_det.xlow = float(bmath.format_number(header[4], 9, useD=False))
+            bin_det.xhigh = float(bmath.format_number(header[5], 9, useD=False))
             bin_det.nx = header[6]
             if bin_det.nx > 0 and bin_det.type not in (2, 12, 8, 18):
                 bin_det.dx = (bin_det.xhigh - bin_det.xlow) / float(bin_det.nx)
             else:
-                bin_det.dx = float(bmath.format(header[7], 9, useD=False))
+                bin_det.dx = float(bmath.format_number(header[7], 9, useD=False))
 
             if bin_det.type in (1, 11):
                 bin_det.ylow = -math.pi
                 bin_det.yhigh = math.pi
             else:
-                bin_det.ylow = float(bmath.format(header[8], 9, useD=False))
-                bin_det.yhigh = float(bmath.format(header[9], 9, useD=False))
+                bin_det.ylow = float(bmath.format_number(header[8], 9, useD=False))
+                bin_det.yhigh = float(bmath.format_number(header[9], 9, useD=False))
             bin_det.ny = header[10]
             if bin_det.ny > 0 and bin_det.type not in (2, 12, 8, 18):
                 bin_det.dy = (bin_det.yhigh - bin_det.ylow) / float(bin_det.ny)
             else:
-                bin_det.dy = float(bmath.format(header[11], 9, useD=False))
+                bin_det.dy = float(bmath.format_number(header[11], 9, useD=False))
 
-            bin_det.zlow = float(bmath.format(header[12], 9, useD=False))
-            bin_det.zhigh = float(bmath.format(header[13], 9, useD=False))
+            bin_det.zlow = float(bmath.format_number(header[12], 9, useD=False))
+            bin_det.zhigh = float(bmath.format_number(header[13], 9, useD=False))
             bin_det.nz = header[14]
             if bin_det.nz > 0 and bin_det.type not in (2, 12):  # 8=special with z=real
                 bin_det.dz = (bin_det.zhigh - bin_det.zlow) / float(bin_det.nz)
             else:
-                bin_det.dz = float(bmath.format(header[15], 9, useD=False))
+                bin_det.dz = float(bmath.format_number(header[15], 9, useD=False))
 
             bin_det.lntzer = header[16]
             bin_det.bk = header[17]
