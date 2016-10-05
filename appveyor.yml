@@ -84,7 +84,7 @@ test_script:
   - pip install matplotlib
 # pytrip98 is available only for Python 3.5, lets install it together with deps
   - ps: If ($env:PYTHON_VERSION -eq "3.5") {conda install -q --name python%PYTHON_VERSION% scipy}
-  - python -c "import scipy as sp;print(sp.version.version)"
+  - ps: If ($env:PYTHON_VERSION -eq "3.5") {python -c "import scipy as sp;print(sp.version.version)"}
   - ps: If ($env:PYTHON_VERSION -eq "3.5") {pip install pytrip98}
 # run tests
   - py.test
