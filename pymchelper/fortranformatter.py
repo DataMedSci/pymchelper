@@ -93,8 +93,8 @@ def _compose_float_string(w, e, d, state, val, ftype):
     # handle the nan and inf cases
     if type(val) is float and val != val:
         return _compose_nan_string(w, ftype)
-    Infinity = 1e1000000
-    if val in (-Infinity, Infinity):
+    infinity = 1e1000000
+    if val in (-infinity, infinity):
         return _compose_inf_string(w, ftype, sign_bit)
     tmp = abs(val)
     # Round the input if the input is less than 1

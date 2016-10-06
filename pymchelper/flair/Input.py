@@ -2326,7 +2326,7 @@ class Card:
                 w = self.evalWhat(i, False)
                 try:
                     # num = float(w)  # Force to number TODO not used ?
-                    w = bmath.format(w, 22)
+                    w = bmath.format_number(w, 22)
                 except:
                     if not w or w[0] != "$":
                         w = "0.0"
@@ -2354,7 +2354,7 @@ class Card:
                 w = self._what[i]
                 try:
                     # num = float(w) # TODO not used ?
-                    w = bmath.format(w, width)
+                    w = bmath.format_number(w, width)
                 except:
                     w = "0.0"
                 line += w.rjust(width)
@@ -2583,7 +2583,7 @@ class Card:
                     else:
                         try:
                             # num = float(w) # TODO not used ?
-                            w = bmath.format(w, width)
+                            w = bmath.format_number(w, width)
                         except:
                             pass
                     if fmt == FORMAT_FREE:
@@ -2641,24 +2641,24 @@ class Card:
             if w6 == 0 or w6 == 5:
                 line += "\n%s" % (self._extra)
                 line += "\n%10s%10s%10s%10s%10s%10s" \
-                        % (bmath.format(self.numWhat(7), 10),
-                           bmath.format(self.numWhat(8), 10),
-                           bmath.format(self.numWhat(9), 10),
-                           bmath.format(self.numWhat(10), 10),
-                           bmath.format(self.numWhat(11), 10),
-                           bmath.format(self.numWhat(12), 10))
+                        % (bmath.format_number(self.numWhat(7), 10),
+                           bmath.format_number(self.numWhat(8), 10),
+                           bmath.format_number(self.numWhat(9), 10),
+                           bmath.format_number(self.numWhat(10), 10),
+                           bmath.format_number(self.numWhat(11), 10),
+                           bmath.format_number(self.numWhat(12), 10))
                 line += "\n%10s%10s%10s%10s%10s%10s" \
-                        % (bmath.format(self.numWhat(13), 10),
-                           bmath.format(self.numWhat(14), 10),
-                           bmath.format(self.numWhat(15), 10),
-                           bmath.format(self.numWhat(16), 10),
-                           bmath.format(self.numWhat(17), 10),
-                           bmath.format(self.numWhat(18), 10))
+                        % (bmath.format_number(self.numWhat(13), 10),
+                           bmath.format_number(self.numWhat(14), 10),
+                           bmath.format_number(self.numWhat(15), 10),
+                           bmath.format_number(self.numWhat(16), 10),
+                           bmath.format_number(self.numWhat(17), 10),
+                           bmath.format_number(self.numWhat(18), 10))
                 line += "\n%10s%10s%10s%10s" \
-                        % (bmath.format(self.numWhat(19), 10),
-                           bmath.format(self.numWhat(20), 10),
-                           bmath.format(self.numWhat(21), 10),
-                           bmath.format(self.numWhat(22), 10))
+                        % (bmath.format_number(self.numWhat(19), 10),
+                           bmath.format_number(self.numWhat(20), 10),
+                           bmath.format_number(self.numWhat(21), 10),
+                           bmath.format_number(self.numWhat(22), 10))
         return line
 
     # ---------------------------------------------------------------------
@@ -4288,7 +4288,7 @@ class Input:
 
         # 1st. Write bodies
         self.writeCards(fgeo, lambda x: x.tag in BODY_NOVXL_TAGS or x.tag[0] == "$", geoFmt, 1)
-        ends = self.cards.get("END", None)
+        ends = self.cards.get("END")
         if ends:
             # write all END until the first active
             for lastEnd, card in enumerate(ends):
@@ -4327,7 +4327,7 @@ class Input:
                 vol = region.getProperty(_VOLUME, "")
                 if vol == "":
                     vol = "1.0"
-                line += "%10s" % bmath.format(vol, 10)
+                line += "%10s" % bmath.format_number(vol, 10)
                 if len(line) == 70:
                     writeln(fgeo, line)
                     line = ""
@@ -4569,7 +4569,7 @@ class Input:
                 # FIXME Must append at the end ONLY the icru that are assigned
                 for card in self.cardsSorted("ASSIGNMA", which):
                     if card.name() not in mats:
-                        mat = _icruMatDict.get(card.name(), None)
+                        mat = _icruMatDict.get(card.name())
                         if mat:
                             lst.append(mat)
 

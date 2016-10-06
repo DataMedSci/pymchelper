@@ -44,8 +44,8 @@ def main(args=sys.argv[1:]):
     parser.add_argument(
         "--converter",
         help='converters',
-        default=[SHConverters.standard.name],
-        choices=SHConverters.__members__.keys(),
+        default=(SHConverters.standard.name,),
+        choices=[x.name for x in SHConverters],
         nargs='+')
     parser.add_argument("--colormap", help='image color map', default=SHImageWriter.default_colormap, type=str)
     parser.add_argument('-V', '--version', action='version', version=pymchelper.__version__)

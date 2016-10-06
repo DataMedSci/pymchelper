@@ -16,7 +16,7 @@ class FlukaBinaryReader:
     def read(self, detector):
         usr = Usrbin(self.filename)
         usr.say()  # file,title,time,weight,ncase,nbatch
-        for i in range(len(usr.detector)):
+        for i, _ in enumerate(usr.detector):
             logger.debug("-" * 20 + (" Detector number %i " % i) + "-" * 20)
             usr.say(i)  # details for each detector
         data = usr.readData(0)
