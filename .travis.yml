@@ -40,8 +40,14 @@ matrix:
           python: 3.5-dev
           env: TOXENV=py35
         - os: linux
-          python: nightly
+          python: 3.6
           env: TOXENV=py36
+        - os: linux
+          python: 3.6-dev
+          env: TOXENV=py36
+        - os: linux
+          python: nightly
+          env: TOXENV=py37
         - os: linux
           python: 3.4
           env: TOXENV=docs
@@ -67,10 +73,16 @@ matrix:
           language: generic
           env: TOXENV=py27
 #    uncomment and adjust if you want to allow some failures
-#    allow_failures:
-#        - os: linux
-#          python: nightly
-#          env: TOXENV=py36
+    allow_failures:
+        - os: linux
+          python: 3.6
+          env: TOXENV=py36
+        - os: linux
+          python: 3.6-dev
+          env: TOXENV=py36
+        - os: linux
+          python: nightly
+          env: TOXENV=py37
 
 # travis-ci runs by default on ancient Ubuntu 12.04 (precise)
 # following options will give us Ubuntu 14.04 (trusty)
