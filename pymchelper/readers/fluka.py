@@ -54,3 +54,5 @@ class FlukaBinaryReader:
 
         # set units : detector.units are [x,y,z,v,data,detector_title]
         detector.units = [""] * 6
+
+        detector.title = usr.title.decode('ascii')
