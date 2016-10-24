@@ -64,7 +64,7 @@ Overview
 
 .. end-badges
 
-Python toolkit for SHIELD-HIT12A and Fluka
+Python toolkit for SHIELD-HIT12A and FLUKA
 
 
 Installation
