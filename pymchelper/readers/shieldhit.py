@@ -180,9 +180,9 @@ class SHBinaryReader:
         """
         if geotyp == SHGeoType.zone:
             dose_units = ("MeV/primary", "Dose*volume")
-            dose_gy_units = ("Gy * cm3", "Dose*volume")
+            dose_gy_units = ("J", "Dose*volume")
             alanine_units = ("MeV/primary", "Alanine RE*Dose*volume")
-            alanine_gy_units = ("Gy * cm3", "Alanine RE*Dose*volume")
+            alanine_gy_units = ("J", "Alanine RE*Dose*volume")
         else:
             dose_units = (" MeV/g/primary", "Dose")
             dose_gy_units = ("Gy", "Dose")
