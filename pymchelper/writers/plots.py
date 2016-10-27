@@ -37,7 +37,7 @@ class SHGnuplotDataWriter:
         self.awk_script_filename = os.path.join(dirname, "addblanks.awk")
 
     _awk_2d_script_content = """/^[[:blank:]]*#/ {next} # ignore comments (lines starting with #)
-NF < 3 {next} # ignore lines which don’t have at least 3 columns
+NF < 3 {next} # ignore lines which don't have at least 3 columns
 $2 != prev {printf \"\\n\"; prev=$2} # print blank line
 {print} # print the line
     """
