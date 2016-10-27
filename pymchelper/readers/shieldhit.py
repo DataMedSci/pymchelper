@@ -229,10 +229,6 @@ class SHBinaryReader:
         if detector.geotyp == SHGeoType.plane:
             detector.data = np.asarray([detector.data])
 
-        # change units for LET from MeV/cm to keV/um
-        if detector.dettyp in (SHDetType.dlet, SHDetType.dletg, SHDetType.tlet, SHDetType.tletg):
-            detector.data *= np.float64(0.1) # 1 MeV / cm = 0.1 keV / um
-
         # normalize result if we need that.
         if detector.dettyp not in (SHDetType.dlet, SHDetType.tlet,
                                    SHDetType.avg_energy, SHDetType.avg_beta,
