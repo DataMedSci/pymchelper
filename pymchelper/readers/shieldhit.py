@@ -180,12 +180,14 @@ class SHBinaryReader:
         """
         if geotyp == SHGeoType.zone:
             dose_units = ("MeV/primary", "Dose*volume")
-            dose_gy_units = ("Gy", "Dose*volume")
+            dose_gy_units = ("Gy * cm3", "Dose*volume")
             alanine_units = ("MeV/primary", "Alanine RE*Dose*volume")
+            alanine_gy_units = ("Gy * cm3", "Alanine RE*Dose*volume")
         else:
             dose_units = (" MeV/g/primary", "Dose")
             dose_gy_units = ("Gy", "Dose")
             alanine_units = ("MeV/g/primary", "Alanine RE*Dose")
+            alanine_gy_units = ("Gy", "Alanine RE*Dose")
 
         _detector_units = {
             SHDetType.unknown: ("(nil)", "None"),
@@ -245,7 +247,7 @@ class SHBinaryReader:
         if nscale != 1 and detector.dettyp in (SHDetType.energy, SHDetType.fluence, SHDetType.crossflu,
                                                SHDetType.dose, SHDetType.counter, SHDetType.pet):
             detector.data *= np.float64(nscale)  # scale with number of particles given by user
-            if detector.dettyp == SHDetType.dose:
+            if detector.dettyp in (SHDetType.dose, SHDetType.alanine):
                 # 1 megaelectron volt / gram = 1.60217662 x 10-10 Gy
                 detector.data *= np.float64(1.60217662e-10)
                 detector.dettyp = SHDetType.dose_gy
