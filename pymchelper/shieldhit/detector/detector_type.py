@@ -24,6 +24,7 @@ class SHDetType(IntEnum):
     let = 120  # for differential scoring
     angle = 121  # for differential scoring
     dose_gy = 205
+    alanine_gy = 213
 
     def __str__(self):
         return self.name.upper().replace('_', '-')

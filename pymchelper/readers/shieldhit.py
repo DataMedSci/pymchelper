@@ -203,6 +203,7 @@ class SHBinaryReader:
             SHDetType.avg_beta: ("(dimensionless)", "Average beta"),
             SHDetType.material: ("(nil)", "Material number"),
             SHDetType.alanine: alanine_units,
+            SHDetType.alanine_gy: alanine_gy_units,
             SHDetType.counter: ("/primary", "Particle counter"),
             SHDetType.pet: ("/primary", "PET isotopes"),
             SHDetType.dletg: ("keV/um", "dose-averaged LET"),
@@ -247,10 +248,13 @@ class SHBinaryReader:
         if nscale != 1 and detector.dettyp in (SHDetType.energy, SHDetType.fluence, SHDetType.crossflu,
                                                SHDetType.dose, SHDetType.counter, SHDetType.pet):
             detector.data *= np.float64(nscale)  # scale with number of particles given by user
+            if detector.dettyp == SHDetType.dose:
+                detector.dettyp = SHDetType.dose_gy
+            if detector.dettyp == SHDetType.alanine:
+                detector.dettyp = SHDetType.alanine_gy
             if detector.dettyp in (SHDetType.dose, SHDetType.alanine):
                 # 1 megaelectron volt / gram = 1.60217662 x 10-10 Gy
                 detector.data *= np.float64(1.60217662e-10)
-                detector.dettyp = SHDetType.dose_gy
                 detector.units[0:4] = SHBinaryReader.get_estimator_units(detector.geotyp)
                 detector.units[4:6] = SHBinaryReader.get_detector_unit(detector.dettyp, detector.geotyp)
                 detector.title = detector.units[5]
