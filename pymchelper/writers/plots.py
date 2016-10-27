@@ -48,17 +48,24 @@ set output \"{plot_filename}\"
 
     _plotting_command = {
         1: """plot './{data_filename}' w l
+set xlabel \"{xlabel}\"
+set ylabel \"{ylabel}\"
         """,
-        2: """set pm3d interpolate 0,0
-set view map
-set dgrid3d
-splot \"awk -f addblanks.awk '{data_filename}'\" with pm3d
+        2: """set view map
+set xlabel \"{xlabel}\"
+set ylabel \"{ylabel}\"
+splot \"<awk -f addblanks.awk '{data_filename}'\" with pm3d
 """
     }
 
     def write(self, detector):
         if detector.dimension in (1, 2):
-            if detector.dimension == 2:
+            if detector.dimension == 1:
+                xlabel = detector.units[0]
+                ylabel = SHImageWriter.make_label(detector.units[4], detector.title)
+            elif detector.dimension == 2:
+                xlabel = detector.units[0]
+                ylabel = detector.units[1]
                 with open(self.awk_script_filename, 'w') as script_file:
                     logger.info("Writing: " + self.awk_script_filename)
                     script_file.write(self._awk_2d_script_content)
@@ -67,7 +74,7 @@ splot \"awk -f addblanks.awk '{data_filename}'\" with pm3d
                 logger.info("Writing: " + self.script_filename)
                 script_file.write(self._header.format(plot_filename=self.plot_filename))
                 plt_cmd = self._plotting_command[detector.dimension]
-                script_file.write(plt_cmd.format(data_filename=self.data_filename))
+                script_file.write(plt_cmd.format(data_filename=self.data_filename, xlabel=xlabel, ylabel=ylabel))
 
 
 class SHImageWriter:
