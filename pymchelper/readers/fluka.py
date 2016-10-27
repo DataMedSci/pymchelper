@@ -53,6 +53,8 @@ class FlukaBinaryReader:
         detector.data = np.array(fdata)
         if nscale != 1:
             detector.data *= nscale
+            # 1 gigaelectron volt / gram = 1.60217662 x 10-7 Gy
+            detector.data *= 1.60217662e-7
 
         # set units : detector.units are [x,y,z,v,data,detector_title]
         detector.units = [""] * 6
