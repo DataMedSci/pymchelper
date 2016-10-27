@@ -192,16 +192,16 @@ class SHBinaryReader:
             SHDetType.crossflu: (" cm^-2/primary", "Planar fluence"),
             SHDetType.letflu: (" MeV/cm", "LET fluence"),
             SHDetType.dose: dose_units,
-            SHDetType.dlet: ("MeV/cm", "dose-averaged LET"),
-            SHDetType.tlet: ("MeV/cm", "track-averaged LET"),
+            SHDetType.dlet: ("keV/um", "dose-averaged LET"),
+            SHDetType.tlet: ("keV/um", "track-averaged LET"),
             SHDetType.avg_energy: ("MeV", "Average energy"),
             SHDetType.avg_beta: ("(dimensionless)", "Average beta"),
             SHDetType.material: ("(nil)", "Material number"),
             SHDetType.alanine: alanine_units,
             SHDetType.counter: ("/primary", "Particle counter"),
             SHDetType.pet: ("/primary", "PET isotopes"),
-            SHDetType.dletg: ("MeV/cm", "dose-averaged LET"),
-            SHDetType.tletg: ("MeV/cm", "track-averaged LET"),
+            SHDetType.dletg: ("keV/um", "dose-averaged LET"),
+            SHDetType.tletg: ("keV/um", "track-averaged LET"),
             SHDetType.zone: ("(dimensionless)", "Zone#"),
             SHDetType.medium: ("(dimensionless)", "Medium#"),
             SHDetType.rho: ("g/cm^3", "Density"),
@@ -228,6 +228,10 @@ class SHBinaryReader:
 
         if detector.geotyp == SHGeoType.plane:
             detector.data = np.asarray([detector.data])
+
+        # change units for LET from MeV/cm to keV/um
+        if detector.dettyp in (SHDetType.dlet, SHDetType.dletg, SHDetType.tlet, SHDetType.tletg):
+            detector.data *= np.float64(0.1) # 1 MeV / cm = 0.1 keV / um
 
         # normalize result if we need that.
         if detector.dettyp not in (SHDetType.dlet, SHDetType.tlet,
