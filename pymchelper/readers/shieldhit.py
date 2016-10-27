@@ -208,7 +208,10 @@ class SHBinaryReader:
         }
         return _detector_units.get(detector_type, ("(nil)", "(nil)"))
 
-    def read_payload(self, detector):
+    # TODO: we need an alternative list, in case things have been scaled with nscale, since then things
+    # are not "/particle" anymore.
+    
+    def read_payload(self, detector, nscale=1):
         logger.info("Reading data: " + self.filename)
 
         if detector.geotyp == SHGeoType.unknown or \
@@ -231,15 +234,19 @@ class SHBinaryReader:
 
         # normalize result if we need that.
         if detector.dettyp not in (SHDetType.dlet, SHDetType.tlet,
+                                   SHDetType.letflu,
+                                   SHDetType.dletg, SHDetType.tletg,
                                    SHDetType.avg_energy, SHDetType.avg_beta,
                                    SHDetType.material):
             detector.data /= np.float64(detector.nstat)
-
+            if scale != 1:  # scale with number of particles given by user
+                detector.data *= nscale
+            
         detector.counter = 1
 
-    def read(self, detector):
+    def read(self, detector, nscale=1):
         self.read_header(detector)
-        self.read_payload(detector)
+        self.read_payload(detector, nscale)
 
 
 class SHTextReader:
