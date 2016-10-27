@@ -23,6 +23,7 @@ class SHDetType(IntEnum):
     rho = 20
     let = 120  # for differential scoring
     angle = 121  # for differential scoring
+    dose_gy = 205
 
     def __str__(self):
         return self.name.upper().replace('_', '-')

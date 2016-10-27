@@ -179,10 +179,12 @@ class SHBinaryReader:
         :return:
         """
         if geotyp == SHGeoType.zone:
-            dose_units = (" MeV/primary", "Dose*volume")
+            dose_units = ("MeV/primary", "Dose*volume")
+            dose_gy_units = ("Gy", "Dose*volume")
             alanine_units = ("MeV/primary", "Alanine RE*Dose*volume")
         else:
             dose_units = (" MeV/g/primary", "Dose")
+            dose_gy_units = ("Gy", "Dose")
             alanine_units = ("MeV/g/primary", "Alanine RE*Dose")
 
         _detector_units = {
@@ -192,6 +194,7 @@ class SHBinaryReader:
             SHDetType.crossflu: (" cm^-2/primary", "Planar fluence"),
             SHDetType.letflu: (" MeV/cm", "LET fluence"),
             SHDetType.dose: dose_units,
+            SHDetType.dose_gy: dose_gy_units,
             SHDetType.dlet: ("keV/um", "dose-averaged LET"),
             SHDetType.tlet: ("keV/um", "track-averaged LET"),
             SHDetType.avg_energy: ("MeV", "Average energy"),
@@ -214,8 +217,7 @@ class SHBinaryReader:
     def read_payload(self, detector, nscale=1):
         logger.info("Reading data: " + self.filename)
 
-        if detector.geotyp == SHGeoType.unknown or \
-           detector.dettyp == SHDetType.unknown:
+        if detector.geotyp == SHGeoType.unknown or detector.dettyp == SHDetType.unknown:
             detector.data = []
             return
 
@@ -239,9 +241,17 @@ class SHBinaryReader:
                                    SHDetType.avg_energy, SHDetType.avg_beta,
                                    SHDetType.material):
             detector.data /= np.float64(detector.nstat)
-            if scale != 1:  # scale with number of particles given by user
+            if nscale != 1:  # scale with number of particles given by user
                 detector.data *= nscale
-            
+                if detector.dettyp == SHDetType.dose:
+                    # 1 megaelectron volt / gram = 1.60217662 x 10-10 Gy
+                    detector.data *= 1.60217662e-10
+                    detector.dettyp = SHDetType.dose_gy
+                    detector.units[0:4] = SHBinaryReader.get_estimator_units(detector.geotyp)
+                    detector.units[4:6] = SHBinaryReader.get_detector_unit(detector.dettyp,
+                                                                           detector.geotyp)
+                    detector.title = detector.units[5]
+
         detector.counter = 1
 
     def read(self, detector, nscale=1):

@@ -264,7 +264,7 @@ def merge_list(input_file_list,
 def merge_many(input_file_list,
                conv_names=(SHConverters.standard.name,),
                nan=False,
-               colormap=SHImageWriter.default_colormap
+               colormap=SHImageWriter.default_colormap,
                nscale=1):
     """
     Takes set of input file names, belonging to possibly different estimators.
@@ -275,6 +275,7 @@ def merge_many(input_file_list,
     :param conv_names: list of converter names
     :param nan: if true, invalid values (NaN) will be excluded from averaging
     :param colormap: name of colormap, valid only for image converter
+    :param nscale: number of particles to scale
     :return: none
     """
     core_names_dict = defaultdict(list)
