@@ -241,16 +241,17 @@ class SHBinaryReader:
                                    SHDetType.avg_energy, SHDetType.avg_beta,
                                    SHDetType.material):
             detector.data /= np.float64(detector.nstat)
-            if nscale != 1:  # scale with number of particles given by user
-                detector.data *= nscale
-                if detector.dettyp == SHDetType.dose:
-                    # 1 megaelectron volt / gram = 1.60217662 x 10-10 Gy
-                    detector.data *= 1.60217662e-10
-                    detector.dettyp = SHDetType.dose_gy
-                    detector.units[0:4] = SHBinaryReader.get_estimator_units(detector.geotyp)
-                    detector.units[4:6] = SHBinaryReader.get_detector_unit(detector.dettyp,
-                                                                           detector.geotyp)
-                    detector.title = detector.units[5]
+
+        if nscale != 1 and detector.dettyp in (SHDetType.energy, SHDetType.fluence, SHDetType.crossflu,
+                                               SHDetType.dose, SHDetType.counter, SHDetType.pet):
+            detector.data *= np.float64(nscale)  # scale with number of particles given by user
+            if detector.dettyp == SHDetType.dose:
+                # 1 megaelectron volt / gram = 1.60217662 x 10-10 Gy
+                detector.data *= np.float64(1.60217662e-10)
+                detector.dettyp = SHDetType.dose_gy
+                detector.units[0:4] = SHBinaryReader.get_estimator_units(detector.geotyp)
+                detector.units[4:6] = SHBinaryReader.get_detector_unit(detector.dettyp, detector.geotyp)
+                detector.title = detector.units[5]
 
         detector.counter = 1
 
