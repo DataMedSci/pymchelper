@@ -41,6 +41,7 @@ def main(args=sys.argv[1:]):
     parser.add_argument("outputfile", help='output filename', nargs='?')
     parser.add_argument("--many", help='automatically merge data from various sources', action="store_true")
     parser.add_argument("--nan", help='ignore NaN in averaging', action="store_true")
+    parser.add_argument("-n", '--nscale', help='Scale with number of primaries N.', default=1, type=int)
     parser.add_argument(
         "--converter",
         help='converters',
@@ -63,9 +64,10 @@ def main(args=sys.argv[1:]):
         parsed_args.outputfile = files[0][:-3] + "txt"
 
     if parsed_args.many:
-        merge_many(files, parsed_args.converter, parsed_args.nan, parsed_args.colormap)
+        merge_many(files, parsed_args.converter, parsed_args.nan, parsed_args.colormap, parsed_args.nscale)
     else:
-        merge_list(files, parsed_args.outputfile, parsed_args.converter, parsed_args.nan, parsed_args.colormap)
+        merge_list(files, parsed_args.outputfile, parsed_args.converter, parsed_args.nan, parsed_args.colormap,
+                   parsed_args.nscale)
 
     return 0
 

@@ -61,7 +61,7 @@ class Detector:
     # number of files
     counter = -1
 
-    def read(self, filename):
+    def read(self, filename, nscale=1):
         """
         Reads binary file with. Automatically discovers which reader should be used.
         :param filename: binary file name
@@ -73,7 +73,7 @@ class Detector:
         # find better way to discover if file comes from Fluka
         elif "_fort" in filename:
             reader = FlukaBinaryReader(filename)
-        reader.read(self)
+        reader.read(self, nscale)
         self.counter = 1
 
     def append(self, other_detector):
@@ -228,7 +228,8 @@ def merge_list(input_file_list,
                output_file,
                conv_names=(SHConverters.standard.name,),
                nan=False,
-               colormap=SHImageWriter.default_colormap):
+               colormap=SHImageWriter.default_colormap,
+               nscale=1):
     """
     Takes set of input file names, containing data from the same estimator.
     All input files are read and data is filled (and summed) into detector structure.
@@ -241,13 +242,13 @@ def merge_list(input_file_list,
     :return: none
     """
     first = Detector()
-    first.read(input_file_list[0])
+    first.read(input_file_list[0], nscale)
 
     other_detectors = []
 
     for file in input_file_list[1:]:
         next_one = Detector()
-        next_one.read(file)
+        next_one.read(file, nscale)
         if nan:
             other_detectors.append(next_one)
         else:
@@ -263,7 +264,8 @@ def merge_list(input_file_list,
 def merge_many(input_file_list,
                conv_names=(SHConverters.standard.name,),
                nan=False,
-               colormap=SHImageWriter.default_colormap):
+               colormap=SHImageWriter.default_colormap,
+               nscale=1):
     """
     Takes set of input file names, belonging to possibly different estimators.
     Input files are grouped according to the estimators and for each group
@@ -273,6 +275,7 @@ def merge_many(input_file_list,
     :param conv_names: list of converter names
     :param nan: if true, invalid values (NaN) will be excluded from averaging
     :param colormap: name of colormap, valid only for image converter
+    :param nscale: number of particles to scale
     :return: none
     """
     core_names_dict = defaultdict(list)
@@ -287,4 +290,4 @@ def merge_many(input_file_list,
             core_names_dict[core_name].append(name)
 
     for core_name, group_with_same_core in core_names_dict.items():
-        merge_list(group_with_same_core, core_name + ".txt", conv_names, nan, colormap)
+        merge_list(group_with_same_core, core_name + ".txt", conv_names, nan, colormap, nscale)

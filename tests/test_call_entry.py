@@ -35,6 +35,14 @@ class TestCallMain(unittest.TestCase):
         self.assertGreater(len(files), 4)
         self.assertEqual(len(png_files), len(bdo_files))
 
+    def test_many_shield_nscale(self):
+        run.main(["--many", "tests/res/shieldhit/single/*.bdo", "--converter", "image", "-n", "100000000"])
+        files = os.listdir(os.path.join("tests", "res", "shieldhit", "single"))
+        png_files = [f for f in files if f.endswith(".png")]
+        bdo_files = [f for f in files if f.endswith(".bdo")]
+        self.assertGreater(len(files), 4)
+        self.assertEqual(len(png_files), len(bdo_files))
+
 
 class TestCallExample(unittest.TestCase):
     def test_shieldhit(self):

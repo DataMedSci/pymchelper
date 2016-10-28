@@ -13,7 +13,7 @@ class FlukaBinaryReader:
     def __init__(self, filename):
         self.filename = filename
 
-    def read(self, detector):
+    def read(self, detector, nscale=1):
         usr = Usrbin(self.filename)
         usr.say()  # file,title,time,weight,ncase,nbatch
         for i, _ in enumerate(usr.detector):
@@ -51,6 +51,10 @@ class FlukaBinaryReader:
         detector.dettyp = SHDetType.unknown
 
         detector.data = np.array(fdata)
+        if nscale != 1:
+            detector.data *= nscale
+            # 1 gigaelectron volt / gram = 1.60217662 x 10-7 Gy
+            detector.data *= 1.60217662e-7
 
         # set units : detector.units are [x,y,z,v,data,detector_title]
         detector.units = [""] * 6

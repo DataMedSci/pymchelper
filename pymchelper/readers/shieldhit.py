@@ -179,11 +179,15 @@ class SHBinaryReader:
         :return:
         """
         if geotyp == SHGeoType.zone:
-            dose_units = (" MeV/primary", "Dose*volume")
+            dose_units = ("MeV/primary", "Dose*volume")
+            dose_gy_units = ("J", "Dose*volume")
             alanine_units = ("MeV/primary", "Alanine RE*Dose*volume")
+            alanine_gy_units = ("J", "Alanine RE*Dose*volume")
         else:
             dose_units = (" MeV/g/primary", "Dose")
+            dose_gy_units = ("Gy", "Dose")
             alanine_units = ("MeV/g/primary", "Alanine RE*Dose")
+            alanine_gy_units = ("Gy", "Alanine RE*Dose")
 
         _detector_units = {
             SHDetType.unknown: ("(nil)", "None"),
@@ -192,12 +196,14 @@ class SHBinaryReader:
             SHDetType.crossflu: (" cm^-2/primary", "Planar fluence"),
             SHDetType.letflu: (" MeV/cm", "LET fluence"),
             SHDetType.dose: dose_units,
+            SHDetType.dose_gy: dose_gy_units,
             SHDetType.dlet: ("keV/um", "dose-averaged LET"),
             SHDetType.tlet: ("keV/um", "track-averaged LET"),
             SHDetType.avg_energy: ("MeV", "Average energy"),
             SHDetType.avg_beta: ("(dimensionless)", "Average beta"),
             SHDetType.material: ("(nil)", "Material number"),
             SHDetType.alanine: alanine_units,
+            SHDetType.alanine_gy: alanine_gy_units,
             SHDetType.counter: ("/primary", "Particle counter"),
             SHDetType.pet: ("/primary", "PET isotopes"),
             SHDetType.dletg: ("keV/um", "dose-averaged LET"),
@@ -208,11 +214,12 @@ class SHBinaryReader:
         }
         return _detector_units.get(detector_type, ("(nil)", "(nil)"))
 
-    def read_payload(self, detector):
+    # TODO: we need an alternative list, in case things have been scaled with nscale, since then things
+    # are not "/particle" anymore.
+    def read_payload(self, detector, nscale=1):
         logger.info("Reading data: " + self.filename)
 
-        if detector.geotyp == SHGeoType.unknown or \
-           detector.dettyp == SHDetType.unknown:
+        if detector.geotyp == SHGeoType.unknown or detector.dettyp == SHDetType.unknown:
             detector.data = []
             return
 
@@ -231,15 +238,31 @@ class SHBinaryReader:
 
         # normalize result if we need that.
         if detector.dettyp not in (SHDetType.dlet, SHDetType.tlet,
+                                   SHDetType.letflu,
+                                   SHDetType.dletg, SHDetType.tletg,
                                    SHDetType.avg_energy, SHDetType.avg_beta,
                                    SHDetType.material):
             detector.data /= np.float64(detector.nstat)
 
+        if nscale != 1 and detector.dettyp in (SHDetType.energy, SHDetType.fluence, SHDetType.crossflu,
+                                               SHDetType.dose, SHDetType.counter, SHDetType.pet):
+            detector.data *= np.float64(nscale)  # scale with number of particles given by user
+            if detector.dettyp == SHDetType.dose:
+                detector.dettyp = SHDetType.dose_gy
+            if detector.dettyp == SHDetType.alanine:
+                detector.dettyp = SHDetType.alanine_gy
+            if detector.dettyp in (SHDetType.dose, SHDetType.alanine):
+                # 1 megaelectron volt / gram = 1.60217662 x 10-10 Gy
+                detector.data *= np.float64(1.60217662e-10)
+                detector.units[0:4] = SHBinaryReader.get_estimator_units(detector.geotyp)
+                detector.units[4:6] = SHBinaryReader.get_detector_unit(detector.dettyp, detector.geotyp)
+                detector.title = detector.units[5]
+
         detector.counter = 1
 
-    def read(self, detector):
+    def read(self, detector, nscale=1):
         self.read_header(detector)
-        self.read_payload(detector)
+        self.read_payload(detector, nscale)
 
 
 class SHTextReader:
