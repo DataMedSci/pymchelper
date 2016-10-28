@@ -20,9 +20,12 @@ class SHPlotDataWriter:
         if detector.dettyp in (SHDetType.dlet, SHDetType.dletg, SHDetType.tlet, SHDetType.tletg):
             detector.data *= np.float64(0.1)  # 1 MeV / cm = 0.1 keV / um
 
-        axis_values = [list(detector.axis_values(i, plotting_order=True)) for i in range(detector.dimension)]
         fmt = "%g" + " %g" * detector.dimension + " %g"
-        data = np.transpose(axis_values + [detector.data] + [detector.error])
+        if detector.dimension == 0:
+            data = np.transpose([detector.data[0]] + [detector.error[0]])
+        else:
+            axis_values = [list(detector.axis_values(i, plotting_order=True)) for i in range(detector.dimension)]
+            data = np.transpose(axis_values + [detector.data] + [detector.error])
         np.savetxt(self.filename, data, fmt=fmt, delimiter=' ')
 
 
@@ -116,7 +119,9 @@ class SHImageWriter:
             if detector.dimension == 1:
                 xlist = list(xdata)
                 if np.any(detector.error):
-                    plt.fill_between(xlist, detector.v - detector.error, detector.v + detector.error,
+                    plt.fill_between(xlist,
+                                     (detector.v - detector.error).clip(0.0),
+                                     (detector.v + detector.error).clip(0.0, 3.0*(detector.v.max())),
                                      alpha=0.2, edgecolor='#CC4F1B', facecolor='#FF9848', antialiased=True)
                 plt.plot(xlist, detector.v)
                 plt.xlabel(self.make_label(detector.units[0], ""))
@@ -146,7 +151,7 @@ class SHImageWriter:
             plt.close()
 
             if np.any(detector.error) and detector.dimension == 2:
-                plt.pcolormesh(xlist, ylist, elist, cmap=self.colormap)
+                plt.pcolormesh(xlist, ylist, elist.clip(0.0), cmap=self.colormap)
                 plt.xlabel(detector.units[0])
                 plt.ylabel(detector.units[1])
                 cbar = plt.colorbar()
