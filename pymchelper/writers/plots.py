@@ -22,7 +22,10 @@ class SHPlotDataWriter:
 
         fmt = "%g" + " %g" * detector.dimension + " %g"
         if detector.dimension == 0:
-            data = np.transpose([detector.data[0]] + [detector.error[0]])
+            if len(detector.error.shape) == 1:
+                data = [np.transpose([detector.data[0]] + [detector.error[0]])]
+            else:
+                data = np.transpose([detector.data[0]] + [detector.error[0]])
         else:
             axis_values = [list(detector.axis_values(i, plotting_order=True)) for i in range(detector.dimension)]
             data = np.transpose(axis_values + [detector.data] + [detector.error])
@@ -53,27 +56,29 @@ $2 != prev {printf \"\\n\"; prev=$2} # print blank line
 
     _header = """set term png
 set output \"{plot_filename}\"
+set title \"{title}\"
+set xlabel \"{xlabel}\"
+set ylabel \"{ylabel}\"
 """
 
+    _error_plot_command = "'./{data_filename}' u 1:(max($2-$3,0.0)):($2+$3) w filledcurves " \
+                          "fs transparent solid 0.2 lc 3 title '1-sigma confidence', "
+
     _plotting_command = {
-        1: """plot './{data_filename}' w l
-set xlabel \"{xlabel}\"
-set ylabel \"{ylabel}\"
+        1: """max(x,y) = (x > y) ? x : y
+plot {error_plot} './{data_filename}' u 1:2 w l lt 1 lw 2 lc -1 title 'mean value'
         """,
         2: """set view map
-set xlabel \"{xlabel}\"
-set ylabel \"{ylabel}\"
-splot \"<awk -f addblanks.awk '{data_filename}'\" with pm3d
+splot \"<awk -f addblanks.awk '{data_filename}'\" u 1:2:3 with pm3d
 """
     }
 
     def write(self, detector):
         if detector.dimension in (1, 2):
+            xlabel = detector.units[0]
             if detector.dimension == 1:
-                xlabel = detector.units[0]
                 ylabel = SHImageWriter.make_label(detector.units[4], detector.title)
             elif detector.dimension == 2:
-                xlabel = detector.units[0]
                 ylabel = detector.units[1]
                 with open(self.awk_script_filename, 'w') as script_file:
                     logger.info("Writing: " + self.awk_script_filename)
@@ -81,9 +86,18 @@ splot \"<awk -f addblanks.awk '{data_filename}'\" with pm3d
 
             with open(self.script_filename, 'w') as script_file:
                 logger.info("Writing: " + self.script_filename)
-                script_file.write(self._header.format(plot_filename=self.plot_filename))
+                script_file.write(self._header.format(plot_filename=self.plot_filename,
+                                                      xlabel=xlabel,
+                                                      ylabel=ylabel,
+                                                      title=detector.title
+                                                      ))
                 plt_cmd = self._plotting_command[detector.dimension]
-                script_file.write(plt_cmd.format(data_filename=self.data_filename, xlabel=xlabel, ylabel=ylabel))
+                err_cmd = ""
+                if np.any(detector.error):
+                    err_cmd = self._error_plot_command.format(data_filename=self.data_filename)
+
+                script_file.write(plt_cmd.format(data_filename=self.data_filename,
+                                                 error_plot=err_cmd))
 
 
 class SHImageWriter:

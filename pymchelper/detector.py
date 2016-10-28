@@ -62,7 +62,7 @@ class Detector:
     # number of files
     counter = -1
 
-    _M2 = None
+    _M2 = None  # accumulator needed by average_with_other method
 
     def read(self, filename, nscale=1):
         """
@@ -79,18 +79,6 @@ class Detector:
         reader.read(self, nscale)
         self.error = np.zeros_like(self.data)
         self.counter = 1
-
-    def append_detector(self, other_detector):
-        """
-        Append data from other detector (assuming the same estimator).
-        Values are added, not averaged.
-        :param other_detector:
-        :return:
-        """
-        # TODO add compatibility check
-        self.data += other_detector.data
-        self.nstat += other_detector.nstat
-        self.counter += 1
 
     def average_with_nan(self, other_detectors):
         """
@@ -112,11 +100,15 @@ class Detector:
         :param other_detector:
         :return:
         """
-        self.counter += 1
-        delta = other_detector.data - self.data   # delta = x - mean
-        self.data += delta / self.counter
-        self._M2 += delta * (other_detector.data - self.data)
-        self.error = np.sqrt(self._M2 / (self.counter - 1))
+
+        # Running variance algorithm based on algorithm by B. P. Welford,
+        # presented in Donald Knuth’s Art of Computer Programming, Vol 2, page 232, 3rd edition.
+        # Can be found here: http://www.johndcook.com/blog/standard_deviation/
+        # and https://en.wikipedia.org/wiki/Algorithms_for_calculating_variance#Online_algorithm
+        delta = other_detector.data - self.data                # delta = x - mean
+        self.data += delta / self.counter                      # mean += delta / n
+        self._M2 += delta * (other_detector.data - self.data)  #   M2 *= delta * (x - mean)
+        self.error = np.sqrt(self._M2 / (self.counter - 1))    # stddev = sqrt( var / (n-1) )
 
     def save(self, filename, conv_names=(SHConverters.standard.name,), colormap=SHImageWriter.default_colormap):
         """
