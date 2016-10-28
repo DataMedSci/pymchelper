@@ -216,7 +216,6 @@ class SHBinaryReader:
 
     # TODO: we need an alternative list, in case things have been scaled with nscale, since then things
     # are not "/particle" anymore.
-    
     def read_payload(self, detector, nscale=1):
         logger.info("Reading data: " + self.filename)
 
