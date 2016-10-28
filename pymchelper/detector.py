@@ -105,6 +105,7 @@ class Detector:
         # presented in Donald Knuth's Art of Computer Programming, Vol 2, page 232, 3rd edition.
         # Can be found here: http://www.johndcook.com/blog/standard_deviation/
         # and https://en.wikipedia.org/wiki/Algorithms_for_calculating_variance#Online_algorithm
+        self.counter += 1
         delta = other_detector.data - self.data                # delta = x - mean
         self.data += delta / self.counter                      # mean += delta / n
         self._M2 += delta * (other_detector.data - self.data)  # M2 *= delta * (x - mean)
