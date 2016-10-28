@@ -1,3 +1,4 @@
+import os
 import logging
 
 import numpy as np
@@ -32,27 +33,48 @@ class SHGnuplotDataWriter:
         if not self.data_filename.endswith(".dat"):
             self.data_filename += ".dat"
 
+        dirname = os.path.split(self.script_filename)[0]
+        self.awk_script_filename = os.path.join(dirname, "addblanks.awk")
+
+    _awk_2d_script_content = """/^[[:blank:]]*#/ {next} # ignore comments (lines starting with #)
+NF < 3 {next} # ignore lines which don't have at least 3 columns
+$2 != prev {printf \"\\n\"; prev=$2} # print blank line
+{print} # print the line
+    """
+
     _header = """set term png
 set output \"{plot_filename}\"
 """
 
     _plotting_command = {
         1: """plot './{data_filename}' w l
+set xlabel \"{xlabel}\"
+set ylabel \"{ylabel}\"
         """,
-        2: """set pm3d interpolate 0,0
-set view map
-set dgrid3d
-splot '{data_filename}' with pm3d
+        2: """set view map
+set xlabel \"{xlabel}\"
+set ylabel \"{ylabel}\"
+splot \"<awk -f addblanks.awk '{data_filename}'\" with pm3d
 """
     }
 
     def write(self, detector):
         if detector.dimension in (1, 2):
+            if detector.dimension == 1:
+                xlabel = detector.units[0]
+                ylabel = SHImageWriter.make_label(detector.units[4], detector.title)
+            elif detector.dimension == 2:
+                xlabel = detector.units[0]
+                ylabel = detector.units[1]
+                with open(self.awk_script_filename, 'w') as script_file:
+                    logger.info("Writing: " + self.awk_script_filename)
+                    script_file.write(self._awk_2d_script_content)
+
             with open(self.script_filename, 'w') as script_file:
                 logger.info("Writing: " + self.script_filename)
                 script_file.write(self._header.format(plot_filename=self.plot_filename))
                 plt_cmd = self._plotting_command[detector.dimension]
-                script_file.write(plt_cmd.format(data_filename=self.data_filename))
+                script_file.write(plt_cmd.format(data_filename=self.data_filename, xlabel=xlabel, ylabel=ylabel))
 
 
 class SHImageWriter:
@@ -89,10 +111,14 @@ class SHImageWriter:
                 xn = detector.axis_data(0, plotting_order=True).n
                 yn = detector.axis_data(1, plotting_order=True).n
 
-                xlist = np.asarray(list(xdata)).reshape(xn, yn)
-                ylist = np.asarray(list(ydata)).reshape(xn, yn)
-                zlist = detector.v.reshape(xn, yn)
-
+                if detector._axes_plotting_order[0] == 0 and detector._axes_plotting_order[1] == 1:
+                    xlist = np.asarray(list(xdata)).reshape(xn, yn)
+                    ylist = np.asarray(list(ydata)).reshape(xn, yn)
+                    zlist = detector.v.reshape(xn, yn)
+                else:
+                    xlist = np.asarray(list(xdata)).reshape(yn, xn)
+                    ylist = np.asarray(list(ydata)).reshape(yn, xn)
+                    zlist = detector.v.reshape(yn, xn)
                 plt.pcolormesh(xlist, ylist, zlist, cmap=self.colormap)
                 cbar = plt.colorbar()
                 cbar.set_label(detector.units[4], rotation=270)
