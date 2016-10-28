@@ -14,6 +14,12 @@ class SHPlotDataWriter:
 
     def write(self, detector):
         logger.info("Writing: " + self.filename)
+
+        # change units for LET from MeV/cm to keV/um
+        from pymchelper.shieldhit.detector.detector_type import SHDetType
+        if detector.dettyp in (SHDetType.dlet, SHDetType.dletg, SHDetType.tlet, SHDetType.tletg):
+            detector.data *= np.float64(0.1)  # 1 MeV / cm = 0.1 keV / um
+
         axis_values = [list(detector.axis_values(i, plotting_order=True)) for i in range(detector.dimension)]
         fmt = "%g" + " %g" * detector.dimension
         data = np.transpose(axis_values + [detector.data])
@@ -97,6 +103,12 @@ class SHImageWriter:
         import matplotlib
         matplotlib.use('Agg')
         import matplotlib.pyplot as plt
+
+        # change units for LET from MeV/cm to keV/um
+        from pymchelper.shieldhit.detector.detector_type import SHDetType
+        if detector.dettyp in (SHDetType.dlet, SHDetType.dletg, SHDetType.tlet, SHDetType.tletg):
+            detector.data *= np.float64(0.1)  # 1 MeV / cm = 0.1 keV / um
+
         xdata = detector.axis_values(0, plotting_order=True)
 
         if detector.dimension in (1, 2):
