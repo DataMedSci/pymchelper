@@ -102,12 +102,12 @@ class Detector:
         """
 
         # Running variance algorithm based on algorithm by B. P. Welford,
-        # presented in Donald Knuth’s Art of Computer Programming, Vol 2, page 232, 3rd edition.
+        # presented in Donald Knuth's Art of Computer Programming, Vol 2, page 232, 3rd edition.
         # Can be found here: http://www.johndcook.com/blog/standard_deviation/
         # and https://en.wikipedia.org/wiki/Algorithms_for_calculating_variance#Online_algorithm
         delta = other_detector.data - self.data                # delta = x - mean
         self.data += delta / self.counter                      # mean += delta / n
-        self._M2 += delta * (other_detector.data - self.data)  #   M2 *= delta * (x - mean)
+        self._M2 += delta * (other_detector.data - self.data)  # M2 *= delta * (x - mean)
         self.error = np.sqrt(self._M2 / (self.counter - 1))    # stddev = sqrt( var / (n-1) )
 
     def save(self, filename, conv_names=(SHConverters.standard.name,), colormap=SHImageWriter.default_colormap):

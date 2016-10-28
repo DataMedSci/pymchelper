@@ -135,7 +135,7 @@ class SHImageWriter:
                 if np.any(detector.error):
                     plt.fill_between(xlist,
                                      (detector.v - detector.error).clip(0.0),
-                                     (detector.v + detector.error).clip(0.0, 3.0*(detector.v.max())),
+                                     (detector.v + detector.error).clip(0.0, 3.0 * (detector.v.max())),
                                      alpha=0.2, edgecolor='#CC4F1B', facecolor='#FF9848', antialiased=True)
                 plt.plot(xlist, detector.v)
                 plt.xlabel(self.make_label(detector.units[0], ""))
