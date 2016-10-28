@@ -86,5 +86,5 @@ test_script:
   - ps: If ($env:PYTHON_VERSION -eq "3.5") {conda install -q --name python%PYTHON_VERSION% scipy}
   - ps: If ($env:PYTHON_VERSION -eq "3.5") {python -c "import scipy as sp;print(sp.version.version)"}
   - ps: If ($env:PYTHON_VERSION -eq "3.5") {pip install pytrip98}
-# run tests
-  - py.test
+# run tests (normal py.test command results in memory error on appveyor, so we run tests file-by-file)
+  - FOR %%I in (tests\test*.py) DO python -m pytest %%I
