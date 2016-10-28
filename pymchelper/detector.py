@@ -40,6 +40,7 @@ class Detector:
     Holds data read from single estimator
     """
     data = None
+    error = None
     nstat = -1
 
     xmin = float("NaN")
@@ -61,6 +62,8 @@ class Detector:
     # number of files
     counter = -1
 
+    _M2 = None
+
     def read(self, filename, nscale=1):
         """
         Reads binary file with. Automatically discovers which reader should be used.
@@ -74,9 +77,10 @@ class Detector:
         elif "_fort" in filename:
             reader = FlukaBinaryReader(filename)
         reader.read(self, nscale)
+        self.error = np.zeros_like(self.data)
         self.counter = 1
 
-    def append(self, other_detector):
+    def append_detector(self, other_detector):
         """
         Append data from other detector (assuming the same estimator).
         Values are added, not averaged.
@@ -98,8 +102,21 @@ class Detector:
         l = [det.data for det in other_detectors]
         l.append(self.data)
         self.data = np.nanmean(l, axis=0)
+        self.error = np.nanvar(l, axis=0, ddof=1)
         self.nstat += sum(det.nstat for det in other_detectors)
         self.counter += len(other_detectors)
+
+    def average_with_other(self, other_detector):
+        """
+        Average (not add) data with other detector
+        :param other_detector:
+        :return:
+        """
+        self.counter += 1
+        delta = other_detector.data - self.data   # delta = x - mean
+        self.data += delta / self.counter
+        self._M2 += delta * (other_detector.data - self.data)
+        self.error = np.sqrt(self._M2 / (self.counter - 1))
 
     def save(self, filename, conv_names=(SHConverters.standard.name,), colormap=SHImageWriter.default_colormap):
         """
@@ -118,6 +135,7 @@ class Detector:
     def __str__(self):
         result = ""
         result += "data" + str(self.data[0].shape) + "\n"
+        result += "error" + str(self.error[0].shape) + "\n"
         result += "nstat = {:d}\n".format(self.nstat)
         result += "X {:g} - {:g} ({:d} items)\n".format(self.xmin, self.xmax, self.nx)
         result += "Y {:g} - {:g} ({:d} items)\n".format(self.ymin, self.ymax, self.ny)
@@ -184,6 +202,10 @@ class Detector:
     def v(self):
         return self.data
 
+    @property
+    def e(self):
+        return self.error
+
     AxisData = namedtuple('AxisData', ['min', 'max', 'n'])
 
     def axis_data(self, axis_number, plotting_order=False):
@@ -246,18 +268,19 @@ def merge_list(input_file_list,
 
     other_detectors = []
 
+    if not nan and len(input_file_list) > 1:
+        first._M2 = np.zeros_like(first.error)
+
     for file in input_file_list[1:]:
         next_one = Detector()
         next_one.read(file, nscale)
         if nan:
             other_detectors.append(next_one)
         else:
-            first.append(next_one)
+            first.average_with_other(other_detector=next_one)
 
     if other_detectors and nan:
         first.average_with_nan(other_detectors)
-    else:
-        first.data /= np.float64(first.counter)
     first.save(output_file, conv_names, colormap)
 
 

@@ -21,8 +21,8 @@ class SHPlotDataWriter:
             detector.data *= np.float64(0.1)  # 1 MeV / cm = 0.1 keV / um
 
         axis_values = [list(detector.axis_values(i, plotting_order=True)) for i in range(detector.dimension)]
-        fmt = "%g" + " %g" * detector.dimension
-        data = np.transpose(axis_values + [detector.data])
+        fmt = "%g" + " %g" * detector.dimension + " %g"
+        data = np.transpose(axis_values + [detector.data] + [detector.error])
         np.savetxt(self.filename, data, fmt=fmt, delimiter=' ')
 
 
@@ -114,7 +114,11 @@ class SHImageWriter:
         if detector.dimension in (1, 2):
             logger.info("Writing: " + self.plot_filename)
             if detector.dimension == 1:
-                plt.plot(list(xdata), detector.v)
+                xlist = list(xdata)
+                if np.any(detector.error):
+                    plt.fill_between(xlist, detector.v - detector.error, detector.v + detector.error,
+                                     alpha=0.2, edgecolor='#CC4F1B', facecolor='#FF9848', antialiased=True)
+                plt.plot(xlist, detector.v)
                 plt.xlabel(self.make_label(detector.units[0], ""))
                 plt.ylabel(self.make_label(detector.units[4], detector.title))
             elif detector.dimension == 2:
@@ -127,10 +131,12 @@ class SHImageWriter:
                     xlist = np.asarray(list(xdata)).reshape(xn, yn)
                     ylist = np.asarray(list(ydata)).reshape(xn, yn)
                     zlist = detector.v.reshape(xn, yn)
+                    elist = detector.e.reshape(xn, yn)
                 else:
                     xlist = np.asarray(list(xdata)).reshape(yn, xn)
                     ylist = np.asarray(list(ydata)).reshape(yn, xn)
                     zlist = detector.v.reshape(yn, xn)
+                    elist = detector.e.reshape(yn, xn)
                 plt.pcolormesh(xlist, ylist, zlist, cmap=self.colormap)
                 cbar = plt.colorbar()
                 cbar.set_label(detector.units[4], rotation=270)
@@ -138,3 +144,13 @@ class SHImageWriter:
                 plt.ylabel(detector.units[1])
             plt.savefig(self.plot_filename)
             plt.close()
+
+            if np.any(detector.error) and detector.dimension == 2:
+                plt.pcolormesh(xlist, ylist, elist, cmap=self.colormap)
+                plt.xlabel(detector.units[0])
+                plt.ylabel(detector.units[1])
+                cbar = plt.colorbar()
+                cbar.set_label(detector.units[4], rotation=270)
+                base_name, _ = os.path.splitext(self.plot_filename)
+                plt.savefig(base_name + "_error.png")
+                plt.close()
