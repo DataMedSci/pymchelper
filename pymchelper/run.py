@@ -6,7 +6,7 @@ import sys
 
 import argparse
 
-from pymchelper.detector import merge_list, merge_many, SHConverters
+from pymchelper.detector import merge_list, merge_many, SHConverters, ErrorEstimate
 from pymchelper.writers.plots import SHImageWriter
 
 logger = logging.getLogger(__name__)
@@ -49,6 +49,11 @@ def main(args=sys.argv[1:]):
         choices=[x.name for x in SHConverters],
         nargs='+')
     parser.add_argument("--colormap", help='image color map', default=SHImageWriter.default_colormap, type=str)
+    parser.add_argument("--error",
+                        help='type of error estimate to add (default: stderr)',
+                        default=ErrorEstimate.stderr.name,
+                        choices=[x.name for x in ErrorEstimate],
+                        type=str)
     parser.add_argument('-V', '--version', action='version', version=pymchelper.__version__)
     parsed_args = parser.parse_args(args)
 
@@ -64,10 +69,11 @@ def main(args=sys.argv[1:]):
         parsed_args.outputfile = files[0][:-3] + "txt"
 
     if parsed_args.many:
-        merge_many(files, parsed_args.converter, parsed_args.nan, parsed_args.colormap, parsed_args.nscale)
+        merge_many(files, parsed_args.converter, parsed_args.nan, parsed_args.colormap, parsed_args.nscale,
+                   ErrorEstimate[parsed_args.error])
     else:
         merge_list(files, parsed_args.outputfile, parsed_args.converter, parsed_args.nan, parsed_args.colormap,
-                   parsed_args.nscale)
+                   parsed_args.nscale, ErrorEstimate[parsed_args.error])
 
     return 0
 

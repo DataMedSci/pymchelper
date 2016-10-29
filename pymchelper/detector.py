@@ -26,6 +26,11 @@ class SHConverters(IntEnum):
     tripcube = 4
 
 
+class ErrorEstimate(IntEnum):
+    none = 0
+    stderr = 1
+    stddev = 2
+
 _converter_mapping = {
     SHConverters.standard: SHFortranWriter,
     SHConverters.gnuplot: SHGnuplotDataWriter,
@@ -77,10 +82,9 @@ class Detector:
         elif "_fort" in filename:
             reader = FlukaBinaryReader(filename)
         reader.read(self, nscale)
-        self.error = np.zeros_like(self.data)
         self.counter = 1
 
-    def average_with_nan(self, other_detectors):
+    def average_with_nan(self, other_detectors, error_estimate=ErrorEstimate.stderr):
         """
         Average (not add) data with other detector, excluding malformed data (NaN) from averaging.
         :param other_detectors:
@@ -90,11 +94,14 @@ class Detector:
         l = [det.data for det in other_detectors]
         l.append(self.data)
         self.data = np.nanmean(l, axis=0)
-        self.error = np.nanvar(l, axis=0, ddof=1)
+        if error_estimate != ErrorEstimate.none:
+            if self.error is None:
+                self.error = np.zeros_like(self.data)
+            self.error = np.nanstd(l, axis=0, ddof=1)  # stddev = sqrt( var / (n-1) )
         self.nstat += sum(det.nstat for det in other_detectors)
         self.counter += len(other_detectors)
 
-    def average_with_other(self, other_detector):
+    def average_with_other(self, other_detector, error_estimate=ErrorEstimate.stderr):
         """
         Average (not add) data with other detector
         :param other_detector:
@@ -108,8 +115,11 @@ class Detector:
         self.counter += 1
         delta = other_detector.data - self.data                # delta = x - mean
         self.data += delta / self.counter                      # mean += delta / n
-        self._M2 += delta * (other_detector.data - self.data)  # M2 *= delta * (x - mean)
-        self.error = np.sqrt(self._M2 / (self.counter - 1))    # stddev = sqrt( var / (n-1) )
+        if error_estimate != ErrorEstimate.none:
+            if self.error is None:
+                self.error = np.zeros_like(self.data)
+            self._M2 += delta * (other_detector.data - self.data)  # M2 *= delta * (x - mean)
+            self.error = np.sqrt(self._M2 / (self.counter - 1))    # stddev = sqrt( var / (n-1) )
 
     def save(self, filename, conv_names=(SHConverters.standard.name,), colormap=SHImageWriter.default_colormap):
         """
@@ -244,7 +254,8 @@ def merge_list(input_file_list,
                conv_names=(SHConverters.standard.name,),
                nan=False,
                colormap=SHImageWriter.default_colormap,
-               nscale=1):
+               nscale=1,
+               error_estimate=ErrorEstimate.stderr):
     """
     Takes set of input file names, containing data from the same estimator.
     All input files are read and data is filled (and summed) into detector structure.
@@ -261,8 +272,8 @@ def merge_list(input_file_list,
 
     other_detectors = []
 
-    if not nan and len(input_file_list) > 1:
-        first._M2 = np.zeros_like(first.error)
+    if not nan and len(input_file_list) > 1 and error_estimate != ErrorEstimate.none:
+        first._M2 = np.zeros_like(first.data)
 
     for file in input_file_list[1:]:
         next_one = Detector()
@@ -270,10 +281,14 @@ def merge_list(input_file_list,
         if nan:
             other_detectors.append(next_one)
         else:
-            first.average_with_other(other_detector=next_one)
+            first.average_with_other(other_detector=next_one, error_estimate=error_estimate)
 
     if other_detectors and nan:
-        first.average_with_nan(other_detectors)
+        first.average_with_nan(other_detectors, error_estimate=error_estimate)
+
+    if len(input_file_list) > 1 and error_estimate != ErrorEstimate.none:
+        first.error /= np.float64(first.counter)
+
     first.save(output_file, conv_names, colormap)
 
 
@@ -281,7 +296,8 @@ def merge_many(input_file_list,
                conv_names=(SHConverters.standard.name,),
                nan=False,
                colormap=SHImageWriter.default_colormap,
-               nscale=1):
+               nscale=1,
+               error_estimate=ErrorEstimate.stderr):
     """
     Takes set of input file names, belonging to possibly different estimators.
     Input files are grouped according to the estimators and for each group
@@ -306,4 +322,4 @@ def merge_many(input_file_list,
             core_names_dict[core_name].append(name)
 
     for core_name, group_with_same_core in core_names_dict.items():
-        merge_list(group_with_same_core, core_name + ".txt", conv_names, nan, colormap, nscale)
+        merge_list(group_with_same_core, core_name + ".txt", conv_names, nan, colormap, nscale, error_estimate)

@@ -20,15 +20,20 @@ class SHPlotDataWriter:
         if detector.dettyp in (SHDetType.dlet, SHDetType.dletg, SHDetType.tlet, SHDetType.tletg):
             detector.data *= np.float64(0.1)  # 1 MeV / cm = 0.1 keV / um
 
-        fmt = "%g" + " %g" * detector.dimension + " %g"
-        if detector.dimension == 0:
-            if len(detector.error.shape) == 1:
-                data = [np.transpose([detector.data[0]] + [detector.error[0]])]
+        if detector.error is not None:
+            fmt = "%g" + " %g" * detector.dimension + " %g"
+            if detector.dimension == 0:
+                if len(detector.error.shape) == 1:
+                    data = [np.transpose([detector.data[0]] + [detector.error[0]])]
+                else:
+                    data = np.transpose([detector.data[0]] + [detector.error[0]])
             else:
-                data = np.transpose([detector.data[0]] + [detector.error[0]])
+                axis_values = [list(detector.axis_values(i, plotting_order=True)) for i in range(detector.dimension)]
+                data = np.transpose(axis_values + [detector.data] + [detector.error])
         else:
+            fmt = "%g" + " %g" * detector.dimension
             axis_values = [list(detector.axis_values(i, plotting_order=True)) for i in range(detector.dimension)]
-            data = np.transpose(axis_values + [detector.data] + [detector.error])
+            data = np.transpose(axis_values + [detector.data])
         np.savetxt(self.filename, data, fmt=fmt, delimiter=' ')
 
 
