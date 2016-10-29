@@ -155,12 +155,14 @@ class SHImageWriter:
                     xlist = np.asarray(list(xdata)).reshape(xn, yn)
                     ylist = np.asarray(list(ydata)).reshape(xn, yn)
                     zlist = detector.v.reshape(xn, yn)
-                    elist = detector.e.reshape(xn, yn)
+                    if detector.error is not None:
+                        elist = detector.e.reshape(xn, yn)
                 else:
                     xlist = np.asarray(list(xdata)).reshape(yn, xn)
                     ylist = np.asarray(list(ydata)).reshape(yn, xn)
                     zlist = detector.v.reshape(yn, xn)
-                    elist = detector.e.reshape(yn, xn)
+                    if detector.error is not None:
+                        elist = detector.e.reshape(yn, xn)
                 plt.pcolormesh(xlist, ylist, zlist, cmap=self.colormap)
                 cbar = plt.colorbar()
                 cbar.set_label(detector.units[4], rotation=270)
