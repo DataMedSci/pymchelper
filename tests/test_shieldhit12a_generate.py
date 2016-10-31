@@ -2,6 +2,7 @@ import os
 import tempfile
 import unittest
 import glob
+import shutil
 import logging
 
 from pymchelper import run
@@ -31,14 +32,21 @@ class TestSHGenerated(unittest.TestCase):
     single_dir = os.path.join(main_dir, "single")
     many_dir = os.path.join(main_dir, "many")
 
-    def test_many_image(self):
+    def test_many_plotdata(self):
         for est in ("cyl", "msh", "plane", "zone"):
             logger.info("Estimator: " + est)
-            outdir = os.path.join(self.many_dir, est)
-            run.main(["--many", os.path.join(outdir, "*.bdo"), "--converter", "plotdata"])
-            files = os.listdir(outdir)
-            png_files = [f for f in files if f.endswith(".dat")]
-            self.assertGreater(len(png_files), 4)
+            indir = os.path.join(self.many_dir, est)
+
+            for add_options in ([], ["--error", "stderr"], ["--error", "stddev"], ["--error", "none"]):
+                outdir = tempfile.mkdtemp()
+                run_options = ["--converter", "plotdata", "--many", '' + os.path.join(indir, "*.bdo") + '', outdir]
+                run_options += add_options
+                logger.info("Run options " + " ".join(run_options))
+                run.main(run_options)
+                files = os.listdir(outdir)
+                dat_files = [f for f in files if f.endswith(".dat")]
+                self.assertGreater(len(dat_files), 4)
+                shutil.rmtree(outdir)
 
     def test_standard(self):
         for est in ("cyl", "geomap", "msh", "plane", "zone"):
@@ -65,14 +73,16 @@ class TestSHGenerated(unittest.TestCase):
             self.assertGreater(len(bdo_files), 0)
             for infile in bdo_files:
                 logger.info("Input file: " + infile)
-                fd, outfile = tempfile.mkstemp()
-                os.close(fd)
-                os.remove(outfile)
-                run.main([infile, outfile, "--converter", "plotdata"])
-                saved_file = outfile + ".dat"
-                self.assertTrue(os.path.isfile(saved_file))
-                self.assertGreater(os.path.getsize(saved_file), 0)
-                os.remove(saved_file)
+                for options in ([], ["--error", "stderr"], ["--error", "stddev"], ["--error", "none"]):
+                    logger.info("Option: " + " ".join(options))
+                    fd, outfile = tempfile.mkstemp()
+                    os.close(fd)
+                    os.remove(outfile)
+                    run.main([infile, outfile, "--converter", "plotdata"] + options)
+                    saved_file = outfile + ".dat"
+                    self.assertTrue(os.path.isfile(saved_file))
+                    self.assertGreater(os.path.getsize(saved_file), 0)
+                    os.remove(saved_file)
 
     def test_image(self):
         allowed_patterns = ("_x_", "_y_", "_z_", "_xy_", "_yz_", "_xz_")
@@ -88,7 +98,8 @@ class TestSHGenerated(unittest.TestCase):
                     if pattern in os.path.basename(infile):
                         will_produce_output = True
                 if will_produce_output:
-                    for options in ([], ["--colormap", "gnuplot2"]):
+                    for options in ([], ["--colormap", "gnuplot2"],
+                                    ["--error", "stderr"], ["--error", "stddev"], ["--error", "none"]):
                         fd, outfile = tempfile.mkstemp()
                         os.close(fd)
                         os.remove(outfile)

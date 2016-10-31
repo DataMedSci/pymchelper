@@ -1,3 +1,4 @@
+import os
 import logging
 from collections import namedtuple, defaultdict
 
@@ -26,6 +27,11 @@ class SHConverters(IntEnum):
     tripcube = 4
 
 
+class ErrorEstimate(IntEnum):
+    none = 0
+    stderr = 1
+    stddev = 2
+
 _converter_mapping = {
     SHConverters.standard: SHFortranWriter,
     SHConverters.gnuplot: SHGnuplotDataWriter,
@@ -40,6 +46,7 @@ class Detector:
     Holds data read from single estimator
     """
     data = None
+    error = None
     nstat = -1
 
     xmin = float("NaN")
@@ -61,6 +68,8 @@ class Detector:
     # number of files
     counter = -1
 
+    _M2 = None  # accumulator needed by average_with_other method
+
     def read(self, filename, nscale=1):
         """
         Reads binary file with. Automatically discovers which reader should be used.
@@ -76,19 +85,7 @@ class Detector:
         reader.read(self, nscale)
         self.counter = 1
 
-    def append(self, other_detector):
-        """
-        Append data from other detector (assuming the same estimator).
-        Values are added, not averaged.
-        :param other_detector:
-        :return:
-        """
-        # TODO add compatibility check
-        self.data += other_detector.data
-        self.nstat += other_detector.nstat
-        self.counter += 1
-
-    def average_with_nan(self, other_detectors):
+    def average_with_nan(self, other_detectors, error_estimate=ErrorEstimate.stderr):
         """
         Average (not add) data with other detector, excluding malformed data (NaN) from averaging.
         :param other_detectors:
@@ -98,8 +95,32 @@ class Detector:
         l = [det.data for det in other_detectors]
         l.append(self.data)
         self.data = np.nanmean(l, axis=0)
+        if error_estimate != ErrorEstimate.none:
+            if self.error is None:
+                self.error = np.zeros_like(self.data)
+            self.error = np.nanstd(l, axis=0, ddof=1)  # stddev = sqrt( var / (n-1) )
         self.nstat += sum(det.nstat for det in other_detectors)
         self.counter += len(other_detectors)
+
+    def average_with_other(self, other_detector, error_estimate=ErrorEstimate.stderr):
+        """
+        Average (not add) data with other detector
+        :param other_detector:
+        :return:
+        """
+
+        # Running variance algorithm based on algorithm by B. P. Welford,
+        # presented in Donald Knuth's Art of Computer Programming, Vol 2, page 232, 3rd edition.
+        # Can be found here: http://www.johndcook.com/blog/standard_deviation/
+        # and https://en.wikipedia.org/wiki/Algorithms_for_calculating_variance#Online_algorithm
+        self.counter += 1
+        delta = other_detector.data - self.data                # delta = x - mean
+        self.data += delta / self.counter                      # mean += delta / n
+        if error_estimate != ErrorEstimate.none:
+            if self.error is None:
+                self.error = np.zeros_like(self.data)
+            self._M2 += delta * (other_detector.data - self.data)  # M2 *= delta * (x - mean)
+            self.error = np.sqrt(self._M2 / (self.counter - 1))    # stddev = sqrt( var / (n-1) )
 
     def save(self, filename, conv_names=(SHConverters.standard.name,), colormap=SHImageWriter.default_colormap):
         """
@@ -118,6 +139,7 @@ class Detector:
     def __str__(self):
         result = ""
         result += "data" + str(self.data[0].shape) + "\n"
+        result += "error" + str(self.error[0].shape) + "\n"
         result += "nstat = {:d}\n".format(self.nstat)
         result += "X {:g} - {:g} ({:d} items)\n".format(self.xmin, self.xmax, self.nx)
         result += "Y {:g} - {:g} ({:d} items)\n".format(self.ymin, self.ymax, self.ny)
@@ -184,6 +206,10 @@ class Detector:
     def v(self):
         return self.data
 
+    @property
+    def e(self):
+        return self.error
+
     AxisData = namedtuple('AxisData', ['min', 'max', 'n'])
 
     def axis_data(self, axis_number, plotting_order=False):
@@ -229,7 +255,8 @@ def merge_list(input_file_list,
                conv_names=(SHConverters.standard.name,),
                nan=False,
                colormap=SHImageWriter.default_colormap,
-               nscale=1):
+               nscale=1,
+               error_estimate=ErrorEstimate.stderr):
     """
     Takes set of input file names, containing data from the same estimator.
     All input files are read and data is filled (and summed) into detector structure.
@@ -239,6 +266,8 @@ def merge_list(input_file_list,
     :param conv_names: list of converter names
     :param nan: if true, invalid values (NaN) will be excluded from averaging
     :param colormap: name of colormap, valid only for image converter
+    :param nscale: number of particles to scale
+    :param error_estimate: type of error estimate
     :return: none
     """
     first = Detector()
@@ -246,36 +275,58 @@ def merge_list(input_file_list,
 
     other_detectors = []
 
+    # allocate memory for accumulator needed in standard deviation calculation
+    # not needed if:
+    #  - averaging is done ignoring NaNs (then numpy nanvar function is used)
+    #  - processing only one file
+    #  - user requested not to include errors
+    if not nan and len(input_file_list) > 1 and error_estimate != ErrorEstimate.none:
+        first._M2 = np.zeros_like(first.data)
+
+    # loop over second and next files, if present
     for file in input_file_list[1:]:
         next_one = Detector()
         next_one.read(file, nscale)
         if nan:
-            other_detectors.append(next_one)
+            other_detectors.append(next_one)  # read all detector files into memory
         else:
-            first.append(next_one)
+            first.average_with_other(other_detector=next_one, error_estimate=error_estimate)
 
+    # user requested averaging ignoring nan and more than one file are present
     if other_detectors and nan:
-        first.average_with_nan(other_detectors)
-    else:
-        first.data /= np.float64(first.counter)
+        first.average_with_nan(other_detectors, error_estimate=error_estimate)
+
+    # up to now first.error stores standard deviation
+    # if user requested standard error then we calculate it as:
+    #   stderr = stddev / sqrt(n)
+    if len(input_file_list) > 1 and error_estimate != ErrorEstimate.none:
+        first.error /= np.float64(first.counter)
+
+    if output_file is None:
+        output_file = input_file_list[0][:-3] + "txt"
+
     first.save(output_file, conv_names, colormap)
 
 
 def merge_many(input_file_list,
+               outputdir,
                conv_names=(SHConverters.standard.name,),
                nan=False,
                colormap=SHImageWriter.default_colormap,
-               nscale=1):
+               nscale=1,
+               error_estimate=ErrorEstimate.stderr):
     """
     Takes set of input file names, belonging to possibly different estimators.
     Input files are grouped according to the estimators and for each group
     merging is performed, as in @merge_list method.
     Output file name is automatically generated.
     :param input_file_list: list of input files
+    :param outputdir: output directory
     :param conv_names: list of converter names
     :param nan: if true, invalid values (NaN) will be excluded from averaging
     :param colormap: name of colormap, valid only for image converter
     :param nscale: number of particles to scale
+    :param error_estimate: type of error estimate
     :return: none
     """
     core_names_dict = defaultdict(list)
@@ -290,4 +341,10 @@ def merge_many(input_file_list,
             core_names_dict[core_name].append(name)
 
     for core_name, group_with_same_core in core_names_dict.items():
-        merge_list(group_with_same_core, core_name + ".txt", conv_names, nan, colormap, nscale)
+        core_dirname, core_basename = os.path.split(core_name)
+        if outputdir is None:
+            output_file = os.path.join(core_dirname, core_basename + ".txt")
+        else:
+            output_file = os.path.join(outputdir, core_basename + ".txt")
+        logger.debug("Setting output core name " + output_file)
+        merge_list(group_with_same_core, output_file, conv_names, nan, colormap, nscale, error_estimate)
