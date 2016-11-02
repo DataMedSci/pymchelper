@@ -22,7 +22,7 @@ class SHPlotDataWriter:
         from pymchelper.shieldhit.detector.detector_type import SHDetType
         if detector.dettyp in (SHDetType.dlet, SHDetType.dletg, SHDetType.tlet, SHDetType.tletg):
             data *= np.float64(0.1)  # 1 MeV / cm = 0.1 keV / um
-            if error:
+            if np.any(error):
                 error *= np.float64(0.1)  # 1 MeV / cm = 0.1 keV / um
 
         axis_data_column = [list(detector.axis_values(i, plotting_order=True)) for i in range(detector.dimension)]
@@ -161,7 +161,7 @@ class SHImageWriter:
         from pymchelper.shieldhit.detector.detector_type import SHDetType
         if detector.dettyp in (SHDetType.dlet, SHDetType.dletg, SHDetType.tlet, SHDetType.tletg):
             data *= np.float64(0.1)  # 1 MeV / cm = 0.1 keV / um
-            if error:
+            if np.any(error):
                 error *= np.float64(0.1)  # 1 MeV / cm = 0.1 keV / um
 
         logger.info("Writing: " + self.plot_filename)
