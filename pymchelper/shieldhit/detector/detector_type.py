@@ -13,6 +13,7 @@ class SHDetType(IntEnum):
     avg_energy = 8
     avg_beta = 9
     material = 10
+    ddd = 12
     alanine = 13
     counter = 14
     pet = 15
