@@ -58,13 +58,17 @@ install:
 # create new conda workspace and activate it
   - conda create -q --name python%PYTHON_VERSION% python=%PYTHON_VERSION%
   - activate python%PYTHON_VERSION%
+# check pip version and upgrade it
+  - pip -V
+  - pip install --upgrade pip
 # install usual requirements
   - pip install --upgrade -r tests/requirements-test.txt
   - pip install --upgrade -r requirements.txt
 # check numpy version
   - python -c "import numpy as np;print(np.version.version)"
-# check python version
+# check python and pip versions
   - python -V
+  - pip -V
 # check 32 or 64 bit
   - python -c "import struct;print(8 * struct.calcsize('P'))"
 
