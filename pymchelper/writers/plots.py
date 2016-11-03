@@ -15,26 +15,31 @@ class SHPlotDataWriter:
     def write(self, detector):
         logger.info("Writing: " + self.filename)
 
+        data = np.array(detector.data)
+        error = np.array(detector.error)
+
         # change units for LET from MeV/cm to keV/um
         from pymchelper.shieldhit.detector.detector_type import SHDetType
         if detector.dettyp in (SHDetType.dlet, SHDetType.dletg, SHDetType.tlet, SHDetType.tletg):
-            detector.data *= np.float64(0.1)  # 1 MeV / cm = 0.1 keV / um
+            data *= np.float64(0.1)  # 1 MeV / cm = 0.1 keV / um
+            if np.any(error):
+                error *= np.float64(0.1)  # 1 MeV / cm = 0.1 keV / um
 
         axis_data_column = [list(detector.axis_values(i, plotting_order=True)) for i in range(detector.dimension)]
 
         fmt = "%g" + " %g" * detector.dimension
-        data_to_save = axis_data_column + [detector.data.ravel()]  # ravel needed to change arrays like [[1]] to [1]
+        data_to_save = axis_data_column + [data.ravel()]  # ravel needed to change arrays like [[1]] to [1]
 
         # if error information is present dave it as additional column
         if detector.error is not None:
             fmt += " %g"
-            data_to_save += [detector.error.ravel()]
+            data_to_save += [error.ravel()]
 
         # transpose from rows to columns
-        data = np.transpose(data_to_save)
+        data_columns = np.transpose(data_to_save)
 
         # save space-delimited text file
-        np.savetxt(self.filename, data, fmt=fmt, delimiter=' ')
+        np.savetxt(self.filename, data_columns, fmt=fmt, delimiter=' ')
 
 
 class SHGnuplotDataWriter:
@@ -149,10 +154,15 @@ class SHImageWriter:
         if detector.dimension in (0, 3):
             return
 
+        data = np.array(detector.data)
+        error = np.array(detector.error)
+
         # change units for LET from MeV/cm to keV/um
         from pymchelper.shieldhit.detector.detector_type import SHDetType
         if detector.dettyp in (SHDetType.dlet, SHDetType.dletg, SHDetType.tlet, SHDetType.tletg):
-            detector.data *= np.float64(0.1)  # 1 MeV / cm = 0.1 keV / um
+            data *= np.float64(0.1)  # 1 MeV / cm = 0.1 keV / um
+            if np.any(error):
+                error *= np.float64(0.1)  # 1 MeV / cm = 0.1 keV / um
 
         logger.info("Writing: " + self.plot_filename)
 
@@ -165,11 +175,11 @@ class SHImageWriter:
             # add optional error area
             if np.any(detector.error):
                 plt.fill_between(xlist,
-                                 (detector.v - detector.error).clip(0.0),
-                                 (detector.v + detector.error).clip(0.0, 1.05 * (detector.v.max())),
+                                 (data - error).clip(0.0),
+                                 (data + error).clip(0.0, 1.05 * (detector.v.max())),
                                  alpha=0.2, edgecolor='#CC4F1B', facecolor='#FF9848', antialiased=True)
             plt.ylabel(self.make_label(detector.units[4], detector.title))
-            plt.plot(xlist, detector.v)
+            plt.plot(xlist, data)
         elif detector.dimension == 2:
             ylist = list(detector.axis_values(1, plotting_order=True))   # make list of values from generator
 
@@ -182,11 +192,11 @@ class SHImageWriter:
 
             xlist = np.asarray(xlist).reshape(shape_tuple)
             ylist = np.asarray(ylist).reshape(shape_tuple)
-            zlist = detector.v.reshape(shape_tuple)
+            zlist = data.reshape(shape_tuple)
 
             # add error plot if error data present
             if np.any(detector.error):
-                elist = detector.e.reshape(shape_tuple)
+                elist = error.reshape(shape_tuple)
                 self._save_2d_error_plot(detector, xlist, ylist, elist)
 
             plt.ylabel(detector.units[1])
