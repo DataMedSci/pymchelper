@@ -89,11 +89,13 @@ splot \"<awk -f addblanks.awk '{data_filename}'\" u 1:2:3 with pm3d
             return
 
         # set labels
-        xlabel = detector.units[0]
+        x_axis_number = detector.axis_data(0, plotting_order=True).number
+        xlabel = detector.units[x_axis_number]
         if detector.dimension == 1:
             ylabel = SHImageWriter.make_label(detector.units[4], detector.title)
         elif detector.dimension == 2:
-            ylabel = detector.units[1]
+            y_axis_number = detector.axis_data(1, plotting_order=True).number
+            ylabel = detector.units[y_axis_number]
 
             # for 2-D plots writte additional awk script to convert data
             # as described in gnuplot faq: http://www.gnuplot.info/faq/faq.html#x1-320003.9
@@ -166,7 +168,8 @@ class SHImageWriter:
 
         logger.info("Writing: " + self.plot_filename)
 
-        plt.xlabel(self.make_label(detector.units[0], ""))
+        x_axis_number = detector.axis_data(0, plotting_order=True).number
+        plt.xlabel(self.make_label(detector.units[x_axis_number], ""))
         xlist = list(detector.axis_values(0, plotting_order=True))  # make list of values from generator
 
         # 1-D plotting
@@ -187,9 +190,6 @@ class SHImageWriter:
             yn = detector.axis_data(1, plotting_order=True).n
 
             shape_tuple = (yn, xn)
-            if detector._axes_plotting_order[0] == 0 and detector._axes_plotting_order[1] == 1:
-                shape_tuple = (xn, yn)
-
             xlist = np.asarray(xlist).reshape(shape_tuple)
             ylist = np.asarray(ylist).reshape(shape_tuple)
             zlist = data.reshape(shape_tuple)
@@ -199,7 +199,8 @@ class SHImageWriter:
                 elist = error.reshape(shape_tuple)
                 self._save_2d_error_plot(detector, xlist, ylist, elist)
 
-            plt.ylabel(detector.units[1])
+            y_axis_number = detector.axis_data(1, plotting_order=True).number
+            plt.ylabel(detector.units[y_axis_number])
             plt.pcolormesh(xlist, ylist, zlist, cmap=self.colormap)
             cbar = plt.colorbar()
             cbar.set_label(detector.units[4], rotation=270)

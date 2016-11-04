@@ -160,8 +160,8 @@ class SHBinaryReader:
         _geotyp_units = {
             SHGeoType.msh: ("cm", "cm", "cm", "(nil)"),
             SHGeoType.dmsh: ("cm", "cm", "cm", "#/MeV"),
-            SHGeoType.cyl: ("cm", "cm", "radians", "(nil)"),
-            SHGeoType.dcyl: ("cm", "cm", "radians", "#/MeV"),
+            SHGeoType.cyl: ("cm", "radians", "cm", "(nil)"),
+            SHGeoType.dcyl: ("cm", "radians", "cm", "#/MeV"),
             SHGeoType.zone: ("zone number", "(nil)", "(nil)", "(nil)"),
             SHGeoType.voxscore: ("cm", "cm", "cm", "(nil)"),
             SHGeoType.geomap: ("cm", "cm", "cm", "(nil)"),
