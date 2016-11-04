@@ -45,7 +45,7 @@ class Geometry:
         :return: None
         """
         if axis_no in range(len(self.axis)):
-            self.axis[axis_no].set(start=start, stop=stop, nbins=nbins, number=Axis[axis_no])
+            self.axis[axis_no].set(start=start, stop=stop, nbins=nbins, number=axis_no)
 
     def __str__(self):
         return "general"
