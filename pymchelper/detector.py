@@ -32,6 +32,16 @@ class ErrorEstimate(IntEnum):
     stderr = 1
     stddev = 2
 
+
+class Axis(IntEnum):
+    """
+    Axis numbers
+    """
+    x = 0
+    y = 1
+    z = 2
+
+
 _converter_mapping = {
     SHConverters.standard: SHFortranWriter,
     SHConverters.gnuplot: SHGnuplotDataWriter,
@@ -148,11 +158,11 @@ class Detector:
         result += "counter of files {:d}\n".format(self.counter)
         result += "dimension {:d}\n".format(self.dimension)
         result += "Xs {:d}\n".format(len(list(self.x)))
-        result += "Xp {:d}\n".format(len(list(self.axis_values(0, plotting_order=True))))
+        result += "Xp {:d}\n".format(len(list(self.axis_values(Axis.x, plotting_order=True))))
         result += "Ys {:d}\n".format(len(list(self.y)))
-        result += "Yp {:d}\n".format(len(list(self.axis_values(1, plotting_order=True))))
+        result += "Yp {:d}\n".format(len(list(self.axis_values(Axis.y, plotting_order=True))))
         result += "Zs {:d}\n".format(len(list(self.z)))
-        result += "Zp {:d}\n".format(len(list(self.axis_values(2, plotting_order=True))))
+        result += "Zp {:d}\n".format(len(list(self.axis_values(Axis.z, plotting_order=True))))
         result += "V {:d}\n".format(len(list(self.data)))
         return result
 
@@ -192,15 +202,15 @@ class Detector:
 
     @property
     def x(self):
-        return self.axis_values(0)
+        return self.axis_values(Axis.x)
 
     @property
     def y(self):
-        return self.axis_values(1)
+        return self.axis_values(Axis.y)
 
     @property
     def z(self):
-        return self.axis_values(2)
+        return self.axis_values(Axis.z)
 
     @property
     def v(self):
@@ -210,17 +220,17 @@ class Detector:
     def e(self):
         return self.error
 
-    AxisData = namedtuple('AxisData', ['min', 'max', 'n'])
+    AxisData = namedtuple('AxisData', ['min', 'max', 'n', 'number'])
 
     def axis_data(self, axis_number, plotting_order=False):
         if plotting_order:
             axis_number = self._axes_plotting_order[axis_number]
-        if axis_number == 0:
-            return self.AxisData(min=self.xmin, max=self.xmax, n=self.nx)
-        elif axis_number == 1:
-            return self.AxisData(min=self.ymin, max=self.ymax, n=self.ny)
-        elif axis_number == 2:
-            return self.AxisData(min=self.zmin, max=self.zmax, n=self.nz)
+        if axis_number == Axis.x:
+            return self.AxisData(min=self.xmin, max=self.xmax, n=self.nx, number=axis_number)
+        elif axis_number == Axis.y:
+            return self.AxisData(min=self.ymin, max=self.ymax, n=self.ny, number=axis_number)
+        elif axis_number == Axis.z:
+            return self.AxisData(min=self.zmin, max=self.zmax, n=self.nz, number=axis_number)
         else:
             return None
 
@@ -232,8 +242,7 @@ class Detector:
             self.ymax >= self.ymin and\
             self.zmax >= self.zmin
         nstat_correct = self.nstat > 0
-        return valid_counters and data_exists \
-            and borders_correct and nstat_correct
+        return valid_counters and data_exists and borders_correct and nstat_correct
 
     # 0,1,2,3
     @property
@@ -245,21 +254,21 @@ class Detector:
 
     @property
     def _axes_plotting_order(self):
-        result = (0, 1, 2)
+        result = (Axis.x, Axis.y, Axis.z)
         if self.dimension == 1:
             if self.nx > 1:
-                result = (0, 1, 2)  # X variable; Y,Z constant
+                result = (Axis.x, Axis.y, Axis.z)  # X variable; Y,Z constant
             elif self.ny > 1:
-                result = (1, 0, 2)  # Y variable; X,Z constant
+                result = (Axis.y, Axis.x, Axis.z)  # Y variable; X,Z constant
             elif self.nz > 1:
-                result = (2, 0, 1)  # Z variable; X,Y constant
+                result = (Axis.z, Axis.x, Axis.y)  # Z variable; X,Y constant
         elif self.dimension == 2:
             if self.nx == 1:
-                result = (1, 2, 0)  # Y,Z variable; X constant
+                result = (Axis.y, Axis.z, Axis.x)  # Y,Z variable; X constant
             elif self.ny == 1:
-                result = (0, 2, 1)  # X,Z variable; Y constant
+                result = (Axis.x, Axis.z, Axis.y)  # X,Z variable; Y constant
             elif self.nz == 1:
-                result = (0, 1, 2)  # X,Y variable; Z constant
+                result = (Axis.x, Axis.y, Axis.z)  # X,Y variable; Z constant
         return result
 
 

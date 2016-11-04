@@ -7,14 +7,15 @@ class Axis:
     Can be used as container to describe scoring geometry along one of the axis.
     """
 
-    def __init__(self, name="", start=None, stop=None, nbins=None):
+    def __init__(self, name="", start=None, stop=None, nbins=None, number=None):
         self.name = name
-        self.set(start=start, stop=stop, nbins=nbins)
+        self.set(start=start, stop=stop, nbins=nbins, number=number)
 
-    def set(self, start=None, stop=None, nbins=None):
+    def set(self, start=None, stop=None, nbins=None, number=None):
         self.start = start
         self.stop = stop
         self.nbins = nbins
+        self.number = number
 
 
 class Geometry:
@@ -44,7 +45,7 @@ class Geometry:
         :return: None
         """
         if axis_no in range(len(self.axis)):
-            self.axis[axis_no].set(start=start, stop=stop, nbins=nbins)
+            self.axis[axis_no].set(start=start, stop=stop, nbins=nbins, number=Axis[axis_no])
 
     def __str__(self):
         return "general"
