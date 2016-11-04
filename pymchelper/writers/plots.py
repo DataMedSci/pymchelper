@@ -187,9 +187,6 @@ class SHImageWriter:
             yn = detector.axis_data(1, plotting_order=True).n
 
             shape_tuple = (yn, xn)
-            if detector._axes_plotting_order[0] == 0 and detector._axes_plotting_order[1] == 1:
-                shape_tuple = (xn, yn)
-
             xlist = np.asarray(xlist).reshape(shape_tuple)
             ylist = np.asarray(ylist).reshape(shape_tuple)
             zlist = data.reshape(shape_tuple)

@@ -245,9 +245,22 @@ class Detector:
 
     @property
     def _axes_plotting_order(self):
-        axis_data = list(enumerate((self.nx, self.ny, self.nz)))
-        sorted_data = sorted(axis_data, key=lambda x: x[1], reverse=True)
-        return tuple(i for i, ax in sorted_data)
+        result = (0, 1, 2)
+        if self.dimension == 1:
+            if self.nx > 1:
+                result = (0, 1, 2)  # X variable; Y,Z constant
+            elif self.ny > 1:
+                result = (1, 0, 2)  # Y variable; X,Z constant
+            elif self.nz > 1:
+                result = (2, 0, 1)  # Z variable; X,Y constant
+        elif self.dimension == 2:
+            if self.nx == 1:
+                result = (1, 2, 0)  # Y,Z variable; X constant
+            elif self.ny == 1:
+                result = (0, 2, 1)  # X,Z variable; Y constant
+            elif self.nz == 1:
+                result = (0, 1, 2)  # X,Y variable; Z constant
+        return result
 
 
 def merge_list(input_file_list,
