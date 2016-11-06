@@ -123,7 +123,7 @@ class SHFortranWriter:
         with open(self.filename, 'w') as fout:
             logger.info("Writing: " + self.filename)
             fout.write(header)
-            for x, y, z, v in zip(det.x, det.y, det.z, det.data):
+            for x, y, z, v, e in zip(det.x, det.y, det.z, det.data, det.error):
                 if det.geotyp in (SHGeoType.zone, SHGeoType.dzone):
                     x = 0.0
                 else:
@@ -131,8 +131,10 @@ class SHFortranWriter:
                 y = float('nan') if np.isnan(y) else y
                 z = float('nan') if np.isnan(z) else z
                 v = float('nan') if np.isnan(v) else v
+                e = float('nan') if np.isnan(e) else e
                 tmp = format_e(14, 7, x) + " " + \
                     format_e(14, 7, y) + " " + \
                     format_e(14, 7, z) + " " + \
-                    format_e(23, 16, v) + "\n"
+                    format_e(23, 16, v) + " " + \
+                    format_e(23, 16, e) + "\n"
                 fout.write(tmp)
