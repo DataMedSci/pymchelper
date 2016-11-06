@@ -124,6 +124,7 @@ class Detector:
         # Can be found here: http://www.johndcook.com/blog/standard_deviation/
         # and https://en.wikipedia.org/wiki/Algorithms_for_calculating_variance#Online_algorithm
         self.counter += 1
+        self.nstat += other_detector.nstat
         delta = other_detector.data - self.data                # delta = x - mean
         self.data += delta / self.counter                      # mean += delta / n
         if error_estimate != ErrorEstimate.none:
