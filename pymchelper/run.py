@@ -59,7 +59,7 @@ def main(args=sys.argv[1:]):
     set_logger_level(parsed_args)
 
     # check if output directory exists
-    if parsed.args.output is not None:
+    if parsed_args.output is not None:
         output_dir = os.path.dirname(parsed_args.output)
         if not os.path.exists(output_dir):
             raise IOError("Directory {}/ does not exist.".format(output_dir))
