@@ -251,7 +251,7 @@ class SHBinaryReader:
                 detector.dettyp = SHDetType.dose_gy
             if detector.dettyp == SHDetType.alanine:
                 detector.dettyp = SHDetType.alanine_gy
-            if detector.dettyp in (SHDetType.dose, SHDetType.alanine):
+            if detector.dettyp in (SHDetType.dose_gy, SHDetType.alanine_gy):
                 # 1 megaelectron volt / gram = 1.60217662 x 10-10 Gy
                 detector.data *= np.float64(1.60217662e-10)
                 detector.units[0:4] = SHBinaryReader.get_estimator_units(detector.geotyp)
