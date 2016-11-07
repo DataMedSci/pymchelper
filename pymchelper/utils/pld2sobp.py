@@ -1,15 +1,31 @@
-#!/usr/bin/env python
+#
+#    Copyright (C) 2010-2016 pymchelper Developers.
+#
+#    This file is part of pymchelper.
+#
+#    pymchelper is free software: you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation, either version 3 of the License, or
+#    (at your option) any later version.
+#
+#    pymchelper is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with pymchelper.  If not, see <http://www.gnu.org/licenses/>.
+#
 """
 Reads PLD file in IBA format and convert to sobp.dat
 which is readbale by FLUKA with source_sampler.f and SHIELD-HIT12A.
-
-<niels.bassler@fysik.su.se>
 
 TODO: Translate energy to spotsize.
 """
 import sys
 import logging
 import argparse
+import pymchelper
 
 logger = logging.getLogger(__name__)
 
@@ -32,15 +48,14 @@ class Layer(object):
         self.rf = [0.0] * self.spots      # fluence weight
 
         j = 0
-
-        for i in range(len(elements)):
-            token = elements[i].split(",")
+        for element in elements:
+            token = element.split(",")
             if token[3] != "0.0":
                 self.x[j] = float(token[1].strip())
                 self.y[j] = float(token[2].strip())
                 self.w[j] = float(token[3].strip())  # meterset weight of this spot
                 self.rf[j] = self.w[j]
-                j += 1
+                j += 1  # only every second token has a element we need.
 
 
 class PLDRead(object):
@@ -110,7 +125,7 @@ def main(args=sys.argv[1:]):
                         dest="diag", default=False)
     parser.add_argument("-s", "--scale", type=float, dest='scale',
                         help="number of particles per MU.", default=_particles_per_mu)
-    #  parser.add_argument('-V', '--version', action='version', version=self.__version__)
+    parser.add_argument('-V', '--version', action='version', version=pymchelper.__version__)
     args = parser.parse_args(args)
 
     if args.verbosity == 1:
