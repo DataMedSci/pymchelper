@@ -56,14 +56,14 @@ def dEdx(energy):
 class Layer(object):
     """ Class for handling Layers.
     """
-    def __init__(self, spotsize, energy, meterset, elsum, elements, repaints=0):
+    def __init__(self, spotsize, energy, meterset, elsum, repaints, elements):
         self.spotsize = float(spotsize)
         self.energy = float(energy)
         self.meterset = float(meterset)   # MU sum of this + all previous layers
         self.elsum = float(elsum)         # sum of elements in this layer
         self.repaints = int(repaints)     # number of repaints
         self.elements = elements          # number of elements
-        self.spots = int(len(elements) / 2)
+        self.spots = int(len(elements) / 2)  # there are two elements per spot
 
         self.x = [0.0] * self.spots
         self.y = [0.0] * self.spots
@@ -86,95 +86,105 @@ class PLDRead(object):
     """
     Class for handling PLD files.
     """
-    FileIsRead = False
 
-    def __init__(self, filename):
+    def __init__(self, fpld):
         """ Read the rst file."""
 
-        if os.path.isfile(filename) is False:
-            raise FileNotFoundError(filename)
-        else:
-            with open(filename, 'r') as fpld:
-                pldlines = fpld.readlines()
-            pldlen = len(pldlines)
-            print("Read {} lines of data.".format(pldlen))
-            i = 0
-            # layer_cnt = 0
-            self.layer = []
+        pldlines = fpld.readlines()
+        pldlen = len(pldlines)
+        logger.info("Read {} lines of data.".format(pldlen))
+        i = 0
+        # layer_cnt = 0
+        self.layer = []
 
-            # parse first line
-            token = pldlines[0].split(",")
-            self.beam = token[0].strip()
-            self.patient_iD = token[1].strip()
-            self.patient_name = token[2].strip()
-            self.patient_initals = token[3].strip()
-            self.patient_firstname = token[4].strip()
-            self.plan_label = token[5].strip()
-            self.beam_name = token[6].strip()
-            self.mu = float(token[7].strip())
-            self.csetweight = float(token[8].strip())
-            self.layers = int(token[9].strip())
+        # parse first line
+        token = pldlines[0].split(",")
+        self.beam = token[0].strip()
+        self.patient_iD = token[1].strip()
+        self.patient_name = token[2].strip()
+        self.patient_initals = token[3].strip()
+        self.patient_firstname = token[4].strip()
+        self.plan_label = token[5].strip()
+        self.beam_name = token[6].strip()
+        self.mu = float(token[7].strip())
+        self.csetweight = float(token[8].strip())
+        self.layers = int(token[9].strip())
+        i += 1
+
+        while i < pldlen:
+            line = pldlines[i]
+            if "Layer" in line:
+                header = line
+                token = header.split(",")
+                # extract the subsequent lines with elements
+                el_first = i + 1
+                el_last = el_first + int(token[4])
+
+                elements = pldlines[el_first:el_last]
+
+                self.layer.append(Layer(token[1].strip(),  # Spot1
+                                        token[2].strip(),  # energy
+                                        token[3].strip(),  # cumulative meter set weight including this layer
+                                        token[4].strip(),  # number of elements in this layer
+                                        token[5].strip(),  # number of repaints.
+                                        elements))  # array holding all elements for this layer
             i += 1
-
-            while i < pldlen:
-                line = pldlines[i]
-                if "Layer" in line:
-                    header = line
-                    token = header.split(",")
-                    # extract the subsequent lines with elements
-                    el_first = i + 1
-                    el_last = el_first + int(token[4])
-
-                    elements = pldlines[el_first:el_last]
-
-                    self.layer.append(Layer(token[1].strip(),  # Layer
-                                            token[2].strip(),  # Spot1
-                                            token[3].strip(),  # energy
-                                            token[4].strip(),  # cumulative meter set weight including this layer
-                                            # token[5].strip(),
-                                            elements,  # number of elements in this layer
-                                            token[6].strip()))   # number of repaints.
-                i += 1
 
 
 def main(args=sys.argv[1:]):
     """ Main function of the pld2sobp script.
     """
     parser = argparse.ArgumentParser()
-    parser.add_argument("pld_file", help="path to .pld input file in IBA format", type=str)
-    parser.add_argument("sobp_file", help="path to the SHIELD-HIT12A/FLUKA sobp.dat output file", type=str)
+    #parser.add_argument("pld_file", help="path to .pld input file in IBA format", type=FILE)
+    parser.add_argument('fin', metavar="input_file.pld", type=argparse.FileType('r'),
+                        help="path to .pld input file in IBA format.",
+                        default=sys.stdin)
+    parser.add_argument('fout', nargs='?', metavar="output_file.dat", type=argparse.FileType('w'),
+                        help="path to the SHIELD-HIT12A/FLUKA output file, or print to stdout if not given.",
+                        default=sys.stdout)
     parser.add_argument("-v", "--verbosity", action='count', help="increase output verbosity", default=0)
-    parser.add_argument("-f", "--flip", action='store_true', help="Flip XY axis", dest="flip", default=False)
+    parser.add_argument("-f", "--flip", action='store_true', help="flip XY axis", dest="flip", default=False)
+    parser.add_argument("-s", "--scale", type=float, dest='scale',
+                        help="number of particles per MU.", default=1.0)
     #  parser.add_argument('-V', '--version', action='version', version=self.__version__)
     args = parser.parse_args(args)
 
-    fn = args.pld_file
+    if args.verbosity == 1:
+        logging.basicConfig(level=logging.INFO)
+    if args.verbosity > 1:
+        logging.basicConfig(level=logging.DEBUG)
+        
+    a = PLDRead(args.fin)
+    args.fin.close()
+    
+    for l in a.layer:
+        for j in range(l.spots):
 
-    if not os.path.isfile(fn):
-        raise FileNotFoundError(fn)
+            spotsize = 2.354820045 * l.spotsize * 0.1  # 1 sigma im mm -> 1 cm FWHM
+            weight =  l.rf[j] * a.mu / a.csetweight * args.scale
 
-    a = PLDRead(fn)
-    with open(args.sobp_file, 'w') as fout:
-        for i in range(a.layers):
-            l = a.layer[i]
-            for j in range(l.spots):
+            # SH12A takes any form of list of values, as long as the line is shorter than 78 Chars.
+            outstr = "{:-10.6f} {:-10.2f} {:-10.2f} {:-10.2f} {:-16.6E}\n"
+            
+            if args.flip:
+                args.fout.writelines(outstr.format(l.energy * 0.001,  # MeV -> GeV
+                                                   l.y[j] * 0.1,      # -> cm
+                                                   l.x[j] * 0.1,
+                                                   spotsize,
+                                                   weight))
+            else:
+                args.fout.writelines(outstr.format(l.energy * 0.001,  # MeV -> GeV
+                                                   l.x[j] * 0.1,      # -> cm
+                                                   l.y[j] * 0.1,
+                                                   spotsize,
+                                                   weight))
 
-                if not args.flip:
-                    fout.writelines("%-10.6f%-10.2f%-10.2f%-10.2f%-10.4e\n" % (l.energy/1000.0,
-                                                                               l.x[j]/10.0,
-                                                                               l.y[j]/10.0,
-                                                                               (l.spotsize/10.0)*2.355,
-                                                                               l.rf[j]*a.mu/a.csetweight))
-                else:
-                    fout.writelines("%-10.6f%-10.2f%-10.2f%-10.2f%-10.4e\n" % (l.energy/1000.0,
-                                                                               l.y[j]/10.0,
-                                                                               l.x[j]/10.0,
-                                                                               (l.spotsize/10.0)*2.355,
-                                                                               l.rf[j]*a.mu/a.csetweight))
+    logger.info("Data were scaled with a factor of {:e} particles/MU.".format(args.scale))
+    if args.flip:        
+        logger.info("Output file was XY flipped.")
 
-    if args.flip:
-        print("Output file was XY flipped.")
-
+    args.fout.close()
+    
+        
 if __name__ == '__main__':
-    logging.basicConfig()
     sys.exit(main(sys.argv[1:]))
