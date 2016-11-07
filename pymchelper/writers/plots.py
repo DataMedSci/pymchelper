@@ -30,7 +30,7 @@ class SHPlotDataWriter:
         fmt = "%g" + " %g" * detector.dimension
         data_to_save = axis_data_column + [data.ravel()]  # ravel needed to change arrays like [[1]] to [1]
 
-        # if error information is present dave it as additional column
+        # if error information is present save it as additional column
         if detector.error is not None:
             fmt += " %g"
             data_to_save += [error.ravel()]
