@@ -121,11 +121,11 @@ class PLDRead(object):
                 elements = pldlines[el_first:el_last]
 
                 self.layers.append(Layer(token[1].strip(),  # Spot1
-                                        token[2].strip(),  # energy
-                                        token[3].strip(),  # cumulative meter set weight including this layer
-                                        token[4].strip(),  # number of elements in this layer
-                                        token[5].strip(),  # number of repaints.
-                                        elements))  # array holding all elements for this layer
+                                         token[2].strip(),  # energy
+                                         token[3].strip(),  # cumulative meter set weight including this layer
+                                         token[4].strip(),  # number of elements in this layer
+                                         token[5].strip(),  # number of repaints.
+                                         elements))  # array holding all elements for this layer
             i += 1
 
 
@@ -157,7 +157,7 @@ def main(args=sys.argv[1:]):
     args.fin.close()
 
     msw_sum = 0.0
-    
+
     for l in a.layers:
         for j in range(l.spots):
 
@@ -185,16 +185,13 @@ def main(args=sys.argv[1:]):
     if args.flip:
         logger.info("Output file was XY flipped.")
 
-
     if args.diag:
         energy_list = [0.0]*len(a.layers)
         spotx_list = [0.0, 0.0]  # placeholder for min max values
         spoty_list = [0.0, 0.0]  # placeholder for min max values
         spotw_list = [0.0, 0.0]  # placeholder for min max values
 
-
-        
-        for i,ll in enumerate(a.layers):
+        for i, ll in enumerate(a.layers):
             energy_list[i] = ll.energy
 
             if spotx_list[0] > min(ll.x):
@@ -218,15 +215,15 @@ def main(args=sys.argv[1:]):
         print("Total MUs              : {:10.4f}".format(a.mu))
         print("Total meterset weigths : {:10.4f}".format(msw_sum))
         print("------------------------------------------------")
-        for i,energy in enumerate(energy_list):
-            print("Energy in layer {:3}    : {:10.4f} MeV".format(i,energy))
+        for i, energy in enumerate(energy_list):
+            print("Energy in layer {:3}    : {:10.4f} MeV".format(i, energy))
         print("------------------------------------------------")
         print("Highest energy         : {:10.4f} MeV".format(max(energy_list)))
         print("Lowest energy          : {:10.4f} MeV".format(min(energy_list)))
         print("------------------------------------------------")
-        print("Spot X         min/max : {:10.4f} {:10.4f} mm".format(min(spotx_list),max(spotx_list)))
-        print("Spot Y         min/max : {:10.4f} {:10.4f} mm".format(min(spoty_list),max(spoty_list)))
-        print("Spot meterset  min/max : {:10.4f} {:10.4f}   ".format(min(spotw_list),max(spotw_list)))
+        print("Spot X         min/max : {:10.4f} {:10.4f} mm".format(min(spotx_list), max(spotx_list)))
+        print("Spot Y         min/max : {:10.4f} {:10.4f} mm".format(min(spoty_list), max(spoty_list)))
+        print("Spot meterset  min/max : {:10.4f} {:10.4f}   ".format(min(spotw_list), max(spotw_list)))
         print("")
     args.fout.close()
 
