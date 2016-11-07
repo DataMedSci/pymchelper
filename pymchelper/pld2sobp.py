@@ -27,7 +27,6 @@ E[MeV]    sigmaY_GCS [mm]    sigmaX_GCS [mm]
 225    2,522    2,452
 
 """
-import os
 import sys
 import logging
 import argparse
@@ -135,7 +134,6 @@ def main(args=sys.argv[1:]):
     """ Main function of the pld2sobp script.
     """
     parser = argparse.ArgumentParser()
-    #parser.add_argument("pld_file", help="path to .pld input file in IBA format", type=FILE)
     parser.add_argument('fin', metavar="input_file.pld", type=argparse.FileType('r'),
                         help="path to .pld input file in IBA format.",
                         default=sys.stdin)
@@ -153,19 +151,19 @@ def main(args=sys.argv[1:]):
         logging.basicConfig(level=logging.INFO)
     if args.verbosity > 1:
         logging.basicConfig(level=logging.DEBUG)
-        
+
     a = PLDRead(args.fin)
     args.fin.close()
-    
+
     for l in a.layer:
         for j in range(l.spots):
 
             spotsize = 2.354820045 * l.spotsize * 0.1  # 1 sigma im mm -> 1 cm FWHM
-            weight =  l.rf[j] * a.mu / a.csetweight * args.scale
+            weight = l.rf[j] * a.mu / a.csetweight * args.scale
 
             # SH12A takes any form of list of values, as long as the line is shorter than 78 Chars.
             outstr = "{:-10.6f} {:-10.2f} {:-10.2f} {:-10.2f} {:-16.6E}\n"
-            
+
             if args.flip:
                 args.fout.writelines(outstr.format(l.energy * 0.001,  # MeV -> GeV
                                                    l.y[j] * 0.1,      # -> cm
@@ -180,11 +178,11 @@ def main(args=sys.argv[1:]):
                                                    weight))
 
     logger.info("Data were scaled with a factor of {:e} particles/MU.".format(args.scale))
-    if args.flip:        
+    if args.flip:
         logger.info("Output file was XY flipped.")
 
     args.fout.close()
-    
-        
+
+
 if __name__ == '__main__':
     sys.exit(main(sys.argv[1:]))
