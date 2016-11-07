@@ -6,49 +6,12 @@ which is readbale by FLUKA with source_sampler.f and SHIELD-HIT12A.
 <niels.bassler@fysik.su.se>
 
 TODO: Translate energy to spotsize.
-E[MeV]    sigmaY_GCS [mm]    sigmaX_GCS [mm]
-70    6,476    6,358
-80    5,944    5,991
-90    5,437    5,352
-100    5,081    5,044
-110    4,820    4,828
-120    4,677    4,677
-130    4,401    4,431
-140    4,207    4,104
-150    3,977    3,956
-160    3,758    3,687
-170    3,609    3,477
-180    3,352    3,288
-190    3,131    3,034
-200    2,886    2,803
-210    2,713    2,645
-220    2,529    2,461
-225    2,522    2,452
-
 """
 import sys
 import logging
 import argparse
 
 logger = logging.getLogger(__name__)
-
-
-def dEdx(energy):
-    """
-    PSTAR stopping power for protons in the interval 10 - 250 MeV
-    Energy is in [MeV]
-    Stopping power is in [MeV cm2/g]
-    """
-
-    if (energy > 250.0) or (energy < 10.0):
-        logger.error("dEdx error: {} MeV is out of bounds.".format(energy))
-        raise IOError()
-
-    a0 = 265.78
-    a1 = -0.828879
-    a2 = 0.647173
-
-    return a0 * pow(energy, a1) + a2
 
 
 class Layer(object):
@@ -76,7 +39,7 @@ class Layer(object):
                 self.x[j] = float(token[1].strip())
                 self.y[j] = float(token[2].strip())
                 self.w[j] = float(token[3].strip())  # meterset weight of this spot
-                self.rf[j] = self.w[j] / dEdx(self.energy)  # relative particle number
+                self.rf[j] = self.w[j]
                 j += 1
 
 
@@ -132,6 +95,8 @@ class PLDRead(object):
 def main(args=sys.argv[1:]):
     """ Main function of the pld2sobp script.
     """
+    _particles_per_mu = 8.106687e7  # Calculated Nov. 2016 from Brita's 32 Gy plan.
+
     parser = argparse.ArgumentParser()
     parser.add_argument('fin', metavar="input_file.pld", type=argparse.FileType('r'),
                         help="path to .pld input file in IBA format.",
@@ -144,7 +109,7 @@ def main(args=sys.argv[1:]):
     parser.add_argument("-d", "--diag", action='store_true', help="prints additional diagnostics",
                         dest="diag", default=False)
     parser.add_argument("-s", "--scale", type=float, dest='scale',
-                        help="number of particles per MU.", default=1.0)
+                        help="number of particles per MU.", default=_particles_per_mu)
     #  parser.add_argument('-V', '--version', action='version', version=self.__version__)
     args = parser.parse_args(args)
 
@@ -187,9 +152,11 @@ def main(args=sys.argv[1:]):
 
     if args.diag:
         energy_list = [0.0]*len(a.layers)
-        spotx_list = [0.0, 0.0]  # placeholder for min max values
-        spoty_list = [0.0, 0.0]  # placeholder for min max values
-        spotw_list = [0.0, 0.0]  # placeholder for min max values
+
+        # load some initial values for min/max values
+        spotx_list = [a.layers[0].x[0], a.layers[0].x[0]]  # placeholder for min max values
+        spoty_list = [a.layers[0].y[0], a.layers[0].y[0]]
+        spotw_list = [a.layers[0].w[0], a.layers[0].w[0]]
 
         for i, ll in enumerate(a.layers):
             energy_list[i] = ll.energy
@@ -214,6 +181,7 @@ def main(args=sys.argv[1:]):
         print("------------------------------------------------")
         print("Total MUs              : {:10.4f}".format(a.mu))
         print("Total meterset weigths : {:10.4f}".format(msw_sum))
+        print("Total particles        : {:10.4e} (estimated)".format(a.mu * args.scale))
         print("------------------------------------------------")
         for i, energy in enumerate(energy_list):
             print("Energy in layer {:3}    : {:10.4f} MeV".format(i, energy))
