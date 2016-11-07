@@ -3,7 +3,6 @@
 Reads PLD file in IBA format and convert to sobp.dat
 which is readbale by FLUKA with source_sampler.f and SHIELD-HIT12A.
 
-Niels Bassler 23.2.2016
 <niels.bassler@fysik.su.se>
 
 TODO: Translate energy to spotsize.
@@ -76,8 +75,8 @@ class Layer(object):
             if token[3] != "0.0":
                 self.x[j] = float(token[1].strip())
                 self.y[j] = float(token[2].strip())
-                self.w[j] = float(token[3].strip())
-                self.rf[j] = self.w[j] / dEdx(self.energy)
+                self.w[j] = float(token[3].strip())  # meterset weight of this spot
+                self.rf[j] = self.w[j] / dEdx(self.energy)  # relative particle number
                 j += 1
 
 
@@ -93,8 +92,8 @@ class PLDRead(object):
         pldlen = len(pldlines)
         logger.info("Read {} lines of data.".format(pldlen))
         i = 0
-        # layer_cnt = 0
-        self.layer = []
+
+        self.layers = []
 
         # parse first line
         token = pldlines[0].split(",")
@@ -107,7 +106,7 @@ class PLDRead(object):
         self.beam_name = token[6].strip()
         self.mu = float(token[7].strip())
         self.csetweight = float(token[8].strip())
-        self.layers = int(token[9].strip())
+        self.nrlayers = int(token[9].strip())  # number of layers
         i += 1
 
         while i < pldlen:
@@ -121,7 +120,7 @@ class PLDRead(object):
 
                 elements = pldlines[el_first:el_last]
 
-                self.layer.append(Layer(token[1].strip(),  # Spot1
+                self.layers.append(Layer(token[1].strip(),  # Spot1
                                         token[2].strip(),  # energy
                                         token[3].strip(),  # cumulative meter set weight including this layer
                                         token[4].strip(),  # number of elements in this layer
@@ -142,6 +141,8 @@ def main(args=sys.argv[1:]):
                         default=sys.stdout)
     parser.add_argument("-v", "--verbosity", action='count', help="increase output verbosity", default=0)
     parser.add_argument("-f", "--flip", action='store_true', help="flip XY axis", dest="flip", default=False)
+    parser.add_argument("-d", "--diag", action='store_true', help="prints additional diagnostics",
+                        dest="diag", default=False)
     parser.add_argument("-s", "--scale", type=float, dest='scale',
                         help="number of particles per MU.", default=1.0)
     #  parser.add_argument('-V', '--version', action='version', version=self.__version__)
@@ -155,11 +156,14 @@ def main(args=sys.argv[1:]):
     a = PLDRead(args.fin)
     args.fin.close()
 
-    for l in a.layer:
+    msw_sum = 0.0
+    
+    for l in a.layers:
         for j in range(l.spots):
 
             spotsize = 2.354820045 * l.spotsize * 0.1  # 1 sigma im mm -> 1 cm FWHM
             weight = l.rf[j] * a.mu / a.csetweight * args.scale
+            msw_sum += l.w[j]
 
             # SH12A takes any form of list of values, as long as the line is shorter than 78 Chars.
             outstr = "{:-10.6f} {:-10.2f} {:-10.2f} {:-10.2f} {:-16.6E}\n"
@@ -181,6 +185,49 @@ def main(args=sys.argv[1:]):
     if args.flip:
         logger.info("Output file was XY flipped.")
 
+
+    if args.diag:
+        energy_list = [0.0]*len(a.layers)
+        spotx_list = [0.0, 0.0]  # placeholder for min max values
+        spoty_list = [0.0, 0.0]  # placeholder for min max values
+        spotw_list = [0.0, 0.0]  # placeholder for min max values
+
+
+        
+        for i,ll in enumerate(a.layers):
+            energy_list[i] = ll.energy
+
+            if spotx_list[0] > min(ll.x):
+                spotx_list[0] = min(ll.x)
+            if spotx_list[1] < max(ll.x):
+                spotx_list[1] = max(ll.x)
+
+            if spoty_list[0] > min(ll.y):
+                spoty_list[0] = min(ll.y)
+            if spoty_list[1] < max(ll.y):
+                spoty_list[1] = max(ll.y)
+
+            if spotw_list[0] > min(ll.w):
+                spotw_list[0] = min(ll.w)
+            if spotw_list[1] < max(ll.w):
+                spotw_list[1] = max(ll.w)
+
+        print("")
+        print("Diagnostics:")
+        print("------------------------------------------------")
+        print("Total MUs              : {:10.4f}".format(a.mu))
+        print("Total meterset weigths : {:10.4f}".format(msw_sum))
+        print("------------------------------------------------")
+        for i,energy in enumerate(energy_list):
+            print("Energy in layer {:3}    : {:10.4f} MeV".format(i,energy))
+        print("------------------------------------------------")
+        print("Highest energy         : {:10.4f} MeV".format(max(energy_list)))
+        print("Lowest energy          : {:10.4f} MeV".format(min(energy_list)))
+        print("------------------------------------------------")
+        print("Spot X         min/max : {:10.4f} {:10.4f} mm".format(min(spotx_list),max(spotx_list)))
+        print("Spot Y         min/max : {:10.4f} {:10.4f} mm".format(min(spoty_list),max(spoty_list)))
+        print("Spot meterset  min/max : {:10.4f} {:10.4f}   ".format(min(spotw_list),max(spotw_list)))
+        print("")
     args.fout.close()
 
 
