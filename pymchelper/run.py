@@ -29,6 +29,7 @@ def set_logger_level(args):
 
 def main(args=sys.argv[1:]):
     import pymchelper
+    import os
     parser = argparse.ArgumentParser()
     parser.add_argument("input", help='input filename, file list or pattern', type=str)
     parser.add_argument("output", help='output filename or directory', nargs='?')
@@ -56,6 +57,11 @@ def main(args=sys.argv[1:]):
     parsed_args = parser.parse_args(args)
 
     set_logger_level(parsed_args)
+
+    # check if output directory exists
+    output_dir = os.path.dirname(parsed_args.output)
+    if not(os.path.exists(output_dir)):
+        raise NotADirectoryError(output_dir)
 
     # TODO add filename discovery
     files = sorted(glob.glob(parsed_args.input))
