@@ -68,3 +68,14 @@ class TripCubeWriter:
         else:
             logger.error("Tripcube target is only allowed with dose- or LET-type detectors.")
             raise Exception("Illegal detector for tripcube.")
+
+
+class TripDddWriter(object):
+    def __init__(self, filename):
+        self.output_corename = filename
+
+    def write(self, detector):
+        from pymchelper.shieldhit.detector.detector_type import SHDetType
+
+        if detector.dettyp == SHDetType.ddd:
+            pass
