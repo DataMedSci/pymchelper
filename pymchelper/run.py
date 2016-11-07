@@ -61,7 +61,7 @@ def main(args=sys.argv[1:]):
     # check if output directory exists
     output_dir = os.path.dirname(parsed_args.output)
     if not(os.path.exists(output_dir)):
-        raise NotADirectoryError(output_dir)
+        raise IOError("Directory {}/ does not exist.".format(output_dir))
 
     # TODO add filename discovery
     files = sorted(glob.glob(parsed_args.input))
