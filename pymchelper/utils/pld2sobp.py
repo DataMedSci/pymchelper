@@ -80,11 +80,16 @@ class PLDRead(object):
 
                 elements = pldlines[el_first:el_last]
 
+                # read number of repaints only if 5th column is present, otherwise set to 0
+                repaints_no = 0
+                if 5 in token:
+                    repaints_no = token[5].strip()
+
                 self.layers.append(Layer(token[1].strip(),  # Spot1
                                          token[2].strip(),  # energy
                                          token[3].strip(),  # cumulative meter set weight including this layer
                                          token[4].strip(),  # number of elements in this layer
-                                         token[5].strip(),  # number of repaints.
+                                         repaints_no,  # number of repaints.
                                          elements))  # array holding all elements for this layer
 
 
