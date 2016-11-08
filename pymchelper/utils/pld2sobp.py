@@ -1,21 +1,3 @@
-#
-#    Copyright (C) 2010-2016 pymchelper Developers.
-#
-#    This file is part of pymchelper.
-#
-#    pymchelper is free software: you can redistribute it and/or modify
-#    it under the terms of the GNU General Public License as published by
-#    the Free Software Foundation, either version 3 of the License, or
-#    (at your option) any later version.
-#
-#    pymchelper is distributed in the hope that it will be useful,
-#    but WITHOUT ANY WARRANTY; without even the implied warranty of
-#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#    GNU General Public License for more details.
-#
-#    You should have received a copy of the GNU General Public License
-#    along with pymchelper.  If not, see <http://www.gnu.org/licenses/>.
-#
 """
 Reads PLD file in IBA format and convert to sobp.dat
 which is readbale by FLUKA with source_sampler.f and SHIELD-HIT12A.
@@ -31,7 +13,8 @@ logger = logging.getLogger(__name__)
 
 
 class Layer(object):
-    """ Class for handling Layers.
+    """
+    Class for handling Layers.
     """
     def __init__(self, spotsize, energy, meterset, elsum, repaints, elements):
         self.spotsize = float(spotsize)
@@ -69,7 +52,6 @@ class PLDRead(object):
         pldlines = fpld.readlines()
         pldlen = len(pldlines)
         logger.info("Read {} lines of data.".format(pldlen))
-        i = 0
 
         self.layers = []
 
@@ -85,12 +67,12 @@ class PLDRead(object):
         self.mu = float(token[7].strip())
         self.csetweight = float(token[8].strip())
         self.nrlayers = int(token[9].strip())  # number of layers
-        i += 1
 
-        while i < pldlen:
+        for i in range(1, pldlen):  # loop over all lines starting from the second one
             line = pldlines[i]
             if "Layer" in line:
                 header = line
+
                 token = header.split(",")
                 # extract the subsequent lines with elements
                 el_first = i + 1
@@ -104,7 +86,6 @@ class PLDRead(object):
                                          token[4].strip(),  # number of elements in this layer
                                          token[5].strip(),  # number of repaints.
                                          elements))  # array holding all elements for this layer
-            i += 1
 
 
 def main(args=sys.argv[1:]):
@@ -119,12 +100,12 @@ def main(args=sys.argv[1:]):
     parser.add_argument('fout', nargs='?', metavar="output_file.dat", type=argparse.FileType('w'),
                         help="path to the SHIELD-HIT12A/FLUKA output file, or print to stdout if not given.",
                         default=sys.stdout)
-    parser.add_argument("-v", "--verbosity", action='count', help="increase output verbosity", default=0)
-    parser.add_argument("-f", "--flip", action='store_true', help="flip XY axis", dest="flip", default=False)
-    parser.add_argument("-d", "--diag", action='store_true', help="prints additional diagnostics",
+    parser.add_argument('-f', '--flip', action='store_true', help="flip XY axis", dest="flip", default=False)
+    parser.add_argument('-d', '--diag', action='store_true', help="prints additional diagnostics",
                         dest="diag", default=False)
-    parser.add_argument("-s", "--scale", type=float, dest='scale',
+    parser.add_argument('-s', '--scale', type=float, dest='scale',
                         help="number of particles per MU.", default=_particles_per_mu)
+    parser.add_argument('-v', '--verbosity', action='count', help="increase output verbosity", default=0)
     parser.add_argument('-V', '--version', action='version', version=pymchelper.__version__)
     args = parser.parse_args(args)
 
@@ -133,70 +114,50 @@ def main(args=sys.argv[1:]):
     if args.verbosity > 1:
         logging.basicConfig(level=logging.DEBUG)
 
-    a = PLDRead(args.fin)
+    pld_data = PLDRead(args.fin)
     args.fin.close()
 
-    msw_sum = 0.0
+    # SH12A takes any form of list of values, as long as the line is shorter than 78 Chars.
+    outstr = "{:-10.6f} {:-10.2f} {:-10.2f} {:-10.2f} {:-16.6E}\n"
 
-    for l in a.layers:
-        for j in range(l.spots):
+    meterset_weight_sum = 0.0
+    for layer in pld_data.layers:
+        spotsize = 2.354820045 * layer.spotsize * 0.1  # 1 sigma im mm -> 1 cm FWHM
 
-            spotsize = 2.354820045 * l.spotsize * 0.1  # 1 sigma im mm -> 1 cm FWHM
-            weight = l.rf[j] * a.mu / a.csetweight * args.scale
-            msw_sum += l.w[j]
+        for spot_x, spot_y, spot_w, spot_rf in zip(layer.x, layer.y, layer.w, layer.rf):
 
-            # SH12A takes any form of list of values, as long as the line is shorter than 78 Chars.
-            outstr = "{:-10.6f} {:-10.2f} {:-10.2f} {:-10.2f} {:-16.6E}\n"
+            weight = spot_rf * pld_data.mu / pld_data.csetweight * args.scale
+            meterset_weight_sum += spot_w
+
+            layer_xy = [spot_x * 0.1, spot_y * 0.1]
 
             if args.flip:
-                args.fout.writelines(outstr.format(l.energy * 0.001,  # MeV -> GeV
-                                                   l.y[j] * 0.1,      # -> cm
-                                                   l.x[j] * 0.1,
-                                                   spotsize,
-                                                   weight))
-            else:
-                args.fout.writelines(outstr.format(l.energy * 0.001,  # MeV -> GeV
-                                                   l.x[j] * 0.1,      # -> cm
-                                                   l.y[j] * 0.1,
-                                                   spotsize,
-                                                   weight))
+                layer_xy.reverse()
+
+            args.fout.writelines(outstr.format(layer.energy * 0.001,  # MeV -> GeV
+                                               layer_xy[0],
+                                               layer_xy[1],
+                                               spotsize,
+                                               weight))
 
     logger.info("Data were scaled with a factor of {:e} particles/MU.".format(args.scale))
     if args.flip:
         logger.info("Output file was XY flipped.")
 
     if args.diag:
-        energy_list = [0.0] * len(a.layers)
+        energy_list = [layer.energy for layer in pld_data.layers]
 
-        # load some initial values for min/max values
-        spotx_list = [a.layers[0].x[0], a.layers[0].x[0]]  # placeholder for min max values
-        spoty_list = [a.layers[0].y[0], a.layers[0].y[0]]
-        spotw_list = [a.layers[0].w[0], a.layers[0].w[0]]
-
-        for i, ll in enumerate(a.layers):
-            energy_list[i] = ll.energy
-
-            if spotx_list[0] > min(ll.x):
-                spotx_list[0] = min(ll.x)
-            if spotx_list[1] < max(ll.x):
-                spotx_list[1] = max(ll.x)
-
-            if spoty_list[0] > min(ll.y):
-                spoty_list[0] = min(ll.y)
-            if spoty_list[1] < max(ll.y):
-                spoty_list[1] = max(ll.y)
-
-            if spotw_list[0] > min(ll.w):
-                spotw_list[0] = min(ll.w)
-            if spotw_list[1] < max(ll.w):
-                spotw_list[1] = max(ll.w)
+        # double loop over all layers and over all spots in a layer
+        spot_x_list = [x for layer in pld_data.layers for x in layer.x]
+        spot_y_list = [y for layer in pld_data.layers for y in layer.y]
+        spot_w_list = [w for layer in pld_data.layers for w in layer.w]
 
         print("")
         print("Diagnostics:")
         print("------------------------------------------------")
-        print("Total MUs              : {:10.4f}".format(a.mu))
-        print("Total meterset weigths : {:10.4f}".format(msw_sum))
-        print("Total particles        : {:10.4e} (estimated)".format(a.mu * args.scale))
+        print("Total MUs              : {:10.4f}".format(pld_data.mu))
+        print("Total meterset weigths : {:10.4f}".format(meterset_weight_sum))
+        print("Total particles        : {:10.4e} (estimated)".format(pld_data.mu * args.scale))
         print("------------------------------------------------")
         for i, energy in enumerate(energy_list):
             print("Energy in layer {:3}    : {:10.4f} MeV".format(i, energy))
@@ -204,9 +165,9 @@ def main(args=sys.argv[1:]):
         print("Highest energy         : {:10.4f} MeV".format(max(energy_list)))
         print("Lowest energy          : {:10.4f} MeV".format(min(energy_list)))
         print("------------------------------------------------")
-        print("Spot X         min/max : {:10.4f} {:10.4f} mm".format(min(spotx_list), max(spotx_list)))
-        print("Spot Y         min/max : {:10.4f} {:10.4f} mm".format(min(spoty_list), max(spoty_list)))
-        print("Spot meterset  min/max : {:10.4f} {:10.4f}   ".format(min(spotw_list), max(spotw_list)))
+        print("Spot X         min/max : {:10.4f} {:10.4f} mm".format(min(spot_x_list), max(spot_x_list)))
+        print("Spot Y         min/max : {:10.4f} {:10.4f} mm".format(min(spot_y_list), max(spot_y_list)))
+        print("Spot meterset  min/max : {:10.4f} {:10.4f}   ".format(min(spot_w_list), max(spot_w_list)))
         print("")
     args.fout.close()
 
