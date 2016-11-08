@@ -104,13 +104,11 @@ class Detector:
         # TODO add compatibility check
         l = [det.data for det in other_detectors]
         l.append(self.data)
+        self.counter += len(other_detectors)
+        self.nstat += sum(det.nstat for det in other_detectors)
         self.data = np.nanmean(l, axis=0)
         if error_estimate != ErrorEstimate.none:
-            if self.error is None:
-                self.error = np.zeros_like(self.data)
             self.error = np.nanstd(l, axis=0, ddof=1)  # stddev = sqrt( var / (n-1) )
-        self.nstat += sum(det.nstat for det in other_detectors)
-        self.counter += len(other_detectors)
 
     def average_with_other(self, other_detector, error_estimate=ErrorEstimate.stderr):
         """
@@ -128,8 +126,6 @@ class Detector:
         delta = other_detector.data - self.data                # delta = x - mean
         self.data += delta / self.counter                      # mean += delta / n
         if error_estimate != ErrorEstimate.none:
-            if self.error is None:
-                self.error = np.zeros_like(self.data)
             self._M2 += delta * (other_detector.data - self.data)  # M2 *= delta * (x - mean)
             self.error = np.sqrt(self._M2 / (self.counter - 1))    # stddev = sqrt( var / (n-1) )
 
@@ -306,6 +302,10 @@ def merge_list(input_file_list,
     if not nan and len(input_file_list) > 1 and error_estimate != ErrorEstimate.none:
         first._M2 = np.zeros_like(first.data)
 
+    # set errors to zero also if reading single file
+    if error_estimate != ErrorEstimate.none:
+        first.error = np.zeros_like(first.data)
+
     # loop over second and next files, if present
     for file in input_file_list[1:]:
         next_one = Detector()
@@ -322,7 +322,7 @@ def merge_list(input_file_list,
     # up to now first.error stores standard deviation
     # if user requested standard error then we calculate it as:
     #   stderr = stddev / sqrt(n)
-    if len(input_file_list) > 1 and error_estimate != ErrorEstimate.none:
+    if len(input_file_list) > 1 and error_estimate == ErrorEstimate.stderr:
         first.error /= np.float64(first.counter)
 
     if output_file is None:

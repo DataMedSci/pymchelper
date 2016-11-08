@@ -140,7 +140,7 @@ class SHFortranWriter:
 
                 if e is not None:
                     e = float('nan') if np.isnan(e) else e
-                    tmp += + " " + format_e(23, 16, e)
+                    tmp += " " + format_e(23, 16, e)
 
                 tmp += "\n"
 
