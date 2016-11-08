@@ -1,3 +1,4 @@
+import time
 import logging
 import numpy as np
 
@@ -71,11 +72,40 @@ class TripCubeWriter:
 
 
 class TripDddWriter(object):
+
+    _ddd_header_template = """!filetype    ddd
+!fileversion   {fileversion:s}
+!filedate      {filedate:s}
+!projectile    {projectile:s}
+!material      {material:s}
+!composition   {composition:s}
+!density {density:f}
+!energy {energy:f}
+#   z[g/cm**2] dE/dz[MeV/(g/cm**2)] FWHM1[mm] factor FWHM2[mm]
+!ddd
+"""
+
     def __init__(self, filename):
-        self.output_corename = filename
+        self.ddd_filename = filename
+        if not self.ddd_filename.endswith(".ddd"):
+            self.ddd_filename += ".ddd"
 
     def write(self, detector):
         from pymchelper.shieldhit.detector.detector_type import SHDetType
 
         if detector.dettyp == SHDetType.ddd:
-            pass
+            # time format: %c  Locale's appropriate date and time representation.
+            now = time.strftime('%c')
+
+            header = self._ddd_header_template.format(
+                fileversion='19980520',
+                filedate=now,
+                projectile='C',
+                material='H20',
+                composition='H20',
+                density=1,
+                energy=350
+            )
+
+            with open(self.ddd_filename,'w') as ddd_file:
+                ddd_file.write(header)

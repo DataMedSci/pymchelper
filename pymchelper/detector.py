@@ -11,7 +11,7 @@ from pymchelper.shieldhit.detector.detector_type import SHDetType
 from pymchelper.shieldhit.detector.estimator_type import SHGeoType
 from pymchelper.writers.plots import ImageWriter, GnuplotDataWriter, PlotDataWriter
 from pymchelper.writers.shieldhit import TxtWriter
-from pymchelper.writers.trip98 import TripCubeWriter
+from pymchelper.writers.trip98 import TripCubeWriter, TripDddWriter
 
 logger = logging.getLogger(__name__)
 
@@ -25,6 +25,7 @@ class Converters(IntEnum):
     gnuplot = 2
     image = 3
     tripcube = 4
+    tripddd = 5
 
 
 class ErrorEstimate(IntEnum):
@@ -47,7 +48,8 @@ _converter_mapping = {
     Converters.gnuplot: GnuplotDataWriter,
     Converters.plotdata: PlotDataWriter,
     Converters.image: ImageWriter,
-    Converters.tripcube: TripCubeWriter
+    Converters.tripcube: TripCubeWriter,
+    Converters.tripddd: TripDddWriter
 }
 
 
