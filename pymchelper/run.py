@@ -63,6 +63,9 @@ def main(args=sys.argv[1:]):
     add_default_options(parser_image)
     parser_image.add_argument("--colormap", help='image color map', default=ImageWriter.default_colormap, type=str)
 
+    parser_plotdata = subparsers.add_parser(Converters.plotdata.name, help='converts to gnuplot data')
+    add_default_options(parser_plotdata)
+
     parser_gnuplot = subparsers.add_parser(Converters.gnuplot.name, help='converts to gnuplot script')
     add_default_options(parser_gnuplot)
 
