@@ -6,8 +6,8 @@ import sys
 
 import argparse
 
-from pymchelper.detector import merge_list, merge_many, SHConverters, ErrorEstimate
-from pymchelper.writers.plots import SHImageWriter
+from pymchelper.detector import merge_list, merge_many, Converters, ErrorEstimate
+from pymchelper.writers.plots import ImageWriter
 
 logger = logging.getLogger(__name__)
 
@@ -27,32 +27,48 @@ def set_logger_level(args):
     logging.basicConfig(level=level)
 
 
-def main(args=sys.argv[1:]):
+def add_default_options(parser):
     import pymchelper
-    import os
-    parser = argparse.ArgumentParser()
     parser.add_argument("input", help='input filename, file list or pattern', type=str)
     parser.add_argument("output", help='output filename or directory', nargs='?')
     parser.add_argument("--many", help='automatically merge data from various sources', action="store_true")
     parser.add_argument("--nan", help='ignore NaN in averaging', action="store_true")
-    parser.add_argument("-n", '--nscale', help='Scale with number of primaries N.', default=1, type=float)
-    parser.add_argument("--converter",
-                        help='converters',
-                        default=(SHConverters.standard.name,),
-                        choices=[x.name for x in SHConverters],
-                        nargs='+')
-    parser.add_argument("--colormap", help='image color map', default=SHImageWriter.default_colormap, type=str)
     parser.add_argument("--error",
                         help='type of error estimate to add (default: ' + ErrorEstimate.stderr.name + ')',
                         default=ErrorEstimate.stderr.name,
                         choices=[x.name for x in ErrorEstimate],
                         type=str)
+    parser.add_argument("-n", '--nscale', help='Scale with number of primaries N.', default=1, type=float)
     parser.add_argument('-v',
                         '--verbose',
                         action='count',
                         default=0,
                         help='Give more output. Option is additive, and can be used up to 3 times')
     parser.add_argument('-q', '--quiet', action='count', default=0, help='Be silent')
+    parser.add_argument('-V', '--version', action='version', version=pymchelper.__version__)
+
+
+def main(args=sys.argv[1:]):
+    import pymchelper
+    import os
+    parser = argparse.ArgumentParser()
+
+    # subparsers = parser.add_subparsers(title='available converters', metavar='...')
+    subparsers = parser.add_subparsers(dest='command', metavar='converter')
+
+    parser_ascii = subparsers.add_parser(Converters.ascii.name, help='converts to plain ASCII file')
+    add_default_options(parser_ascii)
+
+    parser_image = subparsers.add_parser(Converters.image.name, help='converts to PNG images')
+    add_default_options(parser_image)
+    parser_image.add_argument("--colormap", help='image color map', default=ImageWriter.default_colormap, type=str)
+
+    parser_gnuplot = subparsers.add_parser(Converters.gnuplot.name, help='converts to gnuplot script')
+    add_default_options(parser_gnuplot)
+
+    parser_tripcube = subparsers.add_parser(Converters.tripcube.name, help='converts to trip98 data cube')
+    add_default_options(parser_tripcube)
+
     parser.add_argument('-V', '--version', action='version', version=pymchelper.__version__)
     parsed_args = parser.parse_args(args)
 
@@ -68,6 +84,10 @@ def main(args=sys.argv[1:]):
     files = sorted(glob.glob(parsed_args.input))
     if not files:
         logger.error('File does not exist: ' + parsed_args.input)
+
+    print(parsed_args)
+
+    return 1
 
     if parsed_args.many:
         merge_many(files, parsed_args.output, parsed_args.converter, parsed_args.nan, parsed_args.colormap,

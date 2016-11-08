@@ -17,7 +17,7 @@ class SHBinaryWriter:
         pass
 
 
-class SHFortranWriter:
+class AsciiWriter:
     @staticmethod
     def _axis_name(geo_type, axis_no):
         cyl = ['R', 'PHI', 'Z']
