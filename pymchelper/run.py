@@ -38,13 +38,13 @@ def add_default_options(parser):
                         default=ErrorEstimate.stderr.name,
                         choices=[x.name for x in ErrorEstimate],
                         type=str)
-    parser.add_argument("-n", '--nscale', help='Scale with number of primaries N.', default=1, type=float)
+    parser.add_argument("-n", '--nscale', help='scale with number of primaries N.', default=1, type=float)
     parser.add_argument('-v',
                         '--verbose',
                         action='count',
                         default=0,
-                        help='Give more output. Option is additive, and can be used up to 3 times')
-    parser.add_argument('-q', '--quiet', action='count', default=0, help='Be silent')
+                        help='give more output. Option is additive, and can be used up to 3 times')
+    parser.add_argument('-q', '--quiet', action='count', default=0, help='be silent')
     parser.add_argument('-V', '--version', action='version', version=pymchelper.__version__)
 
 
@@ -56,12 +56,15 @@ def main(args=sys.argv[1:]):
     # subparsers = parser.add_subparsers(title='available converters', metavar='...')
     subparsers = parser.add_subparsers(dest='command', metavar='converter')
 
-    parser_ascii = subparsers.add_parser(Converters.ascii.name, help='converts to plain ASCII file')
-    add_default_options(parser_ascii)
+    parser_txt = subparsers.add_parser(Converters.txt.name, help='converts to plain txt file')
+    add_default_options(parser_txt)
 
     parser_image = subparsers.add_parser(Converters.image.name, help='converts to PNG images')
     add_default_options(parser_image)
-    parser_image.add_argument("--colormap", help='image color map', default=ImageWriter.default_colormap, type=str)
+    parser_image.add_argument("--colormap",
+                              help='image color map, see http://matplotlib.org/users/colormaps.html '
+                                   'for list of possible options',
+                              default=ImageWriter.default_colormap, type=str)
 
     parser_plotdata = subparsers.add_parser(Converters.plotdata.name, help='converts to gnuplot data')
     add_default_options(parser_plotdata)

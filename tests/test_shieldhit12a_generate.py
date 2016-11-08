@@ -59,7 +59,7 @@ class TestSHGenerated(unittest.TestCase):
                 fd, outfile = tempfile.mkstemp()
                 os.close(fd)
                 os.remove(outfile)
-                run.main(["ascii", infile, outfile])
+                run.main(["txt", infile, outfile])
                 saved_file = outfile
                 self.assertTrue(os.path.isfile(saved_file))
                 self.assertGreater(os.path.getsize(saved_file), 0)
