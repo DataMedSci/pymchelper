@@ -72,29 +72,30 @@ def main(args=sys.argv[1:]):
     parser.add_argument('-V', '--version', action='version', version=pymchelper.__version__)
     parsed_args = parser.parse_args(args)
 
-    set_logger_level(parsed_args)
+    if parsed_args.command is not None:
+        set_logger_level(parsed_args)
 
-    # check if output directory exists
-    if parsed_args.output is not None:
-        output_dir = os.path.dirname(parsed_args.output)
-        if not os.path.exists(output_dir):
-            raise IOError("Directory {}/ does not exist.".format(output_dir))
+        # check if output directory exists
+        if parsed_args.output is not None:
+            output_dir = os.path.dirname(parsed_args.output)
+            if output_dir and not os.path.exists(output_dir):
+                raise IOError("Directory {}/ does not exist.".format(output_dir))
 
-    # TODO add filename discovery
-    files = sorted(glob.glob(parsed_args.input))
-    if not files:
-        logger.error('File does not exist: ' + parsed_args.input)
+        # TODO add filename discovery
+        files = sorted(glob.glob(parsed_args.input))
+        if not files:
+            logger.error('File does not exist: ' + parsed_args.input)
 
-    print(parsed_args)
+        colormap = None
+        if 'colormap' in dir(parsed_args):
+            colormap = parsed_args.colormap
 
-    return 1
-
-    if parsed_args.many:
-        merge_many(files, parsed_args.output, parsed_args.converter, parsed_args.nan, parsed_args.colormap,
-                   parsed_args.nscale, ErrorEstimate[parsed_args.error])
-    else:
-        merge_list(files, parsed_args.output, parsed_args.converter, parsed_args.nan, parsed_args.colormap,
-                   parsed_args.nscale, ErrorEstimate[parsed_args.error])
+        if parsed_args.many:
+            merge_many(files, parsed_args.output, [parsed_args.command], parsed_args.nan, colormap,
+                       parsed_args.nscale, ErrorEstimate[parsed_args.error])
+        else:
+            merge_list(files, parsed_args.output, [parsed_args.command], parsed_args.nan, colormap,
+                       parsed_args.nscale, ErrorEstimate[parsed_args.error])
 
     return 0
 

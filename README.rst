@@ -29,28 +29,27 @@ Documentation
 
 To convert single SHIELDHIT12A output file, called ``dose.bdo`` file to a PNG image run::
 
-    convertmc dose.bdo plot_dose.png --converter image
+    convertmc image dose.bdo plot_dose.png
 
 Let us assume you ran SHIELD-HIT12A on a cluster specifying 5 different estimators in ``detect.dat``
 and running 100 parallel jobs. As an output you have 500 ``.bdo`` files.
-convertmc converter can automatically discover which files belong to which estimator and automatically
+convertmc can automatically discover which files belong to which estimator and automatically
 generate 5 output files.
 To convert all ``*.bdo`` files to a set of PNG images you shouldn't specify output file name, just run::
 
-    convertmc --many "*.bdo" --converter image
+    convertmc image --many "*.bdo"
 
 The same output format as in standard convertmc converter,
-shipped with SHIELD-HIT12A code can be achieved with ``--converter standard`` option.
+shipped with SHIELD-HIT12A code can be achieved with ``ascii`` command.
 In this case ASCII file with 4 columns will be saved.
 
-Reduced ASCII output (i.e. only two columns for 1D scoring) can be produced with ``--converter plotdata`` option.
-Converters can be combined. Following command will generate ASCII data which can be digested by gnuplot and
-accompanying gnuplot scripts::
+Reduced ASCII output (i.e. only two columns for 1D scoring) can be produced with ``plotdata`` command.
+Following command will generate ASCII data which can be digested by gnuplot and accompanying gnuplot scripts::
 
-    convertmc --many "*.bdo" --converter plotdata gnuplot
+    convertmc gnuplot --many "*.bdo"
 
 
-TRiP98 binary ``.dos`` cubes (two files: ASCII ``.hed`` and binary ``.dos``) can be generated with ``--converter tripcube``.
+TRiP98 binary ``.dos`` cubes (two files: ASCII ``.hed`` and binary ``.dos``) can be generated with ``tripcube`` command.
 It will produce output only for ``MSH`` and ``VOXMESH`` SHIELD-HIT12A scorers.
 
 More on https://pymchelper.readthedocs.io/
