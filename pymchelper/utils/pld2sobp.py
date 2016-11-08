@@ -166,7 +166,7 @@ def main(args=sys.argv[1:]):
         logger.info("Output file was XY flipped.")
 
     if args.diag:
-        energy_list = [0.0]*len(a.layers)
+        energy_list = [0.0] * len(a.layers)
 
         # load some initial values for min/max values
         spotx_list = [a.layers[0].x[0], a.layers[0].x[0]]  # placeholder for min max values
