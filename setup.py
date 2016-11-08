@@ -149,6 +149,7 @@ setuptools.setup(
         'console_scripts': [
             'convertmc=' + \
             'pymchelper.run:main',
+            'pld2sobp=pymchelper.utils.pld2sobp:main',
         ],
     },
     install_requires=[
