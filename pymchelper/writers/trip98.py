@@ -2,7 +2,7 @@ import time
 import logging
 import math
 from copy import deepcopy
-
+from scipy.optimize import leastsq
 import numpy as np
 
 logger = logging.getLogger(__name__)
@@ -24,8 +24,7 @@ class TripCubeWriter:
 
             cube = dos.DosCube()
             cube.create_empty_cube(
-                1.0, detector.nx, detector.ny, detector.nz,
-                pixel_size=pixel_size_x, slice_distance=pixel_size_z)
+                1.0, detector.nx, detector.ny, detector.nz, pixel_size=pixel_size_x, slice_distance=pixel_size_z)
 
             # .dos dose cubes are usually in normalized integers,
             # where "1000" equals 100.0 % dose.
@@ -50,9 +49,7 @@ class TripCubeWriter:
 
             cube = let.LETCube()
             cube.create_empty_cube(
-                1.0, detector.nx, detector.ny, detector.nz,
-                pixel_size=pixel_size_x,
-                slice_distance=pixel_size_z)
+                1.0, detector.nx, detector.ny, detector.nz, pixel_size=pixel_size_x, slice_distance=pixel_size_z)
 
             # .dosemlet.dos LET cubes are usually in 32 bit floats.
             cube.data_type = "float"
@@ -78,9 +75,6 @@ class TripCubeWriter:
 Constrained multivariate Levenberg-Marquardt optimization
 """
 
-from scipy.optimize import leastsq
-import numpy as np
-
 
 def internal2external_grad(xi, bounds):
     """
@@ -97,14 +91,14 @@ def internal2external_grad(xi, bounds):
         a = bound[0]  # minimum
         b = bound[1]  # maximum
 
-        if a == None and b == None:  # No constraints
+        if a is None and b is None:  # No constraints
             ge[i] = 1.0
 
-        elif b == None:  # only min
-            ge[i] = v / np.sqrt(v ** 2 + 1)
+        elif b is None:  # only min
+            ge[i] = v / np.sqrt(v**2 + 1)
 
-        elif a == None:  # only max
-            ge[i] = -v / np.sqrt(v ** 2 + 1)
+        elif a is None:  # only max
+            ge[i] = -v / np.sqrt(v**2 + 1)
 
         else:  # both min and max
             ge[i] = (b - a) * np.cos(v) / 2.
@@ -128,14 +122,14 @@ def internal2external(xi, bounds):
         a = bound[0]  # minimum
         b = bound[1]  # maximum
 
-        if a == None and b == None:  # No constraints
+        if a is None and b is None:  # No constraints
             xe[i] = v
 
-        elif b == None:  # only min
-            xe[i] = a - 1. + np.sqrt(v ** 2. + 1.)
+        elif b is None:  # only min
+            xe[i] = a - 1. + np.sqrt(v**2. + 1.)
 
-        elif a == None:  # only max
-            xe[i] = b + 1. - np.sqrt(v ** 2. + 1.)
+        elif a is None:  # only max
+            xe[i] = b + 1. - np.sqrt(v**2. + 1.)
 
         else:  # both min and max
             xe[i] = a + ((b - a) / 2.) * (np.sin(v) + 1.)
@@ -153,14 +147,14 @@ def external2internal(xe, bounds):
         a = bound[0]  # minimum
         b = bound[1]  # maximum
 
-        if a == None and b == None:  # No constraints
+        if a is None and b is None:  # No constraints
             xi[i] = v
 
-        elif b == None:  # only min
-            xi[i] = np.sqrt((v - a + 1.) ** 2. - 1)
+        elif b is None:  # only min
+            xi[i] = np.sqrt((v - a + 1.)**2. - 1)
 
-        elif a == None:  # only max
-            xi[i] = np.sqrt((b - v + 1.) ** 2. - 1)
+        elif a is None:  # only max
+            xi[i] = np.sqrt((b - v + 1.)**2. - 1)
 
         else:  # both min and max
             xi[i] = np.arcsin((2. * (v - a) / (b - a)) - 1.)
@@ -269,35 +263,37 @@ def _lateral_fit(left_radii, radial_dose_scaled, depth, energy):
         return err
 
     def peval(x, mu, p):  # The model function: Two gaussians (sum), the mean mu is locked
-        # In guideline with a similar routine for TRiP by U. Weber, the function is scaled with the radius to fit D(r)*r /TPR
-        return (p[0] * exp(- ((x - mu) ** 2) / (2 * p[1] ** 2)) + p[2] * exp(- ((x - mu) ** 2) / (2 * p[3] ** 2))) * x
+        # In guideline with a similar routine for TRiP by U. Weber,
+        # the function is scaled with the radius to fit D(r)*r /TPR
+        return (p[0] * np.exp(-((x - mu)**2) / (2 * p[1]**2)) + p[2] * np.exp(-((x - mu)**2) / (2 * p[3]**2))) * x
 
     x = left_radii
     y = radial_dose_scaled
-    ## Calculate initial guesses ##
+    # Calculate initial guesses #
     a1 = y.max()  # guess for the amplitude of the first gaussian
     mu = 0  # set the mean to zero - a guess would be: sum(x*y)/sum(y)
     if (sum(y) == 0):  # check if denominator is 0
         sigma1 = 1e5
     else:
-        sigma1 = np.sqrt(abs(sum((x - mu) ** 2 * y) / sum(y)))  # guess for the deviation
+        sigma1 = np.sqrt(abs(sum((x - mu)**2 * y) / sum(y)))  # guess for the deviation
     a2 = deepcopy(a1) * 0.05  # guess for the  amplitude of the second gaussian
     sigma2 = 2  # guess for the deviation of the second gaussian
     sigma2 = deepcopy(sigma1) * 5.0
     # Collect the guesses in an array
-    pname = (['a1', 'sigma1', 'a2', 'sigma2'])
+    # pname = (['a1', 'sigma1', 'a2', 'sigma2'])
     p0 = np.asarray([a1, sigma1, a2, sigma2])
     bounds = [(0, 1e6), (0, 1e6), (0, 1e6), (0, 1e6)]  # set bound for the parameters, they should be non-negative
     plsq = leastsqbound(residuals, p0, bounds, args=(y, x), maxfev=5000)  # Calculate the fit with Levenberg-Marquardt
     pfinal = plsq[0]  # final parameters
-    covar = plsq[1]  # covariance matrix
+    # covar = plsq[1]  # covariance matrix
 
     # ''' Plot the fit '''
     # _mkdir('./pics/')
     # figure
     # xnum = len(x)
     # xplot = linspace(x[0], x[xnum - 1], num=xnum * 10)
-    # plot(x, y, 'r.', xplot, peval(xplot, mu, plsq[0]), 'b-')  # plot the functional fit on a finer grid than data points
+    # plot(x, y, 'r.', xplot, peval(xplot, mu, plsq[0]), 'b-')
+    #  plot the functional fit on a finer grid than data points
     # title('Energy: ' + str(energy) + ' , Depth: ' + str(depth))
     # xlabel('radius [g/cm**2]')
     # ylabel('dose [MeV/(g/cm**2)]')
@@ -319,16 +315,17 @@ def _lateral_fit(left_radii, radial_dose_scaled, depth, energy):
     FWHM1 *= 10.0
     FWHM2 *= 10.0
     # Get the amplitudes of the normalized form of the double Gaussian /TPR
-    A1 = pfinal[0] * 2 * math.pi * FWHM1 ** 2
-    A2 = pfinal[2] * 2 * math.pi * FWHM2 ** 2
+    A1 = pfinal[0] * 2 * math.pi * FWHM1**2
+    A2 = pfinal[2] * 2 * math.pi * FWHM2**2
     normfactor = A1 + A2  # changed to use of the normalized amplitudes /TPR
-    if (normfactor == 0):  # check if denominator is 0
+    if normfactor == 0:  # check if denominator is 0
         #        factor = 1.0
-        print
-        "normfactor = ", normfactor, energy, depth
-        factor = -1e6  # Calculate the factor between the two amplitudes TODO: CHECK THAT THIS IS THE RIGHT ->#what's going on here?!?! /TPR
+        print("normfactor = ", normfactor, energy, depth)
+        factor = -1e6  # Calculate the factor between the two amplitudes
+        # TODO: CHECK THAT THIS IS THE RIGHT ->#what's going on here?!?! /TPR
     else:
-        factor = A2 / normfactor  # Calculate the factor between the two normalized amplitudes: factor = A2 / (A1+A2), This definition was given by Gheorghe and Uli from Marburg!
+        factor = A2 / normfactor  # Calculate the factor between the two normalized amplitudes: factor = A2 / (A1+A2),
+        # This definition was given by Gheorghe and Uli from Marburg!
 
     return FWHM1, factor, FWHM2
 
@@ -366,17 +363,16 @@ class TripDddWriter(object):
                 material='H20',
                 composition='H20',
                 density=1,
-                energy=350
-            )
+                energy=350)
 
-            with open(self.ddd_filename,'w') as ddd_file:
+            with open(self.ddd_filename, 'w') as ddd_file:
                 ddd_file.write(header)
 
             print(detector)
 
-            r_data = list(detector.x)
-            z_data = list(detector.z)
-            dose_data = detector.v
+            # r_data = list(detector.x)
+            # z_data = list(detector.z)
+            # dose_data = detector.v
 
             # for z in np.unique(z_data):
             #     print(z)
@@ -384,10 +380,12 @@ class TripDddWriter(object):
             # for i in pointsChoosen:  # where i is the index of the point choosen
             #     data1 = data[i][:]  # right side of the data
             #     radial_dose = density * data1
-            #     # radial_dose = density * concatenate((data1[::-1],data1)) # no concatenate needed when fitting D(r)*r functions /TPR
+            #     # radial_dose = density * concatenate((data1[::-1],data1))
+            #  no concatenate needed when fitting D(r)*r functions /TPR
             #     left_radii = density * arange(x_offset, x_length,
             #                                   x_binsize)  # construct a vector containing the positive radii
-            #     # radii = concatenate((-1 * left_radii[::-1],left_radii)) # arange(1,11,3) # no concatenate needed when fitting D(r)*r functions /TPR
+            #     # radii = concatenate((-1 * left_radii[::-1],left_radii)) # arange(1,11,3)
+            #  no concatenate needed when fitting D(r)*r functions /TPR
             #     radial_dose_scaled = radial_dose * left_radii  # get the D(r)*r function to be fitted /TPR
             #     fitParameters = _lateral_fit(left_radii, radial_dose_scaled, i, energy)  # Fit the lateral data
             #     lateralFits.append(fitParameters)

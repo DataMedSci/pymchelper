@@ -75,6 +75,9 @@ def main(args=sys.argv[1:]):
     parser_tripcube = subparsers.add_parser(Converters.tripcube.name, help='converts to trip98 data cube')
     add_default_options(parser_tripcube)
 
+    parser_tripddd = subparsers.add_parser(Converters.tripddd.name, help='converts to trip98 ddd file')
+    add_default_options(parser_tripddd)
+
     parser.add_argument('-V', '--version', action='version', version=pymchelper.__version__)
     parsed_args = parser.parse_args(args)
 
