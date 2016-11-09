@@ -9,18 +9,18 @@ from pymchelper.readers.fluka import FlukaBinaryReader
 from pymchelper.readers.shieldhit import SHTextReader, SHBinaryReader
 from pymchelper.shieldhit.detector.detector_type import SHDetType
 from pymchelper.shieldhit.detector.estimator_type import SHGeoType
-from pymchelper.writers.plots import SHImageWriter, SHGnuplotDataWriter, SHPlotDataWriter
-from pymchelper.writers.shieldhit import SHFortranWriter
-from pymchelper.writers.trip98 import SHTripCubeWriter
+from pymchelper.writers.plots import ImageWriter, GnuplotDataWriter, PlotDataWriter
+from pymchelper.writers.shieldhit import TxtWriter
+from pymchelper.writers.trip98 import TripCubeWriter
 
 logger = logging.getLogger(__name__)
 
 
-class SHConverters(IntEnum):
+class Converters(IntEnum):
     """
     Available converters
     """
-    standard = 0
+    txt = 0
     plotdata = 1
     gnuplot = 2
     image = 3
@@ -43,11 +43,11 @@ class Axis(IntEnum):
 
 
 _converter_mapping = {
-    SHConverters.standard: SHFortranWriter,
-    SHConverters.gnuplot: SHGnuplotDataWriter,
-    SHConverters.plotdata: SHPlotDataWriter,
-    SHConverters.image: SHImageWriter,
-    SHConverters.tripcube: SHTripCubeWriter
+    Converters.txt: TxtWriter,
+    Converters.gnuplot: GnuplotDataWriter,
+    Converters.plotdata: PlotDataWriter,
+    Converters.image: ImageWriter,
+    Converters.tripcube: TripCubeWriter
 }
 
 
@@ -129,7 +129,7 @@ class Detector:
             self._M2 += delta * (other_detector.data - self.data)  # M2 *= delta * (x - mean)
             self.error = np.sqrt(self._M2 / (self.counter - 1))    # stddev = sqrt( var / (n-1) )
 
-    def save(self, filename, conv_names=(SHConverters.standard.name,), colormap=SHImageWriter.default_colormap):
+    def save(self, filename, conv_names=(Converters.txt.name,), colormap=ImageWriter.default_colormap):
         """
         Save data to the file, using list of converters
         :param filename:
@@ -138,8 +138,8 @@ class Detector:
         :return:
         """
         for conv_name in conv_names:
-            writer = _converter_mapping[SHConverters[conv_name]](filename)
-            if SHConverters[conv_name] == SHConverters.image:
+            writer = _converter_mapping[Converters[conv_name]](filename)
+            if Converters[conv_name] == Converters.image:
                 writer.set_colormap(colormap)
             writer.write(self)
 
@@ -271,9 +271,9 @@ class Detector:
 
 def merge_list(input_file_list,
                output_file,
-               conv_names=(SHConverters.standard.name,),
+               conv_names=(Converters.txt.name,),
                nan=False,
-               colormap=SHImageWriter.default_colormap,
+               colormap=ImageWriter.default_colormap,
                nscale=1,
                error_estimate=ErrorEstimate.stderr):
     """
@@ -333,9 +333,9 @@ def merge_list(input_file_list,
 
 def merge_many(input_file_list,
                outputdir,
-               conv_names=(SHConverters.standard.name,),
+               conv_names=(Converters.txt.name,),
                nan=False,
-               colormap=SHImageWriter.default_colormap,
+               colormap=ImageWriter.default_colormap,
                nscale=1,
                error_estimate=ErrorEstimate.stderr):
     """

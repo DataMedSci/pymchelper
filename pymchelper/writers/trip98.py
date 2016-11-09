@@ -4,7 +4,7 @@ import numpy as np
 logger = logging.getLogger(__name__)
 
 
-class SHTripCubeWriter:
+class TripCubeWriter:
     def __init__(self, filename):
         self.output_corename = filename
 

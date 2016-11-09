@@ -6,7 +6,7 @@ import numpy as np
 logger = logging.getLogger(__name__)
 
 
-class SHPlotDataWriter:
+class PlotDataWriter:
     def __init__(self, filename):
         self.filename = filename
         if not self.filename.endswith(".dat"):
@@ -42,7 +42,7 @@ class SHPlotDataWriter:
         np.savetxt(self.filename, data_columns, fmt=fmt, delimiter=' ')
 
 
-class SHGnuplotDataWriter:
+class GnuplotDataWriter:
     def __init__(self, filename):
         self.data_filename = filename
         self.script_filename = filename
@@ -92,7 +92,7 @@ splot \"<awk -f addblanks.awk '{data_filename}'\" u 1:2:3 with pm3d
         x_axis_number = detector.axis_data(0, plotting_order=True).number
         xlabel = detector.units[x_axis_number]
         if detector.dimension == 1:
-            ylabel = SHImageWriter.make_label(detector.units[4], detector.title)
+            ylabel = ImageWriter.make_label(detector.units[4], detector.title)
         elif detector.dimension == 2:
             y_axis_number = detector.axis_data(1, plotting_order=True).number
             ylabel = detector.units[y_axis_number]
@@ -118,12 +118,12 @@ splot \"<awk -f addblanks.awk '{data_filename}'\" u 1:2:3 with pm3d
             script_file.write(plt_cmd.format(data_filename=self.data_filename, error_plot=err_cmd))
 
 
-class SHImageWriter:
+class ImageWriter:
     def __init__(self, filename):
         self.plot_filename = filename
         if not self.plot_filename.endswith(".png"):
             self.plot_filename += ".png"
-        self.colormap = SHImageWriter.default_colormap
+        self.colormap = ImageWriter.default_colormap
 
     default_colormap = 'gnuplot2'
 

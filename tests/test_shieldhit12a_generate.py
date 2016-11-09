@@ -39,7 +39,7 @@ class TestSHGenerated(unittest.TestCase):
 
             for add_options in ([], ["--error", "stderr"], ["--error", "stddev"], ["--error", "none"]):
                 outdir = tempfile.mkdtemp()
-                run_options = ["--converter", "plotdata", "--many", '' + os.path.join(indir, "*.bdo") + '', outdir]
+                run_options = ["plotdata", "--many", '' + os.path.join(indir, "*.bdo") + '', outdir]
                 run_options += add_options
                 logger.info("Run options " + " ".join(run_options))
                 run.main(run_options)
@@ -59,7 +59,7 @@ class TestSHGenerated(unittest.TestCase):
                 fd, outfile = tempfile.mkstemp()
                 os.close(fd)
                 os.remove(outfile)
-                run.main([infile, outfile])
+                run.main(["txt", infile, outfile])
                 saved_file = outfile
                 self.assertTrue(os.path.isfile(saved_file))
                 self.assertGreater(os.path.getsize(saved_file), 0)
@@ -78,7 +78,7 @@ class TestSHGenerated(unittest.TestCase):
                     fd, outfile = tempfile.mkstemp()
                     os.close(fd)
                     os.remove(outfile)
-                    run.main([infile, outfile, "--converter", "plotdata"] + options)
+                    run.main(["plotdata", infile, outfile] + options)
                     saved_file = outfile + ".dat"
                     self.assertTrue(os.path.isfile(saved_file))
                     self.assertGreater(os.path.getsize(saved_file), 0)
@@ -103,7 +103,7 @@ class TestSHGenerated(unittest.TestCase):
                         fd, outfile = tempfile.mkstemp()
                         os.close(fd)
                         os.remove(outfile)
-                        run.main([infile, outfile, "--converter", "image"] + options)
+                        run.main(["image", infile, outfile] + options)
                         saved_file = outfile + ".png"
                         self.assertTrue(os.path.isfile(saved_file))
                         self.assertGreater(os.path.getsize(saved_file), 0)
