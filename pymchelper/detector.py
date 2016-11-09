@@ -148,7 +148,8 @@ class Detector:
     def __str__(self):
         result = ""
         result += "data" + str(self.data[0].shape) + "\n"
-        result += "error" + str(self.error[0].shape) + "\n"
+        if self.error is not None:
+            result += "error" + str(self.error[0].shape) + "\n"
         result += "nstat = {:d}\n".format(self.nstat)
         result += "X {:g} - {:g} ({:d} items)\n".format(self.xmin, self.xmax, self.nx)
         result += "Y {:g} - {:g} ({:d} items)\n".format(self.ymin, self.ymax, self.ny)
