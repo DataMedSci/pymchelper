@@ -63,8 +63,9 @@ def main(args=sys.argv[1:]):
     add_default_options(parser_image)
     parser_image.add_argument("--colormap",
                               help='image color map, see http://matplotlib.org/users/colormaps.html '
-                                   'for list of possible options',
-                              default=ImageWriter.default_colormap, type=str)
+                                   'for list of possible options (default: ' + ImageWriter.default_colormap + ')',
+                              default=ImageWriter.default_colormap,
+                              type=str)
 
     parser_plotdata = subparsers.add_parser(Converters.plotdata.name, help='converts to gnuplot data')
     add_default_options(parser_plotdata)
@@ -81,7 +82,7 @@ def main(args=sys.argv[1:]):
                                 help='energy of the beam [MeV/amu]',
                                 type=float)
     parser_tripddd.add_argument("--ngauss",
-                                help='number of Gauss curves to fit',
+                                help='number of Gauss curves to fit (default: 2)',
                                 choices=(0, 1, 2),
                                 default=2,
                                 type=int)

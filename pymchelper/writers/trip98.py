@@ -280,37 +280,11 @@ def _lateral_fit(left_radii, radial_dose_scaled, depth, energy):
     sigma2 = 2  # guess for the deviation of the second gaussian
     sigma2 = deepcopy(sigma1) * 5.0
     # Collect the guesses in an array
-    # pname = (['a1', 'sigma1', 'a2', 'sigma2'])
     p0 = np.asarray([a1, sigma1, a2, sigma2])
     bounds = [(0, 1e6), (0, 1e6), (0, 1e6), (0, 1e6)]  # set bound for the parameters, they should be non-negative
     plsq = leastsqbound(residuals, p0, bounds, args=(y, x), maxfev=5000)  # Calculate the fit with Levenberg-Marquardt
     pfinal = plsq[0]  # final parameters
     # covar = plsq[1]  # covariance matrix
-
-    # import matplotlib
-    # matplotlib.use('Agg')
-    # import matplotlib.pyplot as plt
-
-    # ''' Plot the fit '''
-    # _mkdir('./pics/')
-    # figure
-    # xnum = len(x)
-    # xplot = np.linspace(x[0], x[xnum - 1], num=xnum * 10)
-    # plt.semilogy(x, y, 'r.', xplot, peval(xplot, mu, plsq[0]), 'b-')
-    # #  plot the functional fit on a finer grid than data points
-    # plt.title('Energy: ' + str(energy) + ' , Depth: ' + str(depth))
-    # plt.xlabel('radius [g/cm**2]')
-    # plt.xlim((0,9))
-    # plt.ylabel('dose [MeV/(g/cm**2)]')
-    # # print
-    # # depth
-    # plt.savefig('ddd_e_' + str(energy) + '_depth_' + str(depth) + '.png')
-    # # if energy == 40 and depth == 251:
-    # #     show()
-    # #     close()
-    # # else:
-    # #     close()
-    # plt.close()
 
     # Calculate the output parameters
     # FWHM = sqrt(8*log(2)) * Gaussian_Sigma

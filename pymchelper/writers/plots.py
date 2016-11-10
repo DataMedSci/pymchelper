@@ -123,9 +123,9 @@ class ImageWriter:
         self.plot_filename = filename
         if not self.plot_filename.endswith(".png"):
             self.plot_filename += ".png"
-        self.colormap = options.default_colormap
-        if self.colormap is None:
-            self.colormap = 'gnuplot2'
+        self.colormap = options.colormap
+
+    default_colormap = 'gnuplot2'
 
     @staticmethod
     def make_label(unit, name):
