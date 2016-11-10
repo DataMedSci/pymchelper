@@ -77,6 +77,14 @@ def main(args=sys.argv[1:]):
 
     parser_tripddd = subparsers.add_parser(Converters.tripddd.name, help='converts to trip98 ddd file')
     add_default_options(parser_tripddd)
+    parser_tripddd.add_argument("--energy",
+                                help='energy of the beam [MeV/amu]',
+                                type=float)
+    parser_tripddd.add_argument("--ngauss",
+                                help='number of Gauss curves to fit',
+                                choices=(0, 1, 2),
+                                default=2,
+                                type=int)
 
     parser.add_argument('-V', '--version', action='version', version=pymchelper.__version__)
     parsed_args = parser.parse_args(args)
@@ -95,16 +103,12 @@ def main(args=sys.argv[1:]):
         if not files:
             logger.error('File does not exist: ' + parsed_args.input)
 
-        colormap = None
-        if 'colormap' in dir(parsed_args):
-            colormap = parsed_args.colormap
+        parsed_args.error = ErrorEstimate[parsed_args.error]
 
         if parsed_args.many:
-            merge_many(files, parsed_args.output, [parsed_args.command], parsed_args.nan, colormap,
-                       parsed_args.nscale, ErrorEstimate[parsed_args.error])
+            merge_many(files, parsed_args.output, parsed_args)
         else:
-            merge_list(files, parsed_args.output, [parsed_args.command], parsed_args.nan, colormap,
-                       parsed_args.nscale, ErrorEstimate[parsed_args.error])
+            merge_list(files, parsed_args.output, parsed_args)
 
     return 0
 

@@ -9,7 +9,7 @@ logger = logging.getLogger(__name__)
 
 
 class SHBinaryWriter:
-    def __init__(self, filename):
+    def __init__(self, filename, options):
         self.filename = filename
 
     def write(self, detector):
@@ -27,7 +27,7 @@ class TxtWriter:
         else:
             return msh[axis_no]
 
-    def __init__(self, filename):
+    def __init__(self, filename, options):
         self.filename = filename
         self.ax = ''
         self.ay = ''

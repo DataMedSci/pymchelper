@@ -9,7 +9,7 @@ logger = logging.getLogger(__name__)
 
 
 class TripCubeWriter:
-    def __init__(self, filename):
+    def __init__(self, filename, options):
         self.output_corename = filename
 
     def write(self, detector):
@@ -272,7 +272,7 @@ def _lateral_fit(left_radii, radial_dose_scaled, depth, energy):
     # Calculate initial guesses #
     a1 = y.max()  # guess for the amplitude of the first gaussian
     mu = 0  # set the mean to zero - a guess would be: sum(x*y)/sum(y)
-    if (sum(y) == 0):  # check if denominator is 0
+    if sum(y) == 0:  # check if denominator is 0
         sigma1 = 1e5
     else:
         sigma1 = np.sqrt(abs(sum((x - mu)**2 * y) / sum(y)))  # guess for the deviation
@@ -287,25 +287,30 @@ def _lateral_fit(left_radii, radial_dose_scaled, depth, energy):
     pfinal = plsq[0]  # final parameters
     # covar = plsq[1]  # covariance matrix
 
+    # import matplotlib
+    # matplotlib.use('Agg')
+    # import matplotlib.pyplot as plt
+
     # ''' Plot the fit '''
     # _mkdir('./pics/')
     # figure
     # xnum = len(x)
-    # xplot = linspace(x[0], x[xnum - 1], num=xnum * 10)
-    # plot(x, y, 'r.', xplot, peval(xplot, mu, plsq[0]), 'b-')
-    #  plot the functional fit on a finer grid than data points
-    # title('Energy: ' + str(energy) + ' , Depth: ' + str(depth))
-    # xlabel('radius [g/cm**2]')
-    # ylabel('dose [MeV/(g/cm**2)]')
-    # print
-    # depth
-    # savefig('./pics/ddd_e_' + str(energy) + '_depth_' + str(depth) + '.png')
-    # if energy == 40 and depth == 251:
-    #     show()
-    #     close()
-    # else:
-    #     close()
-    # close()
+    # xplot = np.linspace(x[0], x[xnum - 1], num=xnum * 10)
+    # plt.semilogy(x, y, 'r.', xplot, peval(xplot, mu, plsq[0]), 'b-')
+    # #  plot the functional fit on a finer grid than data points
+    # plt.title('Energy: ' + str(energy) + ' , Depth: ' + str(depth))
+    # plt.xlabel('radius [g/cm**2]')
+    # plt.xlim((0,9))
+    # plt.ylabel('dose [MeV/(g/cm**2)]')
+    # # print
+    # # depth
+    # plt.savefig('ddd_e_' + str(energy) + '_depth_' + str(depth) + '.png')
+    # # if energy == 40 and depth == 251:
+    # #     show()
+    # #     close()
+    # # else:
+    # #     close()
+    # plt.close()
 
     # Calculate the output parameters
     # FWHM = sqrt(8*log(2)) * Gaussian_Sigma
@@ -344,8 +349,10 @@ class TripDddWriter(object):
 !ddd
 """
 
-    def __init__(self, filename):
+    def __init__(self, filename, options):
         self.ddd_filename = filename
+        self.energy = options.energy
+        self.ngauss = options.ngauss
         if not self.ddd_filename.endswith(".ddd"):
             self.ddd_filename += ".ddd"
 
@@ -370,12 +377,57 @@ class TripDddWriter(object):
 
             print(detector)
 
-            # r_data = list(detector.x)
-            # z_data = list(detector.z)
-            # dose_data = detector.v
+            r_data = np.asarray(list(detector.x))
+            z_data = np.asarray(list(detector.z))
+            dose_data = np.asarray(detector.v)
 
-            # for z in np.unique(z_data):
-            #     print(z)
+            fwhm1_data = []
+            fwhm2_data = []
+            weight_data = []
+            z_plot = []
+
+            for z in np.unique(z_data):
+                if z < 100:
+                    print(z)
+                    r_3 = r_data[z_data == z]
+                    d_3 = dose_data[z_data == z]
+
+                    # print(r_3)
+                    # print(d_3)
+
+                    radial_dose = d_3 * r_3
+                    fitParameters = _lateral_fit(r_3, radial_dose, z, 70)
+                    FWHM1, factor, FWHM2 = fitParameters
+                    fwhm1_data.append(FWHM1)
+                    fwhm2_data.append(FWHM2)
+                    weight_data.append(factor)
+                    z_plot.append(z)
+                    print(fitParameters)
+
+            import matplotlib
+            matplotlib.use('Agg')
+            import matplotlib.pyplot as plt
+
+            plt.plot(z_plot, fwhm1_data, 'r')
+            plt.xlabel('z [g/cm**2]')
+            plt.ylabel('FWHM1 [g/cm**2]')
+            plt.savefig('ddd_fwhm1.png')
+            plt.close()
+
+            plt.plot(z_plot, fwhm2_data, 'g')
+            plt.xlabel('z [g/cm**2]')
+            plt.ylabel('FWHM2 [g/cm**2]')
+            plt.savefig('ddd_fwhm2.png')
+            plt.close()
+
+            print(z_data)
+            print(weight_data)
+
+            plt.plot(z_plot, weight_data, 'b')
+            plt.xlabel('z [g/cm**2]')
+            plt.ylabel('weight')
+            plt.savefig('ddd_weight.png')
+            plt.close()
 
             # for i in pointsChoosen:  # where i is the index of the point choosen
             #     data1 = data[i][:]  # right side of the data

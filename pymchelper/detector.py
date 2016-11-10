@@ -131,19 +131,15 @@ class Detector:
             self._M2 += delta * (other_detector.data - self.data)  # M2 *= delta * (x - mean)
             self.error = np.sqrt(self._M2 / (self.counter - 1))    # stddev = sqrt( var / (n-1) )
 
-    def save(self, filename, conv_names=(Converters.txt.name,), colormap=ImageWriter.default_colormap):
+    def save(self, filename, options):
         """
         Save data to the file, using list of converters
         :param filename:
-        :param conv_names:
-        :param colormap:
+        :param options:
         :return:
         """
-        for conv_name in conv_names:
-            writer = _converter_mapping[Converters[conv_name]](filename)
-            if Converters[conv_name] == Converters.image:
-                writer.set_colormap(colormap)
-            writer.write(self)
+        writer = _converter_mapping[Converters[options.command]](filename, options)
+        writer.write(self)
 
     def __str__(self):
         result = ""
@@ -274,26 +270,18 @@ class Detector:
 
 def merge_list(input_file_list,
                output_file,
-               conv_names=(Converters.txt.name,),
-               nan=False,
-               colormap=ImageWriter.default_colormap,
-               nscale=1,
-               error_estimate=ErrorEstimate.stderr):
+               options):
     """
     Takes set of input file names, containing data from the same estimator.
     All input files are read and data is filled (and summed) into detector structure.
     Finally data stored in detector is averaged and saved to output file.
     :param input_file_list: list of input files
     :param output_file: name of output file
-    :param conv_names: list of converter names
-    :param nan: if true, invalid values (NaN) will be excluded from averaging
-    :param colormap: name of colormap, valid only for image converter
-    :param nscale: number of particles to scale
-    :param error_estimate: type of error estimate
+    :param options: list of parsed options
     :return: none
     """
     first = Detector()
-    first.read(input_file_list[0], nscale)
+    first.read(input_file_list[0], options.nscale)
 
     other_detectors = []
 
@@ -302,45 +290,41 @@ def merge_list(input_file_list,
     #  - averaging is done ignoring NaNs (then numpy nanvar function is used)
     #  - processing only one file
     #  - user requested not to include errors
-    if not nan and len(input_file_list) > 1 and error_estimate != ErrorEstimate.none:
+    if not options.nan and len(input_file_list) > 1 and options.error != ErrorEstimate.none:
         first._M2 = np.zeros_like(first.data)
 
     # set errors to zero also if reading single file
-    if error_estimate != ErrorEstimate.none:
+    if options.error != ErrorEstimate.none:
         first.error = np.zeros_like(first.data)
 
     # loop over second and next files, if present
     for file in input_file_list[1:]:
         next_one = Detector()
-        next_one.read(file, nscale)
-        if nan:
+        next_one.read(file, options.nscale)
+        if options.nan:
             other_detectors.append(next_one)  # read all detector files into memory
         else:
-            first.average_with_other(other_detector=next_one, error_estimate=error_estimate)
+            first.average_with_other(other_detector=next_one, error_estimate=options.error)
 
     # user requested averaging ignoring nan and more than one file are present
-    if other_detectors and nan:
-        first.average_with_nan(other_detectors, error_estimate=error_estimate)
+    if other_detectors and options.nan:
+        first.average_with_nan(other_detectors, error_estimate=options.error)
 
     # up to now first.error stores standard deviation
     # if user requested standard error then we calculate it as:
     #   stderr = stddev / sqrt(n)
-    if len(input_file_list) > 1 and error_estimate == ErrorEstimate.stderr:
+    if len(input_file_list) > 1 and options.error == ErrorEstimate.stderr:
         first.error /= np.float64(first.counter)
 
     if output_file is None:
         output_file = input_file_list[0][:-3] + "txt"
 
-    first.save(output_file, conv_names, colormap)
+    first.save(output_file, options)
 
 
 def merge_many(input_file_list,
                outputdir,
-               conv_names=(Converters.txt.name,),
-               nan=False,
-               colormap=ImageWriter.default_colormap,
-               nscale=1,
-               error_estimate=ErrorEstimate.stderr):
+               options):
     """
     Takes set of input file names, belonging to possibly different estimators.
     Input files are grouped according to the estimators and for each group
@@ -348,11 +332,7 @@ def merge_many(input_file_list,
     Output file name is automatically generated.
     :param input_file_list: list of input files
     :param outputdir: output directory
-    :param conv_names: list of converter names
-    :param nan: if true, invalid values (NaN) will be excluded from averaging
-    :param colormap: name of colormap, valid only for image converter
-    :param nscale: number of particles to scale
-    :param error_estimate: type of error estimate
+    :param options: list of parsed options
     :return: none
     """
     core_names_dict = defaultdict(list)
@@ -373,4 +353,4 @@ def merge_many(input_file_list,
         else:
             output_file = os.path.join(outputdir, core_basename + ".txt")
         logger.debug("Setting output core name " + output_file)
-        merge_list(group_with_same_core, output_file, conv_names, nan, colormap, nscale, error_estimate)
+        merge_list(group_with_same_core, output_file, options)
