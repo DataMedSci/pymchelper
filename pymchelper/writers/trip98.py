@@ -2,6 +2,8 @@ import time
 import logging
 import math
 from copy import deepcopy
+
+import scipy.stats
 from scipy.optimize import leastsq
 import numpy as np
 
@@ -344,12 +346,7 @@ class TripDddWriter(object):
                 material='H20',
                 composition='H20',
                 density=1,
-                energy=350)
-
-            with open(self.ddd_filename, 'w') as ddd_file:
-                ddd_file.write(header)
-
-            print(detector)
+                energy=self.energy)
 
             r_data = np.asarray(list(detector.x))
             z_data = np.asarray(list(detector.z))
@@ -359,24 +356,34 @@ class TripDddWriter(object):
             fwhm2_data = []
             weight_data = []
             z_plot = []
+            pval_data = []
 
-            for z in np.unique(z_data):
-                if z < 100:
-                    print(z)
-                    r_3 = r_data[z_data == z]
-                    d_3 = dose_data[z_data == z]
+            if self.ngauss == 2:
 
-                    # print(r_3)
-                    # print(d_3)
+                for z in np.unique(z_data):
+                    if z < 100:
+                        print(z)
+                        r_3 = r_data[z_data == z]
+                        d_3 = dose_data[z_data == z]
 
-                    radial_dose = d_3 * r_3
-                    fitParameters = _lateral_fit(r_3, radial_dose, z, 70)
-                    FWHM1, factor, FWHM2 = fitParameters
-                    fwhm1_data.append(FWHM1)
-                    fwhm2_data.append(FWHM2)
-                    weight_data.append(factor)
-                    z_plot.append(z)
-                    print(fitParameters)
+                        radial_dose = d_3 * r_3
+                        fitParameters = _lateral_fit(r_3, radial_dose, z, 70)
+                        FWHM1, factor, FWHM2 = fitParameters
+
+                        if FWHM2 >= 4*FWHM1 or FWHM1 < 1e3:
+                            fwhm1_data.append(FWHM1)
+                            fwhm2_data.append(FWHM2)
+                            weight_data.append(factor)
+                            z_plot.append(z)
+                            print(fitParameters)
+
+                            w, pval = scipy.stats.shapiro(d_3)
+                            pval_data.append(pval)
+
+            with open(self.ddd_filename, 'w') as ddd_file:
+                ddd_file.write(header)
+                for e, fwhm1, weight, fwhm2 in zip(weight_data, fwhm1_data, weight_data, fwhm2_data):
+                    ddd_file.write('??? {:g} {:g} {:g}\n'.format(fwhm1, weight, fwhm2))
 
             import matplotlib
             matplotlib.use('Agg')
@@ -394,25 +401,14 @@ class TripDddWriter(object):
             plt.savefig('ddd_fwhm2.png')
             plt.close()
 
-            print(z_data)
-            print(weight_data)
-
             plt.plot(z_plot, weight_data, 'b')
             plt.xlabel('z [g/cm**2]')
             plt.ylabel('weight')
             plt.savefig('ddd_weight.png')
             plt.close()
 
-            # for i in pointsChoosen:  # where i is the index of the point choosen
-            #     data1 = data[i][:]  # right side of the data
-            #     radial_dose = density * data1
-            #     # radial_dose = density * concatenate((data1[::-1],data1))
-            #  no concatenate needed when fitting D(r)*r functions /TPR
-            #     left_radii = density * arange(x_offset, x_length,
-            #                                   x_binsize)  # construct a vector containing the positive radii
-            #     # radii = concatenate((-1 * left_radii[::-1],left_radii)) # arange(1,11,3)
-            #  no concatenate needed when fitting D(r)*r functions /TPR
-            #     radial_dose_scaled = radial_dose * left_radii  # get the D(r)*r function to be fitted /TPR
-            #     fitParameters = _lateral_fit(left_radii, radial_dose_scaled, i, energy)  # Fit the lateral data
-            #     lateralFits.append(fitParameters)
-            #
+            plt.plot(z_plot, pval_data, 'b')
+            plt.xlabel('z [g/cm**2]')
+            plt.ylabel('pval')
+            plt.savefig('ddd_pval.png')
+            plt.close()
