@@ -3,6 +3,7 @@ import logging
 import math
 from copy import deepcopy
 
+from matplotlib.colors import LogNorm
 from scipy.optimize import leastsq
 import numpy as np
 
@@ -72,177 +73,6 @@ class TripCubeWriter:
             raise Exception("Illegal detector for tripcube.")
 
 
-"""
-Constrained multivariate Levenberg-Marquardt optimization
-"""
-
-
-def internal2external_grad(xi, bounds):
-    """
-    Calculate the internal to external gradiant
-
-    Calculates the partial of external over internal
-
-    """
-
-    ge = np.empty_like(xi)
-
-    for i, (v, bound) in enumerate(zip(xi, bounds)):
-
-        a = bound[0]  # minimum
-        b = bound[1]  # maximum
-
-        if a is None and b is None:  # No constraints
-            ge[i] = 1.0
-
-        elif b is None:  # only min
-            ge[i] = v / np.sqrt(v**2 + 1)
-
-        elif a is None:  # only max
-            ge[i] = -v / np.sqrt(v**2 + 1)
-
-        else:  # both min and max
-            ge[i] = (b - a) * np.cos(v) / 2.
-
-    return ge
-
-
-def i2e_cov_x(xi, bounds, cov_x):
-    grad = internal2external_grad(xi, bounds)
-    grad = grad = np.atleast_2d(grad)
-    return np.dot(grad.T, grad) * cov_x
-
-
-def internal2external(xi, bounds):
-    """ Convert a series of internal variables to external variables"""
-
-    xe = np.empty_like(xi)
-
-    for i, (v, bound) in enumerate(zip(xi, bounds)):
-
-        a = bound[0]  # minimum
-        b = bound[1]  # maximum
-
-        if a is None and b is None:  # No constraints
-            xe[i] = v
-
-        elif b is None:  # only min
-            xe[i] = a - 1. + np.sqrt(v**2. + 1.)
-
-        elif a is None:  # only max
-            xe[i] = b + 1. - np.sqrt(v**2. + 1.)
-
-        else:  # both min and max
-            xe[i] = a + ((b - a) / 2.) * (np.sin(v) + 1.)
-
-    return xe
-
-
-def external2internal(xe, bounds):
-    """ Convert a series of external variables to internal variables"""
-
-    xi = np.empty_like(xe)
-
-    for i, (v, bound) in enumerate(zip(xe, bounds)):
-
-        a = bound[0]  # minimum
-        b = bound[1]  # maximum
-
-        if a is None and b is None:  # No constraints
-            xi[i] = v
-
-        elif b is None:  # only min
-            xi[i] = np.sqrt((v - a + 1.)**2. - 1)
-
-        elif a is None:  # only max
-            xi[i] = np.sqrt((b - v + 1.)**2. - 1)
-
-        else:  # both min and max
-            xi[i] = np.arcsin((2. * (v - a) / (b - a)) - 1.)
-
-    return xi
-
-
-def err(p, bounds, efunc, args):
-    pe = internal2external(p, bounds)  # convert to external variables
-    return efunc(pe, *args)
-
-
-def calc_cov_x(infodic, p):
-    """
-    Calculate cov_x from fjac, ipvt and p as is done in leastsq
-    """
-
-    fjac = infodic['fjac']
-    ipvt = infodic['ipvt']
-    n = len(p)
-
-    # adapted from leastsq function in scipy/optimize/minpack.py
-    perm = np.take(np.eye(n), ipvt - 1, 0)
-    r = np.triu(np.transpose(fjac)[:n, :])
-    R = np.dot(r, perm)
-    try:
-        cov_x = np.linalg.inv(np.dot(np.transpose(R), R))
-    except np.linalg.LinAlgError:
-        cov_x = None
-    return cov_x
-
-
-def leastsqbound(func, x0, bounds, args=(), **kw):
-    """
-    Constrained multivariant Levenberg-Marquard optimization
-
-    Minimize the sum of squares of a given function using the
-    Levenberg-Marquard algorithm. Contraints on parameters are inforced using
-    variable transformations as described in the MINUIT User's Guide by
-    Fred James and Matthias Winkler.
-
-    Parameters:
-
-    * func      functions to call for optimization.
-    * x0        Starting estimate for the minimization.
-    * bounds    (min,max) pair for each element of x, defining the bounds on
-                that parameter.  Use None for one of min or max when there is
-                no bound in that direction.
-    * args      Any extra arguments to func are places in this tuple.
-
-    Returns: (x,{cov_x,infodict,mesg},ier)
-
-    Return is described in the scipy.optimize.leastsq function.  x and con_v
-    are corrected to take into account the parameter transformation, infodic
-    is not corrected.
-
-    Additional keyword arguments are passed directly to the
-    scipy.optimize.leastsq algorithm.
-
-    """
-    # check for full output
-    if "full_output" in kw and kw["full_output"]:
-        full = True
-    else:
-        full = False
-
-    # convert x0 to internal variables
-    i0 = external2internal(x0, bounds)
-
-    # perfrom unconstrained optimization using internal variables
-    r = leastsq(err, i0, args=(bounds, func, args), **kw)
-
-    # unpack return convert to external variables and return
-    if full:
-        xi, cov_xi, infodic, mesg, ier = r
-        xe = internal2external(xi, bounds)
-        cov_xe = i2e_cov_x(xi, bounds, cov_xi)
-        # XXX correct infodic 'fjac','ipvt', and 'qtf'
-        return xe, cov_xe, infodic, mesg, ier
-
-    else:
-        xi, ier = r
-        xe = internal2external(xi, bounds)
-        return xe, ier
-
-
-# Method fitting the lateral dose distribution
 def _lateral_fit(left_radii, radial_dose_scaled, depth, energy):
     """
     Fitting for lateral dose distribution
@@ -258,6 +88,162 @@ def _lateral_fit(left_radii, radial_dose_scaled, depth, energy):
     Returns: (x,{cov_x,infodict,mesg},ier)
 
     """
+
+    def internal2external_grad(xi, bounds):
+        """
+        Calculate the internal to external gradiant
+        Calculates the partial of external over internal
+        """
+
+        ge = np.empty_like(xi)
+
+        for i, (v, bound) in enumerate(zip(xi, bounds)):
+
+            a = bound[0]  # minimum
+            b = bound[1]  # maximum
+
+            if a is None and b is None:  # No constraints
+                ge[i] = 1.0
+
+            elif b is None:  # only min
+                ge[i] = v / np.sqrt(v**2 + 1)
+
+            elif a is None:  # only max
+                ge[i] = -v / np.sqrt(v**2 + 1)
+
+            else:  # both min and max
+                ge[i] = (b - a) * np.cos(v) / 2.
+
+        return ge
+
+    def i2e_cov_x(xi, bounds, cov_x):
+        grad = internal2external_grad(xi, bounds)
+        grad = grad = np.atleast_2d(grad)
+        return np.dot(grad.T, grad) * cov_x
+
+    def internal2external(xi, bounds):
+        """ Convert a series of internal variables to external variables"""
+
+        xe = np.empty_like(xi)
+
+        for i, (v, bound) in enumerate(zip(xi, bounds)):
+
+            a = bound[0]  # minimum
+            b = bound[1]  # maximum
+
+            if a is None and b is None:  # No constraints
+                xe[i] = v
+
+            elif b is None:  # only min
+                xe[i] = a - 1. + np.sqrt(v**2. + 1.)
+
+            elif a is None:  # only max
+                xe[i] = b + 1. - np.sqrt(v**2. + 1.)
+
+            else:  # both min and max
+                xe[i] = a + ((b - a) / 2.) * (np.sin(v) + 1.)
+
+        return xe
+
+    def external2internal(xe, bounds):
+        """ Convert a series of external variables to internal variables"""
+
+        xi = np.empty_like(xe)
+
+        for i, (v, bound) in enumerate(zip(xe, bounds)):
+
+            a = bound[0]  # minimum
+            b = bound[1]  # maximum
+
+            if a is None and b is None:  # No constraints
+                xi[i] = v
+
+            elif b is None:  # only min
+                xi[i] = np.sqrt((v - a + 1.)**2. - 1)
+
+            elif a is None:  # only max
+                xi[i] = np.sqrt((b - v + 1.)**2. - 1)
+
+            else:  # both min and max
+                xi[i] = np.arcsin((2. * (v - a) / (b - a)) - 1.)
+
+        return xi
+
+    def err(p, bounds, efunc, args):
+        pe = internal2external(p, bounds)  # convert to external variables
+        return efunc(pe, *args)
+
+    def calc_cov_x(infodic, p):
+        """
+        Calculate cov_x from fjac, ipvt and p as is done in leastsq
+        """
+
+        fjac = infodic['fjac']
+        ipvt = infodic['ipvt']
+        n = len(p)
+
+        # adapted from leastsq function in scipy/optimize/minpack.py
+        perm = np.take(np.eye(n), ipvt - 1, 0)
+        r = np.triu(np.transpose(fjac)[:n, :])
+        R = np.dot(r, perm)
+        try:
+            cov_x = np.linalg.inv(np.dot(np.transpose(R), R))
+        except np.linalg.LinAlgError:
+            cov_x = None
+        return cov_x
+
+    def leastsqbound(func, x0, bounds, args=(), **kw):
+        """
+        Constrained multivariant Levenberg-Marquard optimization
+
+        Minimize the sum of squares of a given function using the
+        Levenberg-Marquard algorithm. Contraints on parameters are inforced using
+        variable transformations as described in the MINUIT User's Guide by
+        Fred James and Matthias Winkler.
+
+        Parameters:
+
+        * func      functions to call for optimization.
+        * x0        Starting estimate for the minimization.
+        * bounds    (min,max) pair for each element of x, defining the bounds on
+                    that parameter.  Use None for one of min or max when there is
+                    no bound in that direction.
+        * args      Any extra arguments to func are places in this tuple.
+
+        Returns: (x,{cov_x,infodict,mesg},ier)
+
+        Return is described in the scipy.optimize.leastsq function.  x and con_v
+        are corrected to take into account the parameter transformation, infodic
+        is not corrected.
+
+        Additional keyword arguments are passed directly to the
+        scipy.optimize.leastsq algorithm.
+
+        """
+        # check for full output
+        if "full_output" in kw and kw["full_output"]:
+            full = True
+        else:
+            full = False
+
+        # convert x0 to internal variables
+        i0 = external2internal(x0, bounds)
+
+        # perfrom unconstrained optimization using internal variables
+        r = leastsq(err, i0, args=(bounds, func, args), **kw)
+
+        # unpack return convert to external variables and return
+        if full:
+            xi, cov_xi, infodic, mesg, ier = r
+            xe = internal2external(xi, bounds)
+            cov_xe = i2e_cov_x(xi, bounds, cov_xi)
+            # XXX correct infodic 'fjac','ipvt', and 'qtf'
+            return xe, cov_xe, infodic, mesg, ier
+
+        else:
+            xi, ier = r
+            xe = internal2external(xi, bounds)
+            return xe, ier
 
     def residuals(p, y, x):  # objective function for minimization (vector function)
         err = y - peval(x, mu, p)
@@ -289,14 +275,14 @@ def _lateral_fit(left_radii, radial_dose_scaled, depth, energy):
 
     # Calculate the output parameters
     # FWHM = sqrt(8*log(2)) * Gaussian_Sigma
-    FWHM1 = 2.354820045 * pfinal[1]  # Full Width at Half Maximum for the first Gaussian
-    FWHM2 = 2.354820045 * pfinal[3]  # Full Width at Half Maximum for the second Gaussian
+    fwhm1 = 2.354820045 * pfinal[1]  # Full Width at Half Maximum for the first Gaussian
+    fwhm2 = 2.354820045 * pfinal[3]  # Full Width at Half Maximum for the second Gaussian
     # Scale from cm to mm according to Gheorghe from Marburg
-    FWHM1 *= 10.0
-    FWHM2 *= 10.0
+    # fwhm1 *= 10.0
+    # fwhm2 *= 10.0
     # Get the amplitudes of the normalized form of the double Gaussian /TPR
-    A1 = pfinal[0] * 2 * math.pi * FWHM1**2
-    A2 = pfinal[2] * 2 * math.pi * FWHM2**2
+    A1 = pfinal[0] * 2 * math.pi * fwhm1**2
+    A2 = pfinal[2] * 2 * math.pi * fwhm2**2
     normfactor = A1 + A2  # changed to use of the normalized amplitudes /TPR
     if normfactor == 0:  # check if denominator is 0
         #        factor = 1.0
@@ -307,7 +293,7 @@ def _lateral_fit(left_radii, radial_dose_scaled, depth, energy):
         factor = A2 / normfactor  # Calculate the factor between the two normalized amplitudes: factor = A2 / (A1+A2),
         # This definition was given by Gheorghe and Uli from Marburg!
 
-    return FWHM1, factor, FWHM2
+    return fwhm1, factor, fwhm2
 
 
 class TripDddWriter(object):
@@ -325,17 +311,13 @@ class TripDddWriter(object):
 """
 
     def __init__(self, filename, options):
+        import matplotlib
+        matplotlib.use('Agg')
         self.ddd_filename = filename
         self.energy = options.energy
         self.ngauss = options.ngauss
         if not self.ddd_filename.endswith(".ddd"):
             self.ddd_filename += ".ddd"
-
-    def _extract_data(self, detector):
-        self.r_data_1d = np.asarray(list(detector.x)[0:detector.nx])
-        self.z_data_1d = np.asarray(list(detector.z)[0:detector.nz * detector.nx:detector.nx])
-        self.dose_data_2d = np.array(detector.v).reshape(detector.nz, detector.nx)
-        self.dose_data_1d = np.sum(self.dose_data_2d, axis=1)
 
     def write(self, detector):
         from pymchelper.shieldhit.detector.detector_type import SHDetType
@@ -360,27 +342,36 @@ class TripDddWriter(object):
             weight_data = []
 
             print("fitting...")
+            threshold = 3e-4
 
+            cum_dose = self._cumulative_dose()
+            cum_dose_left = self._cumulative_dose_left(cum_dose)
+
+            thr_ind = cum_dose_left.size - np.searchsorted(cum_dose_left[::-1], threshold) - 1
+            z_fitting_1d = self.z_data_1d[:thr_ind]
+            dose_fitting_1d = self.dose_data_1d[:thr_ind]
+
+            r_fitting_2d, z_fitting_2d = np.meshgrid(self.r_data_1d, z_fitting_1d)
+            dose_fitting_2d = self.dose_data_2d[0:thr_ind]
+
+            print("pre-plotting...")
+            self._pre_fitting_plots(
+                cum_dose_left=cum_dose_left,
+                z_fitting_1d=z_fitting_1d,
+                dose_fitting_1d=dose_fitting_1d,
+                threshold=threshold,
+                zmax=z_fitting_1d[-1])
+
+            self._plot_2d_map(z_fitting_2d, r_fitting_2d, dose_fitting_2d, z_fitting_1d, None, None)
+
+            print("fitting...")
             if self.ngauss == 2:
-
-                cumsum = np.cumsum(self.dose_data_1d)
-                cumsum /= np.sum(self.dose_data_1d)
-
-                cumsum_gr = np.array(cumsum)
-                cumsum *= -1.0
-                cumsum += 1.0
-
-                threshold = 1e-4
-
-                thr_ind = cumsum.size - np.searchsorted(cumsum[::-1], threshold) - 1
-                z_fitting = self.z_data_1d[:thr_ind]
-
-                for z, dose_at_z in zip(z_fitting, self.dose_data_2d[:thr_ind]):
+                for z, dose_at_z in zip(z_fitting_1d, self.dose_data_2d[:thr_ind]):
                     r_fitting = self.r_data_1d[dose_at_z > 0]
-                    dose_fitting = dose_at_z[dose_at_z > 0]
+                    dose_fitting_1d_positive = dose_at_z[dose_at_z > 0]
 
-                    radial_dose = dose_fitting * r_fitting
-                    fitParameters = _lateral_fit(r_fitting, radial_dose, z, 70)
+                    radial_dose = dose_fitting_1d_positive * r_fitting
+                    fitParameters = _lateral_fit(r_fitting, radial_dose, z, self.energy)
                     fwhm1, factor, fwhm2 = fitParameters
                     fwhm1_data.append(fwhm1)
                     fwhm2_data.append(fwhm2)
@@ -392,68 +383,123 @@ class TripDddWriter(object):
                 for e, fwhm1, weight, fwhm2 in zip(weight_data, fwhm1_data, weight_data, fwhm2_data):
                     ddd_file.write('??? {:g} {:g} {:g}\n'.format(fwhm1, weight, fwhm2))
 
-            print("plotting...")
-            import matplotlib
-            matplotlib.use('Agg')
-            import matplotlib.pyplot as plt
+            print("post-plotting...")
+            self._post_fitting_plots(z_fitting_1d, fwhm1_data, fwhm2_data, weight_data)
+            self._plot_2d_map(z_fitting_2d, r_fitting_2d, dose_fitting_2d,
+                              z_fitting_1d, fwhm1_data, fwhm2_data,
+                              suffix='_fwhm')
 
-            plt.plot(z_fitting, fwhm1_data, 'r')
-            plt.xlabel('z [g/cm**2]')
-            plt.ylabel('FWHM1 [g/cm**2]')
-            plt.savefig('ddd_fwhm1.png')
-            plt.close()
+    def _extract_data(self, detector):
+        self.r_data_2d = np.array(list(detector.x)).reshape(detector.nz, detector.nx)
+        self.z_data_2d = np.array(list(detector.z)).reshape(detector.nz, detector.nx)
+        self.dose_data_2d = np.array(detector.v).reshape(detector.nz, detector.nx)
 
-            plt.plot(z_fitting, fwhm2_data, 'g')
-            plt.xlabel('z [g/cm**2]')
-            plt.ylabel('FWHM2 [g/cm**2]')
-            plt.savefig('ddd_fwhm2.png')
-            plt.close()
+        self.r_data_1d = self.r_data_2d[0]
+        self.z_data_1d = np.asarray(list(detector.z)[0:detector.nz * detector.nx:detector.nx])
+        self.dose_data_1d = np.sum(self.dose_data_2d, axis=1)
 
-            plt.plot(z_fitting, weight_data, 'b')
-            plt.xlabel('z [g/cm**2]')
-            plt.ylabel('weight')
-            plt.savefig('ddd_weight.png')
-            plt.close()
+    def _cumulative_dose(self):
+        cumsum = np.cumsum(self.dose_data_1d)
+        cumsum /= np.sum(self.dose_data_1d)
+        return cumsum
 
-            plt.plot(z_fitting, self.dose_data_1d[0:thr_ind], 'b')
-            plt.xlabel('z [g/cm**2]')
-            plt.ylabel('dose')
-            plt.savefig('ddd_dose.png')
-            plt.close()
+    def _cumulative_dose_left(self, cumsum):
+        cum_dose_left = np.array(cumsum)
+        cum_dose_left *= -1.0
+        cum_dose_left += 1.0
+        return cum_dose_left
 
-            plt.semilogy(z_fitting, self.dose_data_1d[0:thr_ind], 'b')
-            plt.xlabel('z [g/cm**2]')
-            plt.ylabel('dose')
-            plt.savefig('ddd_dose_log.png')
-            plt.close()
+    def _plot_2d_map(self,
+                     z_fitting_2d,
+                     r_fitting_2d,
+                     dose_fitting_2d,
+                     z_fitting_1d=None,
+                     fwhm1_data=None,
+                     fwhm2_data=None,
+                     suffix=''):
+        import matplotlib.pyplot as plt
 
-            plt.plot(self.z_data_1d, self.dose_data_1d, 'b')
-            plt.xlabel('z [g/cm**2]')
-            plt.ylabel('dose')
-            plt.savefig('ddd_dose_all.png')
-            plt.close()
+        prefix = 'ddd_{:3.1f}MeV_'.format(self.energy)
+        plt.pcolormesh(z_fitting_2d, r_fitting_2d, dose_fitting_2d, norm=LogNorm(), cmap='gnuplot2', label='dose')
+        cbar = plt.colorbar()
+        cbar.set_label("dose [a.u.]", rotation=270, verticalalignment='bottom')
+        if z_fitting_1d is not None and fwhm1_data is not None:
+            plt.plot(z_fitting_1d, fwhm1_data, label="fwhm1")
+        if z_fitting_1d is not None and fwhm2_data is not None:
+            plt.plot(z_fitting_1d, fwhm2_data, label="fwhm2")
+        plt.legend(loc=0)
+        plt.xlabel("z [cm]")
+        plt.ylabel("r [cm]")
+        plt.xlim((z_fitting_2d.min(), z_fitting_2d.max()))
+        if fwhm1_data is not None and fwhm2_data is not None:
+            plt.ylim((r_fitting_2d.min(), max(max(fwhm1_data), max(fwhm2_data))))
+        plt.clim((1e-8 * dose_fitting_2d.max(), dose_fitting_2d.max()))
+        plt.savefig(prefix + 'dosemap' + suffix + '.png')
+        plt.yscale('log')
+        plt.savefig(prefix + 'dosemap_log' + suffix + '.png')
+        plt.close()
 
-            plt.semilogy(self.z_data_1d, self.dose_data_1d, 'b')
-            plt.xlabel('z [g/cm**2]')
-            plt.ylabel('dose')
-            plt.savefig('ddd_dose_all_log.png')
-            plt.close()
+    def _pre_fitting_plots(self, cum_dose_left, z_fitting_1d, dose_fitting_1d, threshold, zmax):
+        import matplotlib.pyplot as plt
+        prefix = 'ddd_{:3.1f}MeV_'.format(self.energy)
 
-            plt.semilogy(self.z_data_1d, cumsum, 'b')
-            plt.xlabel('z [g/cm**2]')
-            plt.ylabel('dose')
-            plt.axhline(y=threshold)
-            plt.savefig('ddd_cs1.png')
-            plt.close()
+        plt.plot(self.z_data_1d, self.dose_data_1d, color='blue', label='dose')
+        plt.axvspan(
+            0,
+            zmax,
+            alpha=0.1,
+            color='green',
+            label="fitting area, covers {:g} % of dose".format(100.0 * (1 - threshold)))
+        plt.legend(loc=0)
+        plt.xlabel('z [cm]')
+        plt.ylabel('dose [a.u.]')
+        plt.savefig(prefix + 'dose_all.png')
+        plt.yscale('log')
+        plt.savefig(prefix + 'all_log.png')
+        plt.close()
 
-            plt.plot(self.z_data_1d, cumsum, 'b')
-            plt.xlabel('z [g/cm**2]')
-            plt.ylabel('dose')
-            plt.savefig('ddd_cs2.png')
-            plt.close()
+        bp_max_z_pos = self.z_data_1d[self.dose_data_1d == self.dose_data_1d.max()]
 
-            plt.plot(self.z_data_1d, cumsum_gr, 'b')
-            plt.xlabel('z [g/cm**2]')
-            plt.ylabel('dose')
-            plt.savefig('ddd_cs_gr.png')
-            plt.close()
+        plt.semilogy(self.z_data_1d, cum_dose_left, color='blue', label="cumulative missing dose")
+        plt.axvspan(
+            0,
+            zmax,
+            alpha=0.1,
+            color='green',
+            label="fitting area, covers {:g} % of dose".format(100.0 * (1 - threshold)))
+        plt.axhline(threshold, color='black', label='threshold {:g}'.format(threshold))
+        plt.axvline(bp_max_z_pos, color='red', label='BP max')
+        plt.legend(loc=0)
+        plt.xlabel('z [cm]')
+        plt.ylabel('fraction of total dose deposited behind z')
+        plt.savefig(prefix + 'dose_frac.png')
+        plt.close()
+
+        plt.plot(z_fitting_1d, dose_fitting_1d, 'b')
+        plt.xlabel('z [cm]')
+        plt.ylabel('dose [a.u.]')
+        plt.savefig(prefix + 'dose.png')
+        plt.yscale('log')
+        plt.savefig(prefix + 'dose_log.png')
+        plt.close()
+
+    def _post_fitting_plots(self, z_fitting_1d, fwhm1_data, fwhm2_data, weight_data):
+        import matplotlib.pyplot as plt
+        prefix = 'ddd_{:3.1f}MeV_'.format(self.energy)
+
+        fig, ax1 = plt.subplots()
+        ax2 = ax1.twinx()
+        lns1 = ax1.plot(z_fitting_1d, fwhm1_data, 'r', label='fwhm1')
+        lns2 = ax1.plot(z_fitting_1d, fwhm2_data, 'g', label='fwhm2')
+        lns3 = ax2.plot(z_fitting_1d, weight_data, 'b', label='weight')
+        ax1.set_xlabel('z [cm]')
+        ax1.set_ylabel('FWHM1 [cm]')
+        ax2.set_ylabel('weight of FWHM1')
+
+        # added these three lines
+        lns = lns1 + lns2 + lns3
+        labs = [l.get_label() for l in lns]
+        ax1.legend(lns, labs, loc=0)
+
+        plt.savefig(prefix + 'fwhm.png')
+        plt.close()
