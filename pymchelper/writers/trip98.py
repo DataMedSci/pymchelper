@@ -3,7 +3,6 @@ import logging
 import math
 from copy import deepcopy
 
-import scipy.stats
 from scipy.optimize import leastsq
 import numpy as np
 
@@ -332,6 +331,12 @@ class TripDddWriter(object):
         if not self.ddd_filename.endswith(".ddd"):
             self.ddd_filename += ".ddd"
 
+    def _extract_data(self, detector):
+        self.r_data_1d = np.asarray(list(detector.x)[0:detector.nx])
+        self.z_data_1d = np.asarray(list(detector.z)[0:detector.nz * detector.nx:detector.nx])
+        self.dose_data_2d = np.array(detector.v).reshape(detector.nz, detector.nx)
+        self.dose_data_1d = np.sum(self.dose_data_2d, axis=1)
+
     def write(self, detector):
         from pymchelper.shieldhit.detector.detector_type import SHDetType
 
@@ -348,67 +353,107 @@ class TripDddWriter(object):
                 density=1,
                 energy=self.energy)
 
-            r_data = np.asarray(list(detector.x))
-            z_data = np.asarray(list(detector.z))
-            dose_data = np.asarray(detector.v)
+            self._extract_data(detector)
 
             fwhm1_data = []
             fwhm2_data = []
             weight_data = []
-            z_plot = []
-            pval_data = []
+
+            print("fitting...")
 
             if self.ngauss == 2:
 
-                for z in np.unique(z_data):
-                    if z < 100:
-                        print(z)
-                        r_3 = r_data[z_data == z]
-                        d_3 = dose_data[z_data == z]
+                cumsum = np.cumsum(self.dose_data_1d)
+                cumsum /= np.sum(self.dose_data_1d)
 
-                        radial_dose = d_3 * r_3
-                        fitParameters = _lateral_fit(r_3, radial_dose, z, 70)
-                        FWHM1, factor, FWHM2 = fitParameters
+                cumsum_gr = np.array(cumsum)
+                cumsum *= -1.0
+                cumsum += 1.0
 
-                        if FWHM2 >= 4*FWHM1 or FWHM1 < 1e3:
-                            fwhm1_data.append(FWHM1)
-                            fwhm2_data.append(FWHM2)
-                            weight_data.append(factor)
-                            z_plot.append(z)
-                            print(fitParameters)
+                threshold = 1e-4
 
-                            w, pval = scipy.stats.shapiro(d_3)
-                            pval_data.append(pval)
+                thr_ind = cumsum.size - np.searchsorted(cumsum[::-1], threshold) - 1
+                z_fitting = self.z_data_1d[:thr_ind]
 
+                for z, dose_at_z in zip(z_fitting, self.dose_data_2d[:thr_ind]):
+                    r_fitting = self.r_data_1d[dose_at_z > 0]
+                    dose_fitting = dose_at_z[dose_at_z > 0]
+
+                    radial_dose = dose_fitting * r_fitting
+                    fitParameters = _lateral_fit(r_fitting, radial_dose, z, 70)
+                    fwhm1, factor, fwhm2 = fitParameters
+                    fwhm1_data.append(fwhm1)
+                    fwhm2_data.append(fwhm2)
+                    weight_data.append(factor)
+
+            print("writing...")
             with open(self.ddd_filename, 'w') as ddd_file:
                 ddd_file.write(header)
                 for e, fwhm1, weight, fwhm2 in zip(weight_data, fwhm1_data, weight_data, fwhm2_data):
                     ddd_file.write('??? {:g} {:g} {:g}\n'.format(fwhm1, weight, fwhm2))
 
+            print("plotting...")
             import matplotlib
             matplotlib.use('Agg')
             import matplotlib.pyplot as plt
 
-            plt.plot(z_plot, fwhm1_data, 'r')
+            plt.plot(z_fitting, fwhm1_data, 'r')
             plt.xlabel('z [g/cm**2]')
             plt.ylabel('FWHM1 [g/cm**2]')
             plt.savefig('ddd_fwhm1.png')
             plt.close()
 
-            plt.plot(z_plot, fwhm2_data, 'g')
+            plt.plot(z_fitting, fwhm2_data, 'g')
             plt.xlabel('z [g/cm**2]')
             plt.ylabel('FWHM2 [g/cm**2]')
             plt.savefig('ddd_fwhm2.png')
             plt.close()
 
-            plt.plot(z_plot, weight_data, 'b')
+            plt.plot(z_fitting, weight_data, 'b')
             plt.xlabel('z [g/cm**2]')
             plt.ylabel('weight')
             plt.savefig('ddd_weight.png')
             plt.close()
 
-            plt.plot(z_plot, pval_data, 'b')
+            plt.plot(z_fitting, self.dose_data_1d[0:thr_ind], 'b')
             plt.xlabel('z [g/cm**2]')
-            plt.ylabel('pval')
-            plt.savefig('ddd_pval.png')
+            plt.ylabel('dose')
+            plt.savefig('ddd_dose.png')
+            plt.close()
+
+            plt.semilogy(z_fitting, self.dose_data_1d[0:thr_ind], 'b')
+            plt.xlabel('z [g/cm**2]')
+            plt.ylabel('dose')
+            plt.savefig('ddd_dose_log.png')
+            plt.close()
+
+            plt.plot(self.z_data_1d, self.dose_data_1d, 'b')
+            plt.xlabel('z [g/cm**2]')
+            plt.ylabel('dose')
+            plt.savefig('ddd_dose_all.png')
+            plt.close()
+
+            plt.semilogy(self.z_data_1d, self.dose_data_1d, 'b')
+            plt.xlabel('z [g/cm**2]')
+            plt.ylabel('dose')
+            plt.savefig('ddd_dose_all_log.png')
+            plt.close()
+
+            plt.semilogy(self.z_data_1d, cumsum, 'b')
+            plt.xlabel('z [g/cm**2]')
+            plt.ylabel('dose')
+            plt.axhline(y=threshold)
+            plt.savefig('ddd_cs1.png')
+            plt.close()
+
+            plt.plot(self.z_data_1d, cumsum, 'b')
+            plt.xlabel('z [g/cm**2]')
+            plt.ylabel('dose')
+            plt.savefig('ddd_cs2.png')
+            plt.close()
+
+            plt.plot(self.z_data_1d, cumsum_gr, 'b')
+            plt.xlabel('z [g/cm**2]')
+            plt.ylabel('dose')
+            plt.savefig('ddd_cs_gr.png')
             plt.close()
