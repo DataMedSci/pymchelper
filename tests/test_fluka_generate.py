@@ -41,5 +41,6 @@ class TestFlukaGenerate(unittest.TestCase):
         logger.info("Removing directory {:s}".format(working_dir))
         shutil.rmtree(working_dir)
 
+
 if __name__ == '__main__':
     unittest.main()
