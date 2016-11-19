@@ -727,6 +727,7 @@ class Mgdraw:
         self.data = struct.unpack(fmt, data)
         return ncase
 
+
 # ===============================================================================
 if __name__ == "__main__":
     import sys
