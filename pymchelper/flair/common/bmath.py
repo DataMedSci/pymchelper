@@ -658,6 +658,7 @@ class Vector(list):
     def perp(self):
         return math.sqrt(self.perp2())
 
+
 # -------------------------------------------------------------------------------
 # Basic 3D Vectors
 # -------------------------------------------------------------------------------
@@ -1249,6 +1250,7 @@ class Matrix(list):
             for j in range(i + 1, size):
                 s -= self[i][j] * col[j]
             col[i] = s / self[i][i]
+
 
 # -------------------------------------------------------------------------------
 # Basic Matrices
@@ -1995,6 +1997,7 @@ def roman2int(roman):
         return sum
     else:
         raise ValueError('input is not a valid roman numeral: %s' % roman)
+
 
 # ===============================================================================
 if __name__ == "__main__":

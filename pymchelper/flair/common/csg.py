@@ -731,34 +731,3 @@ def split(expr):
         except:
             brk.append(expr)
             return brk
-
-# ----------
-if __name__ == "__main__":
-    import sys
-    import string
-    import pprint
-    from pymchelper.flair.common.log import say
-
-    expr = tokenize(string.join(sys.argv[1:]))
-
-    say("Zones=")
-    pprint.pprint(splitZones(expr))
-
-    say("ZoneString=")
-    pprint.pprint(map(toString, splitZones(expr)))
-
-    say("ORG=", expr)
-
-    exp2rpn(expr)
-    say("RPN=", expr)
-
-    rpnorm(expr)
-    say("RPNORM=", expr)
-
-    expnorm = rpn2exp(expr)
-    say("NORM=", expnorm)
-
-    expr = string.join(expnorm)
-    expr = expr.replace("+ ", "+")
-    expr = expr.replace("- ", "-")
-    say("EXP=", expr)
