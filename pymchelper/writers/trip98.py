@@ -91,7 +91,7 @@ class TripDddWriter(object):
         import matplotlib
         matplotlib.use('Agg')
         self.ddd_filename = filename
-        self.energy = options.energy
+        self.energy_MeV = options.energy
         self.ngauss = options.ngauss
         self.verbosity = options.verbose
         if not self.ddd_filename.endswith(".ddd"):
@@ -112,12 +112,12 @@ class TripDddWriter(object):
                 material='H20',
                 composition='H20',
                 density=1,
-                energy=self.energy)
+                energy=self.energy_MeV)
 
             self._extract_data(detector)
 
-            fwhm1_data = []
-            fwhm2_data = []
+            fwhm1_cm_data = []
+            fwhm2_cm_data = []
             weight_data = []
 
             threshold = 3e-4
@@ -126,64 +126,77 @@ class TripDddWriter(object):
             cum_dose_left = self._cumulative_dose_left(cum_dose)
 
             thr_ind = cum_dose_left.size - np.searchsorted(cum_dose_left[::-1], threshold) - 1
-            z_fitting_1d = self.z_data_cm_1d[:thr_ind]
-            dose_fitting_1d = self.dose_data_1d[:thr_ind]
+            z_fitting_cm_1d = self.z_data_cm_1d[:thr_ind]
+            dose_fitting_MeV_g_1d = self.dose_data_MeV_g_1d[:thr_ind]
 
-            r_fitting_2d, z_fitting_2d = np.meshgrid(self.r_data_cm_1d, z_fitting_1d)
-            dose_fitting_2d = self.dose_data_2d[0:thr_ind]
+            r_fitting_cm_2d, z_fitting_cm_2d = np.meshgrid(self.r_data_cm_1d, z_fitting_cm_1d)
+            dose_fitting_MeV_g_2d = self.dose_data_MeV_g_2d[0:thr_ind]
 
             logger.info("Plotting 1..")
             if self.verbosity > 0:
                 self._pre_fitting_plots(
                     cum_dose_left=cum_dose_left,
-                    z_fitting_1d=z_fitting_1d,
-                    dose_fitting_1d=dose_fitting_1d,
+                    z_fitting_cm_1d=z_fitting_cm_1d,
+                    dose_fitting_MeV_g_1d=dose_fitting_MeV_g_1d,
                     threshold=threshold,
-                    zmax=z_fitting_1d[-1])
+                    zmax_cm=z_fitting_cm_1d[-1])
 
-                self._plot_2d_map(z_fitting_2d, r_fitting_2d, dose_fitting_2d, z_fitting_1d, None, None)
+                self._plot_2d_map(z_fitting_cm_2d, r_fitting_cm_2d, dose_fitting_MeV_g_2d, z_fitting_cm_1d, None, None)
 
             logger.info("Fitting...")
             if self.ngauss in (1, 2):
-                for z, dose_at_z in zip(z_fitting_1d, self.dose_data_2d[:thr_ind]):
-                    r_fitting = self.r_data_cm_1d[dose_at_z > 0]
-                    dose_fitting_1d_positive = dose_at_z[dose_at_z > 0]
+                for z_cm, dose_at_z in zip(z_fitting_cm_1d, self.dose_data_MeV_g_2d[:thr_ind]):
+                    r_fitting_cm = self.r_data_cm_1d[dose_at_z > 0]
+                    dose_fitting_1d_positive_MeV_g = dose_at_z[dose_at_z > 0]
 
-                    radial_dose = dose_fitting_1d_positive * r_fitting
-                    fitParameters = self._lateral_fit(r_fitting, radial_dose, z, self.energy, self.ngauss)
-                    fwhm1, factor, fwhm2 = fitParameters
-                    fwhm1_data.append(fwhm1)
-                    fwhm2_data.append(fwhm2)
-                    weight_data.append(factor)
+                    radial_dose_MeV_cm_g = dose_fitting_1d_positive_MeV_g * r_fitting_cm
+                    fitParameters = self._lateral_fit(r_fitting_cm, radial_dose_MeV_cm_g, z_cm, self.energy_MeV,
+                                                      self.ngauss)
+                    fwhm1_cm, factor, fwhm2_cm = fitParameters
+                    fwhm1_cm_data.append(fwhm1_cm)
+                    fwhm2_cm_data.append(fwhm2_cm)  # set to 0 in case ngauss = 1
+                    weight_data.append(factor)  # set to 0 in case ngauss = 1
 
             logger.info("Plotting 2...")
-            if self.verbosity > 0:
-                self._post_fitting_plots(z_fitting_1d, fwhm1_data, fwhm2_data, weight_data)
+            if self.verbosity > 0 and self.ngauss in (1, 2):
+                self._post_fitting_plots(z_fitting_cm_1d, fwhm1_cm_data, fwhm2_cm_data, weight_data)
                 self._plot_2d_map(
-                    z_fitting_2d, r_fitting_2d, dose_fitting_2d, z_fitting_1d, fwhm1_data, fwhm2_data, suffix='_fwhm')
+                    z_fitting_cm_2d,
+                    r_fitting_cm_2d,
+                    dose_fitting_MeV_g_2d,
+                    z_fitting_cm_1d,
+                    fwhm1_cm_data,
+                    fwhm2_cm_data,
+                    suffix='_fwhm')
 
             logger.info("Writing " + self.ddd_filename)
             with open(self.ddd_filename, 'w') as ddd_file:
                 ddd_file.write(header)
                 if self.ngauss == 2:
-                    for e, fwhm1, weight, fwhm2 in zip(weight_data, fwhm1_data, weight_data, fwhm2_data):
-                        ddd_file.write('??? {:g} {:g} {:g}\n'.format(fwhm1, weight, fwhm2))
+                    for z_cm, dose, fwhm1_cm, weight, fwhm2_cm in zip(z_fitting_cm_1d, dose_fitting_MeV_g_1d,
+                                                                      fwhm1_cm_data, weight_data, fwhm2_cm_data):
+                        ddd_file.write('{:g} {:g} {:g} {:g} {:g}\n'.format(z_cm, dose, fwhm1_cm, weight, fwhm2_cm))
                 elif self.ngauss == 1:
-                    for e, fwhm in zip(weight_data, fwhm1_data):
-                        ddd_file.write('??? {:g} {:g} {:g}\n'.format(fwhm))
+                    for z_cm, dose, fwhm_cm in zip(z_fitting_cm_1d, dose_fitting_MeV_g_1d, fwhm1_cm_data):
+                        ddd_file.write('{:g} {:g} {:g}\n'.format(z_cm, dose, fwhm_cm))
+                elif self.ngauss == 0:
+                    for z_cm, dose in zip(z_fitting_cm_1d, dose_fitting_MeV_g_1d):
+                        ddd_file.write('{:g} {:g}\n'.format(z_cm, dose))
 
     def _extract_data(self, detector):
+        # 2D arrays of r,z and dose
         self.r_data_cm_2d = np.array(list(detector.x)).reshape(detector.nz, detector.nx)
         self.z_data_cm_2d = np.array(list(detector.z)).reshape(detector.nz, detector.nx)
-        self.dose_data_2d = np.array(detector.v).reshape(detector.nz, detector.nx)
+        self.dose_data_MeV_g_2d = np.array(detector.v).reshape(detector.nz, detector.nx)
 
+        # 1D arrays of r,z and dose in the very central bin
         self.r_data_cm_1d = self.r_data_cm_2d[0]
         self.z_data_cm_1d = np.asarray(list(detector.z)[0:detector.nz * detector.nx:detector.nx])
-        self.dose_data_1d = np.sum(self.dose_data_2d, axis=1)
+        self.dose_data_MeV_g_1d = self.dose_data_MeV_g_2d[:, 0]
 
     def _cumulative_dose(self):
-        cumsum = np.cumsum(self.dose_data_1d)
-        cumsum /= np.sum(self.dose_data_1d)
+        cumsum = np.cumsum(self.dose_data_MeV_g_1d)
+        cumsum /= np.sum(self.dose_data_MeV_g_1d)
         return cumsum
 
     def _cumulative_dose_left(self, cumsum):
@@ -195,7 +208,7 @@ class TripDddWriter(object):
     def _plot_2d_map(self,
                      z_fitting_cm_2d,
                      r_fitting_cm_2d,
-                     dose_fitting_2d,
+                     dose_fitting_MeV_g2d,
                      z_fitting_cm_1d=None,
                      fwhm1_cm=None,
                      fwhm2_cm=None,
@@ -205,10 +218,11 @@ class TripDddWriter(object):
         import matplotlib.pyplot as plt
         from matplotlib.colors import LogNorm
 
-        prefix = os.path.join(self.outputdir, 'ddd_{:3.1f}MeV_'.format(self.energy))
-        plt.pcolormesh(z_fitting_cm_2d, r_fitting_cm_2d, dose_fitting_2d, norm=LogNorm(), cmap='gnuplot2', label='dose')
+        prefix = os.path.join(self.outputdir, 'ddd_{:3.1f}MeV_'.format(self.energy_MeV))
+        plt.pcolormesh(
+            z_fitting_cm_2d, r_fitting_cm_2d, dose_fitting_MeV_g2d, norm=LogNorm(), cmap='gnuplot2', label='dose')
         cbar = plt.colorbar()
-        cbar.set_label("dose [a.u.]", rotation=270, verticalalignment='bottom')
+        cbar.set_label("dose [MeV/g]", rotation=270, verticalalignment='bottom')
         if z_fitting_cm_1d is not None and fwhm1_cm is not None:
             plt.plot(z_fitting_cm_1d, fwhm1_cm, label="fwhm1")
         if z_fitting_cm_1d is not None and fwhm2_cm is not None:
@@ -223,7 +237,7 @@ class TripDddWriter(object):
         plt.xlim((z_fitting_cm_2d.min(), z_fitting_cm_2d.max()))
         if fwhm1_cm is not None and fwhm2_cm is not None:
             plt.ylim((r_fitting_cm_2d.min(), max(max(fwhm1_cm), max(fwhm2_cm))))
-        plt.clim((1e-8 * dose_fitting_2d.max(), dose_fitting_2d.max()))
+        plt.clim((1e-8 * dose_fitting_MeV_g2d.max(), dose_fitting_MeV_g2d.max()))
         out_filename = prefix + 'dosemap' + suffix + '.png'
         logger.info('Saving ' + out_filename)
         plt.savefig(out_filename)
@@ -234,16 +248,16 @@ class TripDddWriter(object):
             plt.savefig(out_filename)
         plt.close()
 
-    def _pre_fitting_plots(self, cum_dose_left, z_fitting_1d, dose_fitting_1d, threshold, zmax):
+    def _pre_fitting_plots(self, cum_dose_left, z_fitting_cm_1d, dose_fitting_MeV_g_1d, threshold, zmax_cm):
         import matplotlib
         matplotlib.use('Agg')
         import matplotlib.pyplot as plt
-        prefix = os.path.join(self.outputdir, 'ddd_{:3.1f}MeV_'.format(self.energy))
+        prefix = os.path.join(self.outputdir, 'ddd_{:3.1f}MeV_'.format(self.energy_MeV))
 
-        plt.plot(self.z_data_cm_1d, self.dose_data_1d, color='blue', label='dose')
+        plt.plot(self.z_data_cm_1d, self.dose_data_MeV_g_1d, color='blue', label='dose')
         plt.axvspan(
             0,
-            zmax,
+            zmax_cm,
             alpha=0.1,
             color='green',
             label="fitting area, covers {:g} % of dose".format(100.0 * (1 - threshold)))
@@ -261,17 +275,17 @@ class TripDddWriter(object):
         plt.close()
 
         if self.verbosity > 1:
-            bp_max_z_pos = self.z_data_cm_1d[self.dose_data_1d == self.dose_data_1d.max()]
+            bp_max_z_pos_cm = self.z_data_cm_1d[self.dose_data_MeV_g_1d == self.dose_data_MeV_g_1d.max()]
 
             plt.semilogy(self.z_data_cm_1d, cum_dose_left, color='blue', label="cumulative missing dose")
             plt.axvspan(
                 0,
-                zmax,
+                zmax_cm,
                 alpha=0.1,
                 color='green',
                 label="fitting area, covers {:g} % of dose".format(100.0 * (1 - threshold)))
             plt.axhline(threshold, color='black', label='threshold {:g}'.format(threshold))
-            plt.axvline(bp_max_z_pos, color='red', label='BP max')
+            plt.axvline(bp_max_z_pos_cm, color='red', label='BP max')
             plt.legend(loc=0)
             plt.xlabel('z [cm]')
             plt.ylabel('fraction of total dose deposited behind z')
@@ -280,9 +294,9 @@ class TripDddWriter(object):
             plt.savefig(out_filename)
             plt.close()
 
-        plt.plot(z_fitting_1d, dose_fitting_1d, 'b', label='dose')
+        plt.plot(z_fitting_cm_1d, dose_fitting_MeV_g_1d, 'b', label='dose')
         plt.xlabel('z [cm]')
-        plt.ylabel('dose [a.u.]')
+        plt.ylabel('dose [MeV/g]')
         out_filename = prefix + 'dose.png'
         logger.info('Saving ' + out_filename)
         plt.savefig(out_filename)
@@ -293,22 +307,28 @@ class TripDddWriter(object):
             plt.savefig(out_filename)
         plt.close()
 
-    def _post_fitting_plots(self, z_fitting_1d, fwhm1_data, fwhm2_data, weight_data):
+    def _post_fitting_plots(self, z_fitting_1d, fwhm1_cm_data, fwhm2_cm_data, weight_data):
         import matplotlib.pyplot as plt
-        prefix = os.path.join(self.outputdir, 'ddd_{:3.1f}MeV_'.format(self.energy))
+        prefix = os.path.join(self.outputdir, 'ddd_{:3.1f}MeV_'.format(self.energy_MeV))
 
         # left Y axis dedicated to FWHM, right one to weight
         fig, ax1 = plt.subplots()
         ax2 = ax1.twinx()
-        lns1 = ax1.plot(z_fitting_1d, fwhm1_data, 'r', label='fwhm1')
-        lns2 = ax1.plot(z_fitting_1d, fwhm2_data, 'g', label='fwhm2')
-        lns3 = ax2.plot(z_fitting_1d, weight_data, 'b', label='weight')
+        lns1 = ax1.plot(z_fitting_1d, fwhm1_cm_data, 'r', label='fwhm1')
+        if fwhm2_cm_data is not None:
+            lns2 = ax1.plot(z_fitting_1d, fwhm2_cm_data, 'g', label='fwhm2')
+        if weight_data is not None:
+            lns3 = ax2.plot(z_fitting_1d, weight_data, 'b', label='weight')
+            ax2.set_ylabel('weight of FWHM1')
         ax1.set_xlabel('z [cm]')
-        ax1.set_ylabel('FWHM1 [cm]')
-        ax2.set_ylabel('weight of FWHM1')
+        ax1.set_ylabel('FWHM [cm]')
 
         # add by hand line plots and labels to legend
-        line_objs = lns1 + lns2 + lns3
+        line_objs = lns1
+        if fwhm2_cm_data is not None:
+            line_objs += lns2
+        if weight_data is not None:
+            line_objs += lns3
         labels = [l.get_label() for l in line_objs]
         ax1.legend(line_objs, labels, loc=0)
 
@@ -318,7 +338,7 @@ class TripDddWriter(object):
         plt.close()
 
     @staticmethod
-    def _lateral_fit(left_radii, radial_dose_scaled, depth, energy, ngauss=2):
+    def _lateral_fit(left_radii_cm, radial_dose_scaled, depth_cm, energy_MeV, ngauss=2):
         """
         Fitting for lateral dose distribution
         Fits the lateral dose scaled with the radius using a double Gaussian by the use of Levenberg-Marquardt alg.
@@ -492,12 +512,13 @@ class TripDddWriter(object):
         def peval_1g(x, mu, p):  # The model function: One gaussian
             return p[0] * np.exp(-((x - mu)**2) / (2 * p[1]**2)) * x
 
-        def peval_2g(x, mu, p):  # The model function: Two gaussians (sum), the mean mu is locked
+        def peval_2g(x_cm, mu_cm, p):  # The model function: Two gaussians (sum), the mean mu is locked
             # In guideline with a similar routine for TRiP by U. Weber,
             # the function is scaled with the radius to fit D(r)*r /TPR
-            return (p[0] * np.exp(-((x - mu)**2) / (2 * p[1]**2)) + p[2] * np.exp(-((x - mu)**2) / (2 * p[3]**2))) * x
+            return (p[0] * np.exp(-((x_cm - mu_cm)**2) / (2 * p[1]**2)) + p[2] * np.exp(-(
+                (x_cm - mu_cm)**2) / (2 * p[3]**2))) * x_cm
 
-        x = left_radii
+        x = left_radii_cm
         y = radial_dose_scaled
         # Calculate initial guesses #
         a1 = y.max()  # guess for the amplitude of the first gaussian
@@ -530,7 +551,7 @@ class TripDddWriter(object):
         fwhm1 = 2.354820045 * pfinal[1]  # Full Width at Half Maximum for the first Gaussian
         if ngauss == 2:
             fwhm2 = 2.354820045 * pfinal[3]  # Full Width at Half Maximum for the second Gaussian
-            A2 = pfinal[2] * 2 * math.pi * fwhm2 ** 2
+            A2 = pfinal[2] * 2 * math.pi * fwhm2**2
         else:
             fwhm2 = 0.0
             A2 = 0.0
@@ -542,7 +563,7 @@ class TripDddWriter(object):
         normfactor = A1 + A2  # changed to use of the normalized amplitudes
         if normfactor == 0:  # check if denominator is 0
             #        factor = 1.0
-            print("normfactor = ", normfactor, energy, depth)
+            logger.debug("normfactor = " + normfactor + " , energy = " + energy_MeV + " , depth = " + depth_cm)
             factor = -1e6  # Calculate the factor between the two amplitudes
             # TODO: CHECK THAT THIS IS THE RIGHT ->#what's going on here?!?!
         else:
