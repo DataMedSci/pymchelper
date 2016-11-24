@@ -3,7 +3,6 @@ import logging
 import math
 from copy import deepcopy
 
-from matplotlib.colors import LogNorm
 import numpy as np
 
 logger = logging.getLogger(__name__)
@@ -70,8 +69,6 @@ class TripCubeWriter:
         else:
             logger.error("Tripcube target is only allowed with dose- or LET-type detectors.")
             raise Exception("Illegal detector for tripcube.")
-
-
 
 
 class TripDddWriter(object):
@@ -164,9 +161,8 @@ class TripDddWriter(object):
 
             print("post-plotting...")
             self._post_fitting_plots(z_fitting_1d, fwhm1_data, fwhm2_data, weight_data)
-            self._plot_2d_map(z_fitting_2d, r_fitting_2d, dose_fitting_2d,
-                              z_fitting_1d, fwhm1_data, fwhm2_data,
-                              suffix='_fwhm')
+            self._plot_2d_map(
+                z_fitting_2d, r_fitting_2d, dose_fitting_2d, z_fitting_1d, fwhm1_data, fwhm2_data, suffix='_fwhm')
 
     def _extract_data(self, detector):
         self.r_data_2d = np.array(list(detector.x)).reshape(detector.nz, detector.nx)
@@ -196,7 +192,10 @@ class TripDddWriter(object):
                      fwhm1_data=None,
                      fwhm2_data=None,
                      suffix=''):
+        import matplotlib
+        matplotlib.use('Agg')
         import matplotlib.pyplot as plt
+        from matplotlib.colors import LogNorm
 
         prefix = 'ddd_{:3.1f}MeV_'.format(self.energy)
         plt.pcolormesh(z_fitting_2d, r_fitting_2d, dose_fitting_2d, norm=LogNorm(), cmap='gnuplot2', label='dose')
@@ -219,6 +218,8 @@ class TripDddWriter(object):
         plt.close()
 
     def _pre_fitting_plots(self, cum_dose_left, z_fitting_1d, dose_fitting_1d, threshold, zmax):
+        import matplotlib
+        matplotlib.use('Agg')
         import matplotlib.pyplot as plt
         prefix = 'ddd_{:3.1f}MeV_'.format(self.energy)
 
@@ -287,112 +288,110 @@ class TripDddWriter(object):
     def _lateral_fit(left_radii, radial_dose_scaled, depth, energy):
         """
         Fitting for lateral dose distribution
-        Fits the lateral dose scaled with the radius using a double Gaussian by the use of Levenberg-Marquardt optimization
-    
+        Fits the lateral dose scaled with the radius using a double Gaussian by the use of Levenberg-Marquardt alg.
         Parameters:
         * radii        radius values corresponding to dose
         * dose         dose D(r)
         * dose_scaled  dose times the radii D(r)*r
         * depth        only used for graphing
         * energy       only used for graphing
-    
+
         Returns: (x,{cov_x,infodict,mesg},ier)
-    
         """
-    
+
         def internal2external_grad(xi, bounds):
             """
             Calculate the internal to external gradiant
             Calculates the partial of external over internal
             """
-    
+
             ge = np.empty_like(xi)
-    
+
             for i, (v, bound) in enumerate(zip(xi, bounds)):
-    
+
                 a = bound[0]  # minimum
                 b = bound[1]  # maximum
-    
+
                 if a is None and b is None:  # No constraints
                     ge[i] = 1.0
-    
+
                 elif b is None:  # only min
                     ge[i] = v / np.sqrt(v**2 + 1)
-    
+
                 elif a is None:  # only max
                     ge[i] = -v / np.sqrt(v**2 + 1)
-    
+
                 else:  # both min and max
                     ge[i] = (b - a) * np.cos(v) / 2.
-    
+
             return ge
-    
+
         def i2e_cov_x(xi, bounds, cov_x):
             grad = internal2external_grad(xi, bounds)
             grad = grad = np.atleast_2d(grad)
             return np.dot(grad.T, grad) * cov_x
-    
+
         def internal2external(xi, bounds):
             """ Convert a series of internal variables to external variables"""
-    
+
             xe = np.empty_like(xi)
-    
+
             for i, (v, bound) in enumerate(zip(xi, bounds)):
-    
+
                 a = bound[0]  # minimum
                 b = bound[1]  # maximum
-    
+
                 if a is None and b is None:  # No constraints
                     xe[i] = v
-    
+
                 elif b is None:  # only min
                     xe[i] = a - 1. + np.sqrt(v**2. + 1.)
-    
+
                 elif a is None:  # only max
                     xe[i] = b + 1. - np.sqrt(v**2. + 1.)
-    
+
                 else:  # both min and max
                     xe[i] = a + ((b - a) / 2.) * (np.sin(v) + 1.)
-    
+
             return xe
-    
+
         def external2internal(xe, bounds):
             """ Convert a series of external variables to internal variables"""
-    
+
             xi = np.empty_like(xe)
-    
+
             for i, (v, bound) in enumerate(zip(xe, bounds)):
-    
+
                 a = bound[0]  # minimum
                 b = bound[1]  # maximum
-    
+
                 if a is None and b is None:  # No constraints
                     xi[i] = v
-    
+
                 elif b is None:  # only min
                     xi[i] = np.sqrt((v - a + 1.)**2. - 1)
-    
+
                 elif a is None:  # only max
                     xi[i] = np.sqrt((b - v + 1.)**2. - 1)
-    
+
                 else:  # both min and max
                     xi[i] = np.arcsin((2. * (v - a) / (b - a)) - 1.)
-    
+
             return xi
-    
+
         def err(p, bounds, efunc, args):
             pe = internal2external(p, bounds)  # convert to external variables
             return efunc(pe, *args)
-    
+
         def calc_cov_x(infodic, p):
             """
             Calculate cov_x from fjac, ipvt and p as is done in leastsq
             """
-    
+
             fjac = infodic['fjac']
             ipvt = infodic['ipvt']
             n = len(p)
-    
+
             # adapted from leastsq function in scipy/optimize/minpack.py
             perm = np.take(np.eye(n), ipvt - 1, 0)
             r = np.triu(np.transpose(fjac)[:n, :])
@@ -402,34 +401,34 @@ class TripDddWriter(object):
             except np.linalg.LinAlgError:
                 cov_x = None
             return cov_x
-    
+
         def leastsqbound(func, x0, bounds, args=(), **kw):
             """
             Constrained multivariant Levenberg-Marquard optimization
-    
+
             Minimize the sum of squares of a given function using the
             Levenberg-Marquard algorithm. Contraints on parameters are inforced using
             variable transformations as described in the MINUIT User's Guide by
             Fred James and Matthias Winkler.
-    
+
             Parameters:
-    
+
             * func      functions to call for optimization.
             * x0        Starting estimate for the minimization.
             * bounds    (min,max) pair for each element of x, defining the bounds on
                         that parameter.  Use None for one of min or max when there is
                         no bound in that direction.
             * args      Any extra arguments to func are places in this tuple.
-    
+
             Returns: (x,{cov_x,infodict,mesg},ier)
-    
+
             Return is described in the scipy.optimize.leastsq function.  x and con_v
             are corrected to take into account the parameter transformation, infodic
             is not corrected.
-    
+
             Additional keyword arguments are passed directly to the
             scipy.optimize.leastsq algorithm.
-    
+
             """
             from scipy.optimize import leastsq
 
@@ -438,13 +437,13 @@ class TripDddWriter(object):
                 full = True
             else:
                 full = False
-    
+
             # convert x0 to internal variables
             i0 = external2internal(x0, bounds)
-    
+
             # perfrom unconstrained optimization using internal variables
             r = leastsq(err, i0, args=(bounds, func, args), **kw)
-    
+
             # unpack return convert to external variables and return
             if full:
                 xi, cov_xi, infodic, mesg, ier = r
@@ -452,21 +451,21 @@ class TripDddWriter(object):
                 cov_xe = i2e_cov_x(xi, bounds, cov_xi)
                 # XXX correct infodic 'fjac','ipvt', and 'qtf'
                 return xe, cov_xe, infodic, mesg, ier
-    
+
             else:
                 xi, ier = r
                 xe = internal2external(xi, bounds)
                 return xe, ier
-    
+
         def residuals(p, y, x):  # objective function for minimization (vector function)
             err = y - peval(x, mu, p)
             return err
-    
+
         def peval(x, mu, p):  # The model function: Two gaussians (sum), the mean mu is locked
             # In guideline with a similar routine for TRiP by U. Weber,
             # the function is scaled with the radius to fit D(r)*r /TPR
             return (p[0] * np.exp(-((x - mu)**2) / (2 * p[1]**2)) + p[2] * np.exp(-((x - mu)**2) / (2 * p[3]**2))) * x
-    
+
         x = left_radii
         y = radial_dose_scaled
         # Calculate initial guesses #
@@ -482,10 +481,10 @@ class TripDddWriter(object):
         # Collect the guesses in an array
         p0 = np.asarray([a1, sigma1, a2, sigma2])
         bounds = [(0, 1e6), (0, 1e6), (0, 1e6), (0, 1e6)]  # set bound for the parameters, they should be non-negative
-        plsq = leastsqbound(residuals, p0, bounds, args=(y, x), maxfev=5000)  # Calculate the fit with Levenberg-Marquardt
+        plsq = leastsqbound(residuals, p0, bounds, args=(y, x), maxfev=5000)  # Calculate the fit
         pfinal = plsq[0]  # final parameters
         # covar = plsq[1]  # covariance matrix
-    
+
         # Calculate the output parameters
         # FWHM = sqrt(8*log(2)) * Gaussian_Sigma
         fwhm1 = 2.354820045 * pfinal[1]  # Full Width at Half Maximum for the first Gaussian
@@ -503,7 +502,8 @@ class TripDddWriter(object):
             factor = -1e6  # Calculate the factor between the two amplitudes
             # TODO: CHECK THAT THIS IS THE RIGHT ->#what's going on here?!?! /TPR
         else:
-            factor = A2 / normfactor  # Calculate the factor between the two normalized amplitudes: factor = A2 / (A1+A2),
+            factor = A2 / normfactor
+            # Calculate the factor between the two normalized amplitudes: factor = A2 / (A1+A2),
             # This definition was given by Gheorghe and Uli from Marburg!
-    
+
         return fwhm1, factor, fwhm2
