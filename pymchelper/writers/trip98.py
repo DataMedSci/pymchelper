@@ -284,20 +284,19 @@ class TripDddWriter(object):
         plt.close()
 
         if self.verbosity > 2 and (fwhm1_cm or fwhm2_cm):
+            # TODO add plotting sum of 2 gausses
             sigma1_cm = np.array(fwhm1_cm) / 2.354820045
             gauss_amplitude_MeV_g = dz0_MeV_cm_g_data / (2.0 * np.pi * sigma1_cm**2)
-            for z_cm in self.z_data_cm_1d:
-                z_filter_1d = (z_fitting_cm_1d == z_cm)
-                sigma1_at_z_cm = sigma1_cm[z_filter_1d]
+            for z_cm, sigma1_at_z_cm, amplitude_MeV_g in zip(z_fitting_cm_1d, sigma1_cm, gauss_amplitude_MeV_g):
                 dose_mc_MeV_g = self.dose_data_MeV_g_2d[self.z_data_cm_2d == z_cm]
-                title = "Z = {:4.3f} cm,  sigma1 = {:4.3f} cm".format(z_cm, sigma1_at_z_cm[0])
+                title = "Z = {:4.3f} cm,  sigma1 = {:4.3f} cm".format(z_cm, sigma1_at_z_cm)
                 logger.debug("Plotting at " + title)
                 plt.title(title)
-                plt.plot(self.r_data_cm_1d, dose_mc_MeV_g)
+                plt.plot(self.r_data_cm_1d, dose_mc_MeV_g, label="data")
                 if self.ngauss == 1:
-                    gauss_data_MeV_g = gauss_amplitude_MeV_g[z_filter_1d] * \
-                                       np.exp(-0.5 * self.r_data_cm_1d**2 / sigma1_at_z_cm)
-                    plt.plot(self.r_data_cm_1d, gauss_data_MeV_g)
+                    gauss_data_MeV_g = amplitude_MeV_g * np.exp(-0.5 * self.r_data_cm_1d**2 / sigma1_at_z_cm)
+                    plt.plot(self.r_data_cm_1d, gauss_data_MeV_g, label="fit")
+                plt.legend(loc=0)
                 plt.yscale('log')
                 plt.xlabel("r [cm]")
                 plt.ylabel("dose [MeV/g]")
@@ -315,15 +314,18 @@ class TripDddWriter(object):
                 plt.savefig(out_filename)
                 plt.close()
 
-                plt.plot(self.r_data_cm_1d, dose_mc_MeV_g * self.r_data_cm_1d)
+                plt.plot(self.r_data_cm_1d, dose_mc_MeV_g * self.r_data_cm_1d, label="data")
                 if self.ngauss == 1:
-                    plt.plot(self.r_data_cm_1d, gauss_data_MeV_g * self.r_data_cm_1d)
+                    plt.plot(self.r_data_cm_1d, gauss_data_MeV_g * self.r_data_cm_1d, label="fit")
+                plt.legend(loc=0)
                 plt.ylabel("dose * r [MeV cm/g]")
-                # plt.xlim([0, 5*sigma1_at_z_cm])
+                plt.xlim([0, 20*sigma1_at_z_cm])
                 plt.ylim([(dose_mc_MeV_g * self.r_data_cm_1d).min(), (dose_mc_MeV_g * self.r_data_cm_1d).max()])
                 if self.ngauss == 1:
                     plt.ylim([(dose_mc_MeV_g * self.r_data_cm_1d).min(),
-                              max(gauss_data_MeV_g.max(), (dose_mc_MeV_g * self.r_data_cm_1d).max())])
+                              max(
+                                  (gauss_data_MeV_g * self.r_data_cm_1d).max(),
+                                  (dose_mc_MeV_g * self.r_data_cm_1d).max())])
                 out_filename = prefix + "fit_details_{:4.3f}_r".format(z_cm) + suffix + '.png'
                 logger.info('Saving ' + out_filename)
                 plt.savefig(out_filename)
