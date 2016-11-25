@@ -154,12 +154,17 @@ class TripDddWriter(object):
                                                       self.ngauss)
                     fwhm1_cm, factor, fwhm2_cm = fitParameters
                     fwhm1_cm_data.append(fwhm1_cm)
-                    fwhm2_cm_data.append(fwhm2_cm)  # set to 0 in case ngauss = 1
-                    weight_data.append(factor)  # set to 0 in case ngauss = 1
+                    if self.ngauss == 2:
+                        fwhm2_cm_data.append(fwhm2_cm)  # set to 0 in case ngauss = 1
+                        weight_data.append(factor)  # set to 0 in case ngauss = 1
 
             logger.info("Plotting 2...")
             if self.verbosity > 0 and self.ngauss in (1, 2):
-                self._post_fitting_plots(z_fitting_cm_1d, fwhm1_cm_data, fwhm2_cm_data, weight_data)
+                self._post_fitting_plots(z_fitting_cm_1d,
+                                         dose_fitting_MeV_g_1d,
+                                         fwhm1_cm_data,
+                                         fwhm2_cm_data,
+                                         weight_data)
                 self._plot_2d_map(
                     z_fitting_cm_2d,
                     r_fitting_cm_2d,
@@ -172,6 +177,7 @@ class TripDddWriter(object):
             logger.info("Writing " + self.ddd_filename)
             with open(self.ddd_filename, 'w') as ddd_file:
                 ddd_file.write(header)
+                # TODO write to DDD gaussian amplitude, not the dose in central bin
                 if self.ngauss == 2:
                     for z_cm, dose, fwhm1_cm, weight, fwhm2_cm in zip(z_fitting_cm_1d, dose_fitting_MeV_g_1d,
                                                                       fwhm1_cm_data, weight_data, fwhm2_cm_data):
@@ -190,9 +196,23 @@ class TripDddWriter(object):
         self.dose_data_MeV_g_2d = np.array(detector.v).reshape(detector.nz, detector.nx)
 
         # 1D arrays of r,z and dose in the very central bin
-        self.r_data_cm_1d = self.r_data_cm_2d[0]
+        self.r_data_cm_1d = self.r_data_cm_2d[0]  # middle points of the bins
         self.z_data_cm_1d = np.asarray(list(detector.z)[0:detector.nz * detector.nx:detector.nx])
-        self.dose_data_MeV_g_1d = self.dose_data_MeV_g_2d[:, 0]
+        bin_depth_z_cm = self.z_data_cm_1d[1] - self.z_data_cm_1d[0]
+        r_step_cm = self.r_data_cm_1d[1] - self.r_data_cm_1d[0]
+
+        # i-th bin volume = dz * pi * (r_i_max^2 - r_i_min^2  )
+        #   r_i_max = r_i + dr / 2
+        #   r_i_min = r_i - dr / 2
+        #  r_i_max^2 - r_i_min^2 = (r_i_max - r_i_min)*(r_i_max + r_i_min) = dr * 2 * r_i    thus
+        # i-th bin volume = 2 * pi * dr * r_i * dz
+        bin_volume_data_cm3_1d = 2.0 * np.pi * r_step_cm * self.r_data_cm_1d * bin_depth_z_cm
+        # we assume density of 1 g/c3
+        density_g_cm3 = 1.0
+        total_bin_mass_g = density_g_cm3 * bin_depth_z_cm * np.pi * (self.r_data_cm_1d[-1] + r_step_cm/2.0)**2
+        energy_in_bin_MeV_2d = self.dose_data_MeV_g_2d * bin_volume_data_cm3_1d * density_g_cm3
+        total_energy_at_depth_MeV_1d = np.sum(energy_in_bin_MeV_2d, axis=1)
+        self.dose_data_MeV_g_1d = total_energy_at_depth_MeV_1d / total_bin_mass_g
 
     def _cumulative_dose(self):
         cumsum = np.cumsum(self.dose_data_MeV_g_1d)
@@ -223,19 +243,19 @@ class TripDddWriter(object):
             z_fitting_cm_2d, r_fitting_cm_2d, dose_fitting_MeV_g2d, norm=LogNorm(), cmap='gnuplot2', label='dose')
         cbar = plt.colorbar()
         cbar.set_label("dose [MeV/g]", rotation=270, verticalalignment='bottom')
-        if z_fitting_cm_1d is not None and fwhm1_cm is not None:
+        if z_fitting_cm_1d is not None and fwhm1_cm:
             plt.plot(z_fitting_cm_1d, fwhm1_cm, label="fwhm1")
-        if z_fitting_cm_1d is not None and fwhm2_cm is not None:
+        if z_fitting_cm_1d is not None and fwhm2_cm:
             plt.plot(z_fitting_cm_1d, fwhm2_cm, label="fwhm2")
 
         # plot legend only if some of the FWHM 1-D overlays are present
         # adding legend to only pcolormesh plot will result in a warning about missing labels
-        if z_fitting_cm_1d is not None and (fwhm1_cm is not None or fwhm2_cm is not None):
+        if z_fitting_cm_1d is not None and (fwhm1_cm or fwhm2_cm):
             plt.legend(loc=0)
         plt.xlabel("z [cm]")
         plt.ylabel("r [cm]")
         plt.xlim((z_fitting_cm_2d.min(), z_fitting_cm_2d.max()))
-        if fwhm1_cm is not None and fwhm2_cm is not None:
+        if fwhm1_cm and fwhm2_cm:
             plt.ylim((r_fitting_cm_2d.min(), max(max(fwhm1_cm), max(fwhm2_cm))))
         plt.clim((1e-8 * dose_fitting_MeV_g2d.max(), dose_fitting_MeV_g2d.max()))
         out_filename = prefix + 'dosemap' + suffix + '.png'
@@ -307,27 +327,27 @@ class TripDddWriter(object):
             plt.savefig(out_filename)
         plt.close()
 
-    def _post_fitting_plots(self, z_fitting_1d, fwhm1_cm_data, fwhm2_cm_data, weight_data):
+    def _post_fitting_plots(self, z_fitting_cm_1d, dose_fitting_MeV_g_1d, fwhm1_cm_data, fwhm2_cm_data, weight_data):
         import matplotlib.pyplot as plt
         prefix = os.path.join(self.outputdir, 'ddd_{:3.1f}MeV_'.format(self.energy_MeV))
 
         # left Y axis dedicated to FWHM, right one to weight
         fig, ax1 = plt.subplots()
         ax2 = ax1.twinx()
-        lns1 = ax1.plot(z_fitting_1d, fwhm1_cm_data, 'r', label='fwhm1')
-        if fwhm2_cm_data is not None:
-            lns2 = ax1.plot(z_fitting_1d, fwhm2_cm_data, 'g', label='fwhm2')
-        if weight_data is not None:
-            lns3 = ax2.plot(z_fitting_1d, weight_data, 'b', label='weight')
+        lns1 = ax1.plot(z_fitting_cm_1d, fwhm1_cm_data, 'r', label='fwhm1')
+        if fwhm2_cm_data:
+            lns2 = ax1.plot(z_fitting_cm_1d, fwhm2_cm_data, 'g', label='fwhm2')
+        if weight_data:
+            lns3 = ax2.plot(z_fitting_cm_1d, weight_data, 'b', label='weight')
             ax2.set_ylabel('weight of FWHM1')
         ax1.set_xlabel('z [cm]')
         ax1.set_ylabel('FWHM [cm]')
 
         # add by hand line plots and labels to legend
         line_objs = lns1
-        if fwhm2_cm_data is not None:
+        if fwhm2_cm_data:
             line_objs += lns2
-        if weight_data is not None:
+        if weight_data:
             line_objs += lns3
         labels = [l.get_label() for l in line_objs]
         ax1.legend(line_objs, labels, loc=0)
@@ -335,6 +355,97 @@ class TripDddWriter(object):
         out_filename = prefix + 'fwhm.png'
         logger.info('Saving ' + out_filename)
         plt.savefig(out_filename)
+        plt.close()
+
+        r_step_cm = self.r_data_cm_1d[1] - self.r_data_cm_1d[0]
+        r_max_cm = self.r_data_cm_1d[-1] + 0.5 * r_step_cm
+
+        # beam model for single gaussian is following:
+        #  G(r, sigma) = 1 / (2pi sigma) * exp( - 0.5 r^2 / sigma^2)
+        #  D(z,r) = D(z,0) * G(r, sigma)
+        # for double gaussian it is following:
+        #  D(z,r) = D(z,0) * ( w * G(r, sigma1) + (1-w) * G(r, sigma2))
+        #
+        # to get depth dose profile D(z) we need to calculate average dose in some volume at depth z
+        # (calculating average dose in a subspace separated by two planes at z=z0 and z=z0+dz will lead to zero dose)
+        # we cannot use simple arithmetic mean, as we are dealing with cylindrical scoring and bin mass depends on r
+        #
+        # let rmax be radius of biggest bin in cylindrical scoring
+        # we calculate D(z) which will correspond to depth-dose profile measured with ion. chamber of radius rmax
+        # it is basically energy E(z) deposited in slice of radius rmax and thickness dz divided by slice mass
+        # D(z) = E(z) / m(z) = E(z) / (pi rmax^2 dz rho)
+        # energy E(z) is the sum of energy in all cylyndrical shell in a slice and can be calculated as integral
+        # thin shell has surface at radius r has surface: 2 pi r dr, thus
+        # E(z) = \int_0^rmax D(r,z) rho dz 2 pi r dr
+        # finally:
+        # D(z) = \int_0^rmax D(r,z) rho dz 2 pi r dr / (pi rmax^2 dz rho)   which leads to:
+        #
+        # D(z) = 2 / rmax^2 \int_0^rmax D(r,z) r dr
+        #
+        # for single gaussian model this gives:
+        #
+        # D(z) = 2 / rmax^2 \int_0^rmax D(z,0) * G(r, sigma) r dr = D(z,0) / rmax^2 \int_0^rmax G(r, sigma) r dr
+        #      = D(z,0) / (2 pi sigma rmax^2) \int_0^rmax exp( - 0.5 r^2 / sigma^2) r dr
+        #
+        # integral \int exp( - 0.5 r^2 / sigma^2) r dr is easy to calculate:
+        # https://www.wolframalpha.com/input/?i=%5Cint+exp(+-+0.5+r%5E2+%2F+sigma%5E2)+r+dr
+        #
+        #  \int exp( - 0.5 r^2 / sigma^2) r dr = -sigma^2 exp( - 0.5 r^2 / sigma^2)
+        #
+        # which leads to
+        #
+        # \int_0^rmax exp( - 0.5 r^2 / sigma^2) r dr = sigma^2 ( 1 - exp( - 0.5 rmax^2 / sigma^2))
+        #
+        # this means depth-dose curve for single gaussian model can be expressed as:
+        #
+        # D(z) = D(z,0) / (2 pi sigma rmax^2) * sigma^2 ( 1 - exp( - 0.5 rmax^2 / sigma^2))
+        #
+        # or
+        #
+        # D(z) = sigma * D(z,0) * ( 1 - exp( - 0.5 rmax^2 / sigma^2)) / (2 pi rmax^2)
+        #
+        # double gaussian can be calculated in similar way and leads to:
+        #
+        # D(z) = D(z,0) / (2 pi rmax^2) * ( w * sigma1 * ( 1 - exp( - 0.5 rmax^2 / sigma1^2)) +
+        #                                 ( (1-w) * sigma2 * ( 1 - exp( - 0.5 rmax^2 / sigma2^2)))
+        #
+
+        if self.ngauss == 1:
+            sigma1_cm = np.array(fwhm1_cm_data) / 2.354820045
+            # sigma * D(z,0) / (2 pi rmax^2)
+            fit_dose_MeV_g = sigma1_cm * dose_fitting_MeV_g_1d / (2.0 * np.pi * r_max_cm**2)
+            # missing ( 1 - exp( - 0.5 rmax^2 / sigma^2))
+            fit_dose_MeV_g /= (np.ones_like(sigma1_cm) - np.exp(-0.5 * r_max_cm / sigma1_cm**2))
+            plt.plot(z_fitting_cm_1d, fit_dose_MeV_g, 'r', label='dose fit')
+        if self.ngauss == 2:
+            sigma1_cm = np.array(fwhm1_cm_data) / 2.354820045
+            sigma2_cm = np.array(fwhm2_cm_data) / 2.354820045
+            w = np.asarray(weight_data)
+
+            # ( w * sigma1 * ( 1 - exp( - 0.5 rmax^2 / sigma1^2))
+            fit_dose_MeV_g = w * sigma1_cm * \
+                (np.ones_like(sigma1_cm) - np.exp(-0.5 * r_max_cm / sigma1_cm**2))
+
+            # ( (1-w) * sigma2 * ( 1 - exp( - 0.5 rmax^2 / sigma2^2)))
+            fit_dose_MeV_g += (np.ones_like(w) - w) * sigma2_cm * \
+                (np.ones_like(sigma2_cm) - np.exp(-0.5 * r_max_cm / sigma2_cm**2))
+
+            # D(z,0) / (2 pi rmax^2)
+            fit_dose_MeV_g *= dose_fitting_MeV_g_1d / (2.0 * np.pi * r_max_cm**2)
+            plt.plot(z_fitting_cm_1d, fit_dose_MeV_g, 'r', label='dose fit')
+
+        plt.plot(z_fitting_cm_1d, dose_fitting_MeV_g_1d, 'g', label='dose MC')
+        plt.xlabel('z [cm]')
+        plt.ylabel('dose [MeV/g]')
+        plt.legend(loc=0)
+        out_filename = prefix + 'dose_fit.png'
+        logger.info('Saving ' + out_filename)
+        plt.savefig(out_filename)
+        if self.verbosity > 1:
+            plt.yscale('log')
+            out_filename = prefix + 'dose_fit_log.png'
+            logger.info('Saving ' + out_filename)
+            plt.savefig(out_filename)
         plt.close()
 
     @staticmethod
