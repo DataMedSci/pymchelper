@@ -107,7 +107,7 @@ class TripDddWriter(object):
 
             # in order to avoid fitting data to noisy region far behind Bragg peak tail,
             # find the range of z coordinate which containes (1-threshold) of the deposited energy
-            threshold = 3e-4
+            threshold = 3e-3
             cum_dose = self._cumulative_dose()
             cum_dose_left = self._cumulative_dose_left(cum_dose)
 
@@ -133,7 +133,7 @@ class TripDddWriter(object):
             fwhm1_cm_data = []
             fwhm2_cm_data = []
             weight_data = []
-            dz0_data = []
+            dz0_MeV_cm_g_data = []
             if self.ngauss in (1, 2):
                 # for each depth fit a lateral beam with gaussian models
                 for z_cm, dose_at_z in zip(z_fitting_cm_1d, self.dose_data_MeV_g_2d[:thr_ind]):
@@ -146,14 +146,14 @@ class TripDddWriter(object):
                     radial_dose_MeV_cm_g = dose_fitting_1d_positive_MeV_g * r_fitting_cm
 
                     # perform the fit
-                    fwhm1_cm, factor, fwhm2_cm, dz0 = self._lateral_fit(r_fitting_cm,
-                                                                        radial_dose_MeV_cm_g,
-                                                                        z_cm,
-                                                                        self.energy_MeV,
-                                                                        self.ngauss)
+                    fwhm1_cm, factor, fwhm2_cm, dz0_MeV_cm_g = self._lateral_fit(r_fitting_cm,
+                                                                                 radial_dose_MeV_cm_g,
+                                                                                 z_cm,
+                                                                                 self.energy_MeV,
+                                                                                 self.ngauss)
 
                     fwhm1_cm_data.append(fwhm1_cm)
-                    dz0_data.append(dz0)
+                    dz0_MeV_cm_g_data.append(dz0_MeV_cm_g)
                     if self.ngauss == 2:
                         fwhm2_cm_data.append(fwhm2_cm)  # set to 0 in case ngauss = 1
                         weight_data.append(factor)  # set to 0 in case ngauss = 1
@@ -162,7 +162,7 @@ class TripDddWriter(object):
             if self.verbosity > 0 and self.ngauss in (1, 2):
                 self._post_fitting_plots(z_fitting_cm_1d,
                                          dose_fitting_MeV_g_1d,
-                                         dz0_data,
+                                         dz0_MeV_cm_g_data,
                                          fwhm1_cm_data,
                                          fwhm2_cm_data,
                                          weight_data)
@@ -173,6 +173,7 @@ class TripDddWriter(object):
                     z_fitting_cm_1d,
                     fwhm1_cm_data,
                     fwhm2_cm_data,
+                    dz0_MeV_cm_g_data,
                     suffix='_fwhm')
 
             logger.info("Writing " + self.ddd_filename)
@@ -245,6 +246,7 @@ class TripDddWriter(object):
                      z_fitting_cm_1d=None,
                      fwhm1_cm=None,
                      fwhm2_cm=None,
+                     dz0_MeV_cm_g_data=None,
                      suffix=''):
         import matplotlib
         matplotlib.use('Agg')
@@ -257,9 +259,9 @@ class TripDddWriter(object):
         cbar = plt.colorbar()
         cbar.set_label("dose [MeV/g]", rotation=270, verticalalignment='bottom')
         if z_fitting_cm_1d is not None and fwhm1_cm:
-            plt.plot(z_fitting_cm_1d, fwhm1_cm, label="fwhm1")
+            plt.plot(z_fitting_cm_1d, fwhm1_cm, color='g', label="fwhm1")
         if z_fitting_cm_1d is not None and fwhm2_cm:
-            plt.plot(z_fitting_cm_1d, fwhm2_cm, label="fwhm2")
+            plt.plot(z_fitting_cm_1d, fwhm2_cm, color='r', label="fwhm2")
 
         # plot legend only if some of the FWHM 1-D overlays are present
         # adding legend to only pcolormesh plot will result in a warning about missing labels
@@ -280,6 +282,61 @@ class TripDddWriter(object):
             logger.info('Saving ' + out_filename)
             plt.savefig(out_filename)
         plt.close()
+
+        if self.verbosity > 2 and (fwhm1_cm or fwhm2_cm):
+            sigma1_cm = np.array(fwhm1_cm) / 2.354820045
+            gauss_amplitude_MeV_g = dz0_MeV_cm_g_data / (2.0 * np.pi * sigma1_cm**2)
+            for z_cm in self.z_data_cm_1d:
+                z_filter_1d = (z_fitting_cm_1d == z_cm)
+                sigma1_at_z_cm = sigma1_cm[z_filter_1d]
+                dose_mc_MeV_g = self.dose_data_MeV_g_2d[self.z_data_cm_2d == z_cm]
+                title = "Z = {:4.3f} cm,  sigma1 = {:4.3f} cm".format(z_cm, sigma1_at_z_cm[0])
+                logger.debug("Plotting at " + title)
+                plt.title(title)
+                plt.plot(self.r_data_cm_1d, dose_mc_MeV_g)
+                if self.ngauss == 1:
+                    gauss_data_MeV_g = gauss_amplitude_MeV_g[z_filter_1d] * \
+                                       np.exp(-0.5 * self.r_data_cm_1d**2 / sigma1_at_z_cm)
+                    plt.plot(self.r_data_cm_1d, gauss_data_MeV_g)
+                plt.yscale('log')
+                plt.xlabel("r [cm]")
+                plt.ylabel("dose [MeV/g]")
+                # plt.xlim([0, 5*sigma1_at_z_cm])
+                plt.ylim([dose_mc_MeV_g.min(), dose_mc_MeV_g.max()])
+                if self.ngauss == 1:
+                    plt.ylim([dose_mc_MeV_g.min(), max(gauss_data_MeV_g.max(), dose_mc_MeV_g.max())])
+                out_filename = prefix + "fit_details_{:4.3f}_log".format(z_cm) + suffix + '.png'
+                logger.info('Saving ' + out_filename)
+                plt.savefig(out_filename)
+                plt.xscale('log')
+                plt.xlim([0, self.r_data_cm_1d.max()])
+                out_filename = prefix + "fit_details_{:4.3f}_loglog".format(z_cm) + suffix + '.png'
+                logger.info('Saving ' + out_filename)
+                plt.savefig(out_filename)
+                plt.close()
+
+                plt.plot(self.r_data_cm_1d, dose_mc_MeV_g * self.r_data_cm_1d)
+                if self.ngauss == 1:
+                    plt.plot(self.r_data_cm_1d, gauss_data_MeV_g * self.r_data_cm_1d)
+                plt.ylabel("dose * r [MeV cm/g]")
+                # plt.xlim([0, 5*sigma1_at_z_cm])
+                plt.ylim([(dose_mc_MeV_g * self.r_data_cm_1d).min(), (dose_mc_MeV_g * self.r_data_cm_1d).max()])
+                if self.ngauss == 1:
+                    plt.ylim([(dose_mc_MeV_g * self.r_data_cm_1d).min(),
+                              max(gauss_data_MeV_g.max(), (dose_mc_MeV_g * self.r_data_cm_1d).max())])
+                out_filename = prefix + "fit_details_{:4.3f}_r".format(z_cm) + suffix + '.png'
+                logger.info('Saving ' + out_filename)
+                plt.savefig(out_filename)
+                plt.yscale('log')
+                out_filename = prefix + "fit_details_{:4.3f}_r_log".format(z_cm) + suffix + '.png'
+                logger.info('Saving ' + out_filename)
+                plt.savefig(out_filename)
+                plt.xscale('log')
+                plt.xlim([0, self.r_data_cm_1d.max()])
+                out_filename = prefix + "fit_details_{:4.3f}_r_loglog".format(z_cm) + suffix + '.png'
+                logger.info('Saving ' + out_filename)
+                plt.savefig(out_filename)
+                plt.close()
 
     def _pre_fitting_plots(self, cum_dose_left, z_fitting_cm_1d, dose_fitting_MeV_g_1d, threshold, zmax_cm):
         import matplotlib
@@ -342,7 +399,7 @@ class TripDddWriter(object):
 
     def _post_fitting_plots(self, z_fitting_cm_1d,
                             dose_fitting_MeV_g_1d,
-                            dz0_data,
+                            dz0_MeV_cm_g_data,
                             fwhm1_cm_data,
                             fwhm2_cm_data,
                             weight_data):
@@ -352,12 +409,13 @@ class TripDddWriter(object):
         # left Y axis dedicated to FWHM, right one to weight
         fig, ax1 = plt.subplots()
         ax2 = ax1.twinx()
-        lns1 = ax1.plot(z_fitting_cm_1d, fwhm1_cm_data, 'r', label='fwhm1')
+        lns1 = ax1.plot(z_fitting_cm_1d, fwhm1_cm_data, 'g', label='fwhm1')
         if fwhm2_cm_data:
-            lns2 = ax1.plot(z_fitting_cm_1d, fwhm2_cm_data, 'g', label='fwhm2')
+            lns2 = ax1.plot(z_fitting_cm_1d, fwhm2_cm_data, 'r', label='fwhm2')
         if weight_data:
             lns3 = ax2.plot(z_fitting_cm_1d, weight_data, 'b', label='weight')
             ax2.set_ylabel('weight of FWHM1')
+            ax2.set_ylim([0, 1])
         ax1.set_xlabel('z [cm]')
         ax1.set_ylabel('FWHM [cm]')
 
@@ -431,7 +489,7 @@ class TripDddWriter(object):
         if self.ngauss == 1:
             sigma1_cm = np.array(fwhm1_cm_data) / 2.354820045
             # sigma * D(z,0) / (2 pi rmax^2)
-            fit_dose_MeV_g = sigma1_cm * dz0_data / (2.0 * np.pi * r_max_cm**2)
+            fit_dose_MeV_g = sigma1_cm * dz0_MeV_cm_g_data / (2.0 * np.pi * r_max_cm ** 2)
             # missing ( 1 - exp( - 0.5 rmax^2 / sigma^2))
             fit_dose_MeV_g /= (np.ones_like(sigma1_cm) - np.exp(-0.5 * r_max_cm / sigma1_cm**2))
             plt.plot(z_fitting_cm_1d, fit_dose_MeV_g, 'r', label='dose fit')
@@ -449,7 +507,7 @@ class TripDddWriter(object):
                 (np.ones_like(sigma2_cm) - np.exp(-0.5 * r_max_cm / sigma2_cm**2))
 
             # D(z,0) / (2 pi rmax^2)
-            fit_dose_MeV_g *= dz0_data / (2.0 * np.pi * r_max_cm**2)
+            fit_dose_MeV_g *= dz0_MeV_cm_g_data / (2.0 * np.pi * r_max_cm ** 2)
             plt.plot(z_fitting_cm_1d, fit_dose_MeV_g, 'r', label='dose fit')
 
         plt.plot(z_fitting_cm_1d, dose_fitting_MeV_g_1d, 'g', label='dose MC')
@@ -676,14 +734,14 @@ class TripDddWriter(object):
         # covar = plsq[1]  # covariance matrix
 
         sigma1_cm = pfinal[1]
-        a1 = pfinal[0]
+        a1_MeV_g = pfinal[0]
 
         # Calculate the output parameters
         # FWHM = sqrt(8*log(2)) * Gaussian_Sigma
         fwhm1_cm = 2.354820045 * sigma1_cm  # Full Width at Half Maximum for the first Gaussian
         if ngauss == 2:
             sigma2_cm = pfinal[3]
-            a2 = pfinal[2]
+            a2_MeV_g = pfinal[2]
             fwhm2_cm = 2.354820045 * sigma2_cm  # Full Width at Half Maximum for the second Gaussian
 
             # double gaussian model is following
@@ -716,8 +774,8 @@ class TripDddWriter(object):
             # D(z,0) = 2 pi (a1 sigma1 + a2 sigma2)
             #      w = a1 sigma1 / (a1 sigma1 + a2 sigma2)
 
-            dz0 = 2.0 * np.pi * (a1 * sigma1_cm + a2 * sigma2_cm)
-            factor = a1 * sigma1_cm / (a1 * sigma1_cm + a2 * sigma2_cm)
+            dz0_MeV_cm_g = 2.0 * np.pi * (a1_MeV_g * sigma1_cm + a2_MeV_g * sigma2_cm)
+            factor = a1_MeV_g * sigma1_cm / (a1_MeV_g * sigma1_cm + a2_MeV_g * sigma2_cm)
         else:
 
             # single gaussian model is following
@@ -740,7 +798,7 @@ class TripDddWriter(object):
             #
             # D(z,0) = 2 pi a1 sigma1
 
-            dz0 = 2.0 * np.pi * a1 * sigma1_cm
+            dz0_MeV_cm_g = 2.0 * np.pi * a1_MeV_g * sigma1_cm
             factor = 0.0
             fwhm2_cm = 0.0
 
@@ -749,4 +807,4 @@ class TripDddWriter(object):
         # fwhm1 *= 10.0
         # fwhm2 *= 10.0
 
-        return fwhm1_cm, factor, fwhm2_cm, dz0
+        return fwhm1_cm, factor, fwhm2_cm, dz0_MeV_cm_g
