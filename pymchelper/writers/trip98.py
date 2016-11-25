@@ -1,6 +1,5 @@
 import time
 import logging
-import math
 import os
 from copy import deepcopy
 
@@ -102,26 +101,13 @@ class TripDddWriter(object):
         from pymchelper.shieldhit.detector.detector_type import SHDetType
 
         if detector.dettyp == SHDetType.ddd:
-            # time format: %c  Locale's appropriate date and time representation.
-            now = time.strftime('%c')
 
-            header = self._ddd_header_template.format(
-                fileversion='19980520',
-                filedate=now,
-                projectile='C',
-                material='H20',
-                composition='H20',
-                density=1,
-                energy=self.energy_MeV)
-
+            # extract data from detector data
             self._extract_data(detector)
 
-            fwhm1_cm_data = []
-            fwhm2_cm_data = []
-            weight_data = []
-
+            # in order to avoid fitting data to noisy region far behind Bragg peak tail,
+            # find the range of z coordinate which containes (1-threshold) of the deposited energy
             threshold = 3e-4
-
             cum_dose = self._cumulative_dose()
             cum_dose_left = self._cumulative_dose_left(cum_dose)
 
@@ -144,16 +130,30 @@ class TripDddWriter(object):
                 self._plot_2d_map(z_fitting_cm_2d, r_fitting_cm_2d, dose_fitting_MeV_g_2d, z_fitting_cm_1d, None, None)
 
             logger.info("Fitting...")
+            fwhm1_cm_data = []
+            fwhm2_cm_data = []
+            weight_data = []
+            dz0_data = []
             if self.ngauss in (1, 2):
+                # for each depth fit a lateral beam with gaussian models
                 for z_cm, dose_at_z in zip(z_fitting_cm_1d, self.dose_data_MeV_g_2d[:thr_ind]):
+
+                    # take into account only this position in r for which dose is positive
                     r_fitting_cm = self.r_data_cm_1d[dose_at_z > 0]
                     dose_fitting_1d_positive_MeV_g = dose_at_z[dose_at_z > 0]
 
+                    # fitting will be done on D(r)*r data
                     radial_dose_MeV_cm_g = dose_fitting_1d_positive_MeV_g * r_fitting_cm
-                    fitParameters = self._lateral_fit(r_fitting_cm, radial_dose_MeV_cm_g, z_cm, self.energy_MeV,
-                                                      self.ngauss)
-                    fwhm1_cm, factor, fwhm2_cm = fitParameters
+
+                    # perform the fit
+                    fwhm1_cm, factor, fwhm2_cm, dz0 = self._lateral_fit(r_fitting_cm,
+                                                                        radial_dose_MeV_cm_g,
+                                                                        z_cm,
+                                                                        self.energy_MeV,
+                                                                        self.ngauss)
+
                     fwhm1_cm_data.append(fwhm1_cm)
+                    dz0_data.append(dz0)
                     if self.ngauss == 2:
                         fwhm2_cm_data.append(fwhm2_cm)  # set to 0 in case ngauss = 1
                         weight_data.append(factor)  # set to 0 in case ngauss = 1
@@ -162,6 +162,7 @@ class TripDddWriter(object):
             if self.verbosity > 0 and self.ngauss in (1, 2):
                 self._post_fitting_plots(z_fitting_cm_1d,
                                          dose_fitting_MeV_g_1d,
+                                         dz0_data,
                                          fwhm1_cm_data,
                                          fwhm2_cm_data,
                                          weight_data)
@@ -175,6 +176,18 @@ class TripDddWriter(object):
                     suffix='_fwhm')
 
             logger.info("Writing " + self.ddd_filename)
+
+            # prepare header of DDD file
+            header = self._ddd_header_template.format(
+                fileversion='19980520',
+                filedate=time.strftime('%c'),  # Locale's appropriate date and time representation
+                projectile='C',
+                material='H20',
+                composition='H20',
+                density=1,
+                energy=self.energy_MeV)
+
+            # write the contents of the files
             with open(self.ddd_filename, 'w') as ddd_file:
                 ddd_file.write(header)
                 # TODO write to DDD gaussian amplitude, not the dose in central bin
@@ -327,7 +340,12 @@ class TripDddWriter(object):
             plt.savefig(out_filename)
         plt.close()
 
-    def _post_fitting_plots(self, z_fitting_cm_1d, dose_fitting_MeV_g_1d, fwhm1_cm_data, fwhm2_cm_data, weight_data):
+    def _post_fitting_plots(self, z_fitting_cm_1d,
+                            dose_fitting_MeV_g_1d,
+                            dz0_data,
+                            fwhm1_cm_data,
+                            fwhm2_cm_data,
+                            weight_data):
         import matplotlib.pyplot as plt
         prefix = os.path.join(self.outputdir, 'ddd_{:3.1f}MeV_'.format(self.energy_MeV))
 
@@ -413,7 +431,7 @@ class TripDddWriter(object):
         if self.ngauss == 1:
             sigma1_cm = np.array(fwhm1_cm_data) / 2.354820045
             # sigma * D(z,0) / (2 pi rmax^2)
-            fit_dose_MeV_g = sigma1_cm * dose_fitting_MeV_g_1d / (2.0 * np.pi * r_max_cm**2)
+            fit_dose_MeV_g = sigma1_cm * dz0_data / (2.0 * np.pi * r_max_cm**2)
             # missing ( 1 - exp( - 0.5 rmax^2 / sigma^2))
             fit_dose_MeV_g /= (np.ones_like(sigma1_cm) - np.exp(-0.5 * r_max_cm / sigma1_cm**2))
             plt.plot(z_fitting_cm_1d, fit_dose_MeV_g, 'r', label='dose fit')
@@ -431,7 +449,7 @@ class TripDddWriter(object):
                 (np.ones_like(sigma2_cm) - np.exp(-0.5 * r_max_cm / sigma2_cm**2))
 
             # D(z,0) / (2 pi rmax^2)
-            fit_dose_MeV_g *= dose_fitting_MeV_g_1d / (2.0 * np.pi * r_max_cm**2)
+            fit_dose_MeV_g *= dz0_data / (2.0 * np.pi * r_max_cm**2)
             plt.plot(z_fitting_cm_1d, fit_dose_MeV_g, 'r', label='dose fit')
 
         plt.plot(z_fitting_cm_1d, dose_fitting_MeV_g_1d, 'g', label='dose MC')
@@ -632,54 +650,103 @@ class TripDddWriter(object):
         x = left_radii_cm
         y = radial_dose_scaled
         # Calculate initial guesses #
-        a1 = y.max()  # guess for the amplitude of the first gaussian
+        a1_guess = y.max()  # guess for the amplitude of the first gaussian
         mu = 0  # set the mean to zero - a guess would be: sum(x*y)/sum(y)
         if sum(y) == 0:  # check if denominator is 0
-            sigma1 = 1e5
+            sigma1_cm_guess = 1e5
         else:
-            sigma1 = np.sqrt(abs(sum((x - mu)**2 * y) / sum(y)))  # guess for the deviation
+            sigma1_cm_guess = np.sqrt(abs(sum((x - mu)**2 * y) / sum(y)))  # guess for the deviation
 
         if ngauss == 2:
-            a2 = deepcopy(a1) * 0.05  # guess for the  amplitude of the second gaussian
-            sigma2 = 2  # guess for the deviation of the second gaussian
-            sigma2 = deepcopy(sigma1) * 5.0
+            a2_guess = deepcopy(a1_guess) * 0.05  # guess for the  amplitude of the second gaussian
+            sigma2_cm_guess = 2  # guess for the deviation of the second gaussian
+            sigma2_cm_guess = deepcopy(sigma1_cm_guess) * 5.0
             # Collect the guesses in an array
-            p0 = np.asarray([a1, sigma1, a2, sigma2])
+            p0 = np.asarray([a1_guess, sigma1_cm_guess, a2_guess, sigma2_cm_guess])
             bounds = [(0, 1e6), (0, 1e6), (0, 1e6), (0, 1e6)]  # set bound for the parameters,
             # they should be non-negative
             plsq = leastsqbound(residuals_2g, p0, bounds, args=(y, x), maxfev=5000)  # Calculate the fit
         elif ngauss == 1:
             # Collect the guesses in an array
-            p0 = np.asarray([a1, sigma1])
+            p0 = np.asarray([a1_guess, sigma1_cm_guess])
             bounds = [(0, 1e6), (0, 1e6)]  # set bound for the parameters, they should be non-negative
             plsq = leastsqbound(residuals_1g, p0, bounds, args=(y, x), maxfev=5000)  # Calculate the fit
 
         pfinal = plsq[0]  # final parameters
         # covar = plsq[1]  # covariance matrix
 
+        sigma1_cm = pfinal[1]
+        a1 = pfinal[0]
+
         # Calculate the output parameters
         # FWHM = sqrt(8*log(2)) * Gaussian_Sigma
-        fwhm1 = 2.354820045 * pfinal[1]  # Full Width at Half Maximum for the first Gaussian
+        fwhm1_cm = 2.354820045 * sigma1_cm  # Full Width at Half Maximum for the first Gaussian
         if ngauss == 2:
-            fwhm2 = 2.354820045 * pfinal[3]  # Full Width at Half Maximum for the second Gaussian
-            A2 = pfinal[2] * 2 * math.pi * fwhm2**2
+            sigma2_cm = pfinal[3]
+            a2 = pfinal[2]
+            fwhm2_cm = 2.354820045 * sigma2_cm  # Full Width at Half Maximum for the second Gaussian
+
+            # double gaussian model is following
+            #  G(r, sigma) = 1 / (2pi sigma) * exp( - 0.5 r^2 / sigma^2)
+            #  D(z,r) = D(z,0) * G(r, sigma)
+            # for double gaussian it is following:
+            #  D(z,r) = D(z,0) * ( w * G(r, sigma1) + (1-w) * G(r, sigma2))
+            #
+            # which can be written as:
+            #
+            # D(z,r) = D(z,0) * w / (2 pi sigma1) * exp( - 0.5 r^2 / sigma1^2) +
+            #          D(z,0) * (1-w) / (2 pi sigma1) * exp( - 0.5 r^2 / sigma2^2)
+            #
+            # if we compare this with fitting model:
+            #
+            # D(z,r) = a1 * exp( - 0.5 r^2 / sigma1^2) + a2 * exp( - 0.5 r^2 / sigma2^2)
+            #
+            # then we have following equations:
+            #
+            # a1 = D(z,0) * w / (2 pi sigma1)
+            # a2 = D(z,0) * (1-w) / (2 pi sigma2)
+            #
+            # which leads to:
+            #
+            # D(z,0) * w = 2 pi a1 sigma1
+            # D(z,0) * (1-w) = 2 pi a2 sigma2
+            #
+            # and:
+            #
+            # D(z,0) = 2 pi (a1 sigma1 + a2 sigma2)
+            #      w = a1 sigma1 / (a1 sigma1 + a2 sigma2)
+
+            dz0 = 2.0 * np.pi * (a1 * sigma1_cm + a2 * sigma2_cm)
+            factor = a1 * sigma1_cm / (a1 * sigma1_cm + a2 * sigma2_cm)
         else:
-            fwhm2 = 0.0
-            A2 = 0.0
+
+            # single gaussian model is following
+            #  G(r, sigma) = 1 / (2pi sigma) * exp( - 0.5 r^2 / sigma^2)
+            #  D(z,r) = D(z,0) * G(r, sigma)
+            #
+            # which can be written as:
+            #
+            # D(z,r) = D(z,0) / (2 pi sigma1) * exp( - 0.5 r^2 / sigma1^2)
+            #
+            # if we compare this with fitting model:
+            #
+            # D(z,r) = a1 * exp( - 0.5 r^2 / sigma1^2)
+            #
+            # then we have following equation:
+            #
+            # a1 = D(z,0) / (2 pi sigma1)
+            #
+            # which leads to:
+            #
+            # D(z,0) = 2 pi a1 sigma1
+
+            dz0 = 2.0 * np.pi * a1 * sigma1_cm
+            factor = 0.0
+            fwhm2_cm = 0.0
+
+        # TODO what are really the units ? DDD files in TRiP98 distribution have [cm], not [mm]
         # Scale from cm to mm according to Gheorghe from Marburg
         # fwhm1 *= 10.0
         # fwhm2 *= 10.0
-        # Get the amplitudes of the normalized form of the double Gaussian
-        A1 = pfinal[0] * 2 * math.pi * fwhm1**2
-        normfactor = A1 + A2  # changed to use of the normalized amplitudes
-        if normfactor == 0:  # check if denominator is 0
-            #        factor = 1.0
-            logger.debug("normfactor = " + normfactor + " , energy = " + energy_MeV + " , depth = " + depth_cm)
-            factor = -1e6  # Calculate the factor between the two amplitudes
-            # TODO: CHECK THAT THIS IS THE RIGHT ->#what's going on here?!?!
-        else:
-            factor = A2 / normfactor
-            # Calculate the factor between the two normalized amplitudes: factor = A2 / (A1+A2),
-            # This definition was given by Gheorghe and Uli from Marburg!
 
-        return fwhm1, factor, fwhm2
+        return fwhm1_cm, factor, fwhm2_cm, dz0
