@@ -1,7 +1,6 @@
 import time
 import logging
 import os
-from copy import deepcopy
 
 import numpy as np
 
@@ -127,7 +126,7 @@ class TripDddWriter(object):
                     threshold=threshold,
                     zmax_cm=z_fitting_cm_1d[-1])
 
-                self._plot_2d_map(z_fitting_cm_2d, r_fitting_cm_2d, dose_fitting_MeV_g_2d, z_fitting_cm_1d, None, None)
+                self._plot_2d_map(z_fitting_cm_2d, r_fitting_cm_2d, dose_fitting_MeV_g_2d, z_fitting_cm_1d)
 
             logger.info("Fitting...")
             fwhm1_cm_data = []
@@ -142,12 +141,9 @@ class TripDddWriter(object):
                     r_fitting_cm = self.r_data_cm_1d[dose_at_z > 0]
                     dose_fitting_1d_positive_MeV_g = dose_at_z[dose_at_z > 0]
 
-                    # fitting will be done on D(r)*r data
-                    radial_dose_MeV_cm_g = dose_fitting_1d_positive_MeV_g * r_fitting_cm
-
                     # perform the fit
                     fwhm1_cm, factor, fwhm2_cm, dz0_MeV_cm_g = self._lateral_fit(r_fitting_cm,
-                                                                                 radial_dose_MeV_cm_g,
+                                                                                 dose_fitting_1d_positive_MeV_g,
                                                                                  z_cm,
                                                                                  self.energy_MeV,
                                                                                  self.ngauss)
@@ -173,6 +169,7 @@ class TripDddWriter(object):
                     z_fitting_cm_1d,
                     fwhm1_cm_data,
                     fwhm2_cm_data,
+                    weight_data,
                     dz0_MeV_cm_g_data,
                     suffix='_fwhm')
 
@@ -209,9 +206,15 @@ class TripDddWriter(object):
         self.z_data_cm_2d = np.array(list(detector.z)).reshape(detector.nz, detector.nx)
         self.dose_data_MeV_g_2d = np.array(detector.v).reshape(detector.nz, detector.nx)
 
+        self.dose_error_MeV_g_2d = np.array(detector.error).reshape(detector.nz, detector.nx)
+
         # 1D arrays of r,z and dose in the very central bin
         self.r_data_cm_1d = self.r_data_cm_2d[0]  # middle points of the bins
         self.z_data_cm_1d = np.asarray(list(detector.z)[0:detector.nz * detector.nx:detector.nx])
+
+        # np.savez("data", r2d=self.r_data_cm_2d, z2d=self.z_data_cm_2d, d2d=self.dose_data_MeV_g_2d,
+        #          r1d=self.r_data_cm_1d, z1d=self.z_data_cm_1d, e2d=self.dose_error_MeV_g_2d)
+
         bin_depth_z_cm = self.z_data_cm_1d[1] - self.z_data_cm_1d[0]
         r_step_cm = self.r_data_cm_1d[1] - self.r_data_cm_1d[0]
 
@@ -246,6 +249,7 @@ class TripDddWriter(object):
                      z_fitting_cm_1d=None,
                      fwhm1_cm=None,
                      fwhm2_cm=None,
+                     weight=None,
                      dz0_MeV_cm_g_data=None,
                      suffix=''):
         import matplotlib
@@ -286,55 +290,65 @@ class TripDddWriter(object):
         if self.verbosity > 2 and (fwhm1_cm or fwhm2_cm):
             # TODO add plotting sum of 2 gausses
             sigma1_cm = np.array(fwhm1_cm) / 2.354820045
-            gauss_amplitude_MeV_g = dz0_MeV_cm_g_data / (2.0 * np.pi * sigma1_cm**2)
-            for z_cm, sigma1_at_z_cm, amplitude_MeV_g in zip(z_fitting_cm_1d, sigma1_cm, gauss_amplitude_MeV_g):
+            sigma2_cm = np.array(fwhm2_cm) / 2.354820045
+            gauss_amplitude_MeV_g = dz0_MeV_cm_g_data
+            for z_cm, sigma1_at_z_cm, sigma2_at_z_cm, factor, amplitude_MeV_g in \
+                    zip(z_fitting_cm_1d, sigma1_cm, sigma2_cm, weight, gauss_amplitude_MeV_g):
                 dose_mc_MeV_g = self.dose_data_MeV_g_2d[self.z_data_cm_2d == z_cm]
                 title = "Z = {:4.3f} cm,  sigma1 = {:4.3f} cm".format(z_cm, sigma1_at_z_cm)
+                plt.plot(self.r_data_cm_1d, dose_mc_MeV_g, 'k.', label="data")
+                if self.ngauss == 1:
+                    gauss_data_MeV_g = self.gauss_MeV_g(self.r_data_cm_1d, amplitude_MeV_g, sigma1_at_z_cm)
+                    plt.plot(self.r_data_cm_1d, gauss_data_MeV_g, label="fit")
+                elif self.ngauss == 2:
+                    gauss_data_MeV_g = self.gauss2_MeV_g(self.r_data_cm_1d, amplitude_MeV_g,
+                                                         sigma1_at_z_cm, factor, sigma2_at_z_cm)
+                    gauss_data_MeV_g_1st = self.gauss2_MeV_g_1st(self.r_data_cm_1d, amplitude_MeV_g,
+                                                                 sigma1_at_z_cm, factor, sigma2_at_z_cm)
+                    gauss_data_MeV_g_2nd = self.gauss2_MeV_g_2nd(self.r_data_cm_1d, amplitude_MeV_g,
+                                                                 sigma1_at_z_cm, factor, sigma2_at_z_cm)
+                    plt.plot(self.r_data_cm_1d, gauss_data_MeV_g, label="fit")
+                    plt.plot(self.r_data_cm_1d, gauss_data_MeV_g_1st, label="fit 1st gauss")
+                    plt.plot(self.r_data_cm_1d, gauss_data_MeV_g_2nd, label="fit 2nd gauss")
+                    title += ", sigma2 = {:4.3f} cm, factor = {:4.6f}".format(sigma2_at_z_cm, factor)
                 logger.debug("Plotting at " + title)
                 plt.title(title)
-                plt.plot(self.r_data_cm_1d, dose_mc_MeV_g, label="data")
-                if self.ngauss == 1:
-                    gauss_data_MeV_g = amplitude_MeV_g * np.exp(-0.5 * self.r_data_cm_1d**2 / sigma1_at_z_cm)
-                    plt.plot(self.r_data_cm_1d, gauss_data_MeV_g, label="fit")
                 plt.legend(loc=0)
                 plt.yscale('log')
                 plt.xlabel("r [cm]")
                 plt.ylabel("dose [MeV/g]")
-                # plt.xlim([0, 5*sigma1_at_z_cm])
                 plt.ylim([dose_mc_MeV_g.min(), dose_mc_MeV_g.max()])
                 if self.ngauss == 1:
                     plt.ylim([dose_mc_MeV_g.min(), max(gauss_data_MeV_g.max(), dose_mc_MeV_g.max())])
                 out_filename = prefix + "fit_details_{:4.3f}_log".format(z_cm) + suffix + '.png'
                 logger.info('Saving ' + out_filename)
                 plt.savefig(out_filename)
+
                 plt.xscale('log')
                 plt.xlim([0, self.r_data_cm_1d.max()])
                 out_filename = prefix + "fit_details_{:4.3f}_loglog".format(z_cm) + suffix + '.png'
                 logger.info('Saving ' + out_filename)
                 plt.savefig(out_filename)
-                plt.close()
 
-                plt.plot(self.r_data_cm_1d, dose_mc_MeV_g * self.r_data_cm_1d, label="data")
-                if self.ngauss == 1:
-                    plt.plot(self.r_data_cm_1d, gauss_data_MeV_g * self.r_data_cm_1d, label="fit")
-                plt.legend(loc=0)
-                plt.ylabel("dose * r [MeV cm/g]")
-                plt.xlim([0, 20*sigma1_at_z_cm])
-                plt.ylim([(dose_mc_MeV_g * self.r_data_cm_1d).min(), (dose_mc_MeV_g * self.r_data_cm_1d).max()])
-                if self.ngauss == 1:
-                    plt.ylim([(dose_mc_MeV_g * self.r_data_cm_1d).min(),
-                              max(
-                                  (gauss_data_MeV_g * self.r_data_cm_1d).max(),
-                                  (dose_mc_MeV_g * self.r_data_cm_1d).max())])
-                out_filename = prefix + "fit_details_{:4.3f}_r".format(z_cm) + suffix + '.png'
+                plt.xscale('linear')
+                plt.xlim([0, 5.0*sigma2_at_z_cm])
+                plt.ylim([dose_mc_MeV_g[self.r_data_cm_1d < 5.0*sigma2_at_z_cm].min(), dose_mc_MeV_g.max()])
+                out_filename = prefix + "fit_details_{:4.3f}_small_log".format(z_cm) + suffix + '.png'
                 logger.info('Saving ' + out_filename)
                 plt.savefig(out_filename)
+
+                plt.close()
+
+                plt.plot(self.r_data_cm_1d, dose_mc_MeV_g * self.r_data_cm_1d, 'k.', label="data")
+                plt.plot(self.r_data_cm_1d, gauss_data_MeV_g * self.r_data_cm_1d, label="fit")
+                plt.legend(loc=0)
+                plt.ylabel("dose * r [MeV cm/g]")
+                plt.ylim([(dose_mc_MeV_g * self.r_data_cm_1d).min(), (dose_mc_MeV_g * self.r_data_cm_1d).max()])
                 plt.yscale('log')
                 out_filename = prefix + "fit_details_{:4.3f}_r_log".format(z_cm) + suffix + '.png'
                 logger.info('Saving ' + out_filename)
                 plt.savefig(out_filename)
                 plt.xscale('log')
-                plt.xlim([0, self.r_data_cm_1d.max()])
                 out_filename = prefix + "fit_details_{:4.3f}_r_loglog".format(z_cm) + suffix + '.png'
                 logger.info('Saving ' + out_filename)
                 plt.savefig(out_filename)
@@ -386,18 +400,15 @@ class TripDddWriter(object):
             plt.savefig(out_filename)
             plt.close()
 
-        plt.plot(z_fitting_cm_1d, dose_fitting_MeV_g_1d, 'b', label='dose')
-        plt.xlabel('z [cm]')
-        plt.ylabel('dose [MeV/g]')
-        out_filename = prefix + 'dose.png'
-        logger.info('Saving ' + out_filename)
-        plt.savefig(out_filename)
         if self.verbosity > 1:
+            plt.plot(z_fitting_cm_1d, dose_fitting_MeV_g_1d, 'b', label='dose')
+            plt.xlabel('z [cm]')
+            plt.ylabel('dose [MeV/g]')
             plt.yscale('log')
             out_filename = prefix + 'dose_log.png'
             logger.info('Saving ' + out_filename)
             plt.savefig(out_filename)
-        plt.close()
+            plt.close()
 
     def _post_fitting_plots(self, z_fitting_cm_1d,
                             dose_fitting_MeV_g_1d,
@@ -493,7 +504,7 @@ class TripDddWriter(object):
             # sigma * D(z,0) / (2 pi rmax^2)
             fit_dose_MeV_g = sigma1_cm * dz0_MeV_cm_g_data / (2.0 * np.pi * r_max_cm ** 2)
             # missing ( 1 - exp( - 0.5 rmax^2 / sigma^2))
-            fit_dose_MeV_g /= (np.ones_like(sigma1_cm) - np.exp(-0.5 * r_max_cm / sigma1_cm**2))
+            fit_dose_MeV_g *= (np.ones_like(sigma1_cm) - np.exp(-0.5 * r_max_cm / sigma1_cm**2))
             plt.plot(z_fitting_cm_1d, fit_dose_MeV_g, 'r', label='dose fit')
         if self.ngauss == 2:
             sigma1_cm = np.array(fwhm1_cm_data) / 2.354820045
@@ -512,7 +523,7 @@ class TripDddWriter(object):
             fit_dose_MeV_g *= dz0_MeV_cm_g_data / (2.0 * np.pi * r_max_cm ** 2)
             plt.plot(z_fitting_cm_1d, fit_dose_MeV_g, 'r', label='dose fit')
 
-        plt.plot(z_fitting_cm_1d, dose_fitting_MeV_g_1d, 'g', label='dose MC')
+        plt.plot(z_fitting_cm_1d, dose_fitting_MeV_g_1d, 'b', label='dose MC')
         plt.xlabel('z [cm]')
         plt.ylabel('dose [MeV/g]')
         plt.legend(loc=0)
@@ -526,287 +537,88 @@ class TripDddWriter(object):
             plt.savefig(out_filename)
         plt.close()
 
-    @staticmethod
-    def _lateral_fit(left_radii_cm, radial_dose_scaled, depth_cm, energy_MeV, ngauss=2):
-        """
-        Fitting for lateral dose distribution
-        Fits the lateral dose scaled with the radius using a double Gaussian by the use of Levenberg-Marquardt alg.
-        Parameters:
-        * radii        radius values corresponding to dose
-        * dose         dose D(r)
-        * dose_scaled  dose times the radii D(r)*r
-        * depth        only used for graphing
-        * energy       only used for graphing
+    @classmethod
+    def gauss_MeV_g(cls, x_cm, amp_MeV_cm_g, sigma_cm):
+        return amp_MeV_cm_g / (2.0 * np.pi * sigma_cm) * np.exp(-x_cm ** 2 / (2.0 * sigma_cm ** 2))
 
-        Returns: (x,{cov_x,infodict,mesg},ier)
-        """
+    @classmethod
+    def gauss_r_MeV_cm_g(cls, x_cm, amp_MeV_cm_g, sigma_cm):
+        return cls.gauss_MeV_g(x_cm, amp_MeV_cm_g, sigma_cm) * x_cm
 
-        def internal2external_grad(xi, bounds):
-            """
-            Calculate the internal to external gradiant
-            Calculates the partial of external over internal
-            """
+    @classmethod
+    def gauss2_MeV_g(cls, x_cm, amp_MeV_cm_g, sigma1_cm, weight, sigma2_add_cm):
+        return amp_MeV_cm_g / (2.0 * np.pi) * (
+            (weight / sigma1_cm) * np.exp(-x_cm ** 2 / (2.0 * sigma1_cm ** 2))
+            + ((1.0 - weight) / (sigma1_cm + sigma2_add_cm)) * np.exp(
+                -x_cm ** 2 / (2.0 * (sigma1_cm + sigma2_add_cm) ** 2))
+        )
 
-            ge = np.empty_like(xi)
+    @classmethod
+    def gauss2_MeV_g_1st(cls, x_cm, amp_MeV_cm_g, sigma1_cm, weight, sigma2_add_cm):
+        return amp_MeV_cm_g / (2.0 * np.pi) * (weight / sigma1_cm) * np.exp(-x_cm ** 2 / (2.0 * sigma1_cm ** 2))
 
-            for i, (v, bound) in enumerate(zip(xi, bounds)):
+    @classmethod
+    def gauss2_MeV_g_2nd(cls, x_cm, amp_MeV_cm_g, sigma1_cm, weight, sigma2_add_cm):
+        return amp_MeV_cm_g / (2.0 * np.pi) * ((1.0 - weight) / (sigma1_cm + sigma2_add_cm)) * np.exp(
+            -x_cm ** 2 / (2.0 * (sigma1_cm + sigma2_add_cm) ** 2))
 
-                a = bound[0]  # minimum
-                b = bound[1]  # maximum
+    @classmethod
+    def gauss2_r_MeV_cm_g(cls, x_cm, amp_MeV_cm_g, sigma1_cm, weight, sigma2_add_cm):
+        return cls.gauss2_MeV_g(x_cm, amp_MeV_cm_g, sigma1_cm, weight, sigma2_add_cm) * x_cm
 
-                if a is None and b is None:  # No constraints
-                    ge[i] = 1.0
-                elif b is None:  # only min
-                    ge[i] = v / np.sqrt(v**2 + 1)
-                elif a is None:  # only max
-                    ge[i] = -v / np.sqrt(v**2 + 1)
-                else:  # both min and max
-                    ge[i] = (b - a) * np.cos(v) / 2.
+    @classmethod
+    def _lateral_fit(cls, r_cm, dose_MeV_g, z_cm, energy_MeV, ngauss=2):
+        variance = np.average(r_cm ** 2, weights=dose_MeV_g)
 
-            return ge
+        starting_amp_MeV_g = dose_MeV_g.max()
+        starting_sigma_cm = np.sqrt(variance)
 
-        def i2e_cov_x(xi, bounds, cov_x):
-            grad = internal2external_grad(xi, bounds)
-            grad = grad = np.atleast_2d(grad)
-            return np.dot(grad.T, grad) * cov_x
+        min_amp_MeV_g = 1e-10 * dose_MeV_g.max()
+        min_sigma_cm = 1e-2 * starting_sigma_cm
 
-        def internal2external(xi, bounds):
-            """ Convert a series of internal variables to external variables"""
+        max_amp_MeV_g = 2.0 * dose_MeV_g.max()
+        max_sigma_cm = 1e4 * starting_sigma_cm
 
-            xe = np.empty_like(xi)
+        from scipy.optimize import curve_fit
 
-            for i, (v, bound) in enumerate(zip(xi, bounds)):
+        if ngauss == 1:
+            popt, pcov = curve_fit(f=cls.gauss_r_MeV_cm_g,
+                                   xdata=r_cm,
+                                   ydata=dose_MeV_g * r_cm,
+                                   p0=[starting_amp_MeV_g, starting_sigma_cm],
+                                   bounds=([[min_amp_MeV_g, min_sigma_cm], [max_amp_MeV_g, max_sigma_cm]]),
+                                   sigma=None)
+            # TODO return also parameter errors
+            # perr = np.sqrt(np.diag(pcov))
 
-                a = bound[0]  # minimum
-                b = bound[1]  # maximum
-
-                if a is None and b is None:  # No constraints
-                    xe[i] = v
-                elif b is None:  # only min
-                    xe[i] = a - 1. + np.sqrt(v**2. + 1.)
-                elif a is None:  # only max
-                    xe[i] = b + 1. - np.sqrt(v**2. + 1.)
-                else:  # both min and max
-                    xe[i] = a + ((b - a) / 2.) * (np.sin(v) + 1.)
-
-            return xe
-
-        def external2internal(xe, bounds):
-            """ Convert a series of external variables to internal variables"""
-
-            xi = np.empty_like(xe)
-
-            for i, (v, bound) in enumerate(zip(xe, bounds)):
-
-                a = bound[0]  # minimum
-                b = bound[1]  # maximum
-
-                if a is None and b is None:  # No constraints
-                    xi[i] = v
-                elif b is None:  # only min
-                    xi[i] = np.sqrt((v - a + 1.)**2. - 1)
-                elif a is None:  # only max
-                    xi[i] = np.sqrt((b - v + 1.)**2. - 1)
-                else:  # both min and max
-                    xi[i] = np.arcsin((2. * (v - a) / (b - a)) - 1.)
-
-            return xi
-
-        def err(p, bounds, efunc, args):
-            pe = internal2external(p, bounds)  # convert to external variables
-            return efunc(pe, *args)
-
-        def calc_cov_x(infodic, p):
-            """
-            Calculate cov_x from fjac, ipvt and p as is done in leastsq
-            """
-
-            fjac = infodic['fjac']
-            ipvt = infodic['ipvt']
-            n = len(p)
-
-            # adapted from leastsq function in scipy/optimize/minpack.py
-            perm = np.take(np.eye(n), ipvt - 1, 0)
-            r = np.triu(np.transpose(fjac)[:n, :])
-            R = np.dot(r, perm)
-            try:
-                cov_x = np.linalg.inv(np.dot(np.transpose(R), R))
-            except np.linalg.LinAlgError:
-                cov_x = None
-            return cov_x
-
-        def leastsqbound(func, x0, bounds, args=(), **kw):
-            """
-            Constrained multivariant Levenberg-Marquard optimization
-
-            Minimize the sum of squares of a given function using the
-            Levenberg-Marquard algorithm. Contraints on parameters are inforced using
-            variable transformations as described in the MINUIT User's Guide by
-            Fred James and Matthias Winkler.
-
-            Parameters:
-
-            * func      functions to call for optimization.
-            * x0        Starting estimate for the minimization.
-            * bounds    (min,max) pair for each element of x, defining the bounds on
-                        that parameter.  Use None for one of min or max when there is
-                        no bound in that direction.
-            * args      Any extra arguments to func are places in this tuple.
-
-            Returns: (x,{cov_x,infodict,mesg},ier)
-
-            Return is described in the scipy.optimize.leastsq function.  x and con_v
-            are corrected to take into account the parameter transformation, infodic
-            is not corrected.
-
-            Additional keyword arguments are passed directly to the
-            scipy.optimize.leastsq algorithm.
-
-            """
-            from scipy.optimize import leastsq
-
-            # check for full output
-            if "full_output" in kw and kw["full_output"]:
-                full = True
-            else:
-                full = False
-
-            # convert x0 to internal variables
-            i0 = external2internal(x0, bounds)
-
-            # perfrom unconstrained optimization using internal variables
-            r = leastsq(err, i0, args=(bounds, func, args), **kw)
-
-            # unpack return convert to external variables and return
-            if full:
-                xi, cov_xi, infodic, mesg, ier = r
-                xe = internal2external(xi, bounds)
-                cov_xe = i2e_cov_x(xi, bounds, cov_xi)
-                # XXX correct infodic 'fjac','ipvt', and 'qtf'
-                return xe, cov_xe, infodic, mesg, ier
-
-            else:
-                xi, ier = r
-                xe = internal2external(xi, bounds)
-                return xe, ier
-
-        def residuals_1g(p, y, x):  # objective function for minimization (vector function)
-            err = y - peval_1g(x, mu, p)
-            return err
-
-        def residuals_2g(p, y, x):  # objective function for minimization (vector function)
-            err = y - peval_2g(x, mu, p)
-            return err
-
-        def peval_1g(x, mu, p):  # The model function: One gaussian
-            return p[0] * np.exp(-((x - mu)**2) / (2 * p[1]**2)) * x
-
-        def peval_2g(x_cm, mu_cm, p):  # The model function: Two gaussians (sum), the mean mu is locked
-            # In guideline with a similar routine for TRiP by U. Weber,
-            # the function is scaled with the radius to fit D(r)*r /TPR
-            return (p[0] * np.exp(-((x_cm - mu_cm)**2) / (2 * p[1]**2)) + p[2] * np.exp(-(
-                (x_cm - mu_cm)**2) / (2 * p[3]**2))) * x_cm
-
-        x = left_radii_cm
-        y = radial_dose_scaled
-        # Calculate initial guesses #
-        a1_guess = y.max()  # guess for the amplitude of the first gaussian
-        mu = 0  # set the mean to zero - a guess would be: sum(x*y)/sum(y)
-        if sum(y) == 0:  # check if denominator is 0
-            sigma1_cm_guess = 1e5
-        else:
-            sigma1_cm_guess = np.sqrt(abs(sum((x - mu)**2 * y) / sum(y)))  # guess for the deviation
-
-        if ngauss == 2:
-            a2_guess = deepcopy(a1_guess) * 0.05  # guess for the  amplitude of the second gaussian
-            sigma2_cm_guess = 2  # guess for the deviation of the second gaussian
-            sigma2_cm_guess = deepcopy(sigma1_cm_guess) * 5.0
-            # Collect the guesses in an array
-            p0 = np.asarray([a1_guess, sigma1_cm_guess, a2_guess, sigma2_cm_guess])
-            bounds = [(0, 1e6), (0, 1e6), (0, 1e6), (0, 1e6)]  # set bound for the parameters,
-            # they should be non-negative
-            plsq = leastsqbound(residuals_2g, p0, bounds, args=(y, x), maxfev=5000)  # Calculate the fit
-        elif ngauss == 1:
-            # Collect the guesses in an array
-            p0 = np.asarray([a1_guess, sigma1_cm_guess])
-            bounds = [(0, 1e6), (0, 1e6)]  # set bound for the parameters, they should be non-negative
-            plsq = leastsqbound(residuals_1g, p0, bounds, args=(y, x), maxfev=5000)  # Calculate the fit
-
-        pfinal = plsq[0]  # final parameters
-        # covar = plsq[1]  # covariance matrix
-
-        sigma1_cm = pfinal[1]
-        a1_MeV_g = pfinal[0]
-
-        # Calculate the output parameters
-        # FWHM = sqrt(8*log(2)) * Gaussian_Sigma
-        fwhm1_cm = 2.354820045 * sigma1_cm  # Full Width at Half Maximum for the first Gaussian
-        if ngauss == 2:
-            sigma2_cm = pfinal[3]
-            a2_MeV_g = pfinal[2]
-            fwhm2_cm = 2.354820045 * sigma2_cm  # Full Width at Half Maximum for the second Gaussian
-
-            # double gaussian model is following
-            #  G(r, sigma) = 1 / (2pi sigma) * exp( - 0.5 r^2 / sigma^2)
-            #  D(z,r) = D(z,0) * G(r, sigma)
-            # for double gaussian it is following:
-            #  D(z,r) = D(z,0) * ( w * G(r, sigma1) + (1-w) * G(r, sigma2))
-            #
-            # which can be written as:
-            #
-            # D(z,r) = D(z,0) * w / (2 pi sigma1) * exp( - 0.5 r^2 / sigma1^2) +
-            #          D(z,0) * (1-w) / (2 pi sigma1) * exp( - 0.5 r^2 / sigma2^2)
-            #
-            # if we compare this with fitting model:
-            #
-            # D(z,r) = a1 * exp( - 0.5 r^2 / sigma1^2) + a2 * exp( - 0.5 r^2 / sigma2^2)
-            #
-            # then we have following equations:
-            #
-            # a1 = D(z,0) * w / (2 pi sigma1)
-            # a2 = D(z,0) * (1-w) / (2 pi sigma2)
-            #
-            # which leads to:
-            #
-            # D(z,0) * w = 2 pi a1 sigma1
-            # D(z,0) * (1-w) = 2 pi a2 sigma2
-            #
-            # and:
-            #
-            # D(z,0) = 2 pi (a1 sigma1 + a2 sigma2)
-            #      w = a1 sigma1 / (a1 sigma1 + a2 sigma2)
-
-            dz0_MeV_cm_g = 2.0 * np.pi * (a1_MeV_g * sigma1_cm + a2_MeV_g * sigma2_cm)
-            factor = a1_MeV_g * sigma1_cm / (a1_MeV_g * sigma1_cm + a2_MeV_g * sigma2_cm)
-        else:
-
-            # single gaussian model is following
-            #  G(r, sigma) = 1 / (2pi sigma) * exp( - 0.5 r^2 / sigma^2)
-            #  D(z,r) = D(z,0) * G(r, sigma)
-            #
-            # which can be written as:
-            #
-            # D(z,r) = D(z,0) / (2 pi sigma1) * exp( - 0.5 r^2 / sigma1^2)
-            #
-            # if we compare this with fitting model:
-            #
-            # D(z,r) = a1 * exp( - 0.5 r^2 / sigma1^2)
-            #
-            # then we have following equation:
-            #
-            # a1 = D(z,0) / (2 pi sigma1)
-            #
-            # which leads to:
-            #
-            # D(z,0) = 2 pi a1 sigma1
-
-            dz0_MeV_cm_g = 2.0 * np.pi * a1_MeV_g * sigma1_cm
+            dz0_MeV_cm_g, sigma_cm = popt
             factor = 0.0
             fwhm2_cm = 0.0
 
-        # TODO what are really the units ? DDD files in TRiP98 distribution have [cm], not [mm]
-        # Scale from cm to mm according to Gheorghe from Marburg
-        # fwhm1 *= 10.0
-        # fwhm2 *= 10.0
+        elif ngauss == 2:
+            starting_weigth = 0.99
+            starting_sigma2_add_cm = 0.1
+
+            min_weigth = 0.55
+            min_sigma2_add_cm = 1e-1
+
+            max_weigth = 1.0 - 1e-12
+            max_sigma2_add_cm = 20.0
+
+            popt, pcov = curve_fit(f=cls.gauss2_r_MeV_cm_g,
+                                   xdata=r_cm,
+                                   ydata=dose_MeV_g * r_cm,
+                                   p0=[starting_amp_MeV_g, starting_sigma_cm, starting_weigth, starting_sigma2_add_cm],
+                                   bounds=([min_amp_MeV_g, min_sigma_cm, min_weigth, min_sigma2_add_cm],
+                                           [max_amp_MeV_g, max_sigma_cm, max_weigth, max_sigma2_add_cm]),
+                                   sigma=None)
+            # TODO return also parameter errors
+            # perr = np.sqrt(np.diag(pcov))
+
+            dz0_MeV_cm_g, sigma_cm, factor, sigma2_add_cm = popt
+            sigma2_cm = sigma_cm + sigma2_add_cm
+
+        fwhm1_cm = sigma_cm * 2.354820045
+        fwhm2_cm = sigma2_cm * 2.354820045
 
         return fwhm1_cm, factor, fwhm2_cm, dz0_MeV_cm_g
