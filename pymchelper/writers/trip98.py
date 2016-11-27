@@ -80,7 +80,7 @@ class TripDddWriter(object):
 !composition   {composition:s}
 !density {density:f}
 !energy {energy:f}
-#   z[g/cm**2] dE/dz[MeV/(g/cm**2)] FWHM1[mm] factor FWHM2[mm]
+#   z[g/cm**2] dE/dz[MeV/(g/cm**2)] FWHM1[g/cm**2] factor FWHM2[g/cm**2]
 !ddd
 """
 
