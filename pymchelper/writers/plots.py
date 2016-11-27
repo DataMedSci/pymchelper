@@ -7,7 +7,7 @@ logger = logging.getLogger(__name__)
 
 
 class PlotDataWriter:
-    def __init__(self, filename):
+    def __init__(self, filename, options):
         self.filename = filename
         if not self.filename.endswith(".dat"):
             self.filename += ".dat"
@@ -43,7 +43,7 @@ class PlotDataWriter:
 
 
 class GnuplotDataWriter:
-    def __init__(self, filename):
+    def __init__(self, filename, options):
         self.data_filename = filename
         self.script_filename = filename
         self.plot_filename = filename
@@ -119,20 +119,17 @@ splot \"<awk -f addblanks.awk '{data_filename}'\" u 1:2:3 with pm3d
 
 
 class ImageWriter:
-    def __init__(self, filename):
+    def __init__(self, filename, options):
         self.plot_filename = filename
         if not self.plot_filename.endswith(".png"):
             self.plot_filename += ".png"
-        self.colormap = ImageWriter.default_colormap
+        self.colormap = options.colormap
 
     default_colormap = 'gnuplot2'
 
     @staticmethod
     def make_label(unit, name):
         return name + " " + "[" + unit + "]"
-
-    def set_colormap(self, colormap):
-        self.colormap = colormap
 
     def _save_2d_error_plot(self, detector, xlist, ylist, elist):
         import matplotlib

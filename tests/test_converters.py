@@ -4,6 +4,7 @@ Tests for converters (so far only pld2sobp.py)
 import unittest
 import logging
 import pymchelper.utils.pld2sobp
+import pymchelper.run
 
 logger = logging.getLogger(__name__)
 
@@ -24,6 +25,26 @@ class TestPld2Sobp(unittest.TestCase):
     def test_noarg(self):
         try:
             pymchelper.utils.pld2sobp.main([])
+        except SystemExit as e:
+            self.assertEqual(e.code, 2)
+
+
+class TestTrip2Ddd(unittest.TestCase):
+    def test_help(self):
+        try:
+            pymchelper.run.main(["tripddd", "--help"])
+        except SystemExit as e:
+            self.assertEqual(e.code, 0)
+
+    def test_version(self):
+        try:
+            pymchelper.run.main(["tripddd", "--version"])
+        except SystemExit as e:
+            self.assertEqual(e.code, 0)
+
+    def test_noarg(self):
+        try:
+            pymchelper.run.main(["tripddd"])
         except SystemExit as e:
             self.assertEqual(e.code, 2)
 
