@@ -13,6 +13,7 @@
 
 import sys
 import os
+import subprocess
 
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
@@ -43,6 +44,7 @@ extensions = [
     'sphinx.ext.inheritance_diagram',
     'sphinx.ext.coverage',
     'sphinx.ext.graphviz',
+    'sphinx.ext.napoleon'
 ]
 
 # Add any paths that contain templates here, relative to this directory.
@@ -378,3 +380,24 @@ epub_exclude_files = ['search.html']
 
 # If false, no index is generated.
 #epub_use_index = True
+
+# Example configuration for intersphinx: refer to the Python standard library.
+intersphinx_mapping = {'https://docs.python.org/': None}
+
+# Automate building apidoc when building with readthedocs
+# https://github.com/rtfd/readthedocs.org/issues/1139
+def run_apidoc(_):
+    module = 'pymchelper'
+    cur_dir = os.path.abspath(os.path.dirname(__file__))
+    output_path = os.path.join(cur_dir, 'apidoc')
+    module_path = os.path.join(cur_dir, '..', module)
+    cmd_path = 'sphinx-apidoc'
+    if hasattr(sys, 'real_prefix'):  # Check to see if we are in a virtualenv
+        # If we are, assemble the path manually
+        cmd_path = os.path.abspath(os.path.join(sys.prefix, 'bin', 'sphinx-apidoc'))
+    # sphinx-apidoc switches are described here: http://www.sphinx-doc.org/en/stable/man/sphinx-apidoc.html
+    subprocess.check_call([cmd_path, '--module-first', '--separate', '-o', output_path, module_path])
+
+
+def setup(app):
+    app.connect('builder-inited', run_apidoc)
