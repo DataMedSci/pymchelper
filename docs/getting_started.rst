@@ -16,11 +16,11 @@ To get high statistics run is parallelised into 100 different jobs, each produci
 
 pymchelper comes with **convertmc** program which simplifies postprocessing of such binary data.
 
-To convert all files into two text files (one for energy and one for particle fluence) type ::
+To convert all binary files into two text files (one for energy and one for particle fluence) type ::
 
-    convertmc txt --many "*_fort*" 
+    convertmc txt --many "*_fort.*" 
 
-Two new files will be created: XXX and YYY which can further processed.
+Two new files will be created: `21.txt` and `22.txt` which can further processed.
 
 In case estimated value has form of scored-value vs distance it can be plotted as typical `Y vs X`  plot.
 Same thing might be done if 2-D distribution of scored value is obtained - then a heatmap type plot can be produced.
@@ -28,7 +28,11 @@ In order to directly get such plots you can type::
 
     convertmc image --many "*_fort*" 
 
-Two new PNG files will be created which can be directly opened.
+Two new PNG files will be created which can be directly opened, for example
+
+.. figure:: 21.txt.png
+    :scale: 50 %
+    :alt: map to buried treasure
 
 These are just basic examples. To learn more about additional features, proceed to :doc:`User's Guide </user_guide>`. 
 Among these features are:
