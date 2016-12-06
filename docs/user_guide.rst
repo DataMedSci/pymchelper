@@ -94,13 +94,33 @@ will save a file `dose.txt` with rescaled dose of :math:`10^8` protons in `Gy` u
 Error calculation
 ^^^^^^^^^^^^^^^^^
 
-TODO
+In order to perform averaging converter needs to get at least two files per scorer. By default all **convertermc**
+during averaging will also calculate standard deviation, which can be presented to the user in various forms:
+ 
+ - additional column of numbers when saving data into text files (i.e. using `txt` converter)
+ - error band on the normal plot for 1-D scoring grid (when using `image` and `gnuplot` converters)
+ - additional heatmap error plot  for 2-D scoring grid (when using `image` and `gnuplot` converters)
+
+When working in single-file mode calculation of the startand deviation is not possible and user will 
+not get such information. In this case output text files will have one column less and no error band is displayed
+on the plots. 
+
+User can control presented information by means of `--error` option. When this option is not specified **convertmc**
+will raport standard error if possible. Available options are:
+
+ - `none` - no uncertainty information is reported 
+ - `stderr` - standard error information is reported
+ - `stddev` - standard deviation information is reported
 
 Handling NaNs
 ^^^^^^^^^^^^^
 
-TODO
-
+In case of some simulations the results might include numbers decoded as `NaN` (not-a-number). 
+`NaN` has this property that if a regular number is added to `NaN` then the results is again `NaN`
+(`1.0 + NaN = NaN`). This property might lead to a problems when averaging. Single `NaN` version will
+make a `NaN` when averaged with other 99 regular numbers.
+We have a special flag in **convertmc** which will exclude `NaN` from averaging: if `--nan` is used
+then average will be calculated only on regular numbers.
 
 Obtaining help
 ^^^^^^^^^^^^^^
