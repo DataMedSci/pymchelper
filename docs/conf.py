@@ -47,6 +47,7 @@ sys.path.insert(0, project_root)
 extensions = [
     'sphinx.ext.autodoc',
     'sphinx.ext.autosummary',
+    'sphinx.ext.mathjax',
     'sphinx.ext.todo',
     'sphinx.ext.viewcode',
     'sphinx.ext.inheritance_diagram',

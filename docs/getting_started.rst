@@ -38,8 +38,11 @@ In order to get such plots instead of text files, replace first argument with `i
 Two new PNG files will be created which can be directly opened, for example
 
 .. figure:: 21.txt.png
-    :scale: 50 %
+    :scale: 80 %
     :alt: map to buried treasure
+
+If you are SHIELD-HIT12A user, same effect can be achieved by processing `*.bdo` binary files. 
+
 
 These are just basic examples. To learn more about additional features, proceed to :doc:`User's Guide </user_guide>`. 
 Among these features are:

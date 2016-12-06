@@ -38,9 +38,10 @@ and if they are not installed beforehand, these will automatically be fetched by
 Installing using pip (all platforms)
 ------------------------------------
 
-The easiest way to install PyTRiP98 is using `pip <https://pypi.python.org/pypi/pip>`_::
+The easiest way to install PyTRiP98 is using `pip <https://pypi.python.org/pypi/pip>`_
 
 .. note::
+
     Starting from mid-2014 pip comes pre-installed with Python newer than 3.4 and 2.7.9 (for 2.x family)
 
 
