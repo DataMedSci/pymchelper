@@ -1,4 +1,4 @@
-.. highlight:: console
+.. highlight:: bash
 
 .. role:: bash(code)
    :language: bash
@@ -37,7 +37,7 @@ By default they will contain 5 columns: X,Y,Z coordinates, data and error column
 
 In case estimated value was scored on 1-dimensional grid, it can be easily plotted.
 Same thing might be done if 2-D scoring grid was used - then a heatmap type plot can be produced.
-In order to get such plots instead of text files, replace first argument with ``image``::
+In order to get such plots instead of text files, replace first argument with :bash:`image`::
 
     convertmc image --many "*_fort*" 
 

@@ -1,7 +1,12 @@
+.. highlight:: bash
+
+.. role:: bash(code)
+   :language: bash
+
 Plots and images
 ================
 
-`image` converter is very useful tool to quickly inspect simulation results. 
+``image`` converter is very useful tool to quickly inspect simulation results. 
 It accepts data with any 1-D and 2-D scoring grid and is producing images in PNG format with plots. 
 Conversion is done using standard command::
 

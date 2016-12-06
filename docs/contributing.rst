@@ -1,6 +1,8 @@
-.. highlight:: shell
+.. highlight:: bash
 
-==================
+.. role:: bash(code)
+   :language: bash
+
 Contributing Guide
 ==================
 
@@ -161,7 +163,7 @@ Make your changes and check that they comply with PEP8 code quality standards (f
     $ flake8 pymchelper tests
     $ tox
 
-3. Compress your working directory and send it to us by email (see `authors <authors.rst>`__), describing your changes.
+3. Compress your working directory and send it to us by email (see :doc:`authors <authors>`), describing your changes.
 
 
 Tips
@@ -169,11 +171,11 @@ Tips
 
 To run full tests type::
 
-    $ tox
+   tox
 
 To run only a single test type::
 
-   $ PYTHONPATH=. python tests/test_file_to_run.py
+   PYTHONPATH=. python tests/test_file_to_run.py
 
 .. _`bugs`: https://github.com/DataMedSci/pymchelper/issues
 .. _`features`: https://github.com/DataMedSci/pymchelper/issues

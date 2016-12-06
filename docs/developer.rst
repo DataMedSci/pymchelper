@@ -1,6 +1,5 @@
 .. _developer:
 
-=======================
 Developer documentation
 =======================
 
@@ -14,7 +13,6 @@ Developer documentation
 
    
 Indices and tables
-------------------
 
 * :ref:`genindex`
 * :ref:`modindex`

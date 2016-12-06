@@ -1,4 +1,7 @@
-.. highlight:: shell
+.. highlight:: bash
+
+.. role:: bash(code)
+   :language: bash
 
 Detailed Installation Guide
 ===========================
