@@ -13,8 +13,8 @@ Prerequisites
 First we need to check if Python interpreter is installed.
 Try if one of following commands (printing Python version) works::
 
-    $ python --version
-    $ python3 --version
+    python --version
+    python3 --version
 
 At the time of writing Python language interpreter has two popular versions: 2.x (Python 2) and 3.x (Python 3) families.
 Command ``python`` invokes either Python 2 or 3, while ``python3`` can invoke only Python 3.
@@ -26,8 +26,7 @@ If none of ``python`` and ``python3`` commands are present, then Python interpre
 
 We suggest to use the newest version available (from 3.x family).
 
-Python installers can be found at the python web site
-(http://python.org/download/).
+Python installers can be found at the python web site (http://python.org/download/).
 
 pymchelper also relies on these packages:
 
@@ -50,19 +49,19 @@ Administrator installation (root access)
 
 Administrator installation is very simple, but requires to save some files in system-wide directories (i.e. `/usr`)::
 
-    $ sudo pip install pymchelper
+    sudo pip install pymchelper
 
 To upgrade the **pymchelper** to newer version, simply type::
 
-    $ sudo pip install --upgrade pymchelper
+    sudo pip install --upgrade pymchelper
 
 To completely remove **pymchelper** from your system, use following command::
 
-    $ sudo pip uninstall pymchelper
+    sudo pip uninstall pymchelper
 
 Now all **pymchelper** commands should be installed for all users::
 
-    $ convertmc --help
+    convertmc --help
 
 
 User installation (non-root access)
@@ -72,25 +71,25 @@ User installation will put the **pymchelper** under hidden directory `$HOME/.loc
 
 To install the package, type in the terminal::
 
-    $ pip install pymchelper --user
+    pip install pymchelper --user
 
 If `pip` command is missing on your system, replace `pip` with `pip3` in abovementioned instruction.
 
 To upgrade the **pymchelper** to newer version, simply type::
 
-    $ pip install --upgrade pymchelper --user
+    pip install --upgrade pymchelper --user
 
 To completely remove **pymchelper** from your system, use following command::
 
-    $ pip uninstall pymchelper
+    pip uninstall pymchelper
 
 In most of modern systems all executables found in `$HOME/.local/bin` directory can be called
 like normal commands (i.e. `ls`, `cd`). It means that after installation you should be able
 to simply type in terminal::
 
-    $ convertmc --help
+    convertmc --help
 
 If this is not the case, please prefix the command with `$HOME/.local/bin` and call it in the following way::
 
-    $ $HOME/.local/bin/convertmc --help
+    $HOME/.local/bin/convertmc --help
 

@@ -1,5 +1,5 @@
-pymchelper
-==========
+Badges and links
+================
 
 .. image:: https://img.shields.io/pypi/v/pymchelper.svg
         :target: https://pypi.python.org/pypi/pymchelper
@@ -10,9 +10,6 @@ pymchelper
 .. image:: https://readthedocs.org/projects/pymchelper/badge/?version=latest
         :target: https://readthedocs.org/projects/pymchelper/?badge=latest
         :alt: Documentation Status
-
-Overview
---------
 
 .. start-badges
 
@@ -65,12 +62,3 @@ Overview
 .. end-badges
 
 Overv.io issue board: https://overv.io/DataMedSci/pymchelper/
-
-
-Credits
--------
-
-This package was created with Cookiecutter_ and the `grzanka/cookiecutter-pip-docker-versioneer`_ project template.
-
-.. _Cookiecutter: https://github.com/audreyr/cookiecutter
-.. _`grzanka/cookiecutter-pip-docker-versioneer`: https://github.com/grzanka/cookiecutter-pip-docker-versioneer

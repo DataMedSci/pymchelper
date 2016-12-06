@@ -17,8 +17,9 @@ Contents:
    :maxdepth: 2
 
    getting_started.rst
-   install.rst
    user_guide.rst
+   install.rst
+   developer.rst
 
 
 Indices and tables
