@@ -1,3 +1,5 @@
+.. highlight:: console
+
 .. _user_guide:
 
 .. role:: bash(code)
@@ -159,4 +161,11 @@ These options might be useful if your program is i.e. called repetitively in a s
 Using as a library
 ------------------
 
-TODO
+``pymchelper`` is build around :doc:`Detector class <apidoc/pymchelper.detector>`. It provides :code:`read` method
+to get the data from binary file and is exposing to the user axis data, scoring information and data read from the file.
+See an example:
+
+.. literalinclude:: ../examples/comparison.py
+   :language: python
+   :linenos:
+   :lines: 20-40
