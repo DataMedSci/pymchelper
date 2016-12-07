@@ -7,7 +7,7 @@
   include tests/res/shieldhit/converter/bdo2txt
   recursive-include docs *.py
   recursive-include docs *.rst
-  recursive-include docs *.gif
+  recursive-include docs *.png  
   recursive-include pymchelper *.py
   recursive-include tests *.py
   recursive-include tests *.bdo
@@ -29,3 +29,4 @@
   prune install_deps.sh
   prune make_single_executable.sh
   prune tests/res/shieldhit/converter
+

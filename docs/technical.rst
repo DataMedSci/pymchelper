@@ -1,5 +1,5 @@
-pymchelper
-==========
+Badges and links
+================
 
 .. image:: https://img.shields.io/pypi/v/pymchelper.svg
         :target: https://pypi.python.org/pypi/pymchelper
@@ -10,9 +10,6 @@ pymchelper
 .. image:: https://readthedocs.org/projects/pymchelper/badge/?version=latest
         :target: https://readthedocs.org/projects/pymchelper/?badge=latest
         :alt: Documentation Status
-
-Overview
---------
 
 .. start-badges
 
@@ -64,39 +61,4 @@ Overview
 
 .. end-badges
 
-Python toolkit for SHIELD-HIT12A and FLUKA
-
-
-Installation
-------------
-
-Official version ::
-
-    pip install pymchelper
-
-Development version directly from GIT::
-
-    pip install versioneer
-    pip install git+https://github.com/DataMedSci/pymchelper.git
-
-In case you don't have administrator rights, add ``--user`` flag to ``pip`` command.
-In this situation converter will be probably installed in ``~/.local/bin`` directory.
-
-To be able to use ``tripcube`` converter install also ``pytrip98`` Python package using ``pip``.
-
-To upgrade, type::
-
-    pip install -U pymchelper
-
-To uninstall, simply use::
-
-    pip uninstall pymchelper
-
-
-Credits
--------
-
-This package was created with Cookiecutter_ and the `grzanka/cookiecutter-pip-docker-versioneer`_ project template.
-
-.. _Cookiecutter: https://github.com/audreyr/cookiecutter
-.. _`grzanka/cookiecutter-pip-docker-versioneer`: https://github.com/grzanka/cookiecutter-pip-docker-versioneer
+Overv.io issue board: https://overv.io/DataMedSci/pymchelper/
