@@ -127,11 +127,15 @@ class Detector:
         # and https://en.wikipedia.org/wiki/Algorithms_for_calculating_variance#Online_algorithm
         self.counter += 1
         self.nstat += other_detector.nstat
-        delta = other_detector.data - self.data                # delta = x - mean
-        self.data += delta / self.counter                      # mean += delta / n
+        delta = other_detector.data - self.data                    # delta = x - mean
+        self.data += delta / self.counter                          # mean += delta / n
         if error_estimate != ErrorEstimate.none:
-            self._M2 += delta * (other_detector.data - self.data)  # M2 *= delta * (x - mean)
-            self.error = np.sqrt(self._M2 / (self.counter - 1))    # stddev = sqrt(1/(n-1)sum(x-<x>)**2)
+            self._M2 += delta * (other_detector.data - self.data)  # M2 += delta * (x - mean)
+
+            # unbiased sample variance is stored in `self._M2 / (self.counter - 1)`
+            # unbiased sample standard deviation in classical algorithm is calculated as (sqrt(1/(n-1)sum(x-<x>)**2)
+            # here it is calculated as square root of unbiased sample variance:
+            self.error = np.sqrt(self._M2 / (self.counter - 1))
 
     def save(self, filename, options):
         """
