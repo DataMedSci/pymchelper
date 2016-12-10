@@ -110,7 +110,9 @@ class Detector:
         self.nstat += sum(det.nstat for det in other_detectors)
         self.data = np.nanmean(l, axis=0)
         if error_estimate != ErrorEstimate.none:
-            self.error = np.nanstd(l, axis=0, ddof=1)  # stddev = sqrt( var / (n-1) )
+            # s = stddev = sqrt(1/(n-1)sum(x-<x>)**2)
+            # s : corrected sample standard deviation
+            self.error = np.nanstd(l, axis=0, ddof=1)
 
     def average_with_other(self, other_detector, error_estimate=ErrorEstimate.stderr):
         """
@@ -129,7 +131,7 @@ class Detector:
         self.data += delta / self.counter                      # mean += delta / n
         if error_estimate != ErrorEstimate.none:
             self._M2 += delta * (other_detector.data - self.data)  # M2 *= delta * (x - mean)
-            self.error = np.sqrt(self._M2 / (self.counter - 1))    # stddev = sqrt( var / (n-1) )
+            self.error = np.sqrt(self._M2 / (self.counter - 1))    # stddev = sqrt(1/(n-1)sum(x-<x>)**2)
 
     def save(self, filename, options):
         """
@@ -312,9 +314,10 @@ def merge_list(input_file_list,
 
     # up to now first.error stores standard deviation
     # if user requested standard error then we calculate it as:
-    #   stderr = stddev / sqrt(n)
+    # S = stderr = stddev / sqrt(n), or in other words,
+    # S = s/sqrt(N) where S is the corrected standard deviation of the mean.
     if len(input_file_list) > 1 and options.error == ErrorEstimate.stderr:
-        first.error /= np.float64(first.counter)
+        first.error /= np.sqrt(first.counter)  # np.sqrt() always returns np.float64
 
     if output_file is None:
         output_file = input_file_list[0][:-3] + "txt"
