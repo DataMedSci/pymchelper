@@ -104,15 +104,15 @@ class Detector:
         :return:
         """
         # TODO add compatibility check
-        l = [det.data for det in other_detectors]
-        l.append(self.data)
+        _l = [det.data for det in other_detectors]
+        _l.append(self.data)
         self.counter += len(other_detectors)
         self.nstat += sum(det.nstat for det in other_detectors)
-        self.data = np.nanmean(l, axis=0)
+        self.data = np.nanmean(_l, axis=0)
         if error_estimate != ErrorEstimate.none:
             # s = stddev = sqrt(1/(n-1)sum(x-<x>)**2)
             # s : corrected sample standard deviation
-            self.error = np.nanstd(l, axis=0, ddof=1)
+            self.error = np.nanstd(_l, axis=0, ddof=1)
 
     def average_with_other(self, other_detector, error_estimate=ErrorEstimate.stderr):
         """
