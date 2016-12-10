@@ -317,7 +317,7 @@ def merge_list(input_file_list,
         first.error /= np.float64(first.counter)
 
     if output_file is None:
-        output_file = input_file_list[0][:-3] + "txt"
+        output_file = input_file_list[0][:-4]
 
     first.save(output_file, options)
 
@@ -349,8 +349,8 @@ def merge_many(input_file_list,
     for core_name, group_with_same_core in core_names_dict.items():
         core_dirname, core_basename = os.path.split(core_name)
         if outputdir is None:
-            output_file = os.path.join(core_dirname, core_basename + ".txt")
+            output_file = os.path.join(core_dirname, core_basename)
         else:
-            output_file = os.path.join(outputdir, core_basename + ".txt")
+            output_file = os.path.join(outputdir, core_basename)
         logger.debug("Setting output core name " + output_file)
         merge_list(group_with_same_core, output_file, options)

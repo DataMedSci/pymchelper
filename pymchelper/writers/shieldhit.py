@@ -28,7 +28,7 @@ class TxtWriter:
             return msh[axis_no]
 
     def __init__(self, filename, options):
-        self.filename = filename
+        self.filename = filename + ".txt"
         self.ax = ''
         self.ay = ''
         self.az = ''
