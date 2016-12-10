@@ -60,7 +60,7 @@ class TestSHGenerated(unittest.TestCase):
                 os.close(fd)
                 os.remove(outfile)
                 run.main(["txt", infile, outfile])
-                saved_file = outfile
+                saved_file = outfile + ".txt"
                 self.assertTrue(os.path.isfile(saved_file))
                 self.assertGreater(os.path.getsize(saved_file), 0)
                 os.remove(saved_file)
