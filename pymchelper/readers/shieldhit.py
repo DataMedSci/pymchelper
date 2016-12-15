@@ -16,6 +16,153 @@ class SHBinaryReader:
     def __init__(self, filename):
         self.filename = filename
 
+    def test_version_0p6(self):
+        SH_BDO_MAGIC_NUMBER = b'xSH12A'
+        with open(self.filename, "rb") as f:
+            d1 = np.dtype([('magic', 'S6'),
+                           ('end', 'S2')])
+            x = np.fromfile(f, dtype=d1, count=1)
+            if SH_BDO_MAGIC_NUMBER == x['magic'][0]:
+                return True
+            else:
+                return False
+
+    def read(self, detector, nscale=1):
+        if self.test_version_0p6():
+            print("BDOx not implemented yet.")
+            exit(1)
+            reader = _SHBinaryReader0p6(self.filename)
+            reader.read(detector, nscale)
+        else:
+            reader = _SHBinaryReader0p1(self.filename)
+            reader.read_header(detector)
+            reader.read_payload(detector, nscale)
+
+    @staticmethod
+    def get_estimator_units(geotyp):
+        """
+        TODO
+        :param geotyp:
+        :return:
+        """
+        _geotyp_units = {
+            SHGeoType.msh: ("cm", "cm", "cm", "(nil)"),
+            SHGeoType.dmsh: ("cm", "cm", "cm", "#/MeV"),
+            SHGeoType.cyl: ("cm", "radians", "cm", "(nil)"),
+            SHGeoType.dcyl: ("cm", "radians", "cm", "#/MeV"),
+            SHGeoType.zone: ("zone number", "(nil)", "(nil)", "(nil)"),
+            SHGeoType.voxscore: ("cm", "cm", "cm", "(nil)"),
+            SHGeoType.geomap: ("cm", "cm", "cm", "(nil)"),
+            SHGeoType.plane: ("cm", "cm", "cm", "(nil)"),  # TODO fix me later
+        }
+        _default_units = ("(nil)", "(nil)", "(nil)", "(nil)")
+        return _geotyp_units.get(geotyp, _default_units)
+
+    @staticmethod
+    def get_detector_unit(detector_type, geotyp):
+        """
+        TODO
+        :param detector_type:
+        :param geotyp:
+        :return:
+        """
+        if geotyp == SHGeoType.zone:
+            dose_units = ("MeV/primary", "Dose*volume")
+            dose_gy_units = ("J", "Dose*volume")
+            alanine_units = ("MeV/primary", "Alanine RE*Dose*volume")
+            alanine_gy_units = ("J", "Alanine RE*Dose*volume")
+        else:
+            dose_units = (" MeV/g/primary", "Dose")
+            dose_gy_units = ("Gy", "Dose")
+            alanine_units = ("MeV/g/primary", "Alanine RE*Dose")
+            alanine_gy_units = ("Gy", "Alanine RE*Dose")
+
+        _detector_units = {
+            SHDetType.unknown: ("(nil)", "None"),
+            SHDetType.energy: ("MeV/primary", "Energy"),
+            SHDetType.fluence: (" cm^-2/primary", "Fluence"),
+            SHDetType.crossflu: (" cm^-2/primary", "Planar fluence"),
+            SHDetType.letflu: (" MeV/cm", "LET fluence"),
+            SHDetType.dose: dose_units,
+            SHDetType.dose_gy: dose_gy_units,
+            SHDetType.dlet: ("keV/um", "dose-averaged LET"),
+            SHDetType.tlet: ("keV/um", "track-averaged LET"),
+            SHDetType.avg_energy: ("MeV", "Average energy"),
+            SHDetType.avg_beta: ("(dimensionless)", "Average beta"),
+            SHDetType.material: ("(nil)", "Material number"),
+            SHDetType.alanine: alanine_units,
+            SHDetType.alanine_gy: alanine_gy_units,
+            SHDetType.counter: ("/primary", "Particle counter"),
+            SHDetType.pet: ("/primary", "PET isotopes"),
+            SHDetType.dletg: ("keV/um", "dose-averaged LET"),
+            SHDetType.tletg: ("keV/um", "track-averaged LET"),
+            SHDetType.zone: ("(dimensionless)", "Zone#"),
+            SHDetType.medium: ("(dimensionless)", "Medium#"),
+            SHDetType.rho: ("g/cm^3", "Density"),
+        }
+        return _detector_units.get(detector_type, ("(nil)", "(nil)"))
+
+
+class _SHBinaryReader0p6:
+    """
+    Binary format reader from version >= 0.6
+    """
+    def __init__(self, filename):
+        self.filename = filename
+
+    def read(self, detector, nscale=1):
+        with open(self.filename, "rb") as f:
+            d1 = np.dtype([('magic', 'S6'),
+                           ('end', 'S2')])
+
+            x = np.fromfile(f, dtype=d1, count=1)  # read the data into numpy
+            print(x['magic'][0])
+            print(x['end'][0])
+
+            while(f):
+                token = self.get_token(f)
+                if token is None:
+                    break
+                print(token[0], token[1], token[2])
+                for i, j in enumerate(token[3]):
+                    print(i, j)
+
+    def get_token(f):
+        """
+        returns a tuple with 4 elements:
+        0: payload id
+        1: payload dtype string
+        2: payload number of elements
+        3: payload itself
+        f is an open and readable file pointer.
+        returns None if no token was found / EOF
+        """
+
+        tag = np.dtype([('pl_id', '<u8'),
+                        ('pl_type', 'S8'),
+                        ('pl_len', '<u8')])
+
+        x1 = np.fromfile(f, dtype=tag, count=1)  # read the data into numpy
+
+        if not x1:
+            return None
+        else:
+            pl_id = x1['pl_id'][0]
+            pl_type = x1['pl_type'][0]
+            pl_len = x1['pl_len'][0]
+            pl = np.fromfile(f,
+                             dtype=pl_type,
+                             count=pl_len)  # read the data into numpy
+            return(pl_id, pl_type, pl_len, pl)
+
+
+class _SHBinaryReader0p1:
+    """
+    Binary format reader from 0.1 <= version <= 0.6
+    """
+    def __init__(self, filename):
+        self.filename = filename
+
     def read_header(self, detector):
         logger.info("Reading header: " + self.filename)
 
@@ -150,69 +297,6 @@ class SHBinaryReader:
                                                                detector.geotyp)
         detector.title = detector.units[5]
 
-    @staticmethod
-    def get_estimator_units(geotyp):
-        """
-        TODO
-        :param geotyp:
-        :return:
-        """
-        _geotyp_units = {
-            SHGeoType.msh: ("cm", "cm", "cm", "(nil)"),
-            SHGeoType.dmsh: ("cm", "cm", "cm", "#/MeV"),
-            SHGeoType.cyl: ("cm", "radians", "cm", "(nil)"),
-            SHGeoType.dcyl: ("cm", "radians", "cm", "#/MeV"),
-            SHGeoType.zone: ("zone number", "(nil)", "(nil)", "(nil)"),
-            SHGeoType.voxscore: ("cm", "cm", "cm", "(nil)"),
-            SHGeoType.geomap: ("cm", "cm", "cm", "(nil)"),
-            SHGeoType.plane: ("cm", "cm", "cm", "(nil)"),  # TODO fix me later
-        }
-        _default_units = ("(nil)", "(nil)", "(nil)", "(nil)")
-        return _geotyp_units.get(geotyp, _default_units)
-
-    @staticmethod
-    def get_detector_unit(detector_type, geotyp):
-        """
-        TODO
-        :param detector_type:
-        :param geotyp:
-        :return:
-        """
-        if geotyp == SHGeoType.zone:
-            dose_units = ("MeV/primary", "Dose*volume")
-            dose_gy_units = ("J", "Dose*volume")
-            alanine_units = ("MeV/primary", "Alanine RE*Dose*volume")
-            alanine_gy_units = ("J", "Alanine RE*Dose*volume")
-        else:
-            dose_units = (" MeV/g/primary", "Dose")
-            dose_gy_units = ("Gy", "Dose")
-            alanine_units = ("MeV/g/primary", "Alanine RE*Dose")
-            alanine_gy_units = ("Gy", "Alanine RE*Dose")
-
-        _detector_units = {
-            SHDetType.unknown: ("(nil)", "None"),
-            SHDetType.energy: ("MeV/primary", "Energy"),
-            SHDetType.fluence: (" cm^-2/primary", "Fluence"),
-            SHDetType.crossflu: (" cm^-2/primary", "Planar fluence"),
-            SHDetType.letflu: (" MeV/cm", "LET fluence"),
-            SHDetType.dose: dose_units,
-            SHDetType.dose_gy: dose_gy_units,
-            SHDetType.dlet: ("keV/um", "dose-averaged LET"),
-            SHDetType.tlet: ("keV/um", "track-averaged LET"),
-            SHDetType.avg_energy: ("MeV", "Average energy"),
-            SHDetType.avg_beta: ("(dimensionless)", "Average beta"),
-            SHDetType.material: ("(nil)", "Material number"),
-            SHDetType.alanine: alanine_units,
-            SHDetType.alanine_gy: alanine_gy_units,
-            SHDetType.counter: ("/primary", "Particle counter"),
-            SHDetType.pet: ("/primary", "PET isotopes"),
-            SHDetType.dletg: ("keV/um", "dose-averaged LET"),
-            SHDetType.tletg: ("keV/um", "track-averaged LET"),
-            SHDetType.zone: ("(dimensionless)", "Zone#"),
-            SHDetType.medium: ("(dimensionless)", "Medium#"),
-            SHDetType.rho: ("g/cm^3", "Density"),
-        }
-        return _detector_units.get(detector_type, ("(nil)", "(nil)"))
 
     # TODO: we need an alternative list, in case things have been scaled with nscale, since then things
     # are not "/particle" anymore.
