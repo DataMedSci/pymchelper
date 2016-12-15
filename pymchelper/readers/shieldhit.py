@@ -297,7 +297,6 @@ class _SHBinaryReader0p1:
                                                                detector.geotyp)
         detector.title = detector.units[5]
 
-
     # TODO: we need an alternative list, in case things have been scaled with nscale, since then things
     # are not "/particle" anymore.
     def read_payload(self, detector, nscale=1):
