@@ -89,9 +89,11 @@ class SHBinaryReader:
         sh_bdo_magic_number = b'xSH12A'
         with open(self.filename, "rb") as f:
             d1 = np.dtype([('magic', 'S6'),
-                           ('end', 'S2')])
+                           ('end', 'S2'),
+                           ('vstr', 'S16')])
             x = np.fromfile(f, dtype=d1, count=1)
-            return sh_bdo_magic_number == x['magic'][0]
+            vmaj, vmin = x['vstr'].split(".")
+            return (sh_bdo_magic_number == x['magic'][0]) and (int(vmaj) >= 0) and (int(vmin) >= 6)
 
     def read(self, detector, nscale=1):
         if self.test_version_0p6():
