@@ -9,6 +9,38 @@ from pymchelper.shieldhit.detector.estimator_type import SHGeoType
 logger = logging.getLogger(__name__)
 
 
+def _prepare_detector_units(detector, nscale):
+    """ Set units depending on detector type. Must be called by several classes.
+    """
+    if detector.dimension == 0:
+        detector.data = np.asarray([detector.data])
+
+    if detector.geotyp == SHGeoType.plane:
+        detector.data = np.asarray([detector.data])
+
+    # normalize result if we need that.
+    if detector.dettyp not in (SHDetType.dlet, SHDetType.tlet,
+                               SHDetType.letflu,
+                               SHDetType.dletg, SHDetType.tletg,
+                               SHDetType.avg_energy, SHDetType.avg_beta,
+                               SHDetType.material):
+        detector.data /= np.float64(detector.nstat)
+
+    if nscale != 1 and detector.dettyp in (SHDetType.energy, SHDetType.fluence, SHDetType.crossflu,
+                                           SHDetType.dose, SHDetType.counter, SHDetType.pet):
+        detector.data *= np.float64(nscale)  # scale with number of particles given by user
+        if detector.dettyp == SHDetType.dose:
+            detector.dettyp = SHDetType.dose_gy
+        if detector.dettyp == SHDetType.alanine:
+            detector.dettyp = SHDetType.alanine_gy
+        if detector.dettyp in (SHDetType.dose_gy, SHDetType.alanine_gy):
+            # 1 megaelectron volt / gram = 1.60217662 x 10-10 Gy
+            detector.data *= np.float64(1.60217662e-10)
+            detector.units[0:4] = SHBinaryReader.get_estimator_units(detector.geotyp)
+            detector.units[4:6] = SHBinaryReader.get_detector_unit(detector.dettyp, detector.geotyp)
+            detector.title = detector.units[5]
+
+
 class SHBDOTagID(IntEnum):
     """ List of Tag ID numbers. Must be synchronized with sh_detect.h in SH12A.
     """
@@ -181,19 +213,69 @@ class _SHBinaryReader0p6:
     def read(self, detector, nscale=1):
         with open(self.filename, "rb") as f:
             d1 = np.dtype([('magic', 'S6'),
-                           ('end', 'S2')])
+                           ('end', 'S2'),
+                           ('vstr', 'S16')])
 
             x = np.fromfile(f, dtype=d1, count=1)  # read the data into numpy
+
             print(x['magic'][0])
             print(x['end'][0])
+            print(x['vstr'][0])
 
             while(f):
-                token = self.get_token(f)
-                if token is None:
+                pl_id, _pl_type, _pl_len, pl = self.get_token(f)
+                if pl_id is None:
                     break
-                print(token[0], token[1], token[2])
-                for i, j in enumerate(token[3]):
-                    print(i, j)
+
+                # TODO: some clever mapping could be done here surely
+
+                if pl_id == SHBDOTagID.shversion:
+                    detector.shversion = pl
+
+                if pl_id == SHBDOTagID.filedate:
+                    detector.filedate = pl
+
+                if pl_id == SHBDOTagID.user:
+                    detector.user = pl
+
+                if pl_id == SHBDOTagID.host:
+                    detector.host = pl
+
+                if pl_id == SHBDOTagID.rt_nstat:
+                    detector.nstat = pl
+
+                    # estimator block here ---
+                if pl_id == SHBDOTagID.est_geotyp:
+                    detector.geotyp = pl
+
+                if pl_id == SHBDOTagID.est_pages:
+                    # todo: handling of multiple detectors (SPC)
+                    pass
+
+                # read a single detector
+                if pl_id == SHBDOTagID.det_dtype:
+                    detector.dettyp = pl
+
+                if pl_id == SHBDOTagID.det_nbin:
+                    detector.nx = pl[0]
+                    detector.ny = pl[1]
+                    detector.nz = pl[2]
+
+                if pl_id == SHBDOTagID.det_xyz_start:
+                    detector.xmin = pl[0]
+                    detector.ymin = pl[1]
+                    detector.zmin = pl[2]
+
+                if pl_id == SHBDOTagID.det_xyz_stop:
+                    detector.xmax = pl[0]
+                    detector.ymax = pl[1]
+                    detector.zmax = pl[2]
+
+                if pl_id == SHBDOTagID.det_data:
+                    detector.data = np.asarray([pl])
+
+                _prepare_detector_units(detector, nscale)
+                detector.counter = 1
 
     def get_token(f):
         """
@@ -381,34 +463,8 @@ class _SHBinaryReader0p1:
         record = np.fromfile(self.filename, record_dtype, count=-1)
         # BIN(*)  : a large array holding results. Accessed using pointers.
         detector.data = record['bin2'][:][0]
-        if detector.dimension == 0:
-            detector.data = np.asarray([detector.data])
 
-        if detector.geotyp == SHGeoType.plane:
-            detector.data = np.asarray([detector.data])
-
-        # normalize result if we need that.
-        if detector.dettyp not in (SHDetType.dlet, SHDetType.tlet,
-                                   SHDetType.letflu,
-                                   SHDetType.dletg, SHDetType.tletg,
-                                   SHDetType.avg_energy, SHDetType.avg_beta,
-                                   SHDetType.material):
-            detector.data /= np.float64(detector.nstat)
-
-        if nscale != 1 and detector.dettyp in (SHDetType.energy, SHDetType.fluence, SHDetType.crossflu,
-                                               SHDetType.dose, SHDetType.counter, SHDetType.pet):
-            detector.data *= np.float64(nscale)  # scale with number of particles given by user
-            if detector.dettyp == SHDetType.dose:
-                detector.dettyp = SHDetType.dose_gy
-            if detector.dettyp == SHDetType.alanine:
-                detector.dettyp = SHDetType.alanine_gy
-            if detector.dettyp in (SHDetType.dose_gy, SHDetType.alanine_gy):
-                # 1 megaelectron volt / gram = 1.60217662 x 10-10 Gy
-                detector.data *= np.float64(1.60217662e-10)
-                detector.units[0:4] = SHBinaryReader.get_estimator_units(detector.geotyp)
-                detector.units[4:6] = SHBinaryReader.get_detector_unit(detector.dettyp, detector.geotyp)
-                detector.title = detector.units[5]
-
+        _prepare_detector_units(detector, nscale)
         detector.counter = 1
 
     def read(self, detector, nscale=1):
