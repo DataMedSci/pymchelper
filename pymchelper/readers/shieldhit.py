@@ -124,13 +124,18 @@ class SHBinaryReader:
                            ('end', 'S2'),
                            ('vstr', 'S16')])
             x = np.fromfile(f, dtype=d1, count=1)
-            vmaj, vmin = x['vstr'].split(".")
-            return (sh_bdo_magic_number == x['magic'][0]) and (int(vmaj) >= 0) and (int(vmin) >= 6)
 
+            # if magic string is present, deep check for version number
+            if sh_bdo_magic_number == x['magic'][0]:
+                vmaj, vmin = x['vstr'][0].decode('ASCII').split('.')
+                return (sh_bdo_magic_number == x['magic'][0]) and (int(vmaj) >= 0) and (int(vmin) >= 6)
+            else:
+                return False
+            
     def read(self, detector, nscale=1):
         if self.test_version_0p6():
-            print("BDOx not implemented yet.")
-            exit(1)
+            # print("BDOx not implemented yet.")
+            # exit(1)
             reader = _SHBinaryReader0p6(self.filename)
             reader.read(detector, nscale)
         else:
@@ -223,10 +228,13 @@ class _SHBinaryReader0p6:
             print(x['vstr'][0])
 
             while(f):
-                pl_id, _pl_type, _pl_len, pl = self.get_token(f)
-                if pl_id is None:
+                token = self.get_token(f)
+                if token == None:
                     break
 
+                pl_id, _pl_type, _pl_len, pl = token
+
+                print("{:02x}".format(pl_id))
                 # TODO: some clever mapping could be done here surely
 
                 if pl_id == SHBDOTagID.shversion:
@@ -274,10 +282,12 @@ class _SHBinaryReader0p6:
                 if pl_id == SHBDOTagID.det_data:
                     detector.data = np.asarray([pl])
 
-                _prepare_detector_units(detector, nscale)
-                detector.counter = 1
+            print("doener.")
+            print(detector.dettyp)
+            _prepare_detector_units(detector, nscale)
+            detector.counter = 1
 
-    def get_token(f):
+    def get_token(self, f):
         """
         returns a tuple with 4 elements:
         0: payload id
@@ -295,7 +305,7 @@ class _SHBinaryReader0p6:
         x1 = np.fromfile(f, dtype=tag, count=1)  # read the data into numpy
 
         if not x1:
-            return None
+            return None 
         else:
             pl_id = x1['pl_id'][0]
             pl_type = x1['pl_type'][0]

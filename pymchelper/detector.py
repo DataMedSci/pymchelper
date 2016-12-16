@@ -60,8 +60,8 @@ class Detector:
     data = None
     error = None
 
-    filedata = ""
-    shversion = ""
+    filedate = ""
+    mc_code_version = ""
     user = ""
     host = ""
     
