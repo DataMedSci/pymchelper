@@ -59,6 +59,12 @@ class Detector:
     """
     data = None
     error = None
+
+    filedata = ""
+    shversion = ""
+    user = ""
+    host = ""
+    
     nstat = -1
 
     xmin = float("NaN")
@@ -146,7 +152,7 @@ class Detector:
         """
         writer = _converter_mapping[Converters[options.command]](filename, options)
         writer.write(self)
-
+        
     def __str__(self):
         result = ""
         result += "data" + str(self.data[0].shape) + "\n"
