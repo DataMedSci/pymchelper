@@ -60,11 +60,6 @@ class Detector:
     data = None
     error = None
 
-    filedate = ""
-    mc_code_version = ""
-    user = ""
-    host = ""
-    
     nstat = -1
 
     xmin = float("NaN")
@@ -95,7 +90,7 @@ class Detector:
         :return: none
         """
         reader = SHTextReader(filename)
-        if filename.endswith(".bdo"):
+        if filename.endswith(".bdo") or filename.endswith(".bdox"):
             reader = SHBinaryReader(filename)
         # find better way to discover if file comes from Fluka
         elif "_fort" in filename:
@@ -110,6 +105,7 @@ class Detector:
         :return:
         """
         # TODO add compatibility check
+
         _l = [det.data for det in other_detectors]
         _l.append(self.data)
         self.counter += len(other_detectors)
@@ -152,7 +148,7 @@ class Detector:
         """
         writer = _converter_mapping[Converters[options.command]](filename, options)
         writer.write(self)
-        
+
     def __str__(self):
         result = ""
         result += "data" + str(self.data[0].shape) + "\n"

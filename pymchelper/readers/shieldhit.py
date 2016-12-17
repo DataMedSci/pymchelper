@@ -12,6 +12,14 @@ logger = logging.getLogger(__name__)
 def _prepare_detector_units(detector, nscale):
     """ Set units depending on detector type. Must be called by several classes.
     """
+
+    # set units : detector.units are [x,y,z,v,data,detector_title]
+    detector.units = [""] * 6
+    detector.units[0:4] = SHBinaryReader.get_estimator_units(detector.geotyp)
+    detector.units[4:6] = SHBinaryReader.get_detector_unit(detector.dettyp,
+                                                           detector.geotyp)
+    detector.title = detector.units[5]
+
     if detector.dimension == 0:
         detector.data = np.asarray([detector.data])
 
@@ -48,11 +56,11 @@ class SHBDOTagID(IntEnum):
 
     # Hex values are used for better regognition in binary files, should they be inspected by humans.
     # Group 0x0000 - 0x00FF : Miscellaneous info
-    shversion = 0x00   # [char*] full version string of shield-hit12a
+    shversion = 0x00    # [char*] full version string of shield-hit12a
     shbuilddate = 0x01  # [char*] date of build
     filedate = 0x02     # [char*] bdo file creation date, RFC 2822 compliant
-    user = 0x03       # [char *] optional login name
-    host = 0x04       # [char *] optional host where this file was created
+    user = 0x03         # [char *] optional login name
+    host = 0x04         # [char *] optional host where this file was created
 
     # Group 0xCC00 - 0xCCFF : Configuration
     dele = 0xCC00
@@ -147,8 +155,6 @@ class SHBinaryReader:
 
     def read(self, detector, nscale=1):
         if self.test_version_0p6():
-            # print("BDOx not implemented yet.")
-            # exit(1)
             reader = _SHBinaryReader0p6(self.filename)
             reader.read(detector, nscale)
         else:
@@ -229,6 +235,7 @@ class _SHBinaryReader0p6:
         self.filename = filename
 
     def read(self, detector, nscale=1):
+        logger.info("Reading: " + self.filename)
         with open(self.filename, "rb") as f:
             d1 = np.dtype([('magic', 'S6'),
                            ('end', 'S2'),
@@ -252,7 +259,7 @@ class _SHBinaryReader0p6:
                 # decode all strings (currently there will never be more than one per token)
                 if 'S' in _pl_type.decode('ASCII'):
                     for i, _j in enumerate(_pl):
-                        pl[i] = _pl[i].decode('ASCII')
+                        pl[i] = _pl[i].decode('ASCII').strip()
                 else:
                     pl = _pl
 
@@ -285,7 +292,7 @@ class _SHBinaryReader0p6:
 
                     # estimator block here ---
                 if pl_id == SHBDOTagID.est_geotyp:
-                    detector.geotyp = pl[0]
+                    detector.geotyp = SHGeoType[pl[0].strip().lower()]
 
                 if pl_id == SHBDOTagID.ext_ptvdose:
                     detector.tripdose = 0.0
@@ -299,7 +306,7 @@ class _SHBinaryReader0p6:
 
                 # read a single detector
                 if pl_id == SHBDOTagID.det_dtype:
-                    detector.dettyp = pl[0]
+                    detector.dettyp = SHDetType(pl[0])
 
                 if pl_id == SHBDOTagID.det_part:  # particle to be scored
                     detector.particle = pl[0]
@@ -497,13 +504,6 @@ class _SHBinaryReader0p1:
             detector.zmax = 0.0
 
         detector.dettyp = SHDetType(det_attribs.det_type)
-
-        # set units : detector.units are [x,y,z,v,data,detector_title]
-        detector.units = [""] * 6
-        detector.units[0:4] = SHBinaryReader.get_estimator_units(detector.geotyp)
-        detector.units[4:6] = SHBinaryReader.get_detector_unit(detector.dettyp,
-                                                               detector.geotyp)
-        detector.title = detector.units[5]
 
     # TODO: we need an alternative list, in case things have been scaled with nscale, since then things
     # are not "/particle" anymore.

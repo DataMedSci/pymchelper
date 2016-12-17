@@ -40,6 +40,7 @@ class TxtWriter:
     def _header_first_line(det):
         """first line with detector geo type"""
         result = "#   DETECTOR OUTPUT\n"
+
         if det.geotyp in (SHGeoType.plane, SHGeoType.dplane, ):
             result = "#             DETECTOR OUTPUT PLANE/DPLANE\n"
         elif det.geotyp in (SHGeoType.zone, SHGeoType.dzone, ):
