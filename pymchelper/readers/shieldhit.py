@@ -17,14 +17,15 @@ def _prepare_detector_units(detector, nscale):
 
     if detector.geotyp == SHGeoType.plane:
         detector.data = np.asarray([detector.data])
-
+        
     # normalize result if we need that.
     if detector.dettyp not in (SHDetType.dlet, SHDetType.tlet,
                                SHDetType.letflu,
                                SHDetType.dletg, SHDetType.tletg,
                                SHDetType.avg_energy, SHDetType.avg_beta,
                                SHDetType.material):
-        detector.data /= np.float64(detector.nstat)
+        if detector.nstat != 0:  # geotyp = GEOMAP will have 0 projectiles simulated
+            detector.data /= np.float64(detector.nstat)
 
     if nscale != 1 and detector.dettyp in (SHDetType.energy, SHDetType.fluence, SHDetType.crossflu,
                                            SHDetType.dose, SHDetType.counter, SHDetType.pet):
@@ -108,6 +109,19 @@ class SHBDOTagID(IntEnum):
     # Group 0xAA00 - 0xAAFF : Runtime variables
     rt_nstat = 0xAA00        # number of actually simulated particles
     rt_time = 0xAA01         # [usignend long int] optional runtime in seconds
+
+mapping = { SHBDOTagID.shversion : "mc_code_version",
+            SHBDOTagID.filedate : "filedate",
+            SHBDOTagID.user : "user",
+            SHBDOTagID.host : "host",
+            SHBDOTagID.rt_nstat : "nstat",
+            SHBDOTagID.det_dtype : "dettyp",
+            SHBDOTagID.est_geotyp : "geotyp",
+            SHBDOTagID.det_xyz_start: ("xmin", "ymin", "zmin"),
+            SHBDOTagID.det_xyz_stop: ("xmax", "ymax", "zmax"),
+            SHBDOTagID.det_nbin: ("nx", "ny", "nz")
+            # SHBDOTagID. : "",
+}
 
 
 class SHBinaryReader:
@@ -223,46 +237,67 @@ class _SHBinaryReader0p6:
 
             x = np.fromfile(f, dtype=d1, count=1)  # read the data into numpy
 
-            print(x['magic'][0])
-            print(x['end'][0])
-            print(x['vstr'][0])
+            # print(x['magic'][0])
+            # print(x['end'][0])
+            # print(x['vstr'][0])
 
             while(f):
                 token = self.get_token(f)
                 if token == None:
                     break
 
-                pl_id, _pl_type, _pl_len, pl = token
+                pl_id, _pl_type, _pl_len, _pl = token
 
-                print("{:02x}".format(pl_id))
+
+                pl = [None]*_pl_len
+                
+                # print("_pl_type",_pl_type.decode('ASCII'))
+                # decode all strings (currently there will never be more than one per token)
+                if 'S' in _pl_type.decode('ASCII'):
+                    for i,_j in enumerate(_pl):
+                        pl[i] = _pl[i].decode('ASCII')
+                else:
+                    pl = _pl
+                    
+                # print("0x{:02x}".format(pl_id))
+                
                 # TODO: some clever mapping could be done here surely
+                # something like this: however the keymaps are not complete
+                # attr_keys = SHBDOTagID(pl_id)
+                # attributes = mapping[attr_keys]
+                # for i, attr in enumerate(attributes):
+                #     setattr(detector,attr,pl[i])
+                #
+                # print(detector.mc_code_version)
+                # exit(0)
+
 
                 if pl_id == SHBDOTagID.shversion:
-                    detector.shversion = pl
-
+                    detector.mc_code_version = pl[0]
+                    
                 if pl_id == SHBDOTagID.filedate:
-                    detector.filedate = pl
+                    detector.filedate = pl[0]
 
                 if pl_id == SHBDOTagID.user:
-                    detector.user = pl
+                    detector.user = pl[0]
 
                 if pl_id == SHBDOTagID.host:
-                    detector.host = pl
+                    detector.host = pl[0]
 
                 if pl_id == SHBDOTagID.rt_nstat:
-                    detector.nstat = pl
+                    detector.nstat = pl[0]
 
                     # estimator block here ---
                 if pl_id == SHBDOTagID.est_geotyp:
-                    detector.geotyp = pl
+                    detector.geotyp = pl[0]
 
                 if pl_id == SHBDOTagID.est_pages:
+                    detector.pages = pl[0]
                     # todo: handling of multiple detectors (SPC)
-                    pass
-
+                    
                 # read a single detector
                 if pl_id == SHBDOTagID.det_dtype:
-                    detector.dettyp = pl
+                    detector.dettyp = pl[0]
 
                 if pl_id == SHBDOTagID.det_nbin:
                     detector.nx = pl[0]
@@ -280,10 +315,14 @@ class _SHBinaryReader0p6:
                     detector.zmax = pl[2]
 
                 if pl_id == SHBDOTagID.det_data:
-                    detector.data = np.asarray([pl])
+                    detector.data = np.asarray(pl)
 
-            print("doener.")
-            print(detector.dettyp)
+            # print("doener.")
+            # print(detector.data)
+            # print(detector.nstat)
+            # print(detector.nx)
+            # print(detector.ny)
+            # print(detector.nz)
             _prepare_detector_units(detector, nscale)
             detector.counter = 1
 
