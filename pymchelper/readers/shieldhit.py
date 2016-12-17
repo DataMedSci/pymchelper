@@ -119,16 +119,17 @@ class SHBDOTagID(IntEnum):
     rt_time = 0xAA01         # [usignend long int] optional runtime in seconds
 
 
-mapping = {SHBDOTagID.shversion: "mc_code_version",
-           SHBDOTagID.filedate: "filedate",
-           SHBDOTagID.user: "user",
-           SHBDOTagID.host: "host",
-           SHBDOTagID.rt_nstat: "nstat",
-           SHBDOTagID.det_dtype: "dettyp",
-           SHBDOTagID.est_geotyp: "geotyp",
-           SHBDOTagID.det_xyz_start: ("xmin", "ymin", "zmin"),
-           SHBDOTagID.det_xyz_stop: ("xmax", "ymax", "zmax"),
-           SHBDOTagID.det_nbin: ("nx", "ny", "nz")}
+# for future use
+# mapping = {SHBDOTagID.shversion: "mc_code_version",
+#           SHBDOTagID.filedate: "filedate",
+#           SHBDOTagID.user: "user",
+#           SHBDOTagID.host: "host",
+#           SHBDOTagID.rt_nstat: "nstat",
+#           SHBDOTagID.det_dtype: "dettyp",
+#           SHBDOTagID.est_geotyp: "geotyp",
+#           SHBDOTagID.det_xyz_start: ("xmin", "ymin", "zmin"),
+#           SHBDOTagID.det_xyz_stop: ("xmax", "ymax", "zmax"),
+#           SHBDOTagID.det_nbin: ("nx", "ny", "nz")}
 
 
 class SHBinaryReader:
