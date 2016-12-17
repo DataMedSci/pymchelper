@@ -17,7 +17,7 @@ def _prepare_detector_units(detector, nscale):
 
     if detector.geotyp == SHGeoType.plane:
         detector.data = np.asarray([detector.data])
-        
+
     # normalize result if we need that.
     if detector.dettyp not in (SHDetType.dlet, SHDetType.tlet,
                                SHDetType.letflu,
@@ -110,18 +110,17 @@ class SHBDOTagID(IntEnum):
     rt_nstat = 0xAA00        # number of actually simulated particles
     rt_time = 0xAA01         # [usignend long int] optional runtime in seconds
 
-mapping = { SHBDOTagID.shversion : "mc_code_version",
-            SHBDOTagID.filedate : "filedate",
-            SHBDOTagID.user : "user",
-            SHBDOTagID.host : "host",
-            SHBDOTagID.rt_nstat : "nstat",
-            SHBDOTagID.det_dtype : "dettyp",
-            SHBDOTagID.est_geotyp : "geotyp",
-            SHBDOTagID.det_xyz_start: ("xmin", "ymin", "zmin"),
-            SHBDOTagID.det_xyz_stop: ("xmax", "ymax", "zmax"),
-            SHBDOTagID.det_nbin: ("nx", "ny", "nz")
-            # SHBDOTagID. : "",
-}
+
+mapping = {SHBDOTagID.shversion: "mc_code_version",
+           SHBDOTagID.filedate: "filedate",
+           SHBDOTagID.user: "user",
+           SHBDOTagID.host: "host",
+           SHBDOTagID.rt_nstat: "nstat",
+           SHBDOTagID.det_dtype: "dettyp",
+           SHBDOTagID.est_geotyp: "geotyp",
+           SHBDOTagID.det_xyz_start: ("xmin", "ymin", "zmin"),
+           SHBDOTagID.det_xyz_stop: ("xmax", "ymax", "zmax"),
+           SHBDOTagID.det_nbin: ("nx", "ny", "nz")}
 
 
 class SHBinaryReader:
@@ -145,7 +144,7 @@ class SHBinaryReader:
                 return (sh_bdo_magic_number == x['magic'][0]) and (int(vmaj) >= 0) and (int(vmin) >= 6)
             else:
                 return False
-            
+
     def read(self, detector, nscale=1):
         if self.test_version_0p6():
             # print("BDOx not implemented yet.")
@@ -235,32 +234,30 @@ class _SHBinaryReader0p6:
                            ('end', 'S2'),
                            ('vstr', 'S16')])
 
-            x = np.fromfile(f, dtype=d1, count=1)  # read the data into numpy
-
+            np.fromfile(f, dtype=d1, count=1)  # read the data into numpy
             # print(x['magic'][0])
             # print(x['end'][0])
             # print(x['vstr'][0])
 
             while(f):
                 token = self.get_token(f)
-                if token == None:
+                if token is None:
                     break
 
                 pl_id, _pl_type, _pl_len, _pl = token
 
-
                 pl = [None]*_pl_len
-                
+
                 # print("_pl_type",_pl_type.decode('ASCII'))
                 # decode all strings (currently there will never be more than one per token)
                 if 'S' in _pl_type.decode('ASCII'):
-                    for i,_j in enumerate(_pl):
+                    for i, _j in enumerate(_pl):
                         pl[i] = _pl[i].decode('ASCII')
                 else:
                     pl = _pl
-                    
+
                 # print("0x{:02x}".format(pl_id))
-                
+
                 # TODO: some clever mapping could be done here surely
                 # something like this: however the keymaps are not complete
                 # attr_keys = SHBDOTagID(pl_id)
@@ -271,10 +268,9 @@ class _SHBinaryReader0p6:
                 # print(detector.mc_code_version)
                 # exit(0)
 
-
                 if pl_id == SHBDOTagID.shversion:
                     detector.mc_code_version = pl[0]
-                    
+
                 if pl_id == SHBDOTagID.filedate:
                     detector.filedate = pl[0]
 
@@ -294,7 +290,7 @@ class _SHBinaryReader0p6:
                 if pl_id == SHBDOTagID.est_pages:
                     detector.pages = pl[0]
                     # todo: handling of multiple detectors (SPC)
-                    
+
                 # read a single detector
                 if pl_id == SHBDOTagID.det_dtype:
                     detector.dettyp = pl[0]
@@ -344,7 +340,7 @@ class _SHBinaryReader0p6:
         x1 = np.fromfile(f, dtype=tag, count=1)  # read the data into numpy
 
         if not x1:
-            return None 
+            return None
         else:
             pl_id = x1['pl_id'][0]
             pl_type = x1['pl_type'][0]
