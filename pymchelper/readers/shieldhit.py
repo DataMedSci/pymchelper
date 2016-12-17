@@ -287,6 +287,12 @@ class _SHBinaryReader0p6:
                 if pl_id == SHBDOTagID.est_geotyp:
                     detector.geotyp = pl[0]
 
+                if pl_id == SHBDOTagID.ext_ptvdose:
+                    detector.tripdose = 0.0
+
+                if pl_id == SHBDOTagID.ext_nproj:
+                    detector.tripntot = -1
+
                 if pl_id == SHBDOTagID.est_pages:
                     detector.pages = pl[0]
                     # todo: handling of multiple detectors (SPC)
@@ -294,6 +300,13 @@ class _SHBinaryReader0p6:
                 # read a single detector
                 if pl_id == SHBDOTagID.det_dtype:
                     detector.dettyp = pl[0]
+
+                if pl_id == SHBDOTagID.det_part:  # particle to be scored
+                    detector.particle = pl[0]
+                if pl_id == SHBDOTagID.det_partz:  # particle to be scored
+                    detector.particle_z = pl[0]
+                if pl_id == SHBDOTagID.det_parta:  # particle to be scored
+                    detector.particle_a = pl[0]
 
                 if pl_id == SHBDOTagID.det_nbin:
                     detector.nx = pl[0]
