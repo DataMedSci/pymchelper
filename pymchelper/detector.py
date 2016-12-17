@@ -105,7 +105,6 @@ class Detector:
         :return:
         """
         # TODO add compatibility check
-
         _l = [det.data for det in other_detectors]
         _l.append(self.data)
         self.counter += len(other_detectors)
