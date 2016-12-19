@@ -150,7 +150,8 @@ class SHBinaryReader:
             # if magic string is present, deep check for version number
             if sh_bdo_magic_number == x['magic'][0]:
                 vmaj, vmin = x['vstr'][0].decode('ASCII').split('.')
-                return (sh_bdo_magic_number == x['magic'][0]) and (int(vmaj) >= 0) and (int(vmin) >= 6)
+                fver = float(vmaj) + 0.1 * float(vmin)  # build version number as a floating point number
+                return (sh_bdo_magic_number == x['magic'][0]) and (fver > 0.5999999)
             else:
                 return False
 
@@ -242,10 +243,10 @@ class _SHBinaryReader0p6:
                            ('end', 'S2'),
                            ('vstr', 'S16')])
 
-            np.fromfile(f, dtype=d1, count=1)  # read the data into numpy
-            # print(x['magic'][0])
-            # print(x['end'][0])
-            # print(x['vstr'][0])
+            _x = np.fromfile(f, dtype=d1, count=1)  # read the data into numpy
+            logger.debug("Magic : " + _x['magic'][0])
+            logger.debug("Endian: " + _x['end'][0])
+            logger.debug("VerStr: " + _x['vstr'][0])
 
             while(f):
                 token = self.get_token(f)
@@ -256,7 +257,6 @@ class _SHBinaryReader0p6:
 
                 pl = [None]*_pl_len
 
-                # print("_pl_type",_pl_type.decode('ASCII'))
                 # decode all strings (currently there will never be more than one per token)
                 if 'S' in _pl_type.decode('ASCII'):
                     for i, _j in enumerate(_pl):
@@ -264,7 +264,7 @@ class _SHBinaryReader0p6:
                 else:
                     pl = _pl
 
-                # print("0x{:02x}".format(pl_id))
+                logger.debug("Read token {:s} 0x{:02x}".format(_pl_type.decode('ASCII'), pl_id))
 
                 # TODO: some clever mapping could be done here surely
                 # something like this: however the keymaps are not complete
@@ -273,8 +273,7 @@ class _SHBinaryReader0p6:
                 # for i, attr in enumerate(attributes):
                 #     setattr(detector,attr,pl[i])
                 #
-                # print(detector.mc_code_version)
-                # exit(0)
+                logger.debug("MC code version:" + detector.mc_code_version)
 
                 if pl_id == SHBDOTagID.shversion:
                     detector.mc_code_version = pl[0]
@@ -334,12 +333,12 @@ class _SHBinaryReader0p6:
                 if pl_id == SHBDOTagID.det_data:
                     detector.data = np.asarray(pl)
 
-            # print("doener.")
-            # print(detector.data)
-            # print(detector.nstat)
-            # print(detector.nx)
-            # print(detector.ny)
-            # print(detector.nz)
+            logger.debug("Done reading bdo file.")
+            logger.debug("Detector data : " + str(detector.data))
+            logger.debug("Detector nstat: " + str(detector.nstat))
+            logger.debug("Detector nx   : " + str(detector.nx))
+            logger.debug("Detector ny   : " + str(detector.ny))
+            logger.debug("Detector nz   : " + str(detector.nz))
             _prepare_detector_units(detector, nscale)
             detector.counter = 1
 
