@@ -2,6 +2,7 @@ import logging
 from collections import namedtuple
 from enum import IntEnum
 import numpy as np
+from distutils.version import LooseVersion
 
 from pymchelper.shieldhit.detector.detector_type import SHDetType
 from pymchelper.shieldhit.detector.estimator_type import SHGeoType
@@ -149,9 +150,8 @@ class SHBinaryReader:
 
             # if magic string is present, deep check for version number
             if sh_bdo_magic_number == x['magic'][0]:
-                vmaj, vmin = x['vstr'][0].decode('ASCII').split('.')
-                fver = float(vmaj) + 0.1 * float(vmin)  # build version number as a floating point number
-                return (sh_bdo_magic_number == x['magic'][0]) and (fver > 0.5999999)
+                ver = x['vstr'][0].decode('ASCII')
+                return (sh_bdo_magic_number == x['magic'][0]) and (LooseVersion(ver) >= LooseVersion("0.6"))
             else:
                 return False
 
