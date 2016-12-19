@@ -17,13 +17,19 @@ class TripCubeWriter:
         pixel_size_x = (detector.xmax - detector.xmin) / detector.nx
         pixel_size_z = (detector.zmax - detector.zmin) / detector.nz
 
+        logging.debug("psx: {:.6f} [cm]".format(pixel_size_x))
+        logging.debug("psz: {:.6f} [cm]".format(pixel_size_z))
+        
         if detector.dettyp == SHDetType.dose:
 
             from pytrip import dos
 
             cube = dos.DosCube()
+            # Warning: PyTRiP cube dimensions are in [mm]
             cube.create_empty_cube(
-                1.0, detector.nx, detector.ny, detector.nz, pixel_size=pixel_size_x, slice_distance=pixel_size_z)
+                1.0, detector.nx, detector.ny, detector.nz,
+                pixel_size=pixel_size_x * 10.0,
+                slice_distance=pixel_size_z * 10.0)
 
             # .dos dose cubes are usually in normalized integers,
             # where "1000" equals 100.0 % dose.
@@ -47,8 +53,11 @@ class TripCubeWriter:
             from pytrip import let
 
             cube = let.LETCube()
+            # Warning: PyTRiP cube dimensions are in [mm]
             cube.create_empty_cube(
-                1.0, detector.nx, detector.ny, detector.nz, pixel_size=pixel_size_x, slice_distance=pixel_size_z)
+                1.0, detector.nx, detector.ny, detector.nz,
+                pixel_size=pixel_size_x * 10.0,
+                slice_distance=pixel_size_z *10.0)
 
             # .dosemlet.dos LET cubes are usually in 32 bit floats.
             cube.data_type = "float"
