@@ -1,8 +1,9 @@
 import time
 import logging
 import os
-
 import numpy as np
+from pymchelper import __version__ as _pmcversion
+from pytrip import __version__ as _ptversion
 
 logger = logging.getLogger(__name__)
 
@@ -19,7 +20,12 @@ class TripCubeWriter:
 
         logging.debug("psx: {:.6f} [cm]".format(pixel_size_x))
         logging.debug("psz: {:.6f} [cm]".format(pixel_size_z))
-        
+
+        _patient_name = "Anonymous"
+        _created_by = "PyTRiP98"  # TODO: substitute this by username
+        _creation_info = "Created with pymchelper {:s}; using PyTRiP98 {:s}".format(_pmcversion,
+                                                                                    _ptversion)
+
         if detector.dettyp == SHDetType.dose:
 
             from pytrip import dos
@@ -46,6 +52,11 @@ class TripCubeWriter:
             else:
                 cube.cube = (cube.cube / cube.cube.max()) * 1200.0
 
+            # Save proper meta information
+            cube.patient_name = _patient_name
+            cube.created_by = _created_by
+            cube.creation_info = _creation_info
+
             cube.write(self.output_corename)
 
         elif detector.dettyp in (SHDetType.dlet, SHDetType.tlet, SHDetType.dletg, SHDetType.tletg):
@@ -57,7 +68,7 @@ class TripCubeWriter:
             cube.create_empty_cube(
                 1.0, detector.nx, detector.ny, detector.nz,
                 pixel_size=pixel_size_x * 10.0,
-                slice_distance=pixel_size_z *10.0)
+                slice_distance=pixel_size_z * 10.0)
 
             # .dosemlet.dos LET cubes are usually in 32 bit floats.
             cube.data_type = "float"
@@ -71,9 +82,13 @@ class TripCubeWriter:
 
             cube.cube = detector.data.reshape(detector.nx, detector.ny, detector.nz)
             cube.cube *= 0.1  # MeV/cm -> keV/um
+            # Save proper meta information
+
+            cube.patient_name = _patient_name
+            cube.created_by = _created_by
+            cube.creation_info = _creation_info
 
             cube.write(self.output_corename)
-
         else:
             logger.error("Tripcube target is only allowed with dose- or LET-type detectors.")
             raise Exception("Illegal detector for tripcube.")
