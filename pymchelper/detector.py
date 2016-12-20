@@ -59,6 +59,7 @@ class Detector:
     """
     data = None
     error = None
+
     nstat = -1
 
     xmin = float("NaN")
@@ -89,7 +90,7 @@ class Detector:
         :return: none
         """
         reader = SHTextReader(filename)
-        if filename.endswith(".bdo"):
+        if filename.endswith(".bdo") or filename.endswith(".bdox"):
             reader = SHBinaryReader(filename)
         # find better way to discover if file comes from Fluka
         elif "_fort" in filename:
