@@ -484,16 +484,13 @@ class _SHBinaryReader0p1:
         detector.nstat = header['nstat'][0]
 
         if detector.geotyp not in (SHGeoType.zone, SHGeoType.dzone):
-            shift = 0
-            if 'VOXSCORE' in header['geotyp'][0].decode('ascii'):
-                shift = 1  # TODO to be investigated
-            detector.xmin = header['det'][0][0 + shift]
-            detector.ymin = header['det'][0][1 + shift]
-            detector.zmin = header['det'][0][2 + shift]
+            detector.xmin = header['det'][0][0]
+            detector.ymin = header['det'][0][1]
+            detector.zmin = header['det'][0][2]
 
-            detector.xmax = header['det'][0][3 + shift]
-            detector.ymax = header['det'][0][4 + shift]
-            detector.zmax = header['det'][0][5 + shift]
+            detector.xmax = header['det'][0][3]
+            detector.ymax = header['det'][0][4]
+            detector.zmax = header['det'][0][5]
         else:
             # special case for zone scoring, x min and max will be zone numbers
             detector.xmin = det_attribs.starting_zone
