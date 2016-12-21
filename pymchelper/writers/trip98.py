@@ -2,8 +2,6 @@ import time
 import logging
 import os
 import numpy as np
-from pymchelper import __version__ as _pmcversion
-from pytrip import __version__ as _ptversion
 
 logger = logging.getLogger(__name__)
 
@@ -13,7 +11,11 @@ class TripCubeWriter:
         self.output_corename = filename
 
     def write(self, detector):
+        import getpass
         from pymchelper.shieldhit.detector.detector_type import SHDetType
+        from pymchelper import __version__ as _pmcversion
+        # TODO add printing information how to install pytrip if it's missing
+        from pytrip import __version__ as _ptversion
 
         pixel_size_x = (detector.xmax - detector.xmin) / detector.nx
         pixel_size_z = (detector.zmax - detector.zmin) / detector.nz
@@ -22,7 +24,7 @@ class TripCubeWriter:
         logging.debug("psz: {:.6f} [cm]".format(pixel_size_z))
 
         _patient_name = "Anonymous"
-        _created_by = "PyTRiP98"  # TODO: substitute this by username
+        _created_by = getpass.getuser()
         _creation_info = "Created with pymchelper {:s}; using PyTRiP98 {:s}".format(_pmcversion,
                                                                                     _ptversion)
 
@@ -78,7 +80,7 @@ class TripCubeWriter:
             # need to redo the cube, since by default np.float32 are allocated.
             # When https://github.com/pytrip/pytrip/issues/35 is fixed,
             # then this should not be needed.
-            cube.cube = np.ones((cube.dimz, cube.dimy, cube.dimx), dtype=cube.pydata_type) * (1.0)
+            cube.cube = np.ones((cube.dimz, cube.dimy, cube.dimx), dtype=cube.pydata_type)
 
             cube.cube = detector.data.reshape(detector.nx, detector.ny, detector.nz)
             cube.cube *= 0.1  # MeV/cm -> keV/um
