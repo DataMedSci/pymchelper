@@ -51,7 +51,12 @@ def add_default_options(parser):
 def main(args=sys.argv[1:]):
     import pymchelper
     import os
-    parser = argparse.ArgumentParser()
+
+    _progname = os.path.basename(sys.argv[0])
+    _helptxt = 'Universal converter for FLUKA and SHIELD-HIT12A generated files.'
+    _epitxt = '''Type '{:s} <converter> --help' for help on a specific converter.'''.format(_progname)
+
+    parser = argparse.ArgumentParser(description=_helptxt, epilog=_epitxt)
 
     # subparsers = parser.add_subparsers(title='available converters', metavar='...')
     subparsers = parser.add_subparsers(dest='command', metavar='converter')
@@ -88,6 +93,7 @@ def main(args=sys.argv[1:]):
                                 type=int)
 
     parser.add_argument('-V', '--version', action='version', version=pymchelper.__version__)
+
     parsed_args = parser.parse_args(args)
 
     if parsed_args.command is not None:
