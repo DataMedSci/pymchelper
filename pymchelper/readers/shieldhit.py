@@ -244,9 +244,9 @@ class _SHBinaryReader0p6:
                            ('vstr', 'S16')])
 
             _x = np.fromfile(f, dtype=d1, count=1)  # read the data into numpy
-            logger.debug("Magic : " + _x['magic'][0])
-            logger.debug("Endian: " + _x['end'][0])
-            logger.debug("VerStr: " + _x['vstr'][0])
+            logger.debug("Magic : " + _x['magic'][0].decode('ASCII'))
+            logger.debug("Endian: " + _x['end'][0].decode('ASCII'))
+            logger.debug("VerStr: " + _x['vstr'][0].decode('ASCII'))
 
             while(f):
                 token = self.get_token(f)
@@ -273,10 +273,10 @@ class _SHBinaryReader0p6:
                 # for i, attr in enumerate(attributes):
                 #     setattr(detector,attr,pl[i])
                 #
-                logger.debug("MC code version:" + detector.mc_code_version)
 
                 if pl_id == SHBDOTagID.shversion:
                     detector.mc_code_version = pl[0]
+                    logger.debug("MC code version:" + detector.mc_code_version)
 
                 if pl_id == SHBDOTagID.filedate:
                     detector.filedate = pl[0]
