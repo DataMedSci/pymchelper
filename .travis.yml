@@ -75,9 +75,6 @@ matrix:
 #    uncomment and adjust if you want to allow some failures
     allow_failures:
         - os: linux
-          python: 3.6
-          env: TOXENV=py36
-        - os: linux
           python: nightly
           env: TOXENV=py37
 
