@@ -44,7 +44,7 @@ class TripCubeWriter:
             # The next are also the defaults, but just to be clear
             # this is specifially set.
             cube.data_type = "integer"
-            cube.bytes = 2
+            cube.num_bytes = 2
             cube.pydata_type = np.int16
 
             cube.cube = detector.data.reshape(detector.nx, detector.ny, detector.nz)
@@ -74,7 +74,7 @@ class TripCubeWriter:
 
             # .dosemlet.dos LET cubes are usually in 32 bit floats.
             cube.data_type = "float"
-            cube.bytes = 4
+            cube.num_bytes = 4
             cube.pydata_type = np.float32
 
             # need to redo the cube, since by default np.float32 are allocated.
