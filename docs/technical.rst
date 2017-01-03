@@ -19,9 +19,9 @@ Badges and links
     * - docs
       - |docs|
     * - tests
-      - |travis| |appveyor| |codecov|
+      - |travis| |appveyor| |codecov| |requires|
     * - package
-      - |version| |downloads| |wheel| |supported-versions| |supported-implementations|
+      - |version| |downloads| |wheel| |supportedversions| |supportedimplementations|
 
 .. |docs| image:: https://readthedocs.org/projects/pymchelper/badge/?style=flat
     :target: https://readthedocs.org/projects/pymchelper
@@ -51,11 +51,15 @@ Badges and links
     :alt: PyPI Wheel
     :target: https://pypi.python.org/pypi/pymchelper
 
-.. |supported-versions| image:: https://img.shields.io/pypi/pyversions/pymchelper.svg?style=flat
+.. |requires| image:: https://requires.io/github/DataMedSci/pymchelper/requirements.svg?branch=master
+     :alt: Requirements Status
+     :target: https://requires.io/github/DataMedSci/pymchelper/requirements/?branch=master
+
+.. |supportedversions| image:: https://img.shields.io/pypi/pyversions/pymchelper.svg?style=flat
     :alt: Supported versions
     :target: https://pypi.python.org/pypi/pymchelper
 
-.. |supported-implementations| image:: https://img.shields.io/pypi/implementation/pymchelper.svg?style=flat
+.. |supportedimplementations| image:: https://img.shields.io/pypi/implementation/pymchelper.svg?style=flat
     :alt: Supported implementations
     :target: https://pypi.python.org/pypi/pymchelper
 
