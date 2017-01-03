@@ -1,16 +1,6 @@
 Badges and links
 ================
 
-.. image:: https://img.shields.io/pypi/v/pymchelper.svg
-        :target: https://pypi.python.org/pypi/pymchelper
-
-.. image:: https://img.shields.io/travis/DataMedSci/pymchelper.svg
-        :target: https://travis-ci.org/DataMedSci/pymchelper
-
-.. image:: https://readthedocs.org/projects/pymchelper/badge/?version=latest
-        :target: https://readthedocs.org/projects/pymchelper/?badge=latest
-        :alt: Documentation Status
-
 .. start-badges
 
 .. list-table::
