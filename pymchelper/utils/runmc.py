@@ -26,7 +26,6 @@ def set_logger_level(args):
 
 def main(args=sys.argv[1:]):
     import pymchelper
-    import os
 
     parser = argparse.ArgumentParser()
     parser.add_argument('-v',
@@ -36,12 +35,16 @@ def main(args=sys.argv[1:]):
                         help='give more output. Option is additive, and can be used up to 3 times')
     parser.add_argument('-V', '--version', action='version', version=pymchelper.__version__)
     parser.add_argument("input", help='input filename or directory', type=str)
-    parser.add_argument('-a', '--args', help='optional arguments for MC engine', type=str)
+    parser.add_argument('-a', '--args', help='optional arguments for MC engine', type=str, default=None)
     parser.add_argument('-e', '--executable', help='path to executable', type=str, default=None)
 
     parsed_args = parser.parse_args(args)
 
-    s = runner.Executable(parsed_args.input, parsed_args.executable)
+    mc_args = parsed_args.args
+    if mc_args is not None and len(mc_args) > 1:
+        if mc_args[0] == '[' and mc_args[-1] == ']':
+            mc_args = mc_args[1:-1]
+    s = runner.Executable(parsed_args.input, parsed_args.executable, mc_args)
     s.run()
 
     print("Output stream:")
