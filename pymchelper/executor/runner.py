@@ -78,7 +78,6 @@ class Executable:
         Method starting shieldhit process and supervisor thread
         Raise:
             ProcessAlreadyStarted - if it's tried to run process while it's already running
-            NotEnoughMemoryError - if there is not enough RAM to run process
         """
         if self.status == Executable.RUNNING_STATUS:
             raise ProcessAlreadyStarted
@@ -88,8 +87,9 @@ class Executable:
         try:
             if self._mc_args:
                 print("args", self._mc_args)
-#                t =
-                self._process = Popen([self.executable_path, self._input_cfg, self._mc_args], stdout=PIPE, stderr=PIPE,
+                t = [self.executable_path, self._input_cfg] + self._mc_args.split()
+                print("t", t)
+                self._process = Popen(t, stdout=PIPE, stderr=PIPE,
                                       universal_newlines=True)
             else:
                 self._process = Popen([self.executable_path, self._input_cfg], stdout=PIPE, stderr=PIPE,
@@ -141,6 +141,56 @@ class Executable:
             return self._process.pid
         else:
             return None
+
+
+class TempExecutor:
+    def __init__(self, input_cfg, executable_path=None, mc_args=None):
+        self._input_cfg = input_cfg
+        self._executable_path = executable_path
+        self._mc_args = mc_args
+
+    def run(self):
+        import tempfile
+        import shutil
+        # make temp dir
+        working_dir = tempfile.mkdtemp()  # make temp working dir for converter output files
+        logger.info("Creating directory {:s}".format(working_dir))
+
+        # copy input to temp dir
+        shutil.copytree(self._input_cfg, os.path.join(working_dir, "work"))
+
+        # run in temp dir
+        s = Executable(executable_path=self._executable_path, input_cfg=os.path.join(working_dir, "work"), mc_args=self._mc_args)
+        s.run()
+
+        print("Output stream:")
+        last_communicate = ""
+        while s.status != Executable.FAILED_STATUS and s.status != Executable.FINISHED_STATUS:
+            if s.communicate != last_communicate:
+                last_communicate = s.communicate
+                print(last_communicate)
+
+        # read data, make python objects
+        import glob
+        from pymchelper.detector import Detector
+        files = sorted(glob.glob(os.path.join(working_dir, "work/*.bdo")))
+        results = {}
+        for item in files:
+            key = os.path.basename(item)
+            value = Detector()
+            value.read(item)
+            results[key] = value
+
+        # delete dir
+        logger.info("Removing directory {:s}".format(working_dir))
+        shutil.rmtree(working_dir)
+
+        return results
+
+
+class ParallelExecutor:
+    def __init__(self):
+        pass
 
 
 class Monitor:
