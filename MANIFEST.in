@@ -1,32 +1,6 @@
-  include *.rst
-  include *.txt
-  include *.py
-  include LICENSE
-  include requirements.txt
-  include tests/requirements-test.txt
-  include tests/res/shieldhit/converter/bdo2txt
-  recursive-include docs *.py
-  recursive-include docs *.rst
-  recursive-include docs *.png  
-  recursive-include pymchelper *.py
-  recursive-include tests *.py
-  recursive-include tests *.bdo
-  recursive-include tests *.png
-  recursive-include tests *.dat
-  recursive-include tests *.sh
-  recursive-include tests *.inp
-  recursive-include pymchelper *.db
-  recursive-include pymchelper *.ini
-  recursive-include pymchelper *.r
-  recursive-include tests *.exe
-  exclude .gitkeep
-  exclude .gitconfig
-  exclude tox.ini
-  exclude .travis.yml
-  exclude appveyor.yml
-  exclude wercker.yml
+  recursive-include pymchelper *.py *.db *.ini *.r
+  recursive-include examples *.py
+  exclude *.sh *.yml *.ini *.txt .gitkeep
+  prune docs
   prune .travis
-  prune install_deps.sh
-  prune make_single_executable.sh
-  prune tests/res/shieldhit/converter
-
+  prune tests
