@@ -2,14 +2,6 @@
 
 language: python
 
-cache:
-  directories:
-  - ~/.cache/pip
-  - ~/.pyenv
-
-before_cache:
-  - rm -f $HOME/.cache/pip/log/debug.log
-
 env:
   global:
     - PYPIUSER=grzanka
