@@ -7,11 +7,18 @@ import threading
 import re
 import sys
 import logging
+from enum import IntEnum
 from subprocess import Popen, PIPE
 
 from pymchelper.executor.exceptions import ExecutorError, ProcessAlreadyStarted
 
 logger = logging.getLogger(__name__)
+
+
+class MCOutType(IntEnum):
+    raw = 0
+    plot = 1
+    txt = 2
 
 
 class FlukaEnviroment:
@@ -160,7 +167,8 @@ class TempExecutor:
         shutil.copytree(self._input_cfg, os.path.join(working_dir, "work"))
 
         # run in temp dir
-        s = Executable(executable_path=self._executable_path, input_cfg=os.path.join(working_dir, "work"), mc_args=self._mc_args)
+        s = Executable(executable_path=self._executable_path,
+                       input_cfg=os.path.join(working_dir, "work"), mc_args=self._mc_args)
         s.run()
 
         print("Output stream:")
