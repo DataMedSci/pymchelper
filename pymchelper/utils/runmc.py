@@ -1,12 +1,12 @@
 #!/usr/bin/env python
 
+import os
 import logging
 import sys
 import argparse
 
-from pymchelper.executor import runner
 from pymchelper.executor.options import MCOptions
-from pymchelper.executor.runner import MCOutType, doubler, Runner
+from pymchelper.executor.runner import MCOutType, Runner
 from pymchelper.writers.plots import PlotDataWriter, ImageWriter
 
 logger = logging.getLogger(__name__)
@@ -34,8 +34,9 @@ def main(args=sys.argv[1:]):
     parser.add_argument('-e', '--executable', help='path to MC executable '
                                                    '(automatically discovered if not present)',
                         dest='exec', type=str, default=None)
-    parser.add_argument('-j', '--jobs', help='Number of jobs to run simultaneosly (default: 1)',
-                        type=int, default=1)
+    parser.add_argument('-j', '--jobs',
+                        help='Number of jobs to run simultaneously (default: {:d})'.format(os.cpu_count()),
+                        type=int, default=None)
     parser.add_argument('-m', '--mc-options', help='MC engine options (default: none)',
                         dest='mcopt', type=str, default=None)
     parser.add_argument('-o', '--output-dir', help='Output directory (default: .)',
@@ -65,49 +66,25 @@ def main(args=sys.argv[1:]):
                     executable_path=parsed_args.exec,
                     user_opt=mc_args)
 
-    print(opt)
-
     r = Runner(jobs=parsed_args.jobs, options=opt)
+    workspaces = r.run(outdir=parsed_args.outdir)
+    data = r.get_data(workspaces)
+    print(data)
 
-    r.prepare()
+    if MCOutType.txt.name in parsed_args.outtype:
+        for key in data:
+            output_file = os.path.join(parsed_args.outdir, key)
+            writer = PlotDataWriter(output_file, None)
+            writer.write(data[key])
 
-    r.run()
+    if MCOutType.plot.name in parsed_args.outtype:
+        for key in data:
+            output_file = os.path.join(parsed_args.outdir, key)
+            writer = ImageWriter(output_file, argparse.Namespace(colormap='gnuplot2'))
+            writer.write(data[key])
 
-    return
-
-    # from multiprocessing import Pool, current_process
-    #
-    # numbers = [5, 10, 20]
-    # # processes None will use all of them
-    # # mp.cpu_count()
-    #
-    # # srun -p plgrid -N 1 --ntasks-per-node=1 -n 24 -A ccbmc5 --time=04:55:00 --pty /bin/bash -l
-    # pool = Pool(processes=3)
-    # print(pool.map(doubler, numbers))
-    #
-    # return
-
-    if MCOutType.raw.name not in parsed_args.outtype:
-        print("Temp exec")
-        s = runner.TempExecutor(parsed_args.input, parsed_args.exec, mc_args)
-        results = s.run()
-        for item in results:
-            print("file", item, "data", results[item])
-            if MCOutType.txt.name in parsed_args.outtype:
-                writer = PlotDataWriter(item, None)
-                writer.write(results[item])
-            if MCOutType.plot.name in parsed_args.outtype:
-                writer = ImageWriter(item, None)
-                writer.write(results[item])
-    else:
-        s = runner.Executable(parsed_args.input, parsed_args.exec, mc_args)
-        s.run()
-        print("Output stream:")
-        last_communicate = ""
-        while s.status != runner.Executable.FAILED_STATUS and s.status != runner.Executable.FINISHED_STATUS:
-            if s.communicate != last_communicate:
-                last_communicate = s.communicate
-                print(last_communicate)
+    if not MCOutType.raw.name in parsed_args.outtype:
+        r.clean(workspaces)
 
 
 if __name__ == '__main__':

@@ -1,5 +1,5 @@
-import os, sys
-
+import os
+import sys
 import logging
 
 logger = logging.getLogger(__name__)
@@ -15,7 +15,8 @@ class SH12AEnviroment:
 
 class MCOptions:
     def __init__(self, input_cfg, executable_path=None, user_opt=None):
-        self._mc_enviroment = self._discover_mc_enging(input_cfg)
+        self.input_cfg = input_cfg
+        self._mc_enviroment = self._discover_mc_engine()
         self.executable_path = executable_path
         if self.executable_path is None:
             self.executable_path = self._discover_mc_executable()
@@ -23,6 +24,23 @@ class MCOptions:
         self._validate_user_opt(self.user_opt)
         self.workspace = '.'
 
+    def set_rng_seed(self, rng_seed):
+        options_list = self.user_opt.split()
+        if '-N' not in options_list:
+            self.user_opt += " -N {:d}".format(rng_seed)
+        else:
+            location = options_list.index('-N')
+            options_list[location+1] = str(rng_seed)
+            self.user_opt = ' '.join(options_list)
+
+    def set_nstat(self, nstat):
+        options_list = self.user_opt.split()
+        if '-n' not in options_list:
+            self.user_opt += " -n {:d}".format(nstat)
+        else:
+            location = options_list.index('-n')
+            options_list[location+1] = str(nstat)
+            self.user_opt = ' '.join(options_list)
 
     @staticmethod
     def _validate_user_opt(user_opt):
@@ -44,12 +62,12 @@ class MCOptions:
         if len(options_list) == 1 and not options_list[0].startswith('-'):
             raise SyntaxError("Seems like workspace: {:s}".format(options_list[0]))
 
-    def _discover_mc_enging(self, input_cfg):
-        if not os.path.exists(input_cfg):
-            raise Exception("Input path {:s} doesn't exists".format(input_cfg))
-        if os.path.isfile(input_cfg):
+    def _discover_mc_engine(self):
+        if not os.path.exists(self.input_cfg):
+            raise Exception("Input path {:s} doesn't exists".format(self.input_cfg))
+        if os.path.isfile(self.input_cfg):
             return FlukaEnviroment
-        if os.path.isdir(input_cfg):
+        if os.path.isdir(self.input_cfg):
             return SH12AEnviroment
 
     def _discover_mc_executable(self):
@@ -67,9 +85,9 @@ class MCOptions:
 
     def __str__(self):
         result = "{exec:s} {options:s} {workspace:s}".format(
-            exec=self.executable_path,
+            exec=os.path.abspath(self.executable_path),
             options=self.user_opt,
-            workspace=self.workspace
+            workspace=os.path.abspath(self.workspace)
         )
         return result
 
