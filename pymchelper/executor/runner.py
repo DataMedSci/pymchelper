@@ -13,7 +13,7 @@ from subprocess import Popen, PIPE
 from pymchelper.executor.exceptions import ExecutorError, ProcessAlreadyStarted
 
 logger = logging.getLogger(__name__)
-
+from multiprocessing import Pool, current_process
 
 class MCOutType(IntEnum):
     raw = 0
@@ -24,9 +24,30 @@ class MCOutType(IntEnum):
 class FlukaEnviroment:
     executable_file = 'rfluka'
 
-
 class SH12AEnviroment:
     executable_file = 'shieldhit'
+
+from multiprocessing import Pool, current_process
+
+def doubler(number):
+    proc_name = current_process().name
+    print('{0} doubled by: {1}'.format(number, proc_name))
+    return number * 2
+
+
+class Runner:
+    def __init__(self, jobs=None, options=None):
+        self.jobs = jobs
+        self.options = options
+        self.pool = Pool(processes=self.jobs)
+
+    def prepare(self):
+        pass
+
+
+    def run(self):
+        numbers = [1,2,3,4,5,6]
+        self.pool.map(doubler, numbers)
 
 
 class Executable:
