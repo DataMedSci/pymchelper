@@ -6,7 +6,7 @@ import argparse
 
 from pymchelper.executor import runner
 from pymchelper.executor.options import MCOptions
-from pymchelper.executor.runner import MCOutType
+from pymchelper.executor.runner import MCOutType, doubler, Runner
 from pymchelper.writers.plots import PlotDataWriter, ImageWriter
 
 logger = logging.getLogger(__name__)
@@ -61,11 +61,31 @@ def main(args=sys.argv[1:]):
         if mc_args[0] == '[' and mc_args[-1] == ']':
             mc_args = mc_args[1:-1]
 
-    opt = MCOptions()
+    opt = MCOptions(input_cfg=parsed_args.input,
+                    executable_path=parsed_args.exec,
+                    user_opt=mc_args)
 
     print(opt)
 
+    r = Runner(jobs=parsed_args.jobs, options=opt)
+
+    r.prepare()
+
+    r.run()
+
     return
+
+    # from multiprocessing import Pool, current_process
+    #
+    # numbers = [5, 10, 20]
+    # # processes None will use all of them
+    # # mp.cpu_count()
+    #
+    # # srun -p plgrid -N 1 --ntasks-per-node=1 -n 24 -A ccbmc5 --time=04:55:00 --pty /bin/bash -l
+    # pool = Pool(processes=3)
+    # print(pool.map(doubler, numbers))
+    #
+    # return
 
     if MCOutType.raw.name not in parsed_args.outtype:
         print("Temp exec")
