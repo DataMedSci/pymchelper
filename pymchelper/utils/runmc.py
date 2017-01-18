@@ -5,6 +5,7 @@ import sys
 import argparse
 
 from pymchelper.executor import runner
+from pymchelper.executor.options import MCOptions
 from pymchelper.executor.runner import MCOutType
 from pymchelper.writers.plots import PlotDataWriter, ImageWriter
 
@@ -54,13 +55,17 @@ def main(args=sys.argv[1:]):
 
     parsed_args = parser.parse_args(args)
 
-    print(parsed_args)
-
     # strip MC arguments
     mc_args = parsed_args.mcopt
     if mc_args is not None and len(mc_args) > 1:
         if mc_args[0] == '[' and mc_args[-1] == ']':
             mc_args = mc_args[1:-1]
+
+    opt = MCOptions()
+
+    print(opt)
+
+    return
 
     if MCOutType.raw.name not in parsed_args.outtype:
         print("Temp exec")
