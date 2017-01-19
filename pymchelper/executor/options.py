@@ -74,7 +74,7 @@ class MCOptions:
         dirs_with_mc_exe = []
         for item in sys.path:
             logger.debug("Inspecting {:s}".format(item))
-            if os.path.exists(item) and self._mc_enviroment.executable_file in os.listdir(item):
+            if os.path.exists(item) and os.path.isdir(item) and self._mc_enviroment.executable_file in os.listdir(item):
                 dirs_with_mc_exe.append(item)
 
         if not dirs_with_mc_exe:
