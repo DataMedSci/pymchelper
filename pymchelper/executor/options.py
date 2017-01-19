@@ -84,8 +84,8 @@ class MCOptions:
         return os.path.join(dirs_with_mc_exe[0], self._mc_enviroment.executable_file)
 
     def __str__(self):
-        result = "{exec:s} {options:s} {workspace:s}".format(
-            exec=os.path.abspath(self.executable_path),
+        result = "{executable:s} {options:s} {workspace:s}".format(
+            executable=os.path.abspath(self.executable_path),
             options=self.user_opt,
             workspace=os.path.abspath(self.workspace)
         )
