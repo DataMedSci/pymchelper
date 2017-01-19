@@ -91,6 +91,7 @@ class Executor:
         current_options.workspace = workspace
         logger.debug('dir {:s}, cmd {:s}'.format(workspace, str(current_options)))
 
-        subprocess.check_call(str(current_options).split(), cwd=workspace)
+        DEVNULL = open(os.devnull, 'wb')
+        subprocess.check_call(str(current_options).split(), cwd=workspace, stdout=DEVNULL, stderr=DEVNULL)
 
         return workspace
