@@ -83,7 +83,7 @@ def main(args=sys.argv[1:]):
             writer = ImageWriter(output_file, argparse.Namespace(colormap='gnuplot2'))
             writer.write(data[key])
 
-    if not MCOutType.raw.name in parsed_args.outtype:
+    if MCOutType.raw.name not in parsed_args.outtype:
         r.clean(workspaces)
 
 
