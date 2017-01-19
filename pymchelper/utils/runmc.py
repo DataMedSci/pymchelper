@@ -32,8 +32,8 @@ def main(args=sys.argv[1:]):
 
     parser = argparse.ArgumentParser()
     parser.add_argument('-e', '--executable', help='path to MC executable '
-                                                   '(automatically discovered if not present)',
-                        dest='exec', type=str, default=None)
+                                                   '(automatically detected if option not present)',
+                        type=str, default=None)
     parser.add_argument('-j', '--jobs',
                         help='Number of jobs to run simultaneously (default: {:d})'.format(os.cpu_count()),
                         type=int, default=None)
@@ -63,7 +63,7 @@ def main(args=sys.argv[1:]):
             mc_args = mc_args[1:-1]
 
     opt = MCOptions(input_cfg=parsed_args.input,
-                    executable_path=parsed_args.exec,
+                    executable_path=parsed_args.executable,
                     user_opt=mc_args)
 
     r = Runner(jobs=parsed_args.jobs, options=opt)

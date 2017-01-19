@@ -3,7 +3,7 @@ import logging
 import shutil
 import subprocess
 from enum import IntEnum
-from multiprocessing import Pool, current_process
+from multiprocessing import Pool
 import numpy as np
 
 logger = logging.getLogger(__name__)
@@ -40,7 +40,7 @@ class Runner:
         rng_seeds = range(1, self.jobs + 1)
         e = Executor(outdir=outdir, options=self.options)
         res = self.pool.map(e, rng_seeds)
-        print(res)
+        logger.info(res)
         return res
 
     def get_data(self, workspaces):
@@ -86,12 +86,10 @@ class Executor:
             if not os.path.exists(workspace):
                 os.makedirs(workspace)
             shutil.copy2(self.options.input_cfg, workspace)
-        proc_name = current_process().name
         current_options = self.options
         current_options.set_rng_seed(rng_seed)
         current_options.workspace = workspace
-        print('{0} RNG by: {1}'.format(rng_seed, proc_name))
-        print('dir {:s}, cmd {:s}'.format(workspace, str(current_options)))
+        logger.debug('dir {:s}, cmd {:s}'.format(workspace, str(current_options)))
 
         subprocess.check_call(str(current_options).split(), cwd=workspace)
 
