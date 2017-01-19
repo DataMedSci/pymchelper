@@ -13,7 +13,7 @@ input_cfg = {
 RNDSEED      	89736501     ! Random seed
 JPART0       	25           ! Incident particle type
 HIPROJ     	12.0    6.0  ! A and Z of heavy ion
-TMAX0      	391.0   0.0  ! Incident energy; (MeV/nucl)
+TMAX0      	{energy:3.6f}   0.0  ! Incident energy; (MeV/nucl)
 NSTAT           500    500 ! NSTAT, Step of saving
 STRAGG          2            ! Straggling: 0-Off 1-Gauss, 2-Vavilov
 MSCAT           2            ! Mult. scatt 0-Off 1-Gauss, 2-Moliere
@@ -49,13 +49,13 @@ MSH             -5.0      -5.0       0.0       5.0       5.0      30.0
 """}
 
 
-def run_sh12a():
+def run_sh12a(input_dict):
     dirpath = tempfile.mkdtemp()
 
-    for config_file in input_cfg:
+    for config_file in input_dict:
         file_path = os.path.join(dirpath, config_file)
         with open(file_path, 'w') as f:
-            f.write(input_cfg[config_file])
+            f.write(input_dict[config_file])
 
     opt = MCOptions(input_cfg=dirpath,
                     executable_path=None,
@@ -68,15 +68,29 @@ def run_sh12a():
     return data['ex_zmsh']
 
 
-def analyze(data):
+def max_pos_at_energy(energy_MeV):
+    input_dict = input_cfg.copy()
+    input_dict['beam.dat'] = input_dict['beam.dat'].format(energy=energy_MeV)
+    data = run_sh12a(input_dict)
     index_of_max = np.argmax(data.v)
     max_pos_cm = list(data.z)[index_of_max]
-    print("Maximum position {:4.3} cm".format(max_pos_cm))
+    print("Maximum position {:4.3f} cm at energy {:3.3f} MeV".format(max_pos_cm, energy_MeV))
+    return max_pos_cm
+
+
+def f(energy_MeV, pos_mm):
+    return max_pos_at_energy(energy_MeV) - pos_mm
 
 
 def main(args=sys.argv[1:]):
-    data = run_sh12a()
-    analyze(data)
+    """
+    Find such energy for which position of BP max is 20.05 mm
+    :param args:
+    :return:
+    """
+    pos_mm = 20.05
+    from scipy.optimize import brentq
+    brentq(f, a=20, b=400, args=(pos_mm,), xtol=0.01)
 
 
 if __name__ == '__main__':
