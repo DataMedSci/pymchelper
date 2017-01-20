@@ -1,9 +1,10 @@
-import os
 import logging
+import os
 import shutil
 import subprocess
 from enum import IntEnum
 from multiprocessing import Pool
+
 import numpy as np
 
 logger = logging.getLogger(__name__)
@@ -29,6 +30,9 @@ class SH12AEnviroment:
 #         return b
 #     return gcd(b, a%b)
 
+class KeyboardInterruptError(Exception):
+    pass
+
 
 class Runner:
     def __init__(self, jobs=None, options=None):
@@ -39,7 +43,18 @@ class Runner:
     def run(self, outdir):
         rng_seeds = range(1, self.jobs + 1)
         e = Executor(outdir=outdir, options=self.options)
-        res = self.pool.map(e, rng_seeds)
+        res = None
+        try:
+            res = self.pool.map(e, rng_seeds)
+        except KeyboardInterrupt:
+            logger.info('got ^C while pool mapping, terminating the pool')
+            self.pool.terminate()
+            logger.info('pool is terminated')
+        except Exception as e:
+            logger.info('got exception: %r, terminating the pool' % (e,))
+            self.pool.terminate()
+            logger.info('pool is terminated')
+
         logger.info(res)
         return res
 
@@ -77,21 +92,24 @@ class Executor:
 
     def __call__(self, rng_seed, **kwargs):
         workspace = os.path.join(self.outdir, 'run_{:d}'.format(rng_seed))
-        if os.path.isdir(self.options.input_cfg):
-            # if path already exists, remove it before copying with copytree()
-            if os.path.exists(workspace):
-                shutil.rmtree(workspace)
-            shutil.copytree(self.options.input_cfg, workspace)
-        elif os.path.isfile(self.options.input_cfg):
-            if not os.path.exists(workspace):
-                os.makedirs(workspace)
-            shutil.copy2(self.options.input_cfg, workspace)
-        current_options = self.options
-        current_options.set_rng_seed(rng_seed)
-        current_options.workspace = workspace
-        logger.debug('dir {:s}, cmd {:s}'.format(workspace, str(current_options)))
+        try:
+            if os.path.isdir(self.options.input_cfg):
+                # if path already exists, remove it before copying with copytree()
+                if os.path.exists(workspace):
+                    shutil.rmtree(workspace)
+                shutil.copytree(self.options.input_cfg, workspace)
+            elif os.path.isfile(self.options.input_cfg):
+                if not os.path.exists(workspace):
+                    os.makedirs(workspace)
+                shutil.copy2(self.options.input_cfg, workspace)
+            current_options = self.options
+            current_options.set_rng_seed(rng_seed)
+            current_options.workspace = workspace
+            logger.debug('dir {:s}, cmd {:s}'.format(workspace, str(current_options)))
 
-        DEVNULL = open(os.devnull, 'wb')
-        subprocess.check_call(str(current_options).split(), cwd=workspace, stdout=DEVNULL, stderr=DEVNULL)
+            DEVNULL = open(os.devnull, 'wb')
+            subprocess.check_call(str(current_options).split(), cwd=workspace, stdout=DEVNULL, stderr=DEVNULL)
+        except KeyboardInterrupt:
+            raise KeyboardInterruptError()
 
         return workspace
