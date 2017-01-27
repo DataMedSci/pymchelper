@@ -452,7 +452,6 @@ class _SHBinaryReader0p1:
             detector.payload_offset = 158
 
         header = np.fromfile(self.filename, header_dtype, count=1)
-        print(header)
         detector.rec_size = header['reclen'][0] // 8
 
         if 'VOXSCORE' in header['geotyp'][0].decode('ascii'):
@@ -520,8 +519,6 @@ class _SHBinaryReader0p1:
             detector.zmax = 0.0
 
         detector.dettyp = SHDetType(det_attribs.det_type)
-
-        print("a")
 
     # TODO: we need an alternative list, in case things have been scaled with nscale, since then things
     # are not "/particle" anymore.
