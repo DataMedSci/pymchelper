@@ -101,8 +101,8 @@ class SHBDOTagID(IntEnum):
     det_partz = 0xDD04       # idet(6)
     det_parta = 0xDD05       # idet(7)
     det_dmat = 0xDD06        # idet(8)
-    det_nbine = 0xDD07       # idet(9)
-    det_difftype = 0xDD08    # idet(10)
+    det_nbine = 0xDD07       # idet(9) number of bins in diff scorer, negative means log binning
+    det_difftype = 0xDD08    # idet(10) detector type for differential scorer (i.e. angle, energy, let)
     det_zonestart = 0xDD09   # idet(11)
     det_dsize = 0xDD0A       # idet(12)
     det_dsizexyz = 0xDD0B    # idet(13)
@@ -330,6 +330,24 @@ class _SHBinaryReader0p6:
                     detector.ymax = pl[1]
                     detector.zmax = pl[2]
 
+                # support for differential plane scoring (only linear binning)
+                # TODO add some support for DMSH, DCYL and DZONE
+                # TODO add support for logarithmic binning
+                if pl_id == SHBDOTagID.det_dif_start and detector.geotyp in (SHGeoType.dplane,):
+                    detector.xmin = pl[0]
+                    detector.ymin = 1
+                    detector.zmin = 1
+
+                if pl_id == SHBDOTagID.det_dif_stop and detector.geotyp in (SHGeoType.dplane,):
+                    detector.xmax = pl[0]
+                    detector.ymax = 1
+                    detector.zmax = 1
+
+                if pl_id == SHBDOTagID.det_nbine and detector.geotyp in (SHGeoType.dplane,):
+                    detector.nx = pl[0]
+                    detector.ny = 1
+                    detector.nz = 1
+
                 if pl_id == SHBDOTagID.det_data:
                     detector.data = np.asarray(pl)
 
@@ -434,6 +452,7 @@ class _SHBinaryReader0p1:
             detector.payload_offset = 158
 
         header = np.fromfile(self.filename, header_dtype, count=1)
+        print(header)
         detector.rec_size = header['reclen'][0] // 8
 
         if 'VOXSCORE' in header['geotyp'][0].decode('ascii'):
@@ -501,6 +520,8 @@ class _SHBinaryReader0p1:
             detector.zmax = 0.0
 
         detector.dettyp = SHDetType(det_attribs.det_type)
+
+        print("a")
 
     # TODO: we need an alternative list, in case things have been scaled with nscale, since then things
     # are not "/particle" anymore.
