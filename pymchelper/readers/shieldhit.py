@@ -21,6 +21,18 @@ def _prepare_detector_units(detector, nscale):
                                                            detector.geotyp)
     detector.title = detector.units[5]
 
+    # dirty hack to change the units for differential scorers
+    if hasattr(detector, 'dif_axis') and hasattr(detector, 'dif_type'):
+        if detector.dif_type == 1:
+            diff_unit = SHBinaryReader.get_detector_unit(SHDetType.energy, detector.geotyp)[0]
+        elif detector.dif_type == 2:
+            diff_unit = SHBinaryReader.get_detector_unit(SHDetType.let, detector.geotyp)[0]
+        elif detector.dif_type == 3:
+            diff_unit = SHBinaryReader.get_detector_unit(SHDetType.angle, detector.geotyp)[0]
+        else:
+            diff_unit = ""
+        detector.units[detector.dif_axis] = diff_unit
+
     if detector.dimension == 0:
         detector.data = np.asarray([detector.data])
 
@@ -173,9 +185,9 @@ class SHBinaryReader:
         """
         _geotyp_units = {
             SHGeoType.msh: ("cm", "cm", "cm", "(nil)"),
-            SHGeoType.dmsh: ("cm", "cm", "cm", "#/MeV"),
+            SHGeoType.dmsh: ("cm", "cm", "cm", "(nil)"),
             SHGeoType.cyl: ("cm", "radians", "cm", "(nil)"),
-            SHGeoType.dcyl: ("cm", "radians", "cm", "#/MeV"),
+            SHGeoType.dcyl: ("cm", "radians", "cm", "(nil)"),
             SHGeoType.zone: ("zone number", "(nil)", "(nil)", "(nil)"),
             SHGeoType.voxscore: ("cm", "cm", "cm", "(nil)"),
             SHGeoType.geomap: ("cm", "cm", "cm", "(nil)"),
@@ -225,6 +237,7 @@ class SHBinaryReader:
             SHDetType.zone: ("(dimensionless)", "Zone#"),
             SHDetType.medium: ("(dimensionless)", "Medium#"),
             SHDetType.rho: ("g/cm^3", "Density"),
+            SHDetType.angle: ("radians", "Angle")
         }
         return _detector_units.get(detector_type, ("(nil)", "(nil)"))
 
@@ -248,7 +261,7 @@ class _SHBinaryReader0p6:
             logger.debug("Endian: " + _x['end'][0].decode('ASCII'))
             logger.debug("VerStr: " + _x['vstr'][0].decode('ASCII'))
 
-            while(f):
+            while f:
                 token = self.get_token(f)
                 if token is None:
                     break
@@ -330,26 +343,42 @@ class _SHBinaryReader0p6:
                     detector.ymax = pl[1]
                     detector.zmax = pl[2]
 
-                # support for differential plane scoring (only linear binning)
+                # partial support for differential scoring (only linear binning)
                 # TODO add some support for DMSH, DCYL and DZONE
                 # TODO add support for logarithmic binning
-                if pl_id == SHBDOTagID.det_dif_start and detector.geotyp in (SHGeoType.dplane,):
-                    detector.xmin = pl[0]
-                    detector.ymin = 1
-                    detector.zmin = 1
+                if detector.geotyp in (SHGeoType.dplane,SHGeoType.dmsh, SHGeoType.dcyl, SHGeoType.dzone):
+                    if pl_id == SHBDOTagID.det_dif_start:
+                        detector.dif_min = pl[0]
 
-                if pl_id == SHBDOTagID.det_dif_stop and detector.geotyp in (SHGeoType.dplane,):
-                    detector.xmax = pl[0]
-                    detector.ymax = 1
-                    detector.zmax = 1
+                    if pl_id == SHBDOTagID.det_dif_stop:
+                        detector.dif_max = pl[0]
 
-                if pl_id == SHBDOTagID.det_nbine and detector.geotyp in (SHGeoType.dplane,):
-                    detector.nx = pl[0]
-                    detector.ny = 1
-                    detector.nz = 1
+                    if pl_id == SHBDOTagID.det_nbine:
+                        detector.dif_n = pl[0]
+
+                    if pl_id == SHBDOTagID.det_difftype:
+                        detector.dif_type = pl[0]
 
                 if pl_id == SHBDOTagID.det_data:
                     detector.data = np.asarray(pl)
+
+            # differential scoring data replacement
+            if hasattr(detector, 'dif_min') and hasattr(detector, 'dif_max') and hasattr(detector, 'dif_n'):
+                if detector.nz == 1:
+                    detector.nz = detector.dif_n
+                    detector.zmin = detector.dif_min
+                    detector.zmax = detector.dif_max
+                    detector.dif_axis = 2
+                elif detector.ny == 1:
+                    detector.ny = detector.dif_n
+                    detector.ymin = detector.dif_min
+                    detector.ymax = detector.dif_max
+                    detector.dif_axis = 1
+                elif detector.nx == 1:
+                    detector.nx = detector.dif_n
+                    detector.xmin = detector.dif_min
+                    detector.xmax = detector.dif_max
+                    detector.dif_axis = 0
 
             logger.debug("Done reading bdo file.")
             logger.debug("Detector data : " + str(detector.data))
