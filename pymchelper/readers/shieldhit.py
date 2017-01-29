@@ -346,7 +346,7 @@ class _SHBinaryReader0p6:
                 # partial support for differential scoring (only linear binning)
                 # TODO add some support for DMSH, DCYL and DZONE
                 # TODO add support for logarithmic binning
-                if detector.geotyp in (SHGeoType.dplane,SHGeoType.dmsh, SHGeoType.dcyl, SHGeoType.dzone):
+                if detector.geotyp in (SHGeoType.dplane, SHGeoType.dmsh, SHGeoType.dcyl, SHGeoType.dzone):
                     if pl_id == SHBDOTagID.det_dif_start:
                         detector.dif_min = pl[0]
 
