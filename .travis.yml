@@ -88,5 +88,17 @@ script:
   - if [[ $TRAVIS_OS_NAME == "linux" ]]; then travis_wait tox --notest && travis_retry tox -- -n 8 ; fi
   - if [[ $TRAVIS_OS_NAME == "osx" ]]; then travis_wait 60 bash ./.travis/run_osx.sh ; fi
 # in case all previous commands in script section succeeded, run deploy (if tag is present)
-  - if [[ "$TRAVIS_TEST_RESULT" == "0" ]] && [[ $TRAVIS_TAG != "" ]] && [[ $TOXENV == "packaging" ]]; then bash .travis/deploy_package.sh pypi ; fi
+  - if [[ "$TRAVIS_TEST_RESULT" == "0" ]] && [[ $TOXENV == "packaging" ]]; then .travis/deploy_package.sh pypi ; fi
 
+deploy:
+  provider: releases
+  api_key:
+    secure: sJCUpC/Igjwg98CX55newMpaUjXVv/hdQOi3oazOHJBxk4b2c8Re67to3YAttWu6546zMHWyfgAbgIUHq4cqUc71IbihlHwYCGIx756vT8qebLMQUHv+qtNllaXxrzfm9S3HIrNQG4KJfQOADYBqdXfLYccLWUCF6cTNi3ccWsHwxiHl3ekuCLOq58UnL1cF6PAv2ULGIrXIDWc80VgWH6TgtF8/GhZigCE5c8YkNRYReLf8O3ZgD+anunKLHmzwKnwVgikvjotZz4j9csmFRJotKGZeqgAk7Ux95PNlgM661RXSUiZxRwOlxEUPL/qEz7ExXB9FgNLbRnqhj83L1uueKDlvz2nTVa3wy5r80Q/bxeJ63evQu5rRMod8iKmQI1zZ5pwlQqrG0rt6dpL9nySf+80Gg9WT+wNvhxyyusbuNSe0Tgvg9BgLkXzrTX/4dSB5ERBXwbyUfCWAV8COExUONZeHAO8CACfJvi/ehDOERISFPIF+3uIhN+AuFfXwjk3edh1Kvxm+/Jt5NySujJPkCAadZ5PSJqBCwkGQRvDzrKGlGLDtpWNBvzBGfjlMbWtFLp8O/UNWBbQmdCLAlWfT7J0YtTp4s9ch4EPnTvaimsH0mWHkOv2FoYbLY82ArDW/jVwoF3zYlYDbyCT7cu7blfG5Zxbg4gyXnralUvw=
+  file: 
+   - ./convertmc.pyz
+  overwrite: true
+  skip_cleanup: true
+  on:
+    repo: DataMedSci/pymchelper
+    tags: true
+    condition: $TOXENV == "packaging" && "$TRAVIS_TEST_RESULT" == "0"
