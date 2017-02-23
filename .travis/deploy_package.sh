@@ -44,7 +44,22 @@ set -x
 pip install wheel
 python setup.py bdist_wheel
 
-# upload the package to pypi repository
-pip install -U twine
-twine --version
-twine upload -r $PYPIREPO dist/*
+# makes source package
+python setup.py sdist
+
+# install the package
+pip install dist/*whl
+
+# test if it works
+convertmc --version
+convertmc --help
+
+# upload to pypi only if tag present
+if [[ $TRAVIS_TAG != "" ]]; then
+    pip install -U twine
+    twine --version
+    twine upload -r $PYPIREPO dist/*
+fi
+
+# make nuitka files
+./make_single_executable.sh
