@@ -2,12 +2,6 @@
 
 language: python
 
-env:
-  global:
-    - PYPIUSER=grzanka
-    #  pypi secured password (PYPIPASS variable), you need to update it to your own if you want to use it
-    - secure: "PzKcY692KOmkYIIVaPSLa5II+PSrfFslqau3UVycg8Dz6WYP4jOA/s3dKwU0siztQP85Vn7Jeb/k8W4TTBpU3TKVtwmoOl8DCFVsjfU+0+k2iDGuic9s6bew+ZK0iwbUJKuwhtvj0fk4AVkPI1nIw+/0Z2Lvr5F7GQp1NOFyYy1vF/12Oc9g+FJpmWW8nVtFsKxQzYob2356SHvS8K5IXr8NWtg0Y+HrPjNBEIkqKvDor+C3yKCKCtnmp2rTEXyy4okSFe36xhlJH6AvFwsWWTkPDzcJwPrTslytMSNWtg3dCL/ngwfQo8T1A+0jdHZ4SsUZtRLKwXlzJiOFk2xGGMkYMLW2RbV60RwjEsYoBICjghzdQEv2Oag9zjHi0i9Uq04VztqK8s6py7cECxMDasSF8P5TMq6KioTwBK7yR0p051YbZjOj3upBPOyP0in5J0mmVc6kGLf9P+7Gks4qYoD0qB2ZjDPqq0vIeaAy/25erbvjaUHVX8q/FgCl3Oz2yq9sorhXzZyVgjU0g5KW26jhDZmCZOztBzQ9JzZTiM8Ecf5aPdgsEyhjr5DEVWEgbWSJWMoq9zWGi4yCIprcknWI1SBgCZTZn+3lB8rnSdQVFChbJuDIRr7IYZKcX0y1JRqmTC/tIRX+3K1hCh0k7780zbVJlJWKpV1cfdMcSGY="
-
 matrix:
     include:
         - os: linux
@@ -78,27 +72,40 @@ dist: trusty
 before_install:
   - PYTHON_VERSION="py3"
   - if [[ $TOXENV == "py27" ]]; then PYTHON_VERSION="py2" ; fi
-  - sudo bash ./install_deps.sh $PYTHON_VERSION
+  - sudo ./install_deps.sh $PYTHON_VERSION
 
 install:
-  - if [[ $TRAVIS_OS_NAME == "linux" ]]; then travis_wait bash ./.travis/install_linux.sh ; fi
-  - if [[ $TRAVIS_OS_NAME == "osx" ]]; then travis_wait 60 bash ./.travis/install_osx.sh ; fi
+  - if [[ $TRAVIS_OS_NAME == "linux" ]]; then travis_wait ./.travis/install_linux.sh ; fi
+  - if [[ $TRAVIS_OS_NAME == "osx" ]]; then travis_wait 60 ./.travis/install_osx.sh ; fi
 
 script:
   - if [[ $TRAVIS_OS_NAME == "linux" ]]; then travis_wait tox --notest && travis_retry tox -- -n 8 ; fi
-  - if [[ $TRAVIS_OS_NAME == "osx" ]]; then travis_wait 60 bash ./.travis/run_osx.sh ; fi
+  - if [[ $TRAVIS_OS_NAME == "osx" ]]; then travis_wait 60 ./.travis/run_osx.sh ; fi
 # in case all previous commands in script section succeeded, run deploy (if tag is present)
   - if [[ "$TRAVIS_TEST_RESULT" == "0" ]] && [[ $TOXENV == "packaging" ]]; then .travis/deploy_package.sh pypi ; fi
 
 deploy:
-  provider: releases
-  api_key:
-    secure: sJCUpC/Igjwg98CX55newMpaUjXVv/hdQOi3oazOHJBxk4b2c8Re67to3YAttWu6546zMHWyfgAbgIUHq4cqUc71IbihlHwYCGIx756vT8qebLMQUHv+qtNllaXxrzfm9S3HIrNQG4KJfQOADYBqdXfLYccLWUCF6cTNi3ccWsHwxiHl3ekuCLOq58UnL1cF6PAv2ULGIrXIDWc80VgWH6TgtF8/GhZigCE5c8YkNRYReLf8O3ZgD+anunKLHmzwKnwVgikvjotZz4j9csmFRJotKGZeqgAk7Ux95PNlgM661RXSUiZxRwOlxEUPL/qEz7ExXB9FgNLbRnqhj83L1uueKDlvz2nTVa3wy5r80Q/bxeJ63evQu5rRMod8iKmQI1zZ5pwlQqrG0rt6dpL9nySf+80Gg9WT+wNvhxyyusbuNSe0Tgvg9BgLkXzrTX/4dSB5ERBXwbyUfCWAV8COExUONZeHAO8CACfJvi/ehDOERISFPIF+3uIhN+AuFfXwjk3edh1Kvxm+/Jt5NySujJPkCAadZ5PSJqBCwkGQRvDzrKGlGLDtpWNBvzBGfjlMbWtFLp8O/UNWBbQmdCLAlWfT7J0YtTp4s9ch4EPnTvaimsH0mWHkOv2FoYbLY82ArDW/jVwoF3zYlYDbyCT7cu7blfG5Zxbg4gyXnralUvw=
-  file: 
-   - ./convertmc.pyz
-  overwrite: true
-  skip_cleanup: true
-  on:
-    repo: DataMedSci/pymchelper
-    tags: true
-    condition: $TOXENV == "packaging" && "$TRAVIS_TEST_RESULT" == "0"
+  - provider: releases # deploy files to Github release page https://docs.travis-ci.com/user/deployment/releases/
+    api_key: # encoded github token
+      secure: sJCUpC/Igjwg98CX55newMpaUjXVv/hdQOi3oazOHJBxk4b2c8Re67to3YAttWu6546zMHWyfgAbgIUHq4cqUc71IbihlHwYCGIx756vT8qebLMQUHv+qtNllaXxrzfm9S3HIrNQG4KJfQOADYBqdXfLYccLWUCF6cTNi3ccWsHwxiHl3ekuCLOq58UnL1cF6PAv2ULGIrXIDWc80VgWH6TgtF8/GhZigCE5c8YkNRYReLf8O3ZgD+anunKLHmzwKnwVgikvjotZz4j9csmFRJotKGZeqgAk7Ux95PNlgM661RXSUiZxRwOlxEUPL/qEz7ExXB9FgNLbRnqhj83L1uueKDlvz2nTVa3wy5r80Q/bxeJ63evQu5rRMod8iKmQI1zZ5pwlQqrG0rt6dpL9nySf+80Gg9WT+wNvhxyyusbuNSe0Tgvg9BgLkXzrTX/4dSB5ERBXwbyUfCWAV8COExUONZeHAO8CACfJvi/ehDOERISFPIF+3uIhN+AuFfXwjk3edh1Kvxm+/Jt5NySujJPkCAadZ5PSJqBCwkGQRvDzrKGlGLDtpWNBvzBGfjlMbWtFLp8O/UNWBbQmdCLAlWfT7J0YtTp4s9ch4EPnTvaimsH0mWHkOv2FoYbLY82ArDW/jVwoF3zYlYDbyCT7cu7blfG5Zxbg4gyXnralUvw=
+    file: "./release_files/*" # list of files to upload
+    file_glob: true  # set to true if you want to use glob (* pattern) in file selection
+    overwrite: true # overwrite the file if already uploaded
+    skip_cleanup: true # keep generated files
+    on:
+      repo: DataMedSci/pymchelper 
+      tags: true # fire only when tag applied (release being made)
+      condition: $TOXENV == "packaging" && "$TRAVIS_TEST_RESULT" == "0" # fire for only one matrix element, if tests are OK
+  - provider: pypi # upload pip package to pypi https://docs.travis-ci.com/user/deployment/pypi/
+    user: grzanka
+    distributions: sdist bdist_wheel
+    skip_cleanup: true
+    skip_upload_docs: true
+    password:
+      secure: kmwue5PN2Yi+JpdGQs+/pnoRvNsmjnvbLCHSZWJBrR5A+DPR6/E4bs5r9RZxSlBT5tOtpf+Fekbk3jNwN9p+Dr5tBaDG2GdVbqo/vMsmw0MguZUK34+RFrC0v38ovwRY69O6owEVYZeu2YZgq6PZT20n/OSsQn+Ep7YBYCVjLnG+k49JcfBgMEX/p0aVTcFz2gicrrxlvcyiKW7EMSjSrpgmj1XjEw5l2NCOoXyEtTiIBfGruw9X0aN78jq1eX4E893NfY4zk2sK6pMDq0B3SagsOeufGnMtVjYxct34vRQlNtBonh7GZHOh95NPTFT5Md5HY0vibOKv8/MjzRjLQrlRxoMjm3lZflAwKYldE5GSbpZQPxx3X7DIGZY2Lo1DcGoxx6c8BiHaVhBi7ardMg84ItwSQtTcw1XTPXStYhNQwe9lqoFhfHKD2pfsSs2BGbzUeE6TsXKQrCs9c0lNaE2guuwTqUxWEIv4MC4svqGmLjTRyQDyyIh6fiBCIPlOGHs2XlMixiy+sRUXyr5YYILOTu8WNdA/UgqOAXkTvgzPomWVIFpZvS3lFASho4yW2iNUcrrWQHoEJiIODwOQWhqY4NpVRzfft07zFEiIWXXWZ8bNbGgztUtXiotv2YH5nwQgl38jMeCEX1qQz16NGGOS23ubbxpAbUE/8Ia5Ca0=
+    on:
+      repo: DataMedSci/pymchelper
+      tags: true
+      condition: $TOXENV == "packaging" && "$TRAVIS_TEST_RESULT" == "0"
+    
+    
