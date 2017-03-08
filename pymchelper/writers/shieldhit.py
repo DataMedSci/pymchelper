@@ -118,6 +118,11 @@ class TxtWriter:
 
         header += self._header_no_of_bins_and_prim(det)
 
+        # original bdo2txt is not saving header data for some of cylindrical scorers, hence we do the same
+        if det.geotyp in (SHGeoType.cyl, SHGeoType.dcyl, ) and \
+                det.dettyp in (SHDetType.fluence, SHDetType.avg_energy, SHDetType.avg_beta, SHDetType.energy):
+            header = ""
+
         # dump data
         with open(self.filename, 'w') as fout:
             logger.info("Writing: " + self.filename)
