@@ -118,10 +118,6 @@ class TxtWriter:
 
         header += self._header_no_of_bins_and_prim(det)
 
-        # due to some bug in original bdo2txt converter, no header is generated for cylindrical mesh
-        if det.geotyp in (SHGeoType.cyl, SHGeoType.dcyl, ):
-            header = ""
-
         # dump data
         with open(self.filename, 'w') as fout:
             logger.info("Writing: " + self.filename)
