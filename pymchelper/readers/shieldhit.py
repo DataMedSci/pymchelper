@@ -359,6 +359,9 @@ class _SHBinaryReader0p6:
                     if pl_id == SHBDOTagID.det_difftype:
                         detector.dif_type = pl[0]
 
+                if pl_id == SHBDOTagID.det_zonestart:
+                    detector.zone_start = pl[0]
+
                 if pl_id == SHBDOTagID.det_data:
                     detector.data = np.asarray(pl)
 
@@ -379,6 +382,16 @@ class _SHBinaryReader0p6:
                     detector.xmin = detector.dif_min
                     detector.xmax = detector.dif_max
                     detector.dif_axis = 0
+
+            # TODO: would be better to not overwrite x,y,z and make proper case for ZONE scoring later.
+            if detector.geotyp in (SHGeoType.zone, SHGeoType.dzone):
+                # special case for zone scoring, x min and max will be zone numbers
+                detector.xmin = detector.zone_start
+                detector.xmax = detector.xmin + detector.nx - 1
+                detector.ymin = 0.0
+                detector.ymax = 0.0
+                detector.zmin = 0.0
+                detector.zmax = 0.0
 
             logger.debug("Done reading bdo file.")
             logger.debug("Detector data : " + str(detector.data))
