@@ -112,6 +112,11 @@ def main(args=sys.argv[1:]):
 
         parsed_args.error = ErrorEstimate[parsed_args.error]
 
+        # check required options for tripddd parser
+        if parsed_args.command == Converters.tripddd.name and not parsed_args.energy:
+            logger.error("Option --energy is required, provide an energy value")
+            return 1
+
         if parsed_args.many:
             merge_many(files, parsed_args.output, parsed_args)
         else:
