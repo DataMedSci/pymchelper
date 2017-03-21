@@ -111,6 +111,11 @@ def main(args=sys.argv[1:]):
             logger.error('File does not exist: ' + parsed_args.input)
 
         parsed_args.error = ErrorEstimate[parsed_args.error]
+        
+        # check required options
+        if parsed_args.command == Converters.tripddd.name and not parsed_args.energy:
+            logger.error("Option --energy is required, provide an energy value")
+            return 1
 
         if parsed_args.many:
             merge_many(files, parsed_args.output, parsed_args)
