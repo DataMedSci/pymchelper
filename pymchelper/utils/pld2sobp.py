@@ -12,6 +12,22 @@ import pymchelper
 logger = logging.getLogger(__name__)
 
 
+def dedx_air(energy):
+    """
+    Calculate the mass stopping power of protons in air following ICRU 49.
+    Valid from 1 to 500 MeV only.
+
+    :params energy: Proton energy in MeV
+    :returns: mass stopping power in MeV cm2/g
+    """
+    from numpy import log
+    from numpy import exp
+
+    x = log(energy)
+    y = 5.4041 - 0.66877 * x - 0.034441 * x*x - 0.0010707 * x*x*x + 0.00082584 * x*x*x*x
+    return exp(y)
+
+
 class Layer(object):
     """
     Class for handling Layers.
@@ -132,6 +148,11 @@ def main(args=sys.argv[1:]):
         for spot_x, spot_y, spot_w, spot_rf in zip(layer.x, layer.y, layer.w, layer.rf):
 
             weight = spot_rf * pld_data.mu / pld_data.csetweight * args.scale
+            # Need to convert to weight by fluence, rather than weight by dose
+            # for building the SOBP. Monitor Units (MU) = "meterset", are per dose
+            # in the monitoring Ionization chamber, which returns some signal
+            # proportional to dose to air. D = phi * S => MU = phi * S(air)
+            phi_weight = weight / dedx_air(layer.energy)
             meterset_weight_sum += spot_w
 
             layer_xy = [spot_x * 0.1, spot_y * 0.1]
@@ -143,7 +164,7 @@ def main(args=sys.argv[1:]):
                                                layer_xy[0],
                                                layer_xy[1],
                                                spotsize,
-                                               weight))
+                                               phi_weight))
 
     logger.info("Data were scaled with a factor of {:e} particles/MU.".format(args.scale))
     if args.flip:
