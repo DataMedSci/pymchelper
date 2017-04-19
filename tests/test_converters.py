@@ -28,6 +28,17 @@ class TestPld2Sobp(unittest.TestCase):
         except SystemExit as e:
             self.assertEqual(e.code, 2)
 
+    def test_simple(self):
+        import os
+        inp_path = os.path.join("tests", "res", "pld", "test.pld")
+        out_path = os.path.join("tests", "res", "pld", "test.dat")
+        try:
+            pymchelper.utils.pld2sobp.main(["-d", inp_path, out_path])
+        except SystemExit as e:
+            self.assertEqual(e.code, 0)
+
+        self.assertTrue(os.path.isfile(out_path))
+
 
 class TestTrip2Ddd(unittest.TestCase):
     def test_help(self):
