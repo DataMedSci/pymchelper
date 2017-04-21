@@ -23,6 +23,10 @@ def dedx_air(energy):
     from numpy import log
     from numpy import exp
 
+    if energy > 500.0 or energy < 1.0:
+        logger.error("Proton energy must be between 1 and 500 MeV.")
+        raise ValueError("Energy = {:.2f} out of bounds.".format(energy))
+
     x = log(energy)
     y = 5.4041 - 0.66877 * x - 0.034441 * x*x - 0.0010707 * x*x*x + 0.00082584 * x*x*x*x
     return exp(y)
