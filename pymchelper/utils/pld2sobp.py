@@ -1,15 +1,32 @@
 """
 Reads PLD file in IBA format and convert to sobp.dat
-which is readbale by FLUKA with source_sampler.f and SHIELD-HIT12A.
+which is readable by FLUKA with source_sampler.f and by SHIELD-HIT12A.
 
 TODO: Translate energy to spotsize.
 """
 import sys
 import logging
 import argparse
-import pymchelper
+from math import exp, log
 
 logger = logging.getLogger(__name__)
+
+
+def dedx_air(energy):
+    """
+    Calculate the mass stopping power of protons in air following ICRU 49.
+    Valid from 1 to 500 MeV only.
+
+    :params energy: Proton energy in MeV
+    :returns: mass stopping power in MeV cm2/g
+    """
+    if energy > 500.0 or energy < 1.0:
+        logger.error("Proton energy must be between 1 and 500 MeV.")
+        raise ValueError("Energy = {:.2f} out of bounds.".format(energy))
+
+    x = log(energy)
+    y = 5.4041 - 0.66877 * x - 0.034441 * (x**2) - 0.0010707 * (x**3) + 0.00082584 * (x**4)
+    return exp(y)
 
 
 class Layer(object):
@@ -96,7 +113,12 @@ class PLDRead(object):
 def main(args=sys.argv[1:]):
     """ Main function of the pld2sobp script.
     """
-    _particles_per_mu = 8.106687e7  # Calculated Nov. 2016 from Brita's 32 Gy plan.
+
+    import pymchelper
+
+    # _scaling holds the number of particles * dE/dx / MU = some constant
+    # _scaling = 8.106687e7  # Calculated Nov. 2016 from Brita's 32 Gy plan. (no dE/dx)
+    _scaling = 5.1821e8  # Estimated calculation Apr. 2017 from Brita's 32 Gy plan.
 
     parser = argparse.ArgumentParser()
     parser.add_argument('fin', metavar="input_file.pld", type=argparse.FileType('r'),
@@ -109,7 +131,7 @@ def main(args=sys.argv[1:]):
     parser.add_argument('-d', '--diag', action='store_true', help="prints additional diagnostics",
                         dest="diag", default=False)
     parser.add_argument('-s', '--scale', type=float, dest='scale',
-                        help="number of particles per MU.", default=_particles_per_mu)
+                        help="number of particles*dE/dx per MU.", default=_scaling)
     parser.add_argument('-v', '--verbosity', action='count', help="increase output verbosity", default=0)
     parser.add_argument('-V', '--version', action='version', version=pymchelper.__version__)
     args = parser.parse_args(args)
@@ -126,12 +148,24 @@ def main(args=sys.argv[1:]):
     outstr = "{:-10.6f} {:-10.2f} {:-10.2f} {:-10.2f} {:-16.6E}\n"
 
     meterset_weight_sum = 0.0
+    particles_sum = 0.0
+
     for layer in pld_data.layers:
         spotsize = 2.354820045 * layer.spotsize * 0.1  # 1 sigma im mm -> 1 cm FWHM
 
         for spot_x, spot_y, spot_w, spot_rf in zip(layer.x, layer.y, layer.w, layer.rf):
 
-            weight = spot_rf * pld_data.mu / pld_data.csetweight * args.scale
+            weight = spot_rf * pld_data.mu / pld_data.csetweight
+            # Need to convert to weight by fluence, rather than weight by dose
+            # for building the SOBP. Monitor Units (MU) = "meterset", are per dose
+            # in the monitoring Ionization chamber, which returns some signal
+            # proportional to dose to air. D = phi * S => MU = phi * S(air)
+            phi_weight = weight / dedx_air(layer.energy)
+
+            # add number of paricles in this spot
+            particles_spot = args.scale * phi_weight
+            particles_sum += particles_spot
+
             meterset_weight_sum += spot_w
 
             layer_xy = [spot_x * 0.1, spot_y * 0.1]
@@ -143,9 +177,9 @@ def main(args=sys.argv[1:]):
                                                layer_xy[0],
                                                layer_xy[1],
                                                spotsize,
-                                               weight))
+                                               particles_spot))
 
-    logger.info("Data were scaled with a factor of {:e} particles/MU.".format(args.scale))
+    logger.info("Data were scaled with a factor of {:e} particles*S/MU.".format(args.scale))
     if args.flip:
         logger.info("Output file was XY flipped.")
 
@@ -162,7 +196,7 @@ def main(args=sys.argv[1:]):
         print("------------------------------------------------")
         print("Total MUs              : {:10.4f}".format(pld_data.mu))
         print("Total meterset weigths : {:10.4f}".format(meterset_weight_sum))
-        print("Total particles        : {:10.4e} (estimated)".format(pld_data.mu * args.scale))
+        print("Total particles        : {:10.4e} (estimated)".format(particles_sum))
         print("------------------------------------------------")
         for i, energy in enumerate(energy_list):
             print("Energy in layer {:3}    : {:10.4f} MeV".format(i, energy))
