@@ -1,13 +1,13 @@
 """
 Reads PLD file in IBA format and convert to sobp.dat
-which is readbale by FLUKA with source_sampler.f and SHIELD-HIT12A.
+which is readable by FLUKA with source_sampler.f and by SHIELD-HIT12A.
 
 TODO: Translate energy to spotsize.
 """
 import sys
 import logging
 import argparse
-import pymchelper
+from math import exp, log
 
 logger = logging.getLogger(__name__)
 
@@ -20,15 +20,12 @@ def dedx_air(energy):
     :params energy: Proton energy in MeV
     :returns: mass stopping power in MeV cm2/g
     """
-    from numpy import log
-    from numpy import exp
-
     if energy > 500.0 or energy < 1.0:
         logger.error("Proton energy must be between 1 and 500 MeV.")
         raise ValueError("Energy = {:.2f} out of bounds.".format(energy))
 
     x = log(energy)
-    y = 5.4041 - 0.66877 * x - 0.034441 * x*x - 0.0010707 * x*x*x + 0.00082584 * x*x*x*x
+    y = 5.4041 - 0.66877 * x - 0.034441 * (x**2) - 0.0010707 * (x**3) + 0.00082584 * (x**4)
     return exp(y)
 
 
@@ -116,6 +113,9 @@ class PLDRead(object):
 def main(args=sys.argv[1:]):
     """ Main function of the pld2sobp script.
     """
+
+    import pymchelper
+
     # _scaling holds the number of particles * dE/dx / MU = some constant
     # _scaling = 8.106687e7  # Calculated Nov. 2016 from Brita's 32 Gy plan. (no dE/dx)
     _scaling = 5.1821e8  # Estimated calculation Apr. 2017 from Brita's 32 Gy plan.
