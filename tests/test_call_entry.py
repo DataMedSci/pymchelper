@@ -35,6 +35,14 @@ class TestCallMain(unittest.TestCase):
         self.assertGreater(len(files), 4)
         self.assertEqual(len(png_files), len(bdo_files))
 
+    def test_many_excel(self):
+        run.main(["excel", "--many", "tests/res/shieldhit/single/*.bdo"])
+        files = os.listdir(os.path.join("tests", "res", "shieldhit", "single"))
+        xls_files = [f for f in files if f.endswith(".xls")]
+        bdo_files = [f for f in files if f.endswith(".bdo")]
+        self.assertGreater(len(files), 4)
+        self.assertEqual(len(xls_files), len(bdo_files))
+
     def test_many_shield_nscale(self):
         run.main(["image", "--many", "tests/res/shieldhit/single/*.bdo", "-n", "100000000"])
         files = os.listdir(os.path.join("tests", "res", "shieldhit", "single"))
