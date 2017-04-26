@@ -327,6 +327,10 @@ def merge_list(input_file_list,
     if output_file is None:
         output_file = input_file_list[0][:-4]
 
+    output_dir = os.path.dirname(output_file)
+    if output_dir:  # output directory has been found, output_file is not a plain file in current dir
+        if not os.path.exists(output_dir):  # directory doesn't exists
+            os.makedirs(output_dir)  # let us create it
     first.save(output_file, options)
 
 
