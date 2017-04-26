@@ -41,7 +41,7 @@ class TestCallMain(unittest.TestCase):
         xls_files = [f for f in files if f.endswith(".xls")]
         bdo_files = [f for f in files if f.endswith(".bdo")]
         self.assertGreater(len(files), 4)
-        self.assertEqual(len(xls_files), len(bdo_files))
+        self.assertEqual(len(xls_files), 3)
 
     def test_many_shield_nscale(self):
         run.main(["image", "--many", "tests/res/shieldhit/single/*.bdo", "-n", "100000000"])
