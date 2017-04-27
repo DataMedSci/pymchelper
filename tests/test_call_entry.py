@@ -39,7 +39,6 @@ class TestCallMain(unittest.TestCase):
         run.main(["excel", "--many", "tests/res/shieldhit/single/*.bdo"])
         files = os.listdir(os.path.join("tests", "res", "shieldhit", "single"))
         xls_files = [f for f in files if f.endswith(".xls")]
-        bdo_files = [f for f in files if f.endswith(".bdo")]
         self.assertGreater(len(files), 4)
         self.assertEqual(len(xls_files), 3)
 
