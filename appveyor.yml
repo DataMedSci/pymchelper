@@ -92,6 +92,6 @@ test_script:
   - ps: python -c "import scipy as sp;print(sp.version.version)"
   - ps: pip install pytrip98
 # run tests (normal py.test command may results in memory error on appveyor, so we run tests file-by-file)
-  -  ps: Get-ChildItem -Path tests\ -Recurse -Include test*.py | foreach-object { $(echo $_ | Out-Host ; python -m pytest $_ | Out-Host; $?) -or $(break)}
+  - ps: Get-ChildItem -Path tests\ -Recurse -Include test*.py | foreach-object { $(echo $_ | Out-Host ; python -m pytest $_ | Out-Host; $?) -or $(break)}
 
 
