@@ -17,23 +17,23 @@ environment:
       MINICONDAPATH: "C:\\Miniconda"
 
     - platform: x86
-      PYTHON: "C:\\Python34"
-      PYTHON_VERSION: "3.4"
+      PYTHON: "C:\\Python35"
+      PYTHON_VERSION: "3.5"
       MINICONDAPATH: "C:\\Miniconda3"
 
     - platform: x64
-      PYTHON: "C:\\Python34"
-      PYTHON_VERSION: "3.4"
+      PYTHON: "C:\\Python35"
+      PYTHON_VERSION: "3.5"
       MINICONDAPATH: "C:\\Miniconda3-x64"
 
     - platform: x86
-      PYTHON: "C:\\Python35"
-      PYTHON_VERSION: "3.5"
+      PYTHON: "C:\\Python36"
+      PYTHON_VERSION: "3.6"
       MINICONDAPATH: "C:\\Miniconda35"
 
     - platform: x64
-      PYTHON: "C:\\Python35"
-      PYTHON_VERSION: "3.5"
+      PYTHON: "C:\\Python36"
+      PYTHON_VERSION: "3.6"
       MINICONDAPATH: "C:\\Miniconda35-x64"
 
 
@@ -87,9 +87,11 @@ test_script:
   - cd ..
 # install optional deps
   - pip install matplotlib
-# pytrip98 is available only for Python 3.5, lets install it together with deps
-  - ps: If ($env:PYTHON_VERSION -eq "3.5") {conda install -q --name python%PYTHON_VERSION% scipy}
-  - ps: If ($env:PYTHON_VERSION -eq "3.5") {python -c "import scipy as sp;print(sp.version.version)"}
-  - ps: If ($env:PYTHON_VERSION -eq "3.5") {pip install pytrip98}
-# run tests (normal py.test command results in memory error on appveyor, so we run tests file-by-file)
-  - FOR %%I in (tests\test*.py) DO python -m pytest %%I
+# pytrip98 installation (optional)
+  - ps: conda install -q --name python%PYTHON_VERSION% scipy
+  - ps: python -c "import scipy as sp;print(sp.version.version)"
+  - ps: pip install pytrip98
+# run tests (normal py.test command may results in memory error on appveyor, so we run tests file-by-file)
+  -  ps: Get-ChildItem -Path tests\ -Recurse -Include test*.py | foreach-object { $(echo $_ | Out-Host ; python -m pytest $_ | Out-Host; $?) -or $(break)}
+
+
