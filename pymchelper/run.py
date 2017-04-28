@@ -72,6 +72,9 @@ def main(args=sys.argv[1:]):
                               default=ImageWriter.default_colormap,
                               type=str)
 
+    parser_excel = subparsers.add_parser(Converters.excel.name, help='converts to MS Excel file')
+    add_default_options(parser_excel)
+
     parser_plotdata = subparsers.add_parser(Converters.plotdata.name, help='converts to gnuplot data')
     add_default_options(parser_plotdata)
 

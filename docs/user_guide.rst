@@ -17,6 +17,7 @@ Detailed documentation about available converters:
    :maxdepth: 1
    
    txt_converter.rst
+   excel_converter.rst
    image_converter.rst
    gnuplot_converter.rst
 
@@ -25,7 +26,7 @@ Common options
 --------------
 
 **convertmc** command line program needs several options to work. 
-The first one, obligatory is converter name. User might choose among: ``txt``, ``image``, ``gnuplot`` and ``plotdata``.
+The first one, obligatory is converter name. User might choose among: ``txt``, ``excel``, ``image``, ``gnuplot`` and ``plotdata``.
 
 All converters accepts following options:
 

@@ -9,6 +9,7 @@ from pymchelper.readers.fluka import FlukaBinaryReader
 from pymchelper.readers.shieldhit import SHTextReader, SHBinaryReader
 from pymchelper.shieldhit.detector.detector_type import SHDetType
 from pymchelper.shieldhit.detector.estimator_type import SHGeoType
+from pymchelper.writers.excel import ExcelWriter
 from pymchelper.writers.plots import ImageWriter, GnuplotDataWriter, PlotDataWriter
 from pymchelper.writers.shieldhit import TxtWriter
 from pymchelper.writers.trip98 import TripCubeWriter, TripDddWriter
@@ -26,6 +27,7 @@ class Converters(IntEnum):
     image = 3
     tripcube = 4
     tripddd = 5
+    excel = 6
 
 
 class ErrorEstimate(IntEnum):
@@ -49,7 +51,8 @@ _converter_mapping = {
     Converters.plotdata: PlotDataWriter,
     Converters.image: ImageWriter,
     Converters.tripcube: TripCubeWriter,
-    Converters.tripddd: TripDddWriter
+    Converters.tripddd: TripDddWriter,
+    Converters.excel: ExcelWriter
 }
 
 
