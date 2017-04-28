@@ -1,7 +1,6 @@
 import logging
 
 import numpy as np
-import xlwt
 
 logger = logging.getLogger(__name__)
 
@@ -16,6 +15,12 @@ class ExcelWriter:
             self.filename += ".xls"
 
     def write(self, detector):
+
+        try:
+            import xlwt
+        except ImportError as e:
+            logger.error("Generating Excel files not available on your platform (you are probably running Python 3.2).")
+            raise e
 
         # save only 1-D data
         if detector.dimension != 1:
