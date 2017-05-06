@@ -4,6 +4,7 @@ from collections import namedtuple, defaultdict
 
 import numpy as np
 from enum import IntEnum
+from joblib import Parallel, delayed
 
 from pymchelper.readers.fluka import FlukaBinaryReader
 from pymchelper.readers.shieldhit import SHTextReader, SHBinaryReader
@@ -337,6 +338,16 @@ def merge_list(input_file_list,
     first.save(output_file, options)
 
 
+def _process_one_group(core_name, group_with_same_core, outputdir, options):
+    core_dirname, core_basename = os.path.split(core_name)
+    if outputdir is None:
+        output_file = os.path.join(core_dirname, core_basename)
+    else:
+        output_file = os.path.join(outputdir, core_basename)
+    logger.debug("Setting output core name " + output_file)
+    merge_list(group_with_same_core, output_file, options)
+
+
 def merge_many(input_file_list,
                outputdir,
                options):
@@ -361,11 +372,12 @@ def merge_many(input_file_list,
             core_name = name[-2:]
             core_names_dict[core_name].append(name)
 
-    for core_name, group_with_same_core in core_names_dict.items():
-        core_dirname, core_basename = os.path.split(core_name)
-        if outputdir is None:
-            output_file = os.path.join(core_dirname, core_basename)
-        else:
-            output_file = os.path.join(outputdir, core_basename)
-        logger.debug("Setting output core name " + output_file)
-        merge_list(group_with_same_core, output_file, options)
+    # old single-cpu implementation
+    # for core_name, group_with_same_core in core_names_dict.items():
+    #      _process_one_group(core_name, group_with_same_core, outputdir, options)
+
+    # parallel execution of output file generation, using all CPU cores
+    # see http://pythonhosted.org/joblib
+    Parallel(n_jobs=-1)(
+        delayed(_process_one_group)(core_name, group_with_same_core, outputdir, options)
+        for core_name, group_with_same_core in core_names_dict.items())
