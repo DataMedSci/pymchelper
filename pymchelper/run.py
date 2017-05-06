@@ -31,6 +31,7 @@ def add_default_options(parser):
     import pymchelper
     parser.add_argument("input", help='input filename, file list or pattern', type=str)
     parser.add_argument("output", help='output filename or directory', nargs='?')
+    parser.add_argument("--jobs", help='number of parallel jobs to use (-1 means all CPUs)', default=-1, type=int)
     parser.add_argument("--many", help='automatically merge data from various sources', action="store_true")
     parser.add_argument("--nan", help='ignore NaN in averaging', action="store_true")
     parser.add_argument("--error",
@@ -121,7 +122,7 @@ def main(args=sys.argv[1:]):
             return 1
 
         if parsed_args.many:
-            merge_many(files, parsed_args.output, parsed_args)
+            merge_many(files, parsed_args.output, parsed_args, parsed_args.jobs)
         else:
             merge_list(files, parsed_args.output, parsed_args)
 

@@ -349,7 +349,8 @@ def _process_one_group(core_name, group_with_same_core, outputdir, options):
 
 def merge_many(input_file_list,
                outputdir,
-               options):
+               options,
+               jobs):
     """
     Takes set of input file names, belonging to possibly different estimators.
     Input files are grouped according to the estimators and for each group
@@ -358,6 +359,7 @@ def merge_many(input_file_list,
     :param input_file_list: list of input files
     :param outputdir: output directory
     :param options: list of parsed options
+    :param jobs: number of CPU cores to use (-1 means all)
     :return: none
     """
     core_names_dict = defaultdict(list)
@@ -375,7 +377,7 @@ def merge_many(input_file_list,
     # see http://pythonhosted.org/joblib
     try:
         from joblib import Parallel, delayed
-        Parallel(n_jobs=-1)(
+        Parallel(n_jobs=jobs)(
             delayed(_process_one_group)(core_name, group_with_same_core, outputdir, options)
             for core_name, group_with_same_core in core_names_dict.items())
     except SyntaxError:
