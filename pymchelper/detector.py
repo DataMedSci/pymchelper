@@ -4,7 +4,6 @@ from collections import namedtuple, defaultdict
 
 import numpy as np
 from enum import IntEnum
-from joblib import Parallel, delayed
 
 from pymchelper.readers.fluka import FlukaBinaryReader
 from pymchelper.readers.shieldhit import SHTextReader, SHBinaryReader
@@ -372,12 +371,14 @@ def merge_many(input_file_list,
             core_name = name[-2:]
             core_names_dict[core_name].append(name)
 
-    # old single-cpu implementation
-    # for core_name, group_with_same_core in core_names_dict.items():
-    #      _process_one_group(core_name, group_with_same_core, outputdir, options)
-
     # parallel execution of output file generation, using all CPU cores
     # see http://pythonhosted.org/joblib
-    Parallel(n_jobs=-1)(
-        delayed(_process_one_group)(core_name, group_with_same_core, outputdir, options)
-        for core_name, group_with_same_core in core_names_dict.items())
+    try:
+        from joblib import Parallel, delayed
+        Parallel(n_jobs=-1)(
+            delayed(_process_one_group)(core_name, group_with_same_core, outputdir, options)
+            for core_name, group_with_same_core in core_names_dict.items())
+    except SyntaxError:
+        # single-cpu implementation, in case joblib library fails (i.e. Python 3.2)
+        for core_name, group_with_same_core in core_names_dict.items():
+            _process_one_group(core_name, group_with_same_core, outputdir, options)
