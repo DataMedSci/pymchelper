@@ -14,11 +14,12 @@ def _prepare_detector_units(detector, nscale):
     """ Set units depending on detector type. Must be called by several classes.
     """
 
-    # set units : detector.units are [x,y,z,v,data,detector_title]
-    detector.units = [""] * 6
+    # set units : detector.units are [x,y,z,v,data,detector_title,x_name,y_name,z_name]
+    detector.units = [""] * 9
     detector.units[0:4] = SHBinaryReader.get_estimator_units(detector.geotyp)
     detector.units[4:6] = SHBinaryReader.get_detector_unit(detector.dettyp,
                                                            detector.geotyp)
+    detector.units[6:8] = SHBinaryReader.get_estimator_axis_names(detector.geotyp)
     detector.title = detector.units[5]
 
     # dirty hack to change the units for differential scorers
@@ -175,6 +176,22 @@ class SHBinaryReader:
             reader = _SHBinaryReader0p1(self.filename)
             reader.read_header(detector)
             reader.read_payload(detector, nscale)
+
+    @staticmethod
+    def get_estimator_axis_names(geotyp):
+        """
+        TODO
+        :param geotyp:
+        :return:
+        """
+        _geotyp_axis_names = {
+            SHGeoType.msh: ("X", "Y", "Z", "(nil)"),
+            SHGeoType.cyl: ("R", "PHI", "Z", "(nil)"),
+            SHGeoType.voxscore: ("X", "Y", "Z", "(nil)"),
+            SHGeoType.geomap: ("X", "Y", "Z", "(nil)"),
+        }
+        _default_names = ("(nil)", "(nil)", "(nil)", "(nil)")
+        return _geotyp_axis_names.get(geotyp, _default_names)
 
     @staticmethod
     def get_estimator_units(geotyp):

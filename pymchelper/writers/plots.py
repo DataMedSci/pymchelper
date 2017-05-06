@@ -92,7 +92,7 @@ splot \"<awk -f addblanks.awk '{data_filename}'\" u 1:2:3 with pm3d
         x_axis_number = detector.axis_data(0, plotting_order=True).number
         xlabel = detector.units[x_axis_number]
         if detector.dimension == 1:
-            ylabel = ImageWriter.make_label(detector.units[4], detector.title)
+            ylabel = ImageWriter._make_label(detector.units[4], detector.title)
         elif detector.dimension == 2:
             y_axis_number = detector.axis_data(1, plotting_order=True).number
             ylabel = detector.units[y_axis_number]
@@ -128,7 +128,7 @@ class ImageWriter:
     default_colormap = 'gnuplot2'
 
     @staticmethod
-    def make_label(unit, name):
+    def _make_label(unit, name):
         return name + " " + "[" + unit + "]"
 
     def _save_2d_error_plot(self, detector, xlist, ylist, elist):
@@ -166,7 +166,8 @@ class ImageWriter:
         logger.info("Writing: " + self.plot_filename)
 
         x_axis_number = detector.axis_data(0, plotting_order=True).number
-        plt.xlabel(self.make_label(detector.units[x_axis_number], ""))
+        x_axis_name = detector.units[6+x_axis_number]
+        plt.xlabel(self._make_label(detector.units[x_axis_number], x_axis_name))
         xlist = list(detector.axis_values(0, plotting_order=True))  # make list of values from generator
 
         # 1-D plotting
@@ -178,7 +179,7 @@ class ImageWriter:
                                  (data - error).clip(0.0),
                                  (data + error).clip(0.0, 1.05 * (detector.v.max())),
                                  alpha=0.2, edgecolor='#CC4F1B', facecolor='#FF9848', antialiased=True)
-            plt.ylabel(self.make_label(detector.units[4], detector.title))
+            plt.ylabel(self._make_label(detector.units[4], detector.title))
             plt.plot(xlist, data)
         elif detector.dimension == 2:
             ylist = list(detector.axis_values(1, plotting_order=True))   # make list of values from generator
@@ -197,7 +198,8 @@ class ImageWriter:
                 self._save_2d_error_plot(detector, xlist, ylist, elist)
 
             y_axis_number = detector.axis_data(1, plotting_order=True).number
-            plt.ylabel(detector.units[y_axis_number])
+            y_axis_name = detector.units[6 + y_axis_number]
+            plt.ylabel(self._make_label(detector.units[y_axis_number], y_axis_name))
             plt.pcolormesh(xlist, ylist, zlist, cmap=self.colormap)
             cbar = plt.colorbar()
             cbar.set_label(detector.units[4], rotation=270, verticalalignment='bottom')
