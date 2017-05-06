@@ -380,7 +380,7 @@ def merge_many(input_file_list,
         Parallel(n_jobs=jobs)(
             delayed(_process_one_group)(core_name, group_with_same_core, outputdir, options)
             for core_name, group_with_same_core in core_names_dict.items())
-    except SyntaxError:
+    except (ImportError, SyntaxError):
         # single-cpu implementation, in case joblib library fails (i.e. Python 3.2)
         for core_name, group_with_same_core in core_names_dict.items():
             _process_one_group(core_name, group_with_same_core, outputdir, options)
