@@ -184,14 +184,15 @@ class SHBinaryReader:
         :param geotyp:
         :return:
         """
-        _geotyp_axis_names = {
-            SHGeoType.msh: ("X", "Y", "Z", "(nil)"),
-            SHGeoType.cyl: ("R", "PHI", "Z", "(nil)"),
-            SHGeoType.voxscore: ("X", "Y", "Z", "(nil)"),
-            SHGeoType.geomap: ("X", "Y", "Z", "(nil)"),
-        }
-        _default_names = ("(nil)", "(nil)", "(nil)", "(nil)")
-        return _geotyp_axis_names.get(geotyp, _default_names)
+
+        if geotyp in {SHGeoType.msh, SHGeoType.voxscore, SHGeoType.geomap}:
+            _geotyp_axis_names = ("Position (X)", "Position (Y)", "Position (Z)", ""),
+        elif geotyp in {SHGeoType.cyl}:
+            _geotyp_axis_names = ("Radius (R)", "Angle (PHI)", "Position (Z)", ""),
+        else:
+            _geotyp_axis_names = ("", "", "", "")
+
+        return _geotyp_axis_names
 
     @staticmethod
     def get_estimator_units(geotyp):
