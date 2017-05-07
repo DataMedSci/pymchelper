@@ -186,9 +186,9 @@ class SHBinaryReader:
         """
 
         if geotyp in {SHGeoType.msh, SHGeoType.voxscore, SHGeoType.geomap}:
-            _geotyp_axis_names = ("Position (X)", "Position (Y)", "Position (Z)", ""),
+            _geotyp_axis_names = ("Position (X)", "Position (Y)", "Position (Z)", "")
         elif geotyp in {SHGeoType.cyl}:
-            _geotyp_axis_names = ("Radius (R)", "Angle (PHI)", "Position (Z)", ""),
+            _geotyp_axis_names = ("Radius (R)", "Angle (PHI)", "Position (Z)", "")
         else:
             _geotyp_axis_names = ("", "", "", "")
 
