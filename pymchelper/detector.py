@@ -337,9 +337,20 @@ def merge_list(input_file_list,
     first.save(output_file, options)
 
 
+def _process_one_group(core_name, group_with_same_core, outputdir, options):
+    core_dirname, core_basename = os.path.split(core_name)
+    if outputdir is None:
+        output_file = os.path.join(core_dirname, core_basename)
+    else:
+        output_file = os.path.join(outputdir, core_basename)
+    logger.debug("Setting output core name " + output_file)
+    merge_list(group_with_same_core, output_file, options)
+
+
 def merge_many(input_file_list,
                outputdir,
-               options):
+               options,
+               jobs):
     """
     Takes set of input file names, belonging to possibly different estimators.
     Input files are grouped according to the estimators and for each group
@@ -348,6 +359,7 @@ def merge_many(input_file_list,
     :param input_file_list: list of input files
     :param outputdir: output directory
     :param options: list of parsed options
+    :param jobs: number of CPU cores to use (-1 means all)
     :return: none
     """
     core_names_dict = defaultdict(list)
@@ -361,11 +373,14 @@ def merge_many(input_file_list,
             core_name = name[-2:]
             core_names_dict[core_name].append(name)
 
-    for core_name, group_with_same_core in core_names_dict.items():
-        core_dirname, core_basename = os.path.split(core_name)
-        if outputdir is None:
-            output_file = os.path.join(core_dirname, core_basename)
-        else:
-            output_file = os.path.join(outputdir, core_basename)
-        logger.debug("Setting output core name " + output_file)
-        merge_list(group_with_same_core, output_file, options)
+    # parallel execution of output file generation, using all CPU cores
+    # see http://pythonhosted.org/joblib
+    try:
+        from joblib import Parallel, delayed
+        Parallel(n_jobs=jobs)(
+            delayed(_process_one_group)(core_name, group_with_same_core, outputdir, options)
+            for core_name, group_with_same_core in core_names_dict.items())
+    except (ImportError, SyntaxError):
+        # single-cpu implementation, in case joblib library fails (i.e. Python 3.2)
+        for core_name, group_with_same_core in core_names_dict.items():
+            _process_one_group(core_name, group_with_same_core, outputdir, options)

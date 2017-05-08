@@ -4,3 +4,4 @@ numpy>=1.10.4 ; python_version < '3.0' or python_version >= '3.4' # newest numpy
 # Enum structure has appeared in Python 3.4 (https://docs.python.org/3.4/library/enum.html), for older version a backport is needed
 enum34 ; python_version < '3.4'
 xlwt ; python_version < '3.0' or python_version >= '3.3' # not available for python 3.2
+joblib ; python_version < '3.0' or python_version >= '3.3' # not available for python 3.2
