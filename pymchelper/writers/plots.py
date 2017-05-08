@@ -137,7 +137,9 @@ class ImageWriter:
         import matplotlib.pyplot as plt
 
         plt.pcolormesh(xlist, ylist, elist.clip(0.0), cmap=self.colormap)
-        plt.ylabel(detector.units[1])
+        y_axis_number = detector.axis_data(1, plotting_order=True).number
+        y_axis_name = detector.units[6 + y_axis_number]
+        plt.ylabel(self._make_label(detector.units[y_axis_number], y_axis_name))
         cbar = plt.colorbar()
         cbar.set_label(detector.units[4], rotation=270, verticalalignment='bottom')
         base_name, _ = os.path.splitext(self.plot_filename)
@@ -197,9 +199,14 @@ class ImageWriter:
                 elist = error.reshape(shape_tuple)
                 self._save_2d_error_plot(detector, xlist, ylist, elist)
 
+            x_axis_number = detector.axis_data(0, plotting_order=True).number
+            x_axis_name = detector.units[6 + x_axis_number]
+            plt.xlabel(self._make_label(detector.units[x_axis_number], x_axis_name))
+
             y_axis_number = detector.axis_data(1, plotting_order=True).number
             y_axis_name = detector.units[6 + y_axis_number]
             plt.ylabel(self._make_label(detector.units[y_axis_number], y_axis_name))
+
             plt.pcolormesh(xlist, ylist, zlist, cmap=self.colormap)
             cbar = plt.colorbar()
             cbar.set_label(detector.units[4], rotation=270, verticalalignment='bottom')
