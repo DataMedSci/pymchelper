@@ -5,8 +5,8 @@ pytest<3.0 ; python_version >= '3.2' and python_version < '3.3' or os_name == 'n
 pytest ; (python_version < '3.0' or python_version >= '3.3') and os_name != 'nt' # py different than 3.2
 pytest-capturelog
 pytest-timeout
-pytest-xdist ; python_version != '3.2'
-pytest-xdist<1.18.0  ; python_version == '3.2'
+pytest-xdist ; (python_version < '3.0' or python_version >= '3.3') and os_name != 'nt' # py different than 3.2
+pytest-xdist<1.18.0  ; python_version >= '3.2' and python_version < '3.3' or os_name == 'nt' # py 3.2 or Windows
 pytest-cov ; python_version != '3.2'
 tox
 # matplotlib v 2.0, doesn't work well with Python 3.2 and 3.3
