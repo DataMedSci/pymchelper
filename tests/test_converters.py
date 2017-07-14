@@ -45,11 +45,22 @@ class TestPld2Sobp(unittest.TestCase):
     def test_simple(self):
         """ Simple conversion including diagnostic output.
         """
-        import os
         inp_path = os.path.join("tests", "res", "pld", "test.pld")
         out_path = os.path.join("tests", "res", "pld", "test.dat")
         try:
             pymchelper.utils.pld2sobp.main(["-d", inp_path, out_path])
+        except SystemExit as e:
+            self.assertEqual(e.code, 0)
+
+        self.assertTrue(os.path.isfile(out_path))
+
+    def test_vsad(self):
+        """ Virtual source test
+        """
+        inp_path = os.path.join("tests", "res", "pld", "test.pld")
+        out_path = os.path.join("tests", "res", "pld", "test.dat")
+        try:
+            pymchelper.utils.pld2sobp.main(["-d", "-x", "200.0", "-y", "220.0", "-z", "180", inp_path, out_path])
         except SystemExit as e:
             self.assertEqual(e.code, 0)
 

@@ -7,7 +7,7 @@ TODO: Translate energy to spotsize.
 import sys
 import logging
 import argparse
-from math import exp, log
+from math import exp, log, atan2
 
 logger = logging.getLogger(__name__)
 
@@ -34,7 +34,7 @@ class Layer(object):
     Class for handling Layers.
     """
     def __init__(self, spotsize, energy, meterset, elsum, repaints, elements):
-        self.spotsize = float(spotsize)
+        self.spotsize = float(spotsize)   # spot size at isocenter [mm]
         self.energy = float(energy)
         self.meterset = float(meterset)   # MU sum of this + all previous layers
         self.elsum = float(elsum)         # sum of elements in this layer
@@ -42,8 +42,8 @@ class Layer(object):
         self.elements = elements          # number of elements
         self.spots = int(len(elements) / 2)  # there are two elements per spot
 
-        self.x = [0.0] * self.spots
-        self.y = [0.0] * self.spots
+        self.x = [0.0] * self.spots       # position of spot center at isocenter [mm]
+        self.y = [0.0] * self.spots       # position of spot center at isocenter [mm]
         self.w = [0.0] * self.spots       # MU weight
         self.rf = [0.0] * self.spots      # fluence weight
 
@@ -117,8 +117,7 @@ def main(args=sys.argv[1:]):
     import pymchelper
 
     # _scaling holds the number of particles * dE/dx / MU = some constant
-    # _scaling = 8.106687e7  # Calculated Nov. 2016 from Brita's 32 Gy plan. (no dE/dx)
-    _scaling = 5.1821e8  # Estimated calculation Apr. 2017 from Brita's 32 Gy plan.
+    _scaling = 5e8  # some rough estimation for typical proton center
 
     parser = argparse.ArgumentParser()
     parser.add_argument('fin', metavar="input_file.pld", type=argparse.FileType('r'),
@@ -127,6 +126,12 @@ def main(args=sys.argv[1:]):
     parser.add_argument('fout', nargs='?', metavar="output_file.dat", type=argparse.FileType('w'),
                         help="path to the SHIELD-HIT12A/FLUKA output file, or print to stdout if not given.",
                         default=sys.stdout)
+    parser.add_argument('-x', '--vsadx', type=float, help="VSADX: virtual source (X) to isocenter distance [cm]",
+                        dest='vsadx', default=None)
+    parser.add_argument('-y', '--vsady', type=float, help="VSADY: virtual source (X) to isocenter distance [cm]",
+                        dest='vsady', default=None)
+    parser.add_argument('-z', '--source', type=float, help="beam source position in MC code [cm]",
+                        dest='source', default=None)
     parser.add_argument('-f', '--flip', action='store_true', help="flip XY axis", dest="flip", default=False)
     parser.add_argument('-d', '--diag', action='store_true', help="prints additional diagnostics",
                         dest="diag", default=False)
@@ -141,19 +146,37 @@ def main(args=sys.argv[1:]):
     if args.verbosity > 1:
         logging.basicConfig(level=logging.DEBUG)
 
+    if args.vsadx and not args.vsady:
+        logger.error("Provide VSADY value (--vsady)")
+        return 1
+    elif args.vsady and not args.vsadx:
+        logger.error("Provide VSADX value (--vsadx)")
+        return 1
+    elif args.vsady and args.vsadx and not args.source:
+        logger.error("Provide source value (--source)")
+        return 1
+
     pld_data = PLDRead(args.fin)
     args.fin.close()
 
     # SH12A takes any form of list of values, as long as the line is shorter than 78 Chars.
-    outstr = "{:-10.6f} {:-10.2f} {:-10.2f} {:-10.2f} {:-16.6E}\n"
+    if args.vsadx and args.vsady:
+        args.fout.writelines("*ENERGY(GEV) SigmaT0(GEV) X(CM) Y(CM) "
+                             "FWHMx(cm) FWHMy(cm) THETAx(rad) THETAy(rad) WEIGHT\n")
+        outstr = "{:-10.6f} {:-10.6f} {:-10.2f} {:-10.2f} {:-10.2f} {:-10.2f} {:-10.6f} {:-10.6f} {:-16.6E}\n"
+    else:
+        args.fout.writelines("*ENERGY(GEV) X(CM) Y(CM) FWHM(cm) WEIGHT\n")
+        outstr = "{:-10.6f} {:-10.2f} {:-10.2f} {:-10.2f} {:-16.6E}\n"
 
     meterset_weight_sum = 0.0
     particles_sum = 0.0
 
-    for layer in pld_data.layers:
-        spotsize = 2.354820045 * layer.spotsize * 0.1  # 1 sigma im mm -> 1 cm FWHM
+    sigma_to_fwhm = (8.0*log(2.0))**0.5
 
-        for spot_x, spot_y, spot_w, spot_rf in zip(layer.x, layer.y, layer.w, layer.rf):
+    for layer in pld_data.layers:
+        spot_fwhm_iso_cm = sigma_to_fwhm * layer.spotsize * 0.1  # 1 sigma im mm -> 1 cm FWHM
+
+        for spot_x_iso_mm, spot_y_iso_mm, spot_w, spot_rf in zip(layer.x, layer.y, layer.w, layer.rf):
 
             weight = spot_rf * pld_data.mu / pld_data.csetweight
             # Need to convert to weight by fluence, rather than weight by dose
@@ -162,22 +185,53 @@ def main(args=sys.argv[1:]):
             # proportional to dose to air. D = phi * S => MU = phi * S(air)
             phi_weight = weight / dedx_air(layer.energy)
 
-            # add number of paricles in this spot
+            # add number of particles in this spot
             particles_spot = args.scale * phi_weight
             particles_sum += particles_spot
 
             meterset_weight_sum += spot_w
 
-            layer_xy = [spot_x * 0.1, spot_y * 0.1]
+            # calculate position of spot center at a source position located at distance (args.source) from isocenter
+            # source position in Monte-Carlo code doesn't have to be the same point as vistual source
+            # in fact in TPS we could have different virtual source - one for X and for Y axis, while
+            # in Monte-Carlo we have only one virtual source
+            # we assume here simple triangular geometry, neglecting scattering in the air
+            # if user omitted VSAD parameters, then a parallel beam model is assumed
+            if not args.vsadx:
+                spot_x_source_cm = spot_x_iso_mm * 0.1
+                theta_x = 0
+            else:
+                spot_x_source_cm = spot_x_iso_mm * 0.1 * (args.vsadx - args.source) / args.vsadx
+                theta_x = atan2(spot_x_iso_mm * 0.1, args.vsadx)
+
+            if not args.vsady:
+                spot_y_source_cm = spot_y_iso_mm * 0.1
+                theta_y = 0
+            else:
+                spot_y_source_cm = spot_y_iso_mm * 0.1 * (args.vsady - args.source) / args.vsady
+                theta_y = atan2(spot_x_iso_mm * 0.1, args.vsady)
+
+            layer_xy_source_cm = [spot_x_source_cm, spot_y_source_cm]
 
             if args.flip:
-                layer_xy.reverse()
+                layer_xy_source_cm.reverse()
 
-            args.fout.writelines(outstr.format(layer.energy * 0.001,  # MeV -> GeV
-                                               layer_xy[0],
-                                               layer_xy[1],
-                                               spotsize,
-                                               particles_spot))
+            if args.vsadx and args.vsady:
+                args.fout.writelines(outstr.format(layer.energy * 0.001,  # MeV -> GeV
+                                                   0.0,  # TODO add energy spread
+                                                   layer_xy_source_cm[0],
+                                                   layer_xy_source_cm[1],
+                                                   spot_fwhm_iso_cm,  # FWHMx
+                                                   spot_fwhm_iso_cm,  # FWHMy
+                                                   theta_x,
+                                                   theta_y,
+                                                   particles_spot))
+            else:
+                args.fout.writelines(outstr.format(layer.energy * 0.001,  # MeV -> GeV
+                                                   layer_xy_source_cm[0],
+                                                   layer_xy_source_cm[1],
+                                                   spot_fwhm_iso_cm,
+                                                   particles_spot))
 
     logger.info("Data were scaled with a factor of {:e} particles*S/MU.".format(args.scale))
     if args.flip:
