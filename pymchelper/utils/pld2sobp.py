@@ -5,7 +5,7 @@ which is readable by FLUKA with source_sampler.f and by SHIELD-HIT12A.
 import argparse
 import json
 import logging
-from math import exp, log, atan2
+from math import exp, log
 import sys
 
 logger = logging.getLogger(__name__)
@@ -109,6 +109,43 @@ class PLDRead(object):
                                          elements))  # array holding all elements for this layer
 
 
+def extract_model(model_dictionary, spottag, energy):
+    """
+    TODO
+    :param model_dictionary:
+    :param spottag:
+    :param energy:
+    :return:
+    """
+
+    sigma_to_fwhm = (8.0*log(2.0))**0.5
+
+    spot_fwhm_x_cm = 0.0  # point-like source
+    spot_fwhm_y_cm = 0.0  # point-like source
+    energy_spread = 0.0
+
+    if model_dictionary:
+        compatible_models = [model for model in model_dictionary["model"] if spottag == model["spottag"]]
+        if not compatible_models:
+            print("no models found for spottag {}".format(spottag))
+            return None
+        elif len(compatible_models) > 1:
+            print("more than one model found for spottag {}, taking first one".format(spottag))
+        else:
+            compatible_layers = [model_layer for model_layer in compatible_models[0]["layers"] if
+                                 model_layer["mean_energy"] == energy]
+            if not compatible_layers:
+                print("no layers found for {}".format(energy))
+                return None
+            elif len(compatible_models) > 1:
+                print("more than one layer found for {}, taking first one".format(energy))
+            else:
+                spot_fwhm_x_cm = sigma_to_fwhm * compatible_layers[0]["spot_x"]
+                spot_fwhm_y_cm = sigma_to_fwhm * compatible_layers[0].get("spot_y", spot_fwhm_x_cm)
+                energy_spread = compatible_layers[0].get("energy_spread", 0.0)
+    return spot_fwhm_x_cm, spot_fwhm_y_cm, energy_spread
+
+
 def main(args=sys.argv[1:]):
     """ Main function of the pld2sobp script.
     """
@@ -128,8 +165,6 @@ def main(args=sys.argv[1:]):
     parser.add_argument('-m', '--model', metavar='beam_model.yml', type=argparse.FileType('r'),
                         help="beam model file",
                         default=None)
-    parser.add_argument('-z', '--source', type=float, help="beam source position in MC code [cm]",
-                        dest='source', default=None)
     parser.add_argument('-f', '--flip', action='store_true', help="flip XY axis", dest="flip", default=False)
     parser.add_argument('-d', '--diag', action='store_true', help="prints additional diagnostics",
                         dest="diag", default=False)
@@ -143,7 +178,6 @@ def main(args=sys.argv[1:]):
         logging.basicConfig(level=logging.INFO)
     if args.verbosity > 1:
         logging.basicConfig(level=logging.DEBUG)
-
 
     pld_data = PLDRead(args.fin)
     args.fin.close()
@@ -161,32 +195,14 @@ def main(args=sys.argv[1:]):
     meterset_weight_sum = 0.0
     particles_sum = 0.0
 
-    sigma_to_fwhm = (8.0*log(2.0))**0.5
-
     for layer in pld_data.layers:
 
-        if args.model:
-            compatible_models = [model for model in beam_model["model"] if layer.spottag == model["spottag"]]
-            if not compatible_models:
-                print("no models found")
-                return
-            elif len(compatible_models) > 1:
-                print("more than one model found")
-            else:
-                compatible_layers = [model_layer for model_layer in compatible_models[0]["layers"] if model_layer["mean_energy"] == layer.energy]
-                if not compatible_layers:
-                    print("no layers found for {}".format(layer.energy))
-                    return
-                elif len(compatible_models) > 1:
-                    print("more than one layer found")
-                else:
-                    spot_fwhm_x_cm = compatible_layers[0]["spot_x"]
-                    spot_fwhm_y_cm = compatible_layers[0].get("spot_y", spot_fwhm_x_cm)
-                    energy_spread = compatible_layers[0].get("energy_spread", 0.0)
+        model_data = extract_model(beam_model, layer.spottag, layer.energy)
+
+        if model_data:
+            spot_fwhm_x_cm, spot_fwhm_y_cm, energy_spread = model_data
         else:
-            spot_fwhm_x_cm = 0.0  # point-like source
-            spot_fwhm_y_cm = 0.0  # point-like source
-            energy_spread = 0.0
+            return
 
         for spot_x_iso_mm, spot_y_iso_mm, spot_w, spot_rf in zip(layer.x, layer.y, layer.w, layer.rf):
 
@@ -212,12 +228,12 @@ def main(args=sys.argv[1:]):
 
             if args.model:
                 args.fout.writelines(outstr.format(layer.energy * 0.001,  # MeV -> GeV
-                                                    0.0,  # TODO add energy spread
-                                                    layer_xy_source_cm[0],
-                                                    layer_xy_source_cm[1],
-                                                    spot_fwhm_x_cm,  # FWHMx
-                                                    spot_fwhm_y_cm,  # FWHMy
-                                                    particles_spot))
+                                                   0.0,  # TODO add energy spread
+                                                   layer_xy_source_cm[0],
+                                                   layer_xy_source_cm[1],
+                                                   spot_fwhm_x_cm,  # FWHMx
+                                                   spot_fwhm_y_cm,  # FWHMy
+                                                   particles_spot))
             else:
                 args.fout.writelines(outstr.format(layer.energy * 0.001,  # MeV -> GeV
                                                    layer_xy_source_cm[0],
