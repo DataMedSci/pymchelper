@@ -1,13 +1,12 @@
 """
 Reads PLD file in IBA format and convert to sobp.dat
 which is readable by FLUKA with source_sampler.f and by SHIELD-HIT12A.
-
-TODO: Translate energy to spotsize.
 """
-import sys
-import logging
 import argparse
+import json
+import logging
 from math import exp, log, atan2
+import sys
 
 logger = logging.getLogger(__name__)
 
@@ -33,8 +32,8 @@ class Layer(object):
     """
     Class for handling Layers.
     """
-    def __init__(self, spotsize, energy, meterset, elsum, repaints, elements):
-        self.spotsize = float(spotsize)   # spot size at isocenter [mm]
+    def __init__(self, spottag, energy, meterset, elsum, repaints, elements):
+        self.spottag = float(spottag)     # spot tag number
         self.energy = float(energy)
         self.meterset = float(meterset)   # MU sum of this + all previous layers
         self.elsum = float(elsum)         # sum of elements in this layer
@@ -102,7 +101,7 @@ class PLDRead(object):
                 if 5 in token:
                     repaints_no = token[5].strip()
 
-                self.layers.append(Layer(token[1].strip(),  # Spot1
+                self.layers.append(Layer(token[1].strip(),  # spot tag
                                          token[2].strip(),  # energy
                                          token[3].strip(),  # cumulative meter set weight including this layer
                                          token[4].strip(),  # number of elements in this layer
@@ -126,10 +125,9 @@ def main(args=sys.argv[1:]):
     parser.add_argument('fout', nargs='?', metavar="output_file.dat", type=argparse.FileType('w'),
                         help="path to the SHIELD-HIT12A/FLUKA output file, or print to stdout if not given.",
                         default=sys.stdout)
-    parser.add_argument('-x', '--vsadx', type=float, help="VSADX: virtual source (X) to isocenter distance [cm]",
-                        dest='vsadx', default=None)
-    parser.add_argument('-y', '--vsady', type=float, help="VSADY: virtual source (X) to isocenter distance [cm]",
-                        dest='vsady', default=None)
+    parser.add_argument('-m', '--model', metavar='beam_model.yml', type=argparse.FileType('r'),
+                        help="beam model file",
+                        default=None)
     parser.add_argument('-z', '--source', type=float, help="beam source position in MC code [cm]",
                         dest='source', default=None)
     parser.add_argument('-f', '--flip', action='store_true', help="flip XY axis", dest="flip", default=False)
@@ -146,24 +144,16 @@ def main(args=sys.argv[1:]):
     if args.verbosity > 1:
         logging.basicConfig(level=logging.DEBUG)
 
-    if args.vsadx and not args.vsady:
-        logger.error("Provide VSADY value (--vsady)")
-        return 1
-    elif args.vsady and not args.vsadx:
-        logger.error("Provide VSADX value (--vsadx)")
-        return 1
-    elif args.vsady and args.vsadx and not args.source:
-        logger.error("Provide source value (--source)")
-        return 1
 
     pld_data = PLDRead(args.fin)
     args.fin.close()
 
-    # SH12A takes any form of list of values, as long as the line is shorter than 78 Chars.
-    if args.vsadx and args.vsady:
-        args.fout.writelines("*ENERGY(GEV) SigmaT0(GEV) X(CM) Y(CM) "
-                             "FWHMx(cm) FWHMy(cm) THETAx(rad) THETAy(rad) WEIGHT\n")
-        outstr = "{:-10.6f} {:-10.6f} {:-10.2f} {:-10.2f} {:-10.2f} {:-10.2f} {:-10.6f} {:-10.6f} {:-16.6E}\n"
+    if args.model:
+        # TODO add validation of JSON schema
+        beam_model = json.load(args.model)
+
+        args.fout.writelines("*ENERGY(GEV) SigmaT0(GEV) X(CM) Y(CM) FWHMx(cm) FWHMy(cm) WEIGHT\n")
+        outstr = "{:-10.6f} {:-10.6f} {:-10.2f} {:-10.2f} {:-10.2f} {:-10.2f} {:-16.6E}\n"
     else:
         args.fout.writelines("*ENERGY(GEV) X(CM) Y(CM) FWHM(cm) WEIGHT\n")
         outstr = "{:-10.6f} {:-10.2f} {:-10.2f} {:-10.2f} {:-16.6E}\n"
@@ -174,7 +164,29 @@ def main(args=sys.argv[1:]):
     sigma_to_fwhm = (8.0*log(2.0))**0.5
 
     for layer in pld_data.layers:
-        spot_fwhm_iso_cm = sigma_to_fwhm * layer.spotsize * 0.1  # 1 sigma im mm -> 1 cm FWHM
+
+        if args.model:
+            compatible_models = [model for model in beam_model["model"] if layer.spottag == model["spottag"]]
+            if not compatible_models:
+                print("no models found")
+                return
+            elif len(compatible_models) > 1:
+                print("more than one model found")
+            else:
+                compatible_layers = [model_layer for model_layer in compatible_models[0]["layers"] if model_layer["mean_energy"] == layer.energy]
+                if not compatible_layers:
+                    print("no layers found for {}".format(layer.energy))
+                    return
+                elif len(compatible_models) > 1:
+                    print("more than one layer found")
+                else:
+                    spot_fwhm_x_cm = compatible_layers[0]["spot_x"]
+                    spot_fwhm_y_cm = compatible_layers[0].get("spot_y", spot_fwhm_x_cm)
+                    energy_spread = compatible_layers[0].get("energy_spread", 0.0)
+        else:
+            spot_fwhm_x_cm = 0.0  # point-like source
+            spot_fwhm_y_cm = 0.0  # point-like source
+            energy_spread = 0.0
 
         for spot_x_iso_mm, spot_y_iso_mm, spot_w, spot_rf in zip(layer.x, layer.y, layer.w, layer.rf):
 
@@ -191,46 +203,26 @@ def main(args=sys.argv[1:]):
 
             meterset_weight_sum += spot_w
 
-            # calculate position of spot center at a source position located at distance (args.source) from isocenter
-            # source position in Monte-Carlo code doesn't have to be the same point as vistual source
-            # in fact in TPS we could have different virtual source - one for X and for Y axis, while
-            # in Monte-Carlo we have only one virtual source
-            # we assume here simple triangular geometry, neglecting scattering in the air
-            # if user omitted VSAD parameters, then a parallel beam model is assumed
-            if not args.vsadx:
-                spot_x_source_cm = spot_x_iso_mm * 0.1
-                theta_x = 0
-            else:
-                spot_x_source_cm = spot_x_iso_mm * 0.1 * (args.vsadx - args.source) / args.vsadx
-                theta_x = atan2(spot_x_iso_mm * 0.1, args.vsadx)
-
-            if not args.vsady:
-                spot_y_source_cm = spot_y_iso_mm * 0.1
-                theta_y = 0
-            else:
-                spot_y_source_cm = spot_y_iso_mm * 0.1 * (args.vsady - args.source) / args.vsady
-                theta_y = atan2(spot_x_iso_mm * 0.1, args.vsady)
-
+            spot_x_source_cm = spot_x_iso_mm * 0.1
+            spot_y_source_cm = spot_y_iso_mm * 0.1
             layer_xy_source_cm = [spot_x_source_cm, spot_y_source_cm]
 
             if args.flip:
                 layer_xy_source_cm.reverse()
 
-            if args.vsadx and args.vsady:
+            if args.model:
                 args.fout.writelines(outstr.format(layer.energy * 0.001,  # MeV -> GeV
-                                                   0.0,  # TODO add energy spread
-                                                   layer_xy_source_cm[0],
-                                                   layer_xy_source_cm[1],
-                                                   spot_fwhm_iso_cm,  # FWHMx
-                                                   spot_fwhm_iso_cm,  # FWHMy
-                                                   theta_x,
-                                                   theta_y,
-                                                   particles_spot))
+                                                    0.0,  # TODO add energy spread
+                                                    layer_xy_source_cm[0],
+                                                    layer_xy_source_cm[1],
+                                                    spot_fwhm_x_cm,  # FWHMx
+                                                    spot_fwhm_y_cm,  # FWHMy
+                                                    particles_spot))
             else:
                 args.fout.writelines(outstr.format(layer.energy * 0.001,  # MeV -> GeV
                                                    layer_xy_source_cm[0],
                                                    layer_xy_source_cm[1],
-                                                   spot_fwhm_iso_cm,
+                                                   spot_fwhm_x_cm,
                                                    particles_spot))
 
     logger.info("Data were scaled with a factor of {:e} particles*S/MU.".format(args.scale))
