@@ -43,12 +43,12 @@ class TestPld2Sobp(unittest.TestCase):
             self.assertEqual(e.code, 2)
 
     def test_simple(self):
-        """ Simple conversion including diagnostic output.
+        """ Simple conversion including diagnostic output and nozzle position.
         """
         inp_path = os.path.join("tests", "res", "pld", "test.pld")
         out_path = os.path.join("tests", "res", "pld", "test.dat")
         try:
-            pymchelper.utils.pld2sobp.main(["-d", inp_path, out_path])
+            pymchelper.utils.pld2sobp.main(["-n", "-50.0", inp_path, out_path])
         except SystemExit as e:
             self.assertEqual(e.code, 0)
 
