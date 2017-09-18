@@ -286,7 +286,7 @@ class _SHBinaryReader0p6:
 
                 pl_id, _pl_type, _pl_len, _pl = token
 
-                pl = [None]*_pl_len
+                pl = [None] * _pl_len
 
                 # decode all strings (currently there will never be more than one per token)
                 if 'S' in _pl_type.decode('ASCII'):

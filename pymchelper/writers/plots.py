@@ -166,7 +166,7 @@ class ImageWriter:
         logger.info("Writing: " + self.plot_filename)
 
         x_axis_number = detector.axis_data(0, plotting_order=True).number
-        x_axis_name = detector.units[6+x_axis_number]
+        x_axis_name = detector.units[6 + x_axis_number]
         plt.xlabel(self._make_label(detector.units[x_axis_number], x_axis_name))
         xlist = list(detector.axis_values(0, plotting_order=True))  # make list of values from generator
 

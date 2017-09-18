@@ -152,6 +152,7 @@ class Detector:
         :return:
         """
         writer = _converter_mapping[Converters[options.command]](filename, options)
+        logger.info("Writing file {:s}".format(writer.filename))
         writer.write(self)
 
     def __str__(self):
