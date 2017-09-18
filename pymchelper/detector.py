@@ -1,6 +1,6 @@
-import os
-import logging
 from collections import namedtuple, defaultdict
+import logging
+import os
 
 import numpy as np
 from enum import IntEnum
@@ -93,6 +93,7 @@ class Detector:
         """
         Reads binary file with. Automatically discovers which reader should be used.
         :param filename: binary file name
+        :param nscale:
         :return: none
         """
         reader = SHTextReader(filename)
@@ -108,6 +109,7 @@ class Detector:
         """
         Average (not add) data with other detector, excluding malformed data (NaN) from averaging.
         :param other_detectors:
+        :param error_estimate:
         :return:
         """
         # TODO add compatibility check
@@ -125,6 +127,7 @@ class Detector:
         """
         Average (not add) data with other detector
         :param other_detector:
+        :param error_estimate:
         :return:
         """
 
@@ -152,7 +155,7 @@ class Detector:
         :return:
         """
         writer = _converter_mapping[Converters[options.command]](filename, options)
-        logger.info("Writing file {:s}".format(writer.filename))
+        logger.info("Writing file with corename {:s}".format(filename))
         writer.write(self)
 
     def __str__(self):
