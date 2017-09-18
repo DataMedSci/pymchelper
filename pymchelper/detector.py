@@ -12,6 +12,7 @@ from pymchelper.shieldhit.detector.estimator_type import SHGeoType
 from pymchelper.writers.excel import ExcelWriter
 from pymchelper.writers.plots import ImageWriter, GnuplotDataWriter, PlotDataWriter
 from pymchelper.writers.shieldhit import TxtWriter
+from pymchelper.writers.sparse import SparseWriter
 from pymchelper.writers.trip98 import TripCubeWriter, TripDddWriter
 
 logger = logging.getLogger(__name__)
@@ -28,6 +29,7 @@ class Converters(IntEnum):
     tripcube = 4
     tripddd = 5
     excel = 6
+    sparse = 7
 
 
 class ErrorEstimate(IntEnum):
@@ -52,7 +54,8 @@ _converter_mapping = {
     Converters.image: ImageWriter,
     Converters.tripcube: TripCubeWriter,
     Converters.tripddd: TripDddWriter,
-    Converters.excel: ExcelWriter
+    Converters.excel: ExcelWriter,
+    Converters.sparse: SparseWriter
 }
 
 
