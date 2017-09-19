@@ -6,15 +6,15 @@
 Sparse matrix data
 ==================
 
-Sparse matrix format can greatly reduce size on disk in case when most of the matrix is occupied with zeros.
-This detector writes for every input detector a file with :bash:`.npz` extension which contains:
+Sparse matrix format can greatly reduce size on disk in case most of the matrix is occupied with zeros.
+For every input detector a single file with :bash:`.npz` extension is written. It contains:
 
 * shape of detector data: tuple of 3 numbers holding nx, ny and nz
-* tuple of 3 numpy arrays with X,Y and Z coordinates, pointing to non-zero data cells
+* tuple of 3 numpy arrays with X, Y and Z coordinates, pointing to non-zero data cells
 * plain, 1D numpy array with non-zero data values
 
-Such format is similar to so called COO-rdinate format for 2D sparse matrices. Here it is used
-for any kind of data, with dimensionality between 0 and 3.
+Such format is similar to a so-called COO-rdinate format for 2D sparse matrices.
+Here it is used for any kind of data, with dimensionality between 0 and 3.
 
 Output file is saved in uncompressed NPZ numpy data format,
 for details see https://docs.scipy.org/doc/numpy/reference/generated/numpy.savez.html
@@ -38,6 +38,8 @@ Sparse data can be extracted from NPZ file with following Python code:
 
 .. code-block:: python
 
+   import numpy as np
+
    # load contents of NPZ file:
    npzfile = np.load(filename)
    data = npzfile['data']   # plain 1-D numpy array
@@ -53,9 +55,9 @@ Sparse data can be extracted from NPZ file with following Python code:
 Threshold value
 ---------------
 
-Additionally threshold can be specified to remove noisy data. In this case, all data cells
-with absolute value less or equal than threshold will be treated as zeros.
-Please note that after reconstructing from sparse format we will not get the original data,
+Additionally a threshold can be specified to discard noisy data.
+In this case, all data cells with absolute value less or equal than threshold will be treated as zeros.
+Please note that after reconstructing from sparse format we won't get the original data,
 as values lower than threshold will be overwritten with zeros.
 An example usage::
 
