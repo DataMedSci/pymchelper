@@ -1,6 +1,6 @@
-import os
-import logging
 from collections import namedtuple, defaultdict
+import logging
+import os
 
 import numpy as np
 from enum import IntEnum
@@ -12,6 +12,7 @@ from pymchelper.shieldhit.detector.estimator_type import SHGeoType
 from pymchelper.writers.excel import ExcelWriter
 from pymchelper.writers.plots import ImageWriter, GnuplotDataWriter, PlotDataWriter
 from pymchelper.writers.shieldhit import TxtWriter
+from pymchelper.writers.sparse import SparseWriter
 from pymchelper.writers.trip98 import TripCubeWriter, TripDddWriter
 
 logger = logging.getLogger(__name__)
@@ -28,6 +29,7 @@ class Converters(IntEnum):
     tripcube = 4
     tripddd = 5
     excel = 6
+    sparse = 7
 
 
 class ErrorEstimate(IntEnum):
@@ -52,7 +54,8 @@ _converter_mapping = {
     Converters.image: ImageWriter,
     Converters.tripcube: TripCubeWriter,
     Converters.tripddd: TripDddWriter,
-    Converters.excel: ExcelWriter
+    Converters.excel: ExcelWriter,
+    Converters.sparse: SparseWriter
 }
 
 
@@ -90,6 +93,7 @@ class Detector:
         """
         Reads binary file with. Automatically discovers which reader should be used.
         :param filename: binary file name
+        :param nscale:
         :return: none
         """
         reader = SHTextReader(filename)
@@ -105,6 +109,7 @@ class Detector:
         """
         Average (not add) data with other detector, excluding malformed data (NaN) from averaging.
         :param other_detectors:
+        :param error_estimate:
         :return:
         """
         # TODO add compatibility check
@@ -122,6 +127,7 @@ class Detector:
         """
         Average (not add) data with other detector
         :param other_detector:
+        :param error_estimate:
         :return:
         """
 
@@ -149,6 +155,7 @@ class Detector:
         :return:
         """
         writer = _converter_mapping[Converters[options.command]](filename, options)
+        logger.info("Writing file with corename {:s}".format(filename))
         writer.write(self)
 
     def __str__(self):

@@ -82,6 +82,13 @@ def main(args=sys.argv[1:]):
     parser_gnuplot = subparsers.add_parser(Converters.gnuplot.name, help='converts to gnuplot script')
     add_default_options(parser_gnuplot)
 
+    parser_sparse = subparsers.add_parser(Converters.sparse.name, help='converts to sparse matrix format')
+    add_default_options(parser_sparse)
+    parser_sparse.add_argument("--threshold",
+                               help='only values greater than threshold are saved',
+                               type=float,
+                               default=0.0)
+
     parser_tripcube = subparsers.add_parser(Converters.tripcube.name, help='converts to trip98 data cube')
     add_default_options(parser_tripcube)
 

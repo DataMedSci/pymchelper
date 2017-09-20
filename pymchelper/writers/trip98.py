@@ -268,7 +268,7 @@ class TripDddWriter(object):
         bin_volume_data_cm3_1d = 2.0 * np.pi * r_step_cm * self.r_data_cm_1d * bin_depth_z_cm
         # we assume density of 1 g/c3
         density_g_cm3 = 1.0
-        total_bin_mass_g = density_g_cm3 * bin_depth_z_cm * np.pi * (self.r_data_cm_1d[-1] + r_step_cm/2.0)**2
+        total_bin_mass_g = density_g_cm3 * bin_depth_z_cm * np.pi * (self.r_data_cm_1d[-1] + r_step_cm / 2.0)**2
         energy_in_bin_MeV_2d = self.dose_data_MeV_g_2d * bin_volume_data_cm3_1d * density_g_cm3
         total_energy_at_depth_MeV_1d = np.sum(energy_in_bin_MeV_2d, axis=1)
         self.dose_data_MeV_g_1d = total_energy_at_depth_MeV_1d / total_bin_mass_g
@@ -373,8 +373,8 @@ class TripDddWriter(object):
                 plt.savefig(out_filename)
 
                 plt.xscale('linear')
-                plt.xlim([0, 5.0*sigma2_at_z_cm])
-                plt.ylim([dose_mc_MeV_g[self.r_data_cm_1d < 5.0*sigma2_at_z_cm].min(), dose_mc_MeV_g.max()])
+                plt.xlim([0, 5.0 * sigma2_at_z_cm])
+                plt.ylim([dose_mc_MeV_g[self.r_data_cm_1d < 5.0 * sigma2_at_z_cm].min(), dose_mc_MeV_g.max()])
                 out_filename = prefix + "fit_details_{:4.3f}_small_log".format(z_cm) + suffix + '.png'
                 logger.info('Saving ' + out_filename)
                 plt.savefig(out_filename)
@@ -614,9 +614,9 @@ class TripDddWriter(object):
     @classmethod
     def gauss2_MeV_g(cls, x_cm, amp_MeV_cm_g, sigma1_cm, weight, sigma2_add_cm):
         return amp_MeV_cm_g / (2.0 * np.pi) * (
-            (weight / sigma1_cm) * np.exp(-x_cm ** 2 / (2.0 * sigma1_cm ** 2))
-            + ((1.0 - weight) / (sigma1_cm + sigma2_add_cm)) * np.exp(
-                -x_cm ** 2 / (2.0 * (sigma1_cm + sigma2_add_cm) ** 2))
+            (weight / sigma1_cm) * np.exp(-x_cm ** 2 / (2.0 * sigma1_cm ** 2)) +
+            ((1.0 - weight) / (sigma1_cm + sigma2_add_cm)) *
+            np.exp(-x_cm ** 2 / (2.0 * (sigma1_cm + sigma2_add_cm) ** 2))
         )
 
     @classmethod
