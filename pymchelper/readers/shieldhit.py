@@ -252,6 +252,7 @@ class SHBinaryReader:
             SHDetType.pet: ("/primary", "PET isotopes"),
             SHDetType.dletg: ("keV/um", "dose-averaged LET"),
             SHDetType.tletg: ("keV/um", "track-averaged LET"),
+            SHDetType.q: ("z^2/(MeV/um)", "Q factor"),
             SHDetType.zone: ("(dimensionless)", "Zone#"),
             SHDetType.medium: ("(dimensionless)", "Medium#"),
             SHDetType.rho: ("g/cm^3", "Density"),
