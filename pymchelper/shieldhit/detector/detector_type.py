@@ -22,6 +22,7 @@ class SHDetType(IntEnum):
     zone = 18
     medium = 19
     rho = 20
+    q = 21
     let = 120  # for differential scoring
     angle = 121  # for differential scoring
     dose_gy = 205
