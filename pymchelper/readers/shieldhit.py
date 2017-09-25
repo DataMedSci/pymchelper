@@ -45,7 +45,8 @@ def _prepare_detector_units(detector, nscale):
                                SHDetType.letflu,
                                SHDetType.dletg, SHDetType.tletg,
                                SHDetType.avg_energy, SHDetType.avg_beta,
-                               SHDetType.material):
+                               SHDetType.material,
+                               SHDetType.q):
         if detector.nstat != 0:  # geotyp = GEOMAP will have 0 projectiles simulated
             detector.data /= np.float64(detector.nstat)
 
