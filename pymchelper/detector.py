@@ -370,14 +370,23 @@ def merge_many(input_file_list,
     :return: none
     """
     core_names_dict = defaultdict(list)
+    # keys - core_name, value - list of full paths to corresponding files
+
+    # loop over input list of file paths
     for filepath in input_file_list:
+
+        # extract basename for inspection
         basename = os.path.basename(filepath)
-        if basename.endswith(".bdo"):
-            core_name = basename[:-4]
-            if basename[-8:-4].isdigit() and len(basename[-8:-4]) == 4:
+
+        if basename.endswith(".bdo"):  # SHIELD-HIT12A file encountered
+            # we expect the basename to follow one of two conventions:
+            #  - corenameABCD.bdo (where ABCD is 4-digit integer)
+            #  - corename.bdo
+            core_name = basename[:-4]  # assume no number in the basename
+            if basename[-8:-4].isdigit() and len(basename[-8:-4]) == 4:  # check if number present
                 core_name = basename[:-8]
             core_names_dict[core_name].append(filepath)
-        elif "_fort." in filepath:
+        elif "_fort." in filepath:  # Fluka file encountered
             core_name = filepath[-2:]
             core_names_dict[core_name].append(filepath)
 

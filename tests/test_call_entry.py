@@ -29,28 +29,33 @@ class TestCallMain(unittest.TestCase):
 
     def test_many_shield(self):
         run.main(["image", "--many", "tests/res/shieldhit/single/*.bdo"])
-        files = os.listdir(os.path.join("tests", "res", "shieldhit", "single"))
-        png_files = [f for f in files if f.endswith(".png")]
-        bdo_files = [f for f in files if f.endswith(".bdo")]
-        self.assertGreater(len(files), 4)
+        test_files = os.listdir(os.path.join("tests", "res", "shieldhit", "single"))
+        self.assertGreater(len(test_files), 4)
+
+        # expect output in the current directory
+        bdo_files = [f for f in test_files if f.endswith(".bdo")]
+        png_files = [f for f in os.listdir('.') if f.endswith(".png")]
         self.assertEqual(len(png_files), len(bdo_files))
 
     def test_many_excel(self):
         try:
             run.main(["excel", "--many", "tests/res/shieldhit/single/*.bdo"])
-            files = os.listdir(os.path.join("tests", "res", "shieldhit", "single"))
-            xls_files = [f for f in files if f.endswith(".xls")]
-            self.assertGreater(len(files), 4)
+            test_files = os.listdir(os.path.join("tests", "res", "shieldhit", "single"))
+
+            # expect output in the current directory
+            xls_files = [f for f in os.listdir('.') if f.endswith(".xls")]
+            self.assertGreater(len(test_files), 4)
             self.assertEqual(len(xls_files), 3)
         except ImportError:
             self.assertTrue(True)
 
     def test_many_shield_nscale(self):
         run.main(["image", "--many", "tests/res/shieldhit/single/*.bdo", "-n", "100000000"])
-        files = os.listdir(os.path.join("tests", "res", "shieldhit", "single"))
-        png_files = [f for f in files if f.endswith(".png")]
-        bdo_files = [f for f in files if f.endswith(".bdo")]
-        self.assertGreater(len(files), 4)
+        test_files = os.listdir(os.path.join("tests", "res", "shieldhit", "single"))
+        # expect output in the current directory
+        png_files = [f for f in os.listdir('.') if f.endswith(".png")]
+        bdo_files = [f for f in test_files if f.endswith(".bdo")]
+        self.assertGreater(len(test_files), 4)
         self.assertEqual(len(png_files), len(bdo_files))
 
 
