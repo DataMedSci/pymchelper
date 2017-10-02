@@ -370,24 +370,29 @@ def merge_many(input_file_list,
     :return: none
     """
     core_names_dict = defaultdict(list)
-    for name in input_file_list:
-        if name.endswith(".bdo"):
-            core_name = name[:-4]
-            if name[-8:-4].isdigit() and len(name[-8:-4]) == 4:
-                core_name = name[:-8]
-            core_names_dict[core_name].append(name)
-        elif "_fort." in name:
-            core_name = name[-2:]
-            core_names_dict[core_name].append(name)
+    for filepath in input_file_list:
+        basename = os.path.basename(filepath)
+        if basename.endswith(".bdo"):
+            core_name = basename[:-4]
+            if basename[-8:-4].isdigit() and len(basename[-8:-4]) == 4:
+                core_name = basename[:-8]
+            core_names_dict[core_name].append(filepath)
+        elif "_fort." in filepath:
+            core_name = filepath[-2:]
+            core_names_dict[core_name].append(filepath)
 
     # parallel execution of output file generation, using all CPU cores
     # see http://pythonhosted.org/joblib
     try:
         from joblib import Parallel, delayed
-        Parallel(n_jobs=jobs)(
+        logger.info("Parallel processing on {:d} jobs (-1 means all)".format(jobs))
+        worker = Parallel(n_jobs=jobs, verbose=options.verbose * 100)
+        worker(
             delayed(_process_one_group)(core_name, group_with_same_core, outputdir, options)
-            for core_name, group_with_same_core in core_names_dict.items())
+            for core_name, group_with_same_core in core_names_dict.items()
+        )
     except (ImportError, SyntaxError):
         # single-cpu implementation, in case joblib library fails (i.e. Python 3.2)
+        logger.info("Single CPU processing")
         for core_name, group_with_same_core in core_names_dict.items():
             _process_one_group(core_name, group_with_same_core, outputdir, options)
