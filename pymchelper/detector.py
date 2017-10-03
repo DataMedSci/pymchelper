@@ -97,7 +97,12 @@ class Detector:
         :return: none
         """
         reader = SHTextReader(filename)
-        if filename.endswith(".bdo") or filename.endswith(".bdox"):
+
+        # check if binary file is generated with SHIELD-HIT12A version > 0.6
+        #  (in that case it may or may not have .bdo extension)
+        # this check will also pass is file is generated with older SHIELD-HIT12A version
+        #  (in that case we rely on the file extension)
+        if SHBinaryReader(filename).test_version_0p6() or filename.endswith((".bdo", ".bdox")):
             reader = SHBinaryReader(filename)
         # find better way to discover if file comes from Fluka
         elif "_fort" in filename:
@@ -378,7 +383,8 @@ def merge_many(input_file_list,
         # extract basename for inspection
         basename = os.path.basename(filepath)
 
-        if basename.endswith(".bdo"):  # SHIELD-HIT12A file encountered
+        # SHIELD-HIT12A binary file encountered
+        if SHBinaryReader(filepath).test_version_0p6() or filepath.endswith(('.bdo', '.bdox')):
             # we expect the basename to follow one of two conventions:
             #  - corenameABCD.bdo (where ABCD is 4-digit integer)
             #  - corename.bdo
@@ -386,7 +392,7 @@ def merge_many(input_file_list,
             if basename[-8:-4].isdigit() and len(basename[-8:-4]) == 4:  # check if number present
                 core_name = basename[:-8]
             core_names_dict[core_name].append(filepath)
-        elif "_fort." in filepath:  # Fluka file encountered
+        elif "_fort." in filepath:  # Fluka binary file encountered
             core_name = filepath[-2:]
             core_names_dict[core_name].append(filepath)
 
@@ -395,7 +401,9 @@ def merge_many(input_file_list,
     try:
         from joblib import Parallel, delayed
         logger.info("Parallel processing on {:d} jobs (-1 means all)".format(jobs))
-        worker = Parallel(n_jobs=jobs, verbose=options.verbose * 100)
+        # options.verbose count the number of `-v` switches provided by user
+        # joblib Parallel class expects the verbosity as a larger number (i.e. multiple of 10)
+        worker = Parallel(n_jobs=jobs, verbose=options.verbose * 10)
         worker(
             delayed(_process_one_group)(core_name, group_with_same_core, outputdir, options)
             for core_name, group_with_same_core in core_names_dict.items()
