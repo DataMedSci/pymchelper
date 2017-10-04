@@ -126,6 +126,7 @@ class SHBDOTagID(IntEnum):
     det_dif_start = 0xDD0E   # det(7)
     det_dif_stop = 0xDD0F    # det(8)
     det_voxvol = 0xDD10      # det(9)
+    det_thres = 0xDD11       # det(10) lower energy scoring threshold
 
     det_data = 0xDDBB        # data block
 
