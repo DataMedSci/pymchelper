@@ -254,6 +254,8 @@ class SHBinaryReader:
             SHDetType.dletg: ("keV/um", "dose-averaged LET"),
             SHDetType.tletg: ("keV/um", "track-averaged LET"),
             SHDetType.q: ("(nil)", "beam quality Q"),
+            SHDetType.flu_char: ("cm^-2/primary", "Charged particle fluence"),
+            SHDetType.flu_neut: ("cm^-2/primary", "Neutral particle fluence"),
             SHDetType.zone: ("(dimensionless)", "Zone#"),
             SHDetType.medium: ("(dimensionless)", "Medium#"),
             SHDetType.rho: ("g/cm^3", "Density"),
