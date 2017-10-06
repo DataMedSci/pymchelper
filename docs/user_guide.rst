@@ -21,6 +21,7 @@ Detailed documentation about available converters:
    image_converter.rst
    gnuplot_converter.rst
    sparse_converter.rst
+   inspect_converter.rst
 
 
 Common options

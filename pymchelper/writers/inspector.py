@@ -10,5 +10,6 @@ class Inspector:
     def write(self, detector):
         # print all keys and values from detector structure
         # they include also a metadata read from binary output file
-        for k, v in sorted(detector.__dict__.items()):
-            print(k, v)
+        for name, value in sorted(detector.__dict__.items()):
+            line = "{:24s}: '{:s}'".format(str(name), str(value))
+            print(line)
