@@ -82,6 +82,9 @@ def main(args=sys.argv[1:]):
     parser_gnuplot = subparsers.add_parser(Converters.gnuplot.name, help='converts to gnuplot script')
     add_default_options(parser_gnuplot)
 
+    parser_inspect = subparsers.add_parser(Converters.inspect.name, help='prints metadata')
+    add_default_options(parser_inspect)
+
     parser_sparse = subparsers.add_parser(Converters.sparse.name, help='converts to sparse matrix format')
     add_default_options(parser_sparse)
     parser_sparse.add_argument("--threshold",

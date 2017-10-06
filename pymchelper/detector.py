@@ -10,6 +10,7 @@ from pymchelper.readers.shieldhit import SHTextReader, SHBinaryReader
 from pymchelper.shieldhit.detector.detector_type import SHDetType
 from pymchelper.shieldhit.detector.estimator_type import SHGeoType
 from pymchelper.writers.excel import ExcelWriter
+from pymchelper.writers.inspector import Inspector
 from pymchelper.writers.plots import ImageWriter, GnuplotDataWriter, PlotDataWriter
 from pymchelper.writers.shieldhit import TxtWriter
 from pymchelper.writers.sparse import SparseWriter
@@ -30,6 +31,7 @@ class Converters(IntEnum):
     tripddd = 5
     excel = 6
     sparse = 7
+    inspect = 8
 
 
 class ErrorEstimate(IntEnum):
@@ -55,7 +57,8 @@ _converter_mapping = {
     Converters.tripcube: TripCubeWriter,
     Converters.tripddd: TripDddWriter,
     Converters.excel: ExcelWriter,
-    Converters.sparse: SparseWriter
+    Converters.sparse: SparseWriter,
+    Converters.inspect: Inspector
 }
 
 
@@ -160,7 +163,7 @@ class Detector:
         :return:
         """
         writer = _converter_mapping[Converters[options.command]](filename, options)
-        logger.info("Writing file with corename {:s}".format(filename))
+        logger.debug("Writing file with corename {:s}".format(filename))
         writer.write(self)
 
     def __str__(self):
