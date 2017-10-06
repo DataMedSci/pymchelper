@@ -7,7 +7,7 @@ Inspect data
 ============
 
 Inspector converter (not being in fact a true converter) is not producing any files,
-but prints on the script metadata of the input binary files.
+but prints on the screen metadata of the input binary file.
 
 
 An example usage
