@@ -23,6 +23,8 @@ class SHDetType(IntEnum):
     medium = 19
     rho = 20
     q = 21
+    flu_char = 22
+    flu_neut = 23
     let = 120  # for differential scoring
     angle = 121  # for differential scoring
     dose_gy = 205
