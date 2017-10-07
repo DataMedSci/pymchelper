@@ -513,29 +513,23 @@ class UsrTrack(Usrxxx):
             #     self.statpos = f.tell()
             #     break
             if size != 50:
-                 if not f.closed:
-                     f.close()
-                 raise IOError("Invalid TRACK file")
+                if not f.closed:
+                    f.close()
+                raise IOError("Invalid TRACK file")
 
             # Parse header
-
-            #      &                MTC, TITUTC(NTC), ITUSTC(NTC), IDUSTC(NTC),
-     # &                NRUSTC(NTC), VUSRTC (NTC), LLNUTC (NTC),
-     # &                ETCLOW(NTC), ETCHGH(NTC),
-     # &                NETCBN(NTC), DETCBN(NTC)
-
             header = struct.unpack("=i10siiififfif", data)
 
             bin_det = Detector()
-            bin_det.nb = header[0] # mtc
-            bin_det.name = header[1].strip() # TITUTC
-            bin_det.type = header[2] # ITUSTC
-            bin_det.region = header[4] # IDUSTC
-            bin_det.volume = header[5] # VUSRTC
-            bin_det.low_en_neutr_sc = header[6] # LLNUTC
-            bin_det.elow = header[7] # ETCLOW minimum energy
+            bin_det.nb = header[0]  # mtc
+            bin_det.name = header[1].strip()  # TITUTC
+            bin_det.type = header[2]  # ITUSTC
+            bin_det.region = header[4]  # IDUSTC
+            bin_det.volume = header[5]  # VUSRTC
+            bin_det.low_en_neutr_sc = header[6]  # LLNUTC
+            bin_det.elow = header[7]  # ETCLOW minimum energy
             bin_det.ehigh = header[8]  # ETCHGH maximum energy
-            bin_det.ne = header[9] # NETCBN number of energy intervals
+            bin_det.ne = header[9]  # NETCBN number of energy intervals
             bin_det.de = header[10]  # DETCBN energy bin width
 
             bin_det.xlow = bin_det.elow
@@ -574,13 +568,18 @@ class UsrTrack(Usrxxx):
     # Read detector data
     # ----------------------------------------------------------------------
     def readData(self, n):
-        """Read detector det data structure"""
+        """Read detector n data structure"""
         f = open(self.file, "rb")
         fortran.skip(f)
         for i in range(n):
             fortran.skip(f)  # Detector Header
+            if self.detector[i].low_en_neutr_sc:
+                fortran.skip(f)  # Detector low enetry neutron groups
             fortran.skip(f)  # Detector data
+
         fortran.skip(f)  # Detector Header
+        if self.detector[n].low_en_neutr_sc:
+            fortran.skip(f)  # Detector low enetry neutron groups
         data = fortran.read(f)  # Detector data
         f.close()
         return data

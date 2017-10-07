@@ -18,14 +18,16 @@ class FlukaBinaryReader:
 
         try:
             usr = Usrbin(self.filename)
+            data = usr.readData(0)
+            fdata = unpackArray(data)
         except IOError:
             usr = UsrTrack(self.filename)
+            data = usr.readData(0)
+            fdata = unpackArray(data)[:usr.detector[0].ne]
         usr.say()  # file,title,time,weight,ncase,nbatch
         for i, _ in enumerate(usr.detector):
             logger.debug("-" * 20 + (" Detector number %i " % i) + "-" * 20)
             usr.say(i)  # details for each detector
-        data = usr.readData(0)
-        fdata = unpackArray(data)
 
         # TODO read detector type
         detector.det = "FLUKA"
