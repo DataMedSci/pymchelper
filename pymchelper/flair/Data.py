@@ -498,7 +498,7 @@ class UsrTrack(Usrxxx):
     # Fill the self.detector structure
     # ----------------------------------------------------------------------
     def readHeader(self, filename):
-        """Read USRBIN detector information"""
+        """Read USRTRACK detector information"""
         f = Usrxxx.readHeader(self, filename)
 
         for _ in range(1000):
@@ -508,16 +508,13 @@ class UsrTrack(Usrxxx):
                 break
             size = len(data)
 
-            # # Statistics are present?
-            # if size == 14 and data[:10] == "STATISTICS":
-            #     self.statpos = f.tell()
-            #     break
             if size != 50:
                 if not f.closed:
                     f.close()
                 raise IOError("Invalid TRACK file")
 
             # Parse header
+            # see http://www.fluka.org/flair/ustsuw.f for reference
             header = struct.unpack("=i10siiififfif", data)
 
             bin_det = Detector()
@@ -557,11 +554,7 @@ class UsrTrack(Usrxxx):
 
             size = (bin_det.ngroup + bin_det.ne) * 4
             if size != fortran.skip(f):
-                raise IOError("Invalid TRACK file")
-
-            # size = bin_det.nx * bin_det.ny * bin_det.nz * 4
-            # if fortran.skip(f) != size:
-            #     raise IOError("Invalid TRACK file")
+                raise IOError("Invalid USRTRACK file")
         f.close()
 
     # ----------------------------------------------------------------------
@@ -610,10 +603,6 @@ class UsrTrack(Usrxxx):
             say("Title  : ", bin.name)
             say("Type   : ", bin.type)
             say("E      : [", bin.elow, "-", bin.ehigh, "] x", bin.ne, "dx=", bin.de)
-            # say("L      : ", bin.lntzer)
-            # say("bk     : ", bin.bk)
-            # say("b2     : ", bin.b2)
-            # say("tc     : ", bin.tc)
 
 
 # ===============================================================================
