@@ -84,6 +84,9 @@ def main(args=sys.argv[1:]):
 
     parser_inspect = subparsers.add_parser(Converters.inspect.name, help='prints metadata')
     add_default_options(parser_inspect)
+    parser_inspect.add_argument('-d', '--details',
+                                help='print detailed information about data attribute',
+                                action="store_true")
 
     parser_sparse = subparsers.add_parser(Converters.sparse.name, help='converts to sparse matrix format')
     add_default_options(parser_sparse)
