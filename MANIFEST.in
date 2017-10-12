@@ -5,3 +5,5 @@
   prune docs
   prune .travis
   prune tests
+include versioneer.py
+include pymchelper/_version.py

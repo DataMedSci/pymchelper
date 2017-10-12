@@ -1,5 +1,5 @@
-import os
 import logging
+import os
 from enum import IntEnum
 
 import numpy as np
@@ -104,7 +104,7 @@ splot \"<awk -f addblanks.awk '{data_filename}'\" u 1:2:3 with pm3d
             y_axis_number = detector.axis_data(1, plotting_order=True).number
             ylabel = detector.units[y_axis_number]
 
-            # for 2-D plots writte additional awk script to convert data
+            # for 2-D plots write additional awk script to convert data
             # as described in gnuplot faq: http://www.gnuplot.info/faq/faq.html#x1-320003.9
             with open(self.awk_script_filename, 'w') as script_file:
                 logger.info("Writing: " + self.awk_script_filename)
@@ -167,10 +167,14 @@ class ImageWriter:
         plt.close()
 
     def write(self, detector):
-        import matplotlib
-        matplotlib.use('Agg')
-        import matplotlib.pyplot as plt
-        from matplotlib import colors
+        try:
+            import matplotlib
+            matplotlib.use('Agg')
+            import matplotlib.pyplot as plt
+            from matplotlib import colors
+        except ImportError:
+            logger.error("Matplotlib not installed, output won't be generated")
+            return
 
         # skip plotting 0-D and 3-D data
         if detector.dimension in (0, 3):

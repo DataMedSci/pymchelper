@@ -37,17 +37,17 @@ An example plot with logarithmic scale on Y axis::
 
     convertmc image --many "*.bdo" --log y
 
-.. figure:: ex_cyl_logy.png
+.. figure:: ex_zmsh_logy.png
     :scale: 80 %
-    :alt: sample file ex_cyl_logy.png generated with image converter
+    :alt: sample file ex_zmsh_logy.png generated with image converter
 
 Scale can be also change on two axis at once::
 
     convertmc image --many "*.bdo" --log x y
 
-.. figure:: ex_cyl_logxy.png
+.. figure:: ex_zmsh_logxy.png
     :scale: 80 %
-    :alt: sample file ex_cyl_logxy.png generated with image converter
+    :alt: sample file ex_zmsh_logxy.png generated with image converter
 
 
 An example plot with 2-D heatmap and logarithmic scale on Z (color) axis::

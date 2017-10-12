@@ -343,7 +343,8 @@ def merge_list(input_file_list,
         first.error /= np.sqrt(first.counter)  # np.sqrt() always returns np.float64
 
     if output_file is None:
-        output_file = input_file_list[0][:-4]
+        # strip file extension from the first item on input file list
+        output_file = os.path.splitext(input_file_list[0])[0]
 
     output_dir = os.path.dirname(output_file)
     if output_dir:  # output directory has been found, output_file is not a plain file in current dir
