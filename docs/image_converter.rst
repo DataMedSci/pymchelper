@@ -12,7 +12,7 @@ Conversion is done using standard command::
 
     convertmc image --many "*.bdo"
 
-After converting data with 1-D scoring grid, following plot can be generated
+After converting data with 1-D scoring grid, following plot can be generated:
 
 .. figure:: ex_cyl.png
     :scale: 80 %
