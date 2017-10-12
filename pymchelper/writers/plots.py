@@ -228,11 +228,11 @@ class ImageWriter:
 
             x_axis_number = detector.axis_data(0, plotting_order=True).number
             x_axis_name = detector.units[6 + x_axis_number]
-            plt.xlabel(self._make_label(detector.units[x_axis_number], x_axis_name))
+            x_axis_label = self._make_label(detector.units[x_axis_number], x_axis_name)
 
             y_axis_number = detector.axis_data(1, plotting_order=True).number
             y_axis_name = detector.units[6 + y_axis_number]
-            plt.ylabel(self._make_label(detector.units[y_axis_number], y_axis_name))
+            y_axis_label = self._make_label(detector.units[y_axis_number], y_axis_name)
 
             # configure logscale on Z axis
             if PlotAxis.z in self.axis_with_logscale:
@@ -240,6 +240,14 @@ class ImageWriter:
             else:
                 norm = colors.Normalize(vmin=data.min(), vmax=data.max())
 
+            # in case differential scorer was used there is a case when axis has to be swapped
+            # this happens when X-constant, Y-differential, Z-scored
+            if hasattr(detector, 'dif_axis') and detector.dif_axis == 1:
+                x_axis_label, y_axis_label = y_axis_label, x_axis_label
+                xlist, ylist = ylist, xlist
+
+            plt.xlabel(x_axis_label)
+            plt.ylabel(y_axis_label)
             plt.pcolormesh(xlist, ylist, zlist, cmap=self.colormap, norm=norm)
 
             cbar = plt.colorbar()
