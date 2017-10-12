@@ -1,9 +1,17 @@
 import os
 import logging
+from enum import IntEnum
 
 import numpy as np
+from matplotlib import colors
 
 logger = logging.getLogger(__name__)
+
+
+class PlotAxis(IntEnum):
+    x = 1
+    y = 2
+    z = 3
 
 
 class PlotDataWriter:
@@ -124,6 +132,7 @@ class ImageWriter:
         if not self.plot_filename.endswith(".png"):
             self.plot_filename += ".png"
         self.colormap = options.colormap
+        self.axis_with_logscale = {PlotAxis[name] for name in options.log}
 
     default_colormap = 'gnuplot2'
 
@@ -136,7 +145,18 @@ class ImageWriter:
         matplotlib.use('Agg')
         import matplotlib.pyplot as plt
 
-        plt.pcolormesh(xlist, ylist, elist.clip(0.0), cmap=self.colormap)
+        # configure logscale
+        if PlotAxis.x in self.axis_with_logscale:
+            plt.xscale('symlog')
+        if PlotAxis.y in self.axis_with_logscale:
+            plt.yscale('symlog')
+
+        if PlotAxis.z in self.axis_with_logscale:
+            norm = colors.LogNorm(vmin=elist[elist > 0].min(), vmax=elist.max())
+        else:
+            norm = colors.Normalize(vmin=elist.min(), vmax=elist.max())
+
+        plt.pcolormesh(xlist, ylist, elist.clip(0.0), cmap=self.colormap, norm=norm)
         y_axis_number = detector.axis_data(1, plotting_order=True).number
         y_axis_name = detector.units[6 + y_axis_number]
         plt.ylabel(self._make_label(detector.units[y_axis_number], y_axis_name))
@@ -172,6 +192,13 @@ class ImageWriter:
         plt.xlabel(self._make_label(detector.units[x_axis_number], x_axis_name))
         xlist = list(detector.axis_values(0, plotting_order=True))  # make list of values from generator
 
+        # configure logscale on X and Y axis
+        if PlotAxis.x in self.axis_with_logscale:
+            plt.xscale('symlog')
+
+        if PlotAxis.y in self.axis_with_logscale:
+            plt.yscale('symlog')
+
         # 1-D plotting
         if detector.dimension == 1:
 
@@ -179,7 +206,7 @@ class ImageWriter:
             if np.any(detector.error):
                 plt.fill_between(xlist,
                                  (data - error).clip(0.0),
-                                 (data + error).clip(0.0, 1.05 * (detector.v.max())),
+                                 (data + error).clip(0.0, 1.05 * data.max()),
                                  alpha=0.2, edgecolor='#CC4F1B', facecolor='#FF9848', antialiased=True)
             plt.ylabel(self._make_label(detector.units[4], detector.title))
             plt.plot(xlist, data)
@@ -194,11 +221,6 @@ class ImageWriter:
             ylist = np.asarray(ylist).reshape(shape_tuple)
             zlist = data.reshape(shape_tuple)
 
-            # add error plot if error data present
-            if np.any(detector.error):
-                elist = error.reshape(shape_tuple)
-                self._save_2d_error_plot(detector, xlist, ylist, elist)
-
             x_axis_number = detector.axis_data(0, plotting_order=True).number
             x_axis_name = detector.units[6 + x_axis_number]
             plt.xlabel(self._make_label(detector.units[x_axis_number], x_axis_name))
@@ -207,8 +229,21 @@ class ImageWriter:
             y_axis_name = detector.units[6 + y_axis_number]
             plt.ylabel(self._make_label(detector.units[y_axis_number], y_axis_name))
 
-            plt.pcolormesh(xlist, ylist, zlist, cmap=self.colormap)
+            # configure logscale on Z axis
+            if PlotAxis.z in self.axis_with_logscale:
+                norm = colors.LogNorm(vmin=data[data > 0].min(), vmax=data.max())
+            else:
+                norm = colors.Normalize(vmin=data.min(), vmax=data.max())
+
+            plt.pcolormesh(xlist, ylist, zlist, cmap=self.colormap, norm=norm)
+
             cbar = plt.colorbar()
             cbar.set_label(detector.units[4], rotation=270, verticalalignment='bottom')
+
         plt.savefig(self.plot_filename)
         plt.close()
+
+        # add 2-D error plot if error data present
+        if detector.dimension == 2 and np.any(detector.error):
+            elist = error.reshape(shape_tuple)
+            self._save_2d_error_plot(detector, xlist, ylist, elist)

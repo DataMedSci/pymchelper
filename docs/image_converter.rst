@@ -14,19 +14,25 @@ Conversion is done using standard command::
 
 After converting data with 1-D scoring grid, following plot can be generated
 
-.. figure:: ex_cyl.txt.png
+.. figure:: ex_cyl.png
     :scale: 80 %
-    :alt: sample file ex_cyl.txt.png generated with image converter
+    :alt: sample file ex_cyl.png generated with image converter
 
 Data containing 2-D scoring grid are visualised as heatmap with color denoting scored value.
 
-.. figure:: ex_yzmsh.txt.png
+.. figure:: ex_yzmsh.png
     :scale: 80 %
-    :alt: sample file ex_yzmsh.txt.png generated with image converter
+    :alt: sample file ex_yzmsh.png generated with image converter
 
 
 Options
 -------
+
+Logarithmic scale
+^^^^^^^^^^^^^^^^^
+
+User can also set logscale on one or more axis in the plots using `--log` option.
+
 
 Colormap
 ^^^^^^^^
@@ -37,6 +43,6 @@ An example plot obtained with other colormap (`Grays`) can be obtained with foll
 
     convertmc image --many "*.bdo" --colormap Greys
 
-.. figure:: ex_yzmsh2.txt.png
+.. figure:: ex_yzmsh2.png
     :scale: 80 %
-    :alt: sample file ex_yzmsh2.txt.png generated with image converter
+    :alt: sample file ex_yzmsh2.png generated with image converter
