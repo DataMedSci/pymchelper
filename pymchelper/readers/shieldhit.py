@@ -391,15 +391,28 @@ class _SHBinaryReader0p6:
             # differential scoring data replacement
             if hasattr(detector, 'dif_min') and hasattr(detector, 'dif_max') and hasattr(detector, 'dif_n'):
                 if detector.nz == 1:
+                    # max two axis (X or Y) filled with scored value, Z axis empty
+                    # we can put differential quantity as Z axis
                     detector.nz = detector.dif_n
                     detector.zmin = detector.dif_min
                     detector.zmax = detector.dif_max
                     detector.dif_axis = 2
                 elif detector.ny == 1:
+                    # Z axis filled with scored value (X axis maybe also), Y axis empty
+                    # we can put differential quantity as Y axis
                     detector.ny = detector.dif_n
                     detector.ymin = detector.dif_min
                     detector.ymax = detector.dif_max
                     detector.dif_axis = 1
+                    # due to the fact that the data in BDO file is arranged differently
+                    # than assumed here, we need to do some reshaping
+                    #   - in the raw BDO file loop goes first over scored value, then over differential quantity
+                    #   - here we have (X-scored, Y-differential, Z-scored), so we need to reshape data from file
+                    # such reshaping is not needed in other cases - there diff. value goes always as last axis
+                    # first we get the reshaped view (3-D matrix)
+                    reshaped_view = detector.data.reshape((detector.nx, detector.ny, detector.nz))
+                    # reshape the data structure by swapping data and differential columns
+                    detector.data = np.transpose(reshaped_view, axes=(0, 2, 1)).flatten()
                 elif detector.nx == 1:
                     detector.nx = detector.dif_n
                     detector.xmin = detector.dif_min
