@@ -20,15 +20,18 @@ As expected we will get :bash:`proton0001_fort.dat` file. Now a gnuplot script c
 
     convertmc gnuplot proton0001_fort.21
 
-We will get a script :bash:`proton0001_forttxt.plot` with following content::
+We will get a script :bash:`proton0001_fort.plot` with following content::
 
     set term png
     set output "proton0001_fort.png"
-    set title ""
+    set title "dose_z_1"
+    set xlabel ""
+    set ylabel "dose_z_1 []"
+    max(x,y) = (x > y) ? x : y
     plot  './proton0001_fort.dat' u 1:2 w l lt 1 lw 2 lc -1 title 'mean value'
 
 After running :bash:`gnuplot proton0001_fort.plot` we will get a plot
 
-.. figure:: proton0001_forttxt.png
+.. figure:: proton0001_fort.png
     :scale: 80 %
-    :alt: sample file proton0001_forttxt.png generated with gnuplot converter
+    :alt: sample file proton0001_fort.png generated with gnuplot converter

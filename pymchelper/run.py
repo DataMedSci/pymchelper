@@ -7,7 +7,7 @@ import sys
 import argparse
 
 from pymchelper.detector import merge_list, merge_many, Converters, ErrorEstimate
-from pymchelper.writers.plots import ImageWriter
+from pymchelper.writers.plots import ImageWriter, PlotAxis
 
 logger = logging.getLogger(__name__)
 
@@ -67,6 +67,13 @@ def main(args=sys.argv[1:]):
 
     parser_image = subparsers.add_parser(Converters.image.name, help='converts to PNG images')
     add_default_options(parser_image)
+    axis_names = [x.name for x in PlotAxis]
+    parser_image.add_argument('-l', '--log',
+                              help='set logscale for plot axis',
+                              nargs='+',
+                              choices=axis_names,
+                              default={},
+                              type=str)
     parser_image.add_argument("--colormap",
                               help='image color map, see http://matplotlib.org/users/colormaps.html '
                                    'for list of possible options (default: ' + ImageWriter.default_colormap + ')',
@@ -120,7 +127,8 @@ def main(args=sys.argv[1:]):
         if parsed_args.output is not None:
             output_dir = os.path.dirname(parsed_args.output)
             if output_dir and not os.path.exists(output_dir):
-                raise IOError("Directory {}/ does not exist.".format(output_dir))
+                logger.warning("Directory {:s} does not exist, creating.".format(output_dir))
+                os.makedirs(output_dir)
 
         # TODO add filename discovery
         files = sorted(glob.glob(parsed_args.input))
