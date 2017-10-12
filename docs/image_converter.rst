@@ -33,16 +33,41 @@ Logarithmic scale
 
 User can also set logscale on one or more axis in the plots using `--log` option.
 
+An example plot with logarithmic scale on Y axis::
+
+    convertmc image --many "*.bdo" --log y
+
+.. figure:: ex_cyl_logxy.png
+    :scale: 80 %
+    :alt: sample file ex_cyl_logx.png generated with image converter
+
+Scale can be also change on two axis at once::
+
+    convertmc image --many "*.bdo" --log x y
+
+.. figure:: ex_cyl_logxy.png
+    :scale: 80 %
+    :alt: sample file ex_cyl_logxy.png generated with image converter
+
+
+An example plot with 2-D heatmap and logarithmic scale on Z (color) axis::
+
+    convertmc image --many "*.bdo" --log z
+
+.. figure:: ex_yzmsh_logz.png
+    :scale: 80 %
+    :alt: sample file ex_yzmsh_logz.png generated with image converter
+
 
 Colormap
 ^^^^^^^^
 
 When generating heatmaps it is also possible to specify colormap. List of available colormaps is
 available here: http://matplotlib.org/users/colormaps.html. By default colormap called `gnuplot2` is used.
-An example plot obtained with other colormap (`Grays`) can be obtained with following command::
+An example plot obtained with other colormap (`Greys`) can be obtained with following command::
 
     convertmc image --many "*.bdo" --colormap Greys
 
-.. figure:: ex_yzmsh2.png
+.. figure:: ex_yzmsh_grey.png
     :scale: 80 %
-    :alt: sample file ex_yzmsh2.png generated with image converter
+    :alt: sample file ex_yzmsh_grey.png generated with image converter

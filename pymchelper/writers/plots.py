@@ -3,7 +3,6 @@ import logging
 from enum import IntEnum
 
 import numpy as np
-from matplotlib import colors
 
 logger = logging.getLogger(__name__)
 
@@ -144,8 +143,9 @@ class ImageWriter:
         import matplotlib
         matplotlib.use('Agg')
         import matplotlib.pyplot as plt
+        from matplotlib import colors
 
-        # configure logscale
+        # configure logscale on X and Y axis (both for positive and negative numbers)
         if PlotAxis.x in self.axis_with_logscale:
             plt.xscale('symlog')
         if PlotAxis.y in self.axis_with_logscale:
@@ -170,6 +170,7 @@ class ImageWriter:
         import matplotlib
         matplotlib.use('Agg')
         import matplotlib.pyplot as plt
+        from matplotlib import colors
 
         # skip plotting 0-D and 3-D data
         if detector.dimension in (0, 3):
@@ -192,7 +193,7 @@ class ImageWriter:
         plt.xlabel(self._make_label(detector.units[x_axis_number], x_axis_name))
         xlist = list(detector.axis_values(0, plotting_order=True))  # make list of values from generator
 
-        # configure logscale on X and Y axis
+        # configure logscale on X and Y axis (both for positive and negative numbers)
         if PlotAxis.x in self.axis_with_logscale:
             plt.xscale('symlog')
 
