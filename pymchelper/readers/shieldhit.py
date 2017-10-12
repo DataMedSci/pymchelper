@@ -388,24 +388,6 @@ class _SHBinaryReader0p6:
                 if pl_id == SHBDOTagID.det_data:
                     detector.data = np.asarray(pl)
 
-            # differential scoring data replacement
-            if hasattr(detector, 'dif_min') and hasattr(detector, 'dif_max') and hasattr(detector, 'dif_n'):
-                if detector.nz == 1:
-                    detector.nz = detector.dif_n
-                    detector.zmin = detector.dif_min
-                    detector.zmax = detector.dif_max
-                    detector.dif_axis = 2
-                elif detector.ny == 1:
-                    detector.ny = detector.dif_n
-                    detector.ymin = detector.dif_min
-                    detector.ymax = detector.dif_max
-                    detector.dif_axis = 1
-                elif detector.nx == 1:
-                    detector.nx = detector.dif_n
-                    detector.xmin = detector.dif_min
-                    detector.xmax = detector.dif_max
-                    detector.dif_axis = 0
-
             # TODO: would be better to not overwrite x,y,z and make proper case for ZONE scoring later.
             if detector.geotyp in (SHGeoType.zone, SHGeoType.dzone):
                 # special case for zone scoring, x min and max will be zone numbers
