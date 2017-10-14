@@ -27,7 +27,7 @@ class Inspector:
                     from hipsterplot import plot
                     print(75 * "*")
                     print("Data scatter plot")
-                    plot(detector.data)
+                    plot(detector.data_raw)
                 except ImportError:
                     logger.warning("Detailed summary requires installation of hipsterplot package")
             # print data histogram if possible
@@ -35,6 +35,6 @@ class Inspector:
                 from bashplotlib.histogram import plot_hist
                 print(75 * "*")
                 print("Data histogram")
-                plot_hist(detector.data, bincount=70, xlab=False, showSummary=True)
+                plot_hist(detector.data_raw, bincount=70, xlab=False, showSummary=True)
             except ImportError:
                 logger.warning("Detailed summary requires installation of bashplotlib package")
