@@ -7,6 +7,7 @@ import logging
 
 from pymchelper import run
 from pymchelper.detector import Detector
+from pymchelper.io import fromfile
 from pymchelper.shieldhit.detector.detector_type import SHDetType
 from pymchelper.shieldhit.detector.estimator_type import SHGeoType
 from pymchelper.shieldhit.particle import SHParticleType
@@ -117,16 +118,15 @@ class TestSHGenerated(unittest.TestCase):
             self.assertGreater(len(bdo_files), 0)
             for infile in bdo_files:
                 logger.info("Input file: " + infile)
-                det = Detector()
-                det.read(infile)
+                det = fromfile(infile)
                 if det.geotyp == SHGeoType.zone:
-                    self.assertIn(det.nx, (1, 2, 3))
-                    self.assertIn(det.ny, (1, 2, 3))
-                    self.assertIn(det.nz, (1, 2, 3))
+                    self.assertIn(det.x.n, (1, 2, 3))
+                    self.assertIn(det.y.n, (1, 2, 3))
+                    self.assertIn(det.z.n, (1, 2, 3))
                 else:
-                    self.assertIn(det.nx, (1, 10))
-                    self.assertIn(det.ny, (1, 10))
-                    self.assertIn(det.nz, (1, 10))
+                    self.assertIn(det.x.n, (1, 10))
+                    self.assertIn(det.y.n, (1, 10))
+                    self.assertIn(det.z.n, (1, 10))
                 self.assertEqual(det.geotyp, SHGeoType[est])
                 self.assertNotEqual(det.dettyp, SHDetType.unknown)
                 self.assertIn(det.particle, (SHParticleType.all, SHParticleType.proton, SHParticleType.neutron))
@@ -138,9 +138,9 @@ class TestSHGenerated(unittest.TestCase):
                     self.assertIn(det.dettyp,
                                   (SHDetType.energy, SHDetType.fluence, SHDetType.avg_energy, SHDetType.avg_beta))
                 if det.geotyp not in (SHGeoType.zone, SHGeoType.plane):
-                    self.assertGreater(det.xmax, det.xmin)
-                    self.assertGreater(det.ymax, det.ymin)
-                    self.assertGreater(det.zmax, det.zmin)
+                    self.assertGreater(det.x.max_val, det.x.min_val)
+                    self.assertGreater(det.y.max_val, det.y.min_val)
+                    self.assertGreater(det.z.max_val, det.z.min_val)
                 self.assertEqual(det.counter, 1)
                 if det.geotyp == SHGeoType.geomap:
                     self.assertEqual(det.nstat, 1)

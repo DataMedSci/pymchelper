@@ -125,17 +125,25 @@ def main(args=sys.argv[1:]):
     if parsed_args.command is not None:
         set_logger_level(parsed_args)
 
-        # check if output directory exists
-        if parsed_args.output is not None:
-            output_dir = os.path.dirname(parsed_args.output)
-            if output_dir and not os.path.exists(output_dir):
-                logger.warning("Directory {:s} does not exist, creating.".format(output_dir))
-                os.makedirs(output_dir)
-
         # TODO add filename discovery
         files = sorted(glob.glob(parsed_args.input))
         if not files:
             logger.error('File does not exist: ' + parsed_args.input)
+
+        # check if output should be interpreted as a filename
+        if not parsed_args.many and len(files) == 1:
+            output_file = parsed_args.output
+        else:
+            output_file = None
+
+        if parsed_args.output is not None and output_file is None:
+            output_dir = parsed_args.output
+            # check if output directory exists
+            if output_dir and not os.path.exists(output_dir):
+                logger.warning("Directory {:s} does not exist, creating.".format(output_dir))
+                os.makedirs(output_dir)
+        else:
+            output_dir = '.'
 
         parsed_args.error = ErrorEstimate[parsed_args.error]
 
@@ -151,8 +159,8 @@ def main(args=sys.argv[1:]):
                                jobs=parsed_args.jobs, verbose=parsed_args.verbose)
         else:
             convertfromlist(parsed_args.input,
-                            error=parsed_args.error, nan=parsed_args.nan,
-                            outputdir=output_dir, converter_name=parsed_args.command, options=parsed_args)
+                            error=parsed_args.error, nan=parsed_args.nan, outputdir=output_dir,
+                            converter_name=parsed_args.command, options=parsed_args, outputfile=output_file)
 
     return 0
 

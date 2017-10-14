@@ -401,14 +401,14 @@ class _SHBinaryReader0p6:
             yname, yunit = _get_mesh_units(detector, 1)
             zname, zunit = _get_mesh_units(detector, 2)
 
-            detector.unit, detector.name = _get_detector_unit(detector.dettyp, detector.geotyp)
-
             detector.x = MeshAxis(n=nx, min_val=xmin, max_val=xmax,
                                   name=xname, unit=xunit, binning=MeshAxis.BinningType.linear)
             detector.y = MeshAxis(n=ny, min_val=ymin, max_val=ymax,
                                   name=yname, unit=yunit, binning=MeshAxis.BinningType.linear)
             detector.z = MeshAxis(n=nz, min_val=zmin, max_val=zmax,
                                   name=zname, unit=zunit, binning=MeshAxis.BinningType.linear)
+
+            detector.unit, detector.name = _get_detector_unit(detector.dettyp, detector.geotyp)
 
             logger.debug("Done reading bdo file.")
             logger.debug("Detector data : " + str(detector.data))
@@ -570,7 +570,7 @@ class _SHBinaryReader0p1:
         else:
             # special case for zone scoring, x min and max will be zone numbers
             xmin = det_attribs.starting_zone
-            xmax = detector.xmin + detector.nx - 1
+            xmax = xmin + nx - 1
             ymin = 0.0
             ymax = 0.0
             zmin = 0.0
@@ -589,13 +589,15 @@ class _SHBinaryReader0p1:
 
         detector.dettyp = SHDetType(det_attribs.det_type)
 
+        detector.unit, detector.name = _get_detector_unit(detector.dettyp, detector.geotyp)
+
     # TODO: we need an alternative list, in case things have been scaled with nscale, since then things
     # are not "/particle" anymore.
     def read_payload(self, detector, nscale=1):
         logger.info("Reading data: " + self.filename)
 
         if detector.geotyp == SHGeoType.unknown or detector.dettyp == SHDetType.unknown:
-            detector.data = []
+            logger.error("Unknown geotyp or dettyp")
             return
 
         # next read the data:
@@ -604,7 +606,7 @@ class _SHBinaryReader0p1:
                                  ('bin2', '<f8', detector.rec_size)])
         record = np.fromfile(self.filename, record_dtype, count=-1)
         # BIN(*)  : a large array holding results. Accessed using pointers.
-        detector.data = record['bin2'][:][0]
+        detector.data_raw = np.array(record['bin2'][:][0])
 
         _get_mesh_units(detector, nscale)
         detector.counter = 1

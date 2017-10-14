@@ -57,19 +57,19 @@ class TxtWriter:
         result = ""
         if det.geotyp in (SHGeoType.plane, SHGeoType.dplane, ):
             result += "#   PLANE point(X,Y,Z)         :"
-            result += "{:s}".format(format_d(10, 3, det.xmin))
-            result += "{:s}".format(format_d(10, 3, det.ymin))
-            result += "{:s}\n".format(format_d(10, 3, det.zmin))
+            result += "{:s}".format(format_d(10, 3, det.x.min_val))
+            result += "{:s}".format(format_d(10, 3, det.y.min_val))
+            result += "{:s}\n".format(format_d(10, 3, det.z.min_val))
             result += "#   PLANE normal vect(Vx,Vy,Vz):"
-            result += "{:s}".format(format_d(10, 3, det.xmax))
-            result += "{:s}".format(format_d(10, 3, det.ymax))
-            result += "{:s}\n".format(format_d(10, 3, det.zmax))
+            result += "{:s}".format(format_d(10, 3, det.x.max_val))
+            result += "{:s}".format(format_d(10, 3, det.y.max_val))
+            result += "{:s}\n".format(format_d(10, 3, det.z.max_val))
         elif det.geotyp in (SHGeoType.zone, SHGeoType.dzone, ):
-            result += "#   ZONE START:{:6d} ZONE END:{:6d}\n".format(int(det.xmin), int(det.xmax))
+            result += "#   ZONE START:{:6d} ZONE END:{:6d}\n".format(int(det.x.min_val), int(det.x.max_val))
         else:
-            result += "#   {:s} BIN:{:6d} {:s} BIN:{:6d} {:s} BIN:{:6d}\n".format(self.ax, det.nx,
-                                                                                  self.ay, det.ny,
-                                                                                  self.az, det.nz)
+            result += "#   {:s} BIN:{:6d} {:s} BIN:{:6d} {:s} BIN:{:6d}\n".format(self.ax, det.x.n,
+                                                                                  self.ay, det.y.n,
+                                                                                  self.az, det.z.n)
         return result
 
     @staticmethod
@@ -91,12 +91,12 @@ class TxtWriter:
         header = ""
         # number of bins in each dimensions
         if det.geotyp not in (SHGeoType.plane, SHGeoType.dplane, SHGeoType.zone, SHGeoType.dzone):
-            header += "#   {:s} START:{:s}".format(self.ax, format_d(10, 3, det.xmin))
-            header += " {:s} START:{:s}".format(self.ay, format_d(10, 3, det.ymin))
-            header += " {:s} START:{:s}\n".format(self.az, format_d(10, 3, det.zmin))
-            header += "#   {:s} END  :{:s}".format(self.ax, format_d(10, 3, det.xmax))
-            header += " {:s} END  :{:s}".format(self.ay, format_d(10, 3, det.ymax))
-            header += " {:s} END  :{:s}\n".format(self.az, format_d(10, 3, det.zmax))
+            header += "#   {:s} START:{:s}".format(self.ax, format_d(10, 3, det.x.min_val))
+            header += " {:s} START:{:s}".format(self.ay, format_d(10, 3, det.y.min_val))
+            header += " {:s} START:{:s}\n".format(self.az, format_d(10, 3, det.z.min_val))
+            header += "#   {:s} END  :{:s}".format(self.ax, format_d(10, 3, det.x.max_val))
+            header += " {:s} END  :{:s}".format(self.ay, format_d(10, 3, det.y.max_val))
+            header += " {:s} END  :{:s}\n".format(self.az, format_d(10, 3, det.z.max_val))
 
         # number of primaries
         header += "#   PRIMARIES:" + format_d(10, 3, det.nstat) + "\n"
@@ -131,7 +131,8 @@ class TxtWriter:
             det_error = det.error
             if det_error is None:
                 det_error = [None] * len(det.data)
-            for x, y, z, v, e in zip(det.x, det.y, det.z, det.data, det_error):
+            xlist, ylist, zlist = np.meshgrid(det.x.data, det.y.data, det.z.data, indexing='ij')
+            for x, y, z, v, e in zip(xlist.ravel(), ylist.ravel(), zlist.ravel(), det.data.ravel(), det_error.ravel()):
                 if det.geotyp in (SHGeoType.zone, SHGeoType.dzone):
                     x = 0.0
                 else:

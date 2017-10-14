@@ -13,6 +13,7 @@ import numpy as np
 import pymchelper.utils.pld2sobp
 from pymchelper import run
 from pymchelper.detector import Detector
+from pymchelper.io import fromfile
 
 logger = logging.getLogger(__name__)
 
@@ -83,6 +84,7 @@ class TestTrip2Ddd(unittest.TestCase):
 
 
 def unpack_sparse_file(filename):
+        logger.info("Unpacking sparse file {:s}".format(filename))
         npzfile = np.load(filename)
         data = npzfile['data']
         indices = npzfile['indices']
@@ -125,21 +127,19 @@ class TestSparseConverter(unittest.TestCase):
                 self.assertTrue(os.path.exists(pymchelper_output))
 
                 # read the original file into a Detector structure
-                sh12a_data = Detector()
-                sh12a_data.read(inputfile_rel_path)
-                self.assertTrue(np.any(sh12a_data.data))
+                original_mtx = fromfile(inputfile_rel_path)
+                self.assertTrue(np.any(original_mtx.data))
 
                 # unpack saved sparse matrix
                 reconstructed_sparse_mtx = unpack_sparse_file(pymchelper_output)
 
                 # check if unpacked shape is correct
-                self.assertEqual(reconstructed_sparse_mtx.shape[0], sh12a_data.nx)
-                self.assertEqual(reconstructed_sparse_mtx.shape[1], sh12a_data.ny)
-                self.assertEqual(reconstructed_sparse_mtx.shape[2], sh12a_data.nz)
+                self.assertEqual(reconstructed_sparse_mtx.shape[0], original_mtx.x.n)
+                self.assertEqual(reconstructed_sparse_mtx.shape[1], original_mtx.y.n)
+                self.assertEqual(reconstructed_sparse_mtx.shape[2], original_mtx.z.n)
 
                 # check if unpacked data is correct
-                original_mtx = sh12a_data.data.reshape(reconstructed_sparse_mtx.shape)
-                self.assertTrue(np.array_equal(original_mtx, reconstructed_sparse_mtx))
+                self.assertTrue(np.array_equal(original_mtx.data, reconstructed_sparse_mtx))
 
                 logger.info("Removing directory {:s}".format(working_dir))
                 shutil.rmtree(working_dir)

@@ -41,7 +41,7 @@ def fromfilelist(input_file_list, error, nan):
             __M2 = np.zeros_like(result.data_raw)
 
         # loop over second and next files, if present
-        for filename, counter in enumerate(input_file_list[1:]):
+        for counter, filename in enumerate(input_file_list[1:]):
             next_det = fromfile(filename)
 
             # Running variance algorithm based on algorithm by B. P. Welford,
@@ -49,14 +49,14 @@ def fromfilelist(input_file_list, error, nan):
             # Can be found here: http://www.johndcook.com/blog/standard_deviation/
             # and https://en.wikipedia.org/wiki/Algorithms_for_calculating_variance#Online_algorithm
             delta = next_det.data_raw - result.data_raw                    # delta = x - mean
-            result.data_raw += delta / counter                          # mean += delta / n
+            result.data_raw += delta / (counter + 1)                       # mean += delta / n
             if error != ErrorEstimate.none:
                 __M2 += delta * (next_det.data_raw - result.data_raw)  # M2 += delta * (x - mean)
 
                 # unbiased sample variance is stored in `__M2 / (counter - 1)`
                 # unbiased sample standard deviation in classical algorithm is calculated as (sqrt(1/(n-1)sum(x-<x>)**2)
                 # here it is calculated as square root of unbiased sample variance:
-                result.error_raw = np.sqrt(__M2 / (counter - 1))
+                result.error_raw = np.sqrt(__M2 / (counter + 1))
 
         # if user requested standard error then we calculate it as:
         # S = stderr = stddev / sqrt(N), or in other words,
@@ -101,13 +101,15 @@ def frompattern(pattern, error, nan, jobs=-1, verbose=0):
         return result
 
 
-def convertfromlist(filelist, error, nan, outputdir, converter_name, options):
+def convertfromlist(filelist, error, nan, outputdir, converter_name, options, outputfile=None):
     detector = fromfilelist(filelist, error, nan)
-    if outputdir is None:
-        output_file = detector.corename
+    if outputfile is not None:
+        output_path = outputfile
+    elif outputdir is None:
+        output_path = detector.corename
     else:
-        output_file = os.path.join(outputdir, detector.corename)
-    tofile(detector, output_file, converter_name, options)
+        output_path = os.path.join(outputdir, detector.corename)
+    tofile(detector, output_path, converter_name, options)
     return None
 
 

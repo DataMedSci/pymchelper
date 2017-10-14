@@ -22,31 +22,45 @@ class PlotDataWriter:
     def write(self, detector):
         logger.info("Writing: " + self.filename)
 
-        data = np.array(detector.data)
-        error = np.array(detector.error)
+        data_raw = detector.data_raw
+        error_raw = detector.error_raw
 
-        # change units for LET from MeV/cm to keV/um
+        # change units for LET from MeV/cm to keV/um if necessary
+        # a copy of data table is made here
         from pymchelper.shieldhit.detector.detector_type import SHDetType
         if detector.dettyp in (SHDetType.dlet, SHDetType.dletg, SHDetType.tlet, SHDetType.tletg):
-            data *= np.float64(0.1)  # 1 MeV / cm = 0.1 keV / um
-            if np.any(error):
-                error *= np.float64(0.1)  # 1 MeV / cm = 0.1 keV / um
+            data_raw = data_raw * np.float64(0.1)  # 1 MeV / cm = 0.1 keV / um
+            if not np.all(np.isnan(error_raw)) and np.any(error_raw):
+                error_raw = error_raw * np.float64(0.1)  # 1 MeV / cm = 0.1 keV / um
 
-        axis_data_column = [list(detector.axis_values(i, plotting_order=True)) for i in range(detector.dimension)]
+        # special case for 0-dim data
+        if detector.dimension == 0:
+            # save two numbers to the file
+            if not np.all(np.isnan(error_raw)) and np.any(error_raw):
+                np.savetxt(self.filename, [[detector.data_raw, detector.error_raw]], fmt="%g %g", delimiter=' ')
+            else:  # save one number to the file
+                np.savetxt(self.filename, [detector.data_raw], fmt="%g", delimiter=' ')
+        else:
+            # each axis may have different number of points, this is what we store here:
+            axis_data_columns_1d = [detector.plot_axis(i).data for i in range(detector.dimension)]
 
-        fmt = "%g" + " %g" * detector.dimension
-        data_to_save = axis_data_column + [data.ravel()]  # ravel needed to change arrays like [[1]] to [1]
+            # now we calculate running index for each axis
+            axis_data_columns_long = [np.meshgrid(*axis_data_columns_1d, indexing='ij')[i].ravel()
+                                      for i in range(len(axis_data_columns_1d))]
 
-        # if error information is present save it as additional column
-        if detector.error is not None:
-            fmt += " %g"
-            data_to_save += [error.ravel()]
+            fmt = "%g" + " %g" * detector.dimension
+            data_to_save = axis_data_columns_long + [data_raw]
 
-        # transpose from rows to columns
-        data_columns = np.transpose(data_to_save)
+            # if error information is present save it as additional column
+            if not np.all(np.isnan(error_raw)) and np.any(error_raw):
+                fmt += " %g"
+                data_to_save += [error_raw]
 
-        # save space-delimited text file
-        np.savetxt(self.filename, data_columns, fmt=fmt, delimiter=' ')
+            # transpose from rows to columns
+            data_columns = np.transpose(data_to_save)
+
+            # save space-delimited text file
+            np.savetxt(self.filename, data_columns, fmt=fmt, delimiter=' ')
 
 
 class GnuplotDataWriter:
