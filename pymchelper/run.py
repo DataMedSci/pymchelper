@@ -145,10 +145,14 @@ def main(args=sys.argv[1:]):
             return 1
 
         if parsed_args.many:
-            convertfrompattern(parsed_args.input, output_dir, converter_name=parsed_args.command, options=parsed_args, error=parsed_args.error, nan=parsed_args.nan,
+            convertfrompattern(parsed_args.input, output_dir,
+                               converter_name=parsed_args.command, options=parsed_args,
+                               error=parsed_args.error, nan=parsed_args.nan,
                                jobs=parsed_args.jobs, verbose=parsed_args.verbose)
         else:
-            convertfromlist(parsed_args.input, error=parsed_args.error, nan=parsed_args.nan, outputdir=output_dir, converter_name=parsed_args.command, options=parsed_args)
+            convertfromlist(parsed_args.input,
+                            error=parsed_args.error, nan=parsed_args.nan,
+                            outputdir=output_dir, converter_name=parsed_args.command, options=parsed_args)
 
     return 0
 

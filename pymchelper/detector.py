@@ -124,5 +124,3 @@ def average_with_nan(detector_list, error_estimate=ErrorEstimate.stderr):
     else:
         result.error_raw = np.zeros_like(result.data_raw)
     return result
-
-

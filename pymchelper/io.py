@@ -96,8 +96,9 @@ def frompattern(pattern, error, nan, jobs=-1, verbose=0):
     except (ImportError, SyntaxError):
         # single-cpu implementation, in case joblib library fails (i.e. Python 3.2)
         logger.info("Single CPU processing")
-        for core_name, group_with_same_core in core_names_dict.items():
-            result = _get_detector(core_name, group_with_same_core)
+        result = [_get_detector(core_name, filelist)
+                  for core_name, filelist in core_names_dict.items()]
+        return result
 
 
 def convertfromlist(filelist, error, nan, outputdir, converter_name, options):
@@ -110,7 +111,8 @@ def convertfromlist(filelist, error, nan, outputdir, converter_name, options):
     return None
 
 
-def convertfrompattern(pattern, outputdir, converter_name, options, error=ErrorEstimate.stderr, nan=True, jobs=-1, verbose=0):
+def convertfrompattern(pattern, outputdir, converter_name, options,
+                       error=ErrorEstimate.stderr, nan=True, jobs=-1, verbose=0):
     list_of_matching_files = glob(pattern)
 
     core_names_dict = group_input_files(list_of_matching_files)
@@ -123,7 +125,7 @@ def convertfrompattern(pattern, outputdir, converter_name, options, error=ErrorE
         # options.verbose count the number of `-v` switches provided by user
         # joblib Parallel class expects the verbosity as a larger number (i.e. multiple of 10)
         worker = Parallel(n_jobs=jobs, verbose=verbose * 10)
-        result = worker(
+        worker(
             delayed(convertfromlist)(filelist, error, nan, outputdir, converter_name, options)
             for core_name, filelist in core_names_dict.items()
         )

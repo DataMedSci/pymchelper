@@ -189,8 +189,8 @@ class ImageWriter:
         from pymchelper.shieldhit.detector.detector_type import SHDetType
         if detector.dettyp in (SHDetType.dlet, SHDetType.dletg, SHDetType.tlet, SHDetType.tletg):
             data_raw = data_raw * np.float64(0.1)  # 1 MeV / cm = 0.1 keV / um
-            if np.any(error_raw):
-                error = error_raw * np.float64(0.1)  # 1 MeV / cm = 0.1 keV / um
+            if not np.all(np.isnan(error_raw)) and np.any(error_raw):
+                error_raw = error_raw * np.float64(0.1)  # 1 MeV / cm = 0.1 keV / um
 
         logger.info("Writing: " + self.plot_filename)
 

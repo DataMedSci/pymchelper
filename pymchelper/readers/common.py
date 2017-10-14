@@ -23,9 +23,9 @@ class Readers(IntEnum):
     @classmethod
     def _readers_mapping(cls):
         return {
-            cls.fluka_bin : FlukaBinaryReader,
-            cls.shieldhit_bin : SHBinaryReader,
-            cls.shieldhit_txt : SHTextReader
+            cls.fluka_bin: FlukaBinaryReader,
+            cls.shieldhit_bin: SHBinaryReader,
+            cls.shieldhit_txt: SHTextReader
         }
 
     @classmethod
