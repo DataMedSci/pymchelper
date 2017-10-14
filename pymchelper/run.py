@@ -6,7 +6,9 @@ import sys
 
 import argparse
 
-from pymchelper.detector import merge_list, merge_many, Converters, ErrorEstimate
+from pymchelper.detector import ErrorEstimate
+from pymchelper.io import convertfrompattern, convertfromlist
+from pymchelper.writers.common import Converters
 from pymchelper.writers.plots import ImageWriter, PlotAxis
 
 logger = logging.getLogger(__name__)
@@ -143,9 +145,10 @@ def main(args=sys.argv[1:]):
             return 1
 
         if parsed_args.many:
-            merge_many(files, parsed_args.output, parsed_args, parsed_args.jobs)
+            convertfrompattern(parsed_args.input, output_dir, converter_name=parsed_args.command, options=parsed_args, error=parsed_args.error, nan=parsed_args.nan,
+                               jobs=parsed_args.jobs, verbose=parsed_args.verbose)
         else:
-            merge_list(files, parsed_args.output, parsed_args)
+            convertfromlist(parsed_args.input, error=parsed_args.error, nan=parsed_args.nan, outputdir=output_dir, converter_name=parsed_args.command, options=parsed_args)
 
     return 0
 

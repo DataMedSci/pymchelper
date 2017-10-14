@@ -139,7 +139,7 @@ class ImageWriter:
     def _make_label(unit, name):
         return name + " " + "[" + unit + "]"
 
-    def _save_2d_error_plot(self, detector, xlist, ylist, elist):
+    def _save_2d_error_plot(self, detector, xlist, ylist, elist, x_axis_label, y_axis_label, z_axis_label):
         import matplotlib
         matplotlib.use('Agg')
         import matplotlib.pyplot as plt
@@ -156,12 +156,13 @@ class ImageWriter:
         else:
             norm = colors.Normalize(vmin=elist.min(), vmax=elist.max())
 
-        plt.pcolormesh(xlist, ylist, elist.clip(0.0), cmap=self.colormap, norm=norm)
-        y_axis_number = detector.axis_data(1, plotting_order=True).number
-        y_axis_name = detector.units[6 + y_axis_number]
-        plt.ylabel(self._make_label(detector.units[y_axis_number], y_axis_name))
+        plt.xlabel(x_axis_label)
+        plt.ylabel(y_axis_label)
         cbar = plt.colorbar()
-        cbar.set_label(detector.units[4], rotation=270, verticalalignment='bottom')
+        cbar.set_label(z_axis_label, rotation=270, verticalalignment='bottom')
+
+        plt.pcolormesh(xlist, ylist, elist.clip(0.0), cmap=self.colormap, norm=norm)
+
         base_name, _ = os.path.splitext(self.plot_filename)
         plt.savefig(base_name + "_error.png")
         plt.close()
@@ -180,22 +181,22 @@ class ImageWriter:
         if detector.dimension in (0, 3):
             return
 
-        data = np.array(detector.data)
-        error = np.array(detector.error)
+        data_raw = detector.data_raw
+        error_raw = detector.error_raw
 
-        # change units for LET from MeV/cm to keV/um
+        # change units for LET from MeV/cm to keV/um if necessary
+        # a copy of datatable is made here
         from pymchelper.shieldhit.detector.detector_type import SHDetType
         if detector.dettyp in (SHDetType.dlet, SHDetType.dletg, SHDetType.tlet, SHDetType.tletg):
-            data *= np.float64(0.1)  # 1 MeV / cm = 0.1 keV / um
-            if np.any(error):
-                error *= np.float64(0.1)  # 1 MeV / cm = 0.1 keV / um
+            data_raw = data_raw * np.float64(0.1)  # 1 MeV / cm = 0.1 keV / um
+            if np.any(error_raw):
+                error = error_raw * np.float64(0.1)  # 1 MeV / cm = 0.1 keV / um
 
         logger.info("Writing: " + self.plot_filename)
 
-        x_axis_number = detector.axis_data(0, plotting_order=True).number
-        x_axis_name = detector.units[6 + x_axis_number]
-        plt.xlabel(self._make_label(detector.units[x_axis_number], x_axis_name))
-        xlist = list(detector.axis_values(0, plotting_order=True))  # make list of values from generator
+        plot_x_axis = detector.plot_axis(0)
+
+        plt.xlabel(self._make_label(plot_x_axis.unit, plot_x_axis.name))
 
         # configure logscale on X and Y axis (both for positive and negative numbers)
         if PlotAxis.x in self.axis_with_logscale:
@@ -209,36 +210,26 @@ class ImageWriter:
 
             # add optional error area
             if np.any(detector.error):
-                plt.fill_between(xlist,
-                                 (data - error).clip(0.0),
-                                 (data + error).clip(0.0, 1.05 * data.max()),
+                plt.fill_between(plot_x_axis.data,
+                                 (data_raw - error_raw).clip(0.0),
+                                 (data_raw + error_raw).clip(0.0, 1.05 * data_raw.max()),
                                  alpha=0.2, edgecolor='#CC4F1B', facecolor='#FF9848', antialiased=True)
-            plt.ylabel(self._make_label(detector.units[4], detector.title))
-            plt.plot(xlist, data)
+            plt.ylabel(self._make_label(detector.unit, detector.name))
+            plt.plot(plot_x_axis.data, data_raw)
         elif detector.dimension == 2:
-            ylist = list(detector.axis_values(1, plotting_order=True))   # make list of values from generator
+            plot_y_axis = detector.plot_axis(1)
 
-            xn = detector.axis_data(0, plotting_order=True).n
-            yn = detector.axis_data(1, plotting_order=True).n
+            xlist, ylist = np.meshgrid(plot_x_axis.data, plot_y_axis.data)
 
-            shape_tuple = (yn, xn)
-            xlist = np.asarray(xlist).reshape(shape_tuple)
-            ylist = np.asarray(ylist).reshape(shape_tuple)
-            zlist = data.reshape(shape_tuple)
-
-            x_axis_number = detector.axis_data(0, plotting_order=True).number
-            x_axis_name = detector.units[6 + x_axis_number]
-            x_axis_label = self._make_label(detector.units[x_axis_number], x_axis_name)
-
-            y_axis_number = detector.axis_data(1, plotting_order=True).number
-            y_axis_name = detector.units[6 + y_axis_number]
-            y_axis_label = self._make_label(detector.units[y_axis_number], y_axis_name)
+            x_axis_label = self._make_label(plot_x_axis.unit, plot_x_axis.name)
+            y_axis_label = self._make_label(plot_y_axis.unit, plot_y_axis.name)
+            z_axis_label = self._make_label(detector.unit, detector.name)
 
             # configure logscale on Z axis
             if PlotAxis.z in self.axis_with_logscale:
-                norm = colors.LogNorm(vmin=data[data > 0].min(), vmax=data.max())
+                norm = colors.LogNorm(vmin=data_raw[data_raw > 0].min(), vmax=data_raw.max())
             else:
-                norm = colors.Normalize(vmin=data.min(), vmax=data.max())
+                norm = colors.Normalize(vmin=data_raw.min(), vmax=data_raw.max())
 
             # in case differential scorer was used there is a case when axis has to be swapped
             # this happens when X-constant, Y-differential, Z-scored
@@ -248,15 +239,18 @@ class ImageWriter:
 
             plt.xlabel(x_axis_label)
             plt.ylabel(y_axis_label)
+
+            shape_tuple = (plot_y_axis.n, plot_x_axis.n)
+            zlist = data_raw.reshape(shape_tuple)
             plt.pcolormesh(xlist, ylist, zlist, cmap=self.colormap, norm=norm)
 
             cbar = plt.colorbar()
-            cbar.set_label(detector.units[4], rotation=270, verticalalignment='bottom')
+            cbar.set_label(z_axis_label, rotation=270, verticalalignment='bottom')
 
         plt.savefig(self.plot_filename)
         plt.close()
 
         # add 2-D error plot if error data present
-        if detector.dimension == 2 and np.any(detector.error):
-            elist = error.reshape(shape_tuple)
-            self._save_2d_error_plot(detector, xlist, ylist, elist)
+        if detector.dimension == 2 and not np.all(np.isnan(error_raw)) and np.any(error_raw):
+            elist = error_raw.reshape(shape_tuple)
+            self._save_2d_error_plot(detector, xlist, ylist, elist, x_axis_label, y_axis_label, z_axis_label)
