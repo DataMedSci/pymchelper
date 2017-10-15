@@ -106,17 +106,17 @@ splot \"<awk -f addblanks.awk '{data_filename}'\" u 1:2:3 with pm3d
 
     def write(self, detector):
         # skip plotting 0-D and 3-D data
-        if detector.dimension in (0, 3):
+        if detector.dimension in {0, 3}:
             return
 
         # set labels
-        x_axis_number = detector.axis_data(0, plotting_order=True).number
-        xlabel = detector.units[x_axis_number]
+        plot_x_axis = detector.plot_axis(0)
+        xlabel = ImageWriter._make_label(plot_x_axis.unit, plot_x_axis.name)
         if detector.dimension == 1:
-            ylabel = ImageWriter._make_label(detector.units[4], detector.title)
+            ylabel = ImageWriter._make_label(detector.unit, detector.name)
         elif detector.dimension == 2:
-            y_axis_number = detector.axis_data(1, plotting_order=True).number
-            ylabel = detector.units[y_axis_number]
+            plot_y_axis = detector.plot_axis(1)
+            ylabel = ImageWriter._make_label(plot_y_axis.unit, plot_y_axis.name)
 
             # for 2-D plots write additional awk script to convert data
             # as described in gnuplot faq: http://www.gnuplot.info/faq/faq.html#x1-320003.9
@@ -128,7 +128,7 @@ splot \"<awk -f addblanks.awk '{data_filename}'\" u 1:2:3 with pm3d
         with open(self.script_filename, 'w') as script_file:
             logger.info("Writing: " + self.script_filename)
             script_file.write(self._header.format(plot_filename=self.plot_filename, xlabel=xlabel, ylabel=ylabel,
-                                                  title=detector.title))
+                                                  title=detector.name))
             plt_cmd = self._plotting_command[detector.dimension]
 
             # add error plot if error data present

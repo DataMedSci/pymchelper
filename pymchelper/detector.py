@@ -26,7 +26,7 @@ class MeshAxis(namedtuple('MeshAxis', 'n min_val max_val name unit binning')):
             last_bin_mid = self.max_val - bin_width / 2.0
             return np.linspace(start=first_bin_mid, stop=last_bin_mid, num=self.n)
         elif self.binning == self.BinningType.logarithmic:
-            q = (self.max_val / self.min_val)**(1.0 / self.n) # an = a0 q^n
+            q = (self.max_val / self.min_val)**(1.0 / self.n)  # an = a0 q^n
             first_bin_mid = self.min_val * q**0.5  # sqrt(a0 a1) = sqrt( a0 a0 q) = a0 sqrt(q)
             last_bin_mid = self.max_val / q**0.5  # sqrt(an a(n-1)) = sqrt( an an/q) = an / sqrt(q)
             return np.geomspace(start=first_bin_mid, stop=last_bin_mid, num=self.n)
