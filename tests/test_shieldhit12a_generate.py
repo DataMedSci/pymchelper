@@ -6,7 +6,6 @@ import shutil
 import logging
 
 from pymchelper import run
-from pymchelper.detector import Detector
 from pymchelper.io import fromfile
 from pymchelper.shieldhit.detector.detector_type import SHDetType
 from pymchelper.shieldhit.detector.estimator_type import SHGeoType

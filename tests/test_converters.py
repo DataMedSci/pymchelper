@@ -12,7 +12,6 @@ import numpy as np
 
 import pymchelper.utils.pld2sobp
 from pymchelper import run
-from pymchelper.detector import Detector
 from pymchelper.io import fromfile
 
 logger = logging.getLogger(__name__)
