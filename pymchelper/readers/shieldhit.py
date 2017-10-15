@@ -99,6 +99,38 @@ def _get_detector_unit(detector_type, geotyp):
     return _detector_units.get(detector_type, ("(nil)", "(nil)"))
 
 
+def _postprocess(detector, nscale):
+    """normalize result if we need that."""
+    if detector.dettyp not in (SHDetType.dlet, SHDetType.tlet,
+                               SHDetType.letflu,
+                               SHDetType.dletg, SHDetType.tletg,
+                               SHDetType.avg_energy, SHDetType.avg_beta,
+                               SHDetType.material,
+                               SHDetType.q):
+        if detector.nstat != 0:  # geotyp = GEOMAP will have 0 projectiles simulated
+            detector.data_raw /= np.float64(detector.nstat)
+            detector.error_raw /= np.float64(detector.nstat)
+
+    if nscale != 1:
+        # scale with number of particles given by user
+        detector.data_raw *= np.float64(nscale)
+        detector.error_raw *= np.float64(nscale)
+
+        # rescaling with particle number means also unit change for some detectors
+        # from per particle to Grey - this is why we override detector type
+        if detector.dettyp == SHDetType.dose:
+            detector.dettyp = SHDetType.dose_gy
+        if detector.dettyp == SHDetType.alanine:
+            detector.dettyp = SHDetType.alanine_gy
+        # for the same reason as above we change units
+        if detector.dettyp in (SHDetType.dose_gy, SHDetType.alanine_gy):
+            # 1 megaelectron volt / gram = 1.60217662 x 10-10 Gy
+            MeV_g = np.float64(1.60217662e-10)
+            detector.data_raw *= MeV_g
+            detector.error_raw *= MeV_g
+            detector.unit, detector.name = _get_detector_unit(detector.dettyp, detector.geotyp)
+
+
 class SHBDOTagID(IntEnum):
     """ List of Tag ID numbers. Must be synchronized with sh_detect.h in SH12A.
     """
@@ -212,24 +244,7 @@ class SHBinaryReader:
             reader = _SHBinaryReader0p1(self.filename)
             reader.read_header(detector)
             reader.read_payload(detector)
-        if nscale != 1:
-            # scale with number of particles given by user
-            detector.data_raw *= np.float64(nscale)
-            detector.error_raw *= np.float64(nscale)
-
-            # rescaling with particle number means also unit change for some detectors
-            # from per particle to Grey - this is why we override detector type
-            if detector.dettyp == SHDetType.dose:
-                detector.dettyp = SHDetType.dose_gy
-            if detector.dettyp == SHDetType.alanine:
-                detector.dettyp = SHDetType.alanine_gy
-            # for the same reason as above we change units
-            if detector.dettyp in (SHDetType.dose_gy, SHDetType.alanine_gy):
-                # 1 megaelectron volt / gram = 1.60217662 x 10-10 Gy
-                MeV_g = np.float64(1.60217662e-10)
-                detector.data_raw *= MeV_g
-                detector.error_raw *= MeV_g
-                detector.unit, detector.name = _get_detector_unit(detector.dettyp, detector.geotyp)
+        _postprocess(detector, nscale)
 
 
 class _SHBinaryReader0p6:

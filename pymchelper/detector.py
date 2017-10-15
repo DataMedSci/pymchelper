@@ -54,6 +54,7 @@ class Detector:
         self.error_raw = np.array([float("NaN")])
         self.name = ""
         self.unit = ""
+        self.nstat = 0  # number of histories simulated
         self.counter = 0  # number of files read
         self.corename = ""  # common core for paths of contributing files
         self.error_type = ErrorEstimate.none
