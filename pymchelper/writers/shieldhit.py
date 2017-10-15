@@ -128,11 +128,11 @@ class TxtWriter:
             logger.info("Writing: " + self.filename)
             fout.write(header)
 
-            det_error = det.error
-            if det_error is None:
+            det_error = det.error_raw.ravel()
+            if np.all(np.isnan(det.error_raw)):
                 det_error = [None] * len(det.data)
             xlist, ylist, zlist = np.meshgrid(det.x.data, det.y.data, det.z.data, indexing='ij')
-            for x, y, z, v, e in zip(xlist.ravel(), ylist.ravel(), zlist.ravel(), det.data.ravel(), det_error.ravel()):
+            for x, y, z, v, e in zip(xlist.ravel(), ylist.ravel(), zlist.ravel(), det.data.ravel(), det_error):
                 if det.geotyp in (SHGeoType.zone, SHGeoType.dzone):
                     x = 0.0
                 else:
