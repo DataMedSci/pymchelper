@@ -24,12 +24,14 @@ def _get_mesh_units(detector, axis):
         SHGeoType.voxscore: ("cm", "cm", "cm"),
         SHGeoType.geomap: ("cm", "cm", "cm"),
         SHGeoType.plane: ("cm", "cm", "cm"),
+        SHGeoType.dplane: ("cm", "cm", "cm")
     }
     _default_units = ("(nil)", "(nil)", "(nil)")
 
     unit = _geotyp_units.get(detector.geotyp, _default_units)[axis]
 
-    if detector.geotyp in {SHGeoType.msh, SHGeoType.dmsh, SHGeoType.voxscore, SHGeoType.geomap}:
+    if detector.geotyp in {SHGeoType.msh, SHGeoType.dmsh, SHGeoType.voxscore, SHGeoType.geomap,
+                           SHGeoType.plane, SHGeoType.dplane}:
         name = ("Position (X)", "Position (Y)", "Position (Z)")[axis]
     elif detector.geotyp in {SHGeoType.cyl, SHGeoType.dcyl}:
         name = ("Radius (R)", "Angle (PHI)", "Position (Z)")[axis]
@@ -41,13 +43,13 @@ def _get_mesh_units(detector, axis):
         if detector.dif_type == 1:
             unit, name = _get_detector_unit(SHDetType.energy, detector.geotyp)
         elif detector.dif_type == 2:
-            unit, name = _get_detector_unit(SHDetType.let, detector.geotyp)[0]
+            unit, name = _get_detector_unit(SHDetType.let, detector.geotyp)
         elif detector.dif_type == 3:
-            unit, name = _get_detector_unit(SHDetType.angle, detector.geotyp)[0]
+            unit, name = _get_detector_unit(SHDetType.angle, detector.geotyp)
         else:
             unit, name = "", ""
 
-    return name, unit
+    return unit, name
 
 
 def _get_detector_unit(detector_type, geotyp):
@@ -254,7 +256,7 @@ class _SHBinaryReader0p6:
     def __init__(self, filename):
         self.filename = filename
 
-    def read(self, detector, nscale=1):
+    def read(self, detector):
         logger.info("Reading: " + self.filename)
         with open(self.filename, "rb") as f:
             d1 = np.dtype([('magic', 'S6'),
@@ -371,6 +373,25 @@ class _SHBinaryReader0p6:
                 if pl_id == SHBDOTagID.det_data:
                     detector.data_raw = np.asarray(pl)
 
+            # TODO: would be better to not overwrite x,y,z and make proper case for ZONE scoring later.
+            if detector.geotyp in {SHGeoType.zone, SHGeoType.dzone}:
+                # special case for zone scoring, x min and max will be zone numbers
+                xmin = detector.zone_start
+                xmax = xmin + nx - 1
+                ymin = 0.0
+                ymax = 0.0
+                zmin = 0.0
+                zmax = 0.0
+            elif detector.geotyp in {SHGeoType.plane, SHGeoType.dplane}:
+                # special case for plane scoring, according to documentation we have:
+                #  xmin, ymin, zmin = Sx, Sy, Sz (point on the plane)
+                #  xmax, ymax, zmax = nx, ny, nz (normal vector)
+                # to avoid situation where i.e. xmax < xmin (corresponds to nx < Sx)
+                # we store only point on the plane
+                xmax = xmin
+                ymax = ymin
+                zmax = zmin
+
             # # differential scoring data replacement
             if hasattr(detector, 'dif_min') and hasattr(detector, 'dif_max') and hasattr(detector, 'dif_n'):
                 if nz == 1:
@@ -401,20 +422,10 @@ class _SHBinaryReader0p6:
                     xmin = detector.dif_min
                     xmax = detector.dif_max
                     detector.dif_axis = 0
-            #
-            # # TODO: would be better to not overwrite x,y,z and make proper case for ZONE scoring later.
-            if detector.geotyp in (SHGeoType.zone, SHGeoType.dzone):
-                # special case for zone scoring, x min and max will be zone numbers
-                xmin = detector.zone_start
-                xmax = xmin + nx - 1
-                ymin = 0.0
-                ymax = 0.0
-                zmin = 0.0
-                zmax = 0.0
 
-            xname, xunit = _get_mesh_units(detector, 0)
-            yname, yunit = _get_mesh_units(detector, 1)
-            zname, zunit = _get_mesh_units(detector, 2)
+            xunit, xname = _get_mesh_units(detector, 0)
+            yunit, yname = _get_mesh_units(detector, 1)
+            zunit, zname = _get_mesh_units(detector, 2)
 
             detector.x = MeshAxis(n=nx, min_val=xmin, max_val=xmax,
                                   name=xname, unit=xunit, binning=MeshAxis.BinningType.linear)
@@ -574,7 +585,7 @@ class _SHBinaryReader0p1:
             detector.geotyp = SHGeoType.unknown
         detector.nstat = header['nstat'][0]
 
-        if detector.geotyp not in (SHGeoType.zone, SHGeoType.dzone):
+        if detector.geotyp not in {SHGeoType.zone, SHGeoType.dzone}:
             xmin = header['det'][0][0]
             ymin = header['det'][0][1]
             zmin = header['det'][0][2]
@@ -591,9 +602,19 @@ class _SHBinaryReader0p1:
             zmin = 0.0
             zmax = 0.0
 
-        xname, xunit = _get_mesh_units(detector, 0)
-        yname, yunit = _get_mesh_units(detector, 1)
-        zname, zunit = _get_mesh_units(detector, 2)
+        if detector.geotyp in {SHGeoType.plane, SHGeoType.dplane}:
+                # special case for plane scoring, according to documentation we have:
+                #  xmin, ymin, zmin = Sx, Sy, Sz (point on the plane)
+                #  xmax, ymax, zmax = nx, ny, nz (normal vector)
+                # to avoid situation where i.e. xmax < xmin (corresponds to nx < Sx)
+                # we store only point on the plane
+                xmax = xmin
+                ymax = ymin
+                zmax = zmin
+
+        xunit, xname = _get_mesh_units(detector, 0)
+        yunit, yname = _get_mesh_units(detector, 1)
+        zunit, zname = _get_mesh_units(detector, 2)
 
         detector.x = MeshAxis(n=nx, min_val=xmin, max_val=xmax,
                               name=xname, unit=xunit, binning=MeshAxis.BinningType.linear)
@@ -608,7 +629,7 @@ class _SHBinaryReader0p1:
 
     # TODO: we need an alternative list, in case things have been scaled with nscale, since then things
     # are not "/particle" anymore.
-    def read_payload(self, detector, nscale=1):
+    def read_payload(self, detector):
         logger.info("Reading data: " + self.filename)
 
         if detector.geotyp == SHGeoType.unknown or detector.dettyp == SHDetType.unknown:
@@ -622,13 +643,11 @@ class _SHBinaryReader0p1:
         record = np.fromfile(self.filename, record_dtype, count=-1)
         # BIN(*)  : a large array holding results. Accessed using pointers.
         detector.data_raw = np.array(record['bin2'][:][0])
-
-        _get_mesh_units(detector, nscale)
         detector.counter = 1
 
-    def read(self, detector, nscale=1):
+    def read(self, detector):
         self.read_header(detector)
-        self.read_payload(detector, nscale)
+        self.read_payload(detector)
 
 
 class SHTextReader:
