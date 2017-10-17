@@ -388,6 +388,8 @@ class _SHBinaryReader0p6:
                 #  xmax, ymax, zmax = nx, ny, nz (normal vector)
                 # to avoid situation where i.e. xmax < xmin (corresponds to nx < Sx)
                 # we store only point on the plane
+                detector.sx, detector.sy, detector.sz = xmin, ymin, zmin
+                detector.nx, detector.ny, detector.nz = xmax, ymax, zmax
                 xmax = xmin
                 ymax = ymin
                 zmax = zmin

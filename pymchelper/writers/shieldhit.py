@@ -55,16 +55,16 @@ class TxtWriter:
 
         from pymchelper.fortranformatter import format_d
         result = ""
-        if det.geotyp in (SHGeoType.plane, SHGeoType.dplane, ):
+        if det.geotyp in {SHGeoType.plane, SHGeoType.dplane}:
             result += "#   PLANE point(X,Y,Z)         :"
-            result += "{:s}".format(format_d(10, 3, det.x.min_val))
-            result += "{:s}".format(format_d(10, 3, det.y.min_val))
-            result += "{:s}\n".format(format_d(10, 3, det.z.min_val))
+            result += "{:s}".format(format_d(10, 3, det.sx))
+            result += "{:s}".format(format_d(10, 3, det.sy))
+            result += "{:s}\n".format(format_d(10, 3, det.sz))
             result += "#   PLANE normal vect(Vx,Vy,Vz):"
-            result += "{:s}".format(format_d(10, 3, det.x.max_val))
-            result += "{:s}".format(format_d(10, 3, det.y.max_val))
-            result += "{:s}\n".format(format_d(10, 3, det.z.max_val))
-        elif det.geotyp in (SHGeoType.zone, SHGeoType.dzone, ):
+            result += "{:s}".format(format_d(10, 3, det.nx))
+            result += "{:s}".format(format_d(10, 3, det.ny))
+            result += "{:s}\n".format(format_d(10, 3, det.nz))
+        elif det.geotyp in {SHGeoType.zone, SHGeoType.dzone}:
             result += "#   ZONE START:{:6d} ZONE END:{:6d}\n".format(int(det.x.min_val), int(det.x.max_val))
         else:
             result += "#   {:s} BIN:{:6d} {:s} BIN:{:6d} {:s} BIN:{:6d}\n".format(self.ax, det.x.n,
