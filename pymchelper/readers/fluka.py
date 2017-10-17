@@ -60,7 +60,7 @@ class FlukaBinaryReader:
         # TODO read detector type
         detector.dettyp = SHDetType.unknown
 
-        detector.data = np.array(fdata)
+        detector.data_raw = np.array(fdata)
         if nscale != 1:
             detector.data *= nscale
             # 1 gigaelectron volt / gram = 1.60217662 x 10-7 Gy
