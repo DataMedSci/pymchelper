@@ -12,7 +12,7 @@ logger = logging.getLogger(__name__)
 
 
 def fromfile(filename):
-    """Read a detector data from a binary file"""
+    """Read a detector data from a binary file ```filename```"""
 
     reader = guess_reader(filename)
     detector = Detector()
@@ -24,6 +24,13 @@ def fromfile(filename):
 
 
 def fromfilelist(input_file_list, error, nan):
+    """
+
+    :param input_file_list:
+    :param error:
+    :param nan:
+    :return:
+    """
     if not isinstance(input_file_list, list):  # probably a string instead of list
         input_file_list = [input_file_list]
 
@@ -73,6 +80,15 @@ def fromfilelist(input_file_list, error, nan):
 
 
 def frompattern(pattern, error, nan, jobs=-1, verbose=0):
+    """
+
+    :param pattern:
+    :param error:
+    :param nan:
+    :param jobs:
+    :param verbose:
+    :return:
+    """
     list_of_matching_files = glob(pattern)
 
     core_names_dict = group_input_files(list_of_matching_files)
@@ -102,6 +118,17 @@ def frompattern(pattern, error, nan, jobs=-1, verbose=0):
 
 
 def convertfromlist(filelist, error, nan, outputdir, converter_name, options, outputfile=None):
+    """
+
+    :param filelist:
+    :param error:
+    :param nan:
+    :param outputdir:
+    :param converter_name:
+    :param options:
+    :param outputfile:
+    :return:
+    """
     detector = fromfilelist(filelist, error, nan)
     if outputfile is not None:
         output_path = outputfile
@@ -115,6 +142,18 @@ def convertfromlist(filelist, error, nan, outputdir, converter_name, options, ou
 
 def convertfrompattern(pattern, outputdir, converter_name, options,
                        error=ErrorEstimate.stderr, nan=True, jobs=-1, verbose=0):
+    """
+
+    :param pattern:
+    :param outputdir:
+    :param converter_name:
+    :param options:
+    :param error:
+    :param nan:
+    :param jobs:
+    :param verbose:
+    :return:
+    """
     list_of_matching_files = glob(pattern)
 
     core_names_dict = group_input_files(list_of_matching_files)
@@ -139,7 +178,14 @@ def convertfrompattern(pattern, outputdir, converter_name, options,
 
 
 def tofile(detector, filename, converter_name, options):
-    """Read a detector data from a binary file"""
+    """
+    Save a detector data to a ``filename`` using converter defined by ``converter_name``
+    :param detector:
+    :param filename:
+    :param converter_name:
+    :param options:
+    :return:
+    """
     writer_cls = Converters.fromname(converter_name)
     writer = writer_cls(filename, options)
     logger.debug("Writing file with corename {:s}".format(filename))

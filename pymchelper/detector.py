@@ -92,7 +92,15 @@ class MeshAxis(namedtuple('MeshAxis', 'n min_val max_val name unit binning')):
             q = (self.max_val / self.min_val)**(1.0 / self.n)  # an = a0 q^n
             first_bin_mid = self.min_val * q**0.5  # geometrical mean sqrt(a0 a1) = sqrt( a0 a0 q) = a0 sqrt(q)
             last_bin_mid = self.max_val / q**0.5  # geometrical mean sqrt(an a(n-1)) = sqrt( an an/q) = an / sqrt(q)
-            return np.geomspace(start=first_bin_mid, stop=last_bin_mid, num=self.n)
+            try:
+                result = np.geomspace(start=first_bin_mid, stop=last_bin_mid, num=self.n)
+            except AttributeError:
+                # Python3.2 require numpy older than 1.2, such versions of numpy doesn't have geomspace function
+                # in such case we calculate geometrical binning manually
+                result = np.exp(np.linspace(start=np.log(first_bin_mid),
+                                            stop=np.log(last_bin_mid),
+                                            num=self.n))
+            return result
         else:
             return None
 

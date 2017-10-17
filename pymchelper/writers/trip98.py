@@ -243,23 +243,21 @@ class TripDddWriter(object):
                         ddd_file.write('{:g} {:g}\n'.format(z_cm, dose))
 
     def _extract_data(self, detector):
-        # 2D arrays of r,z and dose
-        self.r_data_cm_2d = np.array(list(detector.x)).reshape(detector.z.n, detector.x.n)
-        self.z_data_cm_2d = np.array(list(detector.z)).reshape(detector.z.n, detector.x.n)
-        self.dose_data_MeV_g_2d = np.array(detector.data_raw).reshape(detector.z.n, detector.x.n)
+        # 1D arrays of r,z
+        self.r_data_cm_1d = detector.x.data
+        self.z_data_cm_1d = detector.z.data
 
-        self.dose_error_MeV_g_2d = np.array(detector.error_raw).reshape(detector.z.n, detector.x.n)
+        # 2D arrays of r,z, dose and error
+        self.r_data_cm_2d, self.z_data_cm_2d = np.meshgrid(self.r_data_cm_1d, self.z_data_cm_1d)
 
-        # 1D arrays of r,z and dose in the very central bin
-        self.r_data_cm_1d = self.r_data_cm_2d[0]  # middle points of the bins
-        self.z_data_cm_1d = np.asarray(list(detector.z)[0:detector.z.n * detector.x.n:detector.x.n])
+        self.dose_data_MeV_g_2d = detector.data[:, 0, :].T
+        self.dose_error_MeV_g_2d = detector.error[:, 0, :].T
 
-        # np.savez("data", r2d=self.r_data_cm_2d, z2d=self.z_data_cm_2d, d2d=self.dose_data_MeV_g_2d,
-        #          r1d=self.r_data_cm_1d, z1d=self.z_data_cm_1d, e2d=self.dose_error_MeV_g_2d)
-
+        # dose in the very central bin
         bin_depth_z_cm = self.z_data_cm_1d[1] - self.z_data_cm_1d[0]
         r_step_cm = self.r_data_cm_1d[1] - self.r_data_cm_1d[0]
 
+        # Bin volume increases as we move away from beam axis
         # i-th bin volume = dz * pi * (r_i_max^2 - r_i_min^2  )
         #   r_i_max = r_i + dr / 2
         #   r_i_min = r_i - dr / 2
@@ -268,8 +266,8 @@ class TripDddWriter(object):
         bin_volume_data_cm3_1d = 2.0 * np.pi * r_step_cm * self.r_data_cm_1d * bin_depth_z_cm
         # we assume density of 1 g/c3
         density_g_cm3 = 1.0
-        total_bin_mass_g = density_g_cm3 * bin_depth_z_cm * np.pi * (self.r_data_cm_1d[-1] + r_step_cm / 2.0)**2
         energy_in_bin_MeV_2d = self.dose_data_MeV_g_2d * bin_volume_data_cm3_1d * density_g_cm3
+        total_bin_mass_g = density_g_cm3 * bin_depth_z_cm * np.pi * (self.r_data_cm_1d[-1] + r_step_cm / 2.0)**2
         total_energy_at_depth_MeV_1d = np.sum(energy_in_bin_MeV_2d, axis=1)
         self.dose_data_MeV_g_1d = total_energy_at_depth_MeV_1d / total_bin_mass_g
 
@@ -300,8 +298,8 @@ class TripDddWriter(object):
         from matplotlib.colors import LogNorm
 
         prefix = os.path.join(self.outputdir, 'ddd_{:3.1f}MeV_'.format(self.energy_MeV))
-        plt.pcolormesh(
-            z_fitting_cm_2d, r_fitting_cm_2d, dose_fitting_MeV_g2d, norm=LogNorm(), cmap='gnuplot2', label='dose')
+        plt.pcolormesh(z_fitting_cm_2d, r_fitting_cm_2d, dose_fitting_MeV_g2d,
+                       norm=LogNorm(), cmap='gnuplot2', label='dose')
         cbar = plt.colorbar()
         cbar.set_label("dose [MeV/g]", rotation=270, verticalalignment='bottom')
         if z_fitting_cm_1d is not None and np.any(fwhm1_cm):
