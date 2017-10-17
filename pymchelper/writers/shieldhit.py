@@ -133,8 +133,14 @@ class TxtWriter:
                 det_error = [None] * det.data_raw.size
             zlist, ylist, xlist = np.meshgrid(det.z.data, det.y.data, det.x.data, indexing='ij')
             for x, y, z, v, e in zip(xlist.ravel(), ylist.ravel(), zlist.ravel(), det.data.ravel(), det_error):
-                if det.geotyp in (SHGeoType.zone, SHGeoType.dzone):
+                if det.geotyp in {SHGeoType.zone, SHGeoType.dzone}:
                     x = 0.0
+                # dirty hack to be compliant with old bdo2txt and files generated in old (<0.6) BDO format
+                # this hack will be removed at some point together with bdo-style converter
+                elif not hasattr(det, "mc_code_version") and det.geotyp == SHGeoType.plane:
+                    x = (det.sx + det.nx) / 2.0
+                    y = (det.sy + det.ny) / 2.0
+                    z = (det.sz + det.nz) / 2.0
                 else:
                     x = float('nan') if np.isnan(x) else x
                 y = float('nan') if np.isnan(y) else y
