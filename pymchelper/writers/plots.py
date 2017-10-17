@@ -160,6 +160,9 @@ class ImageWriter:
         from matplotlib import colors
 
         # configure logscale on X and Y axis (both for positive and negative numbers)
+
+        fig, ax = plt.subplots(1, 1)
+
         if PlotAxis.x in self.axis_with_logscale:
             plt.xscale('symlog')
         if PlotAxis.y in self.axis_with_logscale:
@@ -172,10 +175,10 @@ class ImageWriter:
 
         plt.xlabel(x_axis_label)
         plt.ylabel(y_axis_label)
-        cbar = plt.colorbar()
-        cbar.set_label(z_axis_label, rotation=270, verticalalignment='bottom')
 
-        plt.pcolormesh(xlist, ylist, elist.clip(0.0), cmap=self.colormap, norm=norm)
+        mesh = plt.pcolormesh(xlist, ylist, elist.clip(0.0), cmap=self.colormap, norm=norm)
+        cbar = fig.colorbar(mesh)
+        cbar.set_label(label=z_axis_label, rotation=270, verticalalignment='bottom')
 
         base_name, _ = os.path.splitext(self.plot_filename)
         plt.savefig(base_name + "_error.png")
