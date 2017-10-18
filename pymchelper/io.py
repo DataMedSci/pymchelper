@@ -64,9 +64,9 @@ def fromfilelist(input_file_list, error, nan):
         # unbiased sample variance is stored in `__M2 / (n - 1)`
         # unbiased sample standard deviation in classical algorithm is calculated as (sqrt(1/(n-1)sum(x-<x>)**2)
         # here it is calculated as square root of unbiased sample variance:
-        n = np.float128(len(input_file_list) - 1)
+        m = np.float(len(input_file_list) - 1)
         if len(input_file_list) > 1 and error != ErrorEstimate.none:
-            result.error_raw = np.sqrt(__M2 / n)
+            result.error_raw = np.sqrt(__M2 / m)
 
         # if user requested standard error then we calculate it as:
         # S = stderr = stddev / sqrt(N), or in other words,
