@@ -17,8 +17,8 @@ class TripCubeWriter:
         # TODO add printing information how to install pytrip if it's missing
         from pytrip import __version__ as _ptversion
 
-        pixel_size_x = (detector.xmax - detector.xmin) / detector.nx
-        pixel_size_z = (detector.zmax - detector.zmin) / detector.nz
+        pixel_size_x = (detector.x.max_val - detector.x.min_val) / detector.x.n
+        pixel_size_z = (detector.z.max_val - detector.z.min_val) / detector.z.n
 
         logging.debug("psx: {:.6f} [cm]".format(pixel_size_x))
         logging.debug("psz: {:.6f} [cm]".format(pixel_size_z))
@@ -35,7 +35,7 @@ class TripCubeWriter:
             cube = dos.DosCube()
             # Warning: PyTRiP cube dimensions are in [mm]
             cube.create_empty_cube(
-                1.0, detector.nx, detector.ny, detector.nz,
+                1.0, detector.x.n, detector.y.n, detector.z.n,
                 pixel_size=pixel_size_x * 10.0,
                 slice_distance=pixel_size_z * 10.0)
 
@@ -47,7 +47,7 @@ class TripCubeWriter:
             cube.num_bytes = 2
             cube.pydata_type = np.int16
 
-            cube.cube = detector.data.reshape(detector.nx, detector.ny, detector.nz)
+            cube.cube = detector.data
 
             if detector.tripdose >= 0.0 and detector.tripntot > 0:
                 cube.cube = (cube.cube * detector.tripntot * 1.602e-10) / detector.tripdose * 1000.0
@@ -68,7 +68,7 @@ class TripCubeWriter:
             cube = let.LETCube()
             # Warning: PyTRiP cube dimensions are in [mm]
             cube.create_empty_cube(
-                1.0, detector.nx, detector.ny, detector.nz,
+                1.0, detector.x.n, detector.y.n, detector.z.n,
                 pixel_size=pixel_size_x * 10.0,
                 slice_distance=pixel_size_z * 10.0)
 
@@ -82,7 +82,7 @@ class TripCubeWriter:
             # then this should not be needed.
             cube.cube = np.ones((cube.dimz, cube.dimy, cube.dimx), dtype=cube.pydata_type)
 
-            cube.cube = detector.data.reshape(detector.nx, detector.ny, detector.nz)
+            cube.cube = detector.data
             cube.cube *= 0.1  # MeV/cm -> keV/um
             # Save proper meta information
 
@@ -243,23 +243,21 @@ class TripDddWriter(object):
                         ddd_file.write('{:g} {:g}\n'.format(z_cm, dose))
 
     def _extract_data(self, detector):
-        # 2D arrays of r,z and dose
-        self.r_data_cm_2d = np.array(list(detector.x)).reshape(detector.nz, detector.nx)
-        self.z_data_cm_2d = np.array(list(detector.z)).reshape(detector.nz, detector.nx)
-        self.dose_data_MeV_g_2d = np.array(detector.v).reshape(detector.nz, detector.nx)
+        # 1D arrays of r,z
+        self.r_data_cm_1d = detector.x.data
+        self.z_data_cm_1d = detector.z.data
 
-        self.dose_error_MeV_g_2d = np.array(detector.error).reshape(detector.nz, detector.nx)
+        # 2D arrays of r,z, dose and error
+        self.r_data_cm_2d, self.z_data_cm_2d = np.meshgrid(self.r_data_cm_1d, self.z_data_cm_1d)
 
-        # 1D arrays of r,z and dose in the very central bin
-        self.r_data_cm_1d = self.r_data_cm_2d[0]  # middle points of the bins
-        self.z_data_cm_1d = np.asarray(list(detector.z)[0:detector.nz * detector.nx:detector.nx])
+        self.dose_data_MeV_g_2d = detector.data[:, 0, :].T
+        self.dose_error_MeV_g_2d = detector.error[:, 0, :].T
 
-        # np.savez("data", r2d=self.r_data_cm_2d, z2d=self.z_data_cm_2d, d2d=self.dose_data_MeV_g_2d,
-        #          r1d=self.r_data_cm_1d, z1d=self.z_data_cm_1d, e2d=self.dose_error_MeV_g_2d)
-
+        # dose in the very central bin
         bin_depth_z_cm = self.z_data_cm_1d[1] - self.z_data_cm_1d[0]
         r_step_cm = self.r_data_cm_1d[1] - self.r_data_cm_1d[0]
 
+        # Bin volume increases as we move away from beam axis
         # i-th bin volume = dz * pi * (r_i_max^2 - r_i_min^2  )
         #   r_i_max = r_i + dr / 2
         #   r_i_min = r_i - dr / 2
@@ -268,8 +266,8 @@ class TripDddWriter(object):
         bin_volume_data_cm3_1d = 2.0 * np.pi * r_step_cm * self.r_data_cm_1d * bin_depth_z_cm
         # we assume density of 1 g/c3
         density_g_cm3 = 1.0
-        total_bin_mass_g = density_g_cm3 * bin_depth_z_cm * np.pi * (self.r_data_cm_1d[-1] + r_step_cm / 2.0)**2
         energy_in_bin_MeV_2d = self.dose_data_MeV_g_2d * bin_volume_data_cm3_1d * density_g_cm3
+        total_bin_mass_g = density_g_cm3 * bin_depth_z_cm * np.pi * (self.r_data_cm_1d[-1] + r_step_cm / 2.0)**2
         total_energy_at_depth_MeV_1d = np.sum(energy_in_bin_MeV_2d, axis=1)
         self.dose_data_MeV_g_1d = total_energy_at_depth_MeV_1d / total_bin_mass_g
 
@@ -300,8 +298,8 @@ class TripDddWriter(object):
         from matplotlib.colors import LogNorm
 
         prefix = os.path.join(self.outputdir, 'ddd_{:3.1f}MeV_'.format(self.energy_MeV))
-        plt.pcolormesh(
-            z_fitting_cm_2d, r_fitting_cm_2d, dose_fitting_MeV_g2d, norm=LogNorm(), cmap='gnuplot2', label='dose')
+        plt.pcolormesh(z_fitting_cm_2d, r_fitting_cm_2d, dose_fitting_MeV_g2d,
+                       norm=LogNorm(), cmap='gnuplot2', label='dose')
         cbar = plt.colorbar()
         cbar.set_label("dose [MeV/g]", rotation=270, verticalalignment='bottom')
         if z_fitting_cm_1d is not None and np.any(fwhm1_cm):

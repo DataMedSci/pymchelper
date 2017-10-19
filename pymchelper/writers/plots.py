@@ -22,31 +22,45 @@ class PlotDataWriter:
     def write(self, detector):
         logger.info("Writing: " + self.filename)
 
-        data = np.array(detector.data)
-        error = np.array(detector.error)
+        data_raw = detector.data_raw
+        error_raw = detector.error_raw
 
-        # change units for LET from MeV/cm to keV/um
+        # change units for LET from MeV/cm to keV/um if necessary
+        # a copy of data table is made here
         from pymchelper.shieldhit.detector.detector_type import SHDetType
         if detector.dettyp in (SHDetType.dlet, SHDetType.dletg, SHDetType.tlet, SHDetType.tletg):
-            data *= np.float64(0.1)  # 1 MeV / cm = 0.1 keV / um
-            if np.any(error):
-                error *= np.float64(0.1)  # 1 MeV / cm = 0.1 keV / um
+            data_raw = data_raw * np.float64(0.1)  # 1 MeV / cm = 0.1 keV / um
+            if not np.all(np.isnan(error_raw)) and np.any(error_raw):
+                error_raw = error_raw * np.float64(0.1)  # 1 MeV / cm = 0.1 keV / um
 
-        axis_data_column = [list(detector.axis_values(i, plotting_order=True)) for i in range(detector.dimension)]
+        # special case for 0-dim data
+        if detector.dimension == 0:
+            # save two numbers to the file
+            if not np.all(np.isnan(error_raw)) and np.any(error_raw):
+                np.savetxt(self.filename, [[detector.data_raw, detector.error_raw]], fmt="%g %g", delimiter=' ')
+            else:  # save one number to the file
+                np.savetxt(self.filename, [detector.data_raw], fmt="%g", delimiter=' ')
+        else:
+            # each axis may have different number of points, this is what we store here:
+            axis_data_columns_1d = [detector.plot_axis(i).data for i in range(detector.dimension)]
 
-        fmt = "%g" + " %g" * detector.dimension
-        data_to_save = axis_data_column + [data.ravel()]  # ravel needed to change arrays like [[1]] to [1]
+            # now we calculate running index for each axis
+            axis_data_columns_long = [np.meshgrid(*axis_data_columns_1d, indexing='ij')[i].ravel()
+                                      for i in range(len(axis_data_columns_1d))]
 
-        # if error information is present save it as additional column
-        if detector.error is not None:
-            fmt += " %g"
-            data_to_save += [error.ravel()]
+            fmt = "%g" + " %g" * detector.dimension
+            data_to_save = axis_data_columns_long + [data_raw]
 
-        # transpose from rows to columns
-        data_columns = np.transpose(data_to_save)
+            # if error information is present save it as additional column
+            if not np.all(np.isnan(error_raw)) and np.any(error_raw):
+                fmt += " %g"
+                data_to_save += [error_raw]
 
-        # save space-delimited text file
-        np.savetxt(self.filename, data_columns, fmt=fmt, delimiter=' ')
+            # transpose from rows to columns
+            data_columns = np.transpose(data_to_save)
+
+            # save space-delimited text file
+            np.savetxt(self.filename, data_columns, fmt=fmt, delimiter=' ')
 
 
 class GnuplotDataWriter:
@@ -92,17 +106,17 @@ splot \"<awk -f addblanks.awk '{data_filename}'\" u 1:2:3 with pm3d
 
     def write(self, detector):
         # skip plotting 0-D and 3-D data
-        if detector.dimension in (0, 3):
+        if detector.dimension in {0, 3}:
             return
 
         # set labels
-        x_axis_number = detector.axis_data(0, plotting_order=True).number
-        xlabel = detector.units[x_axis_number]
+        plot_x_axis = detector.plot_axis(0)
+        xlabel = ImageWriter._make_label(plot_x_axis.unit, plot_x_axis.name)
         if detector.dimension == 1:
-            ylabel = ImageWriter._make_label(detector.units[4], detector.title)
+            ylabel = ImageWriter._make_label(detector.unit, detector.name)
         elif detector.dimension == 2:
-            y_axis_number = detector.axis_data(1, plotting_order=True).number
-            ylabel = detector.units[y_axis_number]
+            plot_y_axis = detector.plot_axis(1)
+            ylabel = ImageWriter._make_label(plot_y_axis.unit, plot_y_axis.name)
 
             # for 2-D plots write additional awk script to convert data
             # as described in gnuplot faq: http://www.gnuplot.info/faq/faq.html#x1-320003.9
@@ -114,7 +128,7 @@ splot \"<awk -f addblanks.awk '{data_filename}'\" u 1:2:3 with pm3d
         with open(self.script_filename, 'w') as script_file:
             logger.info("Writing: " + self.script_filename)
             script_file.write(self._header.format(plot_filename=self.plot_filename, xlabel=xlabel, ylabel=ylabel,
-                                                  title=detector.title))
+                                                  title=detector.name))
             plt_cmd = self._plotting_command[detector.dimension]
 
             # add error plot if error data present
@@ -139,13 +153,16 @@ class ImageWriter:
     def _make_label(unit, name):
         return name + " " + "[" + unit + "]"
 
-    def _save_2d_error_plot(self, detector, xlist, ylist, elist):
+    def _save_2d_error_plot(self, detector, xlist, ylist, elist, x_axis_label, y_axis_label, z_axis_label):
         import matplotlib
         matplotlib.use('Agg')
         import matplotlib.pyplot as plt
         from matplotlib import colors
 
         # configure logscale on X and Y axis (both for positive and negative numbers)
+
+        fig, ax = plt.subplots(1, 1)
+
         if PlotAxis.x in self.axis_with_logscale:
             plt.xscale('symlog')
         if PlotAxis.y in self.axis_with_logscale:
@@ -156,12 +173,13 @@ class ImageWriter:
         else:
             norm = colors.Normalize(vmin=elist.min(), vmax=elist.max())
 
-        plt.pcolormesh(xlist, ylist, elist.clip(0.0), cmap=self.colormap, norm=norm)
-        y_axis_number = detector.axis_data(1, plotting_order=True).number
-        y_axis_name = detector.units[6 + y_axis_number]
-        plt.ylabel(self._make_label(detector.units[y_axis_number], y_axis_name))
-        cbar = plt.colorbar()
-        cbar.set_label(detector.units[4], rotation=270, verticalalignment='bottom')
+        plt.xlabel(x_axis_label)
+        plt.ylabel(y_axis_label)
+
+        mesh = plt.pcolormesh(xlist, ylist, elist.clip(0.0), cmap=self.colormap, norm=norm)
+        cbar = fig.colorbar(mesh)
+        cbar.set_label(label=z_axis_label, rotation=270, verticalalignment='bottom')
+
         base_name, _ = os.path.splitext(self.plot_filename)
         plt.savefig(base_name + "_error.png")
         plt.close()
@@ -180,22 +198,22 @@ class ImageWriter:
         if detector.dimension in (0, 3):
             return
 
-        data = np.array(detector.data)
-        error = np.array(detector.error)
+        data_raw = detector.data_raw
+        error_raw = detector.error_raw
 
-        # change units for LET from MeV/cm to keV/um
+        # change units for LET from MeV/cm to keV/um if necessary
+        # a copy of datatable is made here
         from pymchelper.shieldhit.detector.detector_type import SHDetType
         if detector.dettyp in (SHDetType.dlet, SHDetType.dletg, SHDetType.tlet, SHDetType.tletg):
-            data *= np.float64(0.1)  # 1 MeV / cm = 0.1 keV / um
-            if np.any(error):
-                error *= np.float64(0.1)  # 1 MeV / cm = 0.1 keV / um
+            data_raw = data_raw * np.float64(0.1)  # 1 MeV / cm = 0.1 keV / um
+            if not np.all(np.isnan(error_raw)) and np.any(error_raw):
+                error_raw = error_raw * np.float64(0.1)  # 1 MeV / cm = 0.1 keV / um
 
         logger.info("Writing: " + self.plot_filename)
 
-        x_axis_number = detector.axis_data(0, plotting_order=True).number
-        x_axis_name = detector.units[6 + x_axis_number]
-        plt.xlabel(self._make_label(detector.units[x_axis_number], x_axis_name))
-        xlist = list(detector.axis_values(0, plotting_order=True))  # make list of values from generator
+        plot_x_axis = detector.plot_axis(0)
+
+        plt.xlabel(self._make_label(plot_x_axis.unit, plot_x_axis.name))
 
         # configure logscale on X and Y axis (both for positive and negative numbers)
         if PlotAxis.x in self.axis_with_logscale:
@@ -209,46 +227,47 @@ class ImageWriter:
 
             # add optional error area
             if np.any(detector.error):
-                plt.fill_between(xlist,
-                                 (data - error).clip(0.0),
-                                 (data + error).clip(0.0, 1.05 * data.max()),
+                plt.fill_between(plot_x_axis.data,
+                                 (data_raw - error_raw).clip(0.0),
+                                 (data_raw + error_raw).clip(0.0, 1.05 * data_raw.max()),
                                  alpha=0.2, edgecolor='#CC4F1B', facecolor='#FF9848', antialiased=True)
-            plt.ylabel(self._make_label(detector.units[4], detector.title))
-            plt.plot(xlist, data)
+            plt.ylabel(self._make_label(detector.unit, detector.name))
+            plt.plot(plot_x_axis.data, data_raw)
         elif detector.dimension == 2:
-            ylist = list(detector.axis_values(1, plotting_order=True))   # make list of values from generator
+            plot_y_axis = detector.plot_axis(1)
 
-            xn = detector.axis_data(0, plotting_order=True).n
-            yn = detector.axis_data(1, plotting_order=True).n
+            xlist, ylist = np.meshgrid(plot_x_axis.data, plot_y_axis.data)
 
-            shape_tuple = (yn, xn)
-            xlist = np.asarray(xlist).reshape(shape_tuple)
-            ylist = np.asarray(ylist).reshape(shape_tuple)
-            zlist = data.reshape(shape_tuple)
-
-            x_axis_number = detector.axis_data(0, plotting_order=True).number
-            x_axis_name = detector.units[6 + x_axis_number]
-            plt.xlabel(self._make_label(detector.units[x_axis_number], x_axis_name))
-
-            y_axis_number = detector.axis_data(1, plotting_order=True).number
-            y_axis_name = detector.units[6 + y_axis_number]
-            plt.ylabel(self._make_label(detector.units[y_axis_number], y_axis_name))
+            x_axis_label = self._make_label(plot_x_axis.unit, plot_x_axis.name)
+            y_axis_label = self._make_label(plot_y_axis.unit, plot_y_axis.name)
+            z_axis_label = self._make_label(detector.unit, detector.name)
 
             # configure logscale on Z axis
             if PlotAxis.z in self.axis_with_logscale:
-                norm = colors.LogNorm(vmin=data[data > 0].min(), vmax=data.max())
+                norm = colors.LogNorm(vmin=data_raw[data_raw > 0].min(), vmax=data_raw.max())
             else:
-                norm = colors.Normalize(vmin=data.min(), vmax=data.max())
+                norm = colors.Normalize(vmin=data_raw.min(), vmax=data_raw.max())
 
+            # in case differential scorer was used there is a case when axis has to be swapped
+            # this happens when X-constant, Y-differential, Z-scored
+            if hasattr(detector, 'dif_axis') and detector.dif_axis == 1:
+                x_axis_label, y_axis_label = y_axis_label, x_axis_label
+                xlist, ylist = ylist, xlist
+
+            plt.xlabel(x_axis_label)
+            plt.ylabel(y_axis_label)
+
+            shape_tuple = (plot_y_axis.n, plot_x_axis.n)
+            zlist = data_raw.reshape(shape_tuple)
             plt.pcolormesh(xlist, ylist, zlist, cmap=self.colormap, norm=norm)
 
             cbar = plt.colorbar()
-            cbar.set_label(detector.units[4], rotation=270, verticalalignment='bottom')
+            cbar.set_label(z_axis_label, rotation=270, verticalalignment='bottom')
 
         plt.savefig(self.plot_filename)
         plt.close()
 
         # add 2-D error plot if error data present
-        if detector.dimension == 2 and np.any(detector.error):
-            elist = error.reshape(shape_tuple)
-            self._save_2d_error_plot(detector, xlist, ylist, elist)
+        if detector.dimension == 2 and not np.all(np.isnan(error_raw)) and np.any(error_raw):
+            elist = error_raw.reshape(shape_tuple)
+            self._save_2d_error_plot(detector, xlist, ylist, elist, x_axis_label, y_axis_label, z_axis_label)

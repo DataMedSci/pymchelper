@@ -19,14 +19,8 @@ class SparseWriter:
 
     def write(self, detector):
 
-        # first lets reshape 1-D detector.data array into a 3-D numpy array
-        # some of the nx, ny, nz may be as well ones and the array reduced to 0,1 or 2-D
-        # note that numpy makes here a view and doesn't allocate new memory
-        det_data = detector.data.reshape((
-            detector.nx,
-            detector.ny,
-            detector.nz,
-        ))
+        # detector.data array is a 3-D numpy array
+        # some of its dimensions may be as well ones and the array reduced to 0,1 or 2-D
         all_items = detector.data.size
         logger.info("Number of all items: {:d}".format(all_items))
 
@@ -34,7 +28,7 @@ class SparseWriter:
         # default value of threshold is zero, in this case non-zero values will be selected
         # cut will be 3-D arrays of booleans
         # note that numpy allocates here same amount of memory as for original data
-        thres_cut = np.abs(det_data) > self.threshold
+        thres_cut = np.abs(detector.data) > self.threshold
         passed_items = np.sum(thres_cut)
         logger.info("Number of items passing threshold: {:d}".format(passed_items))
         logger.info("Sparse matrix compression rate: {:g}".format(passed_items / all_items))
@@ -46,10 +40,10 @@ class SparseWriter:
         indices = np.argwhere(thres_cut)
 
         # select data which pass threshold and save it as plain 1-D numpy array
-        data = det_data[thres_cut]
+        filtered_data = detector.data[thres_cut]
 
         # save file to NPZ file format
         np.savez(file=self.filename,
-                 data=data,
+                 data=filtered_data,
                  indices=indices,
-                 shape=det_data.shape)
+                 shape=detector.data.shape)

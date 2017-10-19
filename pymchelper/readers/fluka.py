@@ -2,6 +2,7 @@ import logging
 
 import numpy as np
 
+from pymchelper.detector import MeshAxis
 from pymchelper.shieldhit.detector.detector_type import SHDetType
 from pymchelper.shieldhit.detector.estimator_type import SHGeoType
 from pymchelper.flair.Data import Usrbin, unpackArray
@@ -35,28 +36,34 @@ class FlukaBinaryReader:
         detector.nstat = usr.ncase
 
         # TODO figure out when more detectors are used
-        detector.nx = usr.detector[0].nx
-        detector.ny = usr.detector[0].ny
-        detector.nz = usr.detector[0].nz
+        nx = usr.detector[0].nx
+        ny = usr.detector[0].ny
+        nz = usr.detector[0].nz
 
-        detector.xmin = usr.detector[0].xlow
-        detector.ymin = usr.detector[0].ylow
-        detector.zmin = usr.detector[0].zlow
+        xmin = usr.detector[0].xlow
+        ymin = usr.detector[0].ylow
+        zmin = usr.detector[0].zlow
 
-        detector.xmax = usr.detector[0].xhigh
-        detector.ymax = usr.detector[0].yhigh
-        detector.zmax = usr.detector[0].zhigh
+        xmax = usr.detector[0].xhigh
+        ymax = usr.detector[0].yhigh
+        zmax = usr.detector[0].zhigh
+
+        detector.x = MeshAxis(n=nx, min_val=xmin, max_val=xmax,
+                              name="X", unit="", binning=MeshAxis.BinningType.linear)
+        detector.y = MeshAxis(n=ny, min_val=ymin, max_val=ymax,
+                              name="Y", unit="", binning=MeshAxis.BinningType.linear)
+        detector.z = MeshAxis(n=nz, min_val=zmin, max_val=zmax,
+                              name="Z", unit="", binning=MeshAxis.BinningType.linear)
+
+        detector.unit, detector.name = "", ""
 
         # TODO read detector type
         detector.dettyp = SHDetType.unknown
 
-        detector.data = np.array(fdata)
+        detector.data_raw = np.array(fdata)
         if nscale != 1:
             detector.data *= nscale
             # 1 gigaelectron volt / gram = 1.60217662 x 10-7 Gy
             detector.data *= 1.60217662e-7
-
-        # set units : detector.units are [x,y,z,v,data,detector_title]
-        detector.units = [""] * 9
 
         detector.title = usr.detector[0].name.decode('ascii')

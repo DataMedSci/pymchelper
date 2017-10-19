@@ -33,16 +33,16 @@ class ExcelWriter:
         ws = wb.add_sheet('Data')
 
         # save X axis data
-        for i, x in enumerate(detector.axis_values(0, plotting_order=True)):
+        for i, x in enumerate(detector.plot_axis(0).data):
             ws.write(i, 0, x)
 
         # save Y axis data
-        for i, y in enumerate(detector.data):
+        for i, y in enumerate(detector.data_raw):
             ws.write(i, 1, y)
 
         # save error column (if present)
-        if np.any(detector.error):
-            for i, e in enumerate(detector.error):
+        if np.any(detector.error_raw):
+            for i, e in enumerate(detector.error_raw):
                 ws.write(i, 2, e)
 
         # save file

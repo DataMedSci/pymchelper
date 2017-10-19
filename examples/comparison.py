@@ -1,7 +1,7 @@
 import sys
 import argparse
 
-from pymchelper.detector import Detector
+from pymchelper.io import fromfile
 
 
 def main(args=sys.argv[1:]):
@@ -22,22 +22,20 @@ def main(args=sys.argv[1:]):
     sh12a_file_path = parsed_args.shield
 
     # creating empty Detector object and filling it with data read from Fluka file
-    fluka_data = Detector()
-    fluka_data.read(fluka_file_path)
+    fluka_data = fromfile(fluka_file_path)
 
     # same as above but reading from SHIELD-HIT12A file
-    sh12a_data = Detector()
-    sh12a_data.read(sh12a_file_path)
+    sh12a_data = fromfile(sh12a_file_path)
 
     # printing some output on the screen
-    print("Fluka bins in X: {:d}, Y: {:d}, Z: {:d}".format(fluka_data.nx, fluka_data.ny, fluka_data.nz))
-    print("First bin of fluka data", fluka_data.v[0])
+    print("Fluka bins in X: {:d}, Y: {:d}, Z: {:d}".format(fluka_data.x.n, fluka_data.y.n, fluka_data.z.n))
+    print("First bin of fluka data", fluka_data.data[0, 0, 0])
 
-    print("SHIELD-HIT12A bins in X: {:d}, Y: {:d}, Z: {:d}".format(sh12a_data.nx, sh12a_data.ny, sh12a_data.nz))
-    print("First bin of SHIELD-HIT12A data", sh12a_data.v[0])
+    print("SHIELD-HIT12A bins in X: {:d}, Y: {:d}, Z: {:d}".format(sh12a_data.x.n, sh12a_data.y.n, sh12a_data.z.n))
+    print("First bin of SHIELD-HIT12A data", sh12a_data.data[0, 0, 0])
 
     # comparing file contents
-    print("Difference Fluka - SHIELD-HIT12A", (sh12a_data.v - fluka_data.v)[0:5], "...")
+    print("Difference Fluka - SHIELD-HIT12A", (sh12a_data.data_raw - fluka_data.data_raw)[0:5], "...")
 
 
 if __name__ == '__main__':
