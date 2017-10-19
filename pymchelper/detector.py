@@ -311,11 +311,11 @@ def average_with_nan(detector_list, error_estimate=ErrorEstimate.stderr):
     # TODO add compatibility check
     result = Detector()
     result.counter = len(detector_list)
-    result.data_raw = np.nanmean((det.data_raw for det in detector_list), axis=0)
+    result.data_raw = np.nanmean([det.data_raw for det in detector_list], axis=0)
     if result.counter > 1 and error_estimate != ErrorEstimate.none:
         # s = stddev = sqrt(1/(n-1)sum(x-<x>)**2)
         # s : corrected sample standard deviation
-        result.error_raw = np.nanstd((det.data_raw for det in detector_list), axis=0, ddof=1)
+        result.error_raw = np.nanstd([det.data_raw for det in detector_list], axis=0, ddof=1)
 
         # if user requested standard error then we calculate it as:
         # S = stderr = stddev / sqrt(n), or in other words,

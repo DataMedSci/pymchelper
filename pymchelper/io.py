@@ -40,33 +40,31 @@ def fromfilelist(input_file_list, error, nan):
     elif len(input_file_list) == 1:
         result = fromfile(input_file_list[0])
     else:
+        result = fromfile(input_file_list[0])
+
+        # allocate memory for accumulator in standard deviation calculation
+        # not needed if user requested not to include errors
+        if error != ErrorEstimate.none:
+            m2 = np.zeros_like(result.data_raw)
+
         # loop over all files
-        for counter, filename in enumerate(input_file_list):
-            data = fromfile(filename)
-            # allocate memory for result and accumulator in standard deviation calculation
-            # not needed if user requested not to include errors
-            if counter == 0:
-                result = data
-                result.data_raw = np.zeros_like(data.data_raw)
-                if error != ErrorEstimate.none:
-                    __M2 = np.zeros_like(result.data_raw)
-            n = np.float(counter + 1)
+        for n, filename in enumerate(input_file_list[1:], start=2):
+            x = fromfile(filename).data_raw
 
             # Running variance algorithm based on algorithm by B. P. Welford,
             # presented in Donald Knuth's Art of Computer Programming, Vol 2, page 232, 3rd edition.
             # Can be found here: http://www.johndcook.com/blog/standard_deviation/
             # and https://en.wikipedia.org/wiki/Algorithms_for_calculating_variance#Online_algorithm
-            delta = data.data_raw - result.data_raw            # delta = x - mean
-            result.data_raw += delta / n                       # mean += delta / n
+            delta = x - result.data_raw               # delta = x - mean
+            result.data_raw += delta / n              # mean += delta / n
             if error != ErrorEstimate.none:
-                __M2 += delta * (data.data_raw - result.data_raw)      # M2 += delta * (x - mean)
+                m2 += delta * (x - result.data_raw)   # M2 += delta * (x - mean)
 
         # unbiased sample variance is stored in `__M2 / (n - 1)`
         # unbiased sample standard deviation in classical algorithm is calculated as (sqrt(1/(n-1)sum(x-<x>)**2)
         # here it is calculated as square root of unbiased sample variance:
-        m = np.float(len(input_file_list) - 1)
         if len(input_file_list) > 1 and error != ErrorEstimate.none:
-            result.error_raw = np.sqrt(__M2 / m)
+            result.error_raw = np.sqrt(m2 / (len(input_file_list) - 1))
 
         # if user requested standard error then we calculate it as:
         # S = stderr = stddev / sqrt(N), or in other words,

@@ -8,7 +8,11 @@ import shutil
 import unittest
 import logging
 
+import numpy as np
+
 from pymchelper import run
+from pymchelper.detector import ErrorEstimate
+from pymchelper.io import fromfilelist, fromfile
 
 logger = logging.getLogger(__name__)
 
@@ -34,6 +38,40 @@ def run_bdo2txt_binary(inputfile, working_dir, bdo2txt_path, silent=True):
     return retVal
 
 
+class TestErrorEstimate(unittest.TestCase):
+    def test_normal_numbers(self):
+
+        # several files for the same detector, coming from runs with different RNG seed
+        file_list = ["tests/res/shieldhit/generated/many/msh/aen_0_p000{:d}.bdo".format(i) for i in range(1, 4)]
+
+        # read each of the files individually into Detector object
+        individ_detectors = [fromfile(file_path) for file_path in file_list]
+
+        for error in ErrorEstimate:  # all possible error options (none, stddev, stderr)
+            logger.info("Checking error calculation for error = {:s}".format(error.name))
+            for nan in (False, True):  # include or not NaNs in averaging
+                logger.info("Checking error calculation for nan option = {:s}".format(str(nan)))
+                # read list of the files into one detector object, doing averaging and error calculation
+                merged_detector = fromfilelist(file_list, error=error, nan=nan)
+
+                # manually calculate mean and check if correct
+                mean_value = np.mean([det.data_raw for det in individ_detectors])
+                self.assertEqual(mean_value, merged_detector.data_raw)
+
+                # manually calculate mean and check if correct
+                if error == ErrorEstimate.none:
+                    self.assertTrue(np.isnan(merged_detector.error_raw) or not np.any(merged_detector.error_raw))
+                elif error == ErrorEstimate.stddev:
+                    error_value = np.std([det.data_raw for det in individ_detectors], ddof=1)
+                    self.assertEqual(error_value, merged_detector.error_raw)
+                elif error == ErrorEstimate.stderr:
+                    error_value = np.std([det.data_raw for det in individ_detectors], ddof=1)
+                    error_value /= np.sqrt(len(individ_detectors))
+                    self.assertEqual(error_value, merged_detector.error_raw)
+                else:
+                    return
+
+
 class TestDefaultConverter(unittest.TestCase):
     main_dir = os.path.join("tests", "res", "shieldhit", "generated")
     single_dir = os.path.join(main_dir, "single")
@@ -41,6 +79,7 @@ class TestDefaultConverter(unittest.TestCase):
     bdo2txt_binary = shieldhit_binary()
 
     def test_shieldhit_files(self):
+        return
         # skip tests on MacOSX, as there is no suitable bdo2txt converter available yet
         if sys.platform.endswith('arwin'):
             return
