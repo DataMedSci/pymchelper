@@ -79,7 +79,6 @@ class TestDefaultConverter(unittest.TestCase):
     bdo2txt_binary = shieldhit_binary()
 
     def test_shieldhit_files(self):
-        return
         # skip tests on MacOSX, as there is no suitable bdo2txt converter available yet
         if sys.platform.endswith('arwin'):
             return
