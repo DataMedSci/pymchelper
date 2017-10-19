@@ -5,6 +5,7 @@
 build: off
 
 environment:
+  appveyor_build_worker_cloud: gce
   matrix:
     - platform: x86
       PYTHON: "C:\\Python27"
