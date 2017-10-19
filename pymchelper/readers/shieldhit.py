@@ -92,7 +92,7 @@ def _get_detector_unit(detector_type, geotyp):
         SHDetType.q: ("(nil)", "beam quality Q"),
         SHDetType.flu_char: ("cm^-2/primary", "Charged particle fluence"),
         SHDetType.flu_neut: ("cm^-2/primary", "Neutral particle fluence"),
-        SHDetType.let: ("keV/um", "dose-averaged LET"),
+        SHDetType.let: ("keV/um", "LET"),
         SHDetType.angle: ("radians", "Angle"),
         SHDetType.zone: ("(dimensionless)", "Zone#"),
         SHDetType.medium: ("(dimensionless)", "Medium#"),
@@ -393,6 +393,11 @@ class _SHBinaryReader0p6:
                 xmax = xmin
                 ymax = ymin
                 zmax = zmin
+
+            # check if scoring quantity is LET, if yes, than change units from [MeV/cm] to [keV/um]
+            if hasattr(detector, 'dif_type') and detector.dif_type == 2:
+                detector.dif_min /= 10.0
+                detector.dif_max /= 10.0
 
             # # differential scoring data replacement
             if hasattr(detector, 'dif_min') and hasattr(detector, 'dif_max') and hasattr(detector, 'dif_n'):
