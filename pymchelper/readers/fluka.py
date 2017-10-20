@@ -5,7 +5,7 @@ import numpy as np
 from pymchelper.detector import MeshAxis
 from pymchelper.shieldhit.detector.detector_type import SHDetType
 from pymchelper.shieldhit.detector.estimator_type import SHGeoType
-from pymchelper.flair.Data import Usrbin, unpackArray
+from pymchelper.flair.Data import Usrbin, UsrTrack, unpackArray
 
 logger = logging.getLogger(__name__)
 
@@ -15,13 +15,19 @@ class FlukaBinaryReader:
         self.filename = filename
 
     def read(self, detector, nscale=1):
-        usr = Usrbin(self.filename)
+
+        try:
+            usr = Usrbin(self.filename)
+            data = usr.readData(0)
+            fdata = unpackArray(data)
+        except IOError:
+            usr = UsrTrack(self.filename)
+            data = usr.readData(0)
+            fdata = unpackArray(data)[:usr.detector[0].ne]
         usr.say()  # file,title,time,weight,ncase,nbatch
         for i, _ in enumerate(usr.detector):
             logger.debug("-" * 20 + (" Detector number %i " % i) + "-" * 20)
             usr.say(i)  # details for each detector
-        data = usr.readData(0)
-        fdata = unpackArray(data)
 
         # TODO read detector type
         detector.det = "FLUKA"

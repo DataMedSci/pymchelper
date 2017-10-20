@@ -388,6 +388,7 @@ class Usrbdx(Usrxxx):
                 raise IOError("Invalid USRBDX file")
 
             # Parse header
+
             header = struct.unpack("=i10siiiifiiiffifffif", data)
 
             det = Detector()
@@ -486,6 +487,122 @@ class Usrbdx(Usrxxx):
                 say("LOWNeut : [", det.egroup[-1], "..", det.egroup[0], "] ne=", det.ngroup)
             say("Angle  : [", det.alow, "..", det.ahigh, "] na=", det.na, "da=", det.da)
             say("Total  : ", det.total, "+/-", det.totalerror)
+
+
+# ===============================================================================
+# Usrtrack detector
+# ===============================================================================
+class UsrTrack(Usrxxx):
+    # ----------------------------------------------------------------------
+    # Read information from TRACK file
+    # Fill the self.detector structure
+    # ----------------------------------------------------------------------
+    def readHeader(self, filename):
+        """Read USRTRACK detector information"""
+        f = Usrxxx.readHeader(self, filename)
+
+        for _ in range(1000):
+            # Header
+            data = fortran.read(f)
+            if data is None:
+                break
+            size = len(data)
+
+            if size != 50:
+                if not f.closed:
+                    f.close()
+                raise IOError("Invalid TRACK file")
+
+            # Parse header
+            # see http://www.fluka.org/flair/ustsuw.f for reference
+            header = struct.unpack("=i10siiififfif", data)
+
+            bin_det = Detector()
+            bin_det.nb = header[0]  # mtc
+            bin_det.name = header[1].strip()  # TITUTC
+            bin_det.type = header[2]  # ITUSTC
+            bin_det.region = header[4]  # IDUSTC
+            bin_det.volume = header[5]  # VUSRTC
+            bin_det.low_en_neutr_sc = header[6]  # LLNUTC
+            bin_det.elow = header[7]  # ETCLOW minimum energy
+            bin_det.ehigh = header[8]  # ETCHGH maximum energy
+            bin_det.ne = header[9]  # NETCBN number of energy intervals
+            bin_det.de = header[10]  # DETCBN energy bin width
+
+            bin_det.xlow = bin_det.elow
+            bin_det.xhigh = bin_det.ehigh
+            bin_det.nx = header[6]
+            bin_det.nx = bin_det.ne
+
+            bin_det.ylow = 0.0
+            bin_det.yhigh = 0.0
+            bin_det.ny = 1
+
+            bin_det.zlow = 0.0
+            bin_det.zhigh = 0.0
+            bin_det.nz = 1
+
+            self.detector.append(bin_det)
+
+            if bin_det.low_en_neutr_sc:
+                data = fortran.read(f)
+                bin_det.ngroup = struct.unpack("=i", data[:4])[0]
+                bin_det.egroup = struct.unpack("=%df" % (bin_det.ngroup + 1), data[4:])
+            else:
+                bin_det.ngroup = 0
+                bin_det.egroup = []
+
+            size = (bin_det.ngroup + bin_det.ne) * 4
+            if size != fortran.skip(f):
+                raise IOError("Invalid USRTRACK file")
+        f.close()
+
+    # ----------------------------------------------------------------------
+    # Read detector data
+    # ----------------------------------------------------------------------
+    def readData(self, n):
+        """Read detector n data structure"""
+        f = open(self.file, "rb")
+        fortran.skip(f)
+        for i in range(n):
+            fortran.skip(f)  # Detector Header
+            if self.detector[i].low_en_neutr_sc:
+                fortran.skip(f)  # Detector low enetry neutron groups
+            fortran.skip(f)  # Detector data
+
+        fortran.skip(f)  # Detector Header
+        if self.detector[n].low_en_neutr_sc:
+            fortran.skip(f)  # Detector low enetry neutron groups
+        data = fortran.read(f)  # Detector data
+        f.close()
+        return data
+
+    # ----------------------------------------------------------------------
+    # Read detector statistical data
+    # ----------------------------------------------------------------------
+    def readStat(self, n):
+        """Read detector n statistical data"""
+        if self.statpos < 0:
+            return None
+        f = open(self.file, "rb")
+        f.seek(self.statpos)
+        for i in range(n):
+            fortran.skip(f)  # Detector Data
+        data = fortran.read(f)
+        f.close()
+        return data
+
+    # ----------------------------------------------------------------------
+    def say(self, det=None):
+        """print header/detector information"""
+        if det is None:
+            self.sayHeader()
+        else:
+            bin = self.detector[det]
+            say("Bin    : ", bin.nb)
+            say("Title  : ", bin.name)
+            say("Type   : ", bin.type)
+            say("E      : [", bin.elow, "-", bin.ehigh, "] x", bin.ne, "dx=", bin.de)
 
 
 # ===============================================================================
