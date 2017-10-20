@@ -249,6 +249,19 @@ class SHBinaryReader:
         _postprocess(detector, nscale)
 
 
+def _bintyp(n):
+    """
+    Calculates type of binning based on number of bins.
+
+    We follow the convention that positive number of bins means linear binning,
+    while the negative - logarithmic.
+
+    :param n: number of bins
+    :return: MeshAxis.BinningType.linear or MeshAxis.BinningType.logarithmic
+    """
+    return MeshAxis.BinningType.linear if n > 0 else MeshAxis.BinningType.logarithmic
+
+
 class _SHBinaryReader0p6:
     """
     Binary format reader from version >= 0.6
@@ -429,12 +442,9 @@ class _SHBinaryReader0p6:
             yunit, yname = _get_mesh_units(detector, 1)
             zunit, zname = _get_mesh_units(detector, 2)
 
-            detector.x = MeshAxis(n=nx, min_val=xmin, max_val=xmax,
-                                  name=xname, unit=xunit, binning=MeshAxis.BinningType.linear)
-            detector.y = MeshAxis(n=ny, min_val=ymin, max_val=ymax,
-                                  name=yname, unit=yunit, binning=MeshAxis.BinningType.linear)
-            detector.z = MeshAxis(n=nz, min_val=zmin, max_val=zmax,
-                                  name=zname, unit=zunit, binning=MeshAxis.BinningType.linear)
+            detector.x = MeshAxis(n=np.abs(nx), min_val=xmin, max_val=xmax, name=xname, unit=xunit, binning=_bintyp(nx))
+            detector.y = MeshAxis(n=np.abs(ny), min_val=ymin, max_val=ymax, name=yname, unit=yunit, binning=_bintyp(ny))
+            detector.z = MeshAxis(n=np.abs(nz), min_val=zmin, max_val=zmax, name=zname, unit=zunit, binning=_bintyp(nz))
 
             detector.unit, detector.name = _get_detector_unit(detector.dettyp, detector.geotyp)
 
@@ -620,12 +630,9 @@ class _SHBinaryReader0p1:
         yunit, yname = _get_mesh_units(detector, 1)
         zunit, zname = _get_mesh_units(detector, 2)
 
-        detector.x = MeshAxis(n=nx, min_val=xmin, max_val=xmax,
-                              name=xname, unit=xunit, binning=MeshAxis.BinningType.linear)
-        detector.y = MeshAxis(n=ny, min_val=ymin, max_val=ymax,
-                              name=yname, unit=yunit, binning=MeshAxis.BinningType.linear)
-        detector.z = MeshAxis(n=nz, min_val=zmin, max_val=zmax,
-                              name=zname, unit=zunit, binning=MeshAxis.BinningType.linear)
+        detector.x = MeshAxis(n=np.abs(nx), min_val=xmin, max_val=xmax, name=xname, unit=xunit, binning=_bintyp(nx))
+        detector.y = MeshAxis(n=np.abs(ny), min_val=ymin, max_val=ymax, name=yname, unit=yunit, binning=_bintyp(ny))
+        detector.z = MeshAxis(n=np.abs(nz), min_val=zmin, max_val=zmax, name=zname, unit=zunit, binning=_bintyp(nz))
 
         detector.dettyp = SHDetType(det_attribs.det_type)
 
