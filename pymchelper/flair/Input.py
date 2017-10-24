@@ -2302,10 +2302,10 @@ class Card:
     def commentStr(self):
         """return a comment string"""
         line = ""
-        for line in self._comment.splitlines():
-            if len(line) > 0:
-                line = " " + line
-            line += "*%s\n" % (line.rstrip())
+        for cur_line in self._comment.splitlines():
+            if len(cur_line) > 0:
+                cur_line = " " + cur_line
+            line += "*%s\n" % (cur_line.rstrip())
         if self._comment != "" and self._comment[-1] == "\n":
             line += "*\n"
         return line
@@ -2379,29 +2379,29 @@ class Card:
     def splitExpr(expr, maxlength=100):
         line = ""
         first = True
-        for line in expr.splitlines():
-            line = line.rstrip()  # remove trailing spaces
-            if len(line) == 0:
+        for cur_line in expr.splitlines():
+            cur_line = cur_line.rstrip()  # remove trailing spaces
+            if len(cur_line) == 0:
                 continue
-            while len(line) > maxlength:
+            while len(cur_line) > maxlength:
                 for i in range(maxlength - 1, 1, -1):
-                    if line[i] not in ('+', '-', '|', '(', ')', '#'):
+                    if cur_line[i] not in ('+', '-', '|', '(', ')', '#'):
                         continue
                     # split line on char before
                     if first:
-                        line += line[0:i].rstrip()
+                        line += cur_line[0:i].rstrip()
                         first = False
                     else:
-                        line += "\n%s" % (line[0:i])
-                    line = line[i:]
+                        line += "\n%s" % (cur_line[0:i])
+                    cur_line = cur_line[i:]
                     break
                 if i <= 2:
                     break
             if first:
-                line += line
+                line += cur_line
                 first = False
             else:
-                line += "\n%s" % (line)
+                line += "\n%s" % (cur_line)
         return line
 
     # ----------------------------------------------------------------------
@@ -2424,30 +2424,30 @@ class Card:
                 line = "%-10s%4d " % (name, neighbors)
 
             first = True
-            for line in self._extra.splitlines():
-                line = line.rstrip()  # remove trailing spaces
-                if len(line) == 0:
+            for cur_line in self._extra.splitlines():
+                cur_line = cur_line.rstrip()  # remove trailing spaces
+                if len(cur_line) == 0:
                     continue
-                while len(line) > 100:
+                while len(cur_line) > 100:
                     for i in range(99, 1, -1):
-                        if line[i] not in ('+', '-', '|', '(', ')', '#'):
+                        if cur_line[i] not in ('+', '-', '|', '(', ')', '#'):
                             continue
                         # split line on char before
                         if first:
-                            line += line[0:i].rstrip()
+                            line += cur_line[0:i].rstrip()
                             first = False
                         else:
                             line += "\n               %s" \
-                                    % (line[0:i])
-                        line = line[i:]
+                                    % (cur_line[0:i])
+                        cur_line = cur_line[i:]
                         break
                     if i <= 2:
                         break
                 if first:
-                    line += line
+                    line += cur_line
                     first = False
                 else:
-                    line += "\n               %s" % (line)
+                    line += "\n               %s" % (cur_line)
             return line
         else:
             expr = ""
@@ -2456,19 +2456,19 @@ class Card:
                 raise TypeError("No parenthesis are allowed in fixed format")
 
             nop = 0
-            for line in self._extra.splitlines():
+            for cur_line in self._extra.splitlines():
                 # Remove spaces
-                line = string.join(line, '')
-                line = line.replace("+", " +")
-                line = line.replace("-", " -")
-                line = line.replace("|", " | ")
+                cur_line = string.join(cur_line, '')
+                cur_line = cur_line.replace("+", " +")
+                cur_line = cur_line.replace("-", " -")
+                cur_line = cur_line.replace("|", " | ")
 
                 if nop > 0 and expr != "":
                     expr += "\n          "
                     nop = 0
 
                 orbefore = False
-                for op in line.split():
+                for op in cur_line.split():
                     if op == "|":
                         expr += "OR"
                         orbefore = True
