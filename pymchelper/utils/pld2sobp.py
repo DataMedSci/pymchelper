@@ -150,10 +150,19 @@ def main(args=sys.argv[1:]):
     meterset_weight_sum = 0.0
     particles_sum = 0.0
 
+    dictionary = {}
+
     for layer in pld_data.layers:
         spotsize = 2.354820045 * layer.spotsize * 0.1  # 1 sigma im mm -> 1 cm FWHM
 
+        dictionary[layer.energy] = {}
+
         for spot_x, spot_y, spot_w, spot_rf in zip(layer.x, layer.y, layer.w, layer.rf):
+
+            if (spot_x, spot_y) in dictionary[layer.energy]:
+                dictionary[layer.energy][(spot_x, spot_y)] += spot_rf
+            else:
+                dictionary[layer.energy][(spot_x, spot_y)] = spot_rf
 
             weight = spot_rf * pld_data.mu / pld_data.csetweight
             # Need to convert to weight by fluence, rather than weight by dose
@@ -178,6 +187,12 @@ def main(args=sys.argv[1:]):
                                                layer_xy[1],
                                                spotsize,
                                                particles_spot))
+
+    for energy in sorted(dictionary):
+        print("\n")
+        print("Energy", energy)
+        for spot_pos in sorted(dictionary[energy]):
+            print(spot_pos, dictionary[energy][spot_pos])
 
     logger.info("Data were scaled with a factor of {:e} particles*S/MU.".format(args.scale))
     if args.flip:

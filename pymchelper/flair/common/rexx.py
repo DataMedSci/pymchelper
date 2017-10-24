@@ -63,13 +63,13 @@ _letters_digits_symbol = _letters_digits + "_."
 
 
 # abbrev
-def abbrev(information, info, l=0):
+def abbrev(information, info, length=0):
     """
     return true if the info is an abbreviation of information
     with minimum length l
     """
-    if l > 0:
-        length = l
+    if length > 0:
+        length = length
     else:
         length = len(info)
 
@@ -80,17 +80,17 @@ def abbrev(information, info, l=0):
 
 
 # center
-def center(s, l, pad=' '):
-    if l <= 0:
+def center(s, length, pad=' '):
+    if length <= 0:
         return ""
 
-    i = l - len(s)
+    i = length - len(s)
     if i == 0:
         return s
     elif i < 0:
         i = -i
         a = i // 2
-        return s[a:a + l]
+        return s[a:a + length]
     else:
         a = i // 2
         return "%s%s%s" % (pad * a, s, pad * (i - a))
@@ -103,7 +103,7 @@ def datatype(str, check="N"):
     try:
         if len(str) == 0:
             return check == "X" or check == "B"
-    except:
+    except Exception:
         return check == "X" or check == "B"
 
     if check == "N":
@@ -211,34 +211,34 @@ def _isnum(str):
 
     # accept one sign
     i = 0
-    l = len(str)
+    length = len(str)
 
-    if l == 0:
+    if length == 0:
         return False
 
     if str[i] == '-' or str[i] == '+':
         i += 1
 
     # skip spaces after sign
-    while i < l and str[i].isspace():
+    while i < length and str[i].isspace():
         i += 1
 
     # accept many digits
-    if i < l and '0' <= str[i] <= '9':
+    if i < length and '0' <= str[i] <= '9':
         i += 1
         F = 1
-        while i < l and '0' <= str[i] <= '9':
+        while i < length and '0' <= str[i] <= '9':
             i += 1
     else:
         F = 0
 
     # accept one dot
-    if i < l and str[i] == '.':
+    if i < length and str[i] == '.':
         i += 1
 
         # accept many digits
-        if i < l and '0' <= str[i] <= '9':
-            while i < l and '0' <= str[i] <= '9':
+        if i < length and '0' <= str[i] <= '9':
+            while i < length and '0' <= str[i] <= '9':
                 i += 1
         else:
             if not F:
@@ -248,20 +248,20 @@ def _isnum(str):
             return False
 
     # accept one e/E/d/D
-    if i < l and (str[i] == 'e' or str[i] == 'E' or str[i] == 'd' or str[i] == 'D'):
+    if i < length and (str[i] == 'e' or str[i] == 'E' or str[i] == 'd' or str[i] == 'D'):
         i += 1
         # accept one sign
-        if i < l and (str[i] == '-' or str[i] == '+'):
+        if i < length and (str[i] == '-' or str[i] == '+'):
             i += 1
 
         # accept many digits
-        if i < l and '0' <= str[i] <= '9':
-            while i < l and '0' <= str[i] <= '9':
+        if i < length and '0' <= str[i] <= '9':
+            while i < length and '0' <= str[i] <= '9':
                 i += 1
         else:
             return False
 
-    if i != l:
+    if i != length:
         return False
 
     return True

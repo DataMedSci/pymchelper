@@ -353,7 +353,7 @@ class LocalDict(dict):
         """Default getitem"""
         try:
             return dict.__getitem__(self, item)
-        except:
+        except Exception:
             # check defines
             defines = self.input.cardsCache("#define")
             # dummy linear search
@@ -368,7 +368,7 @@ class LocalDict(dict):
                         if float(int(f)) == f:
                             return int(f)
                         return f
-                    except:
+                    except Exception:
                         return val
             if item not in _globalDict:
                 return str(item)
@@ -404,7 +404,7 @@ class LocalDict(dict):
             if float(int(f)) == f:
                 return int(f)
             return f
-        except:
+        except Exception:
             return val
 
 
@@ -570,7 +570,7 @@ class CardInfo:
         for match in _WNPAT.finditer(assertStatement):
             try:
                 whatUsed[int(match.group(2))] = True
-            except:
+            except Exception:
                 pass
         ass = _wPAT.sub('c.numWhat(', assertStatement)
         ass = _WPAT.sub('c.what(', ass)
@@ -592,7 +592,7 @@ class CardInfo:
         """Compile or use pre-defined function"""
         try:
             return CardInfo._funcs[s]
-        except:
+        except Exception:
             c = compile(s, "<string>", "eval")
             CardInfo._funcs[s] = c
             return c
@@ -617,12 +617,12 @@ class CardInfo:
                         v = 0
                     try:
                         v = int(float(v))
-                    except:
+                    except Exception:
                         pass
                     try:
                         if not eval(c)(v):
                             break
-                    except:
+                    except Exception:
                         pass
             else:
                 # All conditions met
@@ -664,7 +664,7 @@ class CardInfo:
                         pb.append(w)
                         continue
                     x = xi
-                except:
+                except Exception:
                     # x = 0
                     pb.append(w)
                     continue
@@ -679,7 +679,7 @@ class CardInfo:
                     # Special patch for RADDECAY to restore
                     # the long type instead of float
                     card.setWhat(w, xi)
-                except:
+                except Exception:
                     # x = 0
                     pb.append(w)
                     continue
@@ -687,12 +687,12 @@ class CardInfo:
             elif f == 'r':
                 try:
                     x = float(x)
-                except:
+                except Exception:
                     # Check if it is a fortran number with D or internal spaces
                     # try: x = float(re.sub("[dD]","e",x.replace(" ","")))
                     try:
                         x = float(re.sub("[dD]", "e", x))
-                    except:
+                    except Exception:
                         pb.append(w)
                         continue
 
@@ -701,7 +701,7 @@ class CardInfo:
                     x = 0
                 try:
                     x = int(float(x))
-                except:
+                except Exception:
                     pass
 
             elif f == "pi" or f == "spi":
@@ -709,7 +709,7 @@ class CardInfo:
                     x = float(x)
                     if x > -100.0 and abs(int(x)) not in Particle._db:
                         pb.append(w)
-                except:
+                except Exception:
                     if len(x) > 0:
                         if x[0] == "-":
                             x = x[1:]
@@ -720,7 +720,7 @@ class CardInfo:
             try:
                 if c and not eval(c)(x):
                     pb.append(w)
-            except:
+            except Exception:
                 pb.append(w)
 
         # Check all assert statements
@@ -799,7 +799,7 @@ class CardInfo:
             if sdum[:4] == "ROT#" or sdum[:3] == "RO#":
                 try:
                     id = int(sdum[sdum.find('#') + 1:])
-                except:
+                except Exception:
                     id = 999
                 card.setSdum("rot#%03d" % (id))
 
@@ -811,7 +811,7 @@ class CardInfo:
                 continue
             try:
                 aw = int(float(w))
-            except:
+            except Exception:
                 continue
             if r in ("mi", "smi"):
                 aw = abs(aw)
@@ -998,7 +998,7 @@ class LogicalUnits:
             binary = unit < 0
             unit = abs(unit)
             self.list[unit] = (binary, tag, fn)
-        except:
+        except Exception:
             pass
 
     # ----------------------------------------------------------------------
@@ -1016,7 +1016,7 @@ class LogicalUnits:
         try:
             u = abs(int(u))
             return self.list[u]
-        except:
+        except Exception:
             return None
 
     # ----------------------------------------------------------------------
@@ -1206,7 +1206,7 @@ class Particle:
         try:
             idx = int(pid)
             isInt = True
-        except:
+        except Exception:
             if pid == "":
                 idx = 0
                 isInt = True
@@ -1219,7 +1219,7 @@ class Particle:
                     return str(pid)
                 try:
                     return Particle._db[idx].name
-                except:
+                except Exception:
                     say("Particle %s not found!" % str(pid))
                     return "UNKNOWN"
             else:
@@ -1229,7 +1229,7 @@ class Particle:
                 return idx
             try:
                 return Particle._db[pid].id
-            except:
+            except Exception:
                 raise Exception("Particle %s not found!" % (pid))
 
     # ----------------------------------------------------------------------
@@ -1283,7 +1283,7 @@ class Voxel:
         self.filename = filename
         try:
             f = open(filename, "rb")
-        except:
+        except Exception:
             return False
 
         # Title CHAR*80
@@ -1563,7 +1563,7 @@ class Card:
         if not case:
             try:
                 val = val.upper()
-            except:
+            except Exception:
                 pass
 
         # Search everywhere
@@ -1596,7 +1596,7 @@ class Card:
             try:
                 self.units().index(uval)
                 return True
-            except:
+            except Exception:
                 return False
 
         # Particle
@@ -1816,7 +1816,7 @@ class Card:
 
             try:
                 lab = labels[e]
-            except:
+            except Exception:
                 lab = ""
 
             if msg:
@@ -1888,7 +1888,7 @@ class Card:
         else:
             try:
                 return self._what[n]
-            except:
+            except Exception:
                 return ""
 
     # ----------------------------------------------------------------------
@@ -1901,7 +1901,7 @@ class Card:
             return n
         try:
             return abs(float(n))
-        except:
+        except Exception:
             n = n.strip()
             if n[0] in ("+", "-"):
                 return n[1:]
@@ -1928,7 +1928,7 @@ class Card:
         """try to return a number from what"""
         try:
             return float(self.evalWhat(n))
-        except:
+        except Exception:
             return 0.0
 
     # ----------------------------------------------------------------------
@@ -1960,7 +1960,7 @@ class Card:
                 # expr = expr.replace("]]",")")
                 try:
                     value = eval(expr, _globalDict, self.input.localDict)
-                except:
+                except Exception:
                     say("ERROR %s card %s what(%d):%s" % (sys.exc_info()[1], self.tag, n, str(w)))
                     return "?"
 
@@ -1969,7 +1969,7 @@ class Card:
                     if float(int(f)) == f:
                         return int(f)
                     return f
-                except:
+                except Exception:
                     return value
 
             elif dollar and w[0] == "$":
@@ -1988,7 +1988,7 @@ class Card:
                             if float(int(f)) == f:
                                 return int(f)
                             return f
-                        except:
+                        except Exception:
                             return val
         return w
 
@@ -2029,7 +2029,7 @@ class Card:
     def __delitem__(self, item):
         try:
             del self.prop[item]
-        except:
+        except Exception:
             pass
 
     # ----------------------------------------------------------------------
@@ -2096,7 +2096,7 @@ class Card:
         """set extra information"""
         try:
             self._extra = str(e)
-        except:
+        except Exception:
             self._extra = e.encode("ascii", "replace")
         self.setModified()
 
@@ -2123,11 +2123,11 @@ class Card:
     # ----------------------------------------------------------------------
     def setNWhats(self, n):
         """set the total number of whats"""
-        l = len(self._what)
-        if n < l:
+        length = len(self._what)
+        if n < length:
             del self._what[n:]
-        elif n > l:
-            self._what += [""] * (n - l)
+        elif n > length:
+            self._what += [""] * (n - length)
         self.setModified()
 
     # ----------------------------------------------------------------------
@@ -2148,7 +2148,7 @@ class Card:
                 if s:
                     v = -v
 
-            except:
+            except Exception:
                 if v[0] == "+" or v[0] == "-":
                     if s:
                         v = "-" + v[1:]
@@ -2180,7 +2180,7 @@ class Card:
             n = abs(float(n))
             if s:
                 n = -n
-        except:
+        except Exception:
             n = n.strip()
             if n[0] in ("+", "-"):
                 if s:
@@ -2204,10 +2204,10 @@ class Card:
         # Default numeric value
         try:
             n = self._what[w]
-        except:
+        except Exception:
             try:
                 return self._sign[w]
-            except:
+            except Exception:
                 return False
 
         if n == "":
@@ -2224,7 +2224,7 @@ class Card:
                 if s is not None:
                     return s
             return False
-        except:
+        except Exception:
             n = n.strip()
             if n[0] == "-":
                 return True
@@ -2302,10 +2302,10 @@ class Card:
     def commentStr(self):
         """return a comment string"""
         line = ""
-        for l in self._comment.splitlines():
-            if len(l) > 0:
-                l = " " + l
-            line += "*%s\n" % (l.rstrip())
+        for line in self._comment.splitlines():
+            if len(line) > 0:
+                line = " " + line
+            line += "*%s\n" % (line.rstrip())
         if self._comment != "" and self._comment[-1] == "\n":
             line += "*\n"
         return line
@@ -2327,7 +2327,7 @@ class Card:
                 try:
                     # num = float(w)  # Force to number TODO not used ?
                     w = bmath.format_number(w, 22)
-                except:
+                except Exception:
                     if not w or w[0] != "$":
                         w = "0.0"
                 if len(line) + len(w) + 1 > prevlen + 80:
@@ -2355,7 +2355,7 @@ class Card:
                 try:
                     # num = float(w) # TODO not used ?
                     w = bmath.format_number(w, width)
-                except:
+                except Exception:
                     w = "0.0"
                 line += w.rjust(width)
                 i += 1
@@ -2379,29 +2379,29 @@ class Card:
     def splitExpr(expr, maxlength=100):
         line = ""
         first = True
-        for l in expr.splitlines():
-            l = l.rstrip()  # remove trailing spaces
-            if len(l) == 0:
+        for line in expr.splitlines():
+            line = line.rstrip()  # remove trailing spaces
+            if len(line) == 0:
                 continue
-            while len(l) > maxlength:
+            while len(line) > maxlength:
                 for i in range(maxlength - 1, 1, -1):
-                    if l[i] not in ('+', '-', '|', '(', ')', '#'):
+                    if line[i] not in ('+', '-', '|', '(', ')', '#'):
                         continue
                     # split line on char before
                     if first:
-                        line += l[0:i].rstrip()
+                        line += line[0:i].rstrip()
                         first = False
                     else:
-                        line += "\n%s" % (l[0:i])
-                    l = l[i:]
+                        line += "\n%s" % (line[0:i])
+                    line = line[i:]
                     break
                 if i <= 2:
                     break
             if first:
-                line += l
+                line += line
                 first = False
             else:
-                line += "\n%s" % (l)
+                line += "\n%s" % (line)
         return line
 
     # ----------------------------------------------------------------------
@@ -2410,7 +2410,7 @@ class Card:
     def _regionStr(self, fmt=None):
         try:
             neighbors = int(self._what[1])
-        except:
+        except Exception:
             neighbors = 5
 
         if fmt is None or fmt == FORMAT_FREE:
@@ -2424,30 +2424,30 @@ class Card:
                 line = "%-10s%4d " % (name, neighbors)
 
             first = True
-            for l in self._extra.splitlines():
-                l = l.rstrip()  # remove trailing spaces
-                if len(l) == 0:
+            for line in self._extra.splitlines():
+                line = line.rstrip()  # remove trailing spaces
+                if len(line) == 0:
                     continue
-                while len(l) > 100:
+                while len(line) > 100:
                     for i in range(99, 1, -1):
-                        if l[i] not in ('+', '-', '|', '(', ')', '#'):
+                        if line[i] not in ('+', '-', '|', '(', ')', '#'):
                             continue
                         # split line on char before
                         if first:
-                            line += l[0:i].rstrip()
+                            line += line[0:i].rstrip()
                             first = False
                         else:
                             line += "\n               %s" \
-                                    % (l[0:i])
-                        l = l[i:]
+                                    % (line[0:i])
+                        line = line[i:]
                         break
                     if i <= 2:
                         break
                 if first:
-                    line += l
+                    line += line
                     first = False
                 else:
-                    line += "\n               %s" % (l)
+                    line += "\n               %s" % (line)
             return line
         else:
             expr = ""
@@ -2456,19 +2456,19 @@ class Card:
                 raise TypeError("No parenthesis are allowed in fixed format")
 
             nop = 0
-            for l in self._extra.splitlines():
+            for line in self._extra.splitlines():
                 # Remove spaces
-                l = string.join(l, '')
-                l = l.replace("+", " +")
-                l = l.replace("-", " -")
-                l = l.replace("|", " | ")
+                line = string.join(line, '')
+                line = line.replace("+", " +")
+                line = line.replace("-", " -")
+                line = line.replace("|", " | ")
 
                 if nop > 0 and expr != "":
                     expr += "\n          "
                     nop = 0
 
                 orbefore = False
-                for op in l.split():
+                for op in line.split():
                     if op == "|":
                         expr += "OR"
                         orbefore = True
@@ -2584,7 +2584,7 @@ class Card:
                         try:
                             # num = float(w) # TODO not used ?
                             w = bmath.format_number(w, width)
-                        except:
+                        except Exception:
                             pass
                     if fmt == FORMAT_FREE:
                         line += w + ", "
@@ -2625,11 +2625,11 @@ class Card:
         elif self.tag == "GEOBEGIN":
             try:
                 self.ivopt
-            except:
+            except Exception:
                 self.ivopt = 0
             try:
                 self.idbg
-            except:
+            except Exception:
                 self.idbg = 0
             if fmt == FORMAT_FREE:
                 line += "\n%d,%d,%s" % (self.ivopt, self.idbg, self._extra.rstrip())
@@ -2894,7 +2894,7 @@ class Card:
         """Add zone to card"""
         try:
             zone = str(zone)
-        except:
+        except Exception:
             zone = zone.encode("ascii", "replace")
 
         if self._extra.strip():
@@ -2997,7 +2997,7 @@ class Input:
             try:
                 if os.stat(filename).st_mtime > self._modified:
                     return True
-            except:
+            except Exception:
                 pass
         return False
 
@@ -3024,16 +3024,16 @@ class Input:
                 backupname = filename + "~"
                 try:
                     os.remove(backupname)
-                except:
+                except Exception:
                     pass
                 try:
                     os.rename(filename, backupname)
-                except:
+                except Exception:
                     pass
 
             try:  # open file
                 f = open(filename, mode)
-            except:
+            except Exception:
                 say("ERROR: Cannot open file '%s'" % (filename))
                 f = open("/dev/null", mode)
         else:
@@ -3375,7 +3375,7 @@ class Input:
                 self._addCard(card)
                 try:
                     card.loadVoxel()
-                except:
+                except Exception:
                     say("ERROR loading voxel file %s.vxl" % (card.sdum()))
                     say(sys.exc_info()[1])
                 voxel = True
@@ -3386,11 +3386,11 @@ class Input:
         # Except the title of the GEOBEGIN
         try:
             ivopt = int(line[0:5].strip())
-        except:
+        except Exception:
             ivopt = 0
         try:
             idbg = int(line[5:10].strip())
-        except:
+        except Exception:
             idbg = 0
 
         # Special treatment for GEOBEGIN
@@ -3684,7 +3684,7 @@ class Input:
 
         try:
             neighbors = int(neighbors)
-        except:
+        except Exception:
             neighbors = 5
 
         what = [name, neighbors]
@@ -3704,7 +3704,7 @@ class Input:
             if usdum[0] == "ROT" or usdum[0] == "RO":
                 try:
                     id = int(usdum[-1])
-                except:
+                except Exception:
                     id = 1
                 what[0] = "Rot#%3d" % (id)
 
@@ -3765,7 +3765,7 @@ class Input:
                     if m:
                         try:
                             w = int(m.group(1))
-                        except:
+                        except Exception:
                             w = -1
                         if w >= 0:
                             if w == len(self._cwhat):
@@ -3790,7 +3790,7 @@ class Input:
                             self._cardEnable = False
                             self._commentDisable = True
                             return lline
-                    except:
+                    except Exception:
                         pass
 
             cline = line[cstart:]
@@ -3828,7 +3828,7 @@ class Input:
                     if m:
                         try:
                             w = int(m.group(1))
-                        except:
+                        except Exception:
                             w = -1
                         if w >= 0:
                             if w == len(self._cwhat):
@@ -4095,7 +4095,7 @@ class Input:
         try:
             geobegin = self["GEOBEGIN"][0]
             begin_ = self.cardlist.index(geobegin)
-        except:
+        except Exception:
             # add a GEOBEGIN card
             if self.geoFile != "":
                 w3 = 20
@@ -4146,7 +4146,7 @@ class Input:
             geoend = self["GEOEND"][0]
             end_ = self.cardlist.index(geoend)
             self.writeCards(finp, lambda x: not x._geo, None, 1, begin_ + 1, end_)
-        except:
+        except Exception:
             geoend = None
             end_ = len(self.cardlist)
 
@@ -4166,7 +4166,7 @@ class Input:
             utfWriteln(finp, self.geoFile)
             try:
                 fgeo = self._openFile(self.geoFile, "w", backup=backup)
-            except:
+            except Exception:
                 say("Cannot open output geometry file \"%s\"" % (filename))
                 say("Write geometry to input")
                 fgeo = finp
@@ -4782,7 +4782,7 @@ class Input:
         # Add to new list
         try:
             taglist = self.cards[card.tag]
-        except:
+        except Exception:
             taglist = []
             self.cards[card.tag] = taglist
         taglist.append(card)
@@ -5178,7 +5178,7 @@ class Input:
         try:
             geobegin = self.cards["GEOBEGIN"][0]
             notflugg = geobegin.sdum() != "FLUGG"
-        except:
+        except Exception:
             notflugg = True
 
         matDict = {}
@@ -5217,7 +5217,7 @@ class Input:
             # Check input
             try:
                 case = card.case()
-            except:
+            except Exception:
                 say("ERROR: Disabling unknown card.")
                 say(str(card))
                 card.disable()
@@ -5364,11 +5364,11 @@ class Input:
                 if isinstance(val, str) and val != "" and val[0] == "=":
                     try:
                         val = float(eval(val[1:], _globalDict, self.localDict))
-                    except:
+                    except Exception:
                         pass
                 try:
                     self.localDict[var] = float(val)
-                except:
+                except Exception:
                     self.localDict[var] = val
         else:
             # if none or empty list e.g. default run = []
@@ -5637,7 +5637,7 @@ class Input:
             try:
                 toReg = regionDict.get(card.evalWhat(3))
                 toReg = toReg["@n"]
-            except:
+            except Exception:
                 toReg = fromReg
 
             step = card.intWhat(4)
@@ -5684,11 +5684,11 @@ class Input:
             try:
                 toReg = regionDict.get(card.what(5))
                 toReg = toReg["@n"]
-            except:
+            except Exception:
                 toReg = fromReg
             try:
                 step = int(card.what(6))
-            except:
+            except Exception:
                 step = 1
 
             for rg in range(fromReg, toReg + 1, step):
@@ -5707,11 +5707,11 @@ class Input:
             try:
                 toReg = regionDict.get(card.what(2))
                 toReg = toReg["@n"]
-            except:
+            except Exception:
                 toReg = fromReg
             try:
                 step = int(card.what(3))
-            except:
+            except Exception:
                 step = 1
 
             rotdefi = card.sdum()
@@ -5756,7 +5756,7 @@ class Input:
                 continue
             try:
                 from_ = dictionary[card.what(fromWhat)]["@n"]
-            except:
+            except Exception:
                 continue
             if from_ is None:
                 continue
@@ -5770,7 +5770,7 @@ class Input:
                     else:
                         to_ = dictionary[toW]["@n"]
                     step = card.intWhat(stepWhat)
-                except:
+                except Exception:
                     pass
             if step <= 0:
                 step = 1
@@ -5800,7 +5800,7 @@ class Input:
         else:
             try:
                 return lst.index(mat) + 1
-            except:
+            except Exception:
                 return 0
 
     def materialList(self, which=0, icru=False, assigned=False):
@@ -5820,7 +5820,7 @@ class Input:
             if index < 0:
                 try:
                     index = lst.index(name)
-                except:
+                except Exception:
                     index = len(lst)
 
             # Append or replace
@@ -5944,7 +5944,7 @@ class Input:
         else:
             try:
                 return [x.what(0) for x in regions].index(reg) + 1
-            except:
+            except Exception:
                 return 0
 
     def getTransformation(self, idx=None, rotdefi=None, inv=False):
@@ -6076,18 +6076,18 @@ class Input:
                     rot["rot#%03d" % (i)] = True
                 if len(card.sdum()) > 0:
                     rot[card.sdum()] = True
-        except:
+        except Exception:
             return [""]
 
-        l = rot.keys()
-        l.sort()
+        item = rot.keys()
+        item.sort()
         if negative:
             lst = [""]
-            for i in l:
+            for i in item:
                 lst.append(i)
                 lst.append("-%s" % (i))
         else:
-            lst = l
+            lst = item
             lst.insert(0, "")
 
         del rot
@@ -6127,28 +6127,28 @@ def _str2num(w):
             wn = float(we)
             return wn
         return float(w)
-    except:
+    except Exception:
         return w
 
 
 def _intWhat(what, n):
     try:
         return int(float(_str2num(what[n])))
-    except:
+    except Exception:
         return 0
 
 
 def _body2name(name):
     try:
         return BODY_PREFIX + str(int(name))
-    except:
+    except Exception:
         return str(name)
 
 
 def _region2name(name):
     try:
         return REGION_PREFIX + str(int(name))
-    except:
+    except Exception:
         pass
     name = str(name)
     if _NAMEPAT.match(name):
@@ -6207,7 +6207,7 @@ def init(filename=None):
             n = "range.%d" % i
             try:
                 rg = cardini.get(name, n).split()
-            except:
+            except Exception:
                 break
             range_.append(rg)
 
@@ -6221,7 +6221,7 @@ def init(filename=None):
                 n = "extra.%d.%d" % (i, j)
                 try:
                     e = cardini.get(name, n)
-                except:
+                except Exception:
                     # Correct sdum
                     if j < 7:
                         e = ""
@@ -6236,7 +6236,7 @@ def init(filename=None):
                 n = "assert.%d.%d" % (i, j)
                 try:
                     a = cardini.get(name, n)
-                except:
+                except Exception:
                     break
                 else:
                     ass.append(a)
@@ -6264,7 +6264,7 @@ def init(filename=None):
         try:
             disable = cardini.get(name, "disable")
             cinfo.setDisableComment(disable == "comment")
-        except:
+        except Exception:
             pass
         CardInfo._db[tag] = cinfo
 
@@ -6308,7 +6308,7 @@ def init(filename=None):
         n = "mat.%d" % (i)
         try:
             name = cardini.get(section, n)
-        except:
+        except Exception:
             break
 
         desc = cardini.get(section, "desc.%d" % (i))
@@ -6327,7 +6327,7 @@ def init(filename=None):
         n = "mat.%d" % (i)
         try:
             name = cardini.get(section, n)
-        except:
+        except Exception:
             break
 
         desc = cardini.get(section, "desc.%d" % (i))
@@ -6346,7 +6346,7 @@ def init(filename=None):
     try:
         groups = cardini.get(section, "groups")
         NGROUPS = map(int, groups.split())
-    except:
+    except Exception:
         say("ERROR! No neutron energy groups defined")
 
     pat = re.compile(r"^(\S*) *(.*)$")
@@ -6357,7 +6357,7 @@ def init(filename=None):
             n = "ene.%d.%d" % (g, i)
             try:
                 energy = cardini.get(section, n)
-            except:
+            except Exception:
                 break
             m = pat.match(energy)
             groupsList.append(float(m.group(1)))
@@ -6374,7 +6374,7 @@ def init(filename=None):
             n = "elem.%d.%d" % (g, i)
             try:
                 elem = cardini.get(section, n)
-            except:
+            except Exception:
                 break
 
             mat = LowNeutMaterial()
