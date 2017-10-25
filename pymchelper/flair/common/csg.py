@@ -64,19 +64,19 @@ MAXEXPR = 10000
 def tokenize(expr):
     """return a list of expression tokens"""
     lst = []
-    for l in expr.splitlines():
-        l = l.strip()
-        if len(l) == 0:
+    for line in expr.splitlines():
+        line = line.strip()
+        if len(line) == 0:
             continue
-        if l[0] == '*':
+        if line[0] == '*':
             continue  # Skip comments
-        l = l.replace("+", " + ")
-        l = l.replace("-", " - ")
-        l = l.replace("#", " # ")
-        l = l.replace("|", " | ")
-        l = l.replace("(", " ( ")
-        l = l.replace(")", " ) ")
-        lst.extend(l.split())
+        line = line.replace("+", " + ")
+        line = line.replace("-", " - ")
+        line = line.replace("#", " # ")
+        line = line.replace("|", " | ")
+        line = line.replace("(", " ( ")
+        line = line.replace(")", " ) ")
+        lst.extend(line.split())
     return lst
 
 
@@ -295,11 +295,11 @@ def rpnorm(expr):
         while i >= 4:
             tx = expr[i]
             if tx in ('+', '-', '|'):
-                l = len(expr)
+                length = len(expr)
                 rule = _rpnrule(expr, i)
                 if rule > 0:
                     changed = 1
-                    i += len(expr) - l + 1
+                    i += len(expr) - length + 1
             i -= 1
             if len(expr) > MAXEXPR:
                 raise CSGException("Expansion failed. Too many terms")
@@ -728,6 +728,6 @@ def split(expr):
             p = expr.index("|")
             brk.append(expr[0:p])
             del expr[0:p + 1]
-        except:
+        except Exception:
             brk.append(expr)
             return brk

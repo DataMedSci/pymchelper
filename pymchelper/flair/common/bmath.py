@@ -194,7 +194,7 @@ def format_number(number, length=10, useExp=False, useD=False):
             exponent = 0
         else:
             exponent = int(exponent)
-    except:
+    except Exception:
         mantissa = number
         exponent = 0
 
@@ -209,7 +209,7 @@ def format_number(number, length=10, useExp=False, useD=False):
 
     try:
         (befo, afte) = mantissa.split(".")
-    except:
+    except Exception:
         befo = mantissa
         afte = ""
 
@@ -526,12 +526,12 @@ class Vector(list):
     # ----------------------------------------------------------------------
     def norm(self):
         """Normalize vector and return length"""
-        l = self.length()
-        if l > 0.0:
-            invlen = 1.0 / l
+        s_length = self.length()
+        if s_length > 0.0:
+            invlen = 1.0 / s_length
             for i in range(len(self)):
                 self[i] *= invlen
-        return l
+        return s_length
 
     normalize = norm
 
@@ -584,8 +584,8 @@ class Vector(list):
         if normalized with any of the axis"""
 
         v = self.clone()
-        l = v.norm()
-        if abs(l) <= zero:
+        length = v.norm()
+        if abs(length) <= zero:
             return "O"
         if abs(v[0] - 1.0) < zero:
             return "X"
@@ -662,7 +662,7 @@ class Vector(list):
 # -------------------------------------------------------------------------------
 # Basic 3D Vectors
 # -------------------------------------------------------------------------------
-Vector.O = Vector(0.0, 0.0, 0.0)
+Vector.O = Vector(0.0, 0.0, 0.0)  # noqa: E741
 Vector.X = Vector(1.0, 0.0, 0.0)
 Vector.Y = Vector(0.0, 1.0, 0.0)
 Vector.Z = Vector(0.0, 0.0, 1.0)
@@ -920,10 +920,10 @@ class Matrix(list):
             self[m2][m1] = s
 
         elif isinstance(axis, Vector):
-            l = axis.length()
-            x = axis[0] / l
-            y = axis[1] / l
-            z = axis[2] / l
+            length = axis.length()
+            x = axis[0] / length
+            y = axis[1] / length
+            z = axis[2] / length
 
             c1 = 1 - c
             self[0][0] = x * x + (1 - x * x) * c
@@ -1255,7 +1255,7 @@ class Matrix(list):
 # -------------------------------------------------------------------------------
 # Basic Matrices
 # -------------------------------------------------------------------------------
-Matrix.O = Matrix(4, type=0)
+Matrix.O = Matrix(4, type=0)  # noqa: E741
 Matrix.U = Matrix(4, type=1)
 
 
@@ -1862,7 +1862,7 @@ def fitPlane(xyz):
         A.inverse()
         X = A * B
         return X[0][0], X[1][0], -1.0, X[2][0]
-    except:
+    except Exception:
         pass
 
     # Try a solution where c=0
@@ -1877,7 +1877,7 @@ def fitPlane(xyz):
         A.inverse()
         X = A * B
         return X[0][0], -1.0, 0.0, X[1][0]
-    except:
+    except Exception:
         return None
 
 
