@@ -11,14 +11,11 @@ set -o pipefail # Return value of a pipeline as the value of the last command to
 # file inspired by https://github.com/pyca/cryptography
 
 # MacOSX hav Python 2.7 installed by default, lets use it. We just need to install pip
-if [[ $TOXENV == py27* ]] ;
-then
-    curl -O https://bootstrap.pypa.io/get-pip.py
-    python get-pip.py --user
-    pip install --user --upgrade pip
-    pip install --user --upgrade virtualenv
-    pip install --user --upgrade tox
-fi
+curl -O https://bootstrap.pypa.io/get-pip.py
+python get-pip.py --user
+pip install --user --upgrade pip
+pip install --user --upgrade virtualenv
+pip install --user --upgrade tox
 
 # At this point we run default Python 2.7 interpreter
 # versioneer doesn't support Python 3.2, so we run it now with current interpreter
@@ -43,14 +40,6 @@ eval "$(pyenv init -)"
 # TODO find the way to make it faster (use pre-installed python versions on travis?)
 # this is most time-consuming issue, now takes about 2 min
 case "${TOXENV}" in
-        py32*)
-            pyenv install -s 3.2
-            pyenv global 3.2
-            ;;
-        py33*)
-            pyenv install -s 3.3.6
-            pyenv global 3.3.6
-            ;;
         py34*)
             pyenv install -s 3.4.4
             pyenv global 3.4.4
@@ -70,7 +59,7 @@ esac
 # TODO comment needed
 pyenv rehash
 
-# install virtualenv and tox ($VENVVER and $PIPVER is set only for python 3.2)
-pyenv exec pip install --upgrade virtualenv$VENVVER pip$PIPVER tox
+# install virtualenv and tox
+pyenv exec pip install --upgrade virtualenv pip tox
 
 pyenv exec pip install -r requirements.txt

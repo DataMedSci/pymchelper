@@ -6,30 +6,30 @@ build: off
 
 environment:
   matrix:
-    - platform: x86
-      PYTHON: "C:\\Python27"
-      PYTHON_VERSION: "2.7"
-      MINICONDAPATH: "C:\\Miniconda"
-
-    - platform: x64
-      PYTHON: "C:\\Python27"
-      PYTHON_VERSION: "2.7"
-      MINICONDAPATH: "C:\\Miniconda"
-
-    - platform: x86
-      PYTHON: "C:\\Python35"
-      PYTHON_VERSION: "3.5"
-      MINICONDAPATH: "C:\\Miniconda3"
-
-    - platform: x64
-      PYTHON: "C:\\Python35"
-      PYTHON_VERSION: "3.5"
-      MINICONDAPATH: "C:\\Miniconda3-x64"
-
-    - platform: x86
-      PYTHON: "C:\\Python36"
-      PYTHON_VERSION: "3.6"
-      MINICONDAPATH: "C:\\Miniconda35"
+#    - platform: x86
+#      PYTHON: "C:\\Python27"
+#      PYTHON_VERSION: "2.7"
+#      MINICONDAPATH: "C:\\Miniconda"
+#
+#    - platform: x64
+#      PYTHON: "C:\\Python27"
+#      PYTHON_VERSION: "2.7"
+#      MINICONDAPATH: "C:\\Miniconda"
+#
+#    - platform: x86
+#      PYTHON: "C:\\Python35"
+#      PYTHON_VERSION: "3.5"
+#      MINICONDAPATH: "C:\\Miniconda3"
+#
+#    - platform: x64
+#      PYTHON: "C:\\Python35"
+#      PYTHON_VERSION: "3.5"
+#      MINICONDAPATH: "C:\\Miniconda3-x64"
+#
+#    - platform: x86
+#      PYTHON: "C:\\Python36"
+#      PYTHON_VERSION: "3.6"
+#      MINICONDAPATH: "C:\\Miniconda35"
 
     - platform: x64
       PYTHON: "C:\\Python36"
