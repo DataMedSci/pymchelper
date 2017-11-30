@@ -10,56 +10,43 @@ set -o pipefail # Return value of a pipeline as the value of the last command to
 
 # file inspired by https://github.com/pyca/cryptography
 
-# MacOSX hav Python 2.7 installed by default, lets use it. We just need to install pip
-curl -O https://bootstrap.pypa.io/get-pip.py
-python get-pip.py --user
-pip install --user --upgrade pip
-pip install --user --upgrade virtualenv
-pip install --user --upgrade tox
-
-# At this point we run default Python 2.7 interpreter
-# versioneer doesn't support Python 3.2, so we run it now with current interpreter
-# for other interpreters pointed out by TOXENV look at the end of the script
-pip install --user --upgrade versioneer
-~/Library/Python/2.7/bin/versioneer install
-
-# For native python 2.7 we can jump out
-if [[ $TOXENV == py27* ]] ; then exit 0; fi
-
-
-# For Python 3, first install pyenv
 brew update || brew update
-brew unlink pyenv && brew install pyenv && brew link pyenv
 
-# setup pyenv
+brew outdated openssl || brew upgrade openssl
+brew install openssl@1.1
+
+# install pyenv
+git clone --depth 1 https://github.com/pyenv/pyenv ~/.pyenv
 PYENV_ROOT="$HOME/.pyenv"
 PATH="$PYENV_ROOT/bin:$PATH"
 eval "$(pyenv init -)"
 
-# install Python 3.x
-# TODO find the way to make it faster (use pre-installed python versions on travis?)
-# this is most time-consuming issue, now takes about 2 min
 case "${TOXENV}" in
-        py34*)
-            pyenv install -s 3.4.4
-            pyenv global 3.4.4
+        py27)
+            curl -O https://bootstrap.pypa.io/get-pip.py
+            python get-pip.py --user
             ;;
-        py35*)
-            pyenv install -s 3.5.1
-            pyenv global 3.5.1
+        py34)
+            pyenv install 3.4.6
+            pyenv global 3.4.6
             ;;
-        py36*)
-            pyenv install -s 3.6-dev
-            pyenv global 3.6-dev
+        py35)
+            pyenv install 3.5.3
+            pyenv global 3.5.3
             ;;
-        *)
-            exit 1
+        py36)
+            pyenv install 3.6.1
+            pyenv global 3.6.1
+            ;;
 esac
-
-# TODO comment needed
 pyenv rehash
 
 # install virtualenv and tox
-pyenv exec pip install --upgrade virtualenv pip tox
+python -m pip install --user --upgrade virtualenv pip tox
 
-pyenv exec pip install -r requirements.txt
+python -m pip install -r requirements.txt
+
+python -m pip install versioneer
+
+pyenv exec versioneer install
+
