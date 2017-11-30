@@ -42,11 +42,16 @@ esac
 pyenv rehash
 
 # install virtualenv and tox
-python -m pip install --user --upgrade virtualenv pip tox
-
-python -m pip install -r requirements.txt
-
-python -m pip install versioneer
-
-pyenv exec versioneer install
-
+if [[ $TOXENV == py27* ]] ;
+then
+    PATH="$HOME/Library/Python/2.7/bin:$PATH"
+    pip install --upgrade virtualenv pip tox
+    pip install -r requirements.txt
+    pip install versioneer
+    versioneer install
+else
+    pyenv exec pip install --upgrade virtualenv pip tox
+    pyenv exec pip install -r requirements.txt
+    pyenv exec pip install versioneer
+    pyenv exec versioneer install
+fi
