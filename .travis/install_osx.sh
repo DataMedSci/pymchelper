@@ -45,9 +45,9 @@ pyenv rehash
 if [[ $TOXENV == py27* ]] ;
 then
     PATH="$HOME/Library/Python/2.7/bin:$PATH"
-    pip install --upgrade virtualenv pip tox
-    pip install -r requirements.txt
-    pip install versioneer
+    pip install --user --upgrade virtualenv pip tox
+    pip install --user -r requirements.txt
+    pip install --user versioneer
     versioneer install
 else
     pyenv exec pip install --upgrade virtualenv pip tox
