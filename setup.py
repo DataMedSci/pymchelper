@@ -119,7 +119,7 @@ setuptools.setup(
     url='https://github.com/DataMedSci/pymchelper',
     license='MIT',
     author='Leszek Grzanka',
-    author_email='grzanka@agh.edu.pl',
+    author_email='leszek.grzanka@gmail.com',
     description='Python toolkit for SHIELD-HIT12A and Fluka',
     long_description=readme + '\n',
     classifiers=[
@@ -127,11 +127,18 @@ setuptools.setup(
         #   3 - Alpha
         #   4 - Beta
         #   5 - Production/Stable
-        'Development Status :: 3 - Alpha',
+        'Development Status :: 5 - Production/Stable',
 
         # Indicate who your project is intended for
+        # Indicate who your project is intended for
         'Intended Audience :: Developers',
-        'Topic :: Software Development :: Build Tools',
+        'Intended Audience :: Science/Research',
+        'Topic :: Software Development :: Libraries :: Python Modules',
+        'Topic :: Scientific/Engineering :: Physics',
+
+        # OS and env
+        'Environment :: Console',
+        'Operating System :: POSIX :: Linux',
 
         # Pick your license as you wish (should match "license" above)
         'License :: OSI Approved :: MIT License',
@@ -140,15 +147,13 @@ setuptools.setup(
         # that you indicate whether you support Python 2, Python 3 or both.
         'Programming Language :: Python :: 2.7',
         'Programming Language :: Python :: 3.2',
-        'Programming Language :: Python :: 3.3',
         'Programming Language :: Python :: 3.4',
         'Programming Language :: Python :: 3.5',
         'Programming Language :: Python :: 3.6',
     ],
     entry_points={
         'console_scripts': [
-            'convertmc=' + \
-            'pymchelper.run:main',
+            'convertmc=pymchelper.run:main',
             'pld2sobp=pymchelper.utils.pld2sobp:main',
         ],
     },
