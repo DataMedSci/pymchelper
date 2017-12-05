@@ -161,5 +161,6 @@ setuptools.setup(
         'enum34',
         'numpy'
     ],
-    cmdclass=get_cmdclass()
+    cmdclass=get_cmdclass(),
+    python_requires='>=2.7, !=3.0.*, !=3.1.*, !=3.3.*',
 )
