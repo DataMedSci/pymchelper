@@ -3,7 +3,12 @@ from enum import IntEnum
 import logging
 
 import numpy as np
-np.set_printoptions(legacy="1.13")
+# try to set legacy printing options if working with numpy 1.14 or newer
+# on older numpy versions this shouldn't have effect
+try:
+    np.set_printoptions(legacy="1.13")
+except TypeError as e:
+    pass
 
 logger = logging.getLogger(__name__)
 
