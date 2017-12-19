@@ -3,6 +3,7 @@ from enum import IntEnum
 import logging
 
 import numpy as np
+np.set_printoptions(legacy="1.13")
 
 logger = logging.getLogger(__name__)
 
