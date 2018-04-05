@@ -74,7 +74,7 @@ install:
   - python -c "import struct;print(8 * struct.calcsize('P'))"
 
 before_test:
-  - python %MINICONDAPATH%\envs\python%PYTHON_VERSION%\scripts\versioneer install
+  - python %MINICONDAPATH%\envs\python_pymchelper\scripts\versioneer install
 
 test_script:
 # make wheel package
