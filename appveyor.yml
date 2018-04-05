@@ -56,8 +56,8 @@ install:
 # update miniconda
   - conda update -q conda
 # create new conda workspace and activate it
-  - conda create -q --name python%PYTHON_VERSION% python=%PYTHON_VERSION%
-  - activate python%PYTHON_VERSION%
+  - conda create -q --name python_pymchelper python=%PYTHON_VERSION%
+  - activate python_pymchelper
 # check pip version and upgrade it
   - pip -V
   - pip install --upgrade pip --user
@@ -88,9 +88,9 @@ test_script:
 # install optional deps
   - pip install matplotlib
 # pytrip98 installation (optional)
-  - ps: conda install -q --name python%PYTHON_VERSION% scipy
-  - ps: python -c "import scipy as sp;print(sp.version.version)"
-  - ps: pip install pytrip98
+#  - ps: conda install -q --name python_pymchelper scipy
+#  - ps: python -c "import scipy as sp;print(sp.version.version)"
+  - pip install pytrip98
 # run tests (normal py.test command may results in memory error on appveyor, so we run tests file-by-file)
   - ps: Get-ChildItem -Path tests\ -Recurse -Include test*.py | foreach-object { $(echo $_ | Out-Host ; python -m pytest $_ | Out-Host; $?) -or $(break)}
 
