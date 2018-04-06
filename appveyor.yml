@@ -8,32 +8,26 @@ environment:
   matrix:
     - platform: x86
       PYTHON: "C:\\Python27"
-      PYTHON_VERSION: "2.7"
       MINICONDAPATH: "C:\\Miniconda"
 
     - platform: x64
       PYTHON: "C:\\Python27"
-      PYTHON_VERSION: "2.7"
       MINICONDAPATH: "C:\\Miniconda"
 
     - platform: x86
       PYTHON: "C:\\Python35"
-      PYTHON_VERSION: "3.5"
       MINICONDAPATH: "C:\\Miniconda3"
 
     - platform: x64
       PYTHON: "C:\\Python35"
-      PYTHON_VERSION: "3.5"
       MINICONDAPATH: "C:\\Miniconda3-x64"
 
     - platform: x86
       PYTHON: "C:\\Python36"
-      PYTHON_VERSION: "3.6"
       MINICONDAPATH: "C:\\Miniconda35"
 
     - platform: x64
       PYTHON: "C:\\Python36"
-      PYTHON_VERSION: "3.6"
       MINICONDAPATH: "C:\\Miniconda35-x64"
 
 
@@ -56,7 +50,7 @@ install:
 # update miniconda
   - conda update -q conda
 # create new conda workspace and activate it
-  - conda create -q --name python_pymchelper python=%PYTHON_VERSION%
+  - conda create -q --name python_pymchelper
   - activate python_pymchelper
 # check pip version and upgrade it
   - pip -V
