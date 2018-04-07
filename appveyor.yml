@@ -70,7 +70,7 @@ test_script:
 # pytrip98 installation (optional)
   - python -m pip install pytrip98
 # run tests (normal py.test command may results in memory error on appveyor, so we run tests file-by-file)
-  - rd /s /q tests\\test_default_converter.py # remove one of the problematic tests
+  - del tests\\test_default_converter.py # remove one of the problematic tests
   - ps: Get-ChildItem -Path tests\ -Recurse -Include test*.py | foreach-object { $(echo $_ | Out-Host ; python -m pytest $_ | Out-Host; $?) -or $(break)}
 
 
