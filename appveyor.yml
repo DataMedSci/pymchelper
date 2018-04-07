@@ -53,12 +53,12 @@ install:
   - conda create -q --name python_pymchelper
   - activate python_pymchelper
 # check pip version and upgrade it
-  - pip -V
-  - pip install --upgrade pip --user
-  - pip -V
+  - python -m pip -V
+  - python -m pip install --upgrade pip --user
+  - python -m pip -V
 # install usual requirements
-  - pip install --upgrade -r tests/requirements-test.txt
-  - pip install --upgrade -r requirements.txt
+  - python -m pip install --upgrade -r tests/requirements-test.txt
+  - python -m pip install --upgrade -r requirements.txt
 # check numpy version
   - python -c "import numpy as np;print(np.version.version)"
 # check python and pip versions
@@ -80,11 +80,11 @@ test_script:
   - python -c "import os; import pip; pip.main(['install', os.listdir('.')[0]]);"
   - cd ..
 # install optional deps
-  - pip install matplotlib
+  - python -m pip install matplotlib
 # pytrip98 installation (optional)
 #  - ps: conda install -q --name python_pymchelper scipy
 #  - ps: python -c "import scipy as sp;print(sp.version.version)"
-  - pip install pytrip98
+  - python -m pip install pytrip98
 # run tests (normal py.test command may results in memory error on appveyor, so we run tests file-by-file)
   - ps: Get-ChildItem -Path tests\ -Recurse -Include test*.py | foreach-object { $(echo $_ | Out-Host ; python -m pytest $_ | Out-Host; $?) -or $(break)}
 
