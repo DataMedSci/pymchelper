@@ -53,7 +53,7 @@ install:
   - python -c "import struct;print(8 * struct.calcsize('P'))"
 
 before_test:
-  - %PYTHON%\scripts\versioneer install
+  - python %PYTHON%\\scripts\\versioneer install
 
 test_script:
 # make wheel package
