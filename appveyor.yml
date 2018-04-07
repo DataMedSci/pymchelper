@@ -68,7 +68,7 @@ install:
   - python -c "import struct;print(8 * struct.calcsize('P'))"
 
 before_test:
-  - python -m pip uninstall versioneer -y
+  - ps: echo y | python -m pip uninstall versioneer
   - python -m pip install "versioneer<0.18"
   - python %MINICONDAPATH%\envs\python_pymchelper\scripts\versioneer install
 
