@@ -7,53 +7,53 @@ matrix:
         - os: linux
           python: 2.7
           env: TOXENV=py27
-        - os: linux
-          python: 3.5
-          env: TOXENV=coverage
-        - os: linux
-          python: 3.2
-          env: TOXENV=py32 VENVVER="<14.0.0" PIPVER="<8.0.0" STVER="<30.0.0"
-        - os: linux
-          python: 3.4
-          env: TOXENV=py34
-        - os: linux
-          python: 3.5
-          env: TOXENV=py35
-        - os: linux
-          python: 3.5-dev
-          env: TOXENV=py35
-        - os: linux
-          python: 3.6
-          env: TOXENV=py36
-        - os: linux
-          python: 3.6-dev
-          env: TOXENV=py36
-        - os: linux
-          python: nightly
-          env: TOXENV=py37
-        - os: linux
-          python: 3.5
-          env: TOXENV=docs
-        - os: linux
-          python: 2.7
-          env: TOXENV=pep8
-        - os: linux
-          python: 3.4
-          env: TOXENV=pep8
-        - os: linux
-          python: 3.5
-          env: TOXENV=packaging
-        - os: osx
-          language: generic
-          env: TOXENV=py35
-        - os: osx
-          language: generic
-          env: TOXENV=py27
-#    uncomment and adjust if you want to allow some failures
-    allow_failures:
-        - os: linux
-          python: nightly
-          env: TOXENV=py37
+#        - os: linux
+#          python: 3.5
+#          env: TOXENV=coverage
+#        - os: linux
+#          python: 3.2
+#          env: TOXENV=py32 VENVVER="<14.0.0" PIPVER="<8.0.0" STVER="<30.0.0"
+#        - os: linux
+#          python: 3.4
+#          env: TOXENV=py34
+#        - os: linux
+#          python: 3.5
+#          env: TOXENV=py35
+#        - os: linux
+#          python: 3.5-dev
+#          env: TOXENV=py35
+#        - os: linux
+#          python: 3.6
+#          env: TOXENV=py36
+#        - os: linux
+#          python: 3.6-dev
+#          env: TOXENV=py36
+#        - os: linux
+#          python: nightly
+#          env: TOXENV=py37
+#        - os: linux
+#          python: 3.5
+#          env: TOXENV=docs
+#        - os: linux
+#          python: 2.7
+#          env: TOXENV=pep8
+#        - os: linux
+#          python: 3.4
+#          env: TOXENV=pep8
+#        - os: linux
+#          python: 3.5
+#          env: TOXENV=packaging
+#        - os: osx
+#          language: generic
+#          env: TOXENV=py35
+#        - os: osx
+#          language: generic
+#          env: TOXENV=py27
+##    uncomment and adjust if you want to allow some failures
+#    allow_failures:
+#        - os: linux
+#          python: nightly
+#          env: TOXENV=py37
 
 # travis-ci runs by default on ancient Ubuntu 12.04 (precise)
 # following options will give us Ubuntu 14.04 (trusty)

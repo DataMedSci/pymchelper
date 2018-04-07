@@ -16,19 +16,19 @@ environment:
 
     - platform: x86
       PYTHON: "C:\\Python35"
-      MINICONDAPATH: "C:\\Miniconda3"
-
-    - platform: x64
-      PYTHON: "C:\\Python35"
-      MINICONDAPATH: "C:\\Miniconda3-x64"
-
-    - platform: x86
-      PYTHON: "C:\\Python36"
       MINICONDAPATH: "C:\\Miniconda35"
 
     - platform: x64
-      PYTHON: "C:\\Python36"
+      PYTHON: "C:\\Python35"
       MINICONDAPATH: "C:\\Miniconda35-x64"
+
+    - platform: x86
+      PYTHON: "C:\\Python36"
+      MINICONDAPATH: "C:\\Miniconda36"
+
+    - platform: x64
+      PYTHON: "C:\\Python36"
+      MINICONDAPATH: "C:\\Miniconda36-x64"
 
 
 init:
@@ -68,6 +68,8 @@ install:
   - python -c "import struct;print(8 * struct.calcsize('P'))"
 
 before_test:
+  - python -m pip uninstall versioneer -y
+  - python -m pip install "versioneer<0.18"
   - python %MINICONDAPATH%\envs\python_pymchelper\scripts\versioneer install
 
 test_script:
