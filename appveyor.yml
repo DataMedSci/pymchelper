@@ -57,6 +57,7 @@ before_test:
 
 test_script:
 # make wheel package
+  - pip install wheel
   - python setup.py bdist_wheel
 # clean build directory
   - rd /s /q build
