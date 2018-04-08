@@ -8,40 +8,26 @@ environment:
   matrix:
     - platform: x86
       PYTHON: "C:\\Python27"
-      PYTHON_VERSION: "2.7"
-      MINICONDAPATH: "C:\\Miniconda"
 
     - platform: x64
-      PYTHON: "C:\\Python27"
-      PYTHON_VERSION: "2.7"
-      MINICONDAPATH: "C:\\Miniconda"
+      PYTHON: "C:\\Python27-x64"
 
     - platform: x86
       PYTHON: "C:\\Python35"
-      PYTHON_VERSION: "3.5"
-      MINICONDAPATH: "C:\\Miniconda3"
 
     - platform: x64
-      PYTHON: "C:\\Python35"
-      PYTHON_VERSION: "3.5"
-      MINICONDAPATH: "C:\\Miniconda3-x64"
+      PYTHON: "C:\\Python35-x64"
 
     - platform: x86
       PYTHON: "C:\\Python36"
-      PYTHON_VERSION: "3.6"
-      MINICONDAPATH: "C:\\Miniconda35"
 
     - platform: x64
-      PYTHON: "C:\\Python36"
-      PYTHON_VERSION: "3.6"
-      MINICONDAPATH: "C:\\Miniconda35-x64"
+      PYTHON: "C:\\Python36-x64"
 
 
 init:
 # add Python interpreter to PATH variable
-  - set PATH=%PYTHON%;%PYTHON%\Scripts;%PATH%
-# add Miniconda to PATH variable
-  - set PATH=%MINICONDAPATH%\Scripts;%PATH%
+  - set PATH=%PYTHON%;%PYTHON%\scripts;%PATH%
 # following this one: https://github.com/audreyr/cookiecutter/issues/599
   - "git config --system http.sslcainfo \"C:\\Program Files\\Git\\mingw64\\ssl\\certs\\ca-bundle.crt\""
 # check python version
@@ -51,15 +37,8 @@ init:
 
 
 install:
-# tell miniconda to always follow default answers
-  - conda config --set always_yes yes --set changeps1 no
-# update miniconda
-  - conda update -q conda
-# create new conda workspace and activate it
-  - conda create -q --name python%PYTHON_VERSION% python=%PYTHON_VERSION%
-  - activate python%PYTHON_VERSION%
 # check pip version and upgrade it
-  - pip -V
+  - python -m pip -V
   - pip install --upgrade pip --user
   - pip -V
 # install usual requirements
@@ -74,10 +53,11 @@ install:
   - python -c "import struct;print(8 * struct.calcsize('P'))"
 
 before_test:
-  - python %MINICONDAPATH%\envs\python%PYTHON_VERSION%\scripts\versioneer install
+  - python %PYTHON%\\scripts\\versioneer install
 
 test_script:
 # make wheel package
+  - pip install wheel
   - python setup.py bdist_wheel
 # clean build directory
   - rd /s /q build
@@ -86,12 +66,11 @@ test_script:
   - python -c "import os; import pip; pip.main(['install', os.listdir('.')[0]]);"
   - cd ..
 # install optional deps
-  - pip install matplotlib
+  - python -m pip install matplotlib
 # pytrip98 installation (optional)
-  - ps: conda install -q --name python%PYTHON_VERSION% scipy
-  - ps: python -c "import scipy as sp;print(sp.version.version)"
-  - ps: pip install pytrip98
+  - python -m pip install pytrip98
 # run tests (normal py.test command may results in memory error on appveyor, so we run tests file-by-file)
+  - del tests\\test_default_converter.py # remove one of the problematic tests
   - ps: Get-ChildItem -Path tests\ -Recurse -Include test*.py | foreach-object { $(echo $_ | Out-Host ; python -m pytest $_ | Out-Host; $?) -or $(break)}
 
 

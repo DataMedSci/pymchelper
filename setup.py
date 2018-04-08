@@ -91,7 +91,7 @@ def get_version():
     import versioneer
     version = versioneer.get_version()
     parsed_version = parse_version(version)
-    if '*@' in parsed_version[1]:
+    if '*@' in str(parsed_version):
         import time
         version += str(int(time.time()))
     return version
