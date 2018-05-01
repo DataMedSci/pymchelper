@@ -157,6 +157,7 @@ setuptools.setup(
             'pld2sobp=pymchelper.utils.pld2sobp:main',
         ],
     },
+    package_data={'pymchelper': ['flair/db/*']},
     install_requires=[
         'enum34',
         'numpy'
