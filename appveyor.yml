@@ -49,7 +49,7 @@ install:
   - python -c "import struct;print(8 * struct.calcsize('P'))"
 
 before_test:
-  - versioneer install
+  - %PYTHON%\scripts\versioneer install
 
 test_script:
 # make wheel package
