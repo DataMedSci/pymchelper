@@ -39,7 +39,7 @@ init:
 install:
 # check pip version and upgrade it
   - pip -V
-  - pip install --upgrade pip --user
+  - pip install --upgrade pip
   - pip -V
 # install usual requirements
   - pip install --upgrade -r tests/requirements-test.txt
