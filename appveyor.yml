@@ -62,10 +62,7 @@ test_script:
 # clean build directory
   - rd /s /q build
 # install generated package
-  - cd dist
-# test
-  - python -c "import os; import pip; pip.main(['install', os.listdir('.')[0]]);"
-  - cd ..
+  - python -m pip install --no-index --find-links=dist pymchelper
 # install optional deps
   - python -m pip install matplotlib
 # pytrip98 installation (optional)
