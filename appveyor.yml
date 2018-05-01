@@ -61,7 +61,7 @@ test_script:
   - rd /s /q pymchelper
   - del setup.py
   - dir dist\
-  - ps: Get-ChildItem -Path dist\ -Recurse -Include *.whl | foreach-object { $(echo $_ | Out-Host ; pip install $_ | Out-Host; $?) -or $(break)}
+  - ps: Get-ChildItem -Path dist\ -Recurse -Include *.whl | foreach-object { echo $_ | Out-Host ; pip install -vvv $_}
 # install optional deps
   - pip install matplotlib
 # pytrip98 installation (optional)
