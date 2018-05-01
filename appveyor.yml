@@ -42,8 +42,8 @@ install:
   - pip install --upgrade pip --user
   - python -m pip -V
 # install usual requirements
-  - pip install --upgrade -r tests/requirements-test.txt
-  - pip install --upgrade -r requirements.txt
+  - python -m pip install --upgrade -r tests/requirements-test.txt
+  - python -m pip install --upgrade -r requirements.txt
 # check numpy version
   - python -c "import numpy as np;print(np.version.version)"
 # check python and pip versions
@@ -57,7 +57,7 @@ before_test:
 
 test_script:
 # make wheel package
-  - pip install wheel
+  - python -m pip install wheel
   - python setup.py bdist_wheel
 # clean build directory
   - rd /s /q build
