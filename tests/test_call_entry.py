@@ -1,7 +1,6 @@
 import os
 import unittest
 import logging
-import pymchelper
 from pymchelper import run
 from examples import generate_detect_shieldhit, generate_fluka_input
 from pymchelper.flair import Input

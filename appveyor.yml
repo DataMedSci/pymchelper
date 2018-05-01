@@ -48,6 +48,7 @@ install:
 # check 32 or 64 bit
   - python -c "import struct;print(8 * struct.calcsize('P'))"
 
+# install versioneer stuff
 before_test:
   - python %PYTHON%\scripts\versioneer install
 
@@ -57,14 +58,13 @@ test_script:
   - python setup.py bdist_wheel
 # clean build directory
   - rd /s /q build
-# install generated package
+# remove source directory, to be sure that we use only wheel package for testing
   - rd /s /q pymchelper
   - del setup.py
-  - dir dist\
-  - ps: Get-ChildItem -Path dist\ -Recurse -Include *.whl | foreach-object { echo $_ | Out-Host ; pip install -vvv $_}
+# install wheel package via pip, as we do not know the wheel filename in advance, we loop over all *.whl files in dist directory
+  - ps: Get-ChildItem -Path dist\ -Recurse -Include *.whl | foreach-object { echo $_ | Out-Host ; pip install $_}
 # install optional deps
   - pip install matplotlib
-# pytrip98 installation (optional)
   - pip install pytrip98
 # run tests (normal py.test command may results in memory error on appveyor, so we run tests file-by-file)
   - del tests\\test_default_converter.py # remove one of the problematic tests
