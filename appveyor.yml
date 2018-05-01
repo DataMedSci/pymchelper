@@ -40,7 +40,7 @@ install:
 # check pip version and upgrade it
   - python -m pip -V
   - pip install --upgrade pip --user
-  - pip -V
+  - python -m pip -V
 # install usual requirements
   - pip install --upgrade -r tests/requirements-test.txt
   - pip install --upgrade -r requirements.txt
@@ -48,7 +48,7 @@ install:
   - python -c "import numpy as np;print(np.version.version)"
 # check python and pip versions
   - python -V
-  - pip -V
+  - python -m pip -V
 # check 32 or 64 bit
   - python -c "import struct;print(8 * struct.calcsize('P'))"
 
