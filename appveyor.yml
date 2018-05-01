@@ -63,6 +63,7 @@ test_script:
   - rd /s /q build
 # install generated package
   - cd dist
+# test
   - python -c "import os; import pip; pip.main(['install', os.listdir('.')[0]]);"
   - cd ..
 # install optional deps
