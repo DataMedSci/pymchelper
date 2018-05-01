@@ -63,8 +63,7 @@ test_script:
   - rd /s /q build
 # install generated package
   - rd /s /q pymchelper
-  - python -m pip uninstall pymchelper
-  - python -m pip install --no-index --find-links=dist pymchelper
+  - python -m wheel install dist\pymchelper*whl
 # install optional deps
   - python -m pip install matplotlib
 # pytrip98 installation (optional)
