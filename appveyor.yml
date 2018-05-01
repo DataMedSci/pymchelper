@@ -38,17 +38,17 @@ init:
 
 install:
 # check pip version and upgrade it
-  - python -m pip -V
+  - pip -V
   - pip install --upgrade pip --user
-  - python -m pip -V
+  - pip -V
 # install usual requirements
-  - python -m pip install --upgrade -r tests/requirements-test.txt
-  - python -m pip install --upgrade -r requirements.txt
+  - pip install --upgrade -r tests/requirements-test.txt
+  - pip install --upgrade -r requirements.txt
 # check numpy version
   - python -c "import numpy as np;print(np.version.version)"
 # check python and pip versions
   - python -V
-  - python -m pip -V
+  - pip -V
 # check 32 or 64 bit
   - python -c "import struct;print(8 * struct.calcsize('P'))"
 
@@ -57,7 +57,7 @@ before_test:
 
 test_script:
 # make wheel package
-  - python -m pip install wheel
+  - pip install wheel
   - python setup.py bdist_wheel
 # clean build directory
   - rd /s /q build
@@ -67,9 +67,9 @@ test_script:
   - dir dist\
   - ps: Get-ChildItem -Path dist\ -Recurse -Include *.whl | foreach-object { $(echo $_ | Out-Host ; python -m pip install $_ | Out-Host; $?) -or $(break)}
 # install optional deps
-  - python -m pip install matplotlib
+  - pip install matplotlib
 # pytrip98 installation (optional)
-  - python -m pip install pytrip98
+  - pip install pytrip98
 # run tests (normal py.test command may results in memory error on appveyor, so we run tests file-by-file)
   - del tests\\test_default_converter.py # remove one of the problematic tests
   - ps: Get-ChildItem -Path tests\ -Recurse -Include test*.py | foreach-object { $(echo $_ | Out-Host ; python -m pytest $_ | Out-Host; $?) -or $(break)}
