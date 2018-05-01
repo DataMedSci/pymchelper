@@ -28,8 +28,6 @@ environment:
 init:
 # add Python interpreter to PATH variable
   - set PATH=%PYTHON%;%PYTHON%\scripts;%PATH%
-# following this one: https://github.com/audreyr/cookiecutter/issues/599
-  - "git config --system http.sslcainfo \"C:\\Program Files\\Git\\mingw64\\ssl\\certs\\ca-bundle.crt\""
 # check python version
   - python -V
 # check 32 or 64 bit
@@ -37,9 +35,7 @@ init:
 
 
 install:
-# check pip version and upgrade it
-  - pip -V
-  - pip install --upgrade pip
+# check pip version
   - pip -V
 # install usual requirements
   - pip install --upgrade -r tests/requirements-test.txt
@@ -53,7 +49,7 @@ install:
   - python -c "import struct;print(8 * struct.calcsize('P'))"
 
 before_test:
-  - python %PYTHON%\\scripts\\versioneer install
+  - versioneer install
 
 test_script:
 # make wheel package
@@ -65,13 +61,13 @@ test_script:
   - rd /s /q pymchelper
   - del setup.py
   - dir dist\
-  - ps: Get-ChildItem -Path dist\ -Recurse -Include *.whl | foreach-object { $(echo $_ | Out-Host ; python -m pip install $_ | Out-Host; $?) -or $(break)}
+  - ps: Get-ChildItem -Path dist\ -Recurse -Include *.whl | foreach-object { $(echo $_ | Out-Host ; pip install $_ | Out-Host; $?) -or $(break)}
 # install optional deps
   - pip install matplotlib
 # pytrip98 installation (optional)
   - pip install pytrip98
 # run tests (normal py.test command may results in memory error on appveyor, so we run tests file-by-file)
   - del tests\\test_default_converter.py # remove one of the problematic tests
-  - ps: Get-ChildItem -Path tests\ -Recurse -Include test*.py | foreach-object { $(echo $_ | Out-Host ; python -m pytest $_ | Out-Host; $?) -or $(break)}
+  - ps: Get-ChildItem -Path tests\ -Recurse -Include test*.py | foreach-object { $(echo $_ | Out-Host ; pytest $_ | Out-Host; $?) -or $(break)}
 
 
