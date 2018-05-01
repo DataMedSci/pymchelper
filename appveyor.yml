@@ -63,6 +63,7 @@ test_script:
   - rd /s /q build
 # install generated package
   - rd /s /q pymchelper
+  - del setup.py
   - dir dist\
   - ps: Get-ChildItem -Path dist\ -Recurse -Include *.whl | foreach-object { $(echo $_ | Out-Host ; python -m pip install $_ | Out-Host; $?) -or $(break)}
 # install optional deps
