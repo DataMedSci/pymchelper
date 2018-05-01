@@ -62,7 +62,7 @@ test_script:
 # clean build directory
   - rd /s /q build
 # install generated package
-  - python -m pip install --ignore-installed --force-reinstall --no-index --find-links=dist pymchelper
+  - python -m pip install --force-reinstall --no-index --find-links=dist pymchelper
 # install optional deps
   - python -m pip install matplotlib
 # pytrip98 installation (optional)
