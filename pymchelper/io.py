@@ -94,10 +94,6 @@ def frompattern(pattern, error, nan, jobs=-1, verbose=0):
 
     core_names_dict = group_input_files(list_of_matching_files)
 
-    def _get_detector(filelist, error, nan):
-        detector = fromfilelist(filelist, error, nan)
-        return detector
-
     # parallel execution of output file generation, using all CPU cores
     # see http://pythonhosted.org/joblib
     try:
@@ -107,15 +103,15 @@ def frompattern(pattern, error, nan, jobs=-1, verbose=0):
         # joblib Parallel class expects the verbosity as a larger number (i.e. multiple of 10)
         worker = Parallel(n_jobs=jobs, verbose=verbose * 10)
         result = worker(
-            delayed(_get_detector)(filelist, error, nan)
+            delayed(fromfilelist)(filelist, error, nan)
             for core_name, filelist in core_names_dict.items()
         )
     except (ImportError, SyntaxError):
         # single-cpu implementation, in case joblib library fails (i.e. Python 3.2)
         logger.info("Single CPU processing")
-        result = [_get_detector(core_name, filelist)
+        result = [fromfilelist(filelist, error, nan)
                   for core_name, filelist in core_names_dict.items()]
-        return result
+    return result
 
 
 def convertfromlist(filelist, error, nan, outputdir, converter_name, options, outputfile=None):
