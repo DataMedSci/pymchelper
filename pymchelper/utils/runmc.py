@@ -41,7 +41,7 @@ def main(args=sys.argv[1:]):
     parser.add_argument('-o', '--output-dir', help='Output directory (default: .)',
                         dest='outdir', type=str, default='.')
     parser.add_argument('-t', '--out-type', help='output data type (default {:s})'.format(MCOutType.txt.name),
-                        dest='outtype', type=str,
+                        dest='outtype', type=str, nargs='*',
                         choices=[x.name for x in MCOutType], default=MCOutType.txt.name)
     parser.add_argument('-w', '--work-dir', help='Workspace directory (default: .)',
                         dest='workspace', type=str, default='.')
@@ -85,8 +85,11 @@ def main(args=sys.argv[1:]):
     elapsed = timeit.default_timer() - start_time
     print("Output saving {:.3f} seconds".format(elapsed))
 
+    start_time = timeit.default_timer()
     if workspaces and (MCOutType.raw.name not in parsed_args.outtype):
         r.clean(workspaces)
+    elapsed = timeit.default_timer() - start_time
+    print("Workspace cleaning {:.3f} seconds".format(elapsed))
 
 
 if __name__ == '__main__':

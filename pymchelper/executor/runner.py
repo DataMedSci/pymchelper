@@ -69,7 +69,7 @@ class Runner:
         for det in dets:
             total_results[det.corename] = det
         elapsed = timeit.default_timer() - start_time
-        print("Output reading {:.3f} seconds".format(elapsed))
+        print("Workspace reading {:.3f} seconds".format(elapsed))
 
         return total_results
 
