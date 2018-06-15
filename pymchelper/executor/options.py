@@ -2,8 +2,6 @@ import logging
 import os
 import sys
 
-logger = logging.getLogger(__name__)
-
 
 class FlukaEnviroment:
     executable_file = 'rfluka'
@@ -20,8 +18,9 @@ class MCOptions:
         self.executable_path = executable_path
         if self.executable_path is None:
             self.executable_path = self._discover_mc_executable()
-        self.user_opt = user_opt
-        self._validate_user_opt(self.user_opt)
+        self.user_opt = user_opt if user_opt else ''
+        if self.user_opt:
+            self._validate_user_opt(self.user_opt)
         self.workspace = '.'
 
     def set_rng_seed(self, rng_seed):
@@ -30,7 +29,7 @@ class MCOptions:
             self.user_opt += " -N {:d}".format(rng_seed)
         else:
             location = options_list.index('-N')
-            options_list[location+1] = str(rng_seed)
+            options_list[location + 1] = str(rng_seed)
             self.user_opt = ' '.join(options_list)
 
     def set_nstat(self, nstat):
@@ -39,7 +38,7 @@ class MCOptions:
             self.user_opt += " -n {:d}".format(nstat)
         else:
             location = options_list.index('-n')
-            options_list[location+1] = str(nstat)
+            options_list[location + 1] = str(nstat)
             self.user_opt = ' '.join(options_list)
 
     @staticmethod
@@ -73,7 +72,7 @@ class MCOptions:
     def _discover_mc_executable(self):
         dirs_with_mc_exe = []
         for item in os.environ['PATH'].split(':'):
-            logger.debug("Inspecting {:s}".format(item))
+            logging.debug("Inspecting {:s}".format(item))
             if os.path.exists(item) and os.path.isdir(item) and self._mc_enviroment.executable_file in os.listdir(item):
                 dirs_with_mc_exe.append(item)
 
@@ -86,7 +85,7 @@ class MCOptions:
     def __str__(self):
         result = "{executable:s} {options:s} {workspace:s}".format(
             executable=os.path.abspath(self.executable_path),
-            options=self.user_opt,
+            options=self.user_opt if self.user_opt else '',
             workspace=os.path.abspath(self.workspace)
         )
         return result

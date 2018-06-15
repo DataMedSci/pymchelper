@@ -139,7 +139,11 @@ def frompattern(pattern, error=ErrorEstimate.stderr, nan=True, jobs=-1, verbose=
     :param verbose: optional verbosity level.
     :return: a list of estimators, or an empty list if no files were found.
     """
-    list_of_matching_files = glob(pattern)
+
+    try:
+        list_of_matching_files = glob(pattern)
+    except TypeError as e:  # noqa: F841
+        list_of_matching_files = pattern
 
     core_names_dict = group_input_files(list_of_matching_files)
 
