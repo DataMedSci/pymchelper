@@ -9,8 +9,6 @@ from pymchelper.executor.options import MCOptions
 from pymchelper.executor.runner import MCOutType, Runner
 from pymchelper.writers.plots import PlotDataWriter, ImageWriter
 
-logger = logging.getLogger(__name__)
-
 
 def set_logger_level(args):
     if args.quiet:
@@ -69,21 +67,20 @@ def main(args=sys.argv[1:]):
     r = Runner(jobs=parsed_args.jobs, options=opt)
     workspaces = r.run(outdir=parsed_args.outdir)
     data = r.get_data(workspaces)
-    print(data)
 
-    if MCOutType.txt.name in parsed_args.outtype:
+    if data and (MCOutType.txt.name in parsed_args.outtype):
         for key in data:
             output_file = os.path.join(parsed_args.outdir, key)
             writer = PlotDataWriter(output_file, None)
             writer.write(data[key])
 
-    if MCOutType.plot.name in parsed_args.outtype:
+    if data and (MCOutType.plot.name in parsed_args.outtype):
         for key in data:
             output_file = os.path.join(parsed_args.outdir, key)
-            writer = ImageWriter(output_file, argparse.Namespace(colormap='gnuplot2'))
+            writer = ImageWriter(output_file, argparse.Namespace(colormap='gnuplot2', log=''))
             writer.write(data[key])
 
-    if MCOutType.raw.name not in parsed_args.outtype:
+    if workspaces and (MCOutType.raw.name not in parsed_args.outtype):
         r.clean(workspaces)
 
 

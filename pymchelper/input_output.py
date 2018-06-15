@@ -127,7 +127,7 @@ def fromfilelist(input_file_list, error, nan):
     return result
 
 
-def frompattern(pattern, error, nan, jobs=-1, verbose=0):
+def frompattern(pattern, error=ErrorEstimate.stderr, nan=False, jobs=-1, verbose=0):
     """
 
     :param pattern:
@@ -137,7 +137,11 @@ def frompattern(pattern, error, nan, jobs=-1, verbose=0):
     :param verbose:
     :return:
     """
-    list_of_matching_files = glob(pattern)
+
+    try:
+        list_of_matching_files = glob(pattern)
+    except TypeError as e:  # noqa: F841
+        list_of_matching_files = pattern
 
     core_names_dict = group_input_files(list_of_matching_files)
 

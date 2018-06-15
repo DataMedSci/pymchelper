@@ -1,13 +1,11 @@
 import logging
+import glob
 import os
 import shutil
 import subprocess
 from enum import IntEnum
 from multiprocessing import Pool
-
-import numpy as np
-
-logger = logging.getLogger(__name__)
+from pymchelper.io import frompattern
 
 
 class MCOutType(IntEnum):
@@ -23,12 +21,6 @@ class FlukaEnviroment:
 class SH12AEnviroment:
     executable_file = 'shieldhit'
 
-
-#
-# def gcd(a, b):
-#     if a%b == 0:
-#         return b
-#     return gcd(b, a%b)
 
 class KeyboardInterruptError(Exception):
     pass
@@ -47,36 +39,30 @@ class Runner:
         try:
             res = self.pool.map(e, rng_seeds)
         except KeyboardInterrupt:
-            logger.info('got ^C while pool mapping, terminating the pool')
+            logging.info('got ^C while pool mapping, terminating the pool')
             self.pool.terminate()
-            logger.info('pool is terminated')
+            logging.info('pool is terminated')
         except Exception as e:
-            logger.info('got exception: %r, terminating the pool' % (e,))
+            logging.info('got exception: %r, terminating the pool' % (e,))
             self.pool.terminate()
-            logger.info('pool is terminated')
+            logging.info('pool is terminated')
 
-        logger.info(res)
+            logging.info(res)
         return res
 
     def get_data(self, workspaces):
-        import glob
-        from pymchelper.detector import Detector
+        if not workspaces:
+            return None
         total_results = {}
-        for d in workspaces:
-            files = sorted(glob.glob("{:s}/*.bdo".format(d)))
-            for item in files:
-                key = os.path.basename(item)[:-8]
-                value = Detector()
-                value.read(item)
-                if key not in total_results:
-                    total_results[key] = value
-                    total_results[key]._M2 = np.zeros_like(value.data)
-                    total_results[key].error = np.zeros_like(value.data)
-                else:
-                    total_results[key].average_with_other(value)
 
-        for k in total_results:
-            total_results[k].error /= np.sqrt(total_results[k].counter)
+        full_list = []
+        for d in workspaces:
+            tmp_list = sorted(glob.glob(os.path.join(d, "*.bdo")))
+            full_list += tmp_list
+
+        dets = frompattern(full_list)
+        for det in dets:
+            total_results[det.corename] = det
 
         return total_results
 
@@ -105,7 +91,7 @@ class Executor:
             current_options = self.options
             current_options.set_rng_seed(rng_seed)
             current_options.workspace = workspace
-            logger.debug('dir {:s}, cmd {:s}'.format(workspace, str(current_options)))
+            logging.debug('dir {:s}, cmd {:s}'.format(workspace, str(current_options)))
 
             DEVNULL = open(os.devnull, 'wb')
             subprocess.check_call(str(current_options).split(), cwd=workspace, stdout=DEVNULL, stderr=DEVNULL)
