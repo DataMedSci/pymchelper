@@ -3,6 +3,7 @@ import glob
 import os
 import shutil
 import subprocess
+import timeit
 from enum import IntEnum
 from multiprocessing import Pool
 from pymchelper.fileio import frompattern
@@ -33,6 +34,7 @@ class Runner:
         self.jobs = self.pool._processes  # always int
 
     def run(self, outdir):
+        start_time = timeit.default_timer()
         rng_seeds = range(1, self.jobs + 1)
         e = Executor(outdir=outdir, options=self.options)
         res = None
@@ -48,11 +50,14 @@ class Runner:
             logging.info('pool is terminated')
 
             logging.info(res)
+        elapsed = timeit.default_timer() - start_time
+        print("SH12A elapsed time {:.3f} seconds".format(elapsed))
         return res
 
     def get_data(self, workspaces):
         if not workspaces:
             return None
+        start_time = timeit.default_timer()
         total_results = {}
 
         full_list = []
@@ -63,6 +68,8 @@ class Runner:
         dets = frompattern(full_list)
         for det in dets:
             total_results[det.corename] = det
+        elapsed = timeit.default_timer() - start_time
+        print("Output reading {:.3f} seconds".format(elapsed))
 
         return total_results
 
