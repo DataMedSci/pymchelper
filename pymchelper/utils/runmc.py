@@ -4,6 +4,7 @@ import os
 import logging
 import sys
 import argparse
+import timeit
 
 from pymchelper.executor.options import MCOptions
 from pymchelper.executor.runner import MCOutType, Runner
@@ -68,6 +69,7 @@ def main(args=sys.argv[1:]):
     workspaces = r.run(outdir=parsed_args.outdir)
     data = r.get_data(workspaces)
 
+    start_time = timeit.default_timer()
     if data and (MCOutType.txt.name in parsed_args.outtype):
         for key in data:
             output_file = os.path.join(parsed_args.outdir, key)
@@ -79,6 +81,9 @@ def main(args=sys.argv[1:]):
             output_file = os.path.join(parsed_args.outdir, key)
             writer = ImageWriter(output_file, argparse.Namespace(colormap='gnuplot2', log=''))
             writer.write(data[key])
+
+    elapsed = timeit.default_timer() - start_time
+    print("Output saving {:.3f} seconds".format(elapsed))
 
     if workspaces and (MCOutType.raw.name not in parsed_args.outtype):
         r.clean(workspaces)
