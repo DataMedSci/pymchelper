@@ -11,13 +11,12 @@ from pymchelper.executor.runner import Runner
 input_cfg = {
     'beam.dat': """
 RNDSEED      	89736501     ! Random seed
-JPART0       	25           ! Incident particle type
-HIPROJ     	12.0    6.0  ! A and Z of heavy ion
+JPART0       	2           ! Incident particle type
 TMAX0      	{energy:3.6f}   0.0  ! Incident energy; (MeV/nucl)
-NSTAT           500    500 ! NSTAT, Step of saving
+NSTAT           1000    -1 ! NSTAT, Step of saving
 STRAGG          2            ! Straggling: 0-Off 1-Gauss, 2-Vavilov
 MSCAT           2            ! Mult. scatt 0-Off 1-Gauss, 2-Moliere
-NUCRE           1            ! Nucl.Reac. switcher: 1-ON, 0-OFF
+NUCRE           0            ! Nucl.Reac. switcher: 1-ON, 0-OFF
 """,
     'mat.dat': """
 MEDIUM 1
@@ -27,7 +26,7 @@ END
     'detect.dat': """
 *----0---><----1---><----2---><----3---><----4---><----5---><----6--->
 MSH             -5.0      -5.0       0.0       5.0       5.0      30.0
-                   1         1       300        -1    ENERGY   ex_zmsh
+                   1         1      1000        -1    ENERGY   ex_zmsh
 """,
     'geo.dat': """
 *---><---><--------><------------------------------------------------>
@@ -72,8 +71,8 @@ def max_pos_at_energy(energy_MeV):
     input_dict = input_cfg.copy()
     input_dict['beam.dat'] = input_dict['beam.dat'].format(energy=energy_MeV)
     data = run_sh12a(input_dict)
-    index_of_max = np.argmax(data.v)
-    max_pos_cm = list(data.z)[index_of_max]
+    index_of_max = np.argmax(data.data_raw)
+    max_pos_cm = data.z.data[index_of_max]
     print("Maximum position {:4.3f} cm at energy {:3.3f} MeV".format(max_pos_cm, energy_MeV))
     return max_pos_cm
 
