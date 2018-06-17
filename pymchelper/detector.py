@@ -7,7 +7,7 @@ import numpy as np
 # on older numpy versions this shouldn't have effect
 try:
     np.set_printoptions(legacy="1.13")
-except TypeError as e:
+except TypeError as e:  # noqa: F841
     pass
 
 logger = logging.getLogger(__name__)
