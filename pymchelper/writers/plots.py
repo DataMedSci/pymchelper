@@ -41,12 +41,18 @@ class PlotDataWriter:
             else:  # save one number to the file
                 np.savetxt(self.filename, [detector.data_raw], fmt="%g", delimiter=' ')
         else:
+            # in case differential scorer was used there is a case when axis has to be swapped
+            # this happens when X-constant, Y-differential, Z-scored
+            axis_numbers = list(range(detector.dimension))
+            if hasattr(detector, 'dif_axis') and detector.dif_axis == 1:
+                axis_numbers = [1, 0]
+
             # each axis may have different number of points, this is what we store here:
-            axis_data_columns_1d = [detector.plot_axis(i).data for i in range(detector.dimension)]
+            axis_data_columns_1d = [detector.plot_axis(i).data for i in axis_numbers]
 
             # now we calculate running index for each axis
             axis_data_columns_long = [np.meshgrid(*axis_data_columns_1d, indexing='ij')[i].ravel()
-                                      for i in range(len(axis_data_columns_1d))]
+                                      for i in axis_numbers]
 
             fmt = "%g" + " %g" * detector.dimension
             data_to_save = axis_data_columns_long + [data_raw]
