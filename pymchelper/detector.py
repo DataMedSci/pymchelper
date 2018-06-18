@@ -257,6 +257,13 @@ class Detector:
             elif self.z.n == 1:
                 plotting_order = (0, 1, 2)  # X,Y variable; Z constant
 
+            # when SH12A differential scorer is used, we assume that differential
+            # quantity should go last
+            # a special case is when when X-constant, Y-differential, Z-scored
+            # we need to swap X and Z to guarantee that the differential quantity will be last
+            if hasattr(self, 'dif_axis') and self.dif_axis == 1:
+                plotting_order = (2, 1, 0)
+
         return self.axis(plotting_order[id])
 
     @property
