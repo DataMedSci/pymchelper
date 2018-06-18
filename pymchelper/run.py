@@ -7,7 +7,7 @@ import sys
 import argparse
 
 from pymchelper.detector import ErrorEstimate
-from pymchelper.io import convertfrompattern, convertfromlist
+from pymchelper.mcio import convertfrompattern, convertfromlist
 from pymchelper.writers.common import Converters
 from pymchelper.writers.plots import ImageWriter, PlotAxis
 
