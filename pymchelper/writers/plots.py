@@ -41,12 +41,14 @@ class PlotDataWriter:
             else:  # save one number to the file
                 np.savetxt(self.filename, [detector.data_raw], fmt="%g", delimiter=' ')
         else:
+            axis_numbers = list(range(detector.dimension))
+
             # each axis may have different number of points, this is what we store here:
-            axis_data_columns_1d = [detector.plot_axis(i).data for i in range(detector.dimension)]
+            axis_data_columns_1d = [detector.plot_axis(i).data for i in axis_numbers]
 
             # now we calculate running index for each axis
             axis_data_columns_long = [np.meshgrid(*axis_data_columns_1d, indexing='ij')[i].ravel()
-                                      for i in range(len(axis_data_columns_1d))]
+                                      for i in axis_numbers]
 
             fmt = "%g" + " %g" * detector.dimension
             data_to_save = axis_data_columns_long + [data_raw]
@@ -153,36 +155,35 @@ class ImageWriter:
     def _make_label(unit, name):
         return name + " " + "[" + unit + "]"
 
-    def _save_2d_error_plot(self, detector, xlist, ylist, elist, x_axis_label, y_axis_label, z_axis_label):
+    def _save_2d_error_plot(self, detector, xr, yr, elist, x_axis_label, y_axis_label, z_axis_label):
         import matplotlib
         matplotlib.use('Agg')
         import matplotlib.pyplot as plt
         from matplotlib import colors
 
-        # configure logscale on X and Y axis (both for positive and negative numbers)
-
         fig, ax = plt.subplots(1, 1)
 
+        # configure logscale on X and Y axis (both for positive and negative numbers)
         if PlotAxis.x in self.axis_with_logscale:
-            plt.xscale('symlog')
+            ax.set_xscale('symlog')
         if PlotAxis.y in self.axis_with_logscale:
-            plt.yscale('symlog')
+            ax.set_yscale('symlog')
 
         if PlotAxis.z in self.axis_with_logscale:
             norm = colors.LogNorm(vmin=elist[elist > 0].min(), vmax=elist.max())
         else:
             norm = colors.Normalize(vmin=elist.min(), vmax=elist.max())
 
-        plt.xlabel(x_axis_label)
-        plt.ylabel(y_axis_label)
+        ax.set_xlabel(x_axis_label)
+        ax.set_ylabel(y_axis_label)
 
-        mesh = plt.pcolormesh(xlist, ylist, elist.clip(0.0), cmap=self.colormap, norm=norm)
+        mesh = ax.pcolorfast(xr, yr, elist.clip(0.0), cmap=self.colormap, norm=norm)
         cbar = fig.colorbar(mesh)
         cbar.set_label(label=z_axis_label, rotation=270, verticalalignment='bottom')
 
         base_name, _ = os.path.splitext(self.plot_filename)
-        plt.savefig(base_name + "_error.png")
-        plt.close()
+        fig.savefig(base_name + "_error.png")
+        plt.close(fig)
 
     def write(self, detector):
         try:
@@ -213,30 +214,29 @@ class ImageWriter:
 
         plot_x_axis = detector.plot_axis(0)
 
-        plt.xlabel(self._make_label(plot_x_axis.unit, plot_x_axis.name))
+        fig, ax = plt.subplots()
+        ax.set_xlabel(self._make_label(plot_x_axis.unit, plot_x_axis.name))
 
         # configure logscale on X and Y axis (both for positive and negative numbers)
         if PlotAxis.x in self.axis_with_logscale:
-            plt.xscale('symlog')
+            ax.set_xscale('symlog')
 
         if PlotAxis.y in self.axis_with_logscale:
-            plt.yscale('symlog')
+            ax.set_yscale('symlog')
 
         # 1-D plotting
         if detector.dimension == 1:
 
             # add optional error area
             if np.any(detector.error):
-                plt.fill_between(plot_x_axis.data,
-                                 (data_raw - error_raw).clip(0.0),
-                                 (data_raw + error_raw).clip(0.0, 1.05 * data_raw.max()),
-                                 alpha=0.2, edgecolor='#CC4F1B', facecolor='#FF9848', antialiased=True)
-            plt.ylabel(self._make_label(detector.unit, detector.name))
-            plt.plot(plot_x_axis.data, data_raw)
+                ax.fill_between(plot_x_axis.data,
+                                (data_raw - error_raw).clip(0.0),
+                                (data_raw + error_raw).clip(0.0, 1.05 * data_raw.max()),
+                                alpha=0.2, edgecolor='#CC4F1B', facecolor='#FF9848', antialiased=True)
+            ax.set_ylabel(self._make_label(detector.unit, detector.name))
+            ax.plot(plot_x_axis.data, data_raw)
         elif detector.dimension == 2:
             plot_y_axis = detector.plot_axis(1)
-
-            xlist, ylist = np.meshgrid(plot_x_axis.data, plot_y_axis.data)
 
             x_axis_label = self._make_label(plot_x_axis.unit, plot_x_axis.name)
             y_axis_label = self._make_label(plot_y_axis.unit, plot_y_axis.name)
@@ -248,26 +248,25 @@ class ImageWriter:
             else:
                 norm = colors.Normalize(vmin=data_raw.min(), vmax=data_raw.max())
 
-            # in case differential scorer was used there is a case when axis has to be swapped
-            # this happens when X-constant, Y-differential, Z-scored
-            if hasattr(detector, 'dif_axis') and detector.dif_axis == 1:
-                x_axis_label, y_axis_label = y_axis_label, x_axis_label
-                xlist, ylist = ylist, xlist
+            xspan = [plot_x_axis.min_val, plot_x_axis.max_val]
+            yspan = [plot_y_axis.min_val, plot_y_axis.max_val]
+            zdata = data_raw.reshape((plot_y_axis.n, plot_x_axis.n))
 
             plt.xlabel(x_axis_label)
             plt.ylabel(y_axis_label)
 
-            shape_tuple = (plot_y_axis.n, plot_x_axis.n)
-            zlist = data_raw.reshape(shape_tuple)
-            plt.pcolormesh(xlist, ylist, zlist, cmap=self.colormap, norm=norm)
+            im = ax.pcolorfast(xspan, yspan, zdata, cmap=self.colormap, norm=norm)
 
-            cbar = plt.colorbar()
+            cbar = plt.colorbar(im)
+            if PlotAxis.z in self.axis_with_logscale:
+                import matplotlib.ticker as ticker
+                cbar.set_ticks(ticker.LogLocator(subs='all', numticks=15))
             cbar.set_label(z_axis_label, rotation=270, verticalalignment='bottom')
 
-        plt.savefig(self.plot_filename)
-        plt.close()
+        fig.savefig(self.plot_filename)
+        plt.close(fig)
 
         # add 2-D error plot if error data present
         if detector.dimension == 2 and not np.all(np.isnan(error_raw)) and np.any(error_raw):
-            elist = error_raw.reshape(shape_tuple)
-            self._save_2d_error_plot(detector, xlist, ylist, elist, x_axis_label, y_axis_label, z_axis_label)
+            edata = error_raw.reshape((plot_y_axis.n, plot_x_axis.n))
+            self._save_2d_error_plot(detector, xspan, yspan, edata, x_axis_label, y_axis_label, z_axis_label)

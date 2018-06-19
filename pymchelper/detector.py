@@ -7,7 +7,7 @@ import numpy as np
 # on older numpy versions this shouldn't have effect
 try:
     np.set_printoptions(legacy="1.13")
-except TypeError as e:
+except TypeError as e:  # noqa: F841
     pass
 
 logger = logging.getLogger(__name__)
@@ -256,6 +256,13 @@ class Detector:
                 plotting_order = (0, 2, 1)  # X,Z variable; Y constant
             elif self.z.n == 1:
                 plotting_order = (0, 1, 2)  # X,Y variable; Z constant
+
+            # when SH12A differential scorer is used, we assume that differential
+            # quantity should go last
+            # a special case is when when X-constant, Y-differential, Z-scored
+            # we need to swap X and Z to guarantee that the differential quantity will be last
+            if hasattr(self, 'dif_axis') and self.dif_axis == 1:
+                plotting_order = (2, 1, 0)
 
         return self.axis(plotting_order[id])
 

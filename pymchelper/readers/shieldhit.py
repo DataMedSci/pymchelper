@@ -428,15 +428,6 @@ class _SHBinaryReader0p6:
                     ymin = detector.dif_min
                     ymax = detector.dif_max
                     detector.dif_axis = 1
-                    # due to the fact that the data in BDO file is arranged differently
-                    # than assumed here, we need to do some reshaping
-                    #   - in the raw BDO file loop goes first over scored value, then over differential quantity
-                    #   - here we have (X-scored, Y-differential, Z-scored), so we need to reshape data from file
-                    # such reshaping is not needed in other cases - there diff. value goes always as last axis
-                    # first we get the reshaped view (3-D matrix)
-                    reshaped_view = detector.data_raw.reshape((nx, ny, nz))
-                    # reshape the data structure by swapping data and differential columns
-                    detector.data_raw = np.transpose(reshaped_view, axes=(0, 2, 1)).flatten()
                 elif nx == 1:
                     nx = detector.dif_n
                     xmin = detector.dif_min
