@@ -6,7 +6,7 @@ import subprocess
 import timeit
 from enum import IntEnum
 from multiprocessing import Pool
-from pymchelper.fileio import frompattern
+from pymchelper.io import frompattern
 
 
 class MCOutType(IntEnum):
