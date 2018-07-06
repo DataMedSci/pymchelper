@@ -51,7 +51,7 @@ matrix:
 #          python: nightly
 #          env: TOXENV=py37
 
-sudo: required
+sudo: false
 dist: xenial  # Ubuntu 16.04
 
 before_install:
