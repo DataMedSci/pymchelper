@@ -24,8 +24,7 @@ class ExcelWriter:
 
         # save only 1-D data
         if detector.dimension != 1:
-            logger.warning("Detector dimension {:d} different than 1, XLS output not supported".format(
-                detector.dimension))
+            logger.warning("Detector dimension {:d} != 1, XLS output not supported".format(detector.dimension))
             return
 
         # create workbook with single sheet
@@ -41,7 +40,7 @@ class ExcelWriter:
             ws.write(i, 1, y)
 
         # save error column (if present)
-        if np.any(detector.error_raw):
+        if np.all(np.isfinite(detector.error_raw)):
             for i, e in enumerate(detector.error_raw):
                 ws.write(i, 2, e)
 
