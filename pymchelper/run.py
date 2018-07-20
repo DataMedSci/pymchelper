@@ -125,6 +125,7 @@ def main(args=sys.argv[1:]):
 
     parsed_args = parser.parse_args(args)
 
+    status = 0
     if parsed_args.command is not None:
         set_logger_level(parsed_args)
 
