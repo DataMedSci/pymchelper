@@ -112,6 +112,9 @@ def main(args=sys.argv[1:]):
     parser_tripddd.add_argument("--energy",
                                 help='energy of the beam [MeV/amu]',
                                 type=float)
+    parser_tripddd.add_argument("--projectile",
+                                help='projectile',
+                                type=str)
     parser_tripddd.add_argument("--ngauss",
                                 help='number of Gauss curves to fit (default: 2)',
                                 choices=(0, 1, 2),
@@ -150,19 +153,22 @@ def main(args=sys.argv[1:]):
         # check required options for tripddd parser
         if parsed_args.command == Converters.tripddd.name and not parsed_args.energy:
             logger.error("Option --energy is required, provide an energy value")
-            return 1
+            return 2
+        if parsed_args.command == Converters.tripddd.name and not parsed_args.projectile:
+            logger.error("Option --projectile is required, provide an projectile")
+            return 2
 
         if parsed_args.many:
-            convertfrompattern(parsed_args.input, output_dir,
-                               converter_name=parsed_args.command, options=parsed_args,
-                               error=parsed_args.error, nan=parsed_args.nan,
-                               jobs=parsed_args.jobs, verbose=parsed_args.verbose)
+            status = convertfrompattern(parsed_args.input, output_dir,
+                                        converter_name=parsed_args.command, options=parsed_args,
+                                        error=parsed_args.error, nan=parsed_args.nan,
+                                        jobs=parsed_args.jobs, verbose=parsed_args.verbose)
         else:
-            convertfromlist(parsed_args.input,
-                            error=parsed_args.error, nan=parsed_args.nan, outputdir=output_dir,
-                            converter_name=parsed_args.command, options=parsed_args, outputfile=output_file)
+            status = convertfromlist(parsed_args.input,
+                                     error=parsed_args.error, nan=parsed_args.nan, outputdir=output_dir,
+                                     converter_name=parsed_args.command, options=parsed_args, outputfile=output_file)
 
-    return 0
+    return status
 
 
 if __name__ == '__main__':
