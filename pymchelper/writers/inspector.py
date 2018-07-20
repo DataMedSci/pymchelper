@@ -40,3 +40,5 @@ class Inspector:
                 plot_hist(detector.data_raw, bincount=70, xlab=False, showSummary=True)
             except ImportError:
                 logger.warning("Detailed summary requires installation of bashplotlib package")
+
+        return 0

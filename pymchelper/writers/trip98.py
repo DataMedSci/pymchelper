@@ -65,6 +65,8 @@ class TripCubeWriter:
 
             cube.write(self.output_corename)
 
+            return 0
+
         elif detector.dettyp in (SHDetType.dlet, SHDetType.tlet, SHDetType.dletg, SHDetType.tletg):
 
             from pytrip import let
@@ -95,9 +97,14 @@ class TripCubeWriter:
             cube.creation_info = _creation_info
 
             cube.write(self.output_corename)
+
+            return 0
+
         else:
             logger.error("Tripcube target is only allowed with dose- or LET-type detectors.")
             raise Exception("Illegal detector for tripcube.")
+
+            return 1
 
 
 class TripDddWriter(object):

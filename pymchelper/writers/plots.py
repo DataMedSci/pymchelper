@@ -193,11 +193,11 @@ class ImageWriter:
             from matplotlib import colors
         except ImportError:
             logger.error("Matplotlib not installed, output won't be generated")
-            return
+            return 1
 
         # skip plotting 0-D and 3-D data
         if detector.dimension in (0, 3):
-            return
+            return 0
 
         data_raw = detector.data_raw
         error_raw = detector.error_raw
@@ -270,3 +270,5 @@ class ImageWriter:
         if detector.dimension == 2 and not np.all(np.isnan(error_raw)) and np.any(error_raw):
             edata = error_raw.reshape((plot_y_axis.n, plot_x_axis.n))
             self._save_2d_error_plot(detector, xspan, yspan, edata, x_axis_label, y_axis_label, z_axis_label)
+
+        return 0
