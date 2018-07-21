@@ -63,6 +63,7 @@ class PlotDataWriter:
 
             # save space-delimited text file
             np.savetxt(self.filename, data_columns, fmt=fmt, delimiter=' ')
+        return 0
 
 
 class GnuplotDataWriter:
@@ -139,6 +140,7 @@ splot \"<awk -f addblanks.awk '{data_filename}'\" u 1:2:3 with pm3d
                 err_cmd = self._error_plot_command.format(data_filename=self.data_filename)
 
             script_file.write(plt_cmd.format(data_filename=self.data_filename, error_plot=err_cmd))
+        return 0
 
 
 class ImageWriter:
