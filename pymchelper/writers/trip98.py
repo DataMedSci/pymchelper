@@ -17,7 +17,7 @@ class TripCubeWriter:
         from pymchelper import __version__ as _pmcversion
         try:
             from pytrip import __version__ as _ptversion
-        except ImportError as e:
+        except ImportError:
             logger.error("pytrip package missing, to install type `pip install pytrip98`")
             return 1
 
@@ -240,7 +240,7 @@ class TripDddWriter(object):
         from pymchelper import __version__ as _pmcversion
         try:
             from pytrip import __version__ as _ptversion
-        except ImportError as e:
+        except ImportError:
             logger.error("pytrip package missing, to install type `pip install pytrip98`")
             return 1
         _creator_info = "Created with pymchelper {:s}; using PyTRiP98 {:s}".format(_pmcversion,
