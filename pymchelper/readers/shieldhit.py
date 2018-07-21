@@ -342,7 +342,7 @@ class _SHBinaryReader0p6:
                 if pl_id in tag_to_name:
                     setattr(detector, tag_to_name[pl_id], pl[0])
 
-                    # estimator block here ---
+                # estimator block here ---
                 if pl_id == SHBDOTagID.est_geotyp:
                     detector.geotyp = SHGeoType[pl[0].strip().lower()]
 
@@ -361,11 +361,11 @@ class _SHBinaryReader0p6:
                     detector.dettyp = SHDetType(pl[0])
 
                 if pl_id == SHBDOTagID.det_part:  # particle to be scored
-                    detector.particle = pl[0]
+                    detector.scored_particle_code = pl[0]
                 if pl_id == SHBDOTagID.det_partz:  # particle to be scored
-                    detector.particle_z = pl[0]
+                    detector.scored_particle_z = pl[0]
                 if pl_id == SHBDOTagID.det_parta:  # particle to be scored
-                    detector.particle_a = pl[0]
+                    detector.scored_particle_a = pl[0]
 
                 if pl_id == SHBDOTagID.det_nbin:
                     nx = pl[0]
