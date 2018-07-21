@@ -156,11 +156,11 @@ class SHBDOTagID(IntEnum):
     sigmay = 0xCB07     # [float] lateral extension of the beam in y direction
     tmax0 = 0xCB08      # [float] the initial energy of the primary particle
     sigmat0 = 0xCB09    # [float] energy spread of the primary particle
-    beamtheta = 0xCB10  # [float] polar angle
-    beamphi = 0xCB11    # [float] azimuth angle
-    beamdivx = 0xCB12   # [float] beam divergence - x coordinate
-    beamdivy = 0xCB13   # [float] beam divergence - y coordinate
-    beamdivz = 0xCB14   # [float] beam divergence - z coordinate
+    beamtheta = 0xCB0A  # [float] polar angle
+    beamphi = 0xCB0B    # [float] azimuth angle
+    beamdivx = 0xCB0C   # [float] beam divergence - x coordinate
+    beamdivy = 0xCB0D   # [float] beam divergence - y coordinate
+    beamdivk = 0xCB0E   # [float] beam divergence - focus
 
     # Group 0xCC00 - 0xCCFF : Configuration
     dele = 0xCC00
@@ -235,7 +235,7 @@ tag_to_name = {
     SHBDOTagID.beamphi: 'projectile_azimuth_angle',
     SHBDOTagID.beamdivx: 'projectile_divergence_x',
     SHBDOTagID.beamdivy: 'projectile_divergence_y',
-    SHBDOTagID.beamdivz: 'projectile_divergence_z'
+    SHBDOTagID.beamdivk: 'projectile_divergence_k'
 }
 
 
