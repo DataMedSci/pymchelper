@@ -145,6 +145,23 @@ class SHBDOTagID(IntEnum):
     user = 0x03         # [char *] optional login name
     host = 0x04         # [char *] optional host where this file was created
 
+    # Group 0xCB00 - 0xCBFF : Beam configuration
+    jpart0 = 0xCB00     # [int] primary particle id
+    apro0 = 0xCB01      # [float] number of nucleons a of the beam particles.
+    zpro0 = 0xCB02      # [float] charge z of the beam particles.
+    beamx = 0xCB03      # [float] start position of the beam - x coordinate
+    beamy = 0xCB04      # [float] start position of the beam - y coordinate
+    beamz = 0xCB05      # [float] start position of the beam - z coordinate
+    sigmax = 0xCB06     # [float] lateral extension of the beam in x direction
+    sigmay = 0xCB07     # [float] lateral extension of the beam in y direction
+    tmax0 = 0xCB08      # [float] the initial energy of the primary particle
+    sigmat0 = 0xCB09    # [float] energy spread of the primary particle
+    beamtheta = 0xCB10  # [float] polar angle
+    beamphi = 0xCB11    # [float] azimuth angle
+    beamdivx = 0xCB12   # [float] beam divergence - x coordinate
+    beamdivy = 0xCB13   # [float] beam divergence - y coordinate
+    beamdivz = 0xCB14   # [float] beam divergence - z coordinate
+
     # Group 0xCC00 - 0xCCFF : Configuration
     dele = 0xCC00
     demin = 0xCC01
@@ -203,17 +220,23 @@ class SHBDOTagID(IntEnum):
     rt_time = 0xAA01         # [unsigned long int] optional runtime in seconds
 
 
-# for future use
-# mapping = {SHBDOTagID.shversion: "mc_code_version",
-#           SHBDOTagID.filedate: "filedate",
-#           SHBDOTagID.user: "user",
-#           SHBDOTagID.host: "host",
-#           SHBDOTagID.rt_nstat: "nstat",
-#           SHBDOTagID.det_dtype: "dettyp",
-#           SHBDOTagID.est_geotyp: "geotyp",
-#           SHBDOTagID.det_xyz_start: ("xmin", "ymin", "zmin"),
-#           SHBDOTagID.det_xyz_stop: ("xmax", "ymax", "zmax"),
-#           SHBDOTagID.det_nbin: ("nx", "ny", "nz")}
+tag_to_name = {
+    SHBDOTagID.jpart0: 'projectile_code',
+    SHBDOTagID.apro0: 'projectile_a',
+    SHBDOTagID.zpro0: 'projectile_z',
+    SHBDOTagID.beamx: 'projectile_position_x',
+    SHBDOTagID.beamy: 'projectile_position_y',
+    SHBDOTagID.beamz: 'projectile_position_z',
+    SHBDOTagID.sigmax: 'projectile_sigma_x',
+    SHBDOTagID.sigmay: 'projectile_sigma_y',
+    SHBDOTagID.tmax0: 'projectile_energy',
+    SHBDOTagID.sigmat0: 'projectile_sigma_energy',
+    SHBDOTagID.beamtheta: 'projectile_polar_angle',
+    SHBDOTagID.beamphi: 'projectile_azimuth_angle',
+    SHBDOTagID.beamdivx: 'projectile_divergence_x',
+    SHBDOTagID.beamdivy: 'projectile_divergence_y',
+    SHBDOTagID.beamdivz: 'projectile_divergence_z'
+}
 
 
 class SHBinaryReader:
@@ -299,14 +322,6 @@ class _SHBinaryReader0p6:
 
                 logger.debug("Read token {:s} 0x{:02x}".format(_pl_type.decode('ASCII'), pl_id))
 
-                # TODO: some clever mapping could be done here surely
-                # something like this: however the keymaps are not complete
-                # attr_keys = SHBDOTagID(pl_id)
-                # attributes = mapping[attr_keys]
-                # for i, attr in enumerate(attributes):
-                #     setattr(detector,attr,pl[i])
-                #
-
                 if pl_id == SHBDOTagID.shversion:
                     detector.mc_code_version = pl[0]
                     logger.debug("MC code version:" + detector.mc_code_version)
@@ -322,6 +337,10 @@ class _SHBinaryReader0p6:
 
                 if pl_id == SHBDOTagID.rt_nstat:
                     detector.nstat = pl[0]
+
+                # beam configuration etc...
+                if pl_id in tag_to_name:
+                    setattr(detector, tag_to_name[pl_id], pl[0])
 
                     # estimator block here ---
                 if pl_id == SHBDOTagID.est_geotyp:
