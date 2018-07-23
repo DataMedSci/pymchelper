@@ -110,10 +110,10 @@ def main(args=sys.argv[1:]):
     parser_tripddd = subparsers.add_parser(Converters.tripddd.name, help='converts to trip98 ddd file')
     add_default_options(parser_tripddd)
     parser_tripddd.add_argument("--energy",
-                                help='energy of the beam [MeV/amu]',
+                                help='energy of the beam [MeV/amu] (0 to guess from data)',
                                 type=float)
     parser_tripddd.add_argument("--projectile",
-                                help='projectile',
+                                help='projectile (0 to guess from data)',
                                 type=str)
     parser_tripddd.add_argument("--ngauss",
                                 help='number of Gauss curves to fit (default: 2)',
