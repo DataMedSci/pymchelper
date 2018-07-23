@@ -47,3 +47,5 @@ class SparseWriter:
                  data=filtered_data,
                  indices=indices,
                  shape=detector.data.shape)
+
+        return 0

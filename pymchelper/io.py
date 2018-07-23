@@ -133,8 +133,8 @@ def convertfromlist(filelist, error, nan, outputdir, converter_name, options, ou
         output_path = detector.corename
     else:
         output_path = os.path.join(outputdir, detector.corename)
-    tofile(detector, output_path, converter_name, options)
-    return None
+    status = tofile(detector, output_path, converter_name, options)
+    return status
 
 
 def convertfrompattern(pattern, outputdir, converter_name, options,
@@ -163,15 +163,18 @@ def convertfrompattern(pattern, outputdir, converter_name, options,
         # options.verbose count the number of `-v` switches provided by user
         # joblib Parallel class expects the verbosity as a larger number (i.e. multiple of 10)
         worker = Parallel(n_jobs=jobs, verbose=verbose * 10)
-        worker(
+        status = worker(
             delayed(convertfromlist)(filelist, error, nan, outputdir, converter_name, options)
             for core_name, filelist in core_names_dict.items()
         )
+        return max(status)
     except (ImportError, SyntaxError):
         # single-cpu implementation, in case joblib library fails (i.e. Python 3.2)
         logger.info("Single CPU processing")
+        status = []
         for core_name, filelist in core_names_dict.items():
-            convertfromlist(filelist, error, nan, outputdir, converter_name, options)
+            status.append(convertfromlist(filelist, error, nan, outputdir, converter_name, options))
+        return max(status)
 
 
 def tofile(detector, filename, converter_name, options):
@@ -186,4 +189,5 @@ def tofile(detector, filename, converter_name, options):
     writer_cls = Converters.fromname(converter_name)
     writer = writer_cls(filename, options)
     logger.debug("Writing file with corename {:s}".format(filename))
-    writer.write(detector)
+    status = writer.write(detector)
+    return status

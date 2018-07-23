@@ -25,7 +25,7 @@ class ExcelWriter:
         # save only 1-D data
         if detector.dimension != 1:
             logger.warning("Detector dimension {:d} != 1, XLS output not supported".format(detector.dimension))
-            return
+            return 1
 
         # create workbook with single sheet
         wb = xlwt.Workbook()
@@ -46,3 +46,5 @@ class ExcelWriter:
 
         # save file
         wb.save(self.filename)
+
+        return 0

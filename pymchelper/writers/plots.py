@@ -63,6 +63,7 @@ class PlotDataWriter:
 
             # save space-delimited text file
             np.savetxt(self.filename, data_columns, fmt=fmt, delimiter=' ')
+        return 0
 
 
 class GnuplotDataWriter:
@@ -139,6 +140,7 @@ splot \"<awk -f addblanks.awk '{data_filename}'\" u 1:2:3 with pm3d
                 err_cmd = self._error_plot_command.format(data_filename=self.data_filename)
 
             script_file.write(plt_cmd.format(data_filename=self.data_filename, error_plot=err_cmd))
+        return 0
 
 
 class ImageWriter:
@@ -193,11 +195,11 @@ class ImageWriter:
             from matplotlib import colors
         except ImportError:
             logger.error("Matplotlib not installed, output won't be generated")
-            return
+            return 1
 
         # skip plotting 0-D and 3-D data
         if detector.dimension in (0, 3):
-            return
+            return 0
 
         data_raw = detector.data_raw
         error_raw = detector.error_raw
@@ -270,3 +272,5 @@ class ImageWriter:
         if detector.dimension == 2 and not np.all(np.isnan(error_raw)) and np.any(error_raw):
             edata = error_raw.reshape((plot_y_axis.n, plot_x_axis.n))
             self._save_2d_error_plot(detector, xspan, yspan, edata, x_axis_label, y_axis_label, z_axis_label)
+
+        return 0

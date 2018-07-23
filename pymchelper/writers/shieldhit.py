@@ -156,3 +156,5 @@ class TxtWriter:
                 tmp += "\n"
 
                 fout.write(tmp)
+
+        return 0

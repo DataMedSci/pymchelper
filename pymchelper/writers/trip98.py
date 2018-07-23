@@ -1,6 +1,7 @@
-import time
 import logging
+import math
 import os
+import time
 import numpy as np
 
 logger = logging.getLogger(__name__)
@@ -14,8 +15,11 @@ class TripCubeWriter:
         import getpass
         from pymchelper.shieldhit.detector.detector_type import SHDetType
         from pymchelper import __version__ as _pmcversion
-        # TODO add printing information how to install pytrip if it's missing
-        from pytrip import __version__ as _ptversion
+        try:
+            from pytrip import __version__ as _ptversion
+        except ImportError:
+            logger.error("pytrip package missing, to install type `pip install pytrip98`")
+            return 1
 
         pixel_size_x = (detector.x.max_val - detector.x.min_val) / detector.x.n
         pixel_size_z = (detector.z.max_val - detector.z.min_val) / detector.z.n
@@ -42,7 +46,7 @@ class TripCubeWriter:
             # .dos dose cubes are usually in normalized integers,
             # where "1000" equals 100.0 % dose.
             # The next are also the defaults, but just to be clear
-            # this is specifially set.
+            # this is specifically set.
             cube.data_type = "integer"
             cube.num_bytes = 2
             cube.pydata_type = np.int16
@@ -60,6 +64,8 @@ class TripCubeWriter:
             cube.creation_info = _creation_info
 
             cube.write(self.output_corename)
+
+            return 0
 
         elif detector.dettyp in (SHDetType.dlet, SHDetType.tlet, SHDetType.dletg, SHDetType.tletg):
 
@@ -91,12 +97,19 @@ class TripCubeWriter:
             cube.creation_info = _creation_info
 
             cube.write(self.output_corename)
+
+            return 0
+
         else:
             logger.error("Tripcube target is only allowed with dose- or LET-type detectors.")
             raise Exception("Illegal detector for tripcube.")
 
+            return 1
+
 
 class TripDddWriter(object):
+
+    _sigma_to_fwhm = 2. * (2. * math.log(2.)) ** 0.5
 
     _ddd_header_template = """!filetype    ddd
 !fileversion   {fileversion:s}
@@ -106,6 +119,9 @@ class TripDddWriter(object):
 !composition   {composition:s}
 !density {density:f}
 !energy {energy:f}
+#
+# {creator:s}
+#
 #   z[g/cm**2] dE/dz[MeV/(g/cm**2)] FWHM1[g/cm**2] factor FWHM2[g/cm**2]
 !ddd
 """
@@ -116,6 +132,7 @@ class TripDddWriter(object):
         matplotlib.use('Agg')
         self.ddd_filename = filename
         self.energy_MeV = options.energy
+        self.projectile = options.projectile
         self.ngauss = options.ngauss
         self.verbosity = options.verbose
         if not self.ddd_filename.endswith(".ddd"):
@@ -125,122 +142,137 @@ class TripDddWriter(object):
     def write(self, detector):
         from pymchelper.shieldhit.detector.detector_type import SHDetType
 
-        if detector.dettyp == SHDetType.ddd:
+        if detector.dettyp != SHDetType.ddd:
+            logger.warning("Incompatible detector type {:s} used, please use {:s} instead".format(
+                detector.dettyp, SHDetType.ddd))
+            return 1
 
-            # extract data from detector data
-            self._extract_data(detector)
+        # extract data from detector data
+        self._extract_data(detector)
 
-            # in order to avoid fitting data to noisy region far behind Bragg peak tail,
-            # find the range of z coordinate which containes (1-threshold) of the deposited energy
-            threshold = 3e-3
-            cum_dose = self._cumulative_dose()
-            cum_dose_left = self._cumulative_dose_left(cum_dose)
+        # in order to avoid fitting data to noisy region far behind Bragg peak tail,
+        # find the range of z coordinate which containes (1-threshold) of the deposited energy
+        threshold = 3e-3
+        cum_dose = self._cumulative_dose()
+        cum_dose_left = self._cumulative_dose_left(cum_dose)
 
-            thr_ind = cum_dose_left.size - np.searchsorted(cum_dose_left[::-1], threshold) - 1
-            z_fitting_cm_1d = self.z_data_cm_1d[:thr_ind]
-            dose_fitting_MeV_g_1d = self.dose_data_MeV_g_1d[:thr_ind]
+        thr_ind = cum_dose_left.size - np.searchsorted(cum_dose_left[::-1], threshold) - 1
+        z_fitting_cm_1d = self.z_data_cm_1d[:thr_ind]
+        dose_fitting_MeV_g_1d = self.dose_data_MeV_g_1d[:thr_ind]
 
-            r_fitting_cm_2d, z_fitting_cm_2d = np.meshgrid(self.r_data_cm_1d, z_fitting_cm_1d)
-            dose_fitting_MeV_g_2d = self.dose_data_MeV_g_2d[0:thr_ind]
+        r_fitting_cm_2d, z_fitting_cm_2d = np.meshgrid(self.r_data_cm_1d, z_fitting_cm_1d)
+        dose_fitting_MeV_g_2d = self.dose_data_MeV_g_2d[0:thr_ind]
 
-            logger.info("Plotting 1..")
-            if self.verbosity > 0:
-                self._pre_fitting_plots(
-                    cum_dose_left=cum_dose_left,
-                    z_fitting_cm_1d=z_fitting_cm_1d,
-                    dose_fitting_MeV_g_1d=dose_fitting_MeV_g_1d,
-                    threshold=threshold,
-                    zmax_cm=z_fitting_cm_1d[-1])
+        logger.info("Plotting 1..")
+        if self.verbosity > 0:
+            self._pre_fitting_plots(
+                cum_dose_left=cum_dose_left,
+                z_fitting_cm_1d=z_fitting_cm_1d,
+                dose_fitting_MeV_g_1d=dose_fitting_MeV_g_1d,
+                threshold=threshold,
+                zmax_cm=z_fitting_cm_1d[-1])
 
-                self._plot_2d_map(z_fitting_cm_2d, r_fitting_cm_2d, dose_fitting_MeV_g_2d, z_fitting_cm_1d)
+            self._plot_2d_map(z_fitting_cm_2d, r_fitting_cm_2d, dose_fitting_MeV_g_2d, z_fitting_cm_1d)
 
-            logger.info("Fitting...")
-            fwhm1_cm_data = np.zeros_like(z_fitting_cm_1d)
-            fwhm2_cm_data = np.zeros_like(z_fitting_cm_1d)
-            weight_data = np.zeros_like(z_fitting_cm_1d)
-            dz0_MeV_cm_g_data = np.zeros_like(z_fitting_cm_1d)
-            fwhm1_cm_error_data = np.zeros_like(z_fitting_cm_1d)
-            fwhm2_cm_error_data = np.zeros_like(z_fitting_cm_1d)
-            weight_error_data = np.zeros_like(z_fitting_cm_1d)
-            dz0_MeV_cm_g_error_data = np.zeros_like(z_fitting_cm_1d)
-            if self.ngauss in (1, 2):
-                # for each depth fit a lateral beam with gaussian models
-                for ind, z_cm in enumerate(z_fitting_cm_1d):
+        logger.info("Fitting...")
+        fwhm1_cm_data = np.zeros_like(z_fitting_cm_1d)
+        fwhm2_cm_data = np.zeros_like(z_fitting_cm_1d)
+        weight_data = np.zeros_like(z_fitting_cm_1d)
+        dz0_MeV_cm_g_data = np.zeros_like(z_fitting_cm_1d)
+        fwhm1_cm_error_data = np.zeros_like(z_fitting_cm_1d)
+        fwhm2_cm_error_data = np.zeros_like(z_fitting_cm_1d)
+        weight_error_data = np.zeros_like(z_fitting_cm_1d)
+        dz0_MeV_cm_g_error_data = np.zeros_like(z_fitting_cm_1d)
+        if self.ngauss in (1, 2):
+            # for each depth fit a lateral beam with gaussian models
+            for ind, z_cm in enumerate(z_fitting_cm_1d):
 
-                    dose_at_z = self.dose_data_MeV_g_2d[ind]
+                dose_at_z = self.dose_data_MeV_g_2d[ind]
 
-                    # take into account only this position in r for which dose is positive
-                    r_fitting_cm = self.r_data_cm_1d[dose_at_z > 0]
-                    dose_fitting_1d_positive_MeV_g = dose_at_z[dose_at_z > 0]
+                # take into account only this position in r for which dose is positive
+                r_fitting_cm = self.r_data_cm_1d[dose_at_z > 0]
+                dose_fitting_1d_positive_MeV_g = dose_at_z[dose_at_z > 0]
 
-                    # perform the fit
-                    params, params_error = self._lateral_fit(r_fitting_cm,
-                                                             dose_fitting_1d_positive_MeV_g,
-                                                             z_cm,
-                                                             self.energy_MeV,
-                                                             self.ngauss)
+                # perform the fit
+                params, params_error = self._lateral_fit(r_fitting_cm,
+                                                         dose_fitting_1d_positive_MeV_g,
+                                                         z_cm,
+                                                         self.energy_MeV,
+                                                         self.ngauss)
 
-                    fwhm1_cm, factor, fwhm2_cm, dz0_MeV_cm_g = params
-                    fwhm1_cm_error, factor_error, fwhm2_cm_error, dz0_MeV_cm_g_error = params_error
-                    fwhm1_cm_data[ind] = fwhm1_cm
-                    dz0_MeV_cm_g_data[ind] = dz0_MeV_cm_g
-                    fwhm1_cm_error_data[ind] = fwhm1_cm_error
-                    dz0_MeV_cm_g_error_data[ind] = dz0_MeV_cm_g_error
-                    if self.ngauss == 2:
-                        fwhm2_cm_data[ind] = fwhm2_cm  # set to 0 in case ngauss = 1
-                        weight_data[ind] = factor  # set to 0 in case ngauss = 1
-                        fwhm2_cm_error_data[ind] = fwhm2_cm_error
-                        weight_error_data[ind] = factor_error
-
-            logger.info("Plotting 2...")
-            if self.verbosity > 0 and self.ngauss in (1, 2):
-                self._post_fitting_plots(z_fitting_cm_1d,
-                                         dose_fitting_MeV_g_1d,
-                                         dz0_MeV_cm_g_data,
-                                         fwhm1_cm_data,
-                                         fwhm2_cm_data,
-                                         weight_data,
-                                         dz0_MeV_cm_g_error_data,
-                                         fwhm1_cm_error_data,
-                                         weight_error_data,
-                                         fwhm2_cm_error_data)
-                self._plot_2d_map(
-                    z_fitting_cm_2d,
-                    r_fitting_cm_2d,
-                    dose_fitting_MeV_g_2d,
-                    z_fitting_cm_1d,
-                    fwhm1_cm_data,
-                    fwhm2_cm_data,
-                    weight_data,
-                    dz0_MeV_cm_g_data,
-                    suffix='_fwhm')
-
-            logger.info("Writing " + self.ddd_filename)
-
-            # prepare header of DDD file
-            header = self._ddd_header_template.format(
-                fileversion='19980520',
-                filedate=time.strftime('%c'),  # Locale's appropriate date and time representation
-                projectile='C',
-                material='H20',
-                composition='H20',
-                density=1,
-                energy=self.energy_MeV)
-
-            # write the contents of the files
-            with open(self.ddd_filename, 'w') as ddd_file:
-                ddd_file.write(header)
-                # TODO write to DDD gaussian amplitude, not the dose in central bin
+                fwhm1_cm, factor, fwhm2_cm, dz0_MeV_cm_g = params
+                fwhm1_cm_error, factor_error, fwhm2_cm_error, dz0_MeV_cm_g_error = params_error
+                fwhm1_cm_data[ind] = fwhm1_cm
+                dz0_MeV_cm_g_data[ind] = dz0_MeV_cm_g
+                fwhm1_cm_error_data[ind] = fwhm1_cm_error
+                dz0_MeV_cm_g_error_data[ind] = dz0_MeV_cm_g_error
                 if self.ngauss == 2:
-                    for z_cm, dose, fwhm1_cm, weight, fwhm2_cm in zip(z_fitting_cm_1d, dose_fitting_MeV_g_1d,
-                                                                      fwhm1_cm_data, weight_data, fwhm2_cm_data):
-                        ddd_file.write('{:g} {:g} {:g} {:g} {:g}\n'.format(z_cm, dose, fwhm1_cm, weight, fwhm2_cm))
-                elif self.ngauss == 1:
-                    for z_cm, dose, fwhm_cm in zip(z_fitting_cm_1d, dose_fitting_MeV_g_1d, fwhm1_cm_data):
-                        ddd_file.write('{:g} {:g} {:g}\n'.format(z_cm, dose, fwhm_cm))
-                elif self.ngauss == 0:
-                    for z_cm, dose in zip(z_fitting_cm_1d, dose_fitting_MeV_g_1d):
-                        ddd_file.write('{:g} {:g}\n'.format(z_cm, dose))
+                    fwhm2_cm_data[ind] = fwhm2_cm  # set to 0 in case ngauss = 1
+                    weight_data[ind] = factor  # set to 0 in case ngauss = 1
+                    fwhm2_cm_error_data[ind] = fwhm2_cm_error
+                    weight_error_data[ind] = factor_error
+
+        logger.info("Plotting 2...")
+        if self.verbosity > 0 and self.ngauss in (1, 2):
+            self._post_fitting_plots(z_fitting_cm_1d,
+                                     dose_fitting_MeV_g_1d,
+                                     dz0_MeV_cm_g_data,
+                                     fwhm1_cm_data,
+                                     fwhm2_cm_data,
+                                     weight_data,
+                                     dz0_MeV_cm_g_error_data,
+                                     fwhm1_cm_error_data,
+                                     weight_error_data,
+                                     fwhm2_cm_error_data)
+            self._plot_2d_map(
+                z_fitting_cm_2d,
+                r_fitting_cm_2d,
+                dose_fitting_MeV_g_2d,
+                z_fitting_cm_1d,
+                fwhm1_cm_data,
+                fwhm2_cm_data,
+                weight_data,
+                dz0_MeV_cm_g_data,
+                suffix='_fwhm')
+
+        logger.info("Writing " + self.ddd_filename)
+
+        from pymchelper import __version__ as _pmcversion
+        try:
+            from pytrip import __version__ as _ptversion
+        except ImportError:
+            logger.error("pytrip package missing, to install type `pip install pytrip98`")
+            return 1
+        _creator_info = "Created with pymchelper {:s}; using PyTRiP98 {:s}".format(_pmcversion,
+                                                                                   _ptversion)
+
+        # prepare header of DDD file
+        header = self._ddd_header_template.format(
+            fileversion='19980520',
+            filedate=time.strftime('%c'),  # Locale's appropriate date and time representation
+            projectile=self.projectile,
+            material='H20',
+            composition='H20',
+            density=1,
+            creator=_creator_info,
+            energy=self.energy_MeV)
+
+        # write the contents of the files
+        with open(self.ddd_filename, 'w') as ddd_file:
+            ddd_file.write(header)
+            # TODO write to DDD gaussian amplitude, not the dose in central bin
+            if self.ngauss == 2:
+                for z_cm, dose, fwhm1_cm, weight, fwhm2_cm in zip(z_fitting_cm_1d, dose_fitting_MeV_g_1d,
+                                                                  fwhm1_cm_data, weight_data, fwhm2_cm_data):
+                    ddd_file.write('{:g} {:g} {:g} {:g} {:g}\n'.format(z_cm, dose, fwhm1_cm, weight, fwhm2_cm))
+            elif self.ngauss == 1:
+                for z_cm, dose, fwhm_cm in zip(z_fitting_cm_1d, dose_fitting_MeV_g_1d, fwhm1_cm_data):
+                    ddd_file.write('{:g} {:g} {:g}\n'.format(z_cm, dose, fwhm_cm))
+            elif self.ngauss == 0:
+                for z_cm, dose in zip(z_fitting_cm_1d, dose_fitting_MeV_g_1d):
+                    ddd_file.write('{:g} {:g}\n'.format(z_cm, dose))
+
+        return 0
 
     def _extract_data(self, detector):
         # 1D arrays of r,z
@@ -250,8 +282,8 @@ class TripDddWriter(object):
         # 2D arrays of r,z, dose and error
         self.r_data_cm_2d, self.z_data_cm_2d = np.meshgrid(self.r_data_cm_1d, self.z_data_cm_1d)
 
-        self.dose_data_MeV_g_2d = detector.data[:, 0, :].T
-        self.dose_error_MeV_g_2d = detector.error[:, 0, :].T
+        self.dose_data_MeV_g_2d = detector.data_raw.reshape((detector.z.n, detector.x.n))
+        self.dose_error_MeV_g_2d = detector.error_raw.reshape((detector.z.n, detector.x.n))
 
         # dose in the very central bin
         bin_depth_z_cm = self.z_data_cm_1d[1] - self.z_data_cm_1d[0]
@@ -297,7 +329,11 @@ class TripDddWriter(object):
         import matplotlib.pyplot as plt
         from matplotlib.colors import LogNorm
 
-        prefix = os.path.join(self.outputdir, 'ddd_{:3.1f}MeV_'.format(self.energy_MeV))
+        prefix = os.path.join(self.outputdir,
+                              '{:s}_plot_{:3.1f}MeV_'.format(
+                                  os.path.splitext(os.path.basename(self.ddd_filename))[0],
+                                  self.energy_MeV))
+
         plt.pcolormesh(z_fitting_cm_2d, r_fitting_cm_2d, dose_fitting_MeV_g2d,
                        norm=LogNorm(), cmap='gnuplot2', label='dose')
         cbar = plt.colorbar()
@@ -329,8 +365,9 @@ class TripDddWriter(object):
 
         if self.verbosity > 2 and (np.any(fwhm1_cm) or np.any(fwhm2_cm)):
             # TODO add plotting sum of 2 gausses
-            sigma1_cm = fwhm1_cm / 2.354820045
-            sigma2_cm = fwhm2_cm / 2.354820045
+
+            sigma1_cm = fwhm1_cm / self._sigma_to_fwhm
+            sigma2_cm = fwhm2_cm / self._sigma_to_fwhm
             gauss_amplitude_MeV_g = dz0_MeV_cm_g_data
             for z_cm, sigma1_at_z_cm, sigma2_at_z_cm, factor, amplitude_MeV_g in \
                     zip(z_fitting_cm_1d, sigma1_cm, sigma2_cm, weight, gauss_amplitude_MeV_g):
@@ -398,7 +435,10 @@ class TripDddWriter(object):
         import matplotlib
         matplotlib.use('Agg')
         import matplotlib.pyplot as plt
-        prefix = os.path.join(self.outputdir, 'ddd_{:3.1f}MeV_'.format(self.energy_MeV))
+        prefix = os.path.join(self.outputdir,
+                              '{:s}_plot_{:3.1f}MeV_'.format(
+                                  os.path.splitext(os.path.basename(self.ddd_filename))[0],
+                                  self.energy_MeV))
 
         plt.plot(self.z_data_cm_1d, self.dose_data_MeV_g_1d, color='blue', label='dose')
         plt.axvspan(
@@ -461,7 +501,10 @@ class TripDddWriter(object):
                             weight_error_data,
                             fwhm2_cm_error_data):
         import matplotlib.pyplot as plt
-        prefix = os.path.join(self.outputdir, 'ddd_{:3.1f}MeV_'.format(self.energy_MeV))
+        prefix = os.path.join(self.outputdir,
+                              '{:s}_plot_{:3.1f}MeV_'.format(
+                                  os.path.splitext(os.path.basename(self.ddd_filename))[0],
+                                  self.energy_MeV))
 
         # left Y axis dedicated to FWHM, right one to weight
         fig, ax1 = plt.subplots()
@@ -564,15 +607,15 @@ class TripDddWriter(object):
         #
 
         if self.ngauss == 1:
-            sigma1_cm = fwhm1_cm_data / 2.354820045
+            sigma1_cm = fwhm1_cm_data / self._sigma_to_fwhm
             # sigma * D(z,0) / (2 pi rmax^2)
             fit_dose_MeV_g = sigma1_cm * dz0_MeV_cm_g_data / (2.0 * np.pi * r_max_cm ** 2)
             # missing ( 1 - exp( - 0.5 rmax^2 / sigma^2))
             fit_dose_MeV_g *= (np.ones_like(sigma1_cm) - np.exp(-0.5 * r_max_cm / sigma1_cm**2))
             plt.plot(z_fitting_cm_1d, fit_dose_MeV_g, 'r', label='dose fit')
         if self.ngauss == 2:
-            sigma1_cm = fwhm1_cm_data / 2.354820045
-            sigma2_cm = fwhm2_cm_data / 2.354820045
+            sigma1_cm = fwhm1_cm_data / self._sigma_to_fwhm
+            sigma2_cm = fwhm2_cm_data / self._sigma_to_fwhm
             w = weight_data
 
             # ( w * sigma1 * ( 1 - exp( - 0.5 rmax^2 / sigma1^2))
@@ -686,12 +729,12 @@ class TripDddWriter(object):
             dz0_MeV_cm_g, sigma_cm, factor, sigma2_add_cm = popt
             sigma2_cm = sigma_cm + sigma2_add_cm
             sigma2_cm_error = np.sqrt(sigma_cm_error**2 + sigma2_add_cm_error**2)
-            fwhm2_cm = sigma2_cm * 2.354820045
-            fwhm2_cm_error = sigma2_cm_error * 2.354820045
+            fwhm2_cm = sigma2_cm * cls._sigma_to_fwhm
+            fwhm2_cm_error = sigma2_cm_error * cls._sigma_to_fwhm
 
-        fwhm1_cm = sigma_cm * 2.354820045
+        fwhm1_cm = sigma_cm * cls._sigma_to_fwhm
 
-        fwhm1_cm_error = sigma_cm_error * 2.354820045
+        fwhm1_cm_error = sigma_cm_error * cls._sigma_to_fwhm
 
         params = fwhm1_cm, factor, fwhm2_cm, dz0_MeV_cm_g
         params_error = fwhm1_cm_error, factor_error, fwhm2_cm_error, dz0_MeV_cm_g_error
