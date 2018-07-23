@@ -110,10 +110,10 @@ def main(args=sys.argv[1:]):
     parser_tripddd = subparsers.add_parser(Converters.tripddd.name, help='converts to trip98 ddd file')
     add_default_options(parser_tripddd)
     parser_tripddd.add_argument("--energy",
-                                help='energy of the beam [MeV/amu]',
+                                help='energy of the beam [MeV/amu] (0 to guess from data)',
                                 type=float)
     parser_tripddd.add_argument("--projectile",
-                                help='projectile',
+                                help='projectile (0 to guess from data)',
                                 type=str)
     parser_tripddd.add_argument("--ngauss",
                                 help='number of Gauss curves to fit (default: 2)',
@@ -152,10 +152,10 @@ def main(args=sys.argv[1:]):
         parsed_args.error = ErrorEstimate[parsed_args.error]
 
         # check required options for tripddd parser
-        if parsed_args.command == Converters.tripddd.name and not parsed_args.energy:
+        if parsed_args.command == Converters.tripddd.name and parsed_args.energy is None:
             logger.error("Option --energy is required, provide an energy value")
             return 2
-        if parsed_args.command == Converters.tripddd.name and not parsed_args.projectile:
+        if parsed_args.command == Converters.tripddd.name and parsed_args.projectile is None:
             logger.error("Option --projectile is required, provide an projectile")
             return 2
 
