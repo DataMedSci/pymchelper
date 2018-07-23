@@ -152,10 +152,10 @@ def main(args=sys.argv[1:]):
         parsed_args.error = ErrorEstimate[parsed_args.error]
 
         # check required options for tripddd parser
-        if parsed_args.command == Converters.tripddd.name and not parsed_args.energy:
+        if parsed_args.command == Converters.tripddd.name and parsed_args.energy is None:
             logger.error("Option --energy is required, provide an energy value")
             return 2
-        if parsed_args.command == Converters.tripddd.name and not parsed_args.projectile:
+        if parsed_args.command == Converters.tripddd.name and parsed_args.projectile is None:
             logger.error("Option --projectile is required, provide an projectile")
             return 2
 
