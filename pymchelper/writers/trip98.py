@@ -251,8 +251,8 @@ class TripDddWriter(object):
             fileversion='19980520',
             filedate=time.strftime('%c'),  # Locale's appropriate date and time representation
             projectile=self.projectile,
-            material='H20',
-            composition='H20',
+            material='H2O',
+            composition='H2O',
             density=1,
             creator=_creator_info,
             energy=self.energy_MeV)
