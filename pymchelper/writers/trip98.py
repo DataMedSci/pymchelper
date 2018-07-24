@@ -138,6 +138,11 @@ class TripDddWriter(object):
         if not self.ddd_filename.endswith(".ddd"):
             self.ddd_filename += ".ddd"
         self.outputdir = os.path.abspath(os.path.dirname(self.ddd_filename))
+        self.threshold = 3e-3
+        env_var_name = 'DDD_TAIL_THRESHOLD'
+        if env_var_name in os.environ:
+            self.threshold = float(os.environ[env_var_name])
+            logger.info("Setting tail threshold based on {:s} to {:f}".format(env_var_name, self.threshold))
 
     def write(self, detector):
         from pymchelper.shieldhit.detector.detector_type import SHDetType
@@ -177,11 +182,10 @@ class TripDddWriter(object):
 
         # in order to avoid fitting data to noisy region far behind Bragg peak tail,
         # find the range of z coordinate which containes (1-threshold) of the deposited energy
-        threshold = 3e-3
         cum_dose = self._cumulative_dose()
         cum_dose_left = self._cumulative_dose_left(cum_dose)
 
-        thr_ind = cum_dose_left.size - np.searchsorted(cum_dose_left[::-1], threshold) - 1
+        thr_ind = cum_dose_left.size - np.searchsorted(cum_dose_left[::-1], self.threshold) - 1
         z_fitting_cm_1d = self.z_data_cm_1d[:thr_ind]
         dose_fitting_MeV_g_1d = self.dose_data_MeV_g_1d[:thr_ind]
 
@@ -194,7 +198,7 @@ class TripDddWriter(object):
                 cum_dose_left=cum_dose_left,
                 z_fitting_cm_1d=z_fitting_cm_1d,
                 dose_fitting_MeV_g_1d=dose_fitting_MeV_g_1d,
-                threshold=threshold,
+                threshold=self.threshold,
                 zmax_cm=z_fitting_cm_1d[-1])
 
             self._plot_2d_map(z_fitting_cm_2d, r_fitting_cm_2d, dose_fitting_MeV_g_2d, z_fitting_cm_1d)
@@ -595,7 +599,7 @@ class TripDddWriter(object):
         # we calculate D(z) which will correspond to depth-dose profile measured with ion. chamber of radius rmax
         # it is basically energy E(z) deposited in slice of radius rmax and thickness dz divided by slice mass
         # D(z) = E(z) / m(z) = E(z) / (pi rmax^2 dz rho)
-        # energy E(z) is the sum of energy in all cylyndrical shell in a slice and can be calculated as integral
+        # energy E(z) is the sum of energy in all cylindrical shell in a slice and can be calculated as integral
         # thin shell has surface at radius r has surface: 2 pi r dr, thus
         # E(z) = \int_0^rmax D(r,z) rho dz 2 pi r dr
         # finally:
