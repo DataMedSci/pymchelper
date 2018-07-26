@@ -225,8 +225,6 @@ class TripDddWriter(object):
                 # perform the fit
                 params, params_error = self._lateral_fit(r_fitting_cm,
                                                          dose_fitting_1d_positive_MeV_g,
-                                                         z_cm,
-                                                         self.energy_MeV,
                                                          self.ngauss)
 
                 fwhm1_cm, factor, fwhm2_cm, dz0_MeV_cm_g = params
@@ -703,40 +701,45 @@ class TripDddWriter(object):
         return cls.gauss2_MeV_g(x_cm, amp_MeV_cm_g, sigma1_cm, weight, sigma2_add_cm) * x_cm
 
     @classmethod
-    def _lateral_fit(cls, r_cm, dose_MeV_g, z_cm, energy_MeV, ngauss=2):
+    def _lateral_fit(cls, r_cm, dose_MeV_g, ngauss=2):
         variance = np.average(r_cm ** 2, weights=dose_MeV_g)
 
-        starting_amp_MeV_g = dose_MeV_g.max()
-        starting_sigma_cm = np.sqrt(variance)
+        start_amp_MeV_g = dose_MeV_g.max()
+        start_sigma_cm = np.sqrt(variance)
 
         min_amp_MeV_g = 1e-10 * dose_MeV_g.max()
-        min_sigma_cm = 1e-2 * starting_sigma_cm
+        min_sigma_cm = 1e-2 * start_sigma_cm
 
         max_amp_MeV_g = 2.0 * dose_MeV_g.max()
-        max_sigma_cm = 1e4 * starting_sigma_cm
+        max_sigma_cm = 1e4 * start_sigma_cm
 
         from scipy.optimize import curve_fit
 
         if ngauss == 1:
-            popt, pcov = curve_fit(f=cls.gauss_r_MeV_cm_g,
-                                   xdata=r_cm,
-                                   ydata=dose_MeV_g * r_cm,
-                                   p0=[starting_amp_MeV_g, starting_sigma_cm],
-                                   bounds=([[min_amp_MeV_g, min_sigma_cm], [max_amp_MeV_g, max_sigma_cm]]),
-                                   sigma=None)
-            # TODO return also parameter errors
-            perr = np.sqrt(np.diag(pcov))
+            try:
+                popt, pcov = curve_fit(f=cls.gauss_r_MeV_cm_g,
+                                       xdata=r_cm,
+                                       ydata=dose_MeV_g * r_cm,
+                                       p0=[start_amp_MeV_g, start_sigma_cm],
+                                       bounds=([[min_amp_MeV_g, min_sigma_cm], [max_amp_MeV_g, max_sigma_cm]]),
+                                       sigma=None)
+                # TODO return also parameter errors
+                perr = np.sqrt(np.diag(pcov))
 
-            dz0_MeV_cm_g, sigma_cm = popt
-            dz0_MeV_cm_g_error, sigma_cm_error = perr
+                dz0_MeV_cm_g, sigma_cm = popt
+                dz0_MeV_cm_g_error, sigma_cm_error = perr
+            except RuntimeError as e:
+                logger.warning(e)
+                dz0_MeV_cm_g, sigma_cm = np.nan, np.nan
+                dz0_MeV_cm_g_error, sigma_cm_error = np.nan, np.nan
             factor = 0.0
             factor_error = 0.0
             fwhm2_cm = 0.0
             fwhm2_cm_error = 0.0
 
         elif ngauss == 2:
-            starting_weigth = 0.99
-            starting_sigma2_add_cm = 0.1
+            start_weigth = 0.99
+            start_sigma2_add_cm = 0.1
 
             min_weigth = 0.55
             min_sigma2_add_cm = 1e-1
@@ -744,20 +747,24 @@ class TripDddWriter(object):
             max_weigth = 1.0 - 1e-12
             max_sigma2_add_cm = 20.0
 
-            popt, pcov = curve_fit(f=cls.gauss2_r_MeV_cm_g,
-                                   xdata=r_cm,
-                                   ydata=dose_MeV_g * r_cm,
-                                   p0=[starting_amp_MeV_g, starting_sigma_cm, starting_weigth, starting_sigma2_add_cm],
-                                   bounds=([min_amp_MeV_g, min_sigma_cm, min_weigth, min_sigma2_add_cm],
-                                           [max_amp_MeV_g, max_sigma_cm, max_weigth, max_sigma2_add_cm]),
-                                   sigma=None)
+            try:
+                popt, pcov = curve_fit(f=cls.gauss2_r_MeV_cm_g,
+                                       xdata=r_cm,
+                                       ydata=dose_MeV_g * r_cm,
+                                       p0=[start_amp_MeV_g, start_sigma_cm, start_weigth, start_sigma2_add_cm],
+                                       bounds=([min_amp_MeV_g, min_sigma_cm, min_weigth, min_sigma2_add_cm],
+                                               [max_amp_MeV_g, max_sigma_cm, max_weigth, max_sigma2_add_cm]),
+                                       sigma=None)
+                perr = np.sqrt(np.diag(pcov))
+                dz0_MeV_cm_g_error, sigma_cm_error, factor_error, sigma2_add_cm_error = perr
+                dz0_MeV_cm_g, sigma_cm, factor, sigma2_add_cm = popt
+            except RuntimeError as e:
+                logger.warning(e)
+                dz0_MeV_cm_g_error, sigma_cm_error, factor_error, sigma2_add_cm_error = np.nan, np.nan, np.nan, np.nan
+                dz0_MeV_cm_g, sigma_cm, factor, sigma2_add_cm = np.nan, np.nan, np.nan, np.nan
             # TODO return also parameter errors
-            perr = np.sqrt(np.diag(pcov))
-            dz0_MeV_cm_g_error, sigma_cm_error, factor_error, sigma2_add_cm_error = perr
-
-            dz0_MeV_cm_g, sigma_cm, factor, sigma2_add_cm = popt
             sigma2_cm = sigma_cm + sigma2_add_cm
-            sigma2_cm_error = np.sqrt(sigma_cm_error**2 + sigma2_add_cm_error**2)
+            sigma2_cm_error = (sigma_cm_error**2 + sigma2_add_cm_error**2)**0.5
             fwhm2_cm = sigma2_cm * cls._sigma_to_fwhm
             fwhm2_cm_error = sigma2_cm_error * cls._sigma_to_fwhm
 
