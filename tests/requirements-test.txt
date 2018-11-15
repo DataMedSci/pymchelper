@@ -6,7 +6,8 @@ pytest ; python_version < '3.0' or python_version >= '3.4' # py different than 3
 pytest-xdist ; (python_version < '3.0' or python_version >= '3.4') and os_name != 'nt' # py different than 3.2
 pytest-xdist<1.18.0  ; python_version >= '3.2' and python_version < '3.4' or os_name == 'nt' # py 3.2, 3.3 or Wind
 pytest-cov ; (python_version < '3.0' or python_version >= '3.4')
-tox
+tox<3.2 ; python_version >= '3.2' and python_version < '3.4' # py 3.2 or 3.3
+tox ; python_version < '3.0' or python_version >= '3.4' # py different than 3.2 or 3.3
 # matplotlib v 2.0, doesn't work well with Python 3.2 and 3.3
 matplotlib<=1.5.3 ; (python_version >= '3.2' and python_version < '3.4') or os_name == 'nt' # py 3.2 and 3.3 and Windows
 matplotlib ; (python_version < '3.0' or python_version >= '3.4') and os_name != 'nt' # py 2.7 , 3.4 and higher and not Windows
