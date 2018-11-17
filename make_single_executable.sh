@@ -19,7 +19,7 @@ find_python_interpreter() {
     GOOD_PYTHON_INTERPRETER="none"
 
     # loop over possible python versions
-    for PYTHON_INTERPRETER in python python3 python3.5
+    for PYTHON_INTERPRETER in python3.7 python3.6 python3.5 python3 python
     do
 
         # check if interpreter is installed
