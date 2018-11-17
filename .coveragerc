@@ -1,0 +1,9 @@
+[run]
+source = .
+branch = true
+disable_warnings = include-ignored
+parallel = true
+
+[report]
+show_missing = true
+include = pymchelper/*,tests/*
