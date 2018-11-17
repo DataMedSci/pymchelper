@@ -1,6 +1,6 @@
   recursive-include pymchelper *.py *.db *.ini *.r
   recursive-include examples *.py
-  exclude *.sh *.yml *.ini *.txt .gitkeep
+  exclude *.sh *.yml *.ini *.txt .gitkeep .coveragerc
   exclude versioneer.py
   prune docs
   prune .travis

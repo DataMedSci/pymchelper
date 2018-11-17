@@ -2,6 +2,5 @@
 versioneer<0.18
 pytest
 pytest-xdist
-pytest-cov
 tox
 matplotlib
