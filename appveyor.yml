@@ -18,9 +18,6 @@ environment:
     - platform: x64
       PYTHON: "C:\\Python36-x64"
 
-    - platform: x64
-      PYTHON: "C:\\Python37-x64"
-
 init:
 # check python version
   - python -V
@@ -53,10 +50,6 @@ install:
   - pip -V
 # check 32 or 64 bit
   - python -c "import struct;print(8 * struct.calcsize('P'))"
-
-# install versioneer stuff
-before_test:
-  - python %PYTHON%\scripts\versioneer install
 
 test_script:
 # make wheel package

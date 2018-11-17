@@ -1,112 +1,60 @@
+import os
 import setuptools
-from pkg_resources import parse_version
+import subprocess
 
 
-def pip_command_output(pip_args):
+def git_version():
     """
-    Get output (as a string) from pip command
-    :param pip_args: list o pip switches to pass
-    :return: string with results
+    Inspired by https://github.com/numpy/numpy/blob/master/setup.py
+    :return: the git revision as a string
     """
-    import sys
-    import pip
-    from io import StringIO
-    # as pip will write to stdout we use some nasty hacks
-    # to substitute system stdout with our own
-    old_stdout = sys.stdout
-    sys.stdout = mystdout = StringIO()
-    pip.main(pip_args)
-    output = mystdout.getvalue()
-    mystdout.truncate(0)
-    sys.stdout = old_stdout
-    return output
+    def _minimal_ext_cmd(cmd):
+        # construct minimal environment
+        env = {}
+        for k in ['SYSTEMROOT', 'PATH', 'HOME']:
+            v = os.environ.get(k)
+            if v is not None:
+                env[k] = v
+        # LANGUAGE is used on win32
+        env['LANGUAGE'] = 'C'
+        env['LANG'] = 'C'
+        env['LC_ALL'] = 'C'
+        out = subprocess.Popen(cmd, stdout=subprocess.PIPE, env=env).communicate()[0]
+        return out
 
-
-def setup_versioneer():
-    """
-    Generate (temporarily) versioneer.py file in project root directory
-    :return:
-    """
     try:
-        # assume versioneer.py was generated using "versioneer install" command
-        import versioneer
-        versioneer.get_version()
-    except ImportError:
-        # it looks versioneer.py is missing
-        # lets assume that versioneer package is installed
-        # and versioneer binary is present in $PATH
-        import subprocess
-        try:
-            # call versioneer install to generate versioneer.py
-            subprocess.check_output(["versioneer", "install"])
-        except OSError:
-            # it looks versioneer is missing from $PATH
-            # probably versioneer is installed in some user directory
+        out = _minimal_ext_cmd(['git', 'describe', '--tags', '--long'])
+        GIT_REVISION = out.strip().decode('ascii')
+        print('GIT_REVISION', GIT_REVISION)
+        if GIT_REVISION:
+            no_of_commits_since_last_tag = int(GIT_REVISION.split('-')[1])
+            tag_name = GIT_REVISION.split('-')[0][1:]
+            if no_of_commits_since_last_tag == 0:
+                version = tag_name
+            else:
+                version = '{}+rev{}'.format(tag_name, no_of_commits_since_last_tag)
+        else:
+            version = "Unknown"
+    except OSError:
+        version = "Unknown"
 
-            # query pip for list of files in versioneer package
-            # line below is equivalen to putting result of
-            #  "pip show -f versioneer" command to string output
-            output = pip_command_output(["show", "-f", "versioneer"])
-
-            # now we parse the results
-            import os
-            # find absolute path where *versioneer package* was installed
-            # and store it in main_path
-            main_path = [x[len("Location: "):] for x in output.splitlines()
-                         if x.startswith("Location")][0]
-            # find path relative to main_path where
-            # *versioneer binary* was installed
-            bin_path = [x[len("  "):] for x in output.splitlines()
-                        if x.endswith(os.path.sep + "versioneer")][0]
-
-            # exe_path is absolute path to *versioneer binary*
-            exe_path = os.path.join(main_path, bin_path)
-            # call versioneer install to generate versioneer.py
-            # line below is equivalent to running in terminal
-            # "python versioneer install"
-            subprocess.check_output(["python", exe_path, "install"])
-
-
-def clean_cache():
-    """
-    Python won't realise that new module has appeared in the runtime
-    We need to clean the cache of module finders. Hacking again
-    :return:
-    """
-    import importlib
-    try:  # Python ver < 3.3
-        vermod = importlib.import_module("versioneer")
-        globals()["versioneer"] = vermod
-    except ImportError:
-        importlib.invalidate_caches()
-
-
-def get_version():
-    """
-    Get project version (using versioneer)
-    :return: string containing version
-    """
-    setup_versioneer()
-    clean_cache()
-    import versioneer
-    version = versioneer.get_version()
-    parsed_version = parse_version(version)
-    if '*@' in str(parsed_version):
-        import time
-        version += str(int(time.time()))
     return version
 
 
-def get_cmdclass():
-    """
-    Get setuptools command class
-    :return:
-    """
-    setup_versioneer()
-    clean_cache()
-    import versioneer
-    return versioneer.get_cmdclass()
+def write_version_py(filename='pymchelper/__init__.py'):
+    cnt = """
+__version__ = '%(version)s'
+"""
 
+    GIT_REVISION = git_version()
+    a = open(filename, 'a')
+    try:
+        a.write(cnt % {'version': GIT_REVISION})
+    finally:
+        a.close()
+
+
+write_version_py()
 
 with open('README.rst') as readme_file:
     readme = readme_file.read()
@@ -114,7 +62,7 @@ with open('README.rst') as readme_file:
 
 setuptools.setup(
     name='pymchelper',
-    version=get_version(),
+    version=git_version(),
     packages=setuptools.find_packages(where='.', exclude=("*.tests", "*.tests.*", "tests.*", "tests")),
     url='https://github.com/DataMedSci/pymchelper',
     license='MIT',
@@ -129,7 +77,6 @@ setuptools.setup(
         #   5 - Production/Stable
         'Development Status :: 5 - Production/Stable',
 
-        # Indicate who your project is intended for
         # Indicate who your project is intended for
         'Intended Audience :: Developers',
         'Intended Audience :: Science/Research',
@@ -162,6 +109,5 @@ setuptools.setup(
         'enum34',
         'numpy'
     ],
-    cmdclass=get_cmdclass(),
     python_requires='>=2.7, !=3.0.*, !=3.1.*, !=3.3.*',
 )
