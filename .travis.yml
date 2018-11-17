@@ -2,76 +2,47 @@
 
 language: python
 
+git:
+  quiet: true
+
 matrix:
     include:
-        - os: linux
-          python: 2.7
+        - python: 2.7
           env: TOXENV=py27
-        - os: linux
-          python: 3.5
+        - python: 3.6
           env: TOXENV=coverage
-        - os: linux
-          python: 3.2
-          env: TOXENV=py32 VENVVER="<14.0.0" PIPVER="<8.0.0" STVER="<30.0.0"
-        - os: linux
-          python: 3.4
+        - python: 3.4
           env: TOXENV=py34
-        - os: linux
-          python: 3.5
+        - python: 3.5
           env: TOXENV=py35
-        - os: linux
-          python: 3.5-dev
-          env: TOXENV=py35
-        - os: linux
-          python: 3.6
+        - python: 3.6
           env: TOXENV=py36
-        - os: linux
-          python: 3.6-dev
-          env: TOXENV=py36
-        - os: linux
-          python: nightly
+        - python: 3.7
           env: TOXENV=py37
-        - os: linux
-          python: 3.5
+        - python: 3.6
           env: TOXENV=docs
-        - os: linux
-          python: 2.7
+        - python: 2.7
           env: TOXENV=pep8
-        - os: linux
-          python: 3.4
+        - python: 3.6
           env: TOXENV=pep8
-        - os: linux
-          python: 3.5
+        - python: 3.6
           env: TOXENV=packaging
-        - os: osx
-          language: generic
-          env: TOXENV=py35
-        - os: osx
-          language: generic
-          env: TOXENV=py27
 #    uncomment and adjust if you want to allow some failures
-    allow_failures:
-        - os: linux
-          python: nightly
-          env: TOXENV=py37
+#    allow_failures:
+#        - os: linux
+#          python: nightly
+#          env: TOXENV=py37
 
 # travis-ci runs by default on ancient Ubuntu 12.04 (precise)
 # following options will give us Ubuntu 14.04 (trusty)
-sudo: required
-dist: trusty
-
-before_install:
-  - PYTHON_VERSION="py3"
-  - if [[ $TOXENV == "py27" ]]; then PYTHON_VERSION="py2" ; fi
-  - sudo ./install_deps.sh $PYTHON_VERSION
+sudo: false
+dist: xenial
 
 install:
-  - if [[ $TRAVIS_OS_NAME == "linux" ]]; then travis_wait ./.travis/install_linux.sh ; fi
-  - if [[ $TRAVIS_OS_NAME == "osx" ]]; then travis_wait 60 ./.travis/install_osx.sh ; fi
+  - travis_wait ./.travis/install_linux.sh
 
 script:
-  - if [[ $TRAVIS_OS_NAME == "linux" ]]; then travis_wait tox --notest && travis_retry tox -- -n 8 ; fi
-  - if [[ $TRAVIS_OS_NAME == "osx" ]]; then travis_wait 60 ./.travis/run_osx.sh ; fi
+  - travis_wait tox --notest && travis_retry tox -- -n 8
 # in case all previous commands in script section succeeded, run deploy (if tag is present)
   - if [[ "$TRAVIS_TEST_RESULT" == "0" ]] && [[ $TOXENV == "packaging" ]]; then .travis/deploy_package.sh pypi ; fi
 
