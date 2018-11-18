@@ -682,9 +682,9 @@ class TripDddWriter(object):
     @classmethod
     def gauss2_MeV_g(cls, x_cm, amp_MeV_cm_g, sigma1_cm, weight, sigma2_add_cm):
         return amp_MeV_cm_g / (2.0 * np.pi) * (
-            (weight / sigma1_cm) * np.exp(-x_cm ** 2 / (2.0 * sigma1_cm ** 2)) +
-            ((1.0 - weight) / (sigma1_cm + sigma2_add_cm)) *
-            np.exp(-x_cm ** 2 / (2.0 * (sigma1_cm + sigma2_add_cm) ** 2))
+            (weight / sigma1_cm) * np.exp(-x_cm ** 2 / (2.0 * sigma1_cm ** 2))
+            + ((1.0 - weight) / (sigma1_cm + sigma2_add_cm))
+            * np.exp(-x_cm ** 2 / (2.0 * (sigma1_cm + sigma2_add_cm) ** 2))
         )
 
     @classmethod

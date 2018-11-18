@@ -1130,12 +1130,9 @@ class Matrix(list):
         if self.rows == 2:
             return self[0][0] * self[1][1] - self[1][0] * self[0][1]
         elif self.rows == 3:
-            return self[0][0] * (self[1][1] * self[2][2] -
-                                 self[2][1] * self[1][2]) \
-                - self[0][1] * (self[1][0] * self[2][2] -
-                                self[2][0] * self[1][2]) \
-                + self[0][2] * (self[1][0] * self[2][1] -
-                                self[2][0] * self[1][1])
+            return self[0][0] * (self[1][1] * self[2][2] - self[2][1] * self[1][2]) \
+                - self[0][1] * (self[1][0] * self[2][2] - self[2][0] * self[1][2]) \
+                + self[0][2] * (self[1][0] * self[2][1] - self[2][0] * self[1][1])
 
         M = self.clone()
         s = 1.0

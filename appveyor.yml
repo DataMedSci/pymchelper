@@ -6,24 +6,17 @@ build: off
 
 environment:
   matrix:
-    - platform: x86
-      PYTHON: "C:\\Python27"
-
     - platform: x64
       PYTHON: "C:\\Python27-x64"
 
-    - platform: x86
-      PYTHON: "C:\\Python35"
+    - platform: x64
+      PYTHON: "C:\\Python34-x64"
 
     - platform: x64
       PYTHON: "C:\\Python35-x64"
 
-    - platform: x86
-      PYTHON: "C:\\Python36"
-
     - platform: x64
       PYTHON: "C:\\Python36-x64"
-
 
 init:
 # check python version
@@ -57,10 +50,6 @@ install:
   - pip -V
 # check 32 or 64 bit
   - python -c "import struct;print(8 * struct.calcsize('P'))"
-
-# install versioneer stuff
-before_test:
-  - python %PYTHON%\scripts\versioneer install
 
 test_script:
 # make wheel package

@@ -174,7 +174,7 @@ def exp2rpn(expr):
 
                          <-  (A|B)|C+D
          ------------.   .------------
-         RPN-End      \ /      Exp-End
+         RPN-End      | /      Exp-End
                        |
                       S|
                       t|
@@ -198,7 +198,7 @@ def exp2rpn(expr):
      (6) A B + C
      (7) A B + C |
          ------------.   .------------
-         RPN-End      \ /      Exp-End
+         RPN-End      | /      Exp-End
                        |
                       S|
                       t|
