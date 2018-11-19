@@ -41,6 +41,7 @@ install:
 # check pip version
   - pip -V
 # install usual requirements
+  - pip install --upgrade virtualenv pip setuptools tox wheel --user
   - pip install --upgrade -r tests/requirements-test.txt
   - pip install --upgrade -r requirements.txt
 # check numpy version
