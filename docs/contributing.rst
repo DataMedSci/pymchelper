@@ -17,7 +17,7 @@ Types of Contributions
 Report Bugs
 ~~~~~~~~~~~
 
-Report bugs at https://github.com/DataMedSci/pymchelper/issues.
+Report bugs at https://github.com/DataMedSci/pymchelper/issues
 
 If you are reporting a bug, please include:
 
@@ -83,17 +83,7 @@ The standard way to execute Python scripts WILL NOT WORK. What users see as conv
 
    $ python pymchelper/run.py --help
 
-To have the code working, two things are needed:
-
-* installation of ``versioneer`` package (needed to set proper version number)
-* adjustment of PYTHONPATH variable.
-
-First let us install ``versioneer`` package and generate necessary files::
-
-   $ pip install versioneer
-   $ versioneer install
-
-Now code can be run by typing::
+To have the code working, the PYTHONPATH has to be adjusted::
 
    $ PYTHONPATH=. python pymchelper/run.py --help
     usage: run.py [-h] [-V] converter ...
@@ -146,12 +136,7 @@ Get Started for non-GIT developers
 
     $ git clone git@github.com:DataMedSci/pymchelper.git
 
-2. Follow steps 4-6 from the instruction for GIT-aware developers. Install versioneer::
-
-   $ pip install versioneer
-   $ versioneer install
-
-To run code locally, prefix usual calls with ``PYTHONPATH=.``::
+2. Follow steps 4-6 from the instruction for GIT-aware developers. To run code locally, prefix usual calls with ``PYTHONPATH=.``::
 
    $ PYTHONPATH=. python pymchelper/run.py --help
     usage: run.py [-h] [-V] converter ...
