@@ -122,7 +122,7 @@ class Detector:
     Detector data including scoring mesh description.
 
     This class handles in universal way data generated with MC code.
-    It includes data (``data`` and ``data_raw`` fields) and optinal errors (``error`` and ``error_raw``).
+    It includes data (``data`` and ``data_raw`` fields) and optional errors (``error`` and ``error_raw``).
     Detector holds also up to 3 binning axis (``x``, ``y`` and ``z`` fields).
     Scored quantity can be assigned a ``name`` (i.e. dose) and ``unit`` (i.e. Gy).
     Several other fields are also used:

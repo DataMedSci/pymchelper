@@ -85,6 +85,9 @@ def main(args=sys.argv[1:]):
     parser_excel = subparsers.add_parser(Converters.excel.name, help='converts to MS Excel file')
     add_default_options(parser_excel)
 
+    parser_hdf = subparsers.add_parser(Converters.hdf.name, help='converts to HDF file')
+    add_default_options(parser_hdf)
+
     parser_plotdata = subparsers.add_parser(Converters.plotdata.name, help='converts to gnuplot data')
     add_default_options(parser_plotdata)
 
