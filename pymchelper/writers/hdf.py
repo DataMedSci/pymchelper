@@ -21,7 +21,7 @@ class HdfWriter:
             raise e
 
         with h5py.File(self.filename, 'w') as f:
-            dset = f.create_dataset("data", data=detector.data)
+            dset = f.create_dataset("data", data=detector.data, compression="gzip", compression_opts=9)
             dset.attrs['name'] = detector.name
             dset.attrs['unit'] = detector.unit
             dset.attrs['nstat'] = detector.nstat
