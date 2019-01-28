@@ -1,4 +1,5 @@
 import logging
+import numpy as np
 
 logger = logging.getLogger(__name__)
 
@@ -21,7 +22,26 @@ class HdfWriter:
             raise e
 
         with h5py.File(self.filename, 'w') as f:
-            dset = f.create_dataset("data", data=detector.data, compression="gzip", compression_opts=9)
+
+            # change units for LET from MeV/cm to keV/um if necessary
+            # a copy of data table is made here
+            from pymchelper.shieldhit.detector.detector_type import SHDetType
+            if detector.dettyp in (SHDetType.dlet, SHDetType.dletg, SHDetType.tlet, SHDetType.tletg):
+                data = detector.data * np.float64(0.1)  # 1 MeV / cm = 0.1 keV / um
+                if not np.all(np.isnan(detector.error_raw)) and np.any(detector.error_raw):
+                    error = detector.error * np.float64(0.1)  # 1 MeV / cm = 0.1 keV / um
+            else:
+                data = detector.data
+                error = detector.error
+
+            # save data
+            dset = f.create_dataset("data", data=data, compression="gzip", compression_opts=9)
+
+            # save error (if present)
+            if not np.all(np.isnan(detector.error_raw)) and np.any(detector.error_raw):
+                f.create_dataset("error", data=error, compression="gzip", compression_opts=9)
+
+            # save metadata
             dset.attrs['name'] = detector.name
             dset.attrs['unit'] = detector.unit
             dset.attrs['nstat'] = detector.nstat
