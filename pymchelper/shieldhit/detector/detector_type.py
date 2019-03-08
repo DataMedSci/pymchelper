@@ -4,6 +4,7 @@ from enum import IntEnum
 class SHDetType(IntEnum):
     """
     List of available detector types below is based on IDET(5,*) in detect.f in SHIELD-HIT12A.
+    If new detectors are added, class SHEstimator in estimator.py should also be updated.
     """
 
     unknown = 0

@@ -9,20 +9,25 @@ logger = logging.getLogger(__name__)
 
 
 class SHEstimator:
+    # (internal) Number of detector to be used with most scorers.
+    # This correspons to the last "normal" detector minus 1, since the 0 detector is not inlucded.
+    # Update the last detector if new detectors are added.
+    _nn_det = SHDetType.flu_neqv - 1
+
     allowed_detectors = {
         SHGeoType.unknown: (),
-        SHGeoType.zone: (SHDetType(i + 1) for i in range(SHDetType.flu_neqv - 1)),
-        SHGeoType.cyl: (SHDetType(i + 1) for i in range(SHDetType.flu_neqv - 1)),
-        SHGeoType.msh: (SHDetType(i + 1) for i in range(SHDetType.flu_neqv - 1)),
-        SHGeoType.plane: (SHDetType(i + 1) for i in range(SHDetType.flu_neqv - 1)),
-        SHGeoType.dzone: (SHDetType(i + 1) for i in range(SHDetType.flu_neqv - 1)),
-        SHGeoType.dcyl: (SHDetType(i + 1) for i in range(SHDetType.flu_neqv - 1)),
-        SHGeoType.dmsh: (SHDetType(i + 1) for i in range(SHDetType.flu_neqv - 1)),
-        SHGeoType.dplane: (SHDetType(i + 1) for i in range(SHDetType.flu_neqv - 1)),
-        SHGeoType.dcylz: (SHDetType(i + 1) for i in range(SHDetType.flu_neqv - 1)),
-        SHGeoType.dmshz: (SHDetType(i + 1) for i in range(SHDetType.flu_neqv - 1)),
+        SHGeoType.zone: (SHDetType(i + 1) for i in range(_nn_det)),
+        SHGeoType.cyl: (SHDetType(i + 1) for i in range(_nn_det)),
+        SHGeoType.msh: (SHDetType(i + 1) for i in range(_nn_det)),
+        SHGeoType.plane: (SHDetType(i + 1) for i in range(_nn_det)),
+        SHGeoType.dzone: (SHDetType(i + 1) for i in range(_nn_det)),
+        SHGeoType.dcyl: (SHDetType(i + 1) for i in range(_nn_det)),
+        SHGeoType.dmsh: (SHDetType(i + 1) for i in range(_nn_det)),
+        SHGeoType.dplane: (SHDetType(i + 1) for i in range(_nn_det)),
+        SHGeoType.dcylz: (SHDetType(i + 1) for i in range(_nn_det)),
+        SHGeoType.dmshz: (SHDetType(i + 1) for i in range(_nn_det)),
         SHGeoType.trace: (SHDetType.unknown, ),
-        SHGeoType.voxscore: (SHDetType(i + 1) for i in range(SHDetType.flu_neqv - 1)),
+        SHGeoType.voxscore: (SHDetType(i + 1) for i in range(_nn_det)),
         SHGeoType.geomap: (SHDetType.zone, SHDetType.medium, SHDetType.rho),
     }
 
