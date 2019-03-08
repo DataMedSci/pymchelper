@@ -83,16 +83,16 @@ class TestTrip2Ddd(unittest.TestCase):
 
 
 def unpack_sparse_file(filename):
-        logger.info("Unpacking sparse file {:s}".format(filename))
-        npzfile = np.load(filename)
-        data = npzfile['data']
-        indices = npzfile['indices']
-        shape = npzfile['shape']
+    logger.info("Unpacking sparse file {:s}".format(filename))
+    npzfile = np.load(filename)
+    data = npzfile['data']
+    indices = npzfile['indices']
+    shape = npzfile['shape']
 
-        result = np.zeros(shape)
-        for ind, dat in zip(indices, data):
-            result[tuple(ind)] = dat
-        return result
+    result = np.zeros(shape)
+    for ind, dat in zip(indices, data):
+        result[tuple(ind)] = dat
+    return result
 
 
 class TestSparseConverter(unittest.TestCase):

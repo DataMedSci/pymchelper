@@ -634,16 +634,16 @@ class _SHBinaryReader0p1:
             zmax = 0.0
 
         if detector.geotyp in {SHGeoType.plane, SHGeoType.dplane}:
-                # special case for plane scoring, according to documentation we have:
-                #  xmin, ymin, zmin = Sx, Sy, Sz (point on the plane)
-                #  xmax, ymax, zmax = nx, ny, nz (normal vector)
-                # to avoid situation where i.e. xmax < xmin (corresponds to nx < Sx)
-                # we store only point on the plane
-                detector.sx, detector.sy, detector.sz = xmin, ymin, zmin
-                detector.nx, detector.ny, detector.nz = xmax, ymax, zmax
-                xmax = xmin
-                ymax = ymin
-                zmax = zmin
+            # special case for plane scoring, according to documentation we have:
+            #  xmin, ymin, zmin = Sx, Sy, Sz (point on the plane)
+            #  xmax, ymax, zmax = nx, ny, nz (normal vector)
+            # to avoid situation where i.e. xmax < xmin (corresponds to nx < Sx)
+            # we store only point on the plane
+            detector.sx, detector.sy, detector.sz = xmin, ymin, zmin
+            detector.nx, detector.ny, detector.nz = xmax, ymax, zmax
+            xmax = xmin
+            ymax = ymin
+            zmax = zmin
 
         xunit, xname = _get_mesh_units(detector, 0)
         yunit, yname = _get_mesh_units(detector, 1)
