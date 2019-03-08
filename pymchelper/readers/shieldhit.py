@@ -259,7 +259,10 @@ class SHBinaryReader:
             SHDetType.zone: ("(dimensionless)", "Zone#"),
             SHDetType.medium: ("(dimensionless)", "Medium#"),
             SHDetType.rho: ("g/cm^3", "Density"),
-            SHDetType.angle: ("radians", "Angle")
+            SHDetType.angle: ("radians", "Angle"),
+            SHDetType.char_fluence: ("cm^-2/primary", "Charged particle fluence"),
+            SHDetType.neut_fluence: ("cm^-2/primary", "Neutral particle fluence"),
+            SHDetType.neqv_fluence: ("cm^-2/primary", "1 MeV equiv. neutron fluence")
         }
         return _detector_units.get(detector_type, ("(nil)", "(nil)"))
 

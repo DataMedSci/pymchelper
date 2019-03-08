@@ -23,6 +23,9 @@ class SHDetType(IntEnum):
     medium = 19
     rho = 20
     q = 21
+    char_fluence = 22  # charged particle fluence
+    neut_fluence = 23  # neutral particle fluence
+    neqv_fluence = 24  # 1 MeV equivalent neutron fluence
     let = 120  # for differential scoring
     angle = 121  # for differential scoring
     dose_gy = 205

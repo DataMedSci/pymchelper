@@ -2,6 +2,9 @@ from enum import IntEnum
 
 
 class SHParticleType(IntEnum):
+    """
+    The list below is based on the JPART list of SHIELD-HIT12A including extensions -1 and 0.
+    """
     all = -1
     unknown = 0
     neutron = 1
