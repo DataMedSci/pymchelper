@@ -2,6 +2,11 @@ from enum import IntEnum
 
 
 class SHDetType(IntEnum):
+    """
+    List of available detector types below is based on IDET(5,*) in detect.f in SHIELD-HIT12A.
+    If new detectors are added, class SHEstimator in estimator.py should also be updated.
+    """
+
     unknown = 0
     energy = 1
     fluence = 2
@@ -25,6 +30,7 @@ class SHDetType(IntEnum):
     q = 21
     flu_char = 22
     flu_neut = 23
+    flu_neqv = 24
     let = 120  # for differential scoring
     angle = 121  # for differential scoring
     dose_gy = 205
