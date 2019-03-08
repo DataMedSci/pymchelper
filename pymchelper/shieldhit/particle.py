@@ -2,6 +2,9 @@ from enum import IntEnum
 
 
 class SHParticleType(IntEnum):
+    """
+    Particle list based on JPART from SHIELD-HIT12A, extended with ids 0 and -1.
+    """
     all = -1
     unknown = 0
     neutron = 1
