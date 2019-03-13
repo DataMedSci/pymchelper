@@ -6,7 +6,10 @@ logger = logging.getLogger(__name__)
 
 class HdfWriter:
     """
-    Supports writing HDF file format
+    Supports writing HDF file format.
+    HDF is designed to store large amounts of data organized in convenient way.
+    One HDF file can handle many single- or multi-dimensional tables.
+
     """
     def __init__(self, filename, options):
         self.filename = filename

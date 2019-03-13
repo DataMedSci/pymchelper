@@ -6,7 +6,10 @@
 HDF file
 ========
 
-Saves data in HDF binary file format. For every input detector a single file with :bash:`.h5` extension is written.
+Saves data in HDF binary file format.
+HDF is designed to store large amounts of data organized in convenient way.
+One HDF file can handle many single- or multi-dimensional tables.
+For every detector a single file with :bash:`.h5` extension is written.
 
 An example usage
 ----------------
