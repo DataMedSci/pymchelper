@@ -6,6 +6,7 @@ from pymchelper.writers.plots import GnuplotDataWriter, PlotDataWriter, ImageWri
 from pymchelper.writers.shieldhit import TxtWriter
 from pymchelper.writers.sparse import SparseWriter
 from pymchelper.writers.trip98 import TripCubeWriter, TripDddWriter
+from pymchelper.writers.hdf import HdfWriter
 
 
 class Converters(IntEnum):
@@ -21,6 +22,7 @@ class Converters(IntEnum):
     excel = 6
     sparse = 7
     inspect = 8
+    hdf = 9
 
     @classmethod
     def _converter_mapping(cls, item):
@@ -33,7 +35,8 @@ class Converters(IntEnum):
             cls.tripddd: TripDddWriter,
             cls.excel: ExcelWriter,
             cls.sparse: SparseWriter,
-            cls.inspect: Inspector
+            cls.inspect: Inspector,
+            cls.hdf: HdfWriter
         }.get(item)
 
     @classmethod
