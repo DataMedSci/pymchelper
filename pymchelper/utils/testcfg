@@ -1,15 +1,33 @@
-# Reserved keys
+#### -------- RESERVED KEYS -------------
+# TDIR is the directory where the base template is located relative to where this command is run.
 TDIR = template/.
-WDIR = wdir/${NAME}/${E_}
-FILES = beam.dat, geo.dat, mat.dat, detect.dat
-SYMLINKS = Water.txt, Air.txt, Lucite.txt, Ti.txt
 
-# User keys
+# WDIR is the working directory to be created. Note that user defined keys may be specified here.
+# Keys which were specified with the _MIN, _MAX _STEP suffixes will be treated as float with three digits after dot.
+# Nonexisting directories will be created accordingly
+WDIR = wdir/${NAME}/${E_}
+
+# Files which will be copied into the working directories which were created
+FILES = beam.dat, detect.dat
+
+# Some files do not change across the working directories. Here you can use symlinks instead:
+SYMLINKS = geo.dat, mat.dat, Water.txt, Air.txt, Lucite.txt, Ti.txt
+
+# Finally a special key for energy spread: DE_ will always hold E_ * DE_FACTOR given below.
+# E.g. this is a 1 % energy spread:
+DE_FACTOR = 0.01
+
+#### -------- USER KEYS -------------
+# Constants which will not vary over the working directories may be given like this:
 NSTAT = 100000
 NSAVE = 50000
 DIV = 2.5
 
-# User key tables
+#### -------- USER KEY TABLES -------------
+# Variables may be given as a table.
+# First row contains a list of keys, and the subsequent rows are the directories which may be created.
+# any key with the suffixes _MIN _MAX and _STEP are will be treated as a range, creating more iterations.
+# this can be used for e.g. looping ower energies as in the example below:
 NAME        JPART    Z   NUCL   U               E_MIN   E_MAX   E_STEP       BSIGMA
 1H              2    1   1      1.007276        66.0    254.0   2.0             0.4
 4He            24    2   4      4.002602        65.8    253.3   2.0             0.4

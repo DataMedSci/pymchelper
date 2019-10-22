@@ -1,3 +1,9 @@
+"""
+Tool for creating MC input files using user-specified tables and ranges.
+
+2019 - Niels Bassler
+"""
+
 import os
 import sys
 import logging
@@ -18,7 +24,8 @@ class Config():
 
     def parse(self):
         """
-        parse configuration file
+        Parse configuration file.
+        All data are read into dicts. There are two dicts: a constant and variable (tabluated) one.
         """
 
         self.c_dict = {}  # list of contant assignments
@@ -48,8 +55,6 @@ class Config():
                 else:
                     vals.append(line.split())
 
-        print("keys and vals", keys, vals)
-
         # after parsing all lines setup the variable table, if it exists:
         if keys and vals:
             for i, key in enumerate(keys):
@@ -68,7 +73,8 @@ class Config():
 
 class McFile():
     """
-    General MC single file object
+    General MC single file object.
+    This will be used for the template files as well as the generated output files.
     """
     def __init__(self):
         self.fname = ""  # filename
@@ -114,6 +120,7 @@ class Template():
 
     def read(self, cfg):
         """
+        Reads all template files, and creates a list of McFile objects in self.files.
         """
 
         flist = cfg.c_dict["FILES"] + cfg.c_dict["SYMLINKS"]
@@ -129,10 +136,7 @@ class Template():
             with open(tf.path) as _file:
                 tf.lines = _file.readlines()
 
-            print(f, cfg.c_dict["SYMLINKS"])
-
             if f in cfg.c_dict["SYMLINKS"]:
-                print("YAY")
                 tf.symlink = True
             else:
                 tf.symlink = False
@@ -141,23 +145,33 @@ class Template():
 
 class Generator():
     """
+    This generates and writes the output files based on the loaded template files and the config file.
     """
     def __init__(self, t, cfg):
+        """
+        Logic attached to the variious keys is in here.
+        """
         # create a new dict, with all keys, but single unique values only:
         # this is the "current dictionary"
         dict = cfg.c_dict.copy()
 
+        # loop_keys are special keys which cover a numerical range in discrete steps.
+        # here we will identify them, and for each loop_key, there will be a range setup.
+        # loop_keys are identified by the "_MIN" suffix:
         loop_keys = []
         for key in cfg.t_dict.keys():
             if "_MIN" in key:
                 loop_keys.append(key.strip("_MIN") + "_")
 
-        # reuse any key from table
+        # reuse any key from table to calculate the length of the table
+        # this means that the table must be homogenous, i.e. every key must have the same amount of values.
         _vals = cfg.t_dict[key]
         for i, val in enumerate(_vals):
             for key in cfg.t_dict.keys():
                 dict[key] = cfg.t_dict[key][i]  # only copy the ith value
 
+
+            # now prepare the ranges for every loop_key
             for loop_key in loop_keys:
                 _lmin = float(cfg.t_dict[loop_key + "MIN"][i])
                 _lmax = float(cfg.t_dict[loop_key + "MAX"][i])
@@ -166,8 +180,15 @@ class Generator():
                 for loop_val in loop_vals:
                     dict[loop_key] = loop_val
 
+                    # set the relative energy spread:
+                    if "E_" in dict and "DE_FACTOR" in dict:
+                        _de = float(dict["E_"]) * float(dict["DE_FACTOR"])
+                        dict["DE_"] = "{:.3f}".format(_de)  # HARDCODED float format for DE_
+
                     # at this point, the dict is fully set.
                     self.write(t, dict)
+
+
 
     @staticmethod
     def get_keys(s):
@@ -217,7 +238,7 @@ class Generator():
 
                 _s = dict[key]
                 if isinstance(_s, float):
-                    _s = "{:.3f}".format(dict[key])
+                    _s = "{:08.3f}".format(dict[key])  # HARDCODED float format for directory string
                 _wd = _wd.replace(token, _s)
         wdir = _wd
 
@@ -226,8 +247,6 @@ class Generator():
             of.fname = tf.fname
             of.path = os.path.join(wdir, tf.fname)
             of.tdir = tf.tdir
-
-            print("t.files", tf.fname)
 
             # symlinks should not be parsed for tokens.
             if tf.symlink:
@@ -238,11 +257,14 @@ class Generator():
                 for line in tf.lines:
                     for key in dict.keys():
                         token = "${" + key + "}"
-                        if token in line:
-                            of.lines.append(self.lreplace(line, token, dict[key]))
-
+                        while token in line:
+                            _s = dict[key]
+                            if isinstance(_s, float):
+                                _s = "{:.3f}".format(dict[key])  # HARDCODED float format for loop_keys
+                            line = self.lreplace(line, token, _s)
+                    of.lines.append(line)
+            # end loop over t.files
             of.write()
-        exit()
 
 
 def main(args):
@@ -251,25 +273,23 @@ def main(args):
     """
     logger.setLevel('INFO')
 
-    fn = args[0]
+    if len(args) < 2:
+        print("usage: {} <configfile>".format(args[0]))
+        exit(0)
 
-    print("filename", fn)
+    fname = args[1]
 
-    cfg = Config(args[0])
+    cfg = Config(fname)
     t = Template(cfg)
 
     for f in t.files:
         print(f.fname)
 
-    print(cfg.c_dict)
-    print(cfg.t_dict)
-
     t = Template(cfg)
 
-    print("\n\n\n")
     Generator(t, cfg)
 
 
 if __name__ == '__main__':
     logging.basicConfig()
-    sys.exit(main(sys.argv[1:]))
+    sys.exit(main(sys.argv[0:]))
