@@ -1,0 +1,10 @@
+RNDSEED         89736501             ! Random seed
+JPART0          $JPART               ! Incident particle type
+TMAX0           $ENERGY  $D_ENERGY   ! Incident energy and 1 sigma energy spread, both in [MeV/nucl]
+NSTAT           $NSTAT	 $NSAVE      ! NSTAT, Step of saving
+BEAMSIGMA       $SIGX    $SIGY       ! beam width [cm]
+BEAMPOS         0   0   -200.0       ! Distance from last quadrupole to phantom surface [cm]
+DELTAE          0.005                ! lower min relative energy transfer
+STRAGG          2                    ! Straggling: 0-Off 1-Gauss, 2-Vavilov
+MSCAT           2                    ! Mult. scatt 0-Off 1-Gauss, 2-Moliere
+NUCRE           1                    ! Nucl.Reac. switcher: 1-ON, 0-OFF
