@@ -20,6 +20,11 @@ class Config():
     def __init__(self, fn):
         with open(fn) as file:
             self.lines = file.readlines()
+            self.base_dir = os.path.dirname(fn)
+
+            # script must run relative to location of config file.
+            if self.base_dir:
+                os.chdir(self.base_dir)
             self.parse()
 
     def parse(self):
@@ -93,9 +98,6 @@ class McFile():
         except FileExistsError:
             pass
 
-        print(self.path)
-        print(self.symlink)
-
         if self.symlink:
             link_file = os.path.join(self.tdir, self.fname)
             link_target = os.path.join(self.path)
@@ -124,8 +126,6 @@ class Template():
         """
 
         flist = cfg.c_dict["FILES"] + cfg.c_dict["SYMLINKS"]
-
-        print("TEMPLATE.flist", flist)
 
         for f in flist:
             tf = McFile()
@@ -270,18 +270,13 @@ def main(args):
     """
     logger.setLevel('INFO')
 
-    if len(args) < 2:
-        print("usage: {} <configfile>".format(args[0]))
+    if len(args) < 1:
+        print("usage: {} <configfile>".format("mcscripter.py"))
         exit(0)
 
-    fname = args[1]
+    fname = args[0]
 
     cfg = Config(fname)
-    t = Template(cfg)
-
-    for f in t.files:
-        print(f.fname)
-
     t = Template(cfg)
 
     Generator(t, cfg)
@@ -289,4 +284,4 @@ def main(args):
 
 if __name__ == '__main__':
     logging.basicConfig()
-    sys.exit(main(sys.argv[0:]))
+    sys.exit(main(sys.argv[1:]))
