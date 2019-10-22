@@ -170,7 +170,6 @@ class Generator():
             for key in cfg.t_dict.keys():
                 dict[key] = cfg.t_dict[key][i]  # only copy the ith value
 
-
             # now prepare the ranges for every loop_key
             for loop_key in loop_keys:
                 _lmin = float(cfg.t_dict[loop_key + "MIN"][i])
@@ -187,8 +186,6 @@ class Generator():
 
                     # at this point, the dict is fully set.
                     self.write(t, dict)
-
-
 
     @staticmethod
     def get_keys(s):
