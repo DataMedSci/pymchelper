@@ -22,7 +22,7 @@ class Config():
         """
 
         self.c_dict = {}  # list of contant assignments
-        self.t_dict = {}  # list of contant assignments
+        self.t_dict = {}  # list of table assignments
 
         keys = []
         vals = []
@@ -88,12 +88,15 @@ class McFile():
             pass
 
         print(self.path)
+        print(self.symlink)
 
         if self.symlink:
             link_file = os.path.join(self.tdir, self.fname)
-            link_name = os.path.join(self.path)
+            link_target = os.path.join(self.path)
+            link_name = os.path.relpath(link_file, os.path.dirname(link_target))
+
             try:
-                os.symlink(link_file, link_name)
+                os.symlink(link_name, link_target)
             except FileExistsError:
                 pass
         else:
@@ -115,6 +118,8 @@ class Template():
 
         flist = cfg.c_dict["FILES"] + cfg.c_dict["SYMLINKS"]
 
+        print("TEMPLATE.flist", flist)
+
         for f in flist:
             tf = McFile()
             tf.fname = f
@@ -124,9 +129,13 @@ class Template():
             with open(tf.path) as _file:
                 tf.lines = _file.readlines()
 
-            tf.symlink = False
+            print(f, cfg.c_dict["SYMLINKS"])
+
             if f in cfg.c_dict["SYMLINKS"]:
+                print("YAY")
                 tf.symlink = True
+            else:
+                tf.symlink = False
             self.files.append(tf)
 
 
@@ -202,7 +211,6 @@ class Generator():
         _wd = dict["WDIR"]
 
         # check if any keys are in WDIR subsitutions
-
         for key in dict.keys():
             token = "${" + key + "}"
             if token in _wd:
@@ -214,21 +222,27 @@ class Generator():
         wdir = _wd
 
         for tf in t.files:
-
             of = McFile()
             of.fname = tf.fname
             of.path = os.path.join(wdir, tf.fname)
+            of.tdir = tf.tdir
 
+            print("t.files", tf.fname)
+
+            # symlinks should not be parsed for tokens.
             if tf.symlink:
-                continue
+                of.symlink = True
+            else:
+                of.symlink = False
 
-            for line in tf.lines:
-                for key in dict.keys():
-                    token = "${" + key + "}"
-                    if token in line:
-                        of.lines.append(self.lreplace(line, token, dict[key]))
+                for line in tf.lines:
+                    for key in dict.keys():
+                        token = "${" + key + "}"
+                        if token in line:
+                            of.lines.append(self.lreplace(line, token, dict[key]))
 
             of.write()
+        exit()
 
 
 def main(args):
