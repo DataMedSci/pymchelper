@@ -8,6 +8,7 @@ import os
 import sys
 import errno
 import logging
+import argparse
 
 import numpy as np
 
@@ -280,19 +281,26 @@ class Generator():
             of.write()
 
 
-def main(args):
+def main(args=sys.argv[1:]):
     """
     Main function.
     """
-    logger.setLevel('INFO')
 
-    if len(args) < 1:
-        print("usage: {} <configfile>".format("mcscripter.py"))
-        exit(0)
+    import pymchelper
+    parser = argparse.ArgumentParser()
+    parser.add_argument('fconf', metavar="config.txt", type=argparse.FileType('r'),
+                        help="path to config file.",
+                        default=sys.stdin)
+    parser.add_argument('-v', '--verbosity', action='count', help="increase output verbosity", default=0)
+    parser.add_argument('-V', '--version', action='version', version=pymchelper.__version__)
+    args = parser.parse_args(args)
 
-    fname = args[0]
+    if args.verbosity == 1:
+        logging.basicConfig(level=logging.INFO)
+    if args.verbosity > 1:
+        logging.basicConfig(level=logging.DEBUG)
 
-    cfg = Config(fname)
+    cfg = Config(args.fconf.name)
     t = Template(cfg)
 
     Generator(t, cfg)
