@@ -18,8 +18,8 @@ class Config():
     Reading the config file.
     """
     def __init__(self, fn):
-        with open(fn) as file:
-            self.lines = file.readlines()
+        with open(fn) as _f:
+            self.lines = _f.readlines()
             self.base_dir = os.path.dirname(fn)
 
             # script must run relative to location of config file.
@@ -65,15 +65,15 @@ class Config():
             for i, key in enumerate(keys):
                 self.t_dict[key] = [val[i] for val in vals]
 
-        _f = []
+        _files = []
         for item in self.c_dict["FILES"].split(","):
-            _f.append(item.strip())
-        self.c_dict["FILES"] = _f
+            _files.append(item.strip())
+        self.c_dict["FILES"] = _files
 
-        _f = []
+        _files = []
         for item in self.c_dict["SYMLINKS"].split(","):
-            _f.append(item.strip())
-        self.c_dict["SYMLINKS"] = _f
+            _files.append(item.strip())
+        self.c_dict["SYMLINKS"] = _files
 
 
 class McFile():
@@ -83,10 +83,10 @@ class McFile():
     """
     def __init__(self):
         self.fname = ""  # filename
-        self.path = ""   # full path
+        self.path = ""   # full path to this file (may be relative)
         self.lines = []  # list of lines inside this file
         self.symlink = False  # marker if file is a symlink
-        self.tdir = ""
+        self.tdir = ""  # template directory
 
     def write(self):
         """
@@ -108,8 +108,8 @@ class McFile():
             except FileExistsError:
                 pass
         else:
-            with open(self.path, 'w') as file:
-                file.writelines(self.lines)
+            with open(self.path, 'w') as _f:
+                _f.writelines(self.lines)
 
 
 class Template():
@@ -125,18 +125,18 @@ class Template():
         Reads all template files, and creates a list of McFile objects in self.files.
         """
 
-        flist = cfg.c_dict["FILES"] + cfg.c_dict["SYMLINKS"]
+        fname_list = cfg.c_dict["FILES"] + cfg.c_dict["SYMLINKS"]
 
-        for f in flist:
+        for fname in fname_list:
             tf = McFile()
-            tf.fname = f
-            tf.path = os.path.join(cfg.c_dict["TDIR"], f)
+            tf.fname = fname
+            tf.path = os.path.join(cfg.c_dict["TDIR"], fname)
             tf.tdir = cfg.c_dict["TDIR"]
 
-            with open(tf.path) as _file:
-                tf.lines = _file.readlines()
+            with open(tf.path) as _f:
+                tf.lines = _f.readlines()
 
-            if f in cfg.c_dict["SYMLINKS"]:
+            if fname in cfg.c_dict["SYMLINKS"]:
                 tf.symlink = True
             else:
                 tf.symlink = False
@@ -149,11 +149,11 @@ class Generator():
     """
     def __init__(self, t, cfg):
         """
-        Logic attached to the variious keys is in here.
+        Logic attached to the various keys is in here.
         """
         # create a new dict, with all keys, but single unique values only:
-        # this is the "current dictionary"
-        dict = cfg.c_dict.copy()
+        # this is the "current unique dictionary"
+        u_dict = cfg.c_dict.copy()
 
         # loop_keys are special keys which cover a numerical range in discrete steps.
         # here we will identify them, and for each loop_key, there will be a range setup.
@@ -168,7 +168,7 @@ class Generator():
         _vals = cfg.t_dict[key]
         for i, val in enumerate(_vals):
             for key in cfg.t_dict.keys():
-                dict[key] = cfg.t_dict[key][i]  # only copy the ith value
+                u_dict[key] = cfg.t_dict[key][i]  # only copy the ith value
 
             # now prepare the ranges for every loop_key
             for loop_key in loop_keys:
@@ -177,15 +177,15 @@ class Generator():
                 _lst = float(cfg.t_dict[loop_key + "STEP"][i])
                 loop_vals = np.arange(_lmin, _lmax, _lst)
                 for loop_val in loop_vals:
-                    dict[loop_key] = loop_val
+                    u_dict[loop_key] = loop_val
 
                     # set the relative energy spread:
-                    if "E_" in dict and "DE_FACTOR" in dict:
-                        _de = float(dict["E_"]) * float(dict["DE_FACTOR"])
-                        dict["DE_"] = "{:.3f}".format(_de)  # HARDCODED float format for DE_
+                    if "E_" in u_dict and "DE_FACTOR" in u_dict:
+                        _de = float(u_dict["E_"]) * float(u_dict["DE_FACTOR"])
+                        u_dict["DE_"] = "{:.3f}".format(_de)  # HARDCODED float format for DE_
 
                     # at this point, the dict is fully set.
-                    self.write(t, dict)
+                    self.write(t, u_dict)
 
     @staticmethod
     def get_keys(s):
@@ -206,41 +206,49 @@ class Generator():
     @staticmethod
     def lreplace(s, f, r):
         """
-        Left adjusted replacement.
-        Finds f in s and replaces it with r, but right adjusted, retaining line length.
+        Left adjusted replacement of string f with string r, in string s.
+
+        This function is implemented in order to fill in data in FORTRAN77 fields,
+        which are tied to certain positions on the line, i.e. subsequent values
+        may not be shifted.
+
+        Finds f in s and replaces it with r, but left adjusted, retaining line length.
         If r is shorter than f, remaining chars will be space padded.
         If r is larger than f, then characters will be overwritten.
         A copy of s with the replacement is returned.
         """
         if f in s:
-            idx = s.find(f)
+            _idx = s.find(f)
             if len(r) < len(f):
                 _r = r + " " * (len(f) - len(r))
             else:
                 _r = r
-            text = s[:idx] + _r + s[idx + len(_r):]
+            text = s[:_idx] + _r + s[_idx + len(_r):]
             return text
 
-    def write(self, t, dict):
+    def write(self, t, u_dict):
         """
-        Write a copy of the template, using the substitutions as specifed in dict.
+        Write a copy of the template, using the substitutions as specifed in
+        the unique dictionary u_dict.
+
+        "Unique", means that any _MIN _MAX _STEP type variables have been set.
         """
 
-        _wd = dict["WDIR"]
+        _wd = u_dict["WDIR"]
 
         # check if any keys are in WDIR subsitutions
-        for key in dict.keys():
+        for key in u_dict.keys():
             token = "${" + key + "}"
             if token in _wd:
 
-                _s = dict[key]
+                _s = u_dict[key]
                 if isinstance(_s, float):
-                    _s = "{:08.3f}".format(dict[key])  # HARDCODED float format for directory string
+                    _s = "{:08.3f}".format(u_dict[key])  # HARDCODED float format for directory string
                 _wd = _wd.replace(token, _s)
         wdir = _wd
 
-        for tf in t.files:
-            of = McFile()
+        for tf in t.files:  # tf = template filename
+            of = McFile()  # of = output file object
             of.fname = tf.fname
             of.path = os.path.join(wdir, tf.fname)
             of.tdir = tf.tdir
@@ -252,12 +260,12 @@ class Generator():
                 of.symlink = False
 
                 for line in tf.lines:
-                    for key in dict.keys():
+                    for key in u_dict.keys():
                         token = "${" + key + "}"
                         while token in line:
-                            _s = dict[key]
+                            _s = u_dict[key]
                             if isinstance(_s, float):
-                                _s = "{:.3f}".format(dict[key])  # HARDCODED float format for loop_keys
+                                _s = "{:.3f}".format(u_dict[key])  # HARDCODED float format for loop_keys
                             line = self.lreplace(line, token, _s)
                     of.lines.append(line)
             # end loop over t.files
