@@ -6,6 +6,7 @@ Tool for creating MC input files using user-specified tables and ranges.
 
 import os
 import sys
+import errno
 import logging
 
 import numpy as np
@@ -95,8 +96,12 @@ class McFile():
         # check if target directory exists, create it, if not.
         try:
             os.makedirs(os.path.dirname(self.path))
-        except FileExistsError:
-            pass
+        except OSError as e:  # when python 2.7 is dropped this can be replaces tih FileExistsError: pass
+            if e.errno == errno.EEXIST:
+                pass  # silently accept existing directories
+            else:
+                logger.error('Directory not created.')
+                raise
 
         if self.symlink:
             link_file = os.path.join(self.tdir, self.fname)
@@ -105,8 +110,12 @@ class McFile():
 
             try:
                 os.symlink(link_name, link_target)
-            except FileExistsError:
-                pass
+            except OSError as e:  # when python 2.7 is dropped this can be replaces tih FileExistsError: pass
+                if e.errno == errno.EEXIST:
+                    pass  # silently accept existing symlinks
+                else:
+                    logger.error('Symlink not created.')
+                    raise
         else:
             with open(self.path, 'w') as _f:
                 _f.writelines(self.lines)
