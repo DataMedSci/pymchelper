@@ -37,8 +37,8 @@ class Config():
         All data are read into dicts. There are two dicts: a constant and variable (tabluated) one.
         """
 
-        self.c_dict = {}  # list of contant assignments
-        self.t_dict = {}  # list of table assignments
+        self.const_dict = {}  # list of contant assignments
+        self.table_dict = {}  # list of table assignments
 
         keys = []
         vals = []
@@ -53,7 +53,7 @@ class Config():
             # constant assigments
             if "=" in line:
                 _v = line.split("=")
-                self.c_dict[_v[0].strip()] = _v[1].strip()
+                self.const_dict[_v[0].strip()] = _v[1].strip()
                 continue
 
             # check if we are starting a table
@@ -67,17 +67,17 @@ class Config():
         # after parsing all lines setup the variable table, if it exists:
         if keys and vals:
             for i, key in enumerate(keys):
-                self.t_dict[key] = [val[i] for val in vals]
+                self.table_dict[key] = [val[i] for val in vals]
 
         _files = []
-        for item in self.c_dict["FILES"].split(","):
+        for item in self.const_dict["FILES"].split(","):
             _files.append(item.strip())
-        self.c_dict["FILES"] = _files
+        self.const_dict["FILES"] = _files
 
         _files = []
-        for item in self.c_dict["SYMLINKS"].split(","):
+        for item in self.const_dict["SYMLINKS"].split(","):
             _files.append(item.strip())
-        self.c_dict["SYMLINKS"] = _files
+        self.const_dict["SYMLINKS"] = _files
 
 
 class McFile():
@@ -90,7 +90,7 @@ class McFile():
         self.path = ""   # full path to this file (may be relative)
         self.lines = []  # list of lines inside this file
         self.symlink = False  # marker if file is a symlink
-        self.tdir = ""  # template directory
+        self.templ_dir = ""  # template directory
 
     def write(self):
         """
@@ -107,7 +107,7 @@ class McFile():
                 raise
 
         if self.symlink:
-            link_file = os.path.join(self.tdir, self.fname)
+            link_file = os.path.join(self.templ_dir, self.fname)
             link_target = os.path.join(self.path)
             link_name = os.path.relpath(link_file, os.path.dirname(link_target))
 
@@ -137,18 +137,18 @@ class Template():
         Reads all template files, and creates a list of McFile objects in self.files.
         """
 
-        fname_list = cfg.c_dict["FILES"] + cfg.c_dict["SYMLINKS"]
+        fname_list = cfg.const_dict["FILES"] + cfg.const_dict["SYMLINKS"]
 
         for fname in fname_list:
             tf = McFile()
             tf.fname = fname
-            tf.path = os.path.join(cfg.c_dict["TDIR"], fname)
-            tf.tdir = cfg.c_dict["TDIR"]
+            tf.path = os.path.join(cfg.const_dict["TDIR"], fname)
+            tf.templ_dir = cfg.const_dict["TDIR"]
 
             with open(tf.path) as _f:
                 tf.lines = _f.readlines()
 
-            if fname in cfg.c_dict["SYMLINKS"]:
+            if fname in cfg.const_dict["SYMLINKS"]:
                 tf.symlink = True
             else:
                 tf.symlink = False
@@ -159,34 +159,35 @@ class Generator():
     """
     This generates and writes the output files based on the loaded template files and the config file.
     """
-    def __init__(self, t, cfg):
+    def __init__(self, templ, cfg):
         """
         Logic attached to the various keys is in here.
+        templ is a Template object and cfg is a Config object.
         """
         # create a new dict, with all keys, but single unique values only:
         # this is the "current unique dictionary"
-        u_dict = cfg.c_dict.copy()
+        u_dict = cfg.const_dict.copy()
 
         # loop_keys are special keys which cover a numerical range in discrete steps.
         # here we will identify them, and for each loop_key, there will be a range setup.
         # loop_keys are identified by the "_MIN" suffix:
         loop_keys = []
-        for key in cfg.t_dict.keys():
+        for key in cfg.table_dict.keys():
             if "_MIN" in key:
                 loop_keys.append(key.strip("_MIN") + "_")
 
         # reuse any key from table to calculate the length of the table
         # this means that the table must be homogenous, i.e. every key must have the same amount of values.
-        _vals = cfg.t_dict[key]
+        _vals = cfg.table_dict[key]
         for i, val in enumerate(_vals):
-            for key in cfg.t_dict.keys():
-                u_dict[key] = cfg.t_dict[key][i]  # only copy the ith value
+            for key in cfg.table_dict.keys():
+                u_dict[key] = cfg.table_dict[key][i]  # only copy the ith value
 
             # now prepare the ranges for every loop_key
             for loop_key in loop_keys:
-                _lmin = float(cfg.t_dict[loop_key + "MIN"][i])
-                _lmax = float(cfg.t_dict[loop_key + "MAX"][i])
-                _lst = float(cfg.t_dict[loop_key + "STEP"][i])
+                _lmin = float(cfg.table_dict[loop_key + "MIN"][i])
+                _lmax = float(cfg.table_dict[loop_key + "MAX"][i])
+                _lst = float(cfg.table_dict[loop_key + "STEP"][i])
                 loop_vals = np.arange(_lmin, _lmax, _lst)
                 for loop_val in loop_vals:
                     u_dict[loop_key] = loop_val
@@ -197,7 +198,7 @@ class Generator():
                         u_dict["DE_"] = "{:.3f}".format(_de)  # HARDCODED float format for DE_
 
                     # at this point, the dict is fully set.
-                    self.write(t, u_dict)
+                    self.write(templ, u_dict)
 
     @staticmethod
     def get_keys(s):  # This is currently not used, but kept for future use.
@@ -256,13 +257,13 @@ class Generator():
                 if isinstance(_s, float):
                     _s = "{:08.3f}".format(u_dict[key])  # HARDCODED float format for directory string
                 _wd = _wd.replace(token, _s)
-        wdir = _wd
+        work_dir = _wd
 
         for tf in t.files:  # tf = template filename
             of = McFile()  # of = output file object
             of.fname = tf.fname
-            of.path = os.path.join(wdir, tf.fname)
-            of.tdir = tf.tdir
+            of.path = os.path.join(work_dir, tf.fname)
+            of.templ_dir = tf.templ_dir
 
             # symlinks should not be parsed for tokens.
             if tf.symlink:
