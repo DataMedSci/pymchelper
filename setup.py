@@ -63,6 +63,7 @@ setuptools.setup(
         'console_scripts': [
             'convertmc=pymchelper.run:main',
             'pld2sobp=pymchelper.utils.pld2sobp:main',
+            'mcscripter=pymchelper.utils.mcscripter:main',
         ],
     },
     package_data={'pymchelper': ['flair/db/*']},
