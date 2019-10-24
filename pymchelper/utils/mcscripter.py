@@ -197,7 +197,7 @@ class Generator():
                     self.write(t, u_dict)
 
     @staticmethod
-    def get_keys(s):
+    def get_keys(s):  # This is currently not used, but kept for future use.
         """
         return list of ${} keys in string
         """
@@ -209,7 +209,6 @@ class Generator():
 
             for i in zip(_i, _ii):
                 r.append(s[i[0] + 1:i[1]])
-
         return r
 
     @staticmethod
