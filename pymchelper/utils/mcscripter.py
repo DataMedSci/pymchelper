@@ -25,6 +25,8 @@ class Config():
             self.base_dir = os.path.dirname(fn)
 
             # script must run relative to location of config file.
+            # this is needed, otherwise symlink creation will fail, as these are relative
+            # and expect that the target exists.
             if self.base_dir:
                 os.chdir(self.base_dir)
             self.parse()
@@ -45,7 +47,7 @@ class Config():
 
         for line in self.lines:
             # skip comments
-            if line[0] == '#':
+            if line.startswith('#'):
                 continue
 
             # constant assigments
