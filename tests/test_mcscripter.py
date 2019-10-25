@@ -14,9 +14,25 @@ class TestMcScripter(unittest.TestCase):
         """ Print usage and exit normally.
         """
         try:
-            pymchelper.utils.mcscripter.main([])
+            pymchelper.utils.mcscripter.main(["--help"])
         except SystemExit as e:
             self.assertEqual(e.code, 0)
+
+    def test_version(self):
+        """ Print usage and exit normally.
+        """
+        try:
+            pymchelper.utils.mcscripter.main(["--version"])
+        except SystemExit as e:
+            self.assertEqual(e.code, 0)
+
+    def test_noarg(self):
+        """ Call without args will cause it to fail.
+        """
+        try:
+            pymchelper.utils.mcscripter.main([])
+        except SystemExit as e:
+            self.assertEqual(e.code, 2)
 
     def test_simple(self):
         """ Simple conversion including diagnostic output.
