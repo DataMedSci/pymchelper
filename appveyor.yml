@@ -46,6 +46,7 @@ install:
   - "%PYTHON%\\python.exe -V"
   - python -V
 # check pip version (default and target), as above
+  - pip -V
   - python -m pip -V
   - "%PYTHON%\\python.exe -m pip -V"
 # check 32 or 64 bit of target python
@@ -58,6 +59,7 @@ install:
   - python -c "import numpy as np;print(np.version.version)"
 # check target python and pip versions after upgrades of pip packages
   - python -V
+  - pip -V
   - python -m pip -V
 
 test_script:
@@ -70,7 +72,9 @@ test_script:
   - rd /s /q pymchelper
   - del setup.py
 # install wheel package via pip, as we do not know the wheel filename in advance, we loop over all *.whl files in dist directory
-  - ps: Get-ChildItem -Path dist\ -Recurse -Include *.whl | foreach-object { echo $_ | Out-Host ; python -m pip install $_}
+  - ps: Get-ChildItem -Path dist\ -Recurse -Include *.whl | foreach-object { echo $_ | Out-Host ; pip install $_}
+# check if pymchelper was installed
+  - python -c "import pymchelper;print(pymchelper.__version__)"
 # install optional dependencies
   - python -m pip install matplotlib
   - python -m pip install pytrip98
