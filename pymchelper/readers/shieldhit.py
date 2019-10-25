@@ -80,7 +80,7 @@ def _get_detector_unit(detector_type, geotyp):
         SHDetType.dose_gy: dose_gy_units,
         SHDetType.dlet: ("keV/um", "dose-averaged LET"),
         SHDetType.tlet: ("keV/um", "track-averaged LET"),
-        SHDetType.avg_energy: ("MeV", "Average energy"),
+        SHDetType.avg_energy: ("MeV/nucleon", "Average kinetic energy"),
         SHDetType.avg_beta: ("(dimensionless)", "Average beta"),
         SHDetType.material: ("(nil)", "Material number"),
         SHDetType.alanine: alanine_units,
