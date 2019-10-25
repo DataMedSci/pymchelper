@@ -33,10 +33,7 @@ matrix:
 #          python: nightly
 #          env: TOXENV=py37
 
-# travis-ci runs by default on ancient Ubuntu 12.04 (precise)
-# following options will give us Ubuntu 14.04 (trusty)
 sudo: false
-dist: xenial
 
 install:
   - travis_wait ./.travis/install_linux.sh

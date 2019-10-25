@@ -1,6 +1,8 @@
 
 # validation page for appveyor config: https://ci.appveyor.com/tools/validate-yaml
 
+# TODO - check an alternative tox setup https://www.appveyor.com/docs/lang/python/
+
 # we are not building Visual Studio project, so default build step is off
 build: off
 
@@ -19,9 +21,10 @@ environment:
       PYTHON: "C:\\Python36-x64"
 
 init:
-# check python version
+# check python version for default and target python version
+  - "%PYTHON%\\python.exe -V"
   - python -V
-# check 32 or 64 bit
+# check 32 or 64 bit for default python
   - python -c "import struct;print(8 * struct.calcsize('P'))"
 
 
@@ -36,25 +39,31 @@ install:
         Where-Object pullRequestId -eq $env:APPVEYOR_PULL_REQUEST_NUMBER)[0].buildNumber) { `
           throw "There are newer queued builds for this pull request, failing early." }
 
-  # Prepend Python to the PATH of this build
+  # Prepend Python to the PATH of this build, Appveyor does not do anything special
+  # to put the Python version you want to use on PATH.
   - "SET PATH=%PYTHON%;%PYTHON%\\Scripts;%PATH%"
-# check pip version
+# check python version (default and target) to ensure PATH setting was successful
+  - "%PYTHON%\\python.exe -V"
+  - python -V
+# check pip version (default and target), as above
   - pip -V
-# install usual requirements
-  - pip install --upgrade virtualenv pip setuptools tox wheel --user
-  - pip install --upgrade -r tests/requirements-test.txt
-  - pip install --upgrade -r requirements.txt
+  - python -m pip -V
+  - "%PYTHON%\\python.exe -m pip -V"
+# check 32 or 64 bit of target python
+  - python -c "import struct;print(8 * struct.calcsize('P'))"
+# install usual requirements using target pip
+  - python -m pip install --upgrade virtualenv pip setuptools tox wheel --user
+  - python -m pip install --upgrade -r tests/requirements-test.txt
+  - python -m pip install --upgrade -r requirements.txt
 # check numpy version
   - python -c "import numpy as np;print(np.version.version)"
-# check python and pip versions
+# check target python and pip versions after upgrades of pip packages
   - python -V
-  - pip -V
-# check 32 or 64 bit
-  - python -c "import struct;print(8 * struct.calcsize('P'))"
+  - python -m pip -V
 
 test_script:
 # make wheel package
-  - pip install wheel
+  - python -m pip install wheel
   - python setup.py bdist_wheel
 # clean build directory
   - rd /s /q build
@@ -62,12 +71,19 @@ test_script:
   - rd /s /q pymchelper
   - del setup.py
 # install wheel package via pip, as we do not know the wheel filename in advance, we loop over all *.whl files in dist directory
-  - ps: Get-ChildItem -Path dist\ -Recurse -Include *.whl | foreach-object { echo $_ | Out-Host ; pip install $_}
-# install optional deps
-  - pip install matplotlib
-  - pip install pytrip98
+# with current pip install the installation from the pymchelper project fails, hence we temporarily go somewhere else to call it
+  - ps: cd C:\ ; Get-ChildItem -Path C:\projects\pymchelper\dist\ -Recurse -Include *.whl | foreach-object { echo $_ | Out-Host ; python -m pip install $_}
+# check if pymchelper was installed
+  - python -c "import pymchelper;print(pymchelper.__version__)"
+# install optional dependencies
+  - python -m pip install pytrip98
 # run tests (normal py.test command may results in memory error on appveyor, so we run tests file-by-file)
+  - cd C:\\projects\\pymchelper\
   - del tests\\test_default_converter.py # remove one of the problematic tests
   - ps: Get-ChildItem -Path tests\ -Recurse -Include test*.py | foreach-object { $(echo $_ | Out-Host ; python -m pytest $_ | Out-Host; $?) -or $(break)}
 
+# debugging RDP connection, uncomment to enable
+# more details here: https://www.appveyor.com/docs/how-to/rdp-to-build-worker/
+#on_finish:
+#  - ps: $blockRdp = $true; iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
 
