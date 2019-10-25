@@ -1,3 +1,5 @@
+import setuptools
+
 from pymchelper.version import git_version
 
 
