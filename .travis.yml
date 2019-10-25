@@ -7,36 +7,33 @@ git:
 
 matrix:
     include:
-        - python: 2.7
-          env: TOXENV=py27
+#        - python: 2.7
+#          env: TOXENV=py27
+#        - python: 3.6
+#          env: TOXENV=coverage
+#        - python: 3.4
+#          env: TOXENV=py34
+#        - python: 3.5
+#          env: TOXENV=py35
+#        - python: 3.6
+#          env: TOXENV=py36
+#        - python: 3.7
+#          env: TOXENV=py37
+#        - python: 3.6
+#          env: TOXENV=docs
+#        - python: 2.7
+#          env: TOXENV=pep8
         - python: 3.6
-          env: TOXENV=coverage
-        - python: 3.4
-          env: TOXENV=py34
-        - python: 3.5
-          env: TOXENV=py35
-        - python: 3.6
-          env: TOXENV=py36
-        - python: 3.7
-          env: TOXENV=py37
-        - python: 3.6
-          env: TOXENV=docs
-        - python: 2.7
           env: TOXENV=pep8
-        - python: 3.6
-          env: TOXENV=pep8
-        - python: 3.7
-          env: TOXENV=packaging
+#        - python: 3.7
+#          env: TOXENV=packaging
 #    uncomment and adjust if you want to allow some failures
 #    allow_failures:
 #        - os: linux
 #          python: nightly
 #          env: TOXENV=py37
 
-# travis-ci runs by default on ancient Ubuntu 12.04 (precise)
-# following options will give us Ubuntu 14.04 (trusty)
 sudo: false
-dist: xenial
 
 install:
   - travis_wait ./.travis/install_linux.sh
