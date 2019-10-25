@@ -59,7 +59,6 @@ install:
   - python -c "import numpy as np;print(np.version.version)"
 # check target python and pip versions after upgrades of pip packages
   - python -V
-  - pip -V
   - python -m pip -V
 
 test_script:
