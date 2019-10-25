@@ -71,16 +71,19 @@ test_script:
   - rd /s /q pymchelper
   - del setup.py
 # install wheel package via pip, as we do not know the wheel filename in advance, we loop over all *.whl files in dist directory
+# with current pip install the installation from the pymchelper project fails, hence we temporarily go somewhere else to call it
   - ps: cd C:\ ; Get-ChildItem -Path C:\projects\pymchelper\dist\ -Recurse -Include *.whl | foreach-object { echo $_ | Out-Host ; python -m pip install $_}
 # check if pymchelper was installed
   - python -c "import pymchelper;print(pymchelper.__version__)"
 # install optional dependencies
-#  - python -m pip install matplotlib
-#  - python -m pip install pytrip98
+  - python -m pip install matplotlib
+  - python -m pip install pytrip98
 # run tests (normal py.test command may results in memory error on appveyor, so we run tests file-by-file)
-#  - del tests\\test_default_converter.py # remove one of the problematic tests
-#  - ps: Get-ChildItem -Path tests\ -Recurse -Include test*.py | foreach-object { $(echo $_ | Out-Host ; python -m pytest $_ | Out-Host; $?) -or $(break)}
+  - del tests\\test_default_converter.py # remove one of the problematic tests
+  - ps: Get-ChildItem -Path tests\ -Recurse -Include test*.py | foreach-object { $(echo $_ | Out-Host ; python -m pytest $_ | Out-Host; $?) -or $(break)}
 
-on_finish:
-  - ps: $blockRdp = $true; iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
+# debugging RDP connection, uncomment to enable
+# more details here: https://www.appveyor.com/docs/how-to/rdp-to-build-worker/
+#on_finish:
+#  - ps: $blockRdp = $true; iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
 
