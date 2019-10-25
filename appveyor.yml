@@ -1,6 +1,8 @@
 
 # validation page for appveyor config: https://ci.appveyor.com/tools/validate-yaml
 
+# todo - check tox setup https://www.appveyor.com/docs/lang/python/
+
 # we are not building Visual Studio project, so default build step is off
 build: off
 
@@ -24,7 +26,6 @@ init:
   - python -V
 # check 32 or 64 bit
   - python -c "import struct;print(8 * struct.calcsize('P'))"
-  - "%PYTHON%\python.exe -c \"import struct;print(8 * struct.calcsize('P'))\""
 
 
 install:
@@ -38,20 +39,21 @@ install:
         Where-Object pullRequestId -eq $env:APPVEYOR_PULL_REQUEST_NUMBER)[0].buildNumber) { `
           throw "There are newer queued builds for this pull request, failing early." }
 
-  # Prepend Python to the PATH of this build
+  # Prepend Python to the PATH of this build, Appveyor does not do anything special
+  # to put the Python version you want to use on PATH.
   - "SET PATH=%PYTHON%;%PYTHON%\\Scripts;%PATH%"
 # check python version
   - "%PYTHON%\\python.exe -V"
   - python -V
 # check pip version
   - pip -V
-  - %PYTHON%\\pip.exe -V
+  - "%PYTHON%\\pip.exe -V"
 # install usual requirements
   - pip install --upgrade virtualenv pip setuptools tox wheel --user
   - pip install --upgrade -r tests/requirements-test.txt
   - pip install --upgrade -r requirements.txt
 # check numpy version
-  - %PYTHON%\\python -c "import numpy as np;print(np.version.version)"
+  - python -c "import numpy as np;print(np.version.version)"
 # check python and pip versions
   - python -V
   - pip -V
