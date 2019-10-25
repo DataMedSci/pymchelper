@@ -20,11 +20,11 @@ environment:
 
 init:
 # check python version
-  - %PYTHON%\\python.exe -V
+  - "%PYTHON%\\python.exe -V"
   - python -V
 # check 32 or 64 bit
   - python -c "import struct;print(8 * struct.calcsize('P'))"
-  - %PYTHON%\\python.exe -c "import struct;print(8 * struct.calcsize('P'))"
+  - "%PYTHON%\python.exe -c \"import struct;print(8 * struct.calcsize('P'))\""
 
 
 install:
@@ -40,24 +40,27 @@ install:
 
   # Prepend Python to the PATH of this build
   - "SET PATH=%PYTHON%;%PYTHON%\\Scripts;%PATH%"
+# check python version
+  - "%PYTHON%\\python.exe -V"
+  - python -V
 # check pip version
   - pip -V
   - %PYTHON%\\pip.exe -V
 # install usual requirements
-  - %PYTHON%\\pip install --upgrade virtualenv pip setuptools tox wheel --user
-  - %PYTHON%\\pip install --upgrade -r tests/requirements-test.txt
-  - %PYTHON%\\pip install --upgrade -r requirements.txt
+  - pip install --upgrade virtualenv pip setuptools tox wheel --user
+  - pip install --upgrade -r tests/requirements-test.txt
+  - pip install --upgrade -r requirements.txt
 # check numpy version
   - %PYTHON%\\python -c "import numpy as np;print(np.version.version)"
 # check python and pip versions
-  - %PYTHON%\\python -V
-  - %PYTHON%\\pip -V
+  - python -V
+  - pip -V
 # check 32 or 64 bit
-  - %PYTHON%\\python -c "import struct;print(8 * struct.calcsize('P'))"
+  - python -c "import struct;print(8 * struct.calcsize('P'))"
 
 test_script:
 # make wheel package
-  - %PYTHON%\\pip install wheel
+  - pip install wheel
 #  - python setup.py bdist_wheel
 # clean build directory
 #  - rd /s /q build
@@ -67,8 +70,8 @@ test_script:
 # install wheel package via pip, as we do not know the wheel filename in advance, we loop over all *.whl files in dist directory
 #  - ps: Get-ChildItem -Path dist\ -Recurse -Include *.whl | foreach-object { echo $_ | Out-Host ; pip install $_}
 # install optional deps
-  - %PYTHON%\\pip install matplotlib
-  - %PYTHON%\\pip install pytrip98
+  - pip install matplotlib
+  - pip install pytrip98
 # run tests (normal py.test command may results in memory error on appveyor, so we run tests file-by-file)
 #  - del tests\\test_default_converter.py # remove one of the problematic tests
 #  - ps: Get-ChildItem -Path tests\ -Recurse -Include test*.py | foreach-object { $(echo $_ | Out-Host ; python -m pytest $_ | Out-Host; $?) -or $(break)}
