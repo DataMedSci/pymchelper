@@ -71,7 +71,7 @@ test_script:
   - rd /s /q pymchelper
   - del setup.py
 # install wheel package via pip, as we do not know the wheel filename in advance, we loop over all *.whl files in dist directory
-  - ps: Get-ChildItem -Path dist\ -Recurse -Include *.whl | foreach-object { echo $_ | Out-Host ; python -m pip install $_}
+  - ps: cd C:\ ; Get-ChildItem -Path C:\projects\pymchelper\dist\ -Recurse -Include *.whl | foreach-object { echo $_ | Out-Host ; python -m pip install $_}
 # check if pymchelper was installed
   - python -c "import pymchelper;print(pymchelper.__version__)"
 # install optional dependencies
