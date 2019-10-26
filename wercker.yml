@@ -22,4 +22,4 @@ build:
     - script:
         name: test
         code: |
-          tox -e py36
+          find tests -name "test_*py" -exex pytest {} \;

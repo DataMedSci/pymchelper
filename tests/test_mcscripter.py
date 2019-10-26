@@ -48,11 +48,11 @@ class TestMcScripter(unittest.TestCase):
             self.assertEqual(sys.version_info[0], 2)
         except SystemExit as e:
             self.assertEqual(e.code, 0)
-        self.assertTrue(os.path.isdir(out_dir))
-        self.assertTrue(os.path.isdir(os.path.join(out_dir, "12C")))
-        self.assertTrue(os.path.isdir(os.path.join(out_dir, "12C", "0333.100")))
-        self.assertTrue(os.path.isfile(os.path.join(out_dir, "12C", "0333.100", "beam.dat")))
-        self.assertTrue(os.path.islink(os.path.join(out_dir, "12C", "0333.100", "Water.txt")))
+            self.assertTrue(os.path.isdir(out_dir))
+            self.assertTrue(os.path.isdir(os.path.join(out_dir, "12C")))
+            self.assertTrue(os.path.isdir(os.path.join(out_dir, "12C", "0333.100")))
+            self.assertTrue(os.path.isfile(os.path.join(out_dir, "12C", "0333.100", "beam.dat")))
+            self.assertTrue(os.path.islink(os.path.join(out_dir, "12C", "0333.100", "Water.txt")))
 
 
 if __name__ == '__main__':
