@@ -7,11 +7,6 @@ build:
   # http://devcenter.wercker.com/docs/steps/index.html
   steps:
 
-    # A step that sets up the python virtual environment
-    - virtualenv:
-        name: setup virtual environment
-        install_wheel: false # Enable wheel to speed up builds (experimental)
-
     # A step that executes `pip install` command.
     - pip-install:
         requirements_file: "requirements.txt"

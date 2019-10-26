@@ -43,7 +43,7 @@ class TestMcScripter(unittest.TestCase):
         out_dir = "wdir"
         try:
             pymchelper.utils.mcscripter.main([inp_cfg])
-        except AttributeError as e:  # on Windows with Python os.symlink is not enabled
+        except AttributeError:  # on Windows with Python os.symlink is not enabled
             self.assertEqual(os.name, 'nt')
             self.assertEqual(sys.version_info[0], 2)
         except SystemExit as e:
