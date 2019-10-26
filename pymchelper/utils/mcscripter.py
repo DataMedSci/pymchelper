@@ -113,6 +113,10 @@ class McFile():
 
             try:
                 os.symlink(link_name, link_target)
+            except AttributeError as e:  # python 2.7 on Windows cannot create symlinks
+                logger.error('Symlink not created.')
+                print("Cannot create a link to the file, please check if you are using Linux or Python 3.")
+                raise e
             except OSError as e:  # when python 2.7 is dropped this can be replaces tih FileExistsError: pass
                 if e.errno == errno.EEXIST:
                     pass  # silently accept existing symlinks

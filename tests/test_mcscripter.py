@@ -1,10 +1,9 @@
 """
-Tests for converters (so far only pld2sobp.py)
+Tests for mcscripter
 """
 import unittest
 import logging
 import pymchelper.utils.mcscripter
-import pymchelper.run
 
 logger = logging.getLogger(__name__)
 
