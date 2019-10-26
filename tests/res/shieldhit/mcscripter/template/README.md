@@ -1,0 +1,1 @@
+Here goes the SH12A base structure for ddd generation.
