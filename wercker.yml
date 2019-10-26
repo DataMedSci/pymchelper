@@ -22,4 +22,4 @@ build:
     - script:
         name: test
         code: |
-          find tests -name "test_*py" -exex pytest {} \;
+          find tests -name "test_*py" -exec pytest {} \;
