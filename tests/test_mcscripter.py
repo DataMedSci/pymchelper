@@ -37,11 +37,15 @@ class TestMcScripter(unittest.TestCase):
         """ Simple conversion including diagnostic output.
         """
         import os
+        import sys
         inp_dir = os.path.join("tests", "res", "shieldhit", "mcscripter")
         inp_cfg = os.path.join(inp_dir, "test.cfg")
         out_dir = "wdir"
         try:
             pymchelper.utils.mcscripter.main([inp_cfg])
+        except AttributeError as e:  # on Windows with Python os.symlink is not enabled
+            self.assertEqual(os.name, 'nt')
+            self.assertEqual(sys.version_info[0], 2)
         except SystemExit as e:
             self.assertEqual(e.code, 0)
         self.assertTrue(os.path.isdir(out_dir))
