@@ -66,7 +66,7 @@ setuptools.setup(
             'mcscripter=pymchelper.utils.mcscripter:main',
         ],
     },
-    package_data={'pymchelper': ['flair/db/*']},
+    package_data={'pymchelper': ['flair/db/*', 'VERSION']},
     install_requires=[
         'enum34',
         'numpy'

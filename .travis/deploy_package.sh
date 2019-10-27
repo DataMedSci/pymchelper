@@ -10,6 +10,9 @@ set -o pipefail # Return value of a pipeline as the value of the last command to
 
 # make bdist universal package
 pip install wheel
+
+# first call to version method would generate VERSION  file
+PYTHONPATH=. python pymchelper/run.py --version
 python setup.py bdist_wheel
 
 # makes source package
@@ -21,6 +24,8 @@ pip install dist/*whl
 # test if it works
 convertmc --version
 convertmc --help
+mcscripter --version
+mcscripter --help
 
 # make nuitka files
 ./make_single_executable.sh
