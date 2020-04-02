@@ -94,7 +94,7 @@ def _get_detector_unit(detector_type, geotyp):
         SHDetType.flu_char: ("cm^-2/primary", "Charged particle fluence"),
         SHDetType.flu_neut: ("cm^-2/primary", "Neutral particle fluence"),
         SHDetType.flu_neqv: ("cm^-2/primary", "1 MeV eqv. neutron fluence"),
-        SHDetType.let: ("keV/um", "LET test"),
+        SHDetType.let: ("keV/um", "LET testTEST"),
         SHDetType.angle: ("radians", "Angle"),
         SHDetType.zone: ("(dimensionless)", "Zone#"),
         SHDetType.medium: ("(dimensionless)", "Medium#"),
