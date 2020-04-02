@@ -79,6 +79,7 @@ def _get_detector_unit(detector_type, geotyp):
         SHDetType.dose: dose_units,
         SHDetType.dose_gy: dose_gy_units,
         SHDetType.dlet: ("keV/um", "dose-averaged LET"),
+        SHDetType.ddd: ("keV/um", "dose-averaged LET"),
         SHDetType.tlet: ("keV/um", "track-averaged LET"),
         SHDetType.avg_energy: ("MeV/nucleon", "Average kinetic energy"),
         SHDetType.avg_beta: ("(dimensionless)", "Average beta"),
@@ -93,7 +94,7 @@ def _get_detector_unit(detector_type, geotyp):
         SHDetType.flu_char: ("cm^-2/primary", "Charged particle fluence"),
         SHDetType.flu_neut: ("cm^-2/primary", "Neutral particle fluence"),
         SHDetType.flu_neqv: ("cm^-2/primary", "1 MeV eqv. neutron fluence"),
-        SHDetType.let: ("keV/um", "LET"),
+        SHDetType.let: ("keV/um", "LET test"),
         SHDetType.angle: ("radians", "Angle"),
         SHDetType.zone: ("(dimensionless)", "Zone#"),
         SHDetType.medium: ("(dimensionless)", "Medium#"),
@@ -202,7 +203,8 @@ class SHBDOTagID(IntEnum):
     det_parta = 0xDD05       # idet(7)
     det_dmat = 0xDD06        # idet(8)
     det_nbine = 0xDD07       # idet(9) number of bins in diff scorer, negative means log binning
-    det_difftype = 0xDD08    # idet(10) detector type for differential scorer (i.e. angle, energy, let)
+    # idet(10) detector type for differential scorer (i.e. angle, energy, let)
+    det_difftype = 0xDD08
     det_zonestart = 0xDD09   # idet(11)
     det_dsize = 0xDD0A       # idet(12)
     det_dsizexyz = 0xDD0B    # idet(13)
@@ -460,9 +462,12 @@ class _SHBinaryReader0p6:
             yunit, yname = _get_mesh_units(detector, 1)
             zunit, zname = _get_mesh_units(detector, 2)
 
-            detector.x = MeshAxis(n=np.abs(nx), min_val=xmin, max_val=xmax, name=xname, unit=xunit, binning=_bintyp(nx))
-            detector.y = MeshAxis(n=np.abs(ny), min_val=ymin, max_val=ymax, name=yname, unit=yunit, binning=_bintyp(ny))
-            detector.z = MeshAxis(n=np.abs(nz), min_val=zmin, max_val=zmax, name=zname, unit=zunit, binning=_bintyp(nz))
+            detector.x = MeshAxis(n=np.abs(nx), min_val=xmin, max_val=xmax,
+                                  name=xname, unit=xunit, binning=_bintyp(nx))
+            detector.y = MeshAxis(n=np.abs(ny), min_val=ymin, max_val=ymax,
+                                  name=yname, unit=yunit, binning=_bintyp(ny))
+            detector.z = MeshAxis(n=np.abs(nz), min_val=zmin, max_val=zmax,
+                                  name=zname, unit=zunit, binning=_bintyp(nz))
 
             detector.unit, detector.name = _get_detector_unit(detector.dettyp, detector.geotyp)
 
@@ -649,9 +654,12 @@ class _SHBinaryReader0p1:
         yunit, yname = _get_mesh_units(detector, 1)
         zunit, zname = _get_mesh_units(detector, 2)
 
-        detector.x = MeshAxis(n=np.abs(nx), min_val=xmin, max_val=xmax, name=xname, unit=xunit, binning=_bintyp(nx))
-        detector.y = MeshAxis(n=np.abs(ny), min_val=ymin, max_val=ymax, name=yname, unit=yunit, binning=_bintyp(ny))
-        detector.z = MeshAxis(n=np.abs(nz), min_val=zmin, max_val=zmax, name=zname, unit=zunit, binning=_bintyp(nz))
+        detector.x = MeshAxis(n=np.abs(nx), min_val=xmin, max_val=xmax,
+                              name=xname, unit=xunit, binning=_bintyp(nx))
+        detector.y = MeshAxis(n=np.abs(ny), min_val=ymin, max_val=ymax,
+                              name=yname, unit=yunit, binning=_bintyp(ny))
+        detector.z = MeshAxis(n=np.abs(nz), min_val=zmin, max_val=zmax,
+                              name=zname, unit=zunit, binning=_bintyp(nz))
 
         detector.dettyp = SHDetType(det_attribs.det_type)
 
