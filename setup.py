@@ -24,7 +24,7 @@ with open('README.rst') as readme_file:
 setuptools.setup(
     name='pymchelper',
     version=git_version(),
-    packages=setuptools.find_packages(where='.', exclude=("*.tests", "*.tests.*", "tests.*", "tests")),
+    packages=setuptools.find_packages(where='.', exclude=("*.tests", "*.tests.*", "tests.*", "tests", "examples")),
     url='https://github.com/DataMedSci/pymchelper',
     license='MIT',
     author='Leszek Grzanka',
