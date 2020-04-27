@@ -572,7 +572,7 @@ class TripDddWriter(object):
         if self.ngauss == 2:
             line_objs += lns2
             line_objs += lns3
-        labels = [l.get_label() for l in line_objs]
+        labels = [line_obj.get_label() for line_obj in line_objs]
         ax1.legend(line_objs, labels, loc=0)
 
         out_filename = prefix + 'fwhm.png'
