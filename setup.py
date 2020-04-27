@@ -1,9 +1,10 @@
+import os
 import setuptools
 
 from pymchelper.version import git_version
 
 
-def write_version_py(filename='VERSION'):
+def write_version_py(filename=os.path.join('pymchelper', 'VERSION')):
     cnt = """%(version)s
 """
 
