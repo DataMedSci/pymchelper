@@ -1,0 +1,212 @@
+# files for bdo-reader
+#---------------Geometry--------------------
+Geometry Mesh
+   Name Mesh1D                   ! geometry type
+    X -10.0  10.0    1
+    Y -10.0  10.0    1
+    Z   0.0  20.0    5
+
+Geometry Mesh
+   Name Mesh2D                   ! geometry type
+    X -10.0  10.0    1
+    Y -10.0  10.0    5
+    Z   0.0  20.0    5
+
+Geometry Mesh
+   Name Mesh3D                   ! geometry type
+    X -10.0  10.0    5
+    Y -10.0  10.0    5
+    Z   0.0  20.0    5
+
+Geometry Mesh
+   Name Mesh1cm                   ! geometry type
+    X -20.0  20.0    1
+    Y -20.0  20.0    1
+    Z   0.0   1.0    1
+#-------------------End Geometry--------------
+#--------------------Filters-----------------
+
+Filter
+    Name PrimPart
+    Z = 1
+    A = 1
+    GEN = 0
+
+Filter
+    Name Protons
+    Z = 1
+    A = 1
+
+Filter
+    Name Deutrons
+    Z = 1
+    A = 2
+
+Filter
+    Name Tritons
+    Z = 1
+    A = 3
+#-------------------End Filters-----------------
+
+#----------------------Output bdo format--------
+#--------------------0X
+Output
+         Filename 00_iddc_1d.bdo
+         Fileformat bdo
+         Geo Mesh1D
+         Quantity Dose
+
+Output
+         Filename 01_iddc_2d.bdo
+         Fileformat bdo
+         Geo Mesh2D
+         Quantity Dose
+
+Output
+         Filename 02_iddc_3d.bdo
+         Fileformat bdo
+         Geo Mesh3D
+         Quantity Dose
+
+Output
+         Filename 03_iddc_1d.bdo
+         Fileformat bdo
+         Geo Mesh1D
+         Quantity Fluence PrimPart
+
+#---------------------1x
+Output
+        Filename 10_diff_prm.bdo
+        Fileformat bdo
+        Geo Mesh1cm
+        Quantity    FLUENCE PrimPart
+        Diff1       0   200   20      ! triggers single differential scoring
+        Diff1Type   E
+
+Output
+        Filename 11_diff_z1a.bdo
+        Fileformat bdo
+        Geo Mesh1cm
+        Quantity    FLUENCE Protons
+        Diff1       0   200   20      ! triggers single differential scoring
+        Diff1Type   E
+        Quantity    FLUENCE Deutrons
+        Diff1       0   200   20      ! triggers single differential scoring
+        Diff1Type   E
+        Quantity    FLUENCE Tritons
+        Diff1       0   200   20      ! triggers single differential scoring
+        Diff1Type   E
+
+#----------------------2x
+Output
+        Filename 20_diff_prm.bdo
+        Fileformat bdo
+        Geo Mesh1cm
+        Quantity    FLUENCE PrimPart
+        Diff1       0.1   200   20   log      ! triggers single differential scoring
+        Diff1Type   E
+
+Output
+        Filename 21_diff_z1a.bdo
+        Fileformat bdo
+        Geo Mesh1cm
+        Quantity    FLUENCE Protons
+        Diff1       0.1   200   20   log      ! triggers single differential scoring
+        Diff1Type   E
+        Quantity    FLUENCE Deutrons
+        Diff1       0.1   200   20   log      ! triggers single differential scoring
+        Diff1Type   E
+        Quantity    FLUENCE Tritons
+        Diff1       0.1   200   20 log      ! triggers single differential scoring
+        Diff1Type   E
+
+#---------------------3x
+Output
+        Filename 30_diff_prm.bdo
+        Fileformat bdo
+        Geo Mesh1cm
+        Quantity    FLUENCE PrimPart
+        Diff1       0   200   20      ! triggers single differential scoring
+        Diff1Type   E
+
+
+#-----------------------------output txt format--------------------------
+#--------------------0X
+Output
+         Filename 00_iddc_1d.txt
+         Fileformat txt
+         Geo Mesh1D
+         Quantity Dose
+
+Output
+         Filename 01_iddc_2d.txt
+         Fileformat txt
+         Geo Mesh2D
+         Quantity Dose
+
+Output
+         Filename 02_iddc_3d.txt
+         Fileformat txt
+         Geo Mesh3D
+         Quantity Dose
+
+Output
+         Filename 03_iddc_1d.txt
+         Fileformat txt
+         Geo Mesh1D
+         Quantity Fluence PrimPart
+
+#---------------------1x
+Output
+        Filename 10_diff_prm.txt
+        Fileformat txt
+        Geo Mesh1cm
+        Quantity    FLUENCE PrimPart
+        Diff1       0   200   20      ! triggers single differential scoring
+        Diff1Type   E
+
+Output
+        Filename 11_diff_z1a.txt
+        Fileformat txt
+        Geo Mesh1cm
+        Quantity    FLUENCE Protons
+        Diff1       0   200   20      ! triggers single differential scoring
+        Diff1Type   E
+        Quantity    FLUENCE Deutrons
+        Diff1       0   200   20      ! triggers single differential scoring
+        Diff1Type   E
+        Quantity    FLUENCE Tritons
+        Diff1       0   200   20      ! triggers single differential scoring
+        Diff1Type   E
+
+#----------------------2x
+Output
+        Filename 20_diff_prm.txt
+        Fileformat txt
+        Geo Mesh1cm
+        Quantity    FLUENCE PrimPart
+        Diff1       0.1   200   20   log      ! triggers single differential scoring
+        Diff1Type   E
+
+Output
+        Filename 21_diff_z1a.txt
+        Fileformat txt
+        Geo Mesh1cm
+        Quantity    FLUENCE Protons
+        Diff1       0.1   200   20   log      ! triggers single differential scoring
+        Diff1Type   E
+        Quantity    FLUENCE Deutrons
+        Diff1       0.1   200   20   log      ! triggers single differential scoring
+        Diff1Type   E
+        Quantity    FLUENCE Tritons
+        Diff1       0.1   200   20 log      ! triggers single differential scoring
+        Diff1Type   E
+
+#---------------------3x
+Output
+        Filename 30_diff_prm.txt
+        Fileformat txt
+        Geo Mesh1cm
+        Quantity    FLUENCE PrimPart
+        Diff1       0   200   20      ! triggers single differential scoring
+        Diff1Type   E

@@ -1,0 +1,9 @@
+RNDSEED   89736501	                   ! Random seed
+JPART0    2                           ! Incident particle type
+TMAX0     125.0       0.0              ! Incident energy; (MeV/nucl)
+NSTAT               10000        -1    ! NSTAT, Step of saving
+DELTAE              0.005              ! Delta E (relative share ~0.1)
+DEMIN               0.025              ! Minimum Energy step 0.025 (MeV/u)
+STRAGG                  2              ! Straggling: 0-Off 1-Gauss, 2-Vavilov
+MSCAT                   2              ! Mult. scatt 0-Off 1-Gauss, 2-Moliere
+NUCRE                   1              ! Nucl.Reac. switcher: 0-Off, 1-On
