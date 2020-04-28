@@ -62,9 +62,9 @@ _log = None
 logger = logging.getLogger(__name__)
 
 
-def set_log(l):
+def set_log(log):
     global _log
-    _log = l
+    _log = log
 
 
 def say(*kw):
