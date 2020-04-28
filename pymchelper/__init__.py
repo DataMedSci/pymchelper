@@ -31,18 +31,11 @@ else:  # Python 3.x
 # VERSION should sit next to __init__.py in the directory structure
 version_file = os.path.join(os.path.dirname(init_location), 'VERSION')
 
-# first let us try reading the VERSION file, assuming pymchelper was installed via pip
-# and unpacked into some site-directory folder in the file system
+# let us try reading the VERSION file,
 try:
-    # read first line of the file (removing newline character)
-    with open(version_file, 'r') as f:
-        __version__ = f.readline().strip()
-
-# it may happen that the above method doesn't work, for example when single
-# executable (zipfile with pyz extension) is produced. Such file contains all pymchelper
-# modules files packed together with __main__ script. In that case we cannot simply open file,
-# but we need to reach into the contents of zip file:
-except NotADirectoryError:
+    # it may be that executable (zipfile with pyz extension) is produced which contains all pymchelper
+    # modules files packed together with __main__ script. In that case we cannot simply open file,
+    # but we need to reach into the contents of zip file:
     possible_zipfile_path = os.path.normpath(os.path.join(init_location, '..', '..'))
     import zipfile
     if zipfile.is_zipfile(possible_zipfile_path):  # reach into zip file
@@ -51,6 +44,12 @@ except NotADirectoryError:
             vf = os.path.join('pymchelper', 'VERSION')
             with zipfile.open(vf, 'r') as f:
                 __version__ = f.readline().strip().decode('ascii')
+    # it looks that pymchelper was installed via pip and unpacked into some site-directory folder in the file system
+    # in such case we simply read the VERSION file
+    else:
+        # read first line of the file (removing newline character)
+        with open(version_file, 'r') as f:
+            __version__ = f.readline().strip()
 
 # in case above methods do not work, let us assume we are working with GIT repository
 except FileNotFoundError:
