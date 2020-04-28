@@ -21,7 +21,7 @@ __version__ = 'unknown'
 module_name = 'pymchelper'
 if sys.version_info < (3, 0):  # Python 2.7
     import imp
-    init_location = imp.find_module(module_name)[1]
+    init_location = os.path.join(imp.find_module(module_name)[1], module_name)
 else:  # Python 3.x
     import importlib
     import importlib.util
@@ -41,7 +41,7 @@ try:
     if zipfile.is_zipfile(possible_zipfile_path):  # reach into zip file
         with zipfile.ZipFile(possible_zipfile_path, 'r') as zipfile:  # read file from inside ZIP archive
             # read first line of the file (removing newline character)
-            vf = os.path.join('pymchelper', 'VERSION')
+            vf = os.path.join(module_name, 'VERSION')
             with zipfile.open(vf, 'r') as f:
                 __version__ = f.readline().strip().decode('ascii')
     # it looks that pymchelper was installed via pip and unpacked into some site-directory folder in the file system
