@@ -307,8 +307,10 @@ def main(args=sys.argv[1:]):
 
     if args.verbosity == 1:
         logging.basicConfig(level=logging.INFO)
-    if args.verbosity > 1:
+    elif args.verbosity > 1:
         logging.basicConfig(level=logging.DEBUG)
+    else:
+        logging.basicConfig()
 
     cfg = Config(args.fconf.name)
     t = Template(cfg)
@@ -317,5 +319,4 @@ def main(args=sys.argv[1:]):
 
 
 if __name__ == '__main__':
-    logging.basicConfig()
     sys.exit(main(sys.argv[1:]))
