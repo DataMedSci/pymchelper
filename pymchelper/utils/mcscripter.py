@@ -125,6 +125,7 @@ class McFile():
                     raise
         else:
             with open(self.path, 'w') as _f:
+                logger.info("Writing {}".format(self.path))
                 _f.writelines(self.lines)
 
 
@@ -168,7 +169,6 @@ class Generator():
         Logic attached to the various keys is in here.
         templ is a Template object and cfg is a Config object.
         """
-        print("Generator")
 
         # create a new dict, with all keys, but single unique values only:
         # this is the "current unique dictionary"
@@ -185,7 +185,7 @@ class Generator():
         # reuse any key from table to calculate the length of the table
         # this means that the table must be homogenous, i.e. every key must have the same amount of values.
         _vals = cfg.table_dict[key]
-        print(_vals)
+
         for i, val in enumerate(_vals):
             for key in cfg.table_dict.keys():
                 u_dict[key] = cfg.table_dict[key][i]  # only copy the ith value
@@ -231,9 +231,9 @@ class Generator():
         which are tied to certain positions on the line, i.e. subsequent values
         may not be shifted.
 
-        Finds f in s and replaces it with r, but left adjusted, retaining line length.
-        If r is shorter than f, remaining chars will be space padded.
-        If r is larger than f, then characters will be overwritten.
+        Finds string f in string s and replaces it with string r, but left adjusted, retaining line length.
+        If length of r is shorter than length of f, remaining chars will be space padded.
+        If length of r is larger than length of f, then characters will be overwritten.
         A copy of s with the replacement is returned.
         """
         if f in s:
