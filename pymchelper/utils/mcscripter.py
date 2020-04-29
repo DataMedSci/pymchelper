@@ -99,7 +99,7 @@ class McFile():
         # check if target directory exists, create it, if not.
         try:
             os.makedirs(os.path.dirname(self.path))
-        except OSError as e:  # when python 2.7 is dropped this can be replaces tih FileExistsError: pass
+        except OSError as e:  # when python 2.7 is dropped this can be replaced with FileExistsError: pass
             if e.errno == errno.EEXIST:
                 pass  # silently accept existing directories
             else:
@@ -117,7 +117,7 @@ class McFile():
                 logger.error('Symlink not created.')
                 print("Cannot create a link to the file, please check if you are using Linux or Python 3.")
                 raise e
-            except OSError as e:  # when python 2.7 is dropped this can be replaces tih FileExistsError: pass
+            except OSError as e:  # when python 2.7 is dropped this can be replaced with FileExistsError: pass
                 if e.errno == errno.EEXIST:
                     pass  # silently accept existing symlinks
                 else:
@@ -168,6 +168,8 @@ class Generator():
         Logic attached to the various keys is in here.
         templ is a Template object and cfg is a Config object.
         """
+        print("Generator")
+
         # create a new dict, with all keys, but single unique values only:
         # this is the "current unique dictionary"
         u_dict = cfg.const_dict.copy()
@@ -183,6 +185,7 @@ class Generator():
         # reuse any key from table to calculate the length of the table
         # this means that the table must be homogenous, i.e. every key must have the same amount of values.
         _vals = cfg.table_dict[key]
+        print(_vals)
         for i, val in enumerate(_vals):
             for key in cfg.table_dict.keys():
                 u_dict[key] = cfg.table_dict[key][i]  # only copy the ith value
@@ -201,8 +204,8 @@ class Generator():
                         _de = float(u_dict["E_"]) * float(u_dict["DE_FACTOR"])
                         u_dict["DE_"] = "{:.3f}".format(_de)  # HARDCODED float format for DE_
 
-                    # at this point, the dict is fully set.
-                    self.write(templ, u_dict)
+            # at this point, the dict is fully set.
+            self.write(templ, u_dict)
 
     @staticmethod
     def get_keys(s):  # This is currently not used, but kept for future use.
