@@ -209,4 +209,4 @@ Output
         Geo Mesh1cm
         Quantity    FLUENCE PrimPart
         Diff1       0   200   20      ! triggers single differential scoring
-        Diff1Type   E
+        Diff1Type   EAMU

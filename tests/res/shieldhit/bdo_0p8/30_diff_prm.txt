@@ -1,5 +1,5 @@
-# SHIELD-HIT12A version 0.7.4+dev Wed, 18 Sep 2019 12:13:03 +0200
-# Calculated Tue, 28 Apr 2020 09:37:20 +0200
+# SHIELD-HIT12A version 0.7.4+dev Thu Nov 15 18:27:36 CET 2018
+# Calculated Mon, 04 May 2020 08:40:43 +0200
 # Page[0] is of type: >2<
 # Columns are:
 # Page Diff1[bin#] Diff2[bin#] Data
@@ -14,8 +14,8 @@
  8 0.000000e+00
  9 0.000000e+00
  10 0.000000e+00
- 11 1.011770e+00
- 12 5.195648e+00
+ 11 1.933082e+00
+ 12 4.295712e+00
  13 0.000000e+00
  14 0.000000e+00
  15 0.000000e+00
