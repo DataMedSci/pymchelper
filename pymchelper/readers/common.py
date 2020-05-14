@@ -4,7 +4,7 @@ import logging
 import os
 
 from pymchelper.readers.fluka import FlukaBinaryReader
-from pymchelper.readers.shieldhit import SHBinaryReader, SHTextReader
+from pymchelper.readers.shieldhit import SHReader, SHReaderASCII
 
 
 logger = logging.getLogger(__name__)
@@ -24,8 +24,8 @@ class Readers(IntEnum):
     def _readers_mapping(cls):
         return {
             cls.fluka_bin: FlukaBinaryReader,
-            cls.shieldhit_bin: SHBinaryReader,
-            cls.shieldhit_txt: SHTextReader
+            cls.shieldhit_bin: SHReader,
+            cls.shieldhit_txt: SHReaderASCII
         }
 
     @classmethod
@@ -38,14 +38,14 @@ class Readers(IntEnum):
 
 
 def guess_reader(filename):
-    reader = SHTextReader(filename)
+    reader = SHReaderASCII(filename)
 
     # check if binary file is generated with SHIELD-HIT12A version > 0.6
     #  (in that case it may or may not have .bdo extension)
     # this check will also pass is file is generated with older SHIELD-HIT12A version
     #  (in that case we rely on the file extension)
-    if SHBinaryReader(filename).test_version_0p6() or filename.endswith((".bdo", ".bdox")):
-        reader = SHBinaryReader(filename)
+    if SHReader(filename).test_version_0p6() or filename.endswith((".bdo", ".bdox")):
+        reader = SHReader(filename)
     # find better way to discover if file comes from Fluka
     elif "_fort" in filename:
         reader = FlukaBinaryReader(filename)
@@ -72,7 +72,7 @@ def group_input_files(input_file_list):
         basename = os.path.basename(filepath)
 
         # SHIELD-HIT12A binary file encountered
-        if SHBinaryReader(filepath).test_version_0p6() or filepath.endswith(('.bdo', '.bdox')):
+        if SHReader(filepath).test_version_0p6() or filepath.endswith(('.bdo', '.bdox')):
             # we expect the basename to follow one of two conventions:
             #  - corenameABCD.bdo (where ABCD is 4-digit integer)
             #  - corename.bdo
