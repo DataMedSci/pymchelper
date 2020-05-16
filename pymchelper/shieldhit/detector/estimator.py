@@ -26,7 +26,7 @@ class SHEstimator:
         SHGeoType.dplane: (SHDetType(i + 1) for i in range(_nn_det)),
         SHGeoType.dcylz: (SHDetType(i + 1) for i in range(_nn_det)),
         SHGeoType.dmshz: (SHDetType(i + 1) for i in range(_nn_det)),
-        SHGeoType.trace: (SHDetType.unknown, ),
+        SHGeoType.trace: (SHDetType.none,),
         SHGeoType.voxscore: (SHDetType(i + 1) for i in range(_nn_det)),
         SHGeoType.geomap: (SHDetType.zone, SHDetType.medium, SHDetType.rho),
     }
@@ -35,7 +35,7 @@ class SHEstimator:
         self.estimator = SHGeoType.unknown
         self.particle_type = SHParticleType.unknown
         self.heavy_ion_type = SHHeavyIonType()
-        self.detector_type = SHDetType.unknown
+        self.detector_type = SHDetType.none
         self.geometry = Geometry()
         self.filename = ""
 

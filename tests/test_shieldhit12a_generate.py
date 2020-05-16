@@ -127,7 +127,7 @@ class TestSHGenerated(unittest.TestCase):
                     self.assertIn(det.y.n, (1, 10))
                     self.assertIn(det.z.n, (1, 10))
                 self.assertEqual(det.geotyp, SHGeoType[est])
-                self.assertNotEqual(det.dettyp, SHDetType.unknown)
+                self.assertNotEqual(det.dettyp, SHDetType.none)
                 self.assertIn(det.particle, (SHParticleType.all, SHParticleType.proton, SHParticleType.neutron))
                 if det.geotyp == SHGeoType.geomap:
                     self.assertIn(det.dettyp, (SHDetType.zone, SHDetType.medium, SHDetType.rho))

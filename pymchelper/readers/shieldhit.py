@@ -87,11 +87,11 @@ def _get_mesh_units(detector, axis):
         if detector.dif_type == 1:
             unit, name = _get_detector_unit(SHDetType.energy, detector.geotyp)
         elif detector.dif_type == 2:
-            unit, name = _get_detector_unit(SHDetType.let, detector.geotyp)
+            unit, name = _get_detector_unit(SHDetType.let_bdo2016, detector.geotyp)
         elif detector.dif_type == 3:
-            unit, name = _get_detector_unit(SHDetType.angle, detector.geotyp)
+            unit, name = _get_detector_unit(SHDetType.angle_bdo2016, detector.geotyp)
         else:
-            unit, name = "", ""
+            unit, name = _get_detector_unit(detector.dif_type, detector.geotyp)
 
     return unit, name
 
@@ -114,21 +114,22 @@ def _get_detector_unit(detector_type, geotyp):
         alanine_units = ("MeV/g/primary", "Alanine RE*Dose")
         alanine_gy_units = ("Gy", "Alanine RE*Dose")
 
+    # TODO add more units, move to shieldhit/detector package
     _detector_units = {
-        SHDetType.unknown: ("(nil)", "None"),
+        SHDetType.none: ("(nil)", "None"),
         SHDetType.energy: ("MeV/primary", "Energy"),
         SHDetType.fluence: ("cm^-2/primary", "Fluence"),
         SHDetType.crossflu: ("cm^-2/primary", "Planar fluence"),
         SHDetType.letflu: ("MeV/cm", "LET fluence"),
         SHDetType.dose: dose_units,
-        SHDetType.dose_gy: dose_gy_units,
+        SHDetType.dose_gy_bdo2016: dose_gy_units,
         SHDetType.dlet: ("keV/um", "dose-averaged LET"),
         SHDetType.tlet: ("keV/um", "track-averaged LET"),
         SHDetType.avg_energy: ("MeV/nucleon", "Average kinetic energy"),
         SHDetType.avg_beta: ("(dimensionless)", "Average beta"),
         SHDetType.material: ("(nil)", "Material number"),
         SHDetType.alanine: alanine_units,
-        SHDetType.alanine_gy: alanine_gy_units,
+        SHDetType.alanine_gy_bdo2016: alanine_gy_units,
         SHDetType.counter: ("/primary", "Particle counter"),
         SHDetType.pet: ("/primary", "PET isotopes"),
         SHDetType.dletg: ("keV/um", "dose-averaged LET"),
@@ -137,11 +138,12 @@ def _get_detector_unit(detector_type, geotyp):
         SHDetType.flu_char: ("cm^-2/primary", "Charged particle fluence"),
         SHDetType.flu_neut: ("cm^-2/primary", "Neutral particle fluence"),
         SHDetType.flu_neqv: ("cm^-2/primary", "1 MeV eqv. neutron fluence"),
-        SHDetType.let: ("keV/um", "LET"),
-        SHDetType.angle: ("radians", "Angle"),
+        SHDetType.let_bdo2016: ("keV/um", "LET"),
+        SHDetType.angle_bdo2016: ("radians", "Angle"),
         SHDetType.zone: ("(dimensionless)", "Zone#"),
         SHDetType.medium: ("(dimensionless)", "Medium#"),
-        SHDetType.rho: ("g/cm^3", "Density")
+        SHDetType.rho: ("g/cm^3", "Density"),
+        SHDetType.kinetic_energy: ("MeV", "Kinetic energy"),
     }
     return _detector_units.get(detector_type, ("(nil)", "(nil)"))
 
@@ -166,11 +168,11 @@ def _postprocess(detector, nscale):
         # rescaling with particle number means also unit change for some detectors
         # from per particle to Grey - this is why we override detector type
         if detector.dettyp == SHDetType.dose:
-            detector.dettyp = SHDetType.dose_gy
+            detector.dettyp = SHDetType.dose_gy_bdo2016
         if detector.dettyp == SHDetType.alanine:
-            detector.dettyp = SHDetType.alanine_gy
+            detector.dettyp = SHDetType.alanine_gy_bdo2016
         # for the same reason as above we change units
-        if detector.dettyp in (SHDetType.dose_gy, SHDetType.alanine_gy):
+        if detector.dettyp in (SHDetType.dose_gy_bdo2016, SHDetType.alanine_gy_bdo2016):
             # 1 megaelectron volt / gram = 1.60217662 x 10-10 Gy
             MeV_g = np.float64(1.60217662e-10)
             detector.data_raw *= MeV_g
@@ -413,9 +415,9 @@ class SHReaderBDO2019(SHReader):
                 if pl_id == SHBDOTagID.rt_nstat:
                     detector.nstat = pl[0]
 
-                # # beam configuration etc...
-                # if pl_id in tag_to_name:
-                #     setattr(detector, tag_to_name[pl_id], pl[0])
+                # beam configuration etc...
+                if pl_id in tag_to_name:
+                    setattr(detector, tag_to_name[pl_id], pl[0])
 
                 # estimator block here ---
                 if pl_id == SHBDOTagID.est_geo_type:
@@ -447,29 +449,43 @@ class SHReaderBDO2019(SHReader):
                     ymax = pl[1]
                     zmax = pl[2]
 
+                # TODO implement double differential scoring
+                if pl_id == SHBDOTagID.SHBDO_PAG_DIF_SIZE:
+                    detector.dif_n = pl[0]
+
+                if pl_id == SHBDOTagID.SHBDO_PAG_DIF_START:
+                    detector.dif_min = pl[0]
+
+                if pl_id == SHBDOTagID.SHBDO_PAG_DIF_STOP:
+                    detector.dif_max = pl[0]
+
+                if pl_id == SHBDOTagID.SHBDO_PAG_DIF_TYPE:
+                    detector.dif_type = pl[0]
+
                 if pl_id == SHBDOTagID.det_data:
                     detector.data_raw = np.asarray(pl)
 
-            # TODO: would be better to not overwrite x,y,z and make proper case for ZONE scoring later.
-            if detector.geotyp in {SHGeoType.zone, SHGeoType.dzone}:
-                # special case for zone scoring, x min and max will be zone numbers
-                xmin = detector.zone_start
-                xmax = xmin + nx - 1
-                ymin = 0.0
-                ymax = 0.0
-                zmin = 0.0
-                zmax = 0.0
-            elif detector.geotyp in {SHGeoType.plane, SHGeoType.dplane}:
-                # special case for plane scoring, according to documentation we have:
-                #  xmin, ymin, zmin = Sx, Sy, Sz (point on the plane)
-                #  xmax, ymax, zmax = nx, ny, nz (normal vector)
-                # to avoid situation where i.e. xmax < xmin (corresponds to nx < Sx)
-                # we store only point on the plane
-                detector.sx, detector.sy, detector.sz = xmin, ymin, zmin
-                detector.nx, detector.ny, detector.nz = xmax, ymax, zmax
-                xmax = xmin
-                ymax = ymin
-                zmax = zmin
+            # differential scoring data replacement
+            if hasattr(detector, 'dif_min') and hasattr(detector, 'dif_max') and hasattr(detector, 'dif_n'):
+                if nz == 1:
+                    # max two axis (X or Y) filled with scored value, Z axis empty
+                    # we can put differential quantity as Z axis
+                    nz = detector.dif_n
+                    zmin = detector.dif_min
+                    zmax = detector.dif_max
+                    detector.dif_axis = 2
+                elif ny == 1:
+                    # Z axis filled with scored value (X axis maybe also), Y axis empty
+                    # we can put differential quantity as Y axis
+                    ny = detector.dif_n
+                    ymin = detector.dif_min
+                    ymax = detector.dif_max
+                    detector.dif_axis = 1
+                elif nx == 1:
+                    nx = detector.dif_n
+                    xmin = detector.dif_min
+                    xmax = detector.dif_max
+                    detector.dif_axis = 0
 
             xunit, xname = _get_mesh_units(detector, 0)
             yunit, yname = _get_mesh_units(detector, 1)
@@ -825,7 +841,7 @@ class SHReaderBin2010(SHReader):
     def read_payload(self, detector):
         logger.info("Reading data: " + self.filename)
 
-        if detector.geotyp == SHGeoType.unknown or detector.dettyp == SHDetType.unknown:
+        if detector.geotyp == SHGeoType.unknown or detector.dettyp == SHDetType.none:
             logger.error("Unknown geotyp or dettyp")
             return
 

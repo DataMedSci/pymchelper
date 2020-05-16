@@ -7,34 +7,68 @@ class SHDetType(IntEnum):
     If new detectors are added, class SHEstimator in estimator.py should also be updated.
     """
 
-    unknown = 0
+    # TODO comments needed, see sh_scoredef.h
+
+    none = 0
     energy = 1
     fluence = 2
     crossflu = 3
     letflu = 4
+
     dose = 5
     dlet = 6
     tlet = 7
     avg_energy = 8
     avg_beta = 9
-    material = 10
+
+    spc = 10
+    material = 11
     ddd = 12
     alanine = 13
     counter = 14
+
     pet = 15
     dletg = 16
     tletg = 17
     zone = 18
     medium = 19
+
     rho = 20
     q = 21
     flu_char = 22
     flu_neut = 23
     flu_neqv = 24
-    let = 120  # for differential scoring
-    angle = 121  # for differential scoring
-    dose_gy = 205
-    alanine_gy = 213
+
+    angle = 25
+    trace = 26
+    kinetic_energy = 27
+    energy_nuc = 28
+    energy_amu = 29
+
+    a = 30
+    amass = 31
+    amu = 32
+    gen = 33
+    id = 34
+
+    dedx = 35
+    mass_dedx = 36
+    track_length = 37
+    nkerma = 38
+    dose_gy = 39
+
+    dose_eqv = 40
+    eqv_dose = 41
+    user1 = 41
+    user2 = 43
+    n_eqv_dose = 44  # Neutron equivalent dose, ICRP 103 protection quantity.
+
+    let_bdo2016 = 120  # for differential scoring
+    angle_bdo2016 = 121  # for differential scoring
+    dose_gy_bdo2016 = 205
+    alanine_gy_bdo2016 = 213
+
+    invalid = 32767
 
     def __str__(self):
         return self.name.upper().replace('_', '-')

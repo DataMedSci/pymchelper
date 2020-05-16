@@ -77,7 +77,7 @@ class FlukaReader(Reader):
         detector.unit, detector.name = "", ""
 
         # TODO read detector type
-        detector.dettyp = SHDetType.unknown
+        detector.dettyp = SHDetType.none  # TODO replace with Fluka detector type
 
         detector.data_raw = np.array(fdata)
         if nscale != 1:

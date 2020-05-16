@@ -10,7 +10,7 @@ from pymchelper.shieldhit.particle import SHParticleType, SHHeavyIonType
 class TestSHDetector(unittest.TestCase):
     def test_create(self):
         d0 = SHDetType(0)
-        self.assertEqual(d0, SHDetType.unknown)
+        self.assertEqual(d0, SHDetType.none)
         self.assertEqual(str(d0), "UNKNOWN")
 
         d1 = SHDetType(1)
