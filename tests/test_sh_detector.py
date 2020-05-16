@@ -11,7 +11,7 @@ class TestSHDetector(unittest.TestCase):
     def test_create(self):
         d0 = SHDetType(0)
         self.assertEqual(d0, SHDetType.none)
-        self.assertEqual(str(d0), "UNKNOWN")
+        self.assertEqual(str(d0), "NONE")
 
         d1 = SHDetType(1)
         self.assertEqual(d1, SHDetType.energy)
