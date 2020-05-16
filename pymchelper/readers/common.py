@@ -1,7 +1,5 @@
 from abc import abstractmethod
-from collections import defaultdict
 import logging
-import os
 
 logger = logging.getLogger(__name__)
 
@@ -27,4 +25,3 @@ class Reader:
     @abstractmethod
     def corename(self):
         pass
-

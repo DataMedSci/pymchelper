@@ -7,7 +7,7 @@ import numpy as np
 
 from pymchelper.detector import MeshAxis
 from pymchelper.readers.common import ReaderFactory, Reader
-from pymchelper.readers.shieldhit_bin_spec import SHBDOTagID
+from pymchelper.readers.shieldhit_bin_spec import SHBDOTagID, tag_to_name
 from pymchelper.shieldhit.detector.detector_type import SHDetType
 from pymchelper.shieldhit.detector.estimator_type import SHGeoType
 
@@ -342,6 +342,7 @@ class SHReader(Reader):
                 core_name = basename[:-8]
 
         return core_name
+
 
 def _bintyp(n):
     """

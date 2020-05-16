@@ -241,24 +241,7 @@ def group_input_files(input_file_list):
 
     # loop over input list of file paths
     for filepath in input_file_list:
-
-        # extract basename (strip directory part) for inspection
-        basename = os.path.basename(filepath)
-
         core_name = guess_corename(filepath)
         core_names_dict[core_name].append(filepath)
-
-        # # SHIELD-HIT12A binary file encountered
-        # if filepath.endswith(('.bdo', '.bdox')):
-        #     # we expect the basename to follow one of two conventions:
-        #     #  - corenameABCD.bdo (where ABCD is 4-digit integer)
-        #     #  - corename.bdo
-        #     core_name = basename[:-4]  # assume no number in the basename
-        #     if basename[-8:-4].isdigit() and len(basename[-8:-4]) == 4:  # check if number present
-        #         core_name = basename[:-8]
-        #     core_names_dict[core_name].append(filepath)
-        # elif "_fort." in filepath:  # Fluka binary file encountered
-        #     core_name = filepath[-2:]
-        #     core_names_dict[core_name].append(filepath)
 
     return core_names_dict
