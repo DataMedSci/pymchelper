@@ -852,6 +852,9 @@ class SHReaderBin2010(SHReader):
         record = np.fromfile(self.filename, record_dtype, count=-1)
         # BIN(*)  : a large array holding results. Accessed using pointers.
         detector.data_raw = np.array(record['bin2'][:][0])
+
+        logger.debug("Raw data: {}".format(detector.data_raw))
+
         detector.counter = 1
 
     def read(self, detector):
