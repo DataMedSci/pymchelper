@@ -396,6 +396,7 @@ class SHReaderBDO2019(SHReader):
                     _pl_type.decode('ASCII'),
                     _pl_len
                 ))
+
                 if pl_id == SHBDOTagID.shversion:
                     detector.mc_code_version = pl[0]
                     logger.debug("MC code version:" + detector.mc_code_version)
@@ -515,7 +516,13 @@ class SHReaderBDO2016(SHReader):
                 else:
                     pl = _pl
 
-                logger.debug("Read token {:s} 0x{:02x}".format(_pl_type.decode('ASCII'), pl_id))
+                logger.debug("Read token {:s} (0x{:02x}) value {} type {:s} length {:d}".format(
+                    SHBDOTagID(pl_id).name,
+                    pl_id,
+                    _pl,
+                    _pl_type.decode('ASCII'),
+                    _pl_len
+                ))
 
                 if pl_id == SHBDOTagID.shversion:
                     detector.mc_code_version = pl[0]
@@ -538,7 +545,7 @@ class SHReaderBDO2016(SHReader):
                     setattr(detector, tag_to_name[pl_id], pl[0])
 
                 # estimator block here ---
-                if pl_id == SHBDOTagID.est_geo_type:
+                if pl_id == SHBDOTagID.det_geotyp:
                     detector.geotyp = SHGeoType[pl[0].strip().lower()]
 
                 if pl_id == SHBDOTagID.ext_ptvdose:
@@ -546,10 +553,6 @@ class SHReaderBDO2016(SHReader):
 
                 if pl_id == SHBDOTagID.ext_nproj:
                     detector.tripntot = -1
-
-                if pl_id == SHBDOTagID.est_pages:
-                    detector.pages = pl[0]
-                    # todo: handling of multiple detectors (SPC)
 
                 # read a single detector
                 if pl_id == SHBDOTagID.det_dtype:
