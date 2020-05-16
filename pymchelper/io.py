@@ -1,3 +1,4 @@
+from collections import defaultdict
 from glob import glob
 import logging
 import os
@@ -5,16 +6,49 @@ import os
 import numpy as np
 
 from pymchelper.detector import Detector, average_with_nan, ErrorEstimate
-from pymchelper.readers.common import guess_reader, group_input_files
+from pymchelper.readers.fluka import FlukaReaderFactory, FlukaReader
+from pymchelper.readers.shieldhit import SHReaderFactory, SHReader
 from pymchelper.writers.common import Converters
 
 logger = logging.getLogger(__name__)
+
+
+def guess_reader(filename):
+    """
+    Guess a reader based on file contents or extensions.
+    In some cases (i.e. binary SH12A files) access to file contents is needed.
+    :param filename:
+    :return: Instantiated reader object
+    """
+    fluka_reader = FlukaReaderFactory(filename).get_reader()
+    if fluka_reader:
+        reader = fluka_reader(filename)
+    else:
+        sh_reader = SHReaderFactory(filename).get_reader()
+        if sh_reader:
+            reader = sh_reader(filename)
+    return reader
+
+
+def guess_corename(filename):
+    """
+    Guess a reader based on file contents or extensions.
+    In some cases (i.e. binary SH12A files) access to file contents is needed.
+    :param filename:
+    :return:
+    """
+    corename = FlukaReader(filename).corename
+    if corename is None:
+        corename = SHReader(filename).corename
+    return corename
 
 
 def fromfile(filename):
     """Read a detector data from a binary file ```filename```"""
 
     reader = guess_reader(filename)
+    if reader is None:
+        raise Exception("File format not compatible", filename)
     detector = Detector()
     detector.counter = 1
     reader.read(detector)
@@ -188,6 +222,43 @@ def tofile(detector, filename, converter_name, options):
     """
     writer_cls = Converters.fromname(converter_name)
     writer = writer_cls(filename, options)
-    logger.debug("Writing file with corename {:s}".format(filename))
+    logger.debug("File corename : {:s}".format(filename))
     status = writer.write(detector)
     return status
+
+
+def group_input_files(input_file_list):
+    """
+    Takes set of input file names, belonging to possibly different estimators.
+    Input files are grouped according to the estimators and for each group
+    merging is performed, as in @merge_list method.
+    Output file name is automatically generated.
+    :param input_file_list: list of input files
+    :return: core_names_dict
+    """
+    core_names_dict = defaultdict(list)
+    # keys - core_name, value - list of full paths to corresponding files
+
+    # loop over input list of file paths
+    for filepath in input_file_list:
+
+        # extract basename (strip directory part) for inspection
+        basename = os.path.basename(filepath)
+
+        core_name = guess_corename(filepath)
+        core_names_dict[core_name].append(filepath)
+
+        # # SHIELD-HIT12A binary file encountered
+        # if filepath.endswith(('.bdo', '.bdox')):
+        #     # we expect the basename to follow one of two conventions:
+        #     #  - corenameABCD.bdo (where ABCD is 4-digit integer)
+        #     #  - corename.bdo
+        #     core_name = basename[:-4]  # assume no number in the basename
+        #     if basename[-8:-4].isdigit() and len(basename[-8:-4]) == 4:  # check if number present
+        #         core_name = basename[:-8]
+        #     core_names_dict[core_name].append(filepath)
+        # elif "_fort." in filepath:  # Fluka binary file encountered
+        #     core_name = filepath[-2:]
+        #     core_names_dict[core_name].append(filepath)
+
+    return core_names_dict

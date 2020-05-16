@@ -3,6 +3,7 @@ import logging
 import numpy as np
 
 from pymchelper.detector import MeshAxis
+from pymchelper.readers.common import ReaderFactory, Reader
 from pymchelper.shieldhit.detector.detector_type import SHDetType
 from pymchelper.shieldhit.detector.estimator_type import SHGeoType
 from pymchelper.flair.Data import Usrbin, UsrTrack, unpackArray
@@ -10,9 +11,21 @@ from pymchelper.flair.Data import Usrbin, UsrTrack, unpackArray
 logger = logging.getLogger(__name__)
 
 
-class FlukaBinaryReader:
-    def __init__(self, filename):
-        self.filename = filename
+class FlukaReaderFactory(ReaderFactory):
+    def get_reader(self):
+        if "_fort" in self.filename:
+            return FlukaReader
+        return None
+
+
+class FlukaReader(Reader):
+
+    @property
+    def corename(self):
+        core_name = None
+        if "_fort" in self.filename:
+            core_name = self.filename[-2:]
+        return core_name
 
     def read(self, detector, nscale=1):
 
