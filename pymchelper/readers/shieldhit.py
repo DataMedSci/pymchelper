@@ -1,6 +1,5 @@
 import os
 from collections import namedtuple
-from distutils.version import LooseVersion
 from enum import IntEnum
 import logging
 
@@ -8,6 +7,7 @@ import numpy as np
 
 from pymchelper.detector import MeshAxis
 from pymchelper.readers.common import ReaderFactory, Reader
+from pymchelper.readers.shieldhit_bin_spec import SHBDOTagID
 from pymchelper.shieldhit.detector.detector_type import SHDetType
 from pymchelper.shieldhit.detector.estimator_type import SHGeoType
 
@@ -189,121 +189,6 @@ class SHFileFormatId(IntEnum):
     csv = 4       # comma separated file format
 
 
-class SHBDOTagID(IntEnum):
-    """ List of Tag ID numbers. Must be synchronized with sh_detect.h in SH12A.
-    """
-
-    # Hex values are used for better recognition in binary files, should they be inspected by humans.
-    # Group 0x0000 - 0x00FF : Miscellaneous info
-    shversion = 0x00    # [char*] full version string of SHIELD-HIT12A
-    shbuilddate = 0x01  # [char*] date of build
-    filedate = 0x02     # [char*] bdo file creation date, RFC 2822 compliant
-    user = 0x03         # [char *] optional login name
-    host = 0x04         # [char *] optional host where this file was created
-    format = 0x05       # [int]   optional ID describing which flavour the format is, to help .bdo parsers
-
-    # Group 0xAA00 - 0xAAFF : Runtime variables
-    rt_nstat = 0xAA00        # number of actually simulated particles
-    rt_time = 0xAA01         # [unsigned long int] optional runtime in seconds
-
-    # Group 0xCB00 - 0xCBFF : Beam configuration
-    jpart0 = 0xCB00     # [int] primary particle id
-    apro0 = 0xCB01      # [float] number of nucleons a of the beam particles.
-    zpro0 = 0xCB02      # [float] charge z of the beam particles.
-    beamx = 0xCB03      # [float] start position of the beam - x coordinate
-    beamy = 0xCB04      # [float] start position of the beam - y coordinate
-    beamz = 0xCB05      # [float] start position of the beam - z coordinate
-    sigmax = 0xCB06     # [float] lateral extension of the beam in x direction
-    sigmay = 0xCB07     # [float] lateral extension of the beam in y direction
-    tmax0 = 0xCB08      # [float] the initial energy of the primary particle
-    sigmat0 = 0xCB09    # [float] energy spread of the primary particle
-    beamtheta = 0xCB0A  # [float] polar angle
-    beamphi = 0xCB0B    # [float] azimuth angle
-    beamdivx = 0xCB0C   # [float] beam divergence - x coordinate
-    beamdivy = 0xCB0D   # [float] beam divergence - y coordinate
-    beamdivk = 0xCB0E   # [float] beam divergence - focus
-
-    # Group 0xCC00 - 0xCCFF : Configuration
-    dele = 0xCC00
-    demin = 0xCC01
-    itypst = 0xCC02
-    itypms = 0xCC03
-    oln = 0xCC04
-    inucre = 0xCC05
-    iemtrans = 0xCC06
-    iextspec = 0xCC07
-    intrfast = 0xCC08
-    intrslow = 0xCC09
-    apzlscl = 0xCC0A
-    ioffset = 0xCC0B
-    irifimc = 0xCC0C
-    irifitrans = 0xCC0D
-    irifizone = 0xCC0E
-    ext_nproj = 0xCC0F
-    ext_ptvdose = 0xCC10
-    ixfirs = 0xCC11
-
-    # Group 0xCE00 - 0xCEFF : CT specific tags
-    ct_ang = 0xCE00   # holds two doubles with the couch and gantry angle
-    ct_icnt = 0xCE01  # holds three
-    ct_len = 0xCE02   # holds three
-
-    # Group 0xDD00 - 0xDDFF : Detector/page specific tags
-    det_geotyp = 0xDD00      # may differ from est_geotyp in case of spc
-    det_nbin = 0xDD01        # idet(1-3) (len=3) number of bins x,y,z
-    det_part = 0xDD02        # idet(4) particle type which was scored
-    det_dtype = 0xDD03       # idet(5) detector type
-    det_partz = 0xDD04       # idet(6)
-    det_parta = 0xDD05       # idet(7)
-    det_dmat = 0xDD06        # idet(8)
-    det_nbine = 0xDD07       # idet(9) number of bins in diff scorer, negative means log binning
-    det_difftype = 0xDD08    # idet(10) detector type for differential scorer (i.e. angle, energy, let)
-    det_zonestart = 0xDD09   # idet(11)
-    det_dsize = 0xDD0A       # idet(12)
-    det_dsizexyz = 0xDD0B    # idet(13)
-
-    det_xyz_start = 0xDD0C   # det(1-3)
-    det_xyz_stop = 0xDD0D    # det(4-6)
-    det_dif_start = 0xDD0E   # det(7)
-    det_dif_stop = 0xDD0F    # det(8)
-    det_voxvol = 0xDD10      # det(9)
-    det_thresh = 0xDD11       # det(10) lower energy scoring threshold
-
-    det_data = 0xDDBB        # data block
-
-    # Group 0xEE00 - 0xEEFF : Estimator specific tags
-    # estimator specific tags
-    est_geotyp = 0xEE00         # may differ from det_geotyp in case of spc
-    est_pages = 0xEE01          # number of detectors / pages for this estimator
-    est_pag_dif_type = 0xEE02   #
-    est_pag_dif_start = 0xEE03  #
-    est_pag_dif_stop = 0xEE04   #
-    est_pag_dif_size = 0xEE05   #
-
-    # Group 0xEF00 - 0xEFFF : Filter data attached to estimator
-    st_pag_filter_name = 0xEF00    #
-    est_pag_filter_emin = 0xEF01   # lower energy threshold, emin
-
-
-tag_to_name = {
-    SHBDOTagID.jpart0: 'projectile_code',
-    SHBDOTagID.apro0: 'projectile_a',
-    SHBDOTagID.zpro0: 'projectile_z',
-    SHBDOTagID.beamx: 'projectile_position_x',
-    SHBDOTagID.beamy: 'projectile_position_y',
-    SHBDOTagID.beamz: 'projectile_position_z',
-    SHBDOTagID.sigmax: 'projectile_sigma_x',
-    SHBDOTagID.sigmay: 'projectile_sigma_y',
-    SHBDOTagID.tmax0: 'projectile_energy',
-    SHBDOTagID.sigmat0: 'projectile_sigma_energy',
-    SHBDOTagID.beamtheta: 'projectile_polar_angle',
-    SHBDOTagID.beamphi: 'projectile_azimuth_angle',
-    SHBDOTagID.beamdivx: 'projectile_divergence_x',
-    SHBDOTagID.beamdivy: 'projectile_divergence_y',
-    SHBDOTagID.beamdivk: 'projectile_divergence_k'
-}
-
-
 def read_next_token(f):
     """
     returns a tuple with 4 elements:
@@ -395,26 +280,26 @@ class SHReaderFactory(ReaderFactory):
         # magic number was introduced together with first token-based BDO file format (BDO2016)
         # presence of magic number means we could have BDO2016 or BDO2019 format
         if file_has_sh_magic_number(self.filename):
-            reader = _SHReaderBDO2019
+            reader = SHReaderBDO2019
 
             # format tag specifying binary standard was introduced in SH12A v0.7.4-dev on  07.06.2019 (commit 6eddf98)
             file_format = read_token(self.filename, SHBDOTagID.format)
             if file_format:
                 logger.info("File format: {} {:s}".format(file_format, SHFileFormatId(file_format).name))
                 if file_format == SHFileFormatId.bdo2019:
-                    reader = _SHReaderBDO2019
+                    reader = SHReaderBDO2019
                 elif file_format == SHFileFormatId.bdo2016:
-                    reader = _SHReaderBDO2016
+                    reader = SHReaderBDO2016
                 else:
                     print("What shall we do ?")
             else:
                 # in case format tag is missing we default to BDO2016 format
                 # this mean we cannot read BDO2019 files generated with SH12A built before 07.06.2019
                 logger.info("File format information missing (token)")
-                reader = _SHReaderBDO2016
+                reader = SHReaderBDO2016
         else:
             # lack of magic number means we expect Fortran-style binary format (BIN2010)
-            reader = _SHReaderBin2010
+            reader = SHReaderBin2010
 
         ver_short = extract_sh_ver(self.filename)
         logger.info("Short version: {:s}".format(str(ver_short)))
@@ -430,11 +315,21 @@ class SHReader(Reader):
     """
 
     def read(self, detector, nscale=1):
+        """
+        TODO
+        :param detector:
+        :param nscale:
+        :return:
+        """
         self.read(detector)
         _postprocess(detector, nscale)
 
     @property
     def corename(self):
+        """
+        TODO
+        :return:
+        """
         core_name = None
 
         if self.filename.endswith(('.bdo', '.bdox')):  # TODO add more sophisticated check for file being SH12A output
@@ -461,7 +356,7 @@ def _bintyp(n):
     return MeshAxis.BinningType.linear if n > 0 else MeshAxis.BinningType.logarithmic
 
 
-class _SHReaderBDO2019(SHReader):
+class SHReaderBDO2019(SHReader):
     """
     Experimental binary format reader version >= 0.7
     """
@@ -477,10 +372,117 @@ class _SHReaderBDO2019(SHReader):
             logger.debug("Endiannes: " + _x['end'][0].decode('ASCII'))
             logger.debug("VerStr: " + _x['vstr'][0].decode('ASCII'))
 
+            while f:
+                token = read_next_token(f)
+                if token is None:
+                    break
+
+                pl_id, _pl_type, _pl_len, _pl = token
+
+                pl = [None] * _pl_len
+
+                # decode all strings (currently there will never be more than one per token)
+                if 'S' in _pl_type.decode('ASCII'):
+                    for i, _j in enumerate(_pl):
+                        pl[i] = _pl[i].decode('ASCII').strip()
+                else:
+                    pl = _pl
+
+                logger.debug("Read token {:s} (0x{:02x}) value {} type {:s} length {:d}".format(
+                    SHBDOTagID(pl_id).name,
+                    pl_id,
+                    _pl,
+                    _pl_type.decode('ASCII'),
+                    _pl_len
+                ))
+                if pl_id == SHBDOTagID.shversion:
+                    detector.mc_code_version = pl[0]
+                    logger.debug("MC code version:" + detector.mc_code_version)
+
+                if pl_id == SHBDOTagID.filedate:
+                    detector.filedate = pl[0]
+
+                if pl_id == SHBDOTagID.user:
+                    detector.user = pl[0]
+
+                if pl_id == SHBDOTagID.host:
+                    detector.host = pl[0]
+
+                if pl_id == SHBDOTagID.rt_nstat:
+                    detector.nstat = pl[0]
+
+                # # beam configuration etc...
+                # if pl_id in tag_to_name:
+                #     setattr(detector, tag_to_name[pl_id], pl[0])
+
+                # estimator block here ---
+                if pl_id == SHBDOTagID.est_geo_type:
+                    detector.geotyp = SHGeoType[pl[0].strip().lower()]
+
+                # read a single detector
+                if pl_id == SHBDOTagID.SHBDO_PAG_TYPE:
+                    detector.dettyp = SHDetType(pl[0])
+
+                # if pl_id == SHBDOTagID.det_part:  # particle to be scored
+                #     detector.scored_particle_code = pl[0]
+                # if pl_id == SHBDOTagID.det_partz:  # particle to be scored
+                #     detector.scored_particle_z = pl[0]
+                # if pl_id == SHBDOTagID.det_parta:  # particle to be scored
+                #     detector.scored_particle_a = pl[0]
+
+                if pl_id == SHBDOTagID.SHBDO_GEO_N:
+                    nx = pl[0]
+                    ny = pl[1]
+                    nz = pl[2]
+
+                if pl_id == SHBDOTagID.SHBDO_GEO_P:
+                    xmin = pl[0]
+                    ymin = pl[1]
+                    zmin = pl[2]
+
+                if pl_id == SHBDOTagID.SHBDO_GEO_Q:
+                    xmax = pl[0]
+                    ymax = pl[1]
+                    zmax = pl[2]
+
+                if pl_id == SHBDOTagID.det_data:
+                    detector.data_raw = np.asarray(pl)
+
+            # TODO: would be better to not overwrite x,y,z and make proper case for ZONE scoring later.
+            if detector.geotyp in {SHGeoType.zone, SHGeoType.dzone}:
+                # special case for zone scoring, x min and max will be zone numbers
+                xmin = detector.zone_start
+                xmax = xmin + nx - 1
+                ymin = 0.0
+                ymax = 0.0
+                zmin = 0.0
+                zmax = 0.0
+            elif detector.geotyp in {SHGeoType.plane, SHGeoType.dplane}:
+                # special case for plane scoring, according to documentation we have:
+                #  xmin, ymin, zmin = Sx, Sy, Sz (point on the plane)
+                #  xmax, ymax, zmax = nx, ny, nz (normal vector)
+                # to avoid situation where i.e. xmax < xmin (corresponds to nx < Sx)
+                # we store only point on the plane
+                detector.sx, detector.sy, detector.sz = xmin, ymin, zmin
+                detector.nx, detector.ny, detector.nz = xmax, ymax, zmax
+                xmax = xmin
+                ymax = ymin
+                zmax = zmin
+
+            xunit, xname = _get_mesh_units(detector, 0)
+            yunit, yname = _get_mesh_units(detector, 1)
+            zunit, zname = _get_mesh_units(detector, 2)
+
+            detector.x = MeshAxis(n=np.abs(nx), min_val=xmin, max_val=xmax, name=xname, unit=xunit, binning=_bintyp(nx))
+            detector.y = MeshAxis(n=np.abs(ny), min_val=ymin, max_val=ymax, name=yname, unit=yunit, binning=_bintyp(ny))
+            detector.z = MeshAxis(n=np.abs(nz), min_val=zmin, max_val=zmax, name=zname, unit=zunit, binning=_bintyp(nz))
+
+            detector.unit, detector.name = _get_detector_unit(detector.dettyp, detector.geotyp)
+
             logger.debug("Done reading bdo file.")
 
 
-class _SHReaderBDO2016(SHReader):
+class SHReaderBDO2016(SHReader):
     """
     Binary format reader from version >= 0.6
     """
@@ -535,7 +537,7 @@ class _SHReaderBDO2016(SHReader):
                     setattr(detector, tag_to_name[pl_id], pl[0])
 
                 # estimator block here ---
-                if pl_id == SHBDOTagID.est_geotyp:
+                if pl_id == SHBDOTagID.est_geo_type:
                     detector.geotyp = SHGeoType[pl[0].strip().lower()]
 
                 if pl_id == SHBDOTagID.ext_ptvdose:
@@ -664,7 +666,7 @@ class _SHReaderBDO2016(SHReader):
             detector.counter = 1
 
 
-class _SHReaderBin2010(SHReader):
+class SHReaderBin2010(SHReader):
     """
     Binary format reader from 0.1 <= version <= 0.6
     """
