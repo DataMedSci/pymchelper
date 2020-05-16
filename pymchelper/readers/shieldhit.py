@@ -323,7 +323,6 @@ class SHReader(Reader):
         :param nscale:
         :return:
         """
-        self.read(detector)
         _postprocess(detector, nscale)
 
     @property
@@ -684,6 +683,7 @@ class SHReaderBDO2016(SHReader):
             logger.debug("Detector ny   : " + str(detector.y.n))
             logger.debug("Detector nz   : " + str(detector.z.n))
             detector.counter = 1
+        super().read(detector)
 
 
 class SHReaderBin2010(SHReader):
@@ -860,6 +860,7 @@ class SHReaderBin2010(SHReader):
     def read(self, detector):
         self.read_header(detector)
         self.read_payload(detector)
+        super().read(detector)
 
 
 class SHReaderASCII:
