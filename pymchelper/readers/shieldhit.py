@@ -13,6 +13,7 @@ from pymchelper.shieldhit.detector.estimator_type import SHGeoType
 
 logger = logging.getLogger(__name__)
 
+# TODO add multiple pages support for BDO2016
 
 def file_has_sh_magic_number(filename):
     """
