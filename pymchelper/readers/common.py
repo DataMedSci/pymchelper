@@ -4,7 +4,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-class ReaderFactory:
+class ReaderFactory(object):
     def __init__(self, filename):
         self.filename = filename
 
@@ -13,7 +13,7 @@ class ReaderFactory:
         pass
 
 
-class Reader:
+class Reader(object):
     def __init__(self, filename):
         self.filename = filename
 

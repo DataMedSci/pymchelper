@@ -123,7 +123,6 @@ class TxtWriter:
 
             header += self._header_no_of_bins_and_prim(det)
 
-
         # dump data
         with open(self.filename, 'w') as fout:
             logger.info("Writing: " + self.filename)
