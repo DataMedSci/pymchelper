@@ -86,3 +86,4 @@ class FlukaReader(Reader):
             detector.data *= 1.60217662e-7
 
         detector.title = usr.detector[0].name.decode('ascii')
+        return True

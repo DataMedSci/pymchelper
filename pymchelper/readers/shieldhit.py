@@ -15,6 +15,7 @@ logger = logging.getLogger(__name__)
 
 # TODO add multiple pages support for BDO2016
 
+
 def file_has_sh_magic_number(filename):
     """
     BDO binary files, introduced in 2016 (BDO2016 and BDO2019 formats) starts with 6 magic bytes xSH12A
@@ -26,9 +27,10 @@ def file_has_sh_magic_number(filename):
     with open(filename, "rb") as f:
         d1 = np.dtype([('magic', 'S6')])  # TODO add a check if file has less than 6 bytes or is empty
         x = np.fromfile(f, dtype=d1, count=1)
+        if x:
+            # compare first 6 bytes with reference string
+            has_bdo_magic_number = (sh_bdo_magic_number == x['magic'][0])
 
-        # compare first 6 bytes with reference string
-        has_bdo_magic_number = (sh_bdo_magic_number == x['magic'][0])
     logger.debug("File {:s} has magic number: {:s}".format(filename, str(has_bdo_magic_number)))
     return has_bdo_magic_number
 
@@ -304,10 +306,10 @@ class SHReaderFactory(ReaderFactory):
             # lack of magic number means we expect Fortran-style binary format (BIN2010)
             reader = SHReaderBin2010
 
-        ver_short = extract_sh_ver(self.filename)
-        logger.info("Short version: {:s}".format(str(ver_short)))
-        ver_long = read_token(self.filename, SHBDOTagID.shversion)
-        logger.info("Long version: {:s}".format(str(ver_long)))
+        # ver_short = extract_sh_ver(self.filename)
+        # logger.info("Short version: {:s}".format(str(ver_short)))
+        # ver_long = read_token(self.filename, SHBDOTagID.shversion)
+        # logger.info("Long version: {:s}".format(str(ver_long)))
 
         return reader
 
@@ -325,6 +327,7 @@ class SHReader(Reader):
         :return:
         """
         _postprocess(detector, nscale)
+        return True
 
     @property
     def corename(self):
@@ -423,16 +426,19 @@ class SHReaderBDO2019(SHReader):
                 if pl_id == SHBDOTagID.est_geo_type:
                     detector.geotyp = SHGeoType[pl[0].strip().lower()]
 
+                if pl_id == SHBDOTagID.SHBDO_EST_COUNT:
+                    detector.page_count = pl[0]
+
                 # read a single detector
                 if pl_id == SHBDOTagID.SHBDO_PAG_TYPE:
-                    detector.dettyp = SHDetType(pl[0])
-
-                # if pl_id == SHBDOTagID.det_part:  # particle to be scored
-                #     detector.scored_particle_code = pl[0]
-                # if pl_id == SHBDOTagID.det_partz:  # particle to be scored
-                #     detector.scored_particle_z = pl[0]
-                # if pl_id == SHBDOTagID.det_parta:  # particle to be scored
-                #     detector.scored_particle_a = pl[0]
+                    if hasattr(detector, 'page_count') and detector.page_count > 1:
+                        if hasattr(detector, 'dettyp'):
+                            detector.dettyp.append(SHDetType(pl[0]))
+                        else:
+                            detector.dettyp = [SHDetType(pl[0])]
+                            logger.info("First page : {}".format(detector.dettyp))
+                    else:
+                        detector.dettyp = SHDetType(pl[0])
 
                 if pl_id == SHBDOTagID.SHBDO_GEO_N:
                     nx = pl[0]
@@ -463,7 +469,13 @@ class SHReaderBDO2019(SHReader):
                     detector.dif_type = pl[0]
 
                 if pl_id == SHBDOTagID.det_data:
-                    detector.data_raw = np.asarray(pl)
+                    if hasattr(detector, 'page_count') and detector.page_count > 1:
+                        if hasattr(detector, 'data_raw'):
+                            detector.data_raw.append(np.asarray(pl))
+                        else:
+                            detector.data_raw = [np.asarray(pl)]
+                    else:
+                        detector.data_raw = np.asarray(pl)
 
             # differential scoring data replacement
             if hasattr(detector, 'dif_min') and hasattr(detector, 'dif_max') and hasattr(detector, 'dif_n'):
@@ -498,6 +510,7 @@ class SHReaderBDO2019(SHReader):
             detector.unit, detector.name = _get_detector_unit(detector.dettyp, detector.geotyp)
 
             logger.debug("Done reading bdo file.")
+            return True
 
 
 class SHReaderBDO2016(SHReader):
@@ -685,6 +698,7 @@ class SHReaderBDO2016(SHReader):
             logger.debug("Detector nz   : " + str(detector.z.n))
             detector.counter = 1
         super(SHReaderBDO2016, self).read(detector)
+        return True
 
 
 class SHReaderBin2010(SHReader):
@@ -701,6 +715,9 @@ class SHReaderBin2010(SHReader):
         # first figure out if this is a VOXSCORE card
         header_dtype = np.dtype([('__fo1', '<i4'), ('geotyp', 'S10')])
         header = np.fromfile(self.filename, header_dtype, count=1)
+        if not header:
+            print("File {:s} has unknown format".format(self.filename))
+            return None
 
         if 'VOXSCORE' in header['geotyp'][0].decode('ascii'):
             header_dtype = np.dtype([('__fo1', '<i4'),     # 0x00
@@ -837,6 +854,8 @@ class SHReaderBin2010(SHReader):
 
         detector.unit, detector.name = _get_detector_unit(detector.dettyp, detector.geotyp)
 
+        return True  # reading OK
+
     # TODO: we need an alternative list, in case things have been scaled with nscale, since then things
     # are not "/particle" anymore.
     def read_payload(self, detector):
@@ -844,7 +863,7 @@ class SHReaderBin2010(SHReader):
 
         if detector.geotyp == SHGeoType.unknown or detector.dettyp == SHDetType.none:
             logger.error("Unknown geotyp or dettyp")
-            return
+            return None
 
         # next read the data:
         offset_str = "S" + str(detector.payload_offset)
@@ -858,10 +877,15 @@ class SHReaderBin2010(SHReader):
 
         detector.counter = 1
 
+        return None
+
     def read(self, detector):
-        self.read_header(detector)
-        self.read_payload(detector)
+        if not self.read_header(detector):
+            return None
+        if not self.read_payload(detector):
+            return None
         super(SHReaderBin2010, self).read(detector)
+        return True
 
 
 class SHReaderASCII:

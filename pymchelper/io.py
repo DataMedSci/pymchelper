@@ -51,9 +51,11 @@ def fromfile(filename):
         raise Exception("File format not compatible", filename)
     detector = Detector()
     detector.counter = 1
-    reader.read(detector)
-    detector.error_raw = np.zeros_like(detector.data_raw)
-    detector.error_raw *= np.nan
+    if not reader.read(detector):  # unsuccefful read
+        detector = None
+    else:
+        detector.error_raw = np.zeros_like(detector.data_raw)
+        detector.error_raw *= np.nan
     return detector
 
 
@@ -71,10 +73,16 @@ def fromfilelist(input_file_list, error, nan):
     if nan:
         detector_list = [fromfile(filename) for filename in input_file_list]
         result = average_with_nan(detector_list, error)
+        if not result:  # TODO check here !
+            return None
     elif len(input_file_list) == 1:
         result = fromfile(input_file_list[0])
+        if not result:
+            return None
     else:
         result = fromfile(input_file_list[0])
+        if not result:
+            return None
 
         # allocate memory for accumulator in standard deviation calculation
         # not needed if user requested not to include errors
@@ -161,6 +169,8 @@ def convertfromlist(filelist, error, nan, outputdir, converter_name, options, ou
     :return:
     """
     detector = fromfilelist(filelist, error, nan)
+    if not detector:
+        return None
     if outputfile is not None:
         output_path = outputfile
     elif outputdir is None:
