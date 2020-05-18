@@ -877,12 +877,14 @@ class SHReaderBin2010(SHReader):
 
         detector.counter = 1
 
-        return None
+        return True
 
     def read(self, detector):
         if not self.read_header(detector):
+            logger.debug("Reading header failed")
             return None
         if not self.read_payload(detector):
+            logger.debug("Reading payload failed")
             return None
         super(SHReaderBin2010, self).read(detector)
         return True

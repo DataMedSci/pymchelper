@@ -76,7 +76,7 @@ class TxtWriter:
     def _header_scored_value(det):
         """scored value and optionally particle type"""
         result = ""
-        if det.geotyp != SHGeoType.geomap:
+        if det.geotyp != SHGeoType.geomap and hasattr(det, "particle"):
             result += "#   JPART:{:6d} DETECTOR TYPE: {:s}\n".format(det.particle, str(det.dettyp).ljust(10))
         else:
             det_type_name = str(det.dettyp)
@@ -110,18 +110,19 @@ class TxtWriter:
         self.ay = self._axis_name(det.geotyp, 1)
         self.az = self._axis_name(det.geotyp, 2)
 
-        header = self._header_first_line(det)
-
-        header += self._header_geometric_info(det)
-
-        header += self._header_scored_value(det)
-
-        header += self._header_no_of_bins_and_prim(det)
-
         # original bdo2txt is not saving header data for some of cylindrical scorers, hence we do the same
         if det.geotyp in (SHGeoType.cyl, SHGeoType.dcyl, ) and \
                 det.dettyp in (SHDetType.fluence, SHDetType.avg_energy, SHDetType.avg_beta, SHDetType.energy):
             header = ""
+        else:
+            header = self._header_first_line(det)
+
+            header += self._header_geometric_info(det)
+
+            header += self._header_scored_value(det)
+
+            header += self._header_no_of_bins_and_prim(det)
+
 
         # dump data
         with open(self.filename, 'w') as fout:
