@@ -63,6 +63,12 @@ class SHDetType(IntEnum):
     user2 = 43
     n_eqv_dose = 44  # Neutron equivalent dose, ICRP 103 protection quantity.
 
+    z2beta2 = 45
+    dose_av_z2beta2 = 46
+    track_av_z2beta2 = 47
+    dose_av_q = 48
+    track_av_q = 49
+
     let_bdo2016 = 120  # for differential scoring
     angle_bdo2016 = 121  # for differential scoring
     dose_gy_bdo2016 = 205
