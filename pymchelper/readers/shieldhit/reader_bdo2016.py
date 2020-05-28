@@ -7,7 +7,7 @@ from pymchelper.readers.shieldhit.reader_base import SHReader, _get_mesh_units, 
     read_next_token
 from pymchelper.readers.shieldhit.binary_spec import SHBDOTagID, detector_name_from_bdotag
 from pymchelper.shieldhit.detector.estimator_type import SHGeoType
-from shieldhit.detector.detector_type import SHDetType
+from pymchelper.shieldhit.detector.detector_type import SHDetType
 
 logger = logging.getLogger(__name__)
 
