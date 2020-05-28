@@ -1,7 +1,7 @@
 import sys
 import argparse
 
-from pymchelper.io import fromfile
+from pymchelper.input_output import fromfile
 
 
 def main(args=sys.argv[1:]):

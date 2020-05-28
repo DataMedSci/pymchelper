@@ -12,7 +12,7 @@ import numpy as np
 
 from pymchelper import run
 from pymchelper.detector import ErrorEstimate
-from pymchelper.io import fromfilelist, fromfile
+from pymchelper.input_output import fromfilelist, fromfile
 
 logger = logging.getLogger(__name__)
 
