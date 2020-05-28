@@ -229,7 +229,7 @@ class ImageWriter:
 
         plot_x_axis = detector.plot_axis(0)
 
-        fig, ax = plt.subplots(detector.pages.size)
+        fig, ax = plt.subplots()
         ax.set_xlabel(self._make_label(plot_x_axis.unit, plot_x_axis.name))
 
         # configure logscale on X and Y axis (both for positive and negative numbers)
