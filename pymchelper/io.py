@@ -7,7 +7,8 @@ import numpy as np
 
 from pymchelper.detector import Detector, average_with_nan, ErrorEstimate
 from pymchelper.readers.fluka import FlukaReaderFactory, FlukaReader
-from pymchelper.readers.shieldhit import SHReaderFactory, SHReader
+from pymchelper.readers.shieldhit.general import SHReaderFactory
+from pymchelper.readers.shieldhit.reader_base import SHReader
 from pymchelper.writers.common import Converters
 
 logger = logging.getLogger(__name__)
@@ -50,12 +51,9 @@ def fromfile(filename):
     if reader is None:
         raise Exception("File format not compatible", filename)
     detector = Detector()
-    detector.counter = 1
+    detector.file_counter = 1
     if not reader.read(detector):  # unsuccefful read
         detector = None
-    else:
-        detector.error_raw = np.zeros_like(detector.data_raw)
-        detector.error_raw *= np.nan
     return detector
 
 
@@ -114,10 +112,10 @@ def fromfilelist(input_file_list, error, nan):
         if len(input_file_list) > 1 and error == ErrorEstimate.stderr:
             result.error_raw /= np.sqrt(len(input_file_list))  # np.sqrt() always returns np.float64
 
-    result.counter = len(input_file_list)
+    result.file_counter = len(input_file_list)
     core_names_dict = group_input_files(input_file_list)
     if len(core_names_dict) == 1:
-        result.corename = list(core_names_dict)[0]
+        result.file_corename = list(core_names_dict)[0]
 
     return result
 
@@ -174,9 +172,9 @@ def convertfromlist(filelist, error, nan, outputdir, converter_name, options, ou
     if outputfile is not None:
         output_path = outputfile
     elif outputdir is None:
-        output_path = detector.corename
+        output_path = detector.file_corename
     else:
-        output_path = os.path.join(outputdir, detector.corename)
+        output_path = os.path.join(outputdir, detector.file_corename)
     status = tofile(detector, output_path, converter_name, options)
     return status
 

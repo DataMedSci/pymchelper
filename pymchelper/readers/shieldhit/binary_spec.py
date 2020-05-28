@@ -2,7 +2,7 @@ from enum import IntEnum
 
 
 class SHBDOTagID(IntEnum):
-    """ List of Tag ID numbers. Must be synchronized with sh_detect.h in SH12A.
+    """ List of Tag ID numbers. Must be synchronized with bdotags in sh_detect.h in SH12A.
     """
 
     # Hex values are used for better recognition in binary files, should they be inspected by humans.
@@ -81,27 +81,6 @@ class SHBDOTagID(IntEnum):
     det_voxvol = 0xDD10  # det(9)
     det_thresh = 0xDD11  # det(10) lower energy scoring threshold
 
-    det_data = 0xDDBB  # data block
-
-    # Group 0xEE00 - 0xEEFF : Estimator specific tags
-    # Geometry, as in gE0metry
-    est_geo_type = 0xE000  # geometry type ID, see SH_SGEO_* in sh_scoredef.h
-    SHBDO_GEO_NAME = 0xE001  # number of detectors / pages for this estimator
-    SHBDO_GEO_P = 0xE002  #
-    SHBDO_GEO_Q = 0xE003  #
-    SHBDO_GEO_N = 0xE004  #
-    SHBDO_GEO_ROT = 0xE005  #
-    SHBDO_GEO_VOL = 0xE006  #
-    SHBDO_GEO_ZONES = 0xE007  #
-    SHBDO_GEO_NEQGRID = 0xE008  #
-    SHBDO_GEO_UNITS = 0xE009  #
-
-    # Group 0xEF00 - 0xEFFF : Estimator
-    SHBDO_EST_FILENAME = 0xEE00  # /* number of detectors / pages for this estimator */
-    SHBDO_EST_COUNT = 0xEE01  # /* Unique number for this estimator, if several files were saved, starting at 0 */
-    SHBDO_EST_NPAGES = 0xEE02  # /* number of detectors / pages for this estimator */
-    SHBDO_EST_RESCALE_NSTAT = 0xEE03
-
     # Page: meta-data */
     # Group 0xDD30 - 0xDDFF : page specific tags. */
     SHBDO_PAG_TYPE = 0xDD30  # /* detector_type */
@@ -113,6 +92,7 @@ class SHBDOTagID(IntEnum):
     SHBDO_PAG_MEDIUM_SCORE = 0xDD36  # /* [future] ASCII-string for detector medium set in detect.dat scoring */
 
     # /* page data */
+    det_data = 0xDDBB  # data block
     SHBDO_PAG_DATA = 0xDDBB  # /* data block, identical to SHBDO_DET_DATA */
     SHBDO_PAG_DATA_UNIT = 0xDDBC  # /* [future] ASCII string unit */
 
@@ -130,9 +110,24 @@ class SHBDOTagID(IntEnum):
     SHBDO_PAG_FILTER_EMIN = 0xDDF2  # /* lower energy threshold, emin */
     SHBDO_PAG_FILTER_EMAX = 0xDDF3  # /* upper energy threshold, emin */
 
-    # /* Group 0xAA00 - 0xAAFF : Runtime variables */
-    SHBDO_RT_NSTAT = 0xAA00  # /* number of actually simulated particles */
-    SHBDO_RT_TIME = 0xAA01  # /* [usignend long int] optional runtime in seconds */
+    # Group 0xEE00 - 0xEEFF : Estimator specific tags
+    # Geometry, as in gE0metry
+    est_geo_type = 0xE000  # geometry type ID, see SH_SGEO_* in sh_scoredef.h
+    SHBDO_GEO_NAME = 0xE001  # /* User-given name of this geometry */
+    SHBDO_GEO_P = 0xE002  # /* start values, e.g xmin, ymin, zmin */
+    SHBDO_GEO_Q = 0xE003  # /* stop values, e.g xmax, ymax, zmax */
+    SHBDO_GEO_N = 0xE004  # /* number of bins */
+    SHBDO_GEO_ROT = 0xE005  #
+    SHBDO_GEO_VOL = 0xE006  #
+    SHBDO_GEO_ZONES = 0xE007  #
+    SHBDO_GEO_NEQGRID = 0xE008  #
+    SHBDO_GEO_UNITS = 0xE009  #
+
+    # Group 0xEF00 - 0xEFFF : Estimator
+    SHBDO_EST_FILENAME = 0xEE00  # /* number of detectors / pages for this estimator */
+    SHBDO_EST_COUNT = 0xEE01  # /* Unique number for this estimator, if several files were saved, starting at 0 */
+    SHBDO_EST_NPAGES = 0xEE02  # /* number of detectors / pages for this estimator */
+    SHBDO_EST_RESCALE_NSTAT = 0xEE03
 
     # /* Group 0xFFCC - 0xFFFF : Diagnostics, may be ignored by readers. */
     SHBDO_COMMENT = 0xFFCC  # /* 0xFFCC-omment */
@@ -140,7 +135,7 @@ class SHBDOTagID(IntEnum):
     SHBDO_ERROR = 0xFFCE  # /* 0xFFCE-rror */
 
 
-tag_to_name = {
+detector_name_from_bdotag = {
     SHBDOTagID.jpart0: 'projectile_code',
     SHBDOTagID.apro0: 'projectile_a',
     SHBDOTagID.zpro0: 'projectile_z',
@@ -155,5 +150,16 @@ tag_to_name = {
     SHBDOTagID.beamphi: 'projectile_azimuth_angle',
     SHBDOTagID.beamdivx: 'projectile_divergence_x',
     SHBDOTagID.beamdivy: 'projectile_divergence_y',
-    SHBDOTagID.beamdivk: 'projectile_divergence_k'
+    SHBDOTagID.beamdivk: 'projectile_divergence_k',
+    SHBDOTagID.shversion: 'mc_code_version',
+    SHBDOTagID.filedate: 'filedate',
+    SHBDOTagID.user: 'user',
+    SHBDOTagID.host: 'host',
+    SHBDOTagID.rt_nstat: 'number_of_primaries',
+    SHBDOTagID.SHBDO_EST_NPAGES: 'page_count'
+}
+
+page_name_from_bdotag = {
+    SHBDOTagID.SHBDO_PAG_RESCALE: 'rescale',
+    SHBDOTagID.SHBDO_PAG_OFFSET: 'offset',
 }

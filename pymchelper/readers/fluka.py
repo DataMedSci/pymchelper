@@ -27,7 +27,7 @@ class FlukaReader(Reader):
             core_name = self.filename[-2:]
         return core_name
 
-    def read(self, detector, nscale=1):
+    def read_data(self, detector, nscale=1):
 
         try:
             usr = Usrbin(self.filename)
@@ -52,7 +52,7 @@ class FlukaReader(Reader):
         detector.geotyp = SHGeoType.unknown
 
         # TODO cross-check statistics
-        detector.nstat = usr.ncase
+        detector.number_of_primaries = usr.ncase
 
         # TODO figure out when more detectors are used
         nx = usr.detector[0].nx

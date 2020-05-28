@@ -117,6 +117,17 @@ class ErrorEstimate(IntEnum):
     stddev = 2
 
 
+class Page:
+    def __init__(self):
+        self.data_raw = np.array([float("NaN")])  # linear data storage
+        self.error_raw = np.array([float("NaN")])  # linear data storage
+
+        self.name = ""
+        self.unit = ""
+
+        self.dettyp = None  # Dose, Fluence, LET etc...
+
+
 class Detector:
     """
     Detector data including scoring mesh description.
@@ -181,14 +192,59 @@ class Detector:
                           binning=MeshAxis.BinningType.linear)
         self.y = self.x
         self.z = self.x
-        self.data_raw = np.array([float("NaN")])
-        self.error_raw = np.array([float("NaN")])
-        self.name = ""
-        self.unit = ""
-        self.nstat = 0  # number of histories simulated
-        self.counter = 0  # number of files read
-        self.corename = ""  # common core for paths of contributing files
+
+        self.pages = [Page()]
+
+        self.number_of_primaries = 0  # number of histories simulated
+        self.file_counter = 0  # number of files read
+        self.file_corename = ""  # common core for paths of contributing files
         self.error_type = ErrorEstimate.none
+        self.geotyp = None  # MSH, CYL, etc...
+
+    @property
+    def data_raw(self):
+        if len(self.pages) == 1:
+            return self.pages[0].data_raw
+        else:
+            return np.asarray([page.data_raw for page in self.pages])
+
+    @data_raw.setter
+    def data_raw(self, value):
+        if len(self.pages) == 1:
+            self.pages[0].data_raw = np.array(value)
+        else:
+            for page, item in zip(self.pages, value):
+                page.data_raw = item
+
+    @property
+    def error_raw(self):
+        if len(self.pages) == 1:
+            return self.pages[0].error_raw
+        else:
+            return np.asarray([page.error_raw for page in self.pages])
+
+    @error_raw.setter
+    def error_raw(self, value):
+        if len(self.pages) == 1:
+            self.pages[0].error_raw = np.array(value)
+        else:
+            for page, item in zip(self.pages, value):
+                page.error_raw = item
+
+    @property
+    def dettyp(self):
+        if len(self.pages) == 1:
+            return self.pages[0].dettyp
+        else:
+            return [page.dettyp for page in self.pages]
+
+    @dettyp.setter
+    def dettyp(self, value):
+        if len(self.pages) == 1:
+            self.pages[0].dettyp = value
+        else:
+            for page, value_item in zip(self.pages, value):
+                page.dettyp = value_item
 
     def axis(self, id):
         """
@@ -301,7 +357,11 @@ class Detector:
 
         :return: reshaped view of ``data_raw``
         """
-        return self.data_raw.reshape((self.x.n, self.y.n, self.z.n))
+
+        if len(self.pages) == 1:
+            return self.pages[0].data_raw.reshape((self.x.n, self.y.n, self.z.n))
+        else:
+            return np.array([page.data_raw.reshape((self.x.n, self.y.n, self.z.n)) for page in self.pages])
 
     @property
     def error(self):
@@ -311,7 +371,10 @@ class Detector:
         For more details see ``data`` property.
         :return:
         """
-        return self.error_raw.reshape((self.x.n, self.y.n, self.z.n))
+        if len(self.pages) == 1:
+            return self.error_raw.reshape((self.x.n, self.y.n, self.z.n))
+        else:
+            return np.array([page.error_raw.reshape((self.x.n, self.y.n, self.z.n)) for page in self.pages])
 
 
 def average_with_nan(detector_list, error_estimate=ErrorEstimate.stderr):
@@ -323,9 +386,9 @@ def average_with_nan(detector_list, error_estimate=ErrorEstimate.stderr):
     """
     # TODO add compatibility check
     result = Detector()
-    result.counter = len(detector_list)
+    result.file_counter = len(detector_list)
     result.data_raw = np.nanmean([det.data_raw for det in detector_list], axis=0)
-    if result.counter > 1 and error_estimate != ErrorEstimate.none:
+    if result.file_counter > 1 and error_estimate != ErrorEstimate.none:
         # s = stddev = sqrt(1/(n-1)sum(x-<x>)**2)
         # s : corrected sample standard deviation
         result.error_raw = np.nanstd([det.data_raw for det in detector_list], axis=0, ddof=1)
@@ -334,7 +397,7 @@ def average_with_nan(detector_list, error_estimate=ErrorEstimate.stderr):
         # S = stderr = stddev / sqrt(n), or in other words,
         # S = s/sqrt(N) where S is the corrected standard deviation of the mean.
         if error_estimate == ErrorEstimate.stderr:
-            result.error_raw /= np.sqrt(result.counter)  # np.sqrt() always returns np.float64
+            result.error_raw /= np.sqrt(result.file_counter)  # np.sqrt() always returns np.float64
     else:
         result.error_raw = np.zeros_like(result.data_raw)
     return result

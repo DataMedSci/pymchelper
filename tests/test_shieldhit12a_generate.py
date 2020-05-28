@@ -140,11 +140,11 @@ class TestSHGenerated(unittest.TestCase):
                     self.assertGreater(det.x.max_val, det.x.min_val)
                     self.assertGreater(det.y.max_val, det.y.min_val)
                     self.assertGreater(det.z.max_val, det.z.min_val)
-                self.assertEqual(det.counter, 1)
+                self.assertEqual(det.file_counter, 1)
                 if det.geotyp == SHGeoType.geomap:
-                    self.assertEqual(det.nstat, 1)
+                    self.assertEqual(det.number_of_primaries, 1)
                 else:
-                    self.assertEqual(det.nstat, 1000)
+                    self.assertEqual(det.number_of_primaries, 1000)
                 self.assertGreaterEqual(len(det.data), 1)
 
 

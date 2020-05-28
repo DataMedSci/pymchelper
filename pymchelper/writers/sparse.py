@@ -18,6 +18,9 @@ class SparseWriter:
         logger.info("Sparse threshold {:g}".format(self.threshold))
 
     def write(self, detector):
+        if len(detector.pages) > 1:
+            print("Conversion of data with multiple pages not supported yet")
+            return False
 
         # detector.data array is a 3-D numpy array
         # some of its dimensions may be as well ones and the array reduced to 0,1 or 2-D

@@ -1,6 +1,8 @@
 from abc import abstractmethod
 import logging
 
+import numpy as np
+
 logger = logging.getLogger(__name__)
 
 
@@ -17,8 +19,16 @@ class Reader(object):
     def __init__(self, filename):
         self.filename = filename
 
-    @abstractmethod
     def read(self, detector):
+        result = self.read_data(detector)
+        if not result:
+            return False
+        for page in detector.pages:
+            page.error_raw = np.zeros_like(page.data_raw) * np.nan
+        return True
+
+    @abstractmethod
+    def read_data(self, detector):
         pass
 
     @property

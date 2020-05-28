@@ -14,17 +14,19 @@ class Inspector:
         they include also a metadata read from binary output file
         """
         for name, value in sorted(detector.__dict__.items()):
-            # be careful not to check for np.array but for np.ndarray!
-            if name not in {'data', 'data_raw', 'error', 'error_raw', 'counter'}:  # skip non-metadata fields
+            # skip non-metadata fields
+            if name not in {'data', 'data_raw', 'error', 'error_raw', 'counter', 'pages'}:
                 line = "{:24s}: '{:s}'".format(str(name), str(value))
                 print(line)
         # print some data-related statistics
         print(75 * "*")
-        print("Data min: {:g}, max: {:g}".format(detector.data.min(), detector.data.max()))
+
+        for page in detector.pages:
+            print("Data min: {:g}, max: {:g}".format(page.data_raw.min(), page.data_raw.max()))
 
         if self.options.details:
             # print data scatter-plot if possible
-            if detector.dimension == 1:
+            if detector.dimension == 1 and len(self.pages) == 1:
                 try:
                     from hipsterplot import plot
                     print(75 * "*")

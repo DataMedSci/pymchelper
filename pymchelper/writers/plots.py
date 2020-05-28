@@ -20,6 +20,10 @@ class PlotDataWriter:
             self.filename += ".dat"
 
     def write(self, detector):
+        if len(detector.pages) > 1:
+            print("Conversion of data with multiple pages not supported yet")
+            return False
+
         logger.info("Writing: " + self.filename)
 
         data_raw = detector.data_raw
@@ -108,9 +112,13 @@ splot \"<awk -f addblanks.awk '{data_filename}'\" u 1:2:3 with pm3d
     }
 
     def write(self, detector):
+        if len(detector.pages) > 1:
+            print("Conversion of data with multiple pages not supported yet")
+            return False
+
         # skip plotting 0-D and 3-D data
         if detector.dimension in {0, 3}:
-            return
+            return False
 
         # set labels
         plot_x_axis = detector.plot_axis(0)
@@ -157,7 +165,7 @@ class ImageWriter:
     def _make_label(unit, name):
         return name + " " + "[" + unit + "]"
 
-    def _save_2d_error_plot(self, detector, xr, yr, elist, x_axis_label, y_axis_label, z_axis_label):
+    def _save_2d_error_plot(self, xr, yr, elist, x_axis_label, y_axis_label, z_axis_label):
         import matplotlib
         matplotlib.use('Agg')
         import matplotlib.pyplot as plt
@@ -188,6 +196,11 @@ class ImageWriter:
         plt.close(fig)
 
     def write(self, detector):
+
+        if len(detector.pages) > 1:
+            print("Conversion of data with multiple pages not supported yet")
+            return False
+
         try:
             import matplotlib
             matplotlib.use('Agg')
@@ -216,7 +229,7 @@ class ImageWriter:
 
         plot_x_axis = detector.plot_axis(0)
 
-        fig, ax = plt.subplots()
+        fig, ax = plt.subplots(detector.pages.size)
         ax.set_xlabel(self._make_label(plot_x_axis.unit, plot_x_axis.name))
 
         # configure logscale on X and Y axis (both for positive and negative numbers)
@@ -271,6 +284,6 @@ class ImageWriter:
         # add 2-D error plot if error data present
         if detector.dimension == 2 and not np.all(np.isnan(error_raw)) and np.any(error_raw):
             edata = error_raw.reshape((plot_y_axis.n, plot_x_axis.n))
-            self._save_2d_error_plot(detector, xspan, yspan, edata, x_axis_label, y_axis_label, z_axis_label)
+            self._save_2d_error_plot(xspan, yspan, edata, x_axis_label, y_axis_label, z_axis_label)
 
         return 0

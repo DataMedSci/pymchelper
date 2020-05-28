@@ -12,6 +12,10 @@ class TripCubeWriter:
         self.output_corename = filename
 
     def write(self, detector):
+        if len(detector.pages) > 1:
+            print("Conversion of data with multiple pages not supported yet")
+            return False
+
         import getpass
         from pymchelper.shieldhit.detector.detector_type import SHDetType
         from pymchelper import __version__ as _pmcversion
@@ -145,6 +149,11 @@ class TripDddWriter(object):
             logger.info("Setting tail threshold based on {:s} to {:f}".format(env_var_name, self.threshold))
 
     def write(self, detector):
+
+        if len(detector.pages) > 1:
+            print("Conversion of data with multiple pages not supported yet")
+            return False
+
         from pymchelper.shieldhit.detector.detector_type import SHDetType
 
         if detector.dettyp != SHDetType.ddd:

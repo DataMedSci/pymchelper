@@ -99,11 +99,15 @@ class TxtWriter:
             header += " {:s} END  :{:s}\n".format(self.az, format_d(10, 3, det.z.max_val))
 
         # number of primaries
-        header += "#   PRIMARIES:" + format_d(10, 3, det.nstat) + "\n"
+        header += "#   PRIMARIES:" + format_d(10, 3, det.number_of_primaries) + "\n"
 
         return header
 
     def write(self, det):
+        if len(det.pages) > 1:
+            print("Conversion of data with multiple pages not supported yet")
+            return False
+
         from pymchelper.fortranformatter import format_e
 
         self.ax = self._axis_name(det.geotyp, 0)

@@ -15,6 +15,9 @@ class ExcelWriter:
             self.filename += ".xls"
 
     def write(self, detector):
+        if len(detector.pages) > 1:
+            print("Conversion of data with multiple pages not supported yet")
+            return False
 
         try:
             import xlwt

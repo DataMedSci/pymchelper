@@ -17,6 +17,9 @@ class HdfWriter:
             self.filename += ".h5"
 
     def write(self, detector):
+        if len(detector.pages) > 1:
+            print("Conversion of data with multiple pages not supported yet")
+            return False
 
         try:
             import h5py
@@ -47,9 +50,9 @@ class HdfWriter:
             # save metadata
             dset.attrs['name'] = detector.name
             dset.attrs['unit'] = detector.unit
-            dset.attrs['nstat'] = detector.nstat
-            dset.attrs['counter'] = detector.counter
-            dset.attrs['counter'] = detector.counter
+            dset.attrs['nstat'] = detector.number_of_primaries
+            dset.attrs['counter'] = detector.file_counter
+            dset.attrs['counter'] = detector.file_counter
             dset.attrs['xaxis_n'] = detector.x.n
             dset.attrs['xaxis_min'] = detector.x.min_val
             dset.attrs['xaxis_max'] = detector.x.max_val
