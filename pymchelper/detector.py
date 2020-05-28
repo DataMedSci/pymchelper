@@ -209,6 +209,14 @@ class Detector:
         else:
             return result
 
+    @unit.setter
+    def unit(self, value):
+        if len(self.pages) == 1:
+            self.pages[0].unit = value
+        else:
+            for page, value_item in zip(self.pages, value):
+                page.unit = value_item
+
     @property
     def name(self):
         result = [page.name for page in self.pages]
@@ -216,6 +224,14 @@ class Detector:
             return result[0]
         else:
             return result
+
+    @name.setter
+    def name(self, value):
+        if len(self.pages) == 1:
+            self.pages[0].name = value
+        else:
+            for page, value_item in zip(self.pages, value):
+                page.name = value_item
 
     @property
     def x(self):
