@@ -128,7 +128,7 @@ class Page:
         self.dettyp = None  # Dose, Fluence, LET etc...
 
 
-class Detector:
+class Detector(object):
     """
     Detector data including scoring mesh description.
 
