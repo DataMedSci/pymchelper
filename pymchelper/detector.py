@@ -184,22 +184,74 @@ class Detector:
         >>> d.data
         array([[[ nan]]])
         """
-        self.x = MeshAxis(n=1,
-                          min_val=float("NaN"),
-                          max_val=float("NaN"),
-                          name="",
-                          unit="",
-                          binning=MeshAxis.BinningType.linear)
-        self.y = self.x
-        self.z = self.x
+        self._x = MeshAxis(n=1,
+                           min_val=float("NaN"),
+                           max_val=float("NaN"),
+                           name="",
+                           unit="",
+                           binning=MeshAxis.BinningType.linear)
+        self._y = self._x
+        self._z = self._x
 
-        self.pages = [Page()]
+        self.pages = [Page()]  # empty page at the beginning
 
         self.number_of_primaries = 0  # number of histories simulated
         self.file_counter = 0  # number of files read
         self.file_corename = ""  # common core for paths of contributing files
         self.error_type = ErrorEstimate.none
         self.geotyp = None  # MSH, CYL, etc...
+
+    @property
+    def unit(self):
+        result = [page.unit for page in self.pages]
+        if len(result) == 1:
+            return result[0]
+        else:
+            return result
+
+    @property
+    def name(self):
+        result = [page.name for page in self.pages]
+        if len(result) == 1:
+            return result[0]
+        else:
+            return result
+
+    @property
+    def x(self):
+        result = [getattr(page, 'x', self._x) for page in self.pages]
+        if len(result) == 1:
+            return result[0]
+        else:
+            return result
+
+    @x.setter
+    def x(self, value):
+        self._x = value
+
+    @property
+    def y(self):
+        result = [getattr(page, 'y', self._y) for page in self.pages]
+        if len(result) == 1:
+            return result[0]
+        else:
+            return result
+
+    @y.setter
+    def y(self, value):
+        self._y = value
+
+    @property
+    def z(self):
+        result = [getattr(page, 'z', self._z) for page in self.pages]
+        if len(result) == 1:
+            return result[0]
+        else:
+            return result
+
+    @z.setter
+    def z(self, value):
+        self._z = value
 
     @property
     def data_raw(self):

@@ -90,11 +90,12 @@ class SHBDOTagID(IntEnum):
     SHBDO_PAG_OFFSET = 0xDD34  # /* if set and != 0.0 the data set was offset with this value */
     SHBDO_PAG_MEDIUM_TRANSP = 0xDD35  # /* [future] ASCII-string for detector medium set in geo.dat */
     SHBDO_PAG_MEDIUM_SCORE = 0xDD36  # /* [future] ASCII-string for detector medium set in detect.dat scoring */
+    SHBDO_PAG_UNITIDS = 0xDD37  # /* Unit IDs according to sh_units.h. Set for detector and the two diff. bins */
 
     # /* page data */
     det_data = 0xDDBB  # data block
     SHBDO_PAG_DATA = 0xDDBB  # /* data block, identical to SHBDO_DET_DATA */
-    SHBDO_PAG_DATA_UNIT = 0xDDBC  # /* [future] ASCII string unit */
+    SHBDO_PAG_DATA_UNIT = 0xDDBC  # /* ASCII string unit, including any differentials */
 
     # /* Page differential data */
     SHBDO_PAG_DIF_SET = 0xDDD0  # /* flags if 1 or 2 differential binning was set. 1 for set, -1 for set as log10. */
@@ -102,7 +103,7 @@ class SHBDOTagID(IntEnum):
     SHBDO_PAG_DIF_START = 0xDDD2  # /* array holding 1 or 2 lower bounds, for 1-D or 2-D respectively */
     SHBDO_PAG_DIF_STOP = 0xDDD3  # /* array holding 1 or 2 upper bounds, for 1-D or 2-D respectively */
     SHBDO_PAG_DIF_SIZE = 0xDDD4  # /* array holding 1 or 2 number of bins, for 1-D or 2-D respectively */
-    SHBDO_PAG_DIF_UNITS = 0xDDD5  # /* [Future]: ASCII string of ;-separated units along each dimension. */
+    SHBDO_PAG_DIF_UNITS = 0xDDD5  # /* ASCII string of ;-separated units along each dimension. */
 
     # /* Filter data attached to page */
     SHBDO_PAG_FILTER_NAME = 0xDDF0  # /* name of filter containing one or more rules */
@@ -122,6 +123,7 @@ class SHBDOTagID(IntEnum):
     SHBDO_GEO_ZONES = 0xE007  #
     SHBDO_GEO_NEQGRID = 0xE008  #
     SHBDO_GEO_UNITS = 0xE009  #
+    SHBDO_GEO_UNITIDS = 0xE00A  # /* Unit IDs according to sh_units.h, one unit along each axis. */
 
     # Group 0xEF00 - 0xEFFF : Estimator
     SHBDO_EST_FILENAME = 0xEE00  # /* number of detectors / pages for this estimator */
@@ -156,10 +158,132 @@ detector_name_from_bdotag = {
     SHBDOTagID.user: 'user',
     SHBDOTagID.host: 'host',
     SHBDOTagID.rt_nstat: 'number_of_primaries',
-    SHBDOTagID.SHBDO_EST_NPAGES: 'page_count'
+    SHBDOTagID.SHBDO_EST_NPAGES: 'page_count',
+    SHBDOTagID.SHBDO_GEO_UNITIDS: 'geo_unit_ids',
+    SHBDOTagID.SHBDO_GEO_UNITS: 'geo_units',
+    SHBDOTagID.SHBDO_GEO_NAME: 'geo_name'
 }
 
 page_name_from_bdotag = {
     SHBDOTagID.SHBDO_PAG_RESCALE: 'rescale',
     SHBDOTagID.SHBDO_PAG_OFFSET: 'offset',
+    SHBDOTagID.SHBDO_PAG_DIF_TYPE: 'dif_type',
+    SHBDOTagID.SHBDO_PAG_DIF_START: 'dif_start',
+    SHBDOTagID.SHBDO_PAG_DIF_STOP: 'dif_stop',
+    SHBDOTagID.SHBDO_PAG_DIF_SIZE: 'dif_size',
+    SHBDOTagID.SHBDO_PAG_DIF_UNITS: 'dif_units',
+    SHBDOTagID.SHBDO_PAG_DATA_UNIT: 'data_unit',
+    SHBDOTagID.SHBDO_PAG_UNITIDS: 'unit_ids',
+}
+
+
+class SHBDOUnitID(IntEnum):
+    SH_SCORING_UNIT_UNKNOWN = -2  # /* e.g. for user defined scoring */
+    SH_SCORING_UNIT_INVALID = -1  # /* N/A (not applicable), or undefined */
+
+    SH_SCORING_UNIT_NONE = 0  # /* dimensionless */
+    SH_SCORING_UNIT_AU = 1  # /* arbitrary units */
+    SH_SCORING_UNIT_PCT = 2  # /* percent (%) */
+    SH_SCORING_UNIT_PMIL = 3  # /* promill (%%) */
+    SH_SCORING_UNIT_RELATIVE = 4  # /* dimensionless relative fraction */
+
+    SH_SCORING_UNIT_CM = 10  # /* cm */
+    SH_SCORING_UNIT_CM2 = 11  # /* cm^2 */
+    SH_SCORING_UNIT_CM3 = 12  # /* cm^3 */
+    SH_SCORING_UNIT_PCM = 13  # /* cm^-1 */
+    SH_SCORING_UNIT_PCM2 = 14  # /* cm^-2 */
+    SH_SCORING_UNIT_PCM3 = 15  # /* cm^-3 */
+
+    SH_SCORING_UNIT_M = 16  # /* m */
+    SH_SCORING_UNIT_M2 = 17  # /* m^2 */
+    SH_SCORING_UNIT_M3 = 18  # /* m^3 */
+    SH_SCORING_UNIT_PM = 19  # /* m^-1 */
+    SH_SCORING_UNIT_PM2 = 20  # /* m^-2 */
+    SH_SCORING_UNIT_PM3 = 21  # /* m^-3 */
+
+    SH_SCORING_UNIT_GPCM3 = 22  # /* density g / cm^3 */
+    SH_SCORING_UNIT_KGPM3 = 23  # /* density kg / m^3 */
+
+    SH_SCORING_UNIT_KEVPUM = 30  # /* keV / um */
+    SH_SCORING_UNIT_MEVPCM = 31  # /* MeV / cm */
+    SH_SCORING_UNIT_MEVCM2PG = 32  # /* MeV * cm^2 / g */
+
+    SH_SCORING_UNIT_MEVPG = 40  # /* MeV / g) */
+    SH_SCORING_UNIT_GY = 41  # /* Gy (J/kg) */
+    SH_SCORING_UNIT_GYRBE = 42  # /* Gy * RBE */
+    SH_SCORING_UNIT_GYRE = 43  # /* Gy * RE (quenching) */
+    SH_SCORING_UNIT_SV = 44  # /* Sv (J/kg) */
+    SH_SCORING_UNIT_DOSERAD = 45  # /* Rad ( = 1 cGy)  */
+    SH_SCORING_UNIT_DOSEREM = 46  # /* Rem ( = 1 cSv)  */
+
+    SH_SCORING_UNIT_DEGREES = 50  # /* degrees */
+    SH_SCORING_UNIT_RADIANS = 51  # /* radians */
+    SH_SCORING_UNIT_SR = 52  # /* steradian sr = rad^2*/
+
+    SH_SCORING_UNIT_COUNT = 60  # /* number # */
+
+    SH_SCORING_UNIT_MEV = 70  # /* MeV */
+    SH_SCORING_UNIT_MEVPNUC = 71  # /* MeV / nucleon */
+    SH_SCORING_UNIT_MEVPAMU = 72  # /* MeV / amu */
+
+    SH_SCORING_UNIT_NUCN = 80  # /* number of nucleons */
+    SH_SCORING_UNIT_MEVPC2 = 81  # /* particle mass MeV / c^2 */
+    SH_SCORING_UNIT_U = 82  # /* particle mass in terms of u */
+
+    SH_SCORING_UNIT_MATID = 90  # /* material ID */
+    SH_SCORING_UNIT_NZONE = 91  # /* zone number */
+
+
+unit_name_from_unit_id = {
+    SHBDOUnitID.SH_SCORING_UNIT_NONE: "",
+    SHBDOUnitID.SH_SCORING_UNIT_AU: "a.u.",
+    SHBDOUnitID.SH_SCORING_UNIT_PCT: "%",
+    SHBDOUnitID.SH_SCORING_UNIT_PMIL: "%%",
+    SHBDOUnitID.SH_SCORING_UNIT_RELATIVE: "rel.units",
+
+    SHBDOUnitID.SH_SCORING_UNIT_CM: "cm",
+    SHBDOUnitID.SH_SCORING_UNIT_CM2: "cm^2",
+    SHBDOUnitID.SH_SCORING_UNIT_CM3: "cm^3",
+    SHBDOUnitID.SH_SCORING_UNIT_PCM: "/cm",
+    SHBDOUnitID.SH_SCORING_UNIT_PCM2: "/cm^2",
+    SHBDOUnitID.SH_SCORING_UNIT_PCM3: "/cm^3",
+
+    SHBDOUnitID.SH_SCORING_UNIT_M: "m",
+    SHBDOUnitID.SH_SCORING_UNIT_M2: "m^2",
+    SHBDOUnitID.SH_SCORING_UNIT_M3: "m^3",
+    SHBDOUnitID.SH_SCORING_UNIT_PM: "/m",
+    SHBDOUnitID.SH_SCORING_UNIT_PM2: "/m^2",
+    SHBDOUnitID.SH_SCORING_UNIT_PM3: "/m^3",
+
+    SHBDOUnitID.SH_SCORING_UNIT_GPCM3: "g/cm^3",
+    SHBDOUnitID.SH_SCORING_UNIT_KGPM3: "kg/m^3",
+
+    SHBDOUnitID.SH_SCORING_UNIT_KEVPUM: "keV/um",
+    SHBDOUnitID.SH_SCORING_UNIT_MEVPCM: "MeV/cm",
+    SHBDOUnitID.SH_SCORING_UNIT_MEVCM2PG: "MeV cm^2/g",
+
+    SHBDOUnitID.SH_SCORING_UNIT_MEVPG: "MeV/g",
+    SHBDOUnitID.SH_SCORING_UNIT_GY: "Gy",
+    SHBDOUnitID.SH_SCORING_UNIT_GYRBE: "Gy(RBE)",  # /* Probably there are new ICRU rules here */
+    SHBDOUnitID.SH_SCORING_UNIT_GYRE: "Gy(RE)",
+    SHBDOUnitID.SH_SCORING_UNIT_SV: "Sv",
+    SHBDOUnitID.SH_SCORING_UNIT_DOSERAD: "Rad",
+    SHBDOUnitID.SH_SCORING_UNIT_DOSEREM: "Rem",
+
+    SHBDOUnitID.SH_SCORING_UNIT_DEGREES: "deg",
+    SHBDOUnitID.SH_SCORING_UNIT_RADIANS: "rad",
+    SHBDOUnitID.SH_SCORING_UNIT_SR: "sr",
+
+    SHBDOUnitID.SH_SCORING_UNIT_COUNT: "#",
+
+    SHBDOUnitID.SH_SCORING_UNIT_MEV: "MeV",
+    SHBDOUnitID.SH_SCORING_UNIT_MEVPNUC: "MeV/nucleon",
+    SHBDOUnitID.SH_SCORING_UNIT_MEVPAMU: "MeV/amu",
+
+    SHBDOUnitID.SH_SCORING_UNIT_NUCN: "",
+    SHBDOUnitID.SH_SCORING_UNIT_MEVPC2: "MeV/c^2",
+    SHBDOUnitID.SH_SCORING_UNIT_U: "u",
+
+    SHBDOUnitID.SH_SCORING_UNIT_MATID: "",
+    SHBDOUnitID.SH_SCORING_UNIT_NZONE: "",
 }

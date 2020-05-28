@@ -3,8 +3,9 @@ import logging
 import numpy as np
 
 from pymchelper.detector import Page
-from pymchelper.readers.shieldhit.reader_base import SHReader, _get_detector_unit, read_next_token
-from pymchelper.readers.shieldhit.binary_spec import SHBDOTagID, detector_name_from_bdotag, page_name_from_bdotag
+from pymchelper.readers.shieldhit.reader_base import SHReader, read_next_token
+from pymchelper.readers.shieldhit.binary_spec import SHBDOTagID, detector_name_from_bdotag, page_name_from_bdotag, \
+    unit_name_from_unit_id
 from pymchelper.shieldhit.detector.detector_type import SHDetType
 from pymchelper.shieldhit.detector.estimator_type import SHGeoType
 
@@ -72,6 +73,11 @@ class SHReaderBDO2019(SHReader):
                     detector.y = detector.y._replace(max_val=payload[1])
                     detector.z = detector.z._replace(max_val=payload[2])
 
+                if token_id == SHBDOTagID.SHBDO_GEO_UNITIDS:
+                    detector.x = detector.x._replace(unit=unit_name_from_unit_id.get(payload[0], ""))
+                    detector.y = detector.y._replace(unit=unit_name_from_unit_id.get(payload[1], ""))
+                    detector.z = detector.z._replace(unit=unit_name_from_unit_id.get(payload[2], ""))
+
                 # detector type
                 if token_id == SHBDOTagID.SHBDO_PAG_TYPE:
                     # check if detector type attribute present, if yes, then create new page
@@ -106,58 +112,28 @@ class SHReaderBDO2019(SHReader):
                     logger.debug("Setting page.{} = {}".format(page_name_from_bdotag[token_id], payload))
                     setattr(detector.pages[-1], page_name_from_bdotag[token_id], payload)
 
-                # # TODO implement double differential scoring
-                # if token_id == SHBDOTagID.SHBDO_PAG_DIF_SIZE:
-                #     detector.dif_n = payload
-                #
-                # if token_id == SHBDOTagID.SHBDO_PAG_DIF_START:
-                #     detector.dif_min = payload
-                #
-                # if token_id == SHBDOTagID.SHBDO_PAG_DIF_STOP:
-                #     detector.dif_max = payload
-                #
-                # if token_id == SHBDOTagID.SHBDO_PAG_DIF_TYPE:
-                #     detector.dif_type = payload
-
-                # if token_id == SHBDOTagID.SHBDO_PAG_DATA:
-                #     logger.debug("page count {}".format(detector.page_count))
-                #
-                #     # data_raw is defined as None just before the loop
-                #     if hasattr(detector, 'page_count') and detector.page_count > 1:
-                #         if data_raw:
-                #             data_raw.append(np.asarray(payload))  # data from subsequent page
-                #         else:
-                #             data_raw = [np.asarray(payload)]  # data from first page
-                #     else:  # information about pages is not parsed yet
-                #         data_raw = np.asarray(payload)
-
-            # # differential scoring data replacement
-            # if hasattr(detector, 'dif_min') and hasattr(detector, 'dif_max') and hasattr(detector, 'dif_n'):
-            #     if nz == 1:
-            #         # max two axis (X or Y) filled with scored value, Z axis empty
-            #         # we can put differential quantity as Z axis
-            #         nz = detector.dif_n
-            #         zmin = detector.dif_min
-            #         zmax = detector.dif_max
-            #         detector.dif_axis = 2
-            #     elif ny == 1:
-            #         # Z axis filled with scored value (X axis maybe also), Y axis empty
-            #         # we can put differential quantity as Y axis
-            #         ny = detector.dif_n
-            #         ymin = detector.dif_min
-            #         ymax = detector.dif_max
-            #         detector.dif_axis = 1
-            #     elif nx == 1:
-            #         nx = detector.dif_n
-            #         xmin = detector.dif_min
-            #         xmax = detector.dif_max
-            #         detector.dif_axis = 0
-
-            # xunit, xname = _get_mesh_units(detector, 0)
-            # yunit, yname = _get_mesh_units(detector, 1)
-            # zunit, zname = _get_mesh_units(detector, 2)
-
-            detector.unit, detector.name = _get_detector_unit(detector.dettyp[0], detector.geotyp)
+            for page in detector.pages:
+                diff_level_1_size = getattr(page, 'dif_size', [0, 0])[0]
+                if diff_level_1_size > 1 and hasattr(page, 'dif_start') and hasattr(page, 'dif_stop'):
+                    if detector._z.n == 1:
+                        # max two axis (X or Y) filled with scored value, Z axis empty
+                        # we can put differential quantity as Z axis
+                        page.z = detector._z._replace(n=diff_level_1_size,
+                                                      min_val=page.dif_start[0],
+                                                      max_val=page.dif_stop[0])
+                        detector.dif_axis = 2
+                    elif detector._y.n == 1:
+                        # Z axis filled with scored value (X axis maybe also), Y axis empty
+                        # we can put differential quantity as Y axis
+                        page.y = detector._y._replace(n=diff_level_1_size,
+                                                      min_val=page.dif_start[0],
+                                                      max_val=page.dif_stop[0])
+                        detector.dif_axis = 1
+                    elif detector._x.n == 1:
+                        page.x = detector._x._replace(n=diff_level_1_size,
+                                                      min_val=page.dif_start[0],
+                                                      max_val=page.dif_stop[0])
+                        detector.dif_axis = 0
 
             logger.debug("Done reading bdo file.")
             return True

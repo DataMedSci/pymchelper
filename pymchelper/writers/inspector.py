@@ -21,8 +21,15 @@ class Inspector:
         # print some data-related statistics
         print(75 * "*")
 
-        for page in detector.pages:
+        for page_no, page in enumerate(detector.pages):
+            print("Page {} / {}".format(page_no, len(detector.pages)))
+            for name, value in sorted(page.__dict__.items()):
+                # skip non-metadata fields
+                if name not in {'data', 'data_raw', 'error', 'error_raw'}:
+                    line = "\t{:24s}: '{:s}'".format(str(name), str(value))
+                    print(line)
             print("Data min: {:g}, max: {:g}".format(page.data_raw.min(), page.data_raw.max()))
+            print(75 * "-")
 
         if self.options.details:
             # print data scatter-plot if possible
