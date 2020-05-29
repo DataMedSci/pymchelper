@@ -37,16 +37,16 @@ class TxtWriter:
         self.az = ''
 
     @staticmethod
-    def _header_first_line(det):
-        """first line with detector geo type"""
+    def _header_first_line(estimator):
+        """first line with estimator geo type"""
         result = "#   DETECTOR OUTPUT\n"
-        if det.geotyp in (SHGeoType.plane, SHGeoType.dplane, ):
+        if estimator.geotyp in (SHGeoType.plane, SHGeoType.dplane,):
             result = "#             DETECTOR OUTPUT PLANE/DPLANE\n"
-        elif det.geotyp in (SHGeoType.zone, SHGeoType.dzone, ):
+        elif estimator.geotyp in (SHGeoType.zone, SHGeoType.dzone,):
             result = "#             DETECTOR OUTPUT ZONE/DZONE\n"
-        elif det.geotyp in (SHGeoType.msh, SHGeoType.dmsh, ):
+        elif estimator.geotyp in (SHGeoType.msh, SHGeoType.dmsh,):
             result = "#   DETECTOR OUTPUT MSH/DMSH\n"
-        elif det.geotyp == SHGeoType.geomap:
+        elif estimator.geotyp == SHGeoType.geomap:
             result = "#   DETECTOR OUTPUT GEOMAP\n"
         return result
 
@@ -73,14 +73,14 @@ class TxtWriter:
         return result
 
     @staticmethod
-    def _header_scored_value(det):
+    def _header_scored_value(geotyp, dettyp, particle):
         """scored value and optionally particle type"""
         result = ""
-        if det.geotyp != SHGeoType.geomap and hasattr(det, "particle"):
-            result += "#   JPART:{:6d} DETECTOR TYPE: {:s}\n".format(det.particle, str(det.dettyp).ljust(10))
+        if geotyp != SHGeoType.geomap and particle:
+            result += "#   JPART:{:6d} DETECTOR TYPE: {:s}\n".format(particle, str(dettyp).ljust(10))
         else:
-            det_type_name = str(det.dettyp)
-            if det.dettyp in (SHDetType.zone, SHDetType.medium, ):
+            det_type_name = str(dettyp)
+            if dettyp in (SHDetType.zone, SHDetType.medium,):
                 det_type_name += "#"
             result += "#                DETECTOR TYPE: {:s}\n".format(str(det_type_name).ljust(10))
         return result
@@ -110,20 +110,22 @@ class TxtWriter:
 
         from writers.fortranformatter import format_e
 
+        page = estimator.pages[0]
+
         self.ax = self._axis_name(estimator.geotyp, 0)
         self.ay = self._axis_name(estimator.geotyp, 1)
         self.az = self._axis_name(estimator.geotyp, 2)
 
         # original bdo2txt is not saving header data for some of cylindrical scorers, hence we do the same
         if estimator.geotyp in (SHGeoType.cyl, SHGeoType.dcyl,) and \
-                estimator.dettyp in (SHDetType.fluence, SHDetType.avg_energy, SHDetType.avg_beta, SHDetType.energy):
+                page.dettyp in (SHDetType.fluence, SHDetType.avg_energy, SHDetType.avg_beta, SHDetType.energy):
             header = ""
         else:
             header = self._header_first_line(estimator)
 
             header += self._header_geometric_info(estimator)
 
-            header += self._header_scored_value(estimator)
+            header += self._header_scored_value(estimator.geotyp, page.dettyp, getattr(estimator, 'particle', None))
 
             header += self._header_no_of_bins_and_prim(estimator)
 
@@ -132,11 +134,24 @@ class TxtWriter:
             logger.info("Writing: " + self.filename)
             fout.write(header)
 
-            det_error = estimator.error_raw.ravel()
-            if np.all(np.isnan(estimator.error_raw)):
-                det_error = [None] * estimator.data_raw.size
-            zlist, ylist, xlist = np.meshgrid(estimator.z.data, estimator.y.data, estimator.x.data, indexing='ij')
-            for x, y, z, v, e in zip(xlist.ravel(), ylist.ravel(), zlist.ravel(), estimator.data.ravel(), det_error):
+            det_error = page.error_raw.ravel()
+            if np.all(np.isnan(page.error_raw)):
+                det_error = [None] * page.data_raw.size
+            xmesh = page.plot_axis(0)
+            ymesh = page.plot_axis(1)
+            zmesh = page.plot_axis(2)
+
+            logger.debug('xmesh {}'.format(xmesh))
+            logger.debug('ymesh {}'.format(ymesh))
+            logger.debug('zmesh {}'.format(zmesh))
+
+            zlist, ylist, xlist = np.meshgrid(zmesh.data, ymesh.data, xmesh.data, indexing='ij')
+
+            logger.debug('xlist {}'.format(xlist))
+            logger.debug('ylist {}'.format(ylist))
+            logger.debug('zlist {}'.format(zlist))
+
+            for x, y, z, v, e in zip(xlist.ravel(), ylist.ravel(), zlist.ravel(), page.data.ravel(), det_error):
                 if estimator.geotyp in {SHGeoType.zone, SHGeoType.dzone}:
                     x = 0.0
                 # dirty hack to be compliant with old bdo2txt and files generated in old (<0.6) BDO format

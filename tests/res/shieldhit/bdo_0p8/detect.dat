@@ -50,6 +50,52 @@ Filter
 
 #----------------------Output bdo format--------
 #--------------------0X
+
+
+Output
+         Filename one_page_diff.bdo
+         Fileformat bdo
+         Geo Mesh1D
+         Quantity Dose
+         Diff1       0   200   20      ! triggers single differential scoring
+         Diff1Type   E
+
+
+Output
+         Filename two_pages.bdo
+         Fileformat bdo
+         Geo Mesh1D
+         Quantity Dose
+         Quantity Fluence
+
+
+
+Output
+         Filename two_pages_filters.bdo
+         Fileformat bdo
+         Geo Mesh1D
+         Quantity Dose
+         Quantity Fluence
+         Quantity Dose Protons
+         Quantity Fluence Protons
+         Quantity DLET Protons
+         Quantity    Dose Deutrons
+
+Output
+         Filename two_pages_filters.bdo
+         Fileformat bdo
+         Geo Mesh1D
+         Quantity Dose
+         Quantity Fluence
+
+         Quantity Dose Protons
+         Diff1       0   200   20      ! triggers single differential scoring
+         Diff1Type   E
+
+         Quantity Fluence Protons
+         Quantity DLET Protons
+         Quantity    Dose Deutrons
+
 Output
          Filename 00_iddc_1d.bdo
          Fileformat bdo

@@ -2,7 +2,7 @@ import logging
 
 import numpy as np
 
-from pymchelper.estimator import Page
+from pymchelper.estimator import Page, MeshAxis
 from pymchelper.readers.shieldhit.reader_base import SHReader, read_next_token
 from pymchelper.readers.shieldhit.binary_spec import SHBDOTagID, detector_name_from_bdotag, page_name_from_bdotag, \
     unit_name_from_unit_id
@@ -83,7 +83,7 @@ class SHReaderBDO2019(SHReader):
                     # check if detector type attribute present, if yes, then create new page
                     if estimator.pages[-1].dettyp is not None:  # the same tag appears again, looks like new page
                         logger.debug("SHBDO_PAG_TYPE Creating new page no {}".format(len(estimator.pages)))
-                        estimator.pages.append(Page())
+                        estimator.add_page(Page())
                     logger.debug("Setting page.dettyp = {} ({})".format(SHDetType(payload), SHDetType(payload).name))
                     estimator.pages[-1].dettyp = SHDetType(payload)
 
@@ -92,10 +92,10 @@ class SHReaderBDO2019(SHReader):
                     # check if data attribute present, if yes, then create new page
                     if estimator.pages[-1].data_raw.size > 1:
                         logger.debug("SHBDO_PAG_DATA Creating new page no {}".format(len(estimator.pages)))
-                        estimator.pages.append(Page())
+                        estimator.add_page(Page())
                     elif estimator.pages[-1].data_raw.size == 1 and not np.isnan(estimator.pages[-1].data_raw[0]):
                         logger.debug("SHBDO_PAG_DATA Creating new page no {}".format(len(estimator.pages)))
-                        estimator.pages.append(Page())
+                        estimator.add_page(Page())
                     logger.debug("Setting page data = {}".format(np.asarray(payload)))
                     estimator.pages[-1].data_raw = np.asarray(payload)
 
@@ -108,32 +108,19 @@ class SHReaderBDO2019(SHReader):
                 if token_id in page_name_from_bdotag:
                     if hasattr(estimator.pages[-1], page_name_from_bdotag[token_id]):
                         logger.debug("page_name_from_bdotag Creating new page no {}".format(len(estimator.pages)))
-                        estimator.pages.append(Page())
+                        estimator.add_page(Page())
                     logger.debug("Setting page.{} = {}".format(page_name_from_bdotag[token_id], payload))
                     setattr(estimator.pages[-1], page_name_from_bdotag[token_id], payload)
 
             for page in estimator.pages:
                 diff_level_1_size = getattr(page, 'dif_size', [0, 0])[0]
                 if diff_level_1_size > 1 and hasattr(page, 'dif_start') and hasattr(page, 'dif_stop'):
-                    if estimator._z.n == 1:
-                        # max two axis (X or Y) filled with scored value, Z axis empty
-                        # we can put differential quantity as Z axis
-                        page.z = estimator._z._replace(n=diff_level_1_size,
-                                                       min_val=page.dif_start[0],
-                                                       max_val=page.dif_stop[0])
-                        estimator.dif_axis = 2
-                    elif estimator._y.n == 1:
-                        # Z axis filled with scored value (X axis maybe also), Y axis empty
-                        # we can put differential quantity as Y axis
-                        page.y = estimator._y._replace(n=diff_level_1_size,
-                                                       min_val=page.dif_start[0],
-                                                       max_val=page.dif_stop[0])
-                        estimator.dif_axis = 1
-                    elif estimator._x.n == 1:
-                        page.x = estimator._x._replace(n=diff_level_1_size,
-                                                       min_val=page.dif_start[0],
-                                                       max_val=page.dif_stop[0])
-                        estimator.dif_axis = 0
+                    page.diff_axis1 = MeshAxis(n=diff_level_1_size,
+                                               min_val=page.dif_start[0],
+                                               max_val=page.dif_stop[0],
+                                               name="",
+                                               unit="",
+                                               binning=MeshAxis.BinningType.linear)
 
             logger.debug("Done reading bdo file.")
             return True

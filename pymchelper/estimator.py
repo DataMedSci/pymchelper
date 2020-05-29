@@ -1,3 +1,4 @@
+import copy
 from collections import namedtuple
 from enum import IntEnum
 import logging
@@ -11,6 +12,14 @@ except TypeError as e:  # noqa: F841
     pass
 
 logger = logging.getLogger(__name__)
+
+
+class AxisId(IntEnum):
+    x = 0
+    y = 1
+    z = 2
+    diff1 = 3
+    diff2 = 4
 
 
 class MeshAxis(namedtuple('MeshAxis', 'n min_val max_val name unit binning')):
@@ -112,13 +121,20 @@ class MeshAxis(namedtuple('MeshAxis', 'n min_val max_val name unit binning')):
 
 
 class ErrorEstimate(IntEnum):
+    """
+    When averaging data multiple files we could estimate statistical error of scored quantity.
+    Such error can be calculated as: none (error information missing), standard error or standard deviation.
+    """
     none = 0
     stderr = 1
     stddev = 2
 
 
 class Page:
-    def __init__(self):
+    def __init__(self, estimator=None):
+
+        self.estimator = estimator
+
         self.data_raw = np.array([float("NaN")])  # linear data storage
         self.error_raw = np.array([float("NaN")])  # linear data storage
 
@@ -126,6 +142,129 @@ class Page:
         self.unit = ""
 
         self.dettyp = None  # Dose, Fluence, LET etc...
+
+        # optional first differential axis
+        self.diff_axis1 = MeshAxis(n=1,
+                          min_val=float("NaN"),
+                          max_val=float("NaN"),
+                          name="",
+                          unit="",
+                          binning=MeshAxis.BinningType.linear)
+
+        # optional second differential axis
+        self.diff_axis2 = MeshAxis(n=1,
+                          min_val=float("NaN"),
+                          max_val=float("NaN"),
+                          name="",
+                          unit="",
+                          binning=MeshAxis.BinningType.linear)
+
+    def axis(self, axis_id):
+        """
+        TODO
+        """
+        if axis_id == AxisId.diff1:
+            return self.diff_axis1
+        elif axis_id == AxisId.diff2:
+            return self.diff_axis2
+        elif self.estimator:
+            return self.estimator.axis(axis_id)
+        return None
+
+    @property
+    def dimension(self):
+        """
+        Let's take again detector d with YZ scoring.
+        >>> e = Estimator()
+        >>> e.x = MeshAxis(n=1, min_val=0.0, max_val=1.0, name="X", unit="cm", binning=MeshAxis.BinningType.linear)
+        >>> e.y = MeshAxis(n=3, min_val=0.0, max_val=150.0, name="Y", unit="cm", binning=MeshAxis.BinningType.linear)
+        >>> e.z = MeshAxis(n=2, min_val=0.0, max_val=2.0, name="Z", unit="cm", binning=MeshAxis.BinningType.linear)
+        >>> e.dimension
+        2
+        >>> p = Page(e)
+        >>> p.diff_axis1 = MeshAxis(n=10, min_val=0.0, max_val=100.0, name="E", unit="MeV", binning=MeshAxis.BinningType.linear)
+        >>> p.dimension
+        3
+
+        :return: number of page axes (including differential) which have more than one bin
+        """
+        if self.estimator:
+            return 2 - (self.diff_axis1.n, self.diff_axis2.n).count(1) + self.estimator.dimension
+        else:
+            return None
+
+    @property
+    def data(self):
+        """
+        3-D view of page data.
+
+        Page data is stored originally in `data_raw` 1-D array.
+        This property provides efficient view of data, suitable for numpy-like indexing.
+
+        >>> e = Estimator()
+        >>> e.x = MeshAxis(n=2, min_val=0.0, max_val=10.0, name="X", unit="cm", binning=MeshAxis.BinningType.linear)
+        >>> e.y = MeshAxis(n=3, min_val=0.0, max_val=150.0, name="Y", unit="cm", binning=MeshAxis.BinningType.linear)
+        >>> e.z = MeshAxis(n=1, min_val=0.0, max_val=1.0, name="Z", unit="cm", binning=MeshAxis.BinningType.linear)
+        >>> p = Page(estimator=e)
+        >>> p.data_raw = np.arange(6)
+        >>> p.data.shape
+        (2, 3, 1)
+        >>> p.data[1, 2, 0]
+        5
+
+        :return: reshaped view of ``data_raw``
+        """
+
+        if self.estimator:
+            return self.data_raw.reshape((self.estimator.x.n, self.estimator.y.n, self.estimator.z.n, self.diff_axis1.n, self.diff_axis2.n))
+        else:
+            return None
+
+    @property
+    def error(self):
+        """
+        3-D view of page error
+
+        For more details see ``data`` property.
+        :return:
+        """
+        if self.estimator:
+            return self.error_raw.reshape((self.estimator.x.n, self.estimator.y.n, self.estimator.z.n, self.diff_axis1.n, self.diff_axis2.n))
+        else:
+            return None
+
+    def plot_axis(self, id):
+        """
+        Calculate new order of detector axis, axis with data (n>1) comes first
+        Axes with constant value goes last.
+
+        Let's take a detector d with YZ scoring.
+        >>> d = Estimator()
+        >>> d.x = MeshAxis(n=1, min_val=0.0, max_val=1.0, name="X", unit="cm", binning=MeshAxis.BinningType.linear)
+        >>> d.y = MeshAxis(n=3, min_val=0.0, max_val=150.0, name="Y", unit="cm", binning=MeshAxis.BinningType.linear)
+        >>> d.z = MeshAxis(n=2, min_val=0.0, max_val=2.0, name="Z", unit="cm", binning=MeshAxis.BinningType.linear)
+
+        First axis for plotting will be Y (as X axis holds only one bin):
+        >>> d.plot_axis(0)
+        MeshAxis(n=3, min_val=0.0, max_val=150.0, name='Y', unit='cm', binning=<BinningType.linear: 0>)
+
+        Second axis for plotting will be Z (its the next after Y with n > 1 bins)
+        >>> d.plot_axis(1)
+        MeshAxis(n=2, min_val=0.0, max_val=2.0, name='Z', unit='cm', binning=<BinningType.linear: 0>)
+
+        Finally the third axis will be X, but it cannot be used for plotting as it has only one bin.
+        >>> d.plot_axis(2)
+        MeshAxis(n=1, min_val=0.0, max_val=1.0, name='X', unit='cm', binning=<BinningType.linear: 0>)
+
+
+        :param id: axis number (0, 1, 2, 3 or 4)
+        :return: axis object
+        """
+        plotting_order = (AxisId.x, AxisId.y, AxisId.z, AxisId.diff1, AxisId.diff2)
+        variable_axes_id = [i for i in plotting_order if self.axis(i).n > 1]
+        constant_axes_id = [i for i in plotting_order if self.axis(i).n == 1]
+        plotting_order = variable_axes_id + constant_axes_id
+        return self.axis(plotting_order[id])
 
 
 class Estimator(object):
@@ -155,45 +294,21 @@ class Estimator(object):
     >>> d.z = MeshAxis(n=1, min_val=0.0, max_val=1.0, name="Z", unit="cm", binning=MeshAxis.BinningType.linear)
     >>> d.z.data
     array([ 0.5])
-    >>> d.data_raw = np.arange(6)
-    >>> d.data.shape
-    (2, 3, 1)
-    >>> d.data
-    array([[[0],
-            [1],
-            [2]],
-           [[3],
-            [4],
-            [5]]])
-
     """
 
     def __init__(self):
         """
         Create dummy detector object.
-
         >>> d = Estimator()
-        >>> d.x.data
-        array([ nan])
-        >>> d.y.data
-        array([ nan])
-        >>> d.z.data
-        array([ nan])
-        >>> d.data.shape
-        (1, 1, 1)
-        >>> d.data
-        array([[[ nan]]])
         """
-        self._x = MeshAxis(n=1,
-                           min_val=float("NaN"),
-                           max_val=float("NaN"),
-                           name="",
-                           unit="",
-                           binning=MeshAxis.BinningType.linear)
-        self._y = self._x
-        self._z = self._x
-
-        self.pages = [Page()]  # empty page at the beginning
+        self.x = MeshAxis(n=1,
+                          min_val=float("NaN"),
+                          max_val=float("NaN"),
+                          name="",
+                          unit="",
+                          binning=MeshAxis.BinningType.linear)
+        self.y = self.x
+        self.z = self.x
 
         self.number_of_primaries = 0  # number of histories simulated
         self.file_counter = 0  # number of files read
@@ -201,120 +316,20 @@ class Estimator(object):
         self.error_type = ErrorEstimate.none
         self.geotyp = None  # MSH, CYL, etc...
 
-    @property
-    def unit(self):
-        result = [page.unit for page in self.pages]
-        if len(result) == 1:
-            return result[0]
-        else:
-            return result
+        self.pages = (Page(estimator=self),)  # empty page at the beginning
 
-    @unit.setter
-    def unit(self, value):
-        if len(self.pages) == 1:
-            self.pages[0].unit = value
-        else:
-            for page, value_item in zip(self.pages, value):
-                page.unit = value_item
+    def add_page(self, page):
+        """
+        Add a page to the estimator object.
+        New copy of page is made and page estimator pointer is set to the estimator object holding this page.
+        :param page:
+        :return: None
+        """
+        new_page = copy.deepcopy(page)
+        new_page.estimator = self
+        self.pages += (new_page,)
 
-    @property
-    def name(self):
-        result = [page.name for page in self.pages]
-        if len(result) == 1:
-            return result[0]
-        else:
-            return result
-
-    @name.setter
-    def name(self, value):
-        if len(self.pages) == 1:
-            self.pages[0].name = value
-        else:
-            for page, value_item in zip(self.pages, value):
-                page.name = value_item
-
-    @property
-    def x(self):
-        result = [getattr(page, 'x', self._x) for page in self.pages]
-        if len(result) == 1:
-            return result[0]
-        else:
-            return result
-
-    @x.setter
-    def x(self, value):
-        self._x = value
-
-    @property
-    def y(self):
-        result = [getattr(page, 'y', self._y) for page in self.pages]
-        if len(result) == 1:
-            return result[0]
-        else:
-            return result
-
-    @y.setter
-    def y(self, value):
-        self._y = value
-
-    @property
-    def z(self):
-        result = [getattr(page, 'z', self._z) for page in self.pages]
-        if len(result) == 1:
-            return result[0]
-        else:
-            return result
-
-    @z.setter
-    def z(self, value):
-        self._z = value
-
-    @property
-    def data_raw(self):
-        if len(self.pages) == 1:
-            return self.pages[0].data_raw
-        else:
-            return np.asarray([page.data_raw for page in self.pages])
-
-    @data_raw.setter
-    def data_raw(self, value):
-        if len(self.pages) == 1:
-            self.pages[0].data_raw = np.array(value)
-        else:
-            for page, item in zip(self.pages, value):
-                page.data_raw = item
-
-    @property
-    def error_raw(self):
-        if len(self.pages) == 1:
-            return self.pages[0].error_raw
-        else:
-            return np.asarray([page.error_raw for page in self.pages])
-
-    @error_raw.setter
-    def error_raw(self, value):
-        if len(self.pages) == 1:
-            self.pages[0].error_raw = np.array(value)
-        else:
-            for page, item in zip(self.pages, value):
-                page.error_raw = item
-
-    @property
-    def dettyp(self):
-        if len(self.pages) == 1:
-            return self.pages[0].dettyp
-        else:
-            return [page.dettyp for page in self.pages]
-
-    @dettyp.setter
-    def dettyp(self, value):
-        if len(self.pages) == 1:
-            self.pages[0].dettyp = value
-        else:
-            for page, value_item in zip(self.pages, value):
-                page.dettyp = value_item
-
-    def axis(self, id):
+    def axis(self, axis_id):
         """
         Mesh axis selector method based on integer id's.
 
@@ -327,122 +342,31 @@ class Estimator(object):
         >>> d.axis(1)
         MeshAxis(n=3, min_val=0.0, max_val=150.0, name='Y', unit='cm', binning=<BinningType.linear: 0>)
 
-        :param id: axis id (0, 1 or 2)
+        :param axis_id: axis id (0, 1 or 2)
         :return: MeshAxis object
         """
-        if id == 0:
+        if axis_id == AxisId.x:
             return self.x
-        elif id == 1:
+        elif axis_id == AxisId.y:
             return self.y
-        elif id == 2:
+        elif axis_id == AxisId.z:
             return self.z
         return None
-
-    def plot_axis(self, id):
-        """
-        Calculate new order of detector axis, axis with data (n>1) comes first
-        Axes with constant value goes last.
-
-        Let's take a detector d with YZ scoring.
-        >>> d = Estimator()
-        >>> d.x = MeshAxis(n=1, min_val=0.0, max_val=1.0, name="X", unit="cm", binning=MeshAxis.BinningType.linear)
-        >>> d.y = MeshAxis(n=3, min_val=0.0, max_val=150.0, name="Y", unit="cm", binning=MeshAxis.BinningType.linear)
-        >>> d.z = MeshAxis(n=2, min_val=0.0, max_val=2.0, name="Z", unit="cm", binning=MeshAxis.BinningType.linear)
-
-        First axis for plotting will be Y (as X axis holds only one bin):
-        >>> d.plot_axis(0)
-        MeshAxis(n=3, min_val=0.0, max_val=150.0, name='Y', unit='cm', binning=<BinningType.linear: 0>)
-
-        Second axis for plotting will be Z (its the next after Y with n > 1 bins)
-        >>> d.plot_axis(1)
-        MeshAxis(n=2, min_val=0.0, max_val=2.0, name='Z', unit='cm', binning=<BinningType.linear: 0>)
-
-        Finally the third axis will be X, but it cannot be used for plotting as it has only one bin.
-        >>> d.plot_axis(2)
-        MeshAxis(n=1, min_val=0.0, max_val=1.0, name='X', unit='cm', binning=<BinningType.linear: 0>)
-
-
-        :param id: axis number (0, 1 or 2)
-        :return: axis object
-        """
-        plotting_order = (0, 1, 2)
-        if self.dimension == 1:
-            if self.x.n > 1:
-                plotting_order = (0, 1, 2)  # X variable; Y,Z constant
-            elif self.y.n > 1:
-                plotting_order = (1, 0, 2)  # Y variable; X,Z constant
-            elif self.z.n > 1:
-                plotting_order = (2, 0, 1)  # Z variable; X,Y constant
-        elif self.dimension == 2:
-            if self.x.n == 1:
-                plotting_order = (1, 2, 0)  # Y,Z variable; X constant
-            elif self.y.n == 1:
-                plotting_order = (0, 2, 1)  # X,Z variable; Y constant
-            elif self.z.n == 1:
-                plotting_order = (0, 1, 2)  # X,Y variable; Z constant
-
-            # when SH12A differential scorer is used, we assume that differential
-            # quantity should go last
-            # a special case is when when X-constant, Y-differential, Z-scored
-            # we need to swap X and Z to guarantee that the differential quantity will be last
-            if hasattr(self, 'dif_axis') and self.dif_axis == 1:
-                plotting_order = (2, 1, 0)
-
-        return self.axis(plotting_order[id])
 
     @property
     def dimension(self):
         """
         Let's take again detector d with YZ scoring.
-        >>> d = Estimator()
-        >>> d.x = MeshAxis(n=1, min_val=0.0, max_val=1.0, name="X", unit="cm", binning=MeshAxis.BinningType.linear)
-        >>> d.y = MeshAxis(n=3, min_val=0.0, max_val=150.0, name="Y", unit="cm", binning=MeshAxis.BinningType.linear)
-        >>> d.z = MeshAxis(n=2, min_val=0.0, max_val=2.0, name="Z", unit="cm", binning=MeshAxis.BinningType.linear)
-        >>> d.dimension
+        >>> e = Estimator()
+        >>> e.x = MeshAxis(n=1, min_val=0.0, max_val=1.0, name="X", unit="cm", binning=MeshAxis.BinningType.linear)
+        >>> e.y = MeshAxis(n=3, min_val=0.0, max_val=150.0, name="Y", unit="cm", binning=MeshAxis.BinningType.linear)
+        >>> e.z = MeshAxis(n=2, min_val=0.0, max_val=2.0, name="Z", unit="cm", binning=MeshAxis.BinningType.linear)
+        >>> e.dimension
         2
 
-        :return: number of axes which have more than one point
+        :return: number of axes (among X,Y,Z) which have more than one bin
         """
         return 3 - (self.x.n, self.y.n, self.z.n).count(1)
-
-    @property
-    def data(self):
-        """
-        3-D view of detector data.
-
-        Detector data are stored originally in `data_raw` 1-D array.
-        This property provides efficient view of detector data, suitable for numpy-like indexing.
-
-        >>> d = Estimator()
-        >>> d.x = MeshAxis(n=2, min_val=0.0, max_val=10.0, name="X", unit="cm", binning=MeshAxis.BinningType.linear)
-        >>> d.y = MeshAxis(n=3, min_val=0.0, max_val=150.0, name="Y", unit="cm", binning=MeshAxis.BinningType.linear)
-        >>> d.z = MeshAxis(n=1, min_val=0.0, max_val=1.0, name="Z", unit="cm", binning=MeshAxis.BinningType.linear)
-        >>> d.data_raw = np.arange(6)
-        >>> d.data.shape
-        (2, 3, 1)
-        >>> d.data[1, 2, 0]
-        5
-
-        :return: reshaped view of ``data_raw``
-        """
-
-        if len(self.pages) == 1:
-            return self.pages[0].data_raw.reshape((self.x.n, self.y.n, self.z.n))
-        else:
-            return np.array([page.data_raw.reshape((self.x.n, self.y.n, self.z.n)) for page in self.pages])
-
-    @property
-    def error(self):
-        """
-        3-D view of detector error
-
-        For more details see ``data`` property.
-        :return:
-        """
-        if len(self.pages) == 1:
-            return self.error_raw.reshape((self.x.n, self.y.n, self.z.n))
-        else:
-            return np.array([page.error_raw.reshape((self.x.n, self.y.n, self.z.n)) for page in self.pages])
 
 
 def average_with_nan(detector_list, error_estimate=ErrorEstimate.stderr):

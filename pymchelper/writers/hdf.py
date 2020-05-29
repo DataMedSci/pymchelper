@@ -31,27 +31,31 @@ class HdfWriter:
 
             # change units for LET from MeV/cm to keV/um if necessary
             # a copy of data table is made here
-            from pymchelper.shieldhit.detector.detector_type import SHDetType
-            if estimator.dettyp in (SHDetType.dlet, SHDetType.dletg, SHDetType.tlet, SHDetType.tletg):
-                data = estimator.data * np.float64(0.1)  # 1 MeV / cm = 0.1 keV / um
-                if not np.all(np.isnan(estimator.error_raw)) and np.any(estimator.error_raw):
-                    error = estimator.error * np.float64(0.1)  # 1 MeV / cm = 0.1 keV / um
-            else:
-                data = estimator.data
-                error = estimator.error
+            # from pymchelper.shieldhit.detector.detector_type import SHDetType
+            # if estimator.dettyp in (SHDetType.dlet, SHDetType.dletg, SHDetType.tlet, SHDetType.tletg):
+            #     data = estimator.data * np.float64(0.1)  # 1 MeV / cm = 0.1 keV / um
+            #     if not np.all(np.isnan(estimator.error_raw)) and np.any(estimator.error_raw):
+            #         error = estimator.error * np.float64(0.1)  # 1 MeV / cm = 0.1 keV / um
+            # else:
+            #     data = estimator.data
+            #     error = estimator.error
+            # TODO move to reader
+
+            page = estimator.pages[0]
+            data = page.data
+            error = page.error
 
             # save data
             dset = f.create_dataset("data", data=data, compression="gzip", compression_opts=9)
 
             # save error (if present)
-            if not np.all(np.isnan(estimator.error_raw)) and np.any(estimator.error_raw):
+            if not np.all(np.isnan(page.error_raw)) and np.any(page.error_raw):
                 f.create_dataset("error", data=error, compression="gzip", compression_opts=9)
 
             # save metadata
-            dset.attrs['name'] = estimator.name
-            dset.attrs['unit'] = estimator.unit
+            dset.attrs['name'] = page.name
+            dset.attrs['unit'] = page.unit
             dset.attrs['nstat'] = estimator.number_of_primaries
-            dset.attrs['counter'] = estimator.file_counter
             dset.attrs['counter'] = estimator.file_counter
             dset.attrs['xaxis_n'] = estimator.x.n
             dset.attrs['xaxis_min'] = estimator.x.min_val
