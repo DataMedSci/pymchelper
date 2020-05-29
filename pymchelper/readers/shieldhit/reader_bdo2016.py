@@ -2,7 +2,7 @@ import logging
 
 import numpy as np
 
-from pymchelper.detector import MeshAxis
+from pymchelper.estimator import MeshAxis
 from pymchelper.readers.shieldhit.reader_base import SHReader, _get_mesh_units, _bintyp, _get_detector_unit, \
     read_next_token
 from pymchelper.readers.shieldhit.binary_spec import SHBDOTagID, detector_name_from_bdotag

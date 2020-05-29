@@ -2,7 +2,7 @@ import logging
 
 import numpy as np
 
-from pymchelper.detector import MeshAxis
+from pymchelper.estimator import MeshAxis
 from pymchelper.readers.common import ReaderFactory, Reader
 from pymchelper.shieldhit.detector.detector_type import SHDetType
 from pymchelper.shieldhit.detector.estimator_type import SHGeoType

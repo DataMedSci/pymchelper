@@ -5,7 +5,7 @@ import os
 
 import numpy as np
 
-from pymchelper.detector import Detector, average_with_nan, ErrorEstimate
+from pymchelper.estimator import Detector, average_with_nan, ErrorEstimate
 from pymchelper.readers.fluka import FlukaReaderFactory, FlukaReader
 from pymchelper.readers.shieldhit.general import SHReaderFactory
 from pymchelper.readers.shieldhit.reader_base import SHReader

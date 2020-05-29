@@ -2,7 +2,7 @@ import logging
 
 import numpy as np
 
-from pymchelper.detector import Page
+from pymchelper.estimator import Page
 from pymchelper.readers.shieldhit.reader_base import SHReader, read_next_token
 from pymchelper.readers.shieldhit.binary_spec import SHBDOTagID, detector_name_from_bdotag, page_name_from_bdotag, \
     unit_name_from_unit_id

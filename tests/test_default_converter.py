@@ -11,7 +11,7 @@ import logging
 import numpy as np
 
 from pymchelper import run
-from pymchelper.detector import ErrorEstimate
+from pymchelper.estimator import ErrorEstimate
 from pymchelper.input_output import fromfilelist, fromfile
 
 logger = logging.getLogger(__name__)
