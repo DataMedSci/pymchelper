@@ -15,11 +15,11 @@ class SHReaderBin2010(SHReader):
     """
     Binary format reader from 0.1 <= version <= 0.6
     """
-    def read_header(self, detector):
+    def read_header(self, estimator):
         logger.info("Reading header: " + self.filename)
 
-        detector.tripdose = 0.0
-        detector.tripntot = -1
+        estimator.tripdose = 0.0
+        estimator.tripntot = -1
 
         # effective read
         # first figure out if this is a VOXSCORE card
@@ -52,7 +52,7 @@ class SHReaderBin2010(SHReader):
                                      ('__fo8', '<i4'),     # 0xB2
                                      ('reclen', '<i4')])   # 0xB6
             # payload starts at 0xBA (186)
-            detector.payload_offset = 186
+            estimator.payload_offset = 186
         else:
             # first figure out the length.
             header_dtype = np.dtype([('__fo1', '<i4'),
@@ -71,14 +71,14 @@ class SHReaderBin2010(SHReader):
                                      ('__fo8', '<i4'),
                                      ('reclen', '<i4')])
             # payload starts at 0x9E (158)
-            detector.payload_offset = 158
+            estimator.payload_offset = 158
 
         header = np.fromfile(self.filename, header_dtype, count=1)
-        detector.rec_size = header['reclen'][0] // 8
+        estimator.rec_size = header['reclen'][0] // 8
 
         if 'VOXSCORE' in header['geotyp'][0].decode('ascii'):
-            detector.tripdose = header['tds'][0]
-            detector.tripntot = header['tnt'][0]
+            estimator.tripdose = header['tds'][0]
+            estimator.tripntot = header['tnt'][0]
 
         # map 10-elements table to namedtuple, for easier access
         # here is description of IDET table, assuming fortran-style numbering
@@ -114,16 +114,16 @@ class SHReaderBin2010(SHReader):
         # DET(4-6): stop positions for x y z or r theta z
         # DET(7)  : start differential grid
         # DET(8)  : stop differential grid
-        detector.det = header['det']
-        detector.particle = det_attribs.particle_type
+        estimator.det = header['det']
+        estimator.particle = det_attribs.particle_type
 
         try:
-            detector.geotyp = SHGeoType[header['geotyp'][0].decode('ascii').strip().lower()]
+            estimator.geotyp = SHGeoType[header['geotyp'][0].decode('ascii').strip().lower()]
         except Exception:
-            detector.geotyp = SHGeoType.unknown
-        detector.number_of_primaries = header['nstat'][0]
+            estimator.geotyp = SHGeoType.unknown
+        estimator.number_of_primaries = header['nstat'][0]
 
-        if detector.geotyp not in {SHGeoType.zone, SHGeoType.dzone}:
+        if estimator.geotyp not in {SHGeoType.zone, SHGeoType.dzone}:
             xmin = header['det'][0][0]
             ymin = header['det'][0][1]
             zmin = header['det'][0][2]
@@ -140,61 +140,61 @@ class SHReaderBin2010(SHReader):
             zmin = 0.0
             zmax = 0.0
 
-        if detector.geotyp in {SHGeoType.plane, SHGeoType.dplane}:
+        if estimator.geotyp in {SHGeoType.plane, SHGeoType.dplane}:
             # special case for plane scoring, according to documentation we have:
             #  xmin, ymin, zmin = Sx, Sy, Sz (point on the plane)
             #  xmax, ymax, zmax = nx, ny, nz (normal vector)
             # to avoid situation where i.e. xmax < xmin (corresponds to nx < Sx)
             # we store only point on the plane
-            detector.sx, detector.sy, detector.sz = xmin, ymin, zmin
-            detector.nx, detector.ny, detector.nz = xmax, ymax, zmax
+            estimator.sx, estimator.sy, estimator.sz = xmin, ymin, zmin
+            estimator.nx, estimator.ny, estimator.nz = xmax, ymax, zmax
             xmax = xmin
             ymax = ymin
             zmax = zmin
 
-        xunit, xname = _get_mesh_units(detector, 0)
-        yunit, yname = _get_mesh_units(detector, 1)
-        zunit, zname = _get_mesh_units(detector, 2)
+        xunit, xname = _get_mesh_units(estimator, 0)
+        yunit, yname = _get_mesh_units(estimator, 1)
+        zunit, zname = _get_mesh_units(estimator, 2)
 
-        detector.x = MeshAxis(n=np.abs(nx), min_val=xmin, max_val=xmax, name=xname, unit=xunit, binning=_bintyp(nx))
-        detector.y = MeshAxis(n=np.abs(ny), min_val=ymin, max_val=ymax, name=yname, unit=yunit, binning=_bintyp(ny))
-        detector.z = MeshAxis(n=np.abs(nz), min_val=zmin, max_val=zmax, name=zname, unit=zunit, binning=_bintyp(nz))
+        estimator.x = MeshAxis(n=np.abs(nx), min_val=xmin, max_val=xmax, name=xname, unit=xunit, binning=_bintyp(nx))
+        estimator.y = MeshAxis(n=np.abs(ny), min_val=ymin, max_val=ymax, name=yname, unit=yunit, binning=_bintyp(ny))
+        estimator.z = MeshAxis(n=np.abs(nz), min_val=zmin, max_val=zmax, name=zname, unit=zunit, binning=_bintyp(nz))
 
-        detector.dettyp = SHDetType(det_attribs.det_type)
+        estimator.dettyp = SHDetType(det_attribs.det_type)
 
-        detector.unit, detector.name = _get_detector_unit(detector.dettyp, detector.geotyp)
+        estimator.unit, estimator.name = _get_detector_unit(estimator.dettyp, estimator.geotyp)
 
         return True  # reading OK
 
     # TODO: we need an alternative list, in case things have been scaled with nscale, since then things
     # are not "/particle" anymore.
-    def read_payload(self, detector):
+    def read_payload(self, estimator):
         logger.info("Reading data: " + self.filename)
 
-        if detector.geotyp == SHGeoType.unknown or detector.dettyp == SHDetType.none:
+        if estimator.geotyp == SHGeoType.unknown or estimator.dettyp == SHDetType.none:
             logger.error("Unknown geotyp or dettyp")
             return None
 
         # next read the data:
-        offset_str = "S" + str(detector.payload_offset)
+        offset_str = "S" + str(estimator.payload_offset)
         record_dtype = np.dtype([('trash', offset_str),
-                                 ('bin2', '<f8', detector.rec_size)])
+                                 ('bin2', '<f8', estimator.rec_size)])
         record = np.fromfile(self.filename, record_dtype, count=-1)
         # BIN(*)  : a large array holding results. Accessed using pointers.
-        detector.data_raw = np.array(record['bin2'][:][0])
+        estimator.data_raw = np.array(record['bin2'][:][0])
 
-        logger.debug("Raw data: {}".format(detector.data_raw))
+        logger.debug("Raw data: {}".format(estimator.data_raw))
 
-        detector.file_counter = 1
+        estimator.file_counter = 1
 
         return True
 
-    def read_data(self, detector):
-        if not self.read_header(detector):
+    def read_data(self, estimator):
+        if not self.read_header(estimator):
             logger.debug("Reading header failed")
             return None
-        if not self.read_payload(detector):
+        if not self.read_payload(estimator):
             logger.debug("Reading payload failed")
             return None
-        super(SHReaderBin2010, self).read_data(detector)
+        super(SHReaderBin2010, self).read_data(estimator)
         return True

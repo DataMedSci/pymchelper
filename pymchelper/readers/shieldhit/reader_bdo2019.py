@@ -16,7 +16,7 @@ class SHReaderBDO2019(SHReader):
     """
     Experimental binary format reader version >= 0.7
     """
-    def read_data(self, detector):
+    def read_data(self, estimator):
         logger.debug("Reading: " + self.filename)
 
         with open(self.filename, "rb") as f:
@@ -56,84 +56,84 @@ class SHReaderBDO2019(SHReader):
 
                 # geometry type
                 if token_id == SHBDOTagID.est_geo_type:
-                    detector.geotyp = SHGeoType[payload.strip().lower()]
+                    estimator.geotyp = SHGeoType[payload.strip().lower()]
 
                 if token_id == SHBDOTagID.SHBDO_GEO_N:
-                    detector.x = detector.x._replace(n=payload[0])
-                    detector.y = detector.y._replace(n=payload[1])
-                    detector.z = detector.z._replace(n=payload[2])
+                    estimator.x = estimator.x._replace(n=payload[0])
+                    estimator.y = estimator.y._replace(n=payload[1])
+                    estimator.z = estimator.z._replace(n=payload[2])
 
                 if token_id == SHBDOTagID.SHBDO_GEO_P:
-                    detector.x = detector.x._replace(min_val=payload[0])
-                    detector.y = detector.y._replace(min_val=payload[1])
-                    detector.z = detector.z._replace(min_val=payload[2])
+                    estimator.x = estimator.x._replace(min_val=payload[0])
+                    estimator.y = estimator.y._replace(min_val=payload[1])
+                    estimator.z = estimator.z._replace(min_val=payload[2])
 
                 if token_id == SHBDOTagID.SHBDO_GEO_Q:
-                    detector.x = detector.x._replace(max_val=payload[0])
-                    detector.y = detector.y._replace(max_val=payload[1])
-                    detector.z = detector.z._replace(max_val=payload[2])
+                    estimator.x = estimator.x._replace(max_val=payload[0])
+                    estimator.y = estimator.y._replace(max_val=payload[1])
+                    estimator.z = estimator.z._replace(max_val=payload[2])
 
                 if token_id == SHBDOTagID.SHBDO_GEO_UNITIDS:
-                    detector.x = detector.x._replace(unit=unit_name_from_unit_id.get(payload[0], ""))
-                    detector.y = detector.y._replace(unit=unit_name_from_unit_id.get(payload[1], ""))
-                    detector.z = detector.z._replace(unit=unit_name_from_unit_id.get(payload[2], ""))
+                    estimator.x = estimator.x._replace(unit=unit_name_from_unit_id.get(payload[0], ""))
+                    estimator.y = estimator.y._replace(unit=unit_name_from_unit_id.get(payload[1], ""))
+                    estimator.z = estimator.z._replace(unit=unit_name_from_unit_id.get(payload[2], ""))
 
                 # detector type
                 if token_id == SHBDOTagID.SHBDO_PAG_TYPE:
                     # check if detector type attribute present, if yes, then create new page
-                    if detector.pages[-1].dettyp is not None:  # the same tag appears again, looks like new page
-                        logger.debug("SHBDO_PAG_TYPE Creating new page no {}".format(len(detector.pages)))
-                        detector.pages.append(Page())
+                    if estimator.pages[-1].dettyp is not None:  # the same tag appears again, looks like new page
+                        logger.debug("SHBDO_PAG_TYPE Creating new page no {}".format(len(estimator.pages)))
+                        estimator.pages.append(Page())
                     logger.debug("Setting page.dettyp = {} ({})".format(SHDetType(payload), SHDetType(payload).name))
-                    detector.pages[-1].dettyp = SHDetType(payload)
+                    estimator.pages[-1].dettyp = SHDetType(payload)
 
                 # detector data
                 if token_id == SHBDOTagID.SHBDO_PAG_DATA:
                     # check if data attribute present, if yes, then create new page
-                    if detector.pages[-1].data_raw.size > 1:
-                        logger.debug("SHBDO_PAG_DATA Creating new page no {}".format(len(detector.pages)))
-                        detector.pages.append(Page())
-                    elif detector.pages[-1].data_raw.size == 1 and not np.isnan(detector.pages[-1].data_raw[0]):
-                        logger.debug("SHBDO_PAG_DATA Creating new page no {}".format(len(detector.pages)))
-                        detector.pages.append(Page())
+                    if estimator.pages[-1].data_raw.size > 1:
+                        logger.debug("SHBDO_PAG_DATA Creating new page no {}".format(len(estimator.pages)))
+                        estimator.pages.append(Page())
+                    elif estimator.pages[-1].data_raw.size == 1 and not np.isnan(estimator.pages[-1].data_raw[0]):
+                        logger.debug("SHBDO_PAG_DATA Creating new page no {}".format(len(estimator.pages)))
+                        estimator.pages.append(Page())
                     logger.debug("Setting page data = {}".format(np.asarray(payload)))
-                    detector.pages[-1].data_raw = np.asarray(payload)
+                    estimator.pages[-1].data_raw = np.asarray(payload)
 
                 # read tokens based on tag <-> name mapping for detector
                 if token_id in detector_name_from_bdotag:
                     logger.debug("Setting detector.{} = {}".format(detector_name_from_bdotag[token_id], payload))
-                    setattr(detector, detector_name_from_bdotag[token_id], payload)
+                    setattr(estimator, detector_name_from_bdotag[token_id], payload)
 
                 # read tokens based on tag <-> name mapping for pages
                 if token_id in page_name_from_bdotag:
-                    if hasattr(detector.pages[-1], page_name_from_bdotag[token_id]):
-                        logger.debug("page_name_from_bdotag Creating new page no {}".format(len(detector.pages)))
-                        detector.pages.append(Page())
+                    if hasattr(estimator.pages[-1], page_name_from_bdotag[token_id]):
+                        logger.debug("page_name_from_bdotag Creating new page no {}".format(len(estimator.pages)))
+                        estimator.pages.append(Page())
                     logger.debug("Setting page.{} = {}".format(page_name_from_bdotag[token_id], payload))
-                    setattr(detector.pages[-1], page_name_from_bdotag[token_id], payload)
+                    setattr(estimator.pages[-1], page_name_from_bdotag[token_id], payload)
 
-            for page in detector.pages:
+            for page in estimator.pages:
                 diff_level_1_size = getattr(page, 'dif_size', [0, 0])[0]
                 if diff_level_1_size > 1 and hasattr(page, 'dif_start') and hasattr(page, 'dif_stop'):
-                    if detector._z.n == 1:
+                    if estimator._z.n == 1:
                         # max two axis (X or Y) filled with scored value, Z axis empty
                         # we can put differential quantity as Z axis
-                        page.z = detector._z._replace(n=diff_level_1_size,
-                                                      min_val=page.dif_start[0],
-                                                      max_val=page.dif_stop[0])
-                        detector.dif_axis = 2
-                    elif detector._y.n == 1:
+                        page.z = estimator._z._replace(n=diff_level_1_size,
+                                                       min_val=page.dif_start[0],
+                                                       max_val=page.dif_stop[0])
+                        estimator.dif_axis = 2
+                    elif estimator._y.n == 1:
                         # Z axis filled with scored value (X axis maybe also), Y axis empty
                         # we can put differential quantity as Y axis
-                        page.y = detector._y._replace(n=diff_level_1_size,
-                                                      min_val=page.dif_start[0],
-                                                      max_val=page.dif_stop[0])
-                        detector.dif_axis = 1
-                    elif detector._x.n == 1:
-                        page.x = detector._x._replace(n=diff_level_1_size,
-                                                      min_val=page.dif_start[0],
-                                                      max_val=page.dif_stop[0])
-                        detector.dif_axis = 0
+                        page.y = estimator._y._replace(n=diff_level_1_size,
+                                                       min_val=page.dif_start[0],
+                                                       max_val=page.dif_stop[0])
+                        estimator.dif_axis = 1
+                    elif estimator._x.n == 1:
+                        page.x = estimator._x._replace(n=diff_level_1_size,
+                                                       min_val=page.dif_start[0],
+                                                       max_val=page.dif_stop[0])
+                        estimator.dif_axis = 0
 
             logger.debug("Done reading bdo file.")
             return True

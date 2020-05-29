@@ -128,7 +128,7 @@ class Page:
         self.dettyp = None  # Dose, Fluence, LET etc...
 
 
-class Detector(object):
+class Estimator(object):
     """
     Detector data including scoring mesh description.
 
@@ -145,7 +145,7 @@ class Detector(object):
     Detector data can be either read from the file (see ``fromfile`` method in ``io`` module
     or constructed directly:
 
-    >>> d = Detector()
+    >>> d = Estimator()
     >>> d.x = MeshAxis(n=2, min_val=0.0, max_val=10.0, name="X", unit="cm", binning=MeshAxis.BinningType.linear)
     >>> d.x.data
     array([ 2.5,  7.5])
@@ -172,7 +172,7 @@ class Detector(object):
         """
         Create dummy detector object.
 
-        >>> d = Detector()
+        >>> d = Estimator()
         >>> d.x.data
         array([ nan])
         >>> d.y.data
@@ -320,7 +320,7 @@ class Detector(object):
 
         Instead of getting mesh axis data by calling `d.x`, `d.y` or `d.z` (assuming `d` an object of `Detector`
         class) we can get that data by calling `d.axis(0)`, `d.axis(1)` or `d.axis(2)`. See for example:
-        >>> d = Detector()
+        >>> d = Estimator()
         >>> d.x = MeshAxis(n=2, min_val=0.0, max_val=10.0, name="X", unit="cm", binning=MeshAxis.BinningType.linear)
         >>> d.y = MeshAxis(n=3, min_val=0.0, max_val=150.0, name="Y", unit="cm", binning=MeshAxis.BinningType.linear)
         >>> d.z = MeshAxis(n=1, min_val=0.0, max_val=1.0, name="Z", unit="cm", binning=MeshAxis.BinningType.linear)
@@ -344,7 +344,7 @@ class Detector(object):
         Axes with constant value goes last.
 
         Let's take a detector d with YZ scoring.
-        >>> d = Detector()
+        >>> d = Estimator()
         >>> d.x = MeshAxis(n=1, min_val=0.0, max_val=1.0, name="X", unit="cm", binning=MeshAxis.BinningType.linear)
         >>> d.y = MeshAxis(n=3, min_val=0.0, max_val=150.0, name="Y", unit="cm", binning=MeshAxis.BinningType.linear)
         >>> d.z = MeshAxis(n=2, min_val=0.0, max_val=2.0, name="Z", unit="cm", binning=MeshAxis.BinningType.linear)
@@ -394,7 +394,7 @@ class Detector(object):
     def dimension(self):
         """
         Let's take again detector d with YZ scoring.
-        >>> d = Detector()
+        >>> d = Estimator()
         >>> d.x = MeshAxis(n=1, min_val=0.0, max_val=1.0, name="X", unit="cm", binning=MeshAxis.BinningType.linear)
         >>> d.y = MeshAxis(n=3, min_val=0.0, max_val=150.0, name="Y", unit="cm", binning=MeshAxis.BinningType.linear)
         >>> d.z = MeshAxis(n=2, min_val=0.0, max_val=2.0, name="Z", unit="cm", binning=MeshAxis.BinningType.linear)
@@ -413,7 +413,7 @@ class Detector(object):
         Detector data are stored originally in `data_raw` 1-D array.
         This property provides efficient view of detector data, suitable for numpy-like indexing.
 
-        >>> d = Detector()
+        >>> d = Estimator()
         >>> d.x = MeshAxis(n=2, min_val=0.0, max_val=10.0, name="X", unit="cm", binning=MeshAxis.BinningType.linear)
         >>> d.y = MeshAxis(n=3, min_val=0.0, max_val=150.0, name="Y", unit="cm", binning=MeshAxis.BinningType.linear)
         >>> d.z = MeshAxis(n=1, min_val=0.0, max_val=1.0, name="Z", unit="cm", binning=MeshAxis.BinningType.linear)
@@ -453,7 +453,7 @@ def average_with_nan(detector_list, error_estimate=ErrorEstimate.stderr):
     :return:
     """
     # TODO add compatibility check
-    result = Detector()
+    result = Estimator()
     result.file_counter = len(detector_list)
     result.data_raw = np.nanmean([det.data_raw for det in detector_list], axis=0)
     if result.file_counter > 1 and error_estimate != ErrorEstimate.none:

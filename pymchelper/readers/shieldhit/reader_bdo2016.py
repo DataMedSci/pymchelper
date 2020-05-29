@@ -16,7 +16,7 @@ class SHReaderBDO2016(SHReader):
     """
     Binary format reader from version >= 0.6
     """
-    def read_data(self, detector):
+    def read_data(self, estimator):
         logger.debug("Reading: " + self.filename)
         with open(self.filename, "rb") as f:
             d1 = np.dtype([('magic', 'S6'),
@@ -53,45 +53,45 @@ class SHReaderBDO2016(SHReader):
                 ))
 
                 if pl_id == SHBDOTagID.shversion:
-                    detector.mc_code_version = pl[0]
-                    logger.debug("MC code version:" + detector.mc_code_version)
+                    estimator.mc_code_version = pl[0]
+                    logger.debug("MC code version:" + estimator.mc_code_version)
 
                 if pl_id == SHBDOTagID.filedate:
-                    detector.filedate = pl[0]
+                    estimator.filedate = pl[0]
 
                 if pl_id == SHBDOTagID.user:
-                    detector.user = pl[0]
+                    estimator.user = pl[0]
 
                 if pl_id == SHBDOTagID.host:
-                    detector.host = pl[0]
+                    estimator.host = pl[0]
 
                 if pl_id == SHBDOTagID.rt_nstat:
-                    detector.number_of_primaries = pl[0]
+                    estimator.number_of_primaries = pl[0]
 
                 # beam configuration etc...
                 if pl_id in detector_name_from_bdotag:
-                    setattr(detector, detector_name_from_bdotag[pl_id], pl[0])
+                    setattr(estimator, detector_name_from_bdotag[pl_id], pl[0])
 
                 # estimator block here ---
                 if pl_id == SHBDOTagID.det_geotyp:
-                    detector.geotyp = SHGeoType[pl[0].strip().lower()]
+                    estimator.geotyp = SHGeoType[pl[0].strip().lower()]
 
                 if pl_id == SHBDOTagID.ext_ptvdose:
-                    detector.tripdose = 0.0
+                    estimator.tripdose = 0.0
 
                 if pl_id == SHBDOTagID.ext_nproj:
-                    detector.tripntot = -1
+                    estimator.tripntot = -1
 
                 # read a single detector
                 if pl_id == SHBDOTagID.det_dtype:
-                    detector.dettyp = SHDetType(pl[0])
+                    estimator.dettyp = SHDetType(pl[0])
 
                 if pl_id == SHBDOTagID.det_part:  # particle to be scored
-                    detector.scored_particle_code = pl[0]
+                    estimator.scored_particle_code = pl[0]
                 if pl_id == SHBDOTagID.det_partz:  # particle to be scored
-                    detector.scored_particle_z = pl[0]
+                    estimator.scored_particle_z = pl[0]
                 if pl_id == SHBDOTagID.det_parta:  # particle to be scored
-                    detector.scored_particle_a = pl[0]
+                    estimator.scored_particle_a = pl[0]
 
                 if pl_id == SHBDOTagID.det_nbin:
                     nx = pl[0]
@@ -112,89 +112,104 @@ class SHReaderBDO2016(SHReader):
                 # TODO add some support for DMSH, DCYL and DZONE
                 # TODO add support for logarithmic binning
                 diff_geotypes = {SHGeoType.dplane, SHGeoType.dmsh, SHGeoType.dcyl, SHGeoType.dzone}
-                if hasattr(detector, 'geotyp') and detector.geotyp in diff_geotypes:
+                if hasattr(estimator, 'geotyp') and estimator.geotyp in diff_geotypes:
                     if pl_id == SHBDOTagID.det_dif_start:
-                        detector.dif_min = pl[0]
+                        estimator.dif_min = pl[0]
 
                     if pl_id == SHBDOTagID.det_dif_stop:
-                        detector.dif_max = pl[0]
+                        estimator.dif_max = pl[0]
 
                     if pl_id == SHBDOTagID.det_nbine:
-                        detector.dif_n = pl[0]
+                        estimator.dif_n = pl[0]
 
                     if pl_id == SHBDOTagID.det_difftype:
-                        detector.dif_type = pl[0]
+                        estimator.dif_type = pl[0]
 
                 if pl_id == SHBDOTagID.det_zonestart:
-                    detector.zone_start = pl[0]
+                    estimator.zone_start = pl[0]
 
                 if pl_id == SHBDOTagID.det_data:
-                    detector.data_raw = np.asarray(pl)
+                    estimator.data_raw = np.asarray(pl)
 
             # TODO: would be better to not overwrite x,y,z and make proper case for ZONE scoring later.
-            if detector.geotyp in {SHGeoType.zone, SHGeoType.dzone}:
+            if estimator.geotyp in {SHGeoType.zone, SHGeoType.dzone}:
                 # special case for zone scoring, x min and max will be zone numbers
-                xmin = detector.zone_start
+                xmin = estimator.zone_start
                 xmax = xmin + nx - 1
                 ymin = 0.0
                 ymax = 0.0
                 zmin = 0.0
                 zmax = 0.0
-            elif detector.geotyp in {SHGeoType.plane, SHGeoType.dplane}:
+            elif estimator.geotyp in {SHGeoType.plane, SHGeoType.dplane}:
                 # special case for plane scoring, according to documentation we have:
                 #  xmin, ymin, zmin = Sx, Sy, Sz (point on the plane)
                 #  xmax, ymax, zmax = nx, ny, nz (normal vector)
                 # to avoid situation where i.e. xmax < xmin (corresponds to nx < Sx)
                 # we store only point on the plane
-                detector.sx, detector.sy, detector.sz = xmin, ymin, zmin
-                detector.nx, detector.ny, detector.nz = xmax, ymax, zmax
+                estimator.sx, estimator.sy, estimator.sz = xmin, ymin, zmin
+                estimator.nx, estimator.ny, estimator.nz = xmax, ymax, zmax
                 xmax = xmin
                 ymax = ymin
                 zmax = zmin
 
             # check if scoring quantity is LET, if yes, than change units from [MeV/cm] to [keV/um]
-            if hasattr(detector, 'dif_type') and detector.dif_type == 2:
-                detector.dif_min /= 10.0
-                detector.dif_max /= 10.0
+            if hasattr(estimator, 'dif_type') and estimator.dif_type == 2:
+                estimator.dif_min /= 10.0
+                estimator.dif_max /= 10.0
 
             # # differential scoring data replacement
-            if hasattr(detector, 'dif_min') and hasattr(detector, 'dif_max') and hasattr(detector, 'dif_n'):
+            if hasattr(estimator, 'dif_min') and hasattr(estimator, 'dif_max') and hasattr(estimator, 'dif_n'):
                 if nz == 1:
                     # max two axis (X or Y) filled with scored value, Z axis empty
                     # we can put differential quantity as Z axis
-                    nz = detector.dif_n
-                    zmin = detector.dif_min
-                    zmax = detector.dif_max
-                    detector.dif_axis = 2
+                    nz = estimator.dif_n
+                    zmin = estimator.dif_min
+                    zmax = estimator.dif_max
+                    estimator.dif_axis = 2
                 elif ny == 1:
                     # Z axis filled with scored value (X axis maybe also), Y axis empty
                     # we can put differential quantity as Y axis
-                    ny = detector.dif_n
-                    ymin = detector.dif_min
-                    ymax = detector.dif_max
-                    detector.dif_axis = 1
+                    ny = estimator.dif_n
+                    ymin = estimator.dif_min
+                    ymax = estimator.dif_max
+                    estimator.dif_axis = 1
                 elif nx == 1:
-                    nx = detector.dif_n
-                    xmin = detector.dif_min
-                    xmax = detector.dif_max
-                    detector.dif_axis = 0
+                    nx = estimator.dif_n
+                    xmin = estimator.dif_min
+                    xmax = estimator.dif_max
+                    estimator.dif_axis = 0
 
-            xunit, xname = _get_mesh_units(detector, 0)
-            yunit, yname = _get_mesh_units(detector, 1)
-            zunit, zname = _get_mesh_units(detector, 2)
+            xunit, xname = _get_mesh_units(estimator, 0)
+            yunit, yname = _get_mesh_units(estimator, 1)
+            zunit, zname = _get_mesh_units(estimator, 2)
 
-            detector.x = MeshAxis(n=np.abs(nx), min_val=xmin, max_val=xmax, name=xname, unit=xunit, binning=_bintyp(nx))
-            detector.y = MeshAxis(n=np.abs(ny), min_val=ymin, max_val=ymax, name=yname, unit=yunit, binning=_bintyp(ny))
-            detector.z = MeshAxis(n=np.abs(nz), min_val=zmin, max_val=zmax, name=zname, unit=zunit, binning=_bintyp(nz))
+            estimator.x = MeshAxis(n=np.abs(nx),
+                                   min_val=xmin,
+                                   max_val=xmax,
+                                   name=xname,
+                                   unit=xunit,
+                                   binning=_bintyp(nx))
+            estimator.y = MeshAxis(n=np.abs(ny),
+                                   min_val=ymin,
+                                   max_val=ymax,
+                                   name=yname,
+                                   unit=yunit,
+                                   binning=_bintyp(ny))
+            estimator.z = MeshAxis(n=np.abs(nz),
+                                   min_val=zmin,
+                                   max_val=zmax,
+                                   name=zname,
+                                   unit=zunit,
+                                   binning=_bintyp(nz))
 
-            detector.unit, detector.name = _get_detector_unit(detector.dettyp, detector.geotyp)
+            estimator.unit, estimator.name = _get_detector_unit(estimator.dettyp, estimator.geotyp)
 
             logger.debug("Done reading bdo file.")
-            logger.debug("Detector data : " + str(detector.data))
-            logger.debug("Detector nstat: " + str(detector.number_of_primaries))
-            logger.debug("Detector nx   : " + str(detector.x.n))
-            logger.debug("Detector ny   : " + str(detector.y.n))
-            logger.debug("Detector nz   : " + str(detector.z.n))
-            detector.file_counter = 1
-        super(SHReaderBDO2016, self).read_data(detector)
+            logger.debug("Detector data : " + str(estimator.data))
+            logger.debug("Detector nstat: " + str(estimator.number_of_primaries))
+            logger.debug("Detector nx   : " + str(estimator.x.n))
+            logger.debug("Detector ny   : " + str(estimator.y.n))
+            logger.debug("Detector nz   : " + str(estimator.z.n))
+            estimator.file_counter = 1
+        super(SHReaderBDO2016, self).read_data(estimator)
         return True

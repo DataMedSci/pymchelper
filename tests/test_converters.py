@@ -125,7 +125,7 @@ class TestSparseConverter(unittest.TestCase):
                 run.main(["sparse", inputfile_rel_path, pymchelper_output])
                 self.assertTrue(os.path.exists(pymchelper_output))
 
-                # read the original file into a Detector structure
+                # read the original file into a estimator structure
                 original_mtx = fromfile(inputfile_rel_path)
                 self.assertTrue(np.any(original_mtx.data))
 

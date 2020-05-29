@@ -19,42 +19,42 @@ class PlotDataWriter:
         if not self.filename.endswith(".dat"):
             self.filename += ".dat"
 
-    def write(self, detector):
-        if len(detector.pages) > 1:
+    def write(self, estimator):
+        if len(estimator.pages) > 1:
             print("Conversion of data with multiple pages not supported yet")
             return False
 
         logger.info("Writing: " + self.filename)
 
-        data_raw = detector.data_raw
-        error_raw = detector.error_raw
+        data_raw = estimator.data_raw
+        error_raw = estimator.error_raw
 
         # change units for LET from MeV/cm to keV/um if necessary
         # a copy of data table is made here
         from pymchelper.shieldhit.detector.detector_type import SHDetType
-        if detector.dettyp in (SHDetType.dlet, SHDetType.dletg, SHDetType.tlet, SHDetType.tletg):
+        if estimator.dettyp in (SHDetType.dlet, SHDetType.dletg, SHDetType.tlet, SHDetType.tletg):
             data_raw = data_raw * np.float64(0.1)  # 1 MeV / cm = 0.1 keV / um
             if not np.all(np.isnan(error_raw)) and np.any(error_raw):
                 error_raw = error_raw * np.float64(0.1)  # 1 MeV / cm = 0.1 keV / um
 
         # special case for 0-dim data
-        if detector.dimension == 0:
+        if estimator.dimension == 0:
             # save two numbers to the file
             if not np.all(np.isnan(error_raw)) and np.any(error_raw):
-                np.savetxt(self.filename, [[detector.data_raw, detector.error_raw]], fmt="%g %g", delimiter=' ')
+                np.savetxt(self.filename, [[estimator.data_raw, estimator.error_raw]], fmt="%g %g", delimiter=' ')
             else:  # save one number to the file
-                np.savetxt(self.filename, [detector.data_raw], fmt="%g", delimiter=' ')
+                np.savetxt(self.filename, [estimator.data_raw], fmt="%g", delimiter=' ')
         else:
-            axis_numbers = list(range(detector.dimension))
+            axis_numbers = list(range(estimator.dimension))
 
             # each axis may have different number of points, this is what we store here:
-            axis_data_columns_1d = [detector.plot_axis(i).data for i in axis_numbers]
+            axis_data_columns_1d = [estimator.plot_axis(i).data for i in axis_numbers]
 
             # now we calculate running index for each axis
             axis_data_columns_long = [np.meshgrid(*axis_data_columns_1d, indexing='ij')[i].ravel()
                                       for i in axis_numbers]
 
-            fmt = "%g" + " %g" * detector.dimension
+            fmt = "%g" + " %g" * estimator.dimension
             data_to_save = axis_data_columns_long + [data_raw]
 
             # if error information is present save it as additional column

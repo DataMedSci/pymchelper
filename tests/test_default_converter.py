@@ -41,17 +41,17 @@ def run_bdo2txt_binary(inputfile, working_dir, bdo2txt_path, silent=True):
 class TestErrorEstimate(unittest.TestCase):
     def test_normal_numbers(self):
 
-        # several files for the same detector, coming from runs with different RNG seed
+        # several files for the same estimator, coming from runs with different RNG seed
         file_list = ["tests/res/shieldhit/generated/many/msh/aen_0_p000{:d}.bdo".format(i) for i in range(1, 4)]
 
-        # read each of the files individually into Detector object
+        # read each of the files individually into estimator object
         individ_detectors = [fromfile(file_path) for file_path in file_list]
 
         for error in ErrorEstimate:  # all possible error options (none, stddev, stderr)
             logger.info("Checking error calculation for error = {:s}".format(error.name))
             for nan in (False, True):  # include or not NaNs in averaging
                 logger.info("Checking error calculation for nan option = {:s}".format(str(nan)))
-                # read list of the files into one detector object, doing averaging and error calculation
+                # read list of the files into one estimator object, doing averaging and error calculation
                 merged_detector = fromfilelist(file_list, error=error, nan=nan)
 
                 # manually calculate mean and check if correct

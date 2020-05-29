@@ -27,7 +27,7 @@ class FlukaReader(Reader):
             core_name = self.filename[-2:]
         return core_name
 
-    def read_data(self, detector, nscale=1):
+    def read_data(self, estimator, nscale=1):
 
         try:
             usr = Usrbin(self.filename)
@@ -43,16 +43,16 @@ class FlukaReader(Reader):
             usr.say(i)  # details for each detector
 
         # TODO read detector type
-        detector.det = "FLUKA"
+        estimator.det = "FLUKA"
 
         # TODO read particle type
-        detector.particle = 0
+        estimator.particle = 0
 
         # TODO read geo type
-        detector.geotyp = SHGeoType.unknown
+        estimator.geotyp = SHGeoType.unknown
 
         # TODO cross-check statistics
-        detector.number_of_primaries = usr.ncase
+        estimator.number_of_primaries = usr.ncase
 
         # TODO figure out when more detectors are used
         nx = usr.detector[0].nx
@@ -67,23 +67,23 @@ class FlukaReader(Reader):
         ymax = usr.detector[0].yhigh
         zmax = usr.detector[0].zhigh
 
-        detector.x = MeshAxis(n=nx, min_val=xmin, max_val=xmax,
-                              name="X", unit="", binning=MeshAxis.BinningType.linear)
-        detector.y = MeshAxis(n=ny, min_val=ymin, max_val=ymax,
-                              name="Y", unit="", binning=MeshAxis.BinningType.linear)
-        detector.z = MeshAxis(n=nz, min_val=zmin, max_val=zmax,
-                              name="Z", unit="", binning=MeshAxis.BinningType.linear)
+        estimator.x = MeshAxis(n=nx, min_val=xmin, max_val=xmax,
+                               name="X", unit="", binning=MeshAxis.BinningType.linear)
+        estimator.y = MeshAxis(n=ny, min_val=ymin, max_val=ymax,
+                               name="Y", unit="", binning=MeshAxis.BinningType.linear)
+        estimator.z = MeshAxis(n=nz, min_val=zmin, max_val=zmax,
+                               name="Z", unit="", binning=MeshAxis.BinningType.linear)
 
-        detector.unit, detector.name = "", ""
+        estimator.unit, estimator.name = "", ""
 
         # TODO read detector type
-        detector.dettyp = SHDetType.none  # TODO replace with Fluka detector type
+        estimator.dettyp = SHDetType.none  # TODO replace with Fluka detector type
 
-        detector.data_raw = np.array(fdata)
+        estimator.data_raw = np.array(fdata)
         if nscale != 1:
-            detector.data *= nscale
+            estimator.data *= nscale
             # 1 gigaelectron volt / gram = 1.60217662 x 10-7 Gy
-            detector.data *= 1.60217662e-7
+            estimator.data *= 1.60217662e-7
 
-        detector.title = usr.detector[0].name.decode('ascii')
+        estimator.title = usr.detector[0].name.decode('ascii')
         return True

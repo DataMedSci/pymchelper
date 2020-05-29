@@ -14,8 +14,8 @@ class ExcelWriter:
         if not self.filename.endswith(".xls"):
             self.filename += ".xls"
 
-    def write(self, detector):
-        if len(detector.pages) > 1:
+    def write(self, estimator):
+        if len(estimator.pages) > 1:
             print("Conversion of data with multiple pages not supported yet")
             return False
 
@@ -26,8 +26,8 @@ class ExcelWriter:
             raise e
 
         # save only 1-D data
-        if detector.dimension != 1:
-            logger.warning("Detector dimension {:d} != 1, XLS output not supported".format(detector.dimension))
+        if estimator.dimension != 1:
+            logger.warning("estimator dimension {:d} != 1, XLS output not supported".format(estimator.dimension))
             return 1
 
         # create workbook with single sheet
@@ -35,16 +35,16 @@ class ExcelWriter:
         ws = wb.add_sheet('Data')
 
         # save X axis data
-        for i, x in enumerate(detector.plot_axis(0).data):
+        for i, x in enumerate(estimator.plot_axis(0).data):
             ws.write(i, 0, x)
 
         # save Y axis data
-        for i, y in enumerate(detector.data_raw):
+        for i, y in enumerate(estimator.data_raw):
             ws.write(i, 1, y)
 
         # save error column (if present)
-        if np.all(np.isfinite(detector.error_raw)):
-            for i, e in enumerate(detector.error_raw):
+        if np.all(np.isfinite(estimator.error_raw)):
+            for i, e in enumerate(estimator.error_raw):
                 ws.write(i, 2, e)
 
         # save file

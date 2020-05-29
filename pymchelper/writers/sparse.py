@@ -17,21 +17,21 @@ class SparseWriter:
         self.threshold = options.threshold
         logger.info("Sparse threshold {:g}".format(self.threshold))
 
-    def write(self, detector):
-        if len(detector.pages) > 1:
+    def write(self, estimator):
+        if len(estimator.pages) > 1:
             print("Conversion of data with multiple pages not supported yet")
             return False
 
-        # detector.data array is a 3-D numpy array
+        # estimator.data array is a 3-D numpy array
         # some of its dimensions may be as well ones and the array reduced to 0,1 or 2-D
-        all_items = detector.data.size
+        all_items = estimator.data.size
         logger.info("Number of all items: {:d}".format(all_items))
 
         # prepare a cut to select values which norm is greater than threshold
         # default value of threshold is zero, in this case non-zero values will be selected
         # cut will be 3-D arrays of booleans
         # note that numpy allocates here same amount of memory as for original data
-        thres_cut = np.abs(detector.data) > self.threshold
+        thres_cut = np.abs(estimator.data) > self.threshold
         passed_items = np.sum(thres_cut)
         logger.info("Number of items passing threshold: {:d}".format(passed_items))
         logger.info("Sparse matrix compression rate: {:g}".format(passed_items / all_items))
@@ -43,12 +43,12 @@ class SparseWriter:
         indices = np.argwhere(thres_cut)
 
         # select data which pass threshold and save it as plain 1-D numpy array
-        filtered_data = detector.data[thres_cut]
+        filtered_data = estimator.data[thres_cut]
 
         # save file to NPZ file format
         np.savez(file=self.filename,
                  data=filtered_data,
                  indices=indices,
-                 shape=detector.data.shape)
+                 shape=estimator.data.shape)
 
         return 0

@@ -19,16 +19,16 @@ class Reader(object):
     def __init__(self, filename):
         self.filename = filename
 
-    def read(self, detector):
-        result = self.read_data(detector)
+    def read(self, estimator):
+        result = self.read_data(estimator)
         if not result:
             return False
-        for page in detector.pages:
+        for page in estimator.pages:
             page.error_raw = np.zeros_like(page.data_raw) * np.nan
         return True
 
     @abstractmethod
-    def read_data(self, detector):
+    def read_data(self, estimator):
         pass
 
     @property
