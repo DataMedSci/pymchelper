@@ -145,19 +145,19 @@ class Page:
 
         # optional first differential axis
         self.diff_axis1 = MeshAxis(n=1,
-                          min_val=float("NaN"),
-                          max_val=float("NaN"),
-                          name="",
-                          unit="",
-                          binning=MeshAxis.BinningType.linear)
+                                   min_val=float("NaN"),
+                                   max_val=float("NaN"),
+                                   name="",
+                                   unit="",
+                                   binning=MeshAxis.BinningType.linear)
 
         # optional second differential axis
         self.diff_axis2 = MeshAxis(n=1,
-                          min_val=float("NaN"),
-                          max_val=float("NaN"),
-                          name="",
-                          unit="",
-                          binning=MeshAxis.BinningType.linear)
+                                   min_val=float("NaN"),
+                                   max_val=float("NaN"),
+                                   name="",
+                                   unit="",
+                                   binning=MeshAxis.BinningType.linear)
 
     def axis(self, axis_id):
         """
@@ -182,7 +182,8 @@ class Page:
         >>> e.dimension
         2
         >>> p = Page(e)
-        >>> p.diff_axis1 = MeshAxis(n=10, min_val=0.0, max_val=100.0, name="E", unit="MeV", binning=MeshAxis.BinningType.linear)
+        >>> p.diff_axis1 = MeshAxis(n=10, min_val=0.0, max_val=100.0, name="E", unit="MeV",
+        binning=MeshAxis.BinningType.linear)
         >>> p.dimension
         3
 
@@ -216,7 +217,8 @@ class Page:
         """
 
         if self.estimator:
-            return self.data_raw.reshape((self.estimator.x.n, self.estimator.y.n, self.estimator.z.n, self.diff_axis1.n, self.diff_axis2.n))
+            return self.data_raw.reshape((self.estimator.x.n, self.estimator.y.n, self.estimator.z.n,
+                                          self.diff_axis1.n, self.diff_axis2.n))
         else:
             return None
 
@@ -229,7 +231,8 @@ class Page:
         :return:
         """
         if self.estimator:
-            return self.error_raw.reshape((self.estimator.x.n, self.estimator.y.n, self.estimator.z.n, self.diff_axis1.n, self.diff_axis2.n))
+            return self.error_raw.reshape((self.estimator.x.n, self.estimator.y.n, self.estimator.z.n,
+                                           self.diff_axis1.n, self.diff_axis2.n))
         else:
             return None
 

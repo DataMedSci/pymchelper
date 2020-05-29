@@ -28,7 +28,6 @@ class PlotDataWriter:
 
         page = estimator.pages[0]
 
-
         # # change units for LET from MeV/cm to keV/um if necessary
         # # a copy of data table is made here
         # from pymchelper.shieldhit.detector.detector_type import SHDetType
