@@ -52,26 +52,26 @@ class TestErrorEstimate(unittest.TestCase):
             for nan in (False, True):  # include or not NaNs in averaging
                 logger.info("Checking error calculation for nan option = {:s}".format(str(nan)))
                 # read list of the files into one estimator object, doing averaging and error calculation
-                merged_detector = fromfilelist(file_list, error=error, nan=nan)
+                merged_estimators = fromfilelist(file_list, error=error, nan=nan)
 
                 # manually calculate mean and check if correct
-                for page_no, page in enumerate(merged_detector.pages):
+                for page_no, page in enumerate(merged_estimators.pages):
                     mean_value = np.mean([estimator.pages[page_no].data_raw for estimator in estimator_list])
-                    self.assertEqual(mean_value, merged_detector.pages[page_no].data_raw)
+                    self.assertEqual(mean_value, merged_estimators.pages[page_no].data_raw)
 
                 # manually calculate mean and check if correct
                 if error == ErrorEstimate.none:
-                    for page in merged_detector.pages:
+                    for page in merged_estimators.pages:
                         self.assertTrue(np.isnan(page.error_raw) or not np.any(page.error_raw))
                 elif error == ErrorEstimate.stddev:
-                    for page_no, page in enumerate(merged_detector.pages):
+                    for page_no, page in enumerate(merged_estimators.pages):
                         error_value = np.std([estimator.pages[page_no].data_raw for estimator in estimator_list], ddof=1)
-                        self.assertEqual(error_value, merged_detector.pages[page_no].error_raw)
+                        self.assertEqual(error_value, merged_estimators.pages[page_no].error_raw)
                 elif error == ErrorEstimate.stderr:
-                    for page_no, page in enumerate(merged_detector.pages):
+                    for page_no, page in enumerate(merged_estimators.pages):
                         error_value = np.std([estimator.pages[page_no].data_raw for estimator in estimator_list], ddof=1)
                         error_value /= np.sqrt(len(estimator_list))
-                        self.assertEqual(error_value, merged_detector.pages[page_no].error_raw)
+                        self.assertEqual(error_value, merged_estimators.pages[page_no].error_raw)
                 else:
                     return
 

@@ -46,7 +46,7 @@ class SHReader(Reader):
         return core_name
 
 
-def _get_mesh_units(detector, axis):
+def _get_mesh_units(estimator, axis):
     """ Set units depending on detector type.
     """
 
@@ -63,26 +63,26 @@ def _get_mesh_units(detector, axis):
     }
     _default_units = ("(nil)", "(nil)", "(nil)")
 
-    unit = _geotyp_units.get(detector.geotyp, _default_units)[axis]
+    unit = _geotyp_units.get(estimator.geotyp, _default_units)[axis]
 
-    if detector.geotyp in {SHGeoType.msh, SHGeoType.dmsh, SHGeoType.voxscore, SHGeoType.geomap,
-                           SHGeoType.plane, SHGeoType.dplane}:
+    if estimator.geotyp in {SHGeoType.msh, SHGeoType.dmsh, SHGeoType.voxscore, SHGeoType.geomap,
+                            SHGeoType.plane, SHGeoType.dplane}:
         name = ("Position (X)", "Position (Y)", "Position (Z)")[axis]
-    elif detector.geotyp in {SHGeoType.cyl, SHGeoType.dcyl}:
+    elif estimator.geotyp in {SHGeoType.cyl, SHGeoType.dcyl}:
         name = ("Radius (R)", "Angle (PHI)", "Position (Z)")[axis]
     else:
         name = ""
 
     # dirty hack to change the units for differential scorers
-    if hasattr(detector, 'dif_axis') and hasattr(detector, 'dif_type') and axis == detector.dif_axis:
-        if detector.dif_type == 1:
-            unit, name = _get_detector_unit(SHDetType.energy, detector.geotyp)
-        elif detector.dif_type == 2:
-            unit, name = _get_detector_unit(SHDetType.let_bdo2016, detector.geotyp)
-        elif detector.dif_type == 3:
-            unit, name = _get_detector_unit(SHDetType.angle_bdo2016, detector.geotyp)
+    if hasattr(estimator, 'dif_axis') and hasattr(estimator, 'dif_type') and axis == estimator.dif_axis:
+        if estimator.dif_type == 1:
+            unit, name = _get_detector_unit(SHDetType.energy, estimator.geotyp)
+        elif estimator.dif_type == 2:
+            unit, name = _get_detector_unit(SHDetType.let_bdo2016, estimator.geotyp)
+        elif estimator.dif_type == 3:
+            unit, name = _get_detector_unit(SHDetType.angle_bdo2016, estimator.geotyp)
         else:
-            unit, name = _get_detector_unit(detector.dif_type, detector.geotyp)
+            unit, name = _get_detector_unit(estimator.dif_type, estimator.geotyp)
 
     return unit, name
 
@@ -190,8 +190,8 @@ def _postprocess(estimator, nscale):
         if page.dettyp not in (SHDetType.dlet, SHDetType.tlet, SHDetType.letflu, SHDetType.dletg, SHDetType.tletg,
                                SHDetType.avg_energy, SHDetType.avg_beta, SHDetType.material, SHDetType.q):
             if estimator.number_of_primaries != 0:  # geotyp = GEOMAP will have 0 projectiles simulated
-                    page.data_raw /= np.float64(estimator.number_of_primaries)
-                    page.error_raw /= np.float64(estimator.number_of_primaries)
+                page.data_raw /= np.float64(estimator.number_of_primaries)
+                page.error_raw /= np.float64(estimator.number_of_primaries)
 
     if nscale != 1:
         # scale with number of particles given by user
@@ -199,7 +199,7 @@ def _postprocess(estimator, nscale):
             page.data_raw *= np.float64(nscale)
             page.error_raw *= np.float64(nscale)
 
-        # rescaling with particle number means also unit change for some detectors
+        # rescaling with particle number means also unit change for some estimators
         # from per particle to Grey - this is why we override detector type
         for page in estimator.pages:
             page.data_raw *= np.float64(nscale)

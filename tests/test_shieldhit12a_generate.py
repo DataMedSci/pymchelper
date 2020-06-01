@@ -117,35 +117,36 @@ class TestSHGenerated(unittest.TestCase):
             self.assertGreater(len(bdo_files), 0)
             for infile in bdo_files:
                 logger.info("Input file: " + infile)
-                det = fromfile(infile)
-                if det.geotyp == SHGeoType.zone:
-                    self.assertIn(det.x.n, (1, 2, 3))
-                    self.assertIn(det.y.n, (1, 2, 3))
-                    self.assertIn(det.z.n, (1, 2, 3))
+                estimator = fromfile(infile)
+                if estimator.geotyp == SHGeoType.zone:
+                    self.assertIn(estimator.x.n, (1, 2, 3))
+                    self.assertIn(estimator.y.n, (1, 2, 3))
+                    self.assertIn(estimator.z.n, (1, 2, 3))
                 else:
-                    self.assertIn(det.x.n, (1, 10))
-                    self.assertIn(det.y.n, (1, 10))
-                    self.assertIn(det.z.n, (1, 10))
-                self.assertEqual(det.geotyp, SHGeoType[est])
-                self.assertNotEqual(det.dettyp, SHDetType.none)
-                self.assertIn(det.particle, (SHParticleType.all, SHParticleType.proton, SHParticleType.neutron))
-                if det.geotyp == SHGeoType.geomap:
-                    self.assertIn(det.dettyp, (SHDetType.zone, SHDetType.medium, SHDetType.rho))
-                elif det.geotyp == SHGeoType.plane:
-                    self.assertIn(det.dettyp, (SHDetType.counter, ))
+                    self.assertIn(estimator.x.n, (1, 10))
+                    self.assertIn(estimator.y.n, (1, 10))
+                    self.assertIn(estimator.z.n, (1, 10))
+                self.assertEqual(estimator.geotyp, SHGeoType[est])
+                self.assertNotEqual(estimator.dettyp, SHDetType.none)
+                self.assertIn(estimator.particle, (SHParticleType.all, SHParticleType.proton, SHParticleType.neutron))
+                if estimator.geotyp == SHGeoType.geomap:
+                    self.assertIn(estimator.dettyp, (SHDetType.zone, SHDetType.medium, SHDetType.rho))
+                elif estimator.geotyp == SHGeoType.plane:
+                    self.assertIn(estimator.dettyp, (SHDetType.counter, ))
                 else:
-                    self.assertIn(det.dettyp,
+                    self.assertIn(estimator.dettyp,
                                   (SHDetType.energy, SHDetType.fluence, SHDetType.avg_energy, SHDetType.avg_beta))
-                if det.geotyp not in (SHGeoType.zone, SHGeoType.plane):
-                    self.assertGreater(det.x.max_val, det.x.min_val)
-                    self.assertGreater(det.y.max_val, det.y.min_val)
-                    self.assertGreater(det.z.max_val, det.z.min_val)
-                self.assertEqual(det.file_counter, 1)
-                if det.geotyp == SHGeoType.geomap:
-                    self.assertEqual(det.number_of_primaries, 1)
+                if estimator.geotyp not in (SHGeoType.zone, SHGeoType.plane):
+                    self.assertGreater(estimator.x.max_val, estimator.x.min_val)
+                    self.assertGreater(estimator.y.max_val, estimator.y.min_val)
+                    self.assertGreater(estimator.z.max_val, estimator.z.min_val)
+                self.assertEqual(estimator.file_counter, 1)
+                if estimator.geotyp == SHGeoType.geomap:
+                    self.assertEqual(estimator.number_of_primaries, 1)
                 else:
-                    self.assertEqual(det.number_of_primaries, 1000)
-                self.assertGreaterEqual(len(det.data), 1)
+                    self.assertEqual(estimator.number_of_primaries, 1000)
+                self.assertGreaterEqual(len(estimator.pages), 1)
+                self.assertGreaterEqual(estimator.pages[0].data_raw.size, 1)
 
 
 if __name__ == '__main__':

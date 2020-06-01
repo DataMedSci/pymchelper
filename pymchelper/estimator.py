@@ -390,7 +390,8 @@ def average_with_nan(estimator_list, error_estimate=ErrorEstimate.stderr):
         # s = stddev = sqrt(1/(n-1)sum(x-<x>)**2)
         # s : corrected sample standard deviation
         for page_no, page in enumerate(result.pages):
-            page.error_raw = np.nanstd([estimator.pages[page_no].data_raw for estimator in estimator_list], axis=0, ddof=1)
+            page.error_raw = np.nanstd([estimator.pages[page_no].data_raw for estimator in estimator_list],
+                                       axis=0, ddof=1)
 
         # if user requested standard error then we calculate it as:
         # S = stderr = stddev / sqrt(n), or in other words,

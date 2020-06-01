@@ -45,16 +45,16 @@ def guess_corename(filename):
 
 
 def fromfile(filename):
-    """Read a detector data from a binary file ```filename```"""
+    """Read estimator data from a binary file ```filename```"""
 
     reader = guess_reader(filename)
     if reader is None:
         raise Exception("File format not compatible", filename)
-    detector = Estimator()
-    detector.file_counter = 1
-    if not reader.read(detector):  # unsuccefful read
-        detector = None
-    return detector
+    estimator = Estimator()
+    estimator.file_counter = 1
+    if not reader.read(estimator):  # unsuccefful read
+        estimator = None
+    return estimator
 
 
 def fromfilelist(input_file_list, error, nan):
@@ -173,16 +173,16 @@ def convertfromlist(filelist, error, nan, outputdir, converter_name, options, ou
     :param outputfile:
     :return:
     """
-    detector = fromfilelist(filelist, error, nan)
-    if not detector:
+    estimator = fromfilelist(filelist, error, nan)
+    if not estimator:
         return None
     if outputfile is not None:
         output_path = outputfile
     elif outputdir is None:
-        output_path = detector.file_corename
+        output_path = estimator.file_corename
     else:
-        output_path = os.path.join(outputdir, detector.file_corename)
-    status = tofile(detector, output_path, converter_name, options)
+        output_path = os.path.join(outputdir, estimator.file_corename)
+    status = tofile(estimator, output_path, converter_name, options)
     return status
 
 
@@ -226,10 +226,10 @@ def convertfrompattern(pattern, outputdir, converter_name, options,
         return max(status)
 
 
-def tofile(detector, filename, converter_name, options):
+def tofile(estimator, filename, converter_name, options):
     """
-    Save a detector data to a ``filename`` using converter defined by ``converter_name``
-    :param detector:
+    Save a estimator data to a ``filename`` using converter defined by ``converter_name``
+    :param estimator:
     :param filename:
     :param converter_name:
     :param options:
@@ -238,7 +238,7 @@ def tofile(detector, filename, converter_name, options):
     writer_cls = Converters.fromname(converter_name)
     writer = writer_cls(filename, options)
     logger.debug("File corename : {:s}".format(filename))
-    status = writer.write(detector)
+    status = writer.write(estimator)
     return status
 
 
