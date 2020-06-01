@@ -183,7 +183,7 @@ class Page:
         2
         >>> p = Page(e)
         >>> p.diff_axis1 = MeshAxis(n=10, min_val=0.0, max_val=100.0, name="E", unit="MeV",
-        binning=MeshAxis.BinningType.linear)
+        ...                         binning=MeshAxis.BinningType.linear)
         >>> p.dimension
         3
 
@@ -210,7 +210,7 @@ class Page:
         >>> p.data_raw = np.arange(6)
         >>> p.data.shape
         (2, 3, 1, 1, 1)
-        >>> p.data[1, 2, 0]
+        >>> p.data[1, 2, 0, 0, 0]
         5
 
         :return: reshaped view of ``data_raw``
@@ -242,21 +242,22 @@ class Page:
         Axes with constant value goes last.
 
         Let's take a detector d with YZ scoring.
-        >>> d = Estimator()
-        >>> d.x = MeshAxis(n=1, min_val=0.0, max_val=1.0, name="X", unit="cm", binning=MeshAxis.BinningType.linear)
-        >>> d.y = MeshAxis(n=3, min_val=0.0, max_val=150.0, name="Y", unit="cm", binning=MeshAxis.BinningType.linear)
-        >>> d.z = MeshAxis(n=2, min_val=0.0, max_val=2.0, name="Z", unit="cm", binning=MeshAxis.BinningType.linear)
+        >>> e = Estimator()
+        >>> e.x = MeshAxis(n=1, min_val=0.0, max_val=1.0, name="X", unit="cm", binning=MeshAxis.BinningType.linear)
+        >>> e.y = MeshAxis(n=3, min_val=0.0, max_val=150.0, name="Y", unit="cm", binning=MeshAxis.BinningType.linear)
+        >>> e.z = MeshAxis(n=2, min_val=0.0, max_val=2.0, name="Z", unit="cm", binning=MeshAxis.BinningType.linear)
+        >>> p = e.pages[0]
 
         First axis for plotting will be Y (as X axis holds only one bin):
-        >>> d.plot_axis(0)
+        >>> p.plot_axis(0)
         MeshAxis(n=3, min_val=0.0, max_val=150.0, name='Y', unit='cm', binning=<BinningType.linear: 0>)
 
         Second axis for plotting will be Z (its the next after Y with n > 1 bins)
-        >>> d.plot_axis(1)
+        >>> p.plot_axis(1)
         MeshAxis(n=2, min_val=0.0, max_val=2.0, name='Z', unit='cm', binning=<BinningType.linear: 0>)
 
         Finally the third axis will be X, but it cannot be used for plotting as it has only one bin.
-        >>> d.plot_axis(2)
+        >>> p.plot_axis(2)
         MeshAxis(n=1, min_val=0.0, max_val=1.0, name='X', unit='cm', binning=<BinningType.linear: 0>)
 
 

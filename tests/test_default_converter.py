@@ -65,11 +65,13 @@ class TestErrorEstimate(unittest.TestCase):
                         self.assertTrue(np.isnan(page.error_raw) or not np.any(page.error_raw))
                 elif error == ErrorEstimate.stddev:
                     for page_no, page in enumerate(merged_estimators.pages):
-                        error_value = np.std([estimator.pages[page_no].data_raw for estimator in estimator_list], ddof=1)
+                        error_value = np.std([estimator.pages[page_no].data_raw for estimator in estimator_list],
+                                             ddof=1)
                         self.assertEqual(error_value, merged_estimators.pages[page_no].error_raw)
                 elif error == ErrorEstimate.stderr:
                     for page_no, page in enumerate(merged_estimators.pages):
-                        error_value = np.std([estimator.pages[page_no].data_raw for estimator in estimator_list], ddof=1)
+                        error_value = np.std([estimator.pages[page_no].data_raw for estimator in estimator_list],
+                                             ddof=1)
                         error_value /= np.sqrt(len(estimator_list))
                         self.assertEqual(error_value, merged_estimators.pages[page_no].error_raw)
                 else:
