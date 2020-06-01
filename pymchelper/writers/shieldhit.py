@@ -53,7 +53,7 @@ class TxtWriter:
     def _header_geometric_info(self, det):
         """next block - scoring object geometrical information"""
 
-        from writers.fortranformatter import format_d
+        from pymchelper.writers.fortranformatter import format_d
         result = ""
         if det.geotyp in {SHGeoType.plane, SHGeoType.dplane}:
             result += "#   PLANE point(X,Y,Z)         :"
@@ -86,7 +86,7 @@ class TxtWriter:
         return result
 
     def _header_no_of_bins_and_prim(self, estimator):
-        from writers.fortranformatter import format_d
+        from pymchelper.writers.fortranformatter import format_d
 
         header = ""
         # number of bins in each dimensions
@@ -108,7 +108,7 @@ class TxtWriter:
             print("Conversion of data with multiple pages not supported yet")
             return False
 
-        from writers.fortranformatter import format_e
+        from pymchelper.writers.fortranformatter import format_e
 
         page = estimator.pages[0]
 

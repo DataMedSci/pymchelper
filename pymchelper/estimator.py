@@ -209,7 +209,7 @@ class Page:
         >>> p = Page(estimator=e)
         >>> p.data_raw = np.arange(6)
         >>> p.data.shape
-        (2, 3, 1)
+        (2, 3, 1, 1, 1)
         >>> p.data[1, 2, 0]
         5
 
@@ -372,27 +372,33 @@ class Estimator(object):
         return 3 - (self.x.n, self.y.n, self.z.n).count(1)
 
 
-def average_with_nan(detector_list, error_estimate=ErrorEstimate.stderr):
+def average_with_nan(estimator_list, error_estimate=ErrorEstimate.stderr):
     """
-    Calculate average detector object, excluding malformed data (NaN) from averaging.
-    :param detector_list:
+    Calculate average estimator object, excluding malformed data (NaN) from averaging.
+    :param estimator_list:
     :param error_estimate:
     :return:
     """
     # TODO add compatibility check
-    result = Estimator()
-    result.file_counter = len(detector_list)
-    result.data_raw = np.nanmean([det.data_raw for det in detector_list], axis=0)
+    if not estimator_list:
+        return None
+    result = copy.deepcopy(estimator_list[0])
+    for page_no, page in enumerate(result.pages):
+        page.data_raw = np.nanmean([estimator.pages[page_no].data_raw for estimator in estimator_list], axis=0)
+    result.file_counter = len(estimator_list)
     if result.file_counter > 1 and error_estimate != ErrorEstimate.none:
         # s = stddev = sqrt(1/(n-1)sum(x-<x>)**2)
         # s : corrected sample standard deviation
-        result.error_raw = np.nanstd([det.data_raw for det in detector_list], axis=0, ddof=1)
+        for page_no, page in enumerate(result.pages):
+            page.error_raw = np.nanstd([estimator.pages[page_no].data_raw for estimator in estimator_list], axis=0, ddof=1)
 
         # if user requested standard error then we calculate it as:
         # S = stderr = stddev / sqrt(n), or in other words,
         # S = s/sqrt(N) where S is the corrected standard deviation of the mean.
         if error_estimate == ErrorEstimate.stderr:
-            result.error_raw /= np.sqrt(result.file_counter)  # np.sqrt() always returns np.float64
+            for page in result.pages:
+                page.error_raw /= np.sqrt(result.file_counter)  # np.sqrt() always returns np.float64
     else:
-        result.error_raw = np.zeros_like(result.data_raw)
+        for page in result.pages:
+            page.error_raw = np.zeros_like(page.data_raw)
     return result

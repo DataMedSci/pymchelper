@@ -181,9 +181,9 @@ class SHReaderBin2010(SHReader):
                                  ('bin2', '<f8', estimator.rec_size)])
         record = np.fromfile(self.filename, record_dtype, count=-1)
         # BIN(*)  : a large array holding results. Accessed using pointers.
-        estimator.data_raw = np.array(record['bin2'][:][0])
+        estimator.pages[0].data_raw = np.array(record['bin2'][:][0])
 
-        logger.debug("Raw data: {}".format(estimator.data_raw))
+        logger.debug("Raw data: {}".format(estimator.pages[0].data_raw))
 
         estimator.file_counter = 1
 

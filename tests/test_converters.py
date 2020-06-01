@@ -126,19 +126,19 @@ class TestSparseConverter(unittest.TestCase):
                 self.assertTrue(os.path.exists(pymchelper_output))
 
                 # read the original file into a estimator structure
-                original_mtx = fromfile(inputfile_rel_path)
-                self.assertTrue(np.any(original_mtx.data))
+                estimator_data = fromfile(inputfile_rel_path)
+                self.assertTrue(np.any(estimator_data.pages[0].data))
 
                 # unpack saved sparse matrix
                 reconstructed_sparse_mtx = unpack_sparse_file(pymchelper_output)
 
                 # check if unpacked shape is correct
-                self.assertEqual(reconstructed_sparse_mtx.shape[0], original_mtx.x.n)
-                self.assertEqual(reconstructed_sparse_mtx.shape[1], original_mtx.y.n)
-                self.assertEqual(reconstructed_sparse_mtx.shape[2], original_mtx.z.n)
+                self.assertEqual(reconstructed_sparse_mtx.shape[0], estimator_data.x.n)
+                self.assertEqual(reconstructed_sparse_mtx.shape[1], estimator_data.y.n)
+                self.assertEqual(reconstructed_sparse_mtx.shape[2], estimator_data.z.n)
 
                 # check if unpacked data is correct
-                self.assertTrue(np.array_equal(original_mtx.data, reconstructed_sparse_mtx))
+                self.assertTrue(np.array_equal(estimator_data.pages[0].data, reconstructed_sparse_mtx))
 
                 logger.info("Removing directory {:s}".format(working_dir))
                 shutil.rmtree(working_dir)

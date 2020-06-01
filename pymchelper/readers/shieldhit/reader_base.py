@@ -184,33 +184,35 @@ def read_next_token(f):
             return None
 
 
-def _postprocess(detector, nscale):
+def _postprocess(estimator, nscale):
     """normalize result if we need that."""
-    if detector.dettyp not in (SHDetType.dlet, SHDetType.tlet,
-                               SHDetType.letflu,
-                               SHDetType.dletg, SHDetType.tletg,
-                               SHDetType.avg_energy, SHDetType.avg_beta,
-                               SHDetType.material,
-                               SHDetType.q):
-        if detector.number_of_primaries != 0:  # geotyp = GEOMAP will have 0 projectiles simulated
-            detector.data_raw /= np.float64(detector.number_of_primaries)
-            detector.error_raw /= np.float64(detector.number_of_primaries)
+    for page in estimator.pages:
+        if page.dettyp not in (SHDetType.dlet, SHDetType.tlet, SHDetType.letflu, SHDetType.dletg, SHDetType.tletg,
+                               SHDetType.avg_energy, SHDetType.avg_beta, SHDetType.material, SHDetType.q):
+            if estimator.number_of_primaries != 0:  # geotyp = GEOMAP will have 0 projectiles simulated
+                    page.data_raw /= np.float64(estimator.number_of_primaries)
+                    page.error_raw /= np.float64(estimator.number_of_primaries)
 
     if nscale != 1:
         # scale with number of particles given by user
-        detector.data_raw *= np.float64(nscale)
-        detector.error_raw *= np.float64(nscale)
+        for page in estimator.pages:
+            page.data_raw *= np.float64(nscale)
+            page.error_raw *= np.float64(nscale)
 
         # rescaling with particle number means also unit change for some detectors
         # from per particle to Grey - this is why we override detector type
-        if detector.dettyp == SHDetType.dose:
-            detector.dettyp = SHDetType.dose_gy_bdo2016
-        if detector.dettyp == SHDetType.alanine:
-            detector.dettyp = SHDetType.alanine_gy_bdo2016
-        # for the same reason as above we change units
-        if detector.dettyp in (SHDetType.dose_gy_bdo2016, SHDetType.alanine_gy_bdo2016):
-            # 1 megaelectron volt / gram = 1.60217662 x 10-10 Gy
-            MeV_g = np.float64(1.60217662e-10)
-            detector.data_raw *= MeV_g
-            detector.error_raw *= MeV_g
-            detector.unit, detector.name = _get_detector_unit(detector.dettyp, detector.geotyp)
+        for page in estimator.pages:
+            page.data_raw *= np.float64(nscale)
+            page.error_raw *= np.float64(nscale)
+
+            if page.dettyp == SHDetType.dose:
+                page.dettyp = SHDetType.dose_gy_bdo2016
+            if page.dettyp == SHDetType.alanine:
+                page.dettyp = SHDetType.alanine_gy_bdo2016
+            # for the same reason as above we change units
+            if page.dettyp in (SHDetType.dose_gy_bdo2016, SHDetType.alanine_gy_bdo2016):
+                # 1 megaelectron volt / gram = 1.60217662 x 10-10 Gy
+                MeV_g = np.float64(1.60217662e-10)
+                page.data_raw *= MeV_g
+                page.error_raw *= MeV_g
+                page.unit, page.name = _get_detector_unit(page.dettyp, estimator.geotyp)

@@ -129,7 +129,7 @@ class SHReaderBDO2016(SHReader):
                     estimator.zone_start = pl[0]
 
                 if pl_id == SHBDOTagID.det_data:
-                    estimator.data_raw = np.asarray(pl)
+                    estimator.pages[0].data_raw = np.asarray(pl)
 
             # TODO: would be better to not overwrite x,y,z and make proper case for ZONE scoring later.
             if estimator.geotyp in {SHGeoType.zone, SHGeoType.dzone}:
@@ -202,7 +202,7 @@ class SHReaderBDO2016(SHReader):
                                    unit=zunit,
                                    binning=_bintyp(nz))
 
-            estimator.unit, estimator.name = _get_detector_unit(estimator.dettyp, estimator.geotyp)
+            estimator.pages[0].unit, estimator.pages[0].name = _get_detector_unit(estimator.dettyp, estimator.geotyp)
 
             logger.debug("Done reading bdo file.")
             logger.debug("Detector data : " + str(estimator.data))

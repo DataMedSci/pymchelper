@@ -247,7 +247,7 @@ class ImageWriter:
         if page.dimension == 1:
 
             # add optional error area
-            if np.any(estimator.error):
+            if np.any(page.error):
                 ax.fill_between(plot_x_axis.data,
                                 (data_raw - error_raw).clip(0.0),
                                 (data_raw + error_raw).clip(0.0, 1.05 * data_raw.max()),

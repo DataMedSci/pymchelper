@@ -45,7 +45,7 @@ class TestErrorEstimate(unittest.TestCase):
         file_list = ["tests/res/shieldhit/generated/many/msh/aen_0_p000{:d}.bdo".format(i) for i in range(1, 4)]
 
         # read each of the files individually into estimator object
-        individ_detectors = [fromfile(file_path) for file_path in file_list]
+        estimator_list = [fromfile(file_path) for file_path in file_list]
 
         for error in ErrorEstimate:  # all possible error options (none, stddev, stderr)
             logger.info("Checking error calculation for error = {:s}".format(error.name))
@@ -55,19 +55,23 @@ class TestErrorEstimate(unittest.TestCase):
                 merged_detector = fromfilelist(file_list, error=error, nan=nan)
 
                 # manually calculate mean and check if correct
-                mean_value = np.mean([det.data_raw for det in individ_detectors])
-                self.assertEqual(mean_value, merged_detector.data_raw)
+                for page_no, page in enumerate(merged_detector.pages):
+                    mean_value = np.mean([estimator.pages[page_no].data_raw for estimator in estimator_list])
+                    self.assertEqual(mean_value, merged_detector.pages[page_no].data_raw)
 
                 # manually calculate mean and check if correct
                 if error == ErrorEstimate.none:
-                    self.assertTrue(np.isnan(merged_detector.error_raw) or not np.any(merged_detector.error_raw))
+                    for page in merged_detector.pages:
+                        self.assertTrue(np.isnan(page.error_raw) or not np.any(page.error_raw))
                 elif error == ErrorEstimate.stddev:
-                    error_value = np.std([det.data_raw for det in individ_detectors], ddof=1)
-                    self.assertEqual(error_value, merged_detector.error_raw)
+                    for page_no, page in enumerate(merged_detector.pages):
+                        error_value = np.std([estimator.pages[page_no].data_raw for estimator in estimator_list], ddof=1)
+                        self.assertEqual(error_value, merged_detector.pages[page_no].error_raw)
                 elif error == ErrorEstimate.stderr:
-                    error_value = np.std([det.data_raw for det in individ_detectors], ddof=1)
-                    error_value /= np.sqrt(len(individ_detectors))
-                    self.assertEqual(error_value, merged_detector.error_raw)
+                    for page_no, page in enumerate(merged_detector.pages):
+                        error_value = np.std([estimator.pages[page_no].data_raw for estimator in estimator_list], ddof=1)
+                        error_value /= np.sqrt(len(estimator_list))
+                        self.assertEqual(error_value, merged_detector.pages[page_no].error_raw)
                 else:
                     return
 

@@ -69,8 +69,8 @@ def fromfilelist(input_file_list, error, nan):
         input_file_list = [input_file_list]
 
     if nan:
-        detector_list = [fromfile(filename) for filename in input_file_list]
-        result = average_with_nan(detector_list, error)
+        estimator_list = [fromfile(filename) for filename in input_file_list]
+        result = average_with_nan(estimator_list, error)
         if not result:  # TODO check here !
             return None
     elif len(input_file_list) == 1:
@@ -85,32 +85,39 @@ def fromfilelist(input_file_list, error, nan):
         # allocate memory for accumulator in standard deviation calculation
         # not needed if user requested not to include errors
         if error != ErrorEstimate.none:
-            m2 = np.zeros_like(result.data_raw)
+            for page in result.pages:
+                page.error_raw = np.zeros_like(page.data_raw)
 
-        # loop over all files
+        # loop over all files with n running from 2
         for n, filename in enumerate(input_file_list[1:], start=2):
-            x = fromfile(filename).data_raw
+            current_estimator = fromfile(filename)  # x
 
             # Running variance algorithm based on algorithm by B. P. Welford,
             # presented in Donald Knuth's Art of Computer Programming, Vol 2, page 232, 3rd edition.
             # Can be found here: http://www.johndcook.com/blog/standard_deviation/
             # and https://en.wikipedia.org/wiki/Algorithms_for_calculating_variance#Online_algorithm
-            delta = x - result.data_raw               # delta = x - mean
-            result.data_raw += delta / n              # mean += delta / n
+            delta = [current_page.data_raw - result_page.data_raw for current_page, result_page
+                     in zip(current_estimator.pages, result.pages)]               # delta = x - mean
+            for page, delta_item in zip(result.pages, delta):
+                page.data_raw += delta_item / np.float64(n)
+
             if error != ErrorEstimate.none:
-                m2 += delta * (x - result.data_raw)   # M2 += delta * (x - mean)
+                for page, delta_item, current_page in zip(result.pages, delta, current_estimator.pages):
+                    page.error_raw += delta_item * (current_page.data_raw - page.data_raw)   # M2 += delta * (x - mean)
 
         # unbiased sample variance is stored in `__M2 / (n - 1)`
         # unbiased sample standard deviation in classical algorithm is calculated as (sqrt(1/(n-1)sum(x-<x>)**2)
         # here it is calculated as square root of unbiased sample variance:
         if len(input_file_list) > 1 and error != ErrorEstimate.none:
-            result.error_raw = np.sqrt(m2 / (len(input_file_list) - 1))
+            for page in result.pages:
+                page.error_raw = np.sqrt(page.error_raw / (len(input_file_list) - 1.0))
 
         # if user requested standard error then we calculate it as:
         # S = stderr = stddev / sqrt(N), or in other words,
         # S = s/sqrt(N) where S is the corrected standard deviation of the mean.
         if len(input_file_list) > 1 and error == ErrorEstimate.stderr:
-            result.error_raw /= np.sqrt(len(input_file_list))  # np.sqrt() always returns np.float64
+            for page in result.pages:
+                page.error_raw /= np.sqrt(len(input_file_list))  # np.sqrt() always returns np.float64
 
     result.file_counter = len(input_file_list)
     core_names_dict = group_input_files(input_file_list)
