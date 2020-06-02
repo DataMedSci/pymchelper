@@ -212,11 +212,12 @@ class ImageWriter:
             logger.error("Matplotlib not installed, output won't be generated")
             return 1
 
+        page = estimator.pages[0]
+
         # skip plotting 1-D and 3-D and higher dimensional data
-        if estimator.dimension not in (1, 2):
+        if page.dimension not in (1, 2):
             return 0
 
-        page = estimator.pages[0]
         data_raw = page.data_raw
         error_raw = page.error_raw
 
@@ -252,7 +253,7 @@ class ImageWriter:
                                 (data_raw - error_raw).clip(0.0),
                                 (data_raw + error_raw).clip(0.0, 1.05 * data_raw.max()),
                                 alpha=0.2, edgecolor='#CC4F1B', facecolor='#FF9848', antialiased=True)
-            ax.set_ylabel(self._make_label(estimator.unit, estimator.name))
+            ax.set_ylabel(self._make_label(page.unit, page.name))
             ax.plot(plot_x_axis.data, data_raw)
         elif page.dimension == 2:
             plot_y_axis = page.plot_axis(1)
