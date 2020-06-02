@@ -124,14 +124,12 @@ class TestDefaultConverter(unittest.TestCase):
 
                 # compare both files
                 comparison = filecmp.cmp(shieldhit_output_moved, pymchelper_output)
-                print("comparison", comparison, shieldhit_output_moved, pymchelper_output)
                 if not comparison:
                     with open(shieldhit_output_moved, 'r') as f1, open(pymchelper_output, 'r') as f2:
                         diff = difflib.unified_diff(f1.readlines(), f2.readlines())
-                        print("diff", diff)
-                        #diffs_to_print = list(next(diff) for _ in range(30))
-                        #for item in diffs_to_print:
-                        #    logger.info(item)
+                        diffs_to_print = list(next(diff) for _ in range(30))
+                        for item in diffs_to_print:
+                            logger.info(item)
                 self.assertTrue(comparison)
 
                 logger.info("Removing directory {:s}".format(working_dir))
