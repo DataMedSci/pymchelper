@@ -136,7 +136,7 @@ class TestSHGenerated(unittest.TestCase):
                 else:
                     self.assertIn(estimator.pages[0].dettyp,
                                   (SHDetType.energy, SHDetType.fluence, SHDetType.avg_energy, SHDetType.avg_beta))
-                if estimator.pages[0].geotyp not in (SHGeoType.zone, SHGeoType.plane):
+                if estimator.geotyp not in (SHGeoType.zone, SHGeoType.plane):
                     self.assertGreater(estimator.x.max_val, estimator.x.min_val)
                     self.assertGreater(estimator.y.max_val, estimator.y.min_val)
                     self.assertGreater(estimator.z.max_val, estimator.z.min_val)
