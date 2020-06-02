@@ -160,9 +160,9 @@ class SHReaderBin2010(SHReader):
         estimator.y = MeshAxis(n=np.abs(ny), min_val=ymin, max_val=ymax, name=yname, unit=yunit, binning=_bintyp(ny))
         estimator.z = MeshAxis(n=np.abs(nz), min_val=zmin, max_val=zmax, name=zname, unit=zunit, binning=_bintyp(nz))
 
-        estimator.dettyp = SHDetType(det_attribs.det_type)
+        estimator.pages[0].dettyp = SHDetType(det_attribs.det_type)
 
-        estimator.unit, estimator.name = _get_detector_unit(estimator.dettyp, estimator.geotyp)
+        estimator.unit, estimator.name = _get_detector_unit(estimator.pages[0].dettyp, estimator.geotyp)
 
         return True  # reading OK
 
@@ -171,7 +171,7 @@ class SHReaderBin2010(SHReader):
     def read_payload(self, estimator):
         logger.info("Reading data: " + self.filename)
 
-        if estimator.geotyp == SHGeoType.unknown or estimator.dettyp == SHDetType.none:
+        if estimator.geotyp == SHGeoType.unknown or estimator.pages[0].dettyp == SHDetType.none:
             logger.error("Unknown geotyp or dettyp")
             return None
 
