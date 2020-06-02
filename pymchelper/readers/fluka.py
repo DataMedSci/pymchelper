@@ -74,16 +74,16 @@ class FlukaReader(Reader):
         estimator.z = MeshAxis(n=nz, min_val=zmin, max_val=zmax,
                                name="Z", unit="", binning=MeshAxis.BinningType.linear)
 
-        estimator.unit, estimator.name = "", ""
+        estimator.pages[0].unit, estimator.pages[0].name = "", ""
 
         # TODO read detector type
-        estimator.dettyp = SHDetType.none  # TODO replace with Fluka detector type
+        estimator.pages[0].dettyp = SHDetType.none  # TODO replace with Fluka detector type
 
-        estimator.data_raw = np.array(fdata)
+        estimator.pages[0].data_raw = np.array(fdata)
         if nscale != 1:
-            estimator.data *= nscale
+            estimator.pages[0].data_raw *= nscale
             # 1 gigaelectron volt / gram = 1.60217662 x 10-7 Gy
-            estimator.data *= 1.60217662e-7
+            estimator.pages[0].data_raw *= 1.60217662e-7
 
         estimator.title = usr.detector[0].name.decode('ascii')
         return True

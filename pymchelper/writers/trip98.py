@@ -36,7 +36,7 @@ class TripCubeWriter:
         _creation_info = "Created with pymchelper {:s}; using PyTRiP98 {:s}".format(_pmcversion,
                                                                                     _ptversion)
 
-        if estimator.dettyp == SHDetType.dose:
+        if estimator.pages[0].dettyp == SHDetType.dose:
 
             from pytrip import dos
 
@@ -71,7 +71,7 @@ class TripCubeWriter:
 
             return 0
 
-        elif estimator.dettyp in (SHDetType.dlet, SHDetType.tlet, SHDetType.dletg, SHDetType.tletg):
+        elif estimator.pages[0].dettyp in (SHDetType.dlet, SHDetType.tlet, SHDetType.dletg, SHDetType.tletg):
 
             from pytrip import let
 
@@ -156,9 +156,9 @@ class TripDddWriter(object):
 
         from pymchelper.shieldhit.detector.detector_type import SHDetType
 
-        if estimator.dettyp != SHDetType.ddd:
+        if estimator.pages[0].dettyp != SHDetType.ddd:
             logger.warning("Incompatible detector type {:s} used, please use {:s} instead".format(
-                estimator.dettyp, SHDetType.ddd))
+                estimator.pages[0].dettyp, SHDetType.ddd))
             return 1
 
         # guess projectile and energy

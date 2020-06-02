@@ -84,7 +84,7 @@ class SHReaderBDO2016(SHReader):
 
                 # read a single detector
                 if pl_id == SHBDOTagID.det_dtype:
-                    estimator.dettyp = SHDetType(pl[0])
+                    estimator.pages[0].dettyp = SHDetType(pl[0])
 
                 if pl_id == SHBDOTagID.det_part:  # particle to be scored
                     estimator.scored_particle_code = pl[0]
@@ -202,7 +202,8 @@ class SHReaderBDO2016(SHReader):
                                    unit=zunit,
                                    binning=_bintyp(nz))
 
-            estimator.pages[0].unit, estimator.pages[0].name = _get_detector_unit(estimator.dettyp, estimator.geotyp)
+            estimator.pages[0].unit, estimator.pages[0].name = _get_detector_unit(estimator.pages[0].dettyp,
+                                                                                  estimator.geotyp)
 
             logger.debug("Done reading bdo file.")
             logger.debug("Detector data : " + str(estimator.data))
