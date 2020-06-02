@@ -40,7 +40,7 @@ install:
 
 script:
   - travis_wait tox --notest
-  - travis_retry tox -- -n 2
+  - travis_retry tox
 # in case all previous commands in script section succeeded, run deploy (if tag is present)
   - if [[ "$TRAVIS_TEST_RESULT" == "0" ]] && [[ $TOXENV == "packaging" ]]; then .travis/deploy_package.sh pypi ; fi
 
