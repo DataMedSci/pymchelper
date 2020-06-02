@@ -137,9 +137,9 @@ class TxtWriter:
             det_error = page.error_raw.ravel()
             if np.all(np.isnan(page.error_raw)):
                 det_error = [None] * page.data_raw.size
-            xmesh = page.plot_axis(0)
-            ymesh = page.plot_axis(1)
-            zmesh = page.plot_axis(2)
+            xmesh = page.axis(0)
+            ymesh = page.axis(1)
+            zmesh = page.axis(2)
 
             logger.debug('xmesh {}'.format(xmesh))
             logger.debug('ymesh {}'.format(ymesh))
