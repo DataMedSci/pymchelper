@@ -48,9 +48,9 @@ class TestErrorEstimate(unittest.TestCase):
         estimator_list = [fromfile(file_path) for file_path in file_list]
 
         for error in ErrorEstimate:  # all possible error options (none, stddev, stderr)
-            logger.info("Checking error calculation for error = {:s}".format(error.name))
+            logger.debug("Checking error calculation for error = {:s}".format(error.name))
             for nan in (False, True):  # include or not NaNs in averaging
-                logger.info("Checking error calculation for nan option = {:s}".format(str(nan)))
+                logger.debug("Checking error calculation for nan option = {:s}".format(str(nan)))
                 # read list of the files into one estimator object, doing averaging and error calculation
                 merged_estimators = fromfilelist(file_list, error=error, nan=nan)
 
@@ -124,12 +124,14 @@ class TestDefaultConverter(unittest.TestCase):
 
                 # compare both files
                 comparison = filecmp.cmp(shieldhit_output_moved, pymchelper_output)
+                print("comparison", comparison, shieldhit_output_moved, pymchelper_output)
                 if not comparison:
                     with open(shieldhit_output_moved, 'r') as f1, open(pymchelper_output, 'r') as f2:
                         diff = difflib.unified_diff(f1.readlines(), f2.readlines())
-                        diffs_to_print = list(next(diff) for _ in range(30))
-                        for item in diffs_to_print:
-                            logger.info(item)
+                        print("diff", diff)
+                        #diffs_to_print = list(next(diff) for _ in range(30))
+                        #for item in diffs_to_print:
+                        #    logger.info(item)
                 self.assertTrue(comparison)
 
                 logger.info("Removing directory {:s}".format(working_dir))
