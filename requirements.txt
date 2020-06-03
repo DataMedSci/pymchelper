@@ -1,5 +1,7 @@
 # micro-language and markers are described here: https://www.python.org/dev/peps/pep-0496/
-numpy
+numpy<1.16  ; python_version < '3.5'  # numpy 1.16 and 1.17 subsequently dropped support for python < 3.5 and 2.x (see https://docs.scipy.org/doc/numpy/release.html#numpy-1-17-0-release-notes)
+numpy<1.19  ; python_version >= '3.5' and python_version < '3.6'  # numpy 1.19 dropped support for python 3.5 (see https://pypi.org/project/numpy/1.19.0rc1/#files)
+numpy; python_version >= '3.6' # latest numpy version for new python versions
 # Enum structure has appeared in Python 3.4 (https://docs.python.org/3.4/library/enum.html), for older version a backport is needed
 enum34 ; python_version < '3.4'
 xlwt

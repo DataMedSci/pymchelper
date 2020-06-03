@@ -1,26 +1,60 @@
+from collections import defaultdict
 from glob import glob
 import logging
 import os
 
 import numpy as np
 
-from pymchelper.detector import Detector, average_with_nan, ErrorEstimate
-from pymchelper.readers.common import guess_reader, group_input_files
+from pymchelper.estimator import Estimator, average_with_nan, ErrorEstimate
+from pymchelper.readers.fluka import FlukaReaderFactory, FlukaReader
+from pymchelper.readers.shieldhit.general import SHReaderFactory
+from pymchelper.readers.shieldhit.reader_base import SHReader
 from pymchelper.writers.common import Converters
 
 logger = logging.getLogger(__name__)
 
 
+def guess_reader(filename):
+    """
+    Guess a reader based on file contents or extensions.
+    In some cases (i.e. binary SH12A files) access to file contents is needed.
+    :param filename:
+    :return: Instantiated reader object
+    """
+    fluka_reader = FlukaReaderFactory(filename).get_reader()
+    if fluka_reader:
+        reader = fluka_reader(filename)
+    else:
+        sh_reader = SHReaderFactory(filename).get_reader()
+        if sh_reader:
+            reader = sh_reader(filename)
+    return reader
+
+
+def guess_corename(filename):
+    """
+    Guess a reader based on file contents or extensions.
+    In some cases (i.e. binary SH12A files) access to file contents is needed.
+    :param filename:
+    :return:
+    """
+    corename = FlukaReader(filename).corename
+    if corename is None:
+        corename = SHReader(filename).corename
+    return corename
+
+
 def fromfile(filename):
-    """Read a detector data from a binary file ```filename```"""
+    """Read estimator data from a binary file ```filename```"""
 
     reader = guess_reader(filename)
-    detector = Detector()
-    detector.counter = 1
-    reader.read(detector)
-    detector.error_raw = np.zeros_like(detector.data_raw)
-    detector.error_raw *= np.nan
-    return detector
+    if reader is None:
+        raise Exception("File format not compatible", filename)
+    estimator = Estimator()
+    estimator.file_counter = 1
+    if not reader.read(estimator):  # unsuccefful read
+        estimator = None
+    return estimator
 
 
 def fromfilelist(input_file_list, error, nan):
@@ -35,47 +69,60 @@ def fromfilelist(input_file_list, error, nan):
         input_file_list = [input_file_list]
 
     if nan:
-        detector_list = [fromfile(filename) for filename in input_file_list]
-        result = average_with_nan(detector_list, error)
+        estimator_list = [fromfile(filename) for filename in input_file_list]
+        result = average_with_nan(estimator_list, error)
+        if not result:  # TODO check here !
+            return None
     elif len(input_file_list) == 1:
         result = fromfile(input_file_list[0])
+        if not result:
+            return None
     else:
         result = fromfile(input_file_list[0])
+        if not result:
+            return None
 
         # allocate memory for accumulator in standard deviation calculation
         # not needed if user requested not to include errors
         if error != ErrorEstimate.none:
-            m2 = np.zeros_like(result.data_raw)
+            for page in result.pages:
+                page.error_raw = np.zeros_like(page.data_raw)
 
-        # loop over all files
+        # loop over all files with n running from 2
         for n, filename in enumerate(input_file_list[1:], start=2):
-            x = fromfile(filename).data_raw
+            current_estimator = fromfile(filename)  # x
 
             # Running variance algorithm based on algorithm by B. P. Welford,
             # presented in Donald Knuth's Art of Computer Programming, Vol 2, page 232, 3rd edition.
             # Can be found here: http://www.johndcook.com/blog/standard_deviation/
             # and https://en.wikipedia.org/wiki/Algorithms_for_calculating_variance#Online_algorithm
-            delta = x - result.data_raw               # delta = x - mean
-            result.data_raw += delta / n              # mean += delta / n
+            delta = [current_page.data_raw - result_page.data_raw for current_page, result_page
+                     in zip(current_estimator.pages, result.pages)]               # delta = x - mean
+            for page, delta_item in zip(result.pages, delta):
+                page.data_raw += delta_item / np.float64(n)
+
             if error != ErrorEstimate.none:
-                m2 += delta * (x - result.data_raw)   # M2 += delta * (x - mean)
+                for page, delta_item, current_page in zip(result.pages, delta, current_estimator.pages):
+                    page.error_raw += delta_item * (current_page.data_raw - page.data_raw)   # M2 += delta * (x - mean)
 
         # unbiased sample variance is stored in `__M2 / (n - 1)`
         # unbiased sample standard deviation in classical algorithm is calculated as (sqrt(1/(n-1)sum(x-<x>)**2)
         # here it is calculated as square root of unbiased sample variance:
         if len(input_file_list) > 1 and error != ErrorEstimate.none:
-            result.error_raw = np.sqrt(m2 / (len(input_file_list) - 1))
+            for page in result.pages:
+                page.error_raw = np.sqrt(page.error_raw / (len(input_file_list) - 1.0))
 
         # if user requested standard error then we calculate it as:
         # S = stderr = stddev / sqrt(N), or in other words,
         # S = s/sqrt(N) where S is the corrected standard deviation of the mean.
         if len(input_file_list) > 1 and error == ErrorEstimate.stderr:
-            result.error_raw /= np.sqrt(len(input_file_list))  # np.sqrt() always returns np.float64
+            for page in result.pages:
+                page.error_raw /= np.sqrt(len(input_file_list))  # np.sqrt() always returns np.float64
 
-    result.counter = len(input_file_list)
+    result.file_counter = len(input_file_list)
     core_names_dict = group_input_files(input_file_list)
     if len(core_names_dict) == 1:
-        result.corename = list(core_names_dict)[0]
+        result.file_corename = list(core_names_dict)[0]
 
     return result
 
@@ -126,14 +173,16 @@ def convertfromlist(filelist, error, nan, outputdir, converter_name, options, ou
     :param outputfile:
     :return:
     """
-    detector = fromfilelist(filelist, error, nan)
+    estimator = fromfilelist(filelist, error, nan)
+    if not estimator:
+        return None
     if outputfile is not None:
         output_path = outputfile
     elif outputdir is None:
-        output_path = detector.corename
+        output_path = estimator.file_corename
     else:
-        output_path = os.path.join(outputdir, detector.corename)
-    status = tofile(detector, output_path, converter_name, options)
+        output_path = os.path.join(outputdir, estimator.file_corename)
+    status = tofile(estimator, output_path, converter_name, options)
     return status
 
 
@@ -177,10 +226,10 @@ def convertfrompattern(pattern, outputdir, converter_name, options,
         return max(status)
 
 
-def tofile(detector, filename, converter_name, options):
+def tofile(estimator, filename, converter_name, options):
     """
-    Save a detector data to a ``filename`` using converter defined by ``converter_name``
-    :param detector:
+    Save a estimator data to a ``filename`` using converter defined by ``converter_name``
+    :param estimator:
     :param filename:
     :param converter_name:
     :param options:
@@ -188,6 +237,26 @@ def tofile(detector, filename, converter_name, options):
     """
     writer_cls = Converters.fromname(converter_name)
     writer = writer_cls(filename, options)
-    logger.debug("Writing file with corename {:s}".format(filename))
-    status = writer.write(detector)
+    logger.debug("File corename : {:s}".format(filename))
+    status = writer.write(estimator)
     return status
+
+
+def group_input_files(input_file_list):
+    """
+    Takes set of input file names, belonging to possibly different estimators.
+    Input files are grouped according to the estimators and for each group
+    merging is performed, as in @merge_list method.
+    Output file name is automatically generated.
+    :param input_file_list: list of input files
+    :return: core_names_dict
+    """
+    core_names_dict = defaultdict(list)
+    # keys - core_name, value - list of full paths to corresponding files
+
+    # loop over input list of file paths
+    for filepath in input_file_list:
+        core_name = guess_corename(filepath)
+        core_names_dict[core_name].append(filepath)
+
+    return core_names_dict

@@ -16,7 +16,10 @@ class HdfWriter:
         if not self.filename.endswith(".h5"):
             self.filename += ".h5"
 
-    def write(self, detector):
+    def write(self, estimator):
+        if len(estimator.pages) > 1:
+            print("Conversion of data with multiple pages not supported yet")
+            return False
 
         try:
             import h5py
@@ -28,42 +31,46 @@ class HdfWriter:
 
             # change units for LET from MeV/cm to keV/um if necessary
             # a copy of data table is made here
-            from pymchelper.shieldhit.detector.detector_type import SHDetType
-            if detector.dettyp in (SHDetType.dlet, SHDetType.dletg, SHDetType.tlet, SHDetType.tletg):
-                data = detector.data * np.float64(0.1)  # 1 MeV / cm = 0.1 keV / um
-                if not np.all(np.isnan(detector.error_raw)) and np.any(detector.error_raw):
-                    error = detector.error * np.float64(0.1)  # 1 MeV / cm = 0.1 keV / um
-            else:
-                data = detector.data
-                error = detector.error
+            # from pymchelper.shieldhit.detector.detector_type import SHDetType
+            # if estimator.dettyp in (SHDetType.dlet, SHDetType.dletg, SHDetType.tlet, SHDetType.tletg):
+            #     data = estimator.data * np.float64(0.1)  # 1 MeV / cm = 0.1 keV / um
+            #     if not np.all(np.isnan(estimator.error_raw)) and np.any(estimator.error_raw):
+            #         error = estimator.error * np.float64(0.1)  # 1 MeV / cm = 0.1 keV / um
+            # else:
+            #     data = estimator.data
+            #     error = estimator.error
+            # TODO move to reader
+
+            page = estimator.pages[0]
+            data = page.data
+            error = page.error
 
             # save data
             dset = f.create_dataset("data", data=data, compression="gzip", compression_opts=9)
 
             # save error (if present)
-            if not np.all(np.isnan(detector.error_raw)) and np.any(detector.error_raw):
+            if not np.all(np.isnan(page.error_raw)) and np.any(page.error_raw):
                 f.create_dataset("error", data=error, compression="gzip", compression_opts=9)
 
             # save metadata
-            dset.attrs['name'] = detector.name
-            dset.attrs['unit'] = detector.unit
-            dset.attrs['nstat'] = detector.nstat
-            dset.attrs['counter'] = detector.counter
-            dset.attrs['counter'] = detector.counter
-            dset.attrs['xaxis_n'] = detector.x.n
-            dset.attrs['xaxis_min'] = detector.x.min_val
-            dset.attrs['xaxis_max'] = detector.x.max_val
-            dset.attrs['xaxis_name'] = detector.x.name
-            dset.attrs['xaxis_unit'] = detector.x.unit
-            dset.attrs['yaxis_n'] = detector.y.n
-            dset.attrs['yaxis_min'] = detector.y.min_val
-            dset.attrs['yaxis_max'] = detector.y.max_val
-            dset.attrs['yaxis_name'] = detector.y.name
-            dset.attrs['yaxis_unit'] = detector.y.unit
-            dset.attrs['zaxis_n'] = detector.z.n
-            dset.attrs['zaxis_min'] = detector.z.min_val
-            dset.attrs['zaxis_max'] = detector.z.max_val
-            dset.attrs['zaxis_name'] = detector.z.name
-            dset.attrs['zaxis_unit'] = detector.z.unit
+            dset.attrs['name'] = page.name
+            dset.attrs['unit'] = page.unit
+            dset.attrs['nstat'] = estimator.number_of_primaries
+            dset.attrs['counter'] = estimator.file_counter
+            dset.attrs['xaxis_n'] = estimator.x.n
+            dset.attrs['xaxis_min'] = estimator.x.min_val
+            dset.attrs['xaxis_max'] = estimator.x.max_val
+            dset.attrs['xaxis_name'] = estimator.x.name
+            dset.attrs['xaxis_unit'] = estimator.x.unit
+            dset.attrs['yaxis_n'] = estimator.y.n
+            dset.attrs['yaxis_min'] = estimator.y.min_val
+            dset.attrs['yaxis_max'] = estimator.y.max_val
+            dset.attrs['yaxis_name'] = estimator.y.name
+            dset.attrs['yaxis_unit'] = estimator.y.unit
+            dset.attrs['zaxis_n'] = estimator.z.n
+            dset.attrs['zaxis_min'] = estimator.z.min_val
+            dset.attrs['zaxis_max'] = estimator.z.max_val
+            dset.attrs['zaxis_name'] = estimator.z.name
+            dset.attrs['zaxis_unit'] = estimator.z.unit
 
         return 0

@@ -8,28 +8,37 @@ class Inspector:
         logger.debug("Initialising Inspector writer")
         self.options = options
 
-    def write(self, detector):
-        """Print all keys and values from detector structure
+    def write(self, estimator):
+        """Print all keys and values from estimator structure
 
         they include also a metadata read from binary output file
         """
-        for name, value in sorted(detector.__dict__.items()):
-            # be careful not to check for np.array but for np.ndarray!
-            if name not in {'data', 'data_raw', 'error', 'error_raw', 'counter'}:  # skip non-metadata fields
+        for name, value in sorted(estimator.__dict__.items()):
+            # skip non-metadata fields
+            if name not in {'data', 'data_raw', 'error', 'error_raw', 'counter', 'pages'}:
                 line = "{:24s}: '{:s}'".format(str(name), str(value))
                 print(line)
         # print some data-related statistics
         print(75 * "*")
-        print("Data min: {:g}, max: {:g}".format(detector.data.min(), detector.data.max()))
+
+        for page_no, page in enumerate(estimator.pages):
+            print("Page {} / {}".format(page_no, len(estimator.pages)))
+            for name, value in sorted(page.__dict__.items()):
+                # skip non-metadata fields
+                if name not in {'data', 'data_raw', 'error', 'error_raw'}:
+                    line = "\t{:24s}: '{:s}'".format(str(name), str(value))
+                    print(line)
+            print("Data min: {:g}, max: {:g}".format(page.data_raw.min(), page.data_raw.max()))
+            print(75 * "-")
 
         if self.options.details:
             # print data scatter-plot if possible
-            if detector.dimension == 1:
+            if estimator.dimension == 1 and len(self.pages) == 1:
                 try:
                     from hipsterplot import plot
                     print(75 * "*")
                     print("Data scatter plot")
-                    plot(detector.data_raw)
+                    plot(estimator.data_raw)
                 except ImportError:
                     logger.warning("Detailed summary requires installation of hipsterplot package")
             # print data histogram if possible
@@ -37,7 +46,7 @@ class Inspector:
                 from bashplotlib.histogram import plot_hist
                 print(75 * "*")
                 print("Data histogram")
-                plot_hist(detector.data_raw, bincount=70, xlab=False, showSummary=True)
+                plot_hist(estimator.data_raw, bincount=70, xlab=False, showSummary=True)
             except ImportError:
                 logger.warning("Detailed summary requires installation of bashplotlib package")
 

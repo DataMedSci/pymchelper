@@ -12,7 +12,7 @@ import numpy as np
 
 import pymchelper.utils.pld2sobp
 from pymchelper import run
-from pymchelper.io import fromfile
+from pymchelper.input_output import fromfile
 
 logger = logging.getLogger(__name__)
 
@@ -125,20 +125,20 @@ class TestSparseConverter(unittest.TestCase):
                 run.main(["sparse", inputfile_rel_path, pymchelper_output])
                 self.assertTrue(os.path.exists(pymchelper_output))
 
-                # read the original file into a Detector structure
-                original_mtx = fromfile(inputfile_rel_path)
-                self.assertTrue(np.any(original_mtx.data))
+                # read the original file into a estimator structure
+                estimator_data = fromfile(inputfile_rel_path)
+                self.assertTrue(np.any(estimator_data.pages[0].data))
 
                 # unpack saved sparse matrix
                 reconstructed_sparse_mtx = unpack_sparse_file(pymchelper_output)
 
                 # check if unpacked shape is correct
-                self.assertEqual(reconstructed_sparse_mtx.shape[0], original_mtx.x.n)
-                self.assertEqual(reconstructed_sparse_mtx.shape[1], original_mtx.y.n)
-                self.assertEqual(reconstructed_sparse_mtx.shape[2], original_mtx.z.n)
+                self.assertEqual(reconstructed_sparse_mtx.shape[0], estimator_data.x.n)
+                self.assertEqual(reconstructed_sparse_mtx.shape[1], estimator_data.y.n)
+                self.assertEqual(reconstructed_sparse_mtx.shape[2], estimator_data.z.n)
 
                 # check if unpacked data is correct
-                self.assertTrue(np.array_equal(original_mtx.data, reconstructed_sparse_mtx))
+                self.assertTrue(np.array_equal(estimator_data.pages[0].data, reconstructed_sparse_mtx))
 
                 logger.info("Removing directory {:s}".format(working_dir))
                 shutil.rmtree(working_dir)

@@ -19,44 +19,48 @@ class PlotDataWriter:
         if not self.filename.endswith(".dat"):
             self.filename += ".dat"
 
-    def write(self, detector):
+    def write(self, estimator):
+        if len(estimator.pages) > 1:
+            print("Conversion of data with multiple pages not supported yet")
+            return False
+
         logger.info("Writing: " + self.filename)
 
-        data_raw = detector.data_raw
-        error_raw = detector.error_raw
+        page = estimator.pages[0]
 
-        # change units for LET from MeV/cm to keV/um if necessary
-        # a copy of data table is made here
-        from pymchelper.shieldhit.detector.detector_type import SHDetType
-        if detector.dettyp in (SHDetType.dlet, SHDetType.dletg, SHDetType.tlet, SHDetType.tletg):
-            data_raw = data_raw * np.float64(0.1)  # 1 MeV / cm = 0.1 keV / um
-            if not np.all(np.isnan(error_raw)) and np.any(error_raw):
-                error_raw = error_raw * np.float64(0.1)  # 1 MeV / cm = 0.1 keV / um
+        # # change units for LET from MeV/cm to keV/um if necessary
+        # # a copy of data table is made here
+        # from pymchelper.shieldhit.detector.detector_type import SHDetType
+        # if estimator.dettyp in (SHDetType.dlet, SHDetType.dletg, SHDetType.tlet, SHDetType.tletg):
+        #     data_raw = data_raw * np.float64(0.1)  # 1 MeV / cm = 0.1 keV / um
+        #     if not np.all(np.isnan(error_raw)) and np.any(error_raw):
+        #         error_raw = error_raw * np.float64(0.1)  # 1 MeV / cm = 0.1 keV / um
+        # TODO move to reader
 
         # special case for 0-dim data
-        if detector.dimension == 0:
+        if page.dimension == 0:
             # save two numbers to the file
-            if not np.all(np.isnan(error_raw)) and np.any(error_raw):
-                np.savetxt(self.filename, [[detector.data_raw, detector.error_raw]], fmt="%g %g", delimiter=' ')
+            if not np.all(np.isnan(page.error_raw)) and np.any(page.error_raw):
+                np.savetxt(self.filename, [[page.data_raw, page.error_raw]], fmt="%g %g", delimiter=' ')
             else:  # save one number to the file
-                np.savetxt(self.filename, [detector.data_raw], fmt="%g", delimiter=' ')
+                np.savetxt(self.filename, [page.data_raw], fmt="%g", delimiter=' ')
         else:
-            axis_numbers = list(range(detector.dimension))
+            axis_numbers = list(range(page.dimension))
 
             # each axis may have different number of points, this is what we store here:
-            axis_data_columns_1d = [detector.plot_axis(i).data for i in axis_numbers]
+            axis_data_columns_1d = [page.plot_axis(i).data for i in axis_numbers]
 
             # now we calculate running index for each axis
             axis_data_columns_long = [np.meshgrid(*axis_data_columns_1d, indexing='ij')[i].ravel()
                                       for i in axis_numbers]
 
-            fmt = "%g" + " %g" * detector.dimension
-            data_to_save = axis_data_columns_long + [data_raw]
+            fmt = "%g" + " %g" * page.dimension
+            data_to_save = axis_data_columns_long + [page.data_raw]
 
             # if error information is present save it as additional column
-            if not np.all(np.isnan(error_raw)) and np.any(error_raw):
+            if not np.all(np.isnan(page.error_raw)) and np.any(page.error_raw):
                 fmt += " %g"
-                data_to_save += [error_raw]
+                data_to_save += [page.error_raw]
 
             # transpose from rows to columns
             data_columns = np.transpose(data_to_save)
@@ -107,18 +111,24 @@ splot \"<awk -f addblanks.awk '{data_filename}'\" u 1:2:3 with pm3d
 """
     }
 
-    def write(self, detector):
+    def write(self, estimator):
+        if len(estimator.pages) > 1:
+            print("Conversion of data with multiple pages not supported yet")
+            return False
+
         # skip plotting 0-D and 3-D data
-        if detector.dimension in {0, 3}:
-            return
+        if estimator.dimension not in {1, 2}:
+            return False
+
+        page = estimator.pages[0]
 
         # set labels
-        plot_x_axis = detector.plot_axis(0)
+        plot_x_axis = page.plot_axis(0)
         xlabel = ImageWriter._make_label(plot_x_axis.unit, plot_x_axis.name)
-        if detector.dimension == 1:
-            ylabel = ImageWriter._make_label(detector.unit, detector.name)
-        elif detector.dimension == 2:
-            plot_y_axis = detector.plot_axis(1)
+        if estimator.dimension == 1:
+            ylabel = ImageWriter._make_label(page.unit, page.name)
+        elif estimator.dimension == 2:
+            plot_y_axis = page.plot_axis(1)
             ylabel = ImageWriter._make_label(plot_y_axis.unit, plot_y_axis.name)
 
             # for 2-D plots write additional awk script to convert data
@@ -131,12 +141,12 @@ splot \"<awk -f addblanks.awk '{data_filename}'\" u 1:2:3 with pm3d
         with open(self.script_filename, 'w') as script_file:
             logger.info("Writing: " + self.script_filename)
             script_file.write(self._header.format(plot_filename=self.plot_filename, xlabel=xlabel, ylabel=ylabel,
-                                                  title=detector.name))
-            plt_cmd = self._plotting_command[detector.dimension]
+                                                  title=page.name))
+            plt_cmd = self._plotting_command[page.dimension]
 
             # add error plot if error data present
             err_cmd = ""
-            if np.any(detector.error):
+            if np.any(page.error):
                 err_cmd = self._error_plot_command.format(data_filename=self.data_filename)
 
             script_file.write(plt_cmd.format(data_filename=self.data_filename, error_plot=err_cmd))
@@ -157,7 +167,7 @@ class ImageWriter:
     def _make_label(unit, name):
         return name + " " + "[" + unit + "]"
 
-    def _save_2d_error_plot(self, detector, xr, yr, elist, x_axis_label, y_axis_label, z_axis_label):
+    def _save_2d_error_plot(self, xr, yr, elist, x_axis_label, y_axis_label, z_axis_label):
         import matplotlib
         matplotlib.use('Agg')
         import matplotlib.pyplot as plt
@@ -187,7 +197,12 @@ class ImageWriter:
         fig.savefig(base_name + "_error.png")
         plt.close(fig)
 
-    def write(self, detector):
+    def write(self, estimator):
+
+        if len(estimator.pages) > 1:
+            print("Conversion of data with multiple pages not supported yet")
+            return False
+
         try:
             import matplotlib
             matplotlib.use('Agg')
@@ -197,24 +212,27 @@ class ImageWriter:
             logger.error("Matplotlib not installed, output won't be generated")
             return 1
 
-        # skip plotting 0-D and 3-D data
-        if detector.dimension in (0, 3):
+        page = estimator.pages[0]
+
+        # skip plotting 1-D and 3-D and higher dimensional data
+        if page.dimension not in (1, 2):
             return 0
 
-        data_raw = detector.data_raw
-        error_raw = detector.error_raw
+        data_raw = page.data_raw
+        error_raw = page.error_raw
 
         # change units for LET from MeV/cm to keV/um if necessary
         # a copy of datatable is made here
-        from pymchelper.shieldhit.detector.detector_type import SHDetType
-        if detector.dettyp in (SHDetType.dlet, SHDetType.dletg, SHDetType.tlet, SHDetType.tletg):
-            data_raw = data_raw * np.float64(0.1)  # 1 MeV / cm = 0.1 keV / um
-            if not np.all(np.isnan(error_raw)) and np.any(error_raw):
-                error_raw = error_raw * np.float64(0.1)  # 1 MeV / cm = 0.1 keV / um
+        # from pymchelper.shieldhit.detector.detector_type import SHDetType
+        # if estimator.dettyp in (SHDetType.dlet, SHDetType.dletg, SHDetType.tlet, SHDetType.tletg):
+        #     data_raw = data_raw * np.float64(0.1)  # 1 MeV / cm = 0.1 keV / um
+        #     if not np.all(np.isnan(error_raw)) and np.any(error_raw):
+        #         error_raw = error_raw * np.float64(0.1)  # 1 MeV / cm = 0.1 keV / um
+        # TODO - move units change to reader !
 
         logger.info("Writing: " + self.plot_filename)
 
-        plot_x_axis = detector.plot_axis(0)
+        plot_x_axis = page.plot_axis(0)
 
         fig, ax = plt.subplots()
         ax.set_xlabel(self._make_label(plot_x_axis.unit, plot_x_axis.name))
@@ -227,22 +245,22 @@ class ImageWriter:
             ax.set_yscale('symlog')
 
         # 1-D plotting
-        if detector.dimension == 1:
+        if page.dimension == 1:
 
             # add optional error area
-            if np.any(detector.error):
+            if np.any(page.error):
                 ax.fill_between(plot_x_axis.data,
                                 (data_raw - error_raw).clip(0.0),
                                 (data_raw + error_raw).clip(0.0, 1.05 * data_raw.max()),
                                 alpha=0.2, edgecolor='#CC4F1B', facecolor='#FF9848', antialiased=True)
-            ax.set_ylabel(self._make_label(detector.unit, detector.name))
+            ax.set_ylabel(self._make_label(page.unit, page.name))
             ax.plot(plot_x_axis.data, data_raw)
-        elif detector.dimension == 2:
-            plot_y_axis = detector.plot_axis(1)
+        elif page.dimension == 2:
+            plot_y_axis = page.plot_axis(1)
 
             x_axis_label = self._make_label(plot_x_axis.unit, plot_x_axis.name)
             y_axis_label = self._make_label(plot_y_axis.unit, plot_y_axis.name)
-            z_axis_label = self._make_label(detector.unit, detector.name)
+            z_axis_label = self._make_label(page.unit, page.name)
 
             # configure logscale on Z axis
             if PlotAxis.z in self.axis_with_logscale:
@@ -269,8 +287,8 @@ class ImageWriter:
         plt.close(fig)
 
         # add 2-D error plot if error data present
-        if detector.dimension == 2 and not np.all(np.isnan(error_raw)) and np.any(error_raw):
+        if estimator.dimension == 2 and not np.all(np.isnan(error_raw)) and np.any(error_raw):
             edata = error_raw.reshape((plot_y_axis.n, plot_x_axis.n))
-            self._save_2d_error_plot(detector, xspan, yspan, edata, x_axis_label, y_axis_label, z_axis_label)
+            self._save_2d_error_plot(xspan, yspan, edata, x_axis_label, y_axis_label, z_axis_label)
 
         return 0

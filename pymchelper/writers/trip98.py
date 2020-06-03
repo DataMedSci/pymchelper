@@ -11,7 +11,11 @@ class TripCubeWriter:
     def __init__(self, filename, options):
         self.output_corename = filename
 
-    def write(self, detector):
+    def write(self, estimator):
+        if len(estimator.pages) > 1:
+            print("Conversion of data with multiple pages not supported yet")
+            return False
+
         import getpass
         from pymchelper.shieldhit.detector.detector_type import SHDetType
         from pymchelper import __version__ as _pmcversion
@@ -21,8 +25,8 @@ class TripCubeWriter:
             logger.error("pytrip package missing, to install type `pip install pytrip98`")
             return 1
 
-        pixel_size_x = (detector.x.max_val - detector.x.min_val) / detector.x.n
-        pixel_size_z = (detector.z.max_val - detector.z.min_val) / detector.z.n
+        pixel_size_x = (estimator.x.max_val - estimator.x.min_val) / estimator.x.n
+        pixel_size_z = (estimator.z.max_val - estimator.z.min_val) / estimator.z.n
 
         logging.debug("psx: {:.6f} [cm]".format(pixel_size_x))
         logging.debug("psz: {:.6f} [cm]".format(pixel_size_z))
@@ -32,14 +36,14 @@ class TripCubeWriter:
         _creation_info = "Created with pymchelper {:s}; using PyTRiP98 {:s}".format(_pmcversion,
                                                                                     _ptversion)
 
-        if detector.dettyp == SHDetType.dose:
+        if estimator.pages[0].dettyp == SHDetType.dose:
 
             from pytrip import dos
 
             cube = dos.DosCube()
             # Warning: PyTRiP cube dimensions are in [mm]
             cube.create_empty_cube(
-                1.0, detector.x.n, detector.y.n, detector.z.n,
+                1.0, estimator.x.n, estimator.y.n, estimator.z.n,
                 pixel_size=pixel_size_x * 10.0,
                 slice_distance=pixel_size_z * 10.0)
 
@@ -51,10 +55,10 @@ class TripCubeWriter:
             cube.num_bytes = 2
             cube.pydata_type = np.int16
 
-            cube.cube = detector.data
+            cube.cube = estimator.data
 
-            if detector.tripdose >= 0.0 and detector.tripntot > 0:
-                cube.cube = (cube.cube * detector.tripntot * 1.602e-10) / detector.tripdose * 1000.0
+            if estimator.tripdose >= 0.0 and estimator.tripntot > 0:
+                cube.cube = (cube.cube * estimator.tripntot * 1.602e-10) / estimator.tripdose * 1000.0
             else:
                 cube.cube = (cube.cube / cube.cube.max()) * 1200.0
 
@@ -67,14 +71,14 @@ class TripCubeWriter:
 
             return 0
 
-        elif detector.dettyp in (SHDetType.dlet, SHDetType.tlet, SHDetType.dletg, SHDetType.tletg):
+        elif estimator.pages[0].dettyp in (SHDetType.dlet, SHDetType.tlet, SHDetType.dletg, SHDetType.tletg):
 
             from pytrip import let
 
             cube = let.LETCube()
             # Warning: PyTRiP cube dimensions are in [mm]
             cube.create_empty_cube(
-                1.0, detector.x.n, detector.y.n, detector.z.n,
+                1.0, estimator.x.n, estimator.y.n, estimator.z.n,
                 pixel_size=pixel_size_x * 10.0,
                 slice_distance=pixel_size_z * 10.0)
 
@@ -88,7 +92,7 @@ class TripCubeWriter:
             # then this should not be needed.
             cube.cube = np.ones((cube.dimz, cube.dimy, cube.dimx), dtype=cube.pydata_type)
 
-            cube.cube = detector.data
+            cube.cube = estimator.data
             cube.cube *= 0.1  # MeV/cm -> keV/um
             # Save proper meta information
 
@@ -144,12 +148,17 @@ class TripDddWriter(object):
             self.threshold = float(os.environ[env_var_name])
             logger.info("Setting tail threshold based on {:s} to {:f}".format(env_var_name, self.threshold))
 
-    def write(self, detector):
+    def write(self, estimator):
+
+        if len(estimator.pages) > 1:
+            print("Conversion of data with multiple pages not supported yet")
+            return False
+
         from pymchelper.shieldhit.detector.detector_type import SHDetType
 
-        if detector.dettyp != SHDetType.ddd:
+        if estimator.pages[0].dettyp != SHDetType.ddd:
             logger.warning("Incompatible detector type {:s} used, please use {:s} instead".format(
-                detector.dettyp, SHDetType.ddd))
+                estimator.pages[0].dettyp, SHDetType.ddd))
             return 1
 
         # guess projectile and energy
@@ -165,20 +174,20 @@ class TripDddWriter(object):
                                  'Fm', 'Md', 'No', 'Lr', 'Rf', 'Db', 'Sg', 'Bh', 'Hs', 'Mt', 'Ds', 'Rg', 'Cn', 'Nh',
                                  'Fl', 'Mc', 'Lv', 'Ts', 'Og']
                 self.projectile = "{:d}{:s}".format(
-                    int(detector.projectile_a),
-                    element_names[int(detector.projectile_z)],
+                    int(estimator.projectile_a),
+                    element_names[int(estimator.projectile_z)],
                 )
             except AttributeError:
                 logger.error('Projectile energy not available in raw_data, setting to 0')
 
         if self.energy_MeV == 0:
             try:
-                self.energy_MeV = detector.projectile_energy
+                self.energy_MeV = estimator.projectile_energy
             except AttributeError:
                 logger.error('Projectile energy not available in raw_data, setting to 0')
 
         # extract data from detector data
-        self._extract_data(detector)
+        self._extract_data(estimator)
 
         # in order to avoid fitting data to noisy region far behind Bragg peak tail,
         # find the range of z coordinate which containes (1-threshold) of the deposited energy
@@ -301,16 +310,16 @@ class TripDddWriter(object):
 
         return 0
 
-    def _extract_data(self, detector):
+    def _extract_data(self, estimator):
         # 1D arrays of r,z
-        self.r_data_cm_1d = detector.x.data
-        self.z_data_cm_1d = detector.z.data
+        self.r_data_cm_1d = estimator.x.data
+        self.z_data_cm_1d = estimator.z.data
 
         # 2D arrays of r,z, dose and error
         self.r_data_cm_2d, self.z_data_cm_2d = np.meshgrid(self.r_data_cm_1d, self.z_data_cm_1d)
 
-        self.dose_data_MeV_g_2d = detector.data_raw.reshape((detector.z.n, detector.x.n))
-        self.dose_error_MeV_g_2d = detector.error_raw.reshape((detector.z.n, detector.x.n))
+        self.dose_data_MeV_g_2d = estimator.data_raw.reshape((estimator.z.n, estimator.x.n))
+        self.dose_error_MeV_g_2d = estimator.error_raw.reshape((estimator.z.n, estimator.x.n))
 
         # dose in the very central bin
         bin_depth_z_cm = self.z_data_cm_1d[1] - self.z_data_cm_1d[0]

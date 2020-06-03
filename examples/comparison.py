@@ -1,7 +1,7 @@
 import sys
 import argparse
 
-from pymchelper.io import fromfile
+from pymchelper.input_output import fromfile
 
 
 def main(args=sys.argv[1:]):
@@ -29,10 +29,10 @@ def main(args=sys.argv[1:]):
 
     # printing some output on the screen
     print("Fluka bins in X: {:d}, Y: {:d}, Z: {:d}".format(fluka_data.x.n, fluka_data.y.n, fluka_data.z.n))
-    print("First bin of fluka data", fluka_data.data[0, 0, 0])
+    print("First bin of fluka data", fluka_data.pages[0].data[0, 0, 0, 0, 0])
 
     print("SHIELD-HIT12A bins in X: {:d}, Y: {:d}, Z: {:d}".format(sh12a_data.x.n, sh12a_data.y.n, sh12a_data.z.n))
-    print("First bin of SHIELD-HIT12A data", sh12a_data.data[0, 0, 0])
+    print("First bin of SHIELD-HIT12A data", sh12a_data.pages[0].data[0, 0, 0, 0, 0])
 
     # comparing file contents
     print("Difference Fluka - SHIELD-HIT12A", (sh12a_data.data_raw - fluka_data.data_raw)[0:5], "...")

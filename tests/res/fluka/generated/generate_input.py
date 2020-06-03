@@ -13,7 +13,7 @@ logger = logging.getLogger(__name__)
 def generate_fluka_file(output_filename):
     """
     Compose programatically fl_sim.inp Fluka input file
-    with many combinations of detector and mesh types.
+    with many combinations of estimator and mesh types.
 
     Fluka input file is saved in the default format (as Flair saves it), namely:
       - fixed format is used everywhere, except:

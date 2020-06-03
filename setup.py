@@ -1,5 +1,6 @@
 import os
 import setuptools
+import sys
 
 from pymchelper.version import git_version
 
@@ -20,6 +21,19 @@ write_version_py()
 
 with open('README.rst') as readme_file:
     readme = readme_file.read()
+
+install_requires = []
+
+# packages specified in setup_requires are needed only when running setup.py, in our case it is only numpy
+# numpy is also added install_requires which is list of dependencies needed by pip when running `pip install`
+setup_requires = []
+if sys.version_info[0] == 3 and sys.version_info[1] == 5:
+    install_requires += ["numpy<1.19"]
+elif (sys.version_info[0] == 3 and sys.version_info[1] < 5) or (sys.version_info[0] == 2):
+    install_requires += ["numpy<1.16"]
+    install_requires += ["enum34"]
+else:
+    install_requires += ["numpy"]
 
 
 setuptools.setup(
@@ -68,9 +82,6 @@ setuptools.setup(
         ],
     },
     package_data={'pymchelper': ['flair/db/*', 'VERSION']},
-    install_requires=[
-        'enum34',
-        'numpy'
-    ],
+    install_requires=install_requires,
     python_requires='>=2.7, !=3.0.*, !=3.1.*, !=3.3.*',
 )
