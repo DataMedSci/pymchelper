@@ -268,7 +268,7 @@ class ImageWriter:
                 # calculate output filename. it will include page number padded with zeros.
                 # for 10-99 pages the filename would look like: output_p01.png, ... output_p99.png
                 # for 100-999 pages the filename would look like: output_p001.png, ... output_p999.png
-                zero_padded_page_no = str(i).zfill(len(str(len(estimator.pages))))
+                zero_padded_page_no = str(i+1).zfill(len(str(len(estimator.pages))))
                 output_filename = "{}_p{}{}".format(file_base_part, zero_padded_page_no, file_ext)
                 output_path = os.path.join(dir_path, output_filename)
 
