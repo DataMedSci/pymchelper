@@ -167,41 +167,7 @@ class ImageWriter:
     def _make_label(unit, name):
         return name + " " + "[" + unit + "]"
 
-    def _save_2d_error_plot(self, xr, yr, elist, x_axis_label, y_axis_label, z_axis_label):
-        import matplotlib
-        matplotlib.use('Agg')
-        import matplotlib.pyplot as plt
-        from matplotlib import colors
-
-        fig, ax = plt.subplots(1, 1)
-
-        # configure logscale on X and Y axis (both for positive and negative numbers)
-        if PlotAxis.x in self.axis_with_logscale:
-            ax.set_xscale('symlog')
-        if PlotAxis.y in self.axis_with_logscale:
-            ax.set_yscale('symlog')
-
-        if PlotAxis.z in self.axis_with_logscale:
-            norm = colors.LogNorm(vmin=elist[elist > 0].min(), vmax=elist.max())
-        else:
-            norm = colors.Normalize(vmin=elist.min(), vmax=elist.max())
-
-        ax.set_xlabel(x_axis_label)
-        ax.set_ylabel(y_axis_label)
-
-        mesh = ax.pcolorfast(xr, yr, elist.clip(0.0), cmap=self.colormap, norm=norm)
-        cbar = fig.colorbar(mesh)
-        cbar.set_label(label=z_axis_label, rotation=270, verticalalignment='bottom')
-
-        base_name, _ = os.path.splitext(self.plot_filename)
-        fig.savefig(base_name + "_error.png")
-        plt.close(fig)
-
-    def write(self, estimator):
-
-        if len(estimator.pages) > 1:
-            print("Conversion of data with multiple pages not supported yet")
-            return False
+    def get_page_figure(self, page):
 
         try:
             import matplotlib
@@ -211,8 +177,6 @@ class ImageWriter:
         except ImportError:
             logger.error("Matplotlib not installed, output won't be generated")
             return 1
-
-        page = estimator.pages[0]
 
         # skip plotting 1-D and 3-D and higher dimensional data
         if page.dimension not in (1, 2):
@@ -229,8 +193,6 @@ class ImageWriter:
         #     if not np.all(np.isnan(error_raw)) and np.any(error_raw):
         #         error_raw = error_raw * np.float64(0.1)  # 1 MeV / cm = 0.1 keV / um
         # TODO - move units change to reader !
-
-        logger.info("Writing: " + self.plot_filename)
 
         plot_x_axis = page.plot_axis(0)
 
@@ -283,12 +245,36 @@ class ImageWriter:
                 cbar.set_ticks(ticker.LogLocator(subs='all', numticks=15))
             cbar.set_label(z_axis_label, rotation=270, verticalalignment='bottom')
 
-        fig.savefig(self.plot_filename)
-        plt.close(fig)
+        return fig
 
-        # add 2-D error plot if error data present
-        if estimator.dimension == 2 and not np.all(np.isnan(error_raw)) and np.any(error_raw):
-            edata = error_raw.reshape((plot_y_axis.n, plot_x_axis.n))
-            self._save_2d_error_plot(xspan, yspan, edata, x_axis_label, y_axis_label, z_axis_label)
+    def write(self, estimator):
+
+        # save to single page to a file without number (i.e. output.png)
+        if len(estimator.pages) == 1:
+            fig = self.get_page_figure(estimator.pages[0])
+            fig.savefig(self.plot_filename)
+        else:
+
+            # split output path into directory, basename and extension
+            dir_path = os.path.dirname(self.plot_filename)
+            if not os.path.exists(dir_path):
+                logger.info("Creating {}".format(dir_path))
+                os.makedirs(dir_path)
+            file_base_part, file_ext = os.path.splitext(os.path.basename(self.plot_filename))
+
+            # loop over all pages and save an image for each of them
+            for i, page in enumerate(estimator.pages):
+
+                # calculate output filename. it will include page number padded with zeros.
+                # for 10-99 pages the filename would look like: output_p01.png, ... output_p99.png
+                # for 100-999 pages the filename would look like: output_p001.png, ... output_p999.png
+                zero_padded_page_no = str(i).zfill(len(str(len(estimator.pages))))
+                output_filename = "{}_p{}{}".format(file_base_part, zero_padded_page_no, file_ext)
+                output_path = os.path.join(dir_path, output_filename)
+
+                # save the output file
+                logger.info("Writing {}".format(output_path))
+                fig = self.get_page_figure(page)
+                fig.savefig(output_path)
 
         return 0
