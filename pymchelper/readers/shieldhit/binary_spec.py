@@ -154,6 +154,7 @@ detector_name_from_bdotag = {
     SHBDOTagID.beamdivy: 'projectile_divergence_y',
     SHBDOTagID.beamdivk: 'projectile_divergence_k',
     SHBDOTagID.shversion: 'mc_code_version',
+    SHBDOTagID.shbuilddate: 'mc_code_build_date',
     SHBDOTagID.filedate: 'filedate',
     SHBDOTagID.user: 'user',
     SHBDOTagID.host: 'host',
