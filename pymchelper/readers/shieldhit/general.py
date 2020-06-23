@@ -2,6 +2,7 @@ from enum import IntEnum
 import logging
 
 import numpy as np
+import zlib
 
 from pymchelper.readers.common import ReaderFactory
 from pymchelper.readers.shieldhit.reader_base import read_next_token
@@ -22,7 +23,8 @@ def file_has_sh_magic_number(filename):
     sh_bdo_magic_number = b'xSH12A'
     has_bdo_magic_number = False
     with open(filename, "rb") as f:
-        d1 = np.dtype([('magic', 'S6')])  # TODO add a check if file has less than 6 bytes or is empty
+        # TODO add a check if file has less than 6 bytes or is empty
+        d1 = np.dtype([('magic', 'S6')])
         x = np.fromfile(f, dtype=d1, count=1)
         if x:
             # compare first 6 bytes with reference string
@@ -122,6 +124,18 @@ class SHReaderFactory(ReaderFactory):
 
         # TODO add ZIP file unpacking
 
+        # Trying to decompress bdz-file. If it works, saves a temporary bdo-file which will be used for reading later
+        # zip_name is the addition to the file name for the new bdo-file, compared to the original: nothing in case
+        # original is already bdo, and "_TEMP.bdo" in case original was a bdz.
+        with open(self.filename) as f:
+            try:
+                bdo_unzip = zlib.decompress(f.read())
+                zip_name = '_TEMP.bdo'
+                with open(self.filename + zip_name, 'w') as file:
+                    file.write(bdo_unzip)
+            except UnicodeDecodeError:
+                zip_name = ''
+
         # magic number was introduced together with first token-based BDO file format (BDO2016)
         # presence of magic number means we could have BDO2016 or BDO2019 format
         if file_has_sh_magic_number(self.filename):
@@ -130,7 +144,8 @@ class SHReaderFactory(ReaderFactory):
             # format tag specifying binary standard was introduced in SH12A v0.7.4-dev on  07.06.2019 (commit 6eddf98)
             file_format = read_token(self.filename, SHBDOTagID.format)
             if file_format:
-                logger.debug("File format: {} {:s}".format(file_format, SHFileFormatId(file_format).name))
+                logger.debug("File format: {} {:s}".format(
+                    file_format, SHFileFormatId(file_format).name))
                 if file_format == SHFileFormatId.bdo2019:
                     reader = SHReaderBDO2019
                 elif file_format == SHFileFormatId.bdo2016:
