@@ -14,7 +14,7 @@ from pymchelper.readers.shieldhit.binary_spec import SHBDOTagID
 logger = logging.getLogger(__name__)
 
 
-def file_has_sh_magic_number(filename):
+def file_has_sh_magic_number(bdo):
     """
     BDO binary files, introduced in 2016 (BDO2016 and BDO2019 formats) starts with 6 magic bytes xSH12A
     :param filename: Binary file filename
@@ -22,13 +22,12 @@ def file_has_sh_magic_number(filename):
     """
     sh_bdo_magic_number = b'xSH12A'
     has_bdo_magic_number = False
-    with open(filename, "rb") as f:
-        # TODO add a check if file has less than 6 bytes or is empty
-        d1 = np.dtype([('magic', 'S6')])
-        x = np.fromfile(f, dtype=d1, count=1)
-        if x:
-            # compare first 6 bytes with reference string
-            has_bdo_magic_number = (sh_bdo_magic_number == x['magic'][0])
+    # TODO add a check if file has less than 6 bytes or is empty
+    d1 = np.dtype([('magic', 'S6')])
+    x = np.frombuffer(bdo, dtype=d1, count=1)
+    if x:
+        # compare first 6 bytes with reference string
+        has_bdo_magic_number = (sh_bdo_magic_number == x['magic'][0])
 
     logger.debug("File {:s} has magic number: {:s}".format(filename, str(has_bdo_magic_number)))
     return has_bdo_magic_number
@@ -136,7 +135,7 @@ class SHReaderFactory(ReaderFactory):
 
         # magic number was introduced together with first token-based BDO file format (BDO2016)
         # presence of magic number means we could have BDO2016 or BDO2019 format
-        if file_has_sh_magic_number(self.filename):
+        if file_has_sh_magic_number(bdo):
             reader = SHReaderBDO2019
 
             # format tag specifying binary standard was introduced in SH12A v0.7.4-dev on  07.06.2019 (commit 6eddf98)
