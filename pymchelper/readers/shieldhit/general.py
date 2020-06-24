@@ -127,14 +127,12 @@ class SHReaderFactory(ReaderFactory):
         # Trying to decompress bdz-file. If it works, saves a temporary bdo-file which will be used for reading later
         # zip_name is the addition to the file name for the new bdo-file, compared to the original: nothing in case
         # original is already bdo, and "_TEMP.bdo" in case original was a bdz.
-        with open(self.filename) as f:
+
+        with open(self.filename, "rb") as f:
             try:
-                bdo_unzip = zlib.decompress(f.read())
-                zip_name = '_TEMP.bdo'
-                with open(self.filename + zip_name, 'w') as file:
-                    file.write(bdo_unzip)
-            except UnicodeDecodeError:
-                zip_name = ''
+                bdo = zlib.decompress(f.read())
+            except zlib.error:
+                bdo = f.read()
 
         # magic number was introduced together with first token-based BDO file format (BDO2016)
         # presence of magic number means we could have BDO2016 or BDO2019 format
