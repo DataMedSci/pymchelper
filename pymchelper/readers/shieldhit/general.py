@@ -14,7 +14,7 @@ from pymchelper.readers.shieldhit.binary_spec import SHBDOTagID
 logger = logging.getLogger(__name__)
 
 
-def file_has_sh_magic_number(bdo):
+def file_has_sh_magic_number(filename, bdo):
     """
     BDO binary files, introduced in 2016 (BDO2016 and BDO2019 formats) starts with 6 magic bytes xSH12A
     :param filename: Binary file filename
@@ -22,9 +22,10 @@ def file_has_sh_magic_number(bdo):
     """
     sh_bdo_magic_number = b'xSH12A'
     has_bdo_magic_number = False
+
     # TODO add a check if file has less than 6 bytes or is empty
     d1 = np.dtype([('magic', 'S6')])
-    x = np.frombuffer(bdo, dtype=d1, count=1)
+    x = np.fromfile(bdo, dtype=d1, count=1)
     if x:
         # compare first 6 bytes with reference string
         has_bdo_magic_number = (sh_bdo_magic_number == x['magic'][0])
@@ -33,7 +34,7 @@ def file_has_sh_magic_number(bdo):
     return has_bdo_magic_number
 
 
-def extract_sh_ver(filename):
+def extract_sh_ver(filename, bdo):
     """
     BDO binary files, introduced in 2016 (BDO2016 and BDO2019 formats) contain information about SH VER
     :param filename: Binary file filename
@@ -41,16 +42,15 @@ def extract_sh_ver(filename):
     """
 
     ver = None
-    with open(filename, "rb") as f:
-        d1 = np.dtype([('magic', 'S6'),
-                       ('end', 'S2'),
-                       ('vstr', 'S16')])  # TODO add a check if file has less than 6 bytes or is empty
-        x = np.fromfile(f, dtype=d1, count=1)
-        logger.debug("File {:s}, raw version info {:s}".format(filename, str(x['vstr'][0])))
-        try:
-            ver = x['vstr'][0].decode('ASCII')
-        except UnicodeDecodeError:
-            ver = None
+    d1 = np.dtype([('magic', 'S6'),
+                   ('end', 'S2'),
+                   ('vstr', 'S16')])  # TODO add a check if file has less than 6 bytes or is empty
+    x = np.fromfile(bdo, dtype=d1, count=1)
+    logger.debug("File {:s}, raw version info {:s}".format(filename, str(x['vstr'][0])))
+    try:
+        ver = x['vstr'][0].decode('ASCII')
+    except UnicodeDecodeError:
+        ver = None
 
     logger.debug("File {:s}, SH12A version: {:s}".format(filename, str(ver)))
     return ver
@@ -67,49 +67,42 @@ class SHFileFormatId(IntEnum):
     csv = 4       # comma separated file format
 
 
-def read_token(filename, token_id):
+def read_token(bdo, token_id):
     """
     TODO
     :param filename:
     :param token_id:
     :return:
     """
-    with open(filename, "rb") as f:
 
-        # skip ASCII header
-        d1 = np.dtype([('magic', 'S6'), ('endiannes', 'S2'), ('vstr', 'S16')])
-        np.fromfile(f, dtype=d1, count=1)
-
-        # read tokens from rest of the file
-        while f:
-            token = read_next_token(f)
-            if token is None:
-                break
-            pl_id, _pl_type, _pl_len, _pl = token
-            if pl_id == token_id:
-
-                logger.debug("Read token {:s} (0x{:02x}) value {} type {:s} length {:d}".format(
-                    SHBDOTagID(pl_id).name,
-                    pl_id,
-                    _pl,
-                    _pl_type.decode('ASCII'),
-                    _pl_len
-                ))
-
-                pl = [None] * _pl_len
-
-                # decode all strings (currently there will never be more than one per token)
-                if 'S' in _pl_type.decode('ASCII'):
-                    for i, _j in enumerate(_pl):
-                        pl[i] = _pl[i].decode('ASCII').strip()
-                else:
-                    pl = _pl
-
-                if len(pl) == 1:
-                    pl = pl[0]
-
-                return pl
-        return None
+    # skip ASCII header
+    d1 = np.dtype([('magic', 'S6'), ('endiannes', 'S2'), ('vstr', 'S16')])
+    np.fromfile(bdo, dtype=d1, count=1)
+    # read tokens from rest of the file
+    while bdo:
+        token = read_next_token(bdo)
+        if token is None:
+            break
+        pl_id, _pl_type, _pl_len, _pl = token
+        if pl_id == token_id:
+            logger.debug("Read token {:s} (0x{:02x}) value {} type {:s} length {:d}".format(
+                SHBDOTagID(pl_id).name,
+                pl_id,
+                _pl,
+                _pl_type.decode('ASCII'),
+                _pl_len
+            ))
+            pl = [None] * _pl_len
+            # decode all strings (currently there will never be more than one per token)
+            if 'S' in _pl_type.decode('ASCII'):
+                for i, _j in enumerate(_pl):
+                    pl[i] = _pl[i].decode('ASCII').strip()
+            else:
+                pl = _pl
+            if len(pl) == 1:
+                pl = pl[0]
+            return pl
+    return None
 
 
 class SHReaderFactory(ReaderFactory):
@@ -130,16 +123,16 @@ class SHReaderFactory(ReaderFactory):
         with open(self.filename, "rb") as f:
             try:
                 bdo = zlib.decompress(f.read())
+                print('decompressing bdz worked')
             except zlib.error:
                 bdo = f.read()
 
         # magic number was introduced together with first token-based BDO file format (BDO2016)
         # presence of magic number means we could have BDO2016 or BDO2019 format
-        if file_has_sh_magic_number(bdo):
+        if file_has_sh_magic_number(self.filename, bdo):
             reader = SHReaderBDO2019
-
             # format tag specifying binary standard was introduced in SH12A v0.7.4-dev on  07.06.2019 (commit 6eddf98)
-            file_format = read_token(self.filename, SHBDOTagID.format)
+            file_format = read_token(bdo, SHBDOTagID.format)
             if file_format:
                 logger.debug("File format: {} {:s}".format(
                     file_format, SHFileFormatId(file_format).name))
@@ -157,12 +150,10 @@ class SHReaderFactory(ReaderFactory):
         else:
             # lack of magic number means we expect Fortran-style binary format (BIN2010)
             reader = SHReaderBin2010
-
         # ver_short = extract_sh_ver(self.filename)
         # logger.info("Short version: {:s}".format(str(ver_short)))
         # ver_long = read_token(self.filename, SHBDOTagID.shversion)
         # logger.info("Long version: {:s}".format(str(ver_long)))
-
         return reader
 
 
