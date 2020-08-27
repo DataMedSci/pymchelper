@@ -34,6 +34,9 @@ class SHBDOTagID(IntEnum):
     beamdivx = 0xCB0C  # [float] beam divergence - x coordinate
     beamdivy = 0xCB0D  # [float] beam divergence - y coordinate
     beamdivk = 0xCB0E  # [float] beam divergence - focus
+    tmax0mev = 0xCB10  # [double] initial projectile energy, always in [MeV]
+    tmax0amu = 0xCB11  # [double] initial projectile energy in [MeV/amu] - only written if mass > 0.001 u
+    tmax0nuc = 0xCB12  # [double] initial projectile energy in [MeV/nucl] - only written if nucleons > 0
 
     # Group 0xCC00 - 0xCCFF : Configuration
     dele = 0xCC00
@@ -162,7 +165,10 @@ detector_name_from_bdotag = {
     SHBDOTagID.SHBDO_EST_NPAGES: 'page_count',
     SHBDOTagID.SHBDO_GEO_UNITIDS: 'geo_unit_ids',
     SHBDOTagID.SHBDO_GEO_UNITS: 'geo_units',
-    SHBDOTagID.SHBDO_GEO_NAME: 'geo_name'
+    SHBDOTagID.SHBDO_GEO_NAME: 'geo_name',
+    SHBDOTagID.tmax0mev: 'Tmax_MeV',
+    SHBDOTagID.tmax0amu: 'Tmax_MeV/amu',
+    SHBDOTagID.tmax0nuc: 'Tmax_MeV/nucl'
 }
 
 page_name_from_bdotag = {
