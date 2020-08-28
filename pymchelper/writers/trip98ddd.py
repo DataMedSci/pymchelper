@@ -7,111 +7,18 @@ import numpy as np
 logger = logging.getLogger(__name__)
 
 
-class TripCubeWriter:
-    def __init__(self, filename, options):
-        self.output_corename = filename
+class TRiP98DDDWriter(object):
+    """
+    Writer for TRiP98 DDD files. File format is described here:
+    http://bio.gsi.de/DOCS/TRiP98/PRO/DOCS/trip98fmtddd.html
 
-    def write(self, estimator):
-        if len(estimator.pages) > 1:
-            print("Conversion of data with multiple pages not supported yet")
-            return False
+    Only liquid water target is supported now.
 
-        import getpass
-        from pymchelper.shieldhit.detector.detector_type import SHDetType
-        from pymchelper import __version__ as _pmcversion
-        try:
-            from pytrip import __version__ as _ptversion
-        except ImportError:
-            logger.error("pytrip package missing, to install type `pip install pytrip98`")
-            return 1
+    The usual naming convention is <pp>.<tt>.<uuu><eeeee>.spc, where <pp> denotes the projectile,
+    <tt> the target material, <uuu> the unit ( keV, MeV, GeV) and <eeeee> the energy in these units,
+    with the decimal point after the middle digit. Example: 12C.H2O.MeV27000.spc refers to 270 MeV/u.
 
-        pixel_size_x = (estimator.x.max_val - estimator.x.min_val) / estimator.x.n
-        pixel_size_z = (estimator.z.max_val - estimator.z.min_val) / estimator.z.n
-
-        logging.debug("psx: {:.6f} [cm]".format(pixel_size_x))
-        logging.debug("psz: {:.6f} [cm]".format(pixel_size_z))
-
-        _patient_name = "Anonymous"
-        _created_by = getpass.getuser()
-        _creation_info = "Created with pymchelper {:s}; using PyTRiP98 {:s}".format(_pmcversion,
-                                                                                    _ptversion)
-
-        if estimator.pages[0].dettyp == SHDetType.dose:
-
-            from pytrip import dos
-
-            cube = dos.DosCube()
-            # Warning: PyTRiP cube dimensions are in [mm]
-            cube.create_empty_cube(
-                1.0, estimator.x.n, estimator.y.n, estimator.z.n,
-                pixel_size=pixel_size_x * 10.0,
-                slice_distance=pixel_size_z * 10.0)
-
-            # .dos dose cubes are usually in normalized integers,
-            # where "1000" equals 100.0 % dose.
-            # The next are also the defaults, but just to be clear
-            # this is specifically set.
-            cube.data_type = "integer"
-            cube.num_bytes = 2
-            cube.pydata_type = np.int16
-
-            cube.cube = estimator.data
-
-            if estimator.tripdose >= 0.0 and estimator.tripntot > 0:
-                cube.cube = (cube.cube * estimator.tripntot * 1.602e-10) / estimator.tripdose * 1000.0
-            else:
-                cube.cube = (cube.cube / cube.cube.max()) * 1200.0
-
-            # Save proper meta information
-            cube.patient_name = _patient_name
-            cube.created_by = _created_by
-            cube.creation_info = _creation_info
-
-            cube.write(self.output_corename)
-
-            return 0
-
-        elif estimator.pages[0].dettyp in (SHDetType.dlet, SHDetType.tlet, SHDetType.dletg, SHDetType.tletg):
-
-            from pytrip import let
-
-            cube = let.LETCube()
-            # Warning: PyTRiP cube dimensions are in [mm]
-            cube.create_empty_cube(
-                1.0, estimator.x.n, estimator.y.n, estimator.z.n,
-                pixel_size=pixel_size_x * 10.0,
-                slice_distance=pixel_size_z * 10.0)
-
-            # .dosemlet.dos LET cubes are usually in 32 bit floats.
-            cube.data_type = "float"
-            cube.num_bytes = 4
-            cube.pydata_type = np.float32
-
-            # need to redo the cube, since by default np.float32 are allocated.
-            # When https://github.com/pytrip/pytrip/issues/35 is fixed,
-            # then this should not be needed.
-            cube.cube = np.ones((cube.dimz, cube.dimy, cube.dimx), dtype=cube.pydata_type)
-
-            cube.cube = estimator.data
-            cube.cube *= 0.1  # MeV/cm -> keV/um
-            # Save proper meta information
-
-            cube.patient_name = _patient_name
-            cube.created_by = _created_by
-            cube.creation_info = _creation_info
-
-            cube.write(self.output_corename)
-
-            return 0
-
-        else:
-            logger.error("Tripcube target is only allowed with dose- or LET-type detectors.")
-            raise Exception("Illegal detector for tripcube.")
-
-            return 1
-
-
-class TripDddWriter(object):
+    """
 
     _sigma_to_fwhm = 2. * (2. * math.log(2.)) ** 0.5
 
@@ -144,6 +51,38 @@ class TripDddWriter(object):
         if env_var_name in os.environ:
             self.threshold = float(os.environ[env_var_name])
             logger.info("Setting tail threshold based on {:s} to {:f}".format(env_var_name, self.threshold))
+
+    def write_all_pages(self, estimator):
+
+        # save to single page to a file without number (i.e. output.png)
+        if len(estimator.pages) == 1:
+            fig = self.get_page_figure(estimator.pages[0])
+            fig.savefig(self.plot_filename)
+        else:
+
+            # split output path into directory, basename and extension
+            dir_path = os.path.dirname(self.plot_filename)
+            if not os.path.exists(dir_path):
+                logger.info("Creating {}".format(dir_path))
+                os.makedirs(dir_path)
+            file_base_part, file_ext = os.path.splitext(os.path.basename(self.plot_filename))
+
+            # loop over all pages and save an image for each of them
+            for i, page in enumerate(estimator.pages):
+
+                # calculate output filename. it will include page number padded with zeros.
+                # for 10-99 pages the filename would look like: output_p01.png, ... output_p99.png
+                # for 100-999 pages the filename would look like: output_p001.png, ... output_p999.png
+                zero_padded_page_no = str(i + 1).zfill(len(str(len(estimator.pages))))
+                output_filename = "{}_p{}{}".format(file_base_part, zero_padded_page_no, file_ext)
+                output_path = os.path.join(dir_path, output_filename)
+
+                # save the output file
+                logger.info("Writing {}".format(output_path))
+                fig = self.get_page_figure(page)
+                fig.savefig(output_path)
+
+        return 0
 
     def write(self, estimator):
 
