@@ -111,11 +111,11 @@ def main(args=sys.argv[1:]):
     parser.add_argument('-V', '--version', action='version', version=pymchelper.__version__)
 
     parsed_args = parser.parse_args(args)
-    print(parsed_args)
 
-    if parsed_args.verbose == 1:
+    verbose_flag = getattr(parsed_args, 'verbose', 0)
+    if verbose_flag == 1:
         logging.basicConfig(level=logging.INFO)
-    elif parsed_args.verbose > 1:
+    elif verbose_flag > 1:
         logging.basicConfig(level=logging.DEBUG)
     else:
         logging.basicConfig()
