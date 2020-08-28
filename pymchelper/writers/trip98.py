@@ -181,16 +181,15 @@ class TripDddWriter(object):
                 logger.error('Projectile energy not available in raw_data, setting to 0')
 
         if self.energy_MeV == 0:
-            try:
-                self.energy_MeV = estimator.projectile_energy
-            except AttributeError:
-                logger.error('Projectile energy not available in raw_data, setting to 0')
+            self.energy_MeV = getattr(estimator, 'Tmax_MeV/amu', 0)
+            if self.energy_MeV == 0:
+                logger.error('Projectile energy not available in raw data, setting to 0')
 
         # extract data from detector data
         self._extract_data(estimator)
 
         # in order to avoid fitting data to noisy region far behind Bragg peak tail,
-        # find the range of z coordinate which containes (1-threshold) of the deposited energy
+        # find the range of z coordinate which contains (1-threshold) of the deposited energy
         cum_dose = self._cumulative_dose()
         cum_dose_left = self._cumulative_dose_left(cum_dose)
 
@@ -318,13 +317,16 @@ class TripDddWriter(object):
         # 2D arrays of r,z, dose and error
         self.r_data_cm_2d, self.z_data_cm_2d = np.meshgrid(self.r_data_cm_1d, self.z_data_cm_1d)
 
-        self.dose_data_MeV_g_2d = estimator.data_raw.reshape((estimator.z.n, estimator.x.n))
-        self.dose_error_MeV_g_2d = estimator.error_raw.reshape((estimator.z.n, estimator.x.n))
+        self.dose_data_MeV_g_2d = estimator.pages[0].data_raw.reshape((estimator.z.n, estimator.x.n))
+        self.dose_error_MeV_g_2d = estimator.pages[0].error_raw.reshape((estimator.z.n, estimator.x.n))
 
         # dose in the very central bin
         bin_depth_z_cm = self.z_data_cm_1d[1] - self.z_data_cm_1d[0]
-        r_step_cm = self.r_data_cm_1d[1] - self.r_data_cm_1d[0]
 
+        if self.r_data_cm_1d.size > 1:
+            r_step_cm = self.r_data_cm_1d[1] - self.r_data_cm_1d[0]
+        else:
+            r_step_cm = estimator.x.max_val
         # Bin volume increases as we move away from beam axis
         # i-th bin volume = dz * pi * (r_i_max^2 - r_i_min^2  )
         #   r_i_max = r_i + dr / 2
