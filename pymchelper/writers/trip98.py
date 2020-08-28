@@ -131,11 +131,8 @@ class TripDddWriter(object):
 """
 
     def __init__(self, filename, options):
-
-        import matplotlib
-        matplotlib.use('Agg')
-        self.ddd_filename = filename
-        self.energy_MeV = options.energy
+        self.ddd_filename = filename  # TODO adapt filename to TRiP98 convention
+        self.energy_MeV_u = options.energy
         self.projectile = options.projectile
         self.ngauss = options.ngauss
         self.verbosity = options.verbose
@@ -157,12 +154,12 @@ class TripDddWriter(object):
         from pymchelper.shieldhit.detector.detector_type import SHDetType
 
         if estimator.pages[0].dettyp != SHDetType.ddd:
-            logger.warning("Incompatible detector type {:s} used, please use {:s} instead".format(
+            logger.warning("Incompatible estimator type {:s} used, please use {:s} instead".format(
                 estimator.pages[0].dettyp, SHDetType.ddd))
             return 1
 
-        # guess projectile and energy
-        if self.projectile == '0':
+        # guess projectile and energy from MC data
+        if self.projectile is None:
             try:
                 element_names = ['n', 'H', 'He', 'Li', 'Be', 'B', 'C', 'N', 'O', 'F', 'Ne', 'Na', 'Mg', 'Al', 'Si',
                                  'P', 'S', 'Cl', 'Ar', 'K', 'Ca', 'Sc', 'Ti', 'V', 'Cr', 'Mn', 'Fe', 'Co', 'Ni', 'Cu',
@@ -178,11 +175,14 @@ class TripDddWriter(object):
                     element_names[int(estimator.projectile_z)],
                 )
             except AttributeError:
-                logger.error('Projectile energy not available in raw_data, setting to 0')
+                self.projectile = ''
+                logger.error('Projectile not available in raw data, setting to empty string')
 
-        if self.energy_MeV == 0:
-            self.energy_MeV = getattr(estimator, 'Tmax_MeV/amu', 0)
-            if self.energy_MeV == 0:
+        if self.energy_MeV_u is None:
+            try:
+                self.energy_MeV_u = getattr(estimator, 'Tmax_MeV/amu')
+            except AttributeError:
+                self.energy_MeV_u = 0.0
                 logger.error('Projectile energy not available in raw data, setting to 0')
 
         # extract data from detector data
@@ -200,18 +200,17 @@ class TripDddWriter(object):
         r_fitting_cm_2d, z_fitting_cm_2d = np.meshgrid(self.r_data_cm_1d, z_fitting_cm_1d)
         dose_fitting_MeV_g_2d = self.dose_data_MeV_g_2d[0:thr_ind]
 
-        logger.info("Plotting 1..")
         if self.verbosity > 0:
+            logger.info("Plotting 1..")
             self._pre_fitting_plots(
                 cum_dose_left=cum_dose_left,
                 z_fitting_cm_1d=z_fitting_cm_1d,
                 dose_fitting_MeV_g_1d=dose_fitting_MeV_g_1d,
                 threshold=self.threshold,
                 zmax_cm=z_fitting_cm_1d[-1])
+            if self.ngauss in (1, 2):
+                self._plot_2d_map(z_fitting_cm_2d, r_fitting_cm_2d, dose_fitting_MeV_g_2d, z_fitting_cm_1d)
 
-            self._plot_2d_map(z_fitting_cm_2d, r_fitting_cm_2d, dose_fitting_MeV_g_2d, z_fitting_cm_1d)
-
-        logger.info("Fitting...")
         fwhm1_cm_data = np.zeros_like(z_fitting_cm_1d)
         fwhm2_cm_data = np.zeros_like(z_fitting_cm_1d)
         weight_data = np.zeros_like(z_fitting_cm_1d)
@@ -221,6 +220,7 @@ class TripDddWriter(object):
         weight_error_data = np.zeros_like(z_fitting_cm_1d)
         dz0_MeV_cm_g_error_data = np.zeros_like(z_fitting_cm_1d)
         if self.ngauss in (1, 2):
+            logger.info("Fitting...")
             # for each depth fit a lateral beam with gaussian models
             for ind, z_cm in enumerate(z_fitting_cm_1d):
 
@@ -247,8 +247,8 @@ class TripDddWriter(object):
                     fwhm2_cm_error_data[ind] = fwhm2_cm_error
                     weight_error_data[ind] = factor_error
 
-        logger.info("Plotting 2...")
         if self.verbosity > 0 and self.ngauss in (1, 2):
+            logger.info("Plotting 2...")
             self._post_fitting_plots(z_fitting_cm_1d,
                                      dose_fitting_MeV_g_1d,
                                      dz0_MeV_cm_g_data,
@@ -273,13 +273,7 @@ class TripDddWriter(object):
         logger.info("Writing " + self.ddd_filename)
 
         from pymchelper import __version__ as _pmcversion
-        try:
-            from pytrip import __version__ as _ptversion
-        except ImportError:
-            logger.error("pytrip package missing, to install type `pip install pytrip98`")
-            return 1
-        _creator_info = "Created with pymchelper {:s}; using PyTRiP98 {:s}".format(_pmcversion,
-                                                                                   _ptversion)
+        _creator_info = "Created with pymchelper {:s}".format(_pmcversion)
 
         # prepare header of DDD file
         header = self._ddd_header_template.format(
@@ -290,7 +284,7 @@ class TripDddWriter(object):
             composition='H2O',
             density=1,
             creator=_creator_info,
-            energy=self.energy_MeV)
+            energy=self.energy_MeV_u)
 
         # write the contents of the files
         with open(self.ddd_filename, 'w') as ddd_file:
@@ -363,6 +357,7 @@ class TripDddWriter(object):
                      dz0_MeV_cm_g_data=None,
                      suffix=''):
         import matplotlib
+        logging.getLogger('matplotlib').setLevel(logging.WARNING)
         matplotlib.use('Agg')
         import matplotlib.pyplot as plt
         from matplotlib.colors import LogNorm
@@ -370,7 +365,7 @@ class TripDddWriter(object):
         prefix = os.path.join(self.outputdir,
                               '{:s}_plot_{:3.1f}MeV_'.format(
                                   os.path.splitext(os.path.basename(self.ddd_filename))[0],
-                                  self.energy_MeV))
+                                  self.energy_MeV_u))
 
         plt.pcolormesh(z_fitting_cm_2d, r_fitting_cm_2d, dose_fitting_MeV_g2d,
                        norm=LogNorm(), cmap='gnuplot2', label='dose')
@@ -470,13 +465,15 @@ class TripDddWriter(object):
                 plt.close()
 
     def _pre_fitting_plots(self, cum_dose_left, z_fitting_cm_1d, dose_fitting_MeV_g_1d, threshold, zmax_cm):
+        logging.getLogger('matplotlib').setLevel(logging.INFO)
         import matplotlib
+        logging.getLogger('matplotlib').setLevel(logging.INFO)
         matplotlib.use('Agg')
         import matplotlib.pyplot as plt
         prefix = os.path.join(self.outputdir,
                               '{:s}_plot_{:3.1f}MeV_'.format(
                                   os.path.splitext(os.path.basename(self.ddd_filename))[0],
-                                  self.energy_MeV))
+                                  self.energy_MeV_u))
 
         plt.plot(self.z_data_cm_1d, self.dose_data_MeV_g_1d, color='blue', label='dose')
         plt.axvspan(
@@ -542,7 +539,7 @@ class TripDddWriter(object):
         prefix = os.path.join(self.outputdir,
                               '{:s}_plot_{:3.1f}MeV_'.format(
                                   os.path.splitext(os.path.basename(self.ddd_filename))[0],
-                                  self.energy_MeV))
+                                  self.energy_MeV_u))
 
         # left Y axis dedicated to FWHM, right one to weight
         fig, ax1 = plt.subplots()

@@ -14,21 +14,6 @@ from pymchelper.writers.plots import ImageWriter, PlotAxis
 logger = logging.getLogger(__name__)
 
 
-def set_logger_level(args):
-    if args.quiet:
-        if args.quiet == 1:
-            level = "WARNING"
-        if args.quiet == 2:
-            level = "ERROR"
-        else:
-            level = "CRITICAL"
-    elif args.verbose:
-        level = "DEBUG"
-    else:
-        level = "INFO"
-    logging.basicConfig(level=level)
-
-
 def add_default_options(parser):
     import pymchelper
     parser.add_argument('input', help='input filename, file list or pattern', type=str)
@@ -56,12 +41,11 @@ def main(args=sys.argv[1:]):
     import os
 
     _progname = os.path.basename(sys.argv[0])
-    _helptxt = 'Universal converter for FLUKA and SHIELD-HIT12A generated files.'
+    _helptxt = 'Universal converter for FLUKA and SHIELD-HIT12A output files.'
     _epitxt = '''Type '{:s} <converter> --help' for help on a specific converter.'''.format(_progname)
 
     parser = argparse.ArgumentParser(description=_helptxt, epilog=_epitxt)
 
-    # subparsers = parser.add_subparsers(title='available converters', metavar='...')
     subparsers = parser.add_subparsers(dest='command', metavar='converter')
 
     parser_txt = subparsers.add_parser(Converters.txt.name, help='converts to plain txt file')
@@ -107,31 +91,37 @@ def main(args=sys.argv[1:]):
                                type=float,
                                default=0.0)
 
-    parser_tripcube = subparsers.add_parser(Converters.tripcube.name, help='converts to trip98 data cube')
+    parser_tripcube = subparsers.add_parser(Converters.tripcube.name, help='converts to TRiP98 data cube')
     add_default_options(parser_tripcube)
 
-    parser_tripddd = subparsers.add_parser(Converters.tripddd.name, help='converts to trip98 ddd file')
+    parser_tripddd = subparsers.add_parser(Converters.tripddd.name, help='converts to TRiP98 DDD file')
     add_default_options(parser_tripddd)
     parser_tripddd.add_argument("--energy",
-                                help='energy of the beam [MeV/amu] (0 to guess from data)',
+                                help='energy of the beam [MeV/amu] (guess from data if option missing)',
                                 type=float)
     parser_tripddd.add_argument("--projectile",
-                                help='projectile (0 to guess from data)',
+                                help='projectile (guess from data if option missing)',
                                 type=str)
     parser_tripddd.add_argument("--ngauss",
-                                help='number of Gauss curves to fit (default: 2)',
+                                help='number of Gaussian functions to fit (default: 0)',
                                 choices=(0, 1, 2),
-                                default=2,
+                                default=0,
                                 type=int)
 
     parser.add_argument('-V', '--version', action='version', version=pymchelper.__version__)
 
     parsed_args = parser.parse_args(args)
+    print(parsed_args)
+
+    if parsed_args.verbose == 1:
+        logging.basicConfig(level=logging.INFO)
+    elif parsed_args.verbose > 1:
+        logging.basicConfig(level=logging.DEBUG)
+    else:
+        logging.basicConfig()
 
     status = 0
     if parsed_args.command is not None:
-        set_logger_level(parsed_args)
-
         # TODO add filename discovery
         files = sorted(glob.glob(parsed_args.input))
         if not files:
@@ -153,14 +143,6 @@ def main(args=sys.argv[1:]):
             output_dir = '.'
 
         parsed_args.error = ErrorEstimate[parsed_args.error]
-
-        # check required options for tripddd parser
-        if parsed_args.command == Converters.tripddd.name and parsed_args.energy is None:
-            logger.error("Option --energy is required, provide an energy value")
-            return 2
-        if parsed_args.command == Converters.tripddd.name and parsed_args.projectile is None:
-            logger.error("Option --projectile is required, provide an projectile")
-            return 2
 
         if parsed_args.many:
             status = convertfrompattern(parsed_args.input, output_dir,
