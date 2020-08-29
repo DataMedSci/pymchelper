@@ -14,13 +14,10 @@ class TRiP98DDDWriter(object):
 
     Only liquid water target is supported now.
 
-    The usual naming convention is <pp>.<tt>.<uuu><eeeee>.spc, where <pp> denotes the projectile,
-    <tt> the target material, <uuu> the unit (keV, MeV, GeV) and <eeeee> the energy in these units,
-    with the decimal point after the middle digit. Example: 12C.H2O.MeV27000.spc refers to 270 MeV/u.
 
     """
 
-    _sigma_to_fwhm = 2. * (2. * math.log(2.)) ** 0.5
+    _suffix_template = '{projectile:s}.{material:s}.{unit:s}{energy:s}'
 
     _ddd_header_template = """!filetype    ddd
 !fileversion   {fileversion:s}
@@ -38,9 +35,10 @@ class TRiP98DDDWriter(object):
 """
 
     def __init__(self, filename, options):
-        self.ddd_filename = filename  # TODO adapt filename to TRiP98 convention
-        self.energy_MeV_u = options.energy
-        self.projectile = options.projectile
+        self.ddd_filename = filename
+        self.energy_MeV_u = options.energy  # energy in MeV/u
+        self.projectile = options.projectile  # projectile code, i.e. 1H, 12C
+        self.suffix = ''
         self.ngauss = options.ngauss
         self.verbosity = options.verbose
         if not self.ddd_filename.endswith(".ddd"):
@@ -53,45 +51,6 @@ class TRiP98DDDWriter(object):
             logger.info("Setting tail threshold based on {:s} to {:f}".format(env_var_name, self.threshold))
 
     def write(self, estimator):
-
-        # save to single page to a file without number (i.e. output.png)
-        if len(estimator.pages) == 1:
-            self.write_single_page(estimator, estimator.pages[0], self.ddd_filename)
-        else:
-
-            # split output path into directory, basename and extension
-            dir_path = os.path.dirname(self.ddd_filename)
-            if not os.path.exists(dir_path):
-                logger.info("Creating {}".format(dir_path))
-                os.makedirs(dir_path)
-            file_base_part, file_ext = os.path.splitext(os.path.basename(self.ddd_filename))
-
-            # loop over all pages and save an image for each of them
-            for i, page in enumerate(estimator.pages):
-
-                # calculate output filename. it will include page number padded with zeros.
-                # for 10-99 pages the filename would look like: output_p01.png, ... output_p99.png
-                # for 100-999 pages the filename would look like: output_p001.png, ... output_p999.png
-                zero_padded_page_no = str(i + 1).zfill(len(str(len(estimator.pages))))
-                output_filename = "{}_p{}{}".format(file_base_part, zero_padded_page_no, file_ext)
-                output_path = os.path.join(dir_path, output_filename)
-
-                # save the output file
-                logger.info("Writing {}".format(output_path))
-                self.write_single_page(estimator, page, output_path)
-
-        return 0
-
-    def write_single_page(self, estimator, page, filename):
-
-        logger.info("Writing {:s}".format(filename))
-
-        from pymchelper.shieldhit.detector.detector_type import SHDetType
-
-        if estimator.pages[0].dettyp != SHDetType.ddd:
-            logger.warning("Incompatible estimator type {:s} used, please use {:s} instead".format(
-                estimator.pages[0].dettyp, SHDetType.ddd))
-            return 1
 
         # guess projectile and energy from MC data
         if self.projectile is None:
@@ -119,6 +78,49 @@ class TRiP98DDDWriter(object):
             except AttributeError:
                 self.energy_MeV_u = 0.0
                 logger.error('Projectile energy not available in raw data, setting to 0')
+
+        #     The usual naming convention is <pp>.<tt>.<uuu><eeeee>.ddd, where <pp> denotes the projectile,
+        #     <tt> the target material, <uuu> the unit (keV, MeV, GeV) and <eeeee> the energy in these units,
+        #     with the decimal point after the middle digit. Example: 12C.H2O.MeV27000.spc refers to 270 MeV/u.
+        self.suffix = self._suffix_template.format(projectile=self.projectile, material='H2O', unit='MeV',
+                                                   energy=str(int(self.energy_MeV_u * 100)).zfill(5))
+
+        # save to single page to a file without number (i.e. output.ddd)
+        if len(estimator.pages) == 1:
+            self.write_single_page(estimator, estimator.pages[0], self.ddd_filename)
+        else:
+
+            # split output path into directory, basename and extension
+            dir_path = os.path.dirname(self.ddd_filename)
+            if not os.path.exists(dir_path):
+                logger.info("Creating {}".format(dir_path))
+                os.makedirs(dir_path)
+            file_base_part, file_ext = os.path.splitext(os.path.basename(self.ddd_filename))
+
+            # loop over all pages and save an image for each of them
+            for i, page in enumerate(estimator.pages):
+
+                # calculate output filename. it will include page number padded with zeros.
+                # for 10-99 pages the filename would look like: output_p01.ddd, ... output_p99.ddd
+                # for 100-999 pages the filename would look like: output_p001.ddd, ... output_p999.ddd
+                zero_padded_page_no = str(i + 1).zfill(len(str(len(estimator.pages))))
+                output_filename = "{}_p{}{}".format(file_base_part, zero_padded_page_no, file_ext)
+                output_path = os.path.join(dir_path, output_filename)
+
+                # save the output file
+                logger.info("Writing {}".format(output_path))
+                self.write_single_page(estimator, page, output_path)
+
+        return 0
+
+    def write_single_page(self, estimator, page, filename):
+
+        logger.info("Writing {:s}".format(filename))
+
+        from pymchelper.shieldhit.detector.detector_type import SHDetType
+        if page.dettyp != SHDetType.ddd:
+            logger.warning("Incompatible estimator {:s} used, use {:s} instead".format(page.dettyp, SHDetType.ddd))
+            return 1
 
         # extract data from detector data
         data = self._extract_data(estimator, page)
@@ -228,8 +230,14 @@ class TRiP98DDDWriter(object):
             creator=_creator_info,
             energy=self.energy_MeV_u)
 
+        filename_with_suffix = os.path.splitext(filename)[0]
+        filename_with_suffix += '_'
+        filename_with_suffix += self.suffix
+        filename_with_suffix += '.ddd'
+        logger.info("Saving {:s}".format(filename_with_suffix))
+
         # write the contents of the files
-        with open(filename, 'w') as ddd_file:
+        with open(filename_with_suffix, 'w') as ddd_file:
             ddd_file.write(header)
             # TODO write to DDD gaussian amplitude, not the dose in central bin
             if self.ngauss == 2:
@@ -338,12 +346,12 @@ class TRiP98DDDWriter(object):
             # TODO return also parameter errors
             sigma2_cm = sigma_cm + sigma2_add_cm
             sigma2_cm_error = (sigma_cm_error**2 + sigma2_add_cm_error**2)**0.5
-            fwhm2_cm = sigma2_cm * cls._sigma_to_fwhm
-            fwhm2_cm_error = sigma2_cm_error * cls._sigma_to_fwhm
+            fwhm2_cm = sigma2_cm * FittingMethods._sigma_to_fwhm
+            fwhm2_cm_error = sigma2_cm_error * FittingMethods._sigma_to_fwhm
 
-        fwhm1_cm = sigma_cm * cls._sigma_to_fwhm
+        fwhm1_cm = sigma_cm * FittingMethods._sigma_to_fwhm
 
-        fwhm1_cm_error = sigma_cm_error * cls._sigma_to_fwhm
+        fwhm1_cm_error = sigma_cm_error * FittingMethods._sigma_to_fwhm
 
         params = fwhm1_cm, factor, fwhm2_cm, dz0_MeV_cm_g
         params_error = fwhm1_cm_error, factor_error, fwhm2_cm_error, dz0_MeV_cm_g_error
@@ -435,6 +443,8 @@ class FittingMethods(object):
     """
     Functions describing Gaussian functions modelling lateral dose distributions
     """
+
+    _sigma_to_fwhm = 2. * (2. * math.log(2.)) ** 0.5
 
     @classmethod
     def gauss_MeV_g(cls, x_cm, amp_MeV_cm_g, sigma_cm):
