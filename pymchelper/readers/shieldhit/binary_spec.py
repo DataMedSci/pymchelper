@@ -149,7 +149,6 @@ detector_name_from_bdotag = {
     SHBDOTagID.beamz: 'projectile_position_z',
     SHBDOTagID.sigmax: 'projectile_sigma_x',
     SHBDOTagID.sigmay: 'projectile_sigma_y',
-    SHBDOTagID.tmax0: 'projectile_energy',
     SHBDOTagID.sigmat0: 'projectile_sigma_energy',
     SHBDOTagID.beamtheta: 'projectile_polar_angle',
     SHBDOTagID.beamphi: 'projectile_azimuth_angle',

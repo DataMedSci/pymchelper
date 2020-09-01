@@ -5,7 +5,8 @@ from pymchelper.writers.inspector import Inspector
 from pymchelper.writers.plots import GnuplotDataWriter, PlotDataWriter, ImageWriter
 from pymchelper.writers.shieldhit import TxtWriter
 from pymchelper.writers.sparse import SparseWriter
-from pymchelper.writers.trip98 import TripCubeWriter, TripDddWriter
+from pymchelper.writers.trip98cube import TRiP98CubeWriter
+from pymchelper.writers.trip98ddd import TRiP98DDDWriter
 from pymchelper.writers.hdf import HdfWriter
 
 
@@ -31,8 +32,8 @@ class Converters(IntEnum):
             cls.gnuplot: GnuplotDataWriter,
             cls.plotdata: PlotDataWriter,
             cls.image: ImageWriter,
-            cls.tripcube: TripCubeWriter,
-            cls.tripddd: TripDddWriter,
+            cls.tripcube: TRiP98CubeWriter,
+            cls.tripddd: TRiP98DDDWriter,
             cls.excel: ExcelWriter,
             cls.sparse: SparseWriter,
             cls.inspect: Inspector,
