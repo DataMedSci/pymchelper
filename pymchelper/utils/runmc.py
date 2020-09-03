@@ -76,6 +76,7 @@ def main(args=sys.argv[1:]):
     start_time = timeit.default_timer()
     if data and (MCOutType.txt.name in parsed_args.outtype):
         for key in data:
+            logging.debug("Key {:s}".format(key))
             output_file = os.path.join(parsed_args.outdir, key)
             writer = PlotDataWriter(output_file, None)
             writer.write(data[key])
