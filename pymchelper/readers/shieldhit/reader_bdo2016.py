@@ -206,7 +206,7 @@ class SHReaderBDO2016(SHReader):
                                                                                   estimator.geotyp)
 
             logger.debug("Done reading bdo file.")
-            logger.debug("Detector data : " + str(estimator.data))
+            logger.debug("Detector data : " + str(estimator.pages[0].data))
             logger.debug("Detector nstat: " + str(estimator.number_of_primaries))
             logger.debug("Detector nx   : " + str(estimator.x.n))
             logger.debug("Detector ny   : " + str(estimator.y.n))

@@ -6,7 +6,7 @@ import subprocess
 import timeit
 from enum import IntEnum
 from multiprocessing import Pool
-from pymchelper.io import frompattern
+from pymchelper.input_output import frompattern
 
 
 class MCOutType(IntEnum):
@@ -65,9 +65,9 @@ class Runner:
             tmp_list = sorted(glob.glob(os.path.join(d, "*.bdo")))
             full_list += tmp_list
 
-        dets = frompattern(full_list)
-        for det in dets:
-            total_results[det.corename] = det
+        estimators = frompattern(full_list)
+        for est in estimators:
+            total_results[est.file_corename] = est
         elapsed = timeit.default_timer() - start_time
         print("Workspace reading {:.3f} seconds".format(elapsed))
 
