@@ -47,7 +47,7 @@ class MCOptions:
         options_set = set(options_list)
         unsupported = set(('-b', '--beamfile', '-g', '--geofile', '-m', '--matfile', '-d', '--detectfile'))
         if options_set & unsupported:
-            raise SyntaxError("Unsupported option encounted: {:s}".format(",".join(options_set & unsupported)))
+            raise SyntaxError("Unsupported option encountered: {:s}".format(",".join(options_set & unsupported)))
         if len(options_list) > 1:
             last_item = options_list[-1]
             before_last_item = options_list[-2]
