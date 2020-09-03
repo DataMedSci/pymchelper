@@ -64,9 +64,11 @@ class Runner:
         for d in workspaces:
             tmp_list = sorted(glob.glob(os.path.join(d, "*.bdo")))
             full_list += tmp_list
+        logging.debug("List of files to merge {:s}".format(','.join(full_list)))
 
         estimators = frompattern(full_list)
         for est in estimators:
+            logging.debug("Appending estimator for {:s}".format(est.file_corename))
             total_results[est.file_corename] = est
         elapsed = timeit.default_timer() - start_time
         print("Workspace reading {:.3f} seconds".format(elapsed))
