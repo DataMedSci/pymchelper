@@ -85,16 +85,21 @@ class Executor:
 
     def __call__(self, rng_seed, **kwargs):
         workspace = os.path.join(self.outdir, 'run_{:d}'.format(rng_seed))
+        logging.info("Workspace {:s}".format(workspace))
         try:
             if os.path.isdir(self.options.input_cfg):
                 # if path already exists, remove it before copying with copytree()
                 if os.path.exists(workspace):
                     shutil.rmtree(workspace)
                 shutil.copytree(self.options.input_cfg, workspace)
+                logging.debug("Copying input files into {:s}".format(workspace))
             elif os.path.isfile(self.options.input_cfg):
                 if not os.path.exists(workspace):
                     os.makedirs(workspace)
                 shutil.copy2(self.options.input_cfg, workspace)
+                logging.debug("Copying input files into {:s}".format(workspace))
+            else:
+                logging.debug("Input files {:s} not a dir or file".format(self.options.input_cfg))
             current_options = self.options
             current_options.set_rng_seed(rng_seed)
             current_options.workspace = workspace
@@ -103,6 +108,7 @@ class Executor:
             DEVNULL = open(os.devnull, 'wb')
             subprocess.check_call(str(current_options).split(), cwd=workspace, stdout=DEVNULL, stderr=DEVNULL)
         except KeyboardInterrupt:
+            logging.debug("KeyboardInterrupt")
             raise KeyboardInterruptError()
 
         return workspace
