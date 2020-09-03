@@ -45,6 +45,7 @@ def main(args=sys.argv[1:]):
                         choices=[x.name for x in MCOutType], default=MCOutType.txt.name)
     parser.add_argument('-w', '--work-dir', help='Workspace directory (default: .)',
                         dest='workspace', type=str, default='.')
+    parser.add_argument('-q', '--quiet', action='count', default=0, help='be silent')
     parser.add_argument('-v',
                         '--verbose',
                         action='count',
@@ -54,6 +55,9 @@ def main(args=sys.argv[1:]):
     parser.add_argument('input', help='input filename or directory', type=str)
 
     parsed_args = parser.parse_args(args)
+
+    status = 0
+    set_logger_level(parsed_args)
 
     # strip MC arguments
     mc_args = parsed_args.mcopt
@@ -90,6 +94,8 @@ def main(args=sys.argv[1:]):
         r.clean(workspaces)
     elapsed = timeit.default_timer() - start_time
     print("Workspace cleaning {:.3f} seconds".format(elapsed))
+
+    return status
 
 
 if __name__ == '__main__':
