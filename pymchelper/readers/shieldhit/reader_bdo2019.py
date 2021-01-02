@@ -35,6 +35,7 @@ class SHReaderBDO2019(SHReader):
                 token_id, token_type, payload_len, raw_payload = token
 
                 payload = [None] * payload_len
+                _has_geo_units_in_ascii = False
 
                 # decode all strings (currently there will never be more than one per token)
                 if 'S' in token_type.decode('ASCII'):
@@ -73,10 +74,20 @@ class SHReaderBDO2019(SHReader):
                     estimator.y = estimator.y._replace(max_val=payload[1])
                     estimator.z = estimator.z._replace(max_val=payload[2])
 
-                if token_id == SHBDOTagID.SHBDO_GEO_UNITIDS:
+                if token_id == SHBDOTagID.SHBDO_GEO_UNITIDS and not _has_geo_units_in_ascii:
                     estimator.x = estimator.x._replace(unit=unit_name_from_unit_id.get(payload[0], ""))
                     estimator.y = estimator.y._replace(unit=unit_name_from_unit_id.get(payload[1], ""))
                     estimator.z = estimator.z._replace(unit=unit_name_from_unit_id.get(payload[2], ""))
+
+                # Units may also be given as pure ASCII directly from SHIELD-HIT12A new .bdo format.
+                # If this is available, then use those embedded in the .bdo file, instead of pymchelper setting them.
+                if token_id == SHBDOTagID.SHBDO_GEO_UNITS:
+                    _units = payload.split(";")
+                    if len(_units) == 3:
+                        estimator.x = estimator.x._replace(unit=_units[0])
+                        estimator.y = estimator.y._replace(unit=_units[1])
+                        estimator.z = estimator.z._replace(unit=_units[2])
+                        _has_geo_units_in_ascii = True
 
                 # detector type
                 if token_id == SHBDOTagID.SHBDO_PAG_TYPE:
@@ -112,6 +123,7 @@ class SHReaderBDO2019(SHReader):
                     logger.debug("Setting page.{} = {}".format(page_name_from_bdotag[token_id], payload))
                     setattr(estimator.pages[-1], page_name_from_bdotag[token_id], payload)
 
+            # Check if we have differential scoring, i.e. data dimension is larger than 1:
             for page in estimator.pages:
                 diff_level_1_size = getattr(page, 'dif_size', [0, 0])[0]
                 if diff_level_1_size > 1 and hasattr(page, 'dif_start') and hasattr(page, 'dif_stop'):
@@ -119,8 +131,16 @@ class SHReaderBDO2019(SHReader):
                                                min_val=page.dif_start[0],
                                                max_val=page.dif_stop[0],
                                                name="",
-                                               unit="",
+                                               unit=page.diff_units.split(";")[0],
                                                binning=MeshAxis.BinningType.linear)
+
+            # Copy the SH12A specific units into the general placeholders:
+            for page in estimator.pages:
+                page.unit = page.data_unit
+                # in future, a user may optionially give a more specific name in SH12A detect.dat, which then
+                # may be written to the .bdo file. If the name is not set, use the official detector name instead:
+                if not page.name:
+                    page.name = str(page.dettyp)
 
             logger.debug("Done reading bdo file.")
             return True
