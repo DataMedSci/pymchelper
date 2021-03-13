@@ -86,4 +86,5 @@ class FlukaReader(Reader):
             estimator.pages[0].data_raw *= 1.60217662e-7
 
         estimator.title = usr.detector[0].name.decode('ascii')
+        estimator.file_format = 'fluka_binary'
         return True

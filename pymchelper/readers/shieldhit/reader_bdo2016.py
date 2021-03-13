@@ -206,6 +206,8 @@ class SHReaderBDO2016(SHReader):
             estimator.pages[0].unit, estimator.pages[0].name = _get_detector_unit(estimator.pages[0].dettyp,
                                                                                   estimator.geotyp)
 
+            estimator.file_format = 'bdo2016'
+
             logger.debug("Done reading bdo file.")
             logger.debug("Detector data : " + str(estimator.pages[0].data))
             logger.debug("Detector nstat: " + str(estimator.number_of_primaries))
