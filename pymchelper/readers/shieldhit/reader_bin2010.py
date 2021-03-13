@@ -196,5 +196,6 @@ class SHReaderBin2010(SHReader):
         if not self.read_payload(estimator):
             logger.debug("Reading payload failed")
             return None
+        estimator.file_format = 'bin2010'
         super(SHReaderBin2010, self).read_data(estimator)
         return True

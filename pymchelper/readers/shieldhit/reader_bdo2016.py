@@ -15,6 +15,7 @@ logger = logging.getLogger(__name__)
 class SHReaderBDO2016(SHReader):
     """
     Binary format reader from version >= 0.6
+    This format doesn't have support for multiple pages per estimator
     """
     def read_data(self, estimator):
         logger.debug("Reading: " + self.filename)
@@ -205,8 +206,10 @@ class SHReaderBDO2016(SHReader):
             estimator.pages[0].unit, estimator.pages[0].name = _get_detector_unit(estimator.pages[0].dettyp,
                                                                                   estimator.geotyp)
 
+            estimator.file_format = 'bdo2016'
+
             logger.debug("Done reading bdo file.")
-            logger.debug("Detector data : " + str(estimator.data))
+            logger.debug("Detector data : " + str(estimator.pages[0].data))
             logger.debug("Detector nstat: " + str(estimator.number_of_primaries))
             logger.debug("Detector nx   : " + str(estimator.x.n))
             logger.debug("Detector ny   : " + str(estimator.y.n))

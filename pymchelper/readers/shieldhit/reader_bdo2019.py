@@ -142,5 +142,7 @@ class SHReaderBDO2019(SHReader):
                 if not page.name:
                     page.name = str(page.dettyp)
 
+            estimator.file_format = 'bdo2019'
+
             logger.debug("Done reading bdo file.")
             return True
