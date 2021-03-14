@@ -19,6 +19,8 @@ matrix:
           env: TOXENV=py36
         - python: 3.7
           env: TOXENV=py37
+        - python: 3.8
+          env: TOXENV=py38
         - python: 3.6
           env: TOXENV=docs
         - python: 2.7
@@ -28,10 +30,9 @@ matrix:
         - python: 3.7
           env: TOXENV=packaging
 #    uncomment and adjust if you want to allow some failures
-#    allow_failures:
-#        - os: linux
-#          python: nightly
-#          env: TOXENV=py37
+    allow_failures:
+        - python: 3.8
+          env: TOXENV=py38
 
 sudo: false
 
@@ -56,12 +57,12 @@ deploy:
       tags: true # fire only when tag applied (release being made)
       condition: $TOXENV == "packaging" && "$TRAVIS_TEST_RESULT" == "0" # fire for only one matrix element, if tests are OK
   - provider: pypi # upload pip package to pypi https://docs.travis-ci.com/user/deployment/pypi/
-    user: grzanka
+    username: "__token__"
     distributions: sdist bdist_wheel
     skip_cleanup: true
     skip_upload_docs: true
     password:
-      secure: kmwue5PN2Yi+JpdGQs+/pnoRvNsmjnvbLCHSZWJBrR5A+DPR6/E4bs5r9RZxSlBT5tOtpf+Fekbk3jNwN9p+Dr5tBaDG2GdVbqo/vMsmw0MguZUK34+RFrC0v38ovwRY69O6owEVYZeu2YZgq6PZT20n/OSsQn+Ep7YBYCVjLnG+k49JcfBgMEX/p0aVTcFz2gicrrxlvcyiKW7EMSjSrpgmj1XjEw5l2NCOoXyEtTiIBfGruw9X0aN78jq1eX4E893NfY4zk2sK6pMDq0B3SagsOeufGnMtVjYxct34vRQlNtBonh7GZHOh95NPTFT5Md5HY0vibOKv8/MjzRjLQrlRxoMjm3lZflAwKYldE5GSbpZQPxx3X7DIGZY2Lo1DcGoxx6c8BiHaVhBi7ardMg84ItwSQtTcw1XTPXStYhNQwe9lqoFhfHKD2pfsSs2BGbzUeE6TsXKQrCs9c0lNaE2guuwTqUxWEIv4MC4svqGmLjTRyQDyyIh6fiBCIPlOGHs2XlMixiy+sRUXyr5YYILOTu8WNdA/UgqOAXkTvgzPomWVIFpZvS3lFASho4yW2iNUcrrWQHoEJiIODwOQWhqY4NpVRzfft07zFEiIWXXWZ8bNbGgztUtXiotv2YH5nwQgl38jMeCEX1qQz16NGGOS23ubbxpAbUE/8Ia5Ca0=
+      secure: J5DtX72Ixl52SFqhTuPXAWPhSEV0uaBycUg7gxzAy86AKF0iR1BfG5BotMnbw8owu6yAzhNH0j6hwnCi9bj545UeWt/SCT2oPqCZfyfYtR2abrCjSK5Vk9eenOlYn3Wle1EFoyCWA+9FtA0bJ8MP/IPZdPPYloxk05+iCvsfA+dLWK5/NBr8SJh0wNK4QBuuGNzNAkPCoaUI+YWpYzALUToXvWVg9PxtonmIzs2uvdcvWEa0267ejNNfB+lCyezePHElAFY1L4F70d1XDrFBk+kcr6dzwJzFtvsHdmmV0qcNf/JzO/2EGAukUqhTYmLFa0b4TjDb/1SsyCDIMdQcHaJF1sqow9WlfyiQTFO5hket88+EGr6m70k3gzxMiGiV5q9q7aOO825WeRpYkcG/9YvPhpllxaHolpLeQIbi27RCma1whWVrmdvhVqW82tabaTTer+TIltaYP5FDzbBgwcbsfifgmm3FIY/TSVtUAO5+0MMacI0so3u6gLbf9aAaciM9su7+vRu4/7r1mkvaVE2LO2cR22a/5bwkcDYkjB9R54fPZOZp6fpM3pRN1IKMintpgml+1cZaWZRpe5ysBrgV1Whm9F8Un2ekGcSWNtPDbOAbJYqHHOIO0032EwqYudv42PhqtymKQCTCB8i6bxjCf7FDdK0gBBGNHpP3t2U=
     on:
       repo: DataMedSci/pymchelper
       tags: true
