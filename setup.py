@@ -44,7 +44,7 @@ setuptools.setup(
     license='MIT',
     author='Leszek Grzanka',
     author_email='leszek.grzanka@gmail.com',
-    description='Python toolkit for SHIELD-HIT12A and Fluka',
+    description='Python toolkit for SHIELD-HIT12A and FLUKA',
     long_description=readme + '\n',
     classifiers=[
         # How mature is this project? Common values are
@@ -73,6 +73,8 @@ setuptools.setup(
         'Programming Language :: Python :: 3.5',
         'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: 3.7',
+        'Programming Language :: Python :: 3.8',
+        'Programming Language :: Python :: 3.9'
     ],
     entry_points={
         'console_scripts': [

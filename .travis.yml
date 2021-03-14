@@ -9,7 +9,7 @@ matrix:
     include:
         - python: 2.7
           env: TOXENV=py27
-        - python: 3.7
+        - python: 3.8
           env: TOXENV=coverage
         - python: 3.4
           env: TOXENV=py34
@@ -21,6 +21,8 @@ matrix:
           env: TOXENV=py37
         - python: 3.8
           env: TOXENV=py38
+        - python: 3.9
+          env: TOXENV=py39
         - python: 3.6
           env: TOXENV=docs
         - python: 2.7
@@ -30,9 +32,9 @@ matrix:
         - python: 3.7
           env: TOXENV=packaging
 #    uncomment and adjust if you want to allow some failures
-    allow_failures:
-        - python: 3.8
-          env: TOXENV=py38
+#    allow_failures:
+#        - python: 3.8
+#          env: TOXENV=py38
 
 sudo: false
 
