@@ -229,13 +229,13 @@ class Resnuclei(Usrxxx):
             self.irrdt = None
 
             # Statistics are present?
-            if size == 14 and data[:8] == "ISOMERS:":
+            if size == 14 and data[:8] == b"ISOMERS:":
                 self.nisomers = struct.unpack("=10xi", data)[0]
                 data = fortran.read(f)
                 data = fortran.read(f)
                 size = len(data)
 
-            if size == 14 and data[:10] == "STATISTICS":
+            if size == 14 and data[:10] == b"STATISTICS":
                 self.statpos = f.tell()
                 break
 
@@ -625,7 +625,7 @@ class Usrbin(Usrxxx):
             size = len(data)
 
             # Statistics are present?
-            if size == 14 and data[:10] == "STATISTICS":
+            if size == 14 and data[:10] == b"STATISTICS":
                 self.statpos = f.tell()
                 break
             if size != 86:
