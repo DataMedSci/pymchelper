@@ -62,6 +62,7 @@ setuptools.setup(
         # OS and env
         'Environment :: Console',
         'Operating System :: POSIX :: Linux',
+        'Operating System :: Microsoft :: Windows',
 
         # Pick your license as you wish (should match "license" above)
         'License :: OSI Approved :: MIT License',
