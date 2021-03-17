@@ -36,7 +36,7 @@ def guess_corename(filename):
     Guess a reader based on file contents or extensions.
     In some cases (i.e. binary SH12A files) access to file contents is needed.
     :param filename:
-    :return:
+    :return: the corename of the file (i.e. the basename without the running number for averaging)
     """
     corename = FlukaReader(filename).corename
     if corename is None:
@@ -59,11 +59,12 @@ def fromfile(filename):
 
 def fromfilelist(input_file_list, error, nan):
     """
+    Reads all files from a given list, and returns a list of averaged esimators.
 
-    :param input_file_list:
-    :param error:
-    :param nan:
-    :return:
+    :param input_file_list: list of files to bre read
+    :param error: error estimation, see class ErrorEstimate class in pymchelper.estimator
+    :param nan: if True, NaN (not a number) are excluded when averaing data.
+    :return: list of estimators
     """
     if not isinstance(input_file_list, list):  # probably a string instead of list
         input_file_list = [input_file_list]
@@ -129,13 +130,14 @@ def fromfilelist(input_file_list, error, nan):
 
 def frompattern(pattern, error, nan, jobs=-1, verbose=0):
     """
+    Reads all files matching pattern, e.g.: 'foobar_*.bdo', and returns a list of averaged esimators.
 
-    :param pattern:
-    :param error:
-    :param nan:
-    :param jobs:
-    :param verbose:
-    :return:
+    :param pattern: pattern to be matched for reading.
+    :param error: error estimation, see class ErrorEstimate class in pymchelper.estimator
+    :param nan: if True, NaN (not a number) are excluded when averaing data.
+    :param jobs: optional number of threads for parallel processing
+    :param verbose: optional verbosity level.
+    :return: a list of estimators, or an empty list if no files were found.
     """
     list_of_matching_files = glob(pattern)
 
@@ -165,8 +167,8 @@ def convertfromlist(filelist, error, nan, outputdir, converter_name, options, ou
     """
 
     :param filelist:
-    :param error:
-    :param nan:
+    :param error: error estimation, see class ErrorEstimate class in pymchelper.estimator
+    :param nan: if True, NaN (not a number) are excluded when averaing data.
     :param outputdir:
     :param converter_name:
     :param options:
@@ -194,8 +196,8 @@ def convertfrompattern(pattern, outputdir, converter_name, options,
     :param outputdir:
     :param converter_name:
     :param options:
-    :param error:
-    :param nan:
+    :param error: error estimation, see class ErrorEstimate class in pymchelper.estimator
+    :param nan: if True, NaN (not a number) are excluded when averaing data.
     :param jobs:
     :param verbose:
     :return:
