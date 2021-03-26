@@ -55,26 +55,26 @@ class FlukaReader(Reader):
                 page.title = detector.name
 
                 # USRBIN doesn't support differential binning type, only spatial binning is allowed
-                page.x = MeshAxis(n=detector.nx,
-                                  min_val=detector.xlow,
-                                  max_val=detector.xhigh,
-                                  name="X",
-                                  unit="cm",
-                                  binning=MeshAxis.BinningType.linear)
-                page.y = MeshAxis(n=detector.ny,
-                                  min_val=detector.ylow,
-                                  max_val=detector.yhigh,
-                                  name="Y",
-                                  unit="cm",
-                                  binning=MeshAxis.BinningType.linear)
-                page.z = MeshAxis(n=detector.nz,
-                                  min_val=detector.zlow,
-                                  max_val=detector.zhigh,
-                                  name="Z",
-                                  unit="cm",
-                                  binning=MeshAxis.BinningType.linear)
+                estimator.x = MeshAxis(n=detector.nx,
+                                       min_val=detector.xlow,
+                                       max_val=detector.xhigh,
+                                       name="X",
+                                       unit="cm",
+                                       binning=MeshAxis.BinningType.linear)
+                estimator.y = MeshAxis(n=detector.ny,
+                                       min_val=detector.ylow,
+                                       max_val=detector.yhigh,
+                                       name="Y",
+                                       unit="cm",
+                                       binning=MeshAxis.BinningType.linear)
+                estimator.z = MeshAxis(n=detector.nz,
+                                       min_val=detector.zlow,
+                                       max_val=detector.zhigh,
+                                       name="Z",
+                                       unit="cm",
+                                       binning=MeshAxis.BinningType.linear)
 
-                page.name = detector.score
+                page.name = "scorer {}".format(detector.score)
                 page.unit = ""
 
                 # unpack detector data
@@ -102,14 +102,6 @@ class FlukaReader(Reader):
                 page.title = detector.name
                 page.area = detector.area  # area of the detector in cm**2
 
-                # USRBDX doesn't support spatial (XYZ) binning type
-                page.x = MeshAxis(n=1, min_val=detector.reg1, max_val=detector.reg1, name="X", unit="first region",
-                                  binning=MeshAxis.BinningType.linear)
-                page.y = MeshAxis(n=1, min_val=detector.reg2, max_val=detector.reg2, name="Y", unit="second region",
-                                  binning=MeshAxis.BinningType.linear)
-                page.z = MeshAxis(n=1, min_val=0., max_val=0., name="Z", unit="",
-                                  binning=MeshAxis.BinningType.linear)
-
                 if detector.nb == 1:
                     energy_binning = MeshAxis.BinningType.linear
                     angle_binning = MeshAxis.BinningType.linear
@@ -125,6 +117,7 @@ class FlukaReader(Reader):
                 else:
                     return Exception("Invalid binning type")
 
+                # USRBDX doesn't support spatial (XYZ) binning type
                 # USRBDX provides double differential binning, first axis is kinetic energy (in GeV)
                 page.diff_axis1 = MeshAxis(n=detector.ne,  # number of energy intervals for scoring
                                            min_val=detector.elow,  # minimum kinetic energy for scoring (GeV)
