@@ -99,7 +99,6 @@ def unpack_sparse_file(filename):
         result[tuple(ind)] = dat
     return result
 
-
 class TestSparseConverter(unittest.TestCase):
     """
     Tests if saved sparse matrices, after unpacking are equivalent to original data
