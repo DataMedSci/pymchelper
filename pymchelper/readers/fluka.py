@@ -103,9 +103,12 @@ class FlukaReader(Reader):
                 page.area = detector.area  # area of the detector in cm**2
 
                 # USRBDX doesn't support spatial (XYZ) binning type
-                page.x = MeshAxis(n=1, min_val=detector.reg1, max_val=detector.reg1, name="X", unit="first region", binning=MeshAxis.BinningType.linear)
-                page.y = MeshAxis(n=1, min_val=detector.reg2, max_val=detector.reg2, name="Y", unit="second region", binning=MeshAxis.BinningType.linear)
-                page.z = MeshAxis(n=1, min_val=0., max_val=0., name="Z", unit="", binning=MeshAxis.BinningType.linear)
+                page.x = MeshAxis(n=1, min_val=detector.reg1, max_val=detector.reg1, name="X", unit="first region",
+                                  binning=MeshAxis.BinningType.linear)
+                page.y = MeshAxis(n=1, min_val=detector.reg2, max_val=detector.reg2, name="Y", unit="second region",
+                                  binning=MeshAxis.BinningType.linear)
+                page.z = MeshAxis(n=1, min_val=0., max_val=0., name="Z", unit="",
+                                  binning=MeshAxis.BinningType.linear)
 
                 if detector.nb == 1:
                     energy_binning = MeshAxis.BinningType.linear
