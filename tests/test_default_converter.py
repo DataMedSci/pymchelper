@@ -9,6 +9,7 @@ import unittest
 import logging
 
 import numpy as np
+import pytest
 
 from pymchelper import run
 from pymchelper.estimator import ErrorEstimate
@@ -78,6 +79,7 @@ class TestErrorEstimate(unittest.TestCase):
                     return
 
 
+@pytest.mark.slow
 class TestDefaultConverter(unittest.TestCase):
     main_dir = os.path.join("tests", "res", "shieldhit", "generated")
     single_dir = os.path.join(main_dir, "single")

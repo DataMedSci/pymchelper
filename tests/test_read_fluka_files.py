@@ -2,11 +2,14 @@ import os
 import unittest
 import logging
 
+import pytest
+
 import pymchelper.flair.Input as Input
 
 logger = logging.getLogger(__name__)
 
 
+@pytest.mark.smoke
 class TestDefaultConverter(unittest.TestCase):
     main_dir = os.path.join("tests", "res", "fluka")
     generated_dir = os.path.join(main_dir, "generated")

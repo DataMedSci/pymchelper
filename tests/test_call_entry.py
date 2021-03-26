@@ -1,6 +1,9 @@
 import os
 import unittest
 import logging
+
+import pytest
+
 from pymchelper import run
 from examples import generate_detect_shieldhit, generate_fluka_input
 from pymchelper.flair import Input
@@ -9,18 +12,22 @@ logger = logging.getLogger(__name__)
 
 
 class TestCallMain(unittest.TestCase):
+
+    @pytest.mark.smoke
     def test_help(self):
         try:
             run.main(["--help"])
         except SystemExit as e:
             self.assertEqual(e.code, 0)
 
+    @pytest.mark.smoke
     def test_version(self):
         try:
             run.main(["--version"])
         except SystemExit as e:
             self.assertEqual(e.code, 0)
 
+    @pytest.mark.smoke
     def test_noarg(self):
         try:
             run.main([])
@@ -59,7 +66,9 @@ class TestCallMain(unittest.TestCase):
         self.assertEqual(len(png_files), len(bdo_files))
 
 
+@pytest.mark.smoke
 class TestCallExample(unittest.TestCase):
+
     def test_shieldhit(self):
         generate_detect_shieldhit.main()
         expected_filename = "detect.dat"

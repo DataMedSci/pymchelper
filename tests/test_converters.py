@@ -9,6 +9,7 @@ import tempfile
 import unittest
 
 import numpy as np
+import pytest
 
 import pymchelper.utils.pld2sobp
 from pymchelper import run
@@ -17,7 +18,9 @@ from pymchelper.input_output import fromfile
 logger = logging.getLogger(__name__)
 
 
+@pytest.mark.smoke
 class TestPld2Sobp(unittest.TestCase):
+
     def test_help(self):
         """ Print help text and exit normally.
         """
@@ -47,7 +50,7 @@ class TestPld2Sobp(unittest.TestCase):
         """
         import os
         inp_path = os.path.join("tests", "res", "pld", "test.pld")
-        out_path = os.path.join("tests", "res", "pld", "test.dat")
+        out_path = os.path.join("tests", "res", "pld", "test.dat")  # TODO replace with temporary file
         try:
             pymchelper.utils.pld2sobp.main(["-d", inp_path, out_path])
         except SystemExit as e:
@@ -56,7 +59,9 @@ class TestPld2Sobp(unittest.TestCase):
         self.assertTrue(os.path.isfile(out_path))
 
 
+@pytest.mark.smoke
 class TestTrip2Ddd(unittest.TestCase):
+
     def test_help(self):
         """ Print help text and exit normally.
         """

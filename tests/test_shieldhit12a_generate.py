@@ -5,6 +5,8 @@ import glob
 import shutil
 import logging
 
+import pytest
+
 from pymchelper import run
 from pymchelper.input_output import fromfile
 from pymchelper.shieldhit.detector.detector_type import SHDetType
@@ -48,6 +50,7 @@ class TestSHGenerated(unittest.TestCase):
                 self.assertGreater(len(dat_files), 4)
                 shutil.rmtree(outdir)
 
+    @pytest.mark.slow
     def test_standard(self):
         for est in ("cyl", "geomap", "msh", "plane", "zone"):
             logger.info("Estimator: " + est)
@@ -65,6 +68,7 @@ class TestSHGenerated(unittest.TestCase):
                 self.assertGreater(os.path.getsize(saved_file), 0)
                 os.remove(saved_file)
 
+    @pytest.mark.slow
     def test_plotdata(self):
         for est in ("cyl", "geomap", "msh", "plane", "zone"):
             logger.info("Estimator: " + est)
@@ -84,6 +88,7 @@ class TestSHGenerated(unittest.TestCase):
                     self.assertGreater(os.path.getsize(saved_file), 0)
                     os.remove(saved_file)
 
+    @pytest.mark.slow
     def test_image(self):
         allowed_patterns = ("_x_", "_y_", "_z_", "_xy_", "_yz_", "_xz_")
         for est in ("cyl", "geomap", "msh", "plane", "zone"):
