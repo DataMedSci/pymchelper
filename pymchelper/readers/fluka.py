@@ -4,17 +4,26 @@ import numpy as np
 
 from pymchelper.estimator import MeshAxis, Page
 from pymchelper.readers.common import ReaderFactory, Reader
-from pymchelper.shieldhit.detector.detector_type import SHDetType
-from pymchelper.shieldhit.detector.estimator_type import SHGeoType
-from pymchelper.flair.Data import Usrbin, UsrTrack, unpackArray, Usrbdx, Resnuclei
+from pymchelper.flair.Data import Usrbin, UsrTrack, unpackArray, Usrbdx, Resnuclei, Usrxxx
 
 logger = logging.getLogger(__name__)
 
 
 class FlukaReaderFactory(ReaderFactory):
+    """
+    Class responsible for discovery of filetype.
+    """
     def get_reader(self):
-        if "_fort" in self.filename:
+        """
+        Try reading header of Fluka binary file and return a corresponding FlukaReader object
+
+        :return: FlukaReader class if file is digested by Usrxxx Flair reader. None is returned otherwise
+        """
+        try:
+            Usrxxx(self.filename)
             return FlukaReader
+        except IOError:
+            pass
         return None
 
 
@@ -35,6 +44,7 @@ class FlukaReader(Reader):
         """
         USRBIN scores distribution of one of several quantities in a regular spatial
         structure (binning detector) independent from the geometry.
+        :param estimator: an Estimator object, will be modified here and filled with data
         """
         try:
             usr_object = Usrbin(self.filename)
@@ -81,6 +91,7 @@ class FlukaReader(Reader):
     def parse_usrbdx(self, estimator):
         """
         USRBDX defines a detector for a boundary crossing fluence or current estimator
+        :param estimator: an Estimator object, will be modified here and filled with data
         """
         try:
             usr_object = Usrbdx(self.filename)
@@ -155,6 +166,7 @@ class FlukaReader(Reader):
 
     def parse_usrtrack(self, estimator):
         """
+        :param estimator: an Estimator object, will be modified here and filled with data
         USRTRACK defines a detector for a track-length fluence estimator
         """
         try:
@@ -212,15 +224,32 @@ class FlukaReader(Reader):
             return None
 
     def parse_resnuclei(self, estimator):
+        """
+        TODO add support for resnuclei
+        RESNUCLEi Scores residual nuclei produced in inelastic interactions on a region basis
+        :param estimator: an Estimator object, will be modified here and filled with data
+        """
         try:
-            usr = Resnuclei(self.filename)
-            data = usr.readData(0)
-            fdata = unpackArray(data)
-            return usr
+            usr_object = Resnuclei(self.filename)
+            # loop over all detectors (pages) in USRTRACK object
+            for det_no, detector in enumerate(usr_object.detector):
+                page = Page(estimator=estimator)
+
+                # unpack detector data
+                # TODO cross-check if reshaping is needed
+                page.data_raw = np.array(unpackArray(usr_object.readData(det_no)))
+                page.error_raw = np.empty_like(page.data_raw)
+
+                estimator.add_page(page)
+            return usr_object
         except IOError:
             return None
 
     def parse_data(self, estimator):
+        """
+        TODO
+        :param estimator: an Estimator object, will be modified here and filled with data
+        """
         for parse_function in (self.parse_usrbin, self.parse_usrtrack, self.parse_usrbdx, self.parse_resnuclei):
             usr_object = parse_function(estimator)
 
@@ -229,7 +258,10 @@ class FlukaReader(Reader):
                 return usr_object
 
     def read_data(self, estimator, nscale=1):
-
+        """
+        TODO
+        :param estimator: an Estimator object, will be modified here and filled with data
+        """
         usr_object = self.parse_data(estimator)
 
         estimator.file_counter = usr_object.nbatch
@@ -237,54 +269,5 @@ class FlukaReader(Reader):
         estimator.time = usr_object.time
         estimator.title = usr_object.title
 
-        # usr.say()  # file,title,time,weight,ncase,nbatch
-        # for i, _ in enumerate(usr.detector):
-        #     logger.debug("-" * 20 + (" Detector number %i " % i) + "-" * 20)
-        #     usr.say(i)  # details for each detector
-        #
-        # # TODO read detector type
-        # estimator.det = "FLUKA"
-
-        # # TODO read particle type
-        # estimator.particle = 0
-        #
-        # # TODO read geo type
-        # estimator.geotyp = SHGeoType.unknown
-        #
-        # # TODO cross-check statistics
-        # estimator.number_of_primaries = usr.ncase
-        #
-        # # TODO figure out when more detectors are used
-        # nx = usr.detector[0].nx
-        # ny = usr.detector[0].ny
-        # nz = usr.detector[0].nz
-        #
-        # xmin = usr.detector[0].xlow
-        # ymin = usr.detector[0].ylow
-        # zmin = usr.detector[0].zlow
-        #
-        # xmax = usr.detector[0].xhigh
-        # ymax = usr.detector[0].yhigh
-        # zmax = usr.detector[0].zhigh
-        #
-        # estimator.x = MeshAxis(n=nx, min_val=xmin, max_val=xmax,
-        #                        name="X", unit="", binning=MeshAxis.BinningType.linear)
-        # estimator.y = MeshAxis(n=ny, min_val=ymin, max_val=ymax,
-        #                        name="Y", unit="", binning=MeshAxis.BinningType.linear)
-        # estimator.z = MeshAxis(n=nz, min_val=zmin, max_val=zmax,
-        #                        name="Z", unit="", binning=MeshAxis.BinningType.linear)
-        #
-        # estimator.pages[0].unit, estimator.pages[0].name = "", ""
-        #
-        # # TODO read detector type
-        # estimator.pages[0].dettyp = SHDetType.none  # TODO replace with Fluka detector type
-        #
-        # estimator.pages[0].data_raw = np.array(fdata)
-        # if nscale != 1:
-        #     estimator.pages[0].data_raw *= nscale
-        #     # 1 gigaelectron volt / gram = 1.60217662 x 10-7 Gy
-        #     estimator.pages[0].data_raw *= 1.60217662e-7
-
-        # estimator.title = usr.detector[0].name.decode('ascii')
         estimator.file_format = 'fluka_binary'
         return True
