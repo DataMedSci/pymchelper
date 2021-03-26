@@ -9,6 +9,7 @@ import tempfile
 import unittest
 
 import numpy as np
+import pytest
 
 import pymchelper.utils.pld2sobp
 from pymchelper import run
@@ -18,6 +19,8 @@ logger = logging.getLogger(__name__)
 
 
 class TestPld2Sobp(unittest.TestCase):
+
+    @pytest.mark.smoke
     def test_help(self):
         """ Print help text and exit normally.
         """
@@ -26,6 +29,7 @@ class TestPld2Sobp(unittest.TestCase):
         except SystemExit as e:
             self.assertEqual(e.code, 0)
 
+    @pytest.mark.smoke
     def test_version(self):
         """ Print version and exit normally.
         """
@@ -42,12 +46,13 @@ class TestPld2Sobp(unittest.TestCase):
         except SystemExit as e:
             self.assertEqual(e.code, 2)
 
+    @pytest.mark.smoke
     def test_simple(self):
         """ Simple conversion including diagnostic output.
         """
         import os
         inp_path = os.path.join("tests", "res", "pld", "test.pld")
-        out_path = os.path.join("tests", "res", "pld", "test.dat")
+        out_path = os.path.join("tests", "res", "pld", "test.dat")  # TODO replace with temporary file
         try:
             pymchelper.utils.pld2sobp.main(["-d", inp_path, out_path])
         except SystemExit as e:
@@ -57,6 +62,8 @@ class TestPld2Sobp(unittest.TestCase):
 
 
 class TestTrip2Ddd(unittest.TestCase):
+
+    @pytest.mark.smoke
     def test_help(self):
         """ Print help text and exit normally.
         """
@@ -65,6 +72,7 @@ class TestTrip2Ddd(unittest.TestCase):
         except SystemExit as e:
             self.assertEqual(e.code, 0)
 
+    @pytest.mark.smoke
     def test_version(self):
         """ Print version and exit normally.
         """

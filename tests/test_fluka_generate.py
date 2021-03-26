@@ -5,6 +5,8 @@ import logging
 
 import shutil
 
+import pytest
+
 import tests.res.fluka.generated.generate_input as gen
 from pymchelper.flair import Input
 
@@ -12,6 +14,8 @@ logger = logging.getLogger(__name__)
 
 
 class TestFlukaGenerate(unittest.TestCase):
+
+    @pytest.mark.smoke
     def test_create(self):
         working_dir = tempfile.mkdtemp()  # make temp working dir for converter output files
         logger.info("Creating directory {:s}".format(working_dir))

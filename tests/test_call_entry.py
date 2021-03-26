@@ -1,6 +1,9 @@
 import os
 import unittest
 import logging
+
+import pytest
+
 from pymchelper import run
 from examples import generate_detect_shieldhit, generate_fluka_input
 from pymchelper.flair import Input
@@ -9,12 +12,15 @@ logger = logging.getLogger(__name__)
 
 
 class TestCallMain(unittest.TestCase):
+
+    @pytest.mark.smoke
     def test_help(self):
         try:
             run.main(["--help"])
         except SystemExit as e:
             self.assertEqual(e.code, 0)
 
+    @pytest.mark.smoke
     def test_version(self):
         try:
             run.main(["--version"])
@@ -60,6 +66,8 @@ class TestCallMain(unittest.TestCase):
 
 
 class TestCallExample(unittest.TestCase):
+
+    @pytest.mark.smoke
     def test_shieldhit(self):
         generate_detect_shieldhit.main()
         expected_filename = "detect.dat"
@@ -67,6 +75,7 @@ class TestCallExample(unittest.TestCase):
         logger.info("checking presence of {:s} file".format(expected_filename))
         self.assertTrue(os.path.isfile(expected_filename))
 
+    @pytest.mark.smoke
     def test_fluka(self):
         generate_fluka_input.main()
         expected_filename = "fl_sim.inp"

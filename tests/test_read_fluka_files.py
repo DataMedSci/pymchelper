@@ -2,6 +2,8 @@ import os
 import unittest
 import logging
 
+import pytest
+
 import pymchelper.flair.Input as Input
 
 logger = logging.getLogger(__name__)
@@ -28,6 +30,7 @@ class TestDefaultConverter(unittest.TestCase):
                 logger.info("checking if more than one USRBIN present")
                 self.assertGreater(len(input.cards["USRBIN"]), 1)
 
+    @pytest.mark.smoke
     def test_load_input(self):
         self.check_directory(self.main_dir)
         self.check_directory(self.generated_dir)
