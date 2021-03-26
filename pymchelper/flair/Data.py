@@ -165,7 +165,7 @@ class Usrxxx:
         """Read detector det data structure"""
         f = open(self.file, "rb")
         fortran.skip(f)  # Skip header
-        for i in range(2 * det):
+        for _ in range(2 * det):
             fortran.skip(f)  # Detector Header & Data
         fortran.skip(f)  # Detector Header
         data = fortran.read(f)
@@ -229,13 +229,13 @@ class Resnuclei(Usrxxx):
             self.irrdt = None
 
             # Statistics are present?
-            if size == 14 and data[:8] == "ISOMERS:":
+            if size == 14 and data[:8] == b"ISOMERS:":
                 self.nisomers = struct.unpack("=10xi", data)[0]
                 data = fortran.read(f)
                 data = fortran.read(f)
                 size = len(data)
 
-            if size == 14 and data[:10] == "STATISTICS":
+            if size == 14 and data[:10] == b"STATISTICS":
                 self.statpos = f.tell()
                 break
 
@@ -326,7 +326,7 @@ class Resnuclei(Usrxxx):
         else:
             iso = None
         f.close()
-        return (total, A, errA, Z, errZ, data, iso)
+        return total, A, errA, Z, errZ, data, iso
 
     # ----------------------------------------------------------------------
     def say(self, det=None):
@@ -436,12 +436,12 @@ class Usrbdx(Usrxxx):
         for i in range(n):
             fortran.skip(f)  # Detector Header
             if self.detector[i].lowneu:
-                fortran.skip(f)  # Detector low enetry neutron groups
+                fortran.skip(f)  # Detector low energy neutron groups
             fortran.skip(f)  # Detector data
 
         fortran.skip(f)  # Detector Header
         if self.detector[n].lowneu:
-            fortran.skip(f)  # Detector low enetry neutron groups
+            fortran.skip(f)  # Detector low energy neutron groups
         data = fortran.read(f)  # Detector data
         f.close()
         return data
@@ -567,12 +567,12 @@ class UsrTrack(Usrxxx):
         for i in range(n):
             fortran.skip(f)  # Detector Header
             if self.detector[i].low_en_neutr_sc:
-                fortran.skip(f)  # Detector low enetry neutron groups
+                fortran.skip(f)  # Detector low energy neutron groups
             fortran.skip(f)  # Detector data
 
         fortran.skip(f)  # Detector Header
         if self.detector[n].low_en_neutr_sc:
-            fortran.skip(f)  # Detector low enetry neutron groups
+            fortran.skip(f)  # Detector low energy neutron groups
         data = fortran.read(f)  # Detector data
         f.close()
         return data
@@ -625,7 +625,7 @@ class Usrbin(Usrxxx):
             size = len(data)
 
             # Statistics are present?
-            if size == 14 and data[:10] == "STATISTICS":
+            if size == 14 and data[:10] == b"STATISTICS":
                 self.statpos = f.tell()
                 break
             if size != 86:
@@ -689,7 +689,7 @@ class Usrbin(Usrxxx):
         """Read detector det data structure"""
         f = open(self.file, "rb")
         fortran.skip(f)
-        for i in range(n):
+        for _ in range(n):
             fortran.skip(f)  # Detector Header
             fortran.skip(f)  # Detector data
         fortran.skip(f)  # Detector Header
@@ -706,7 +706,7 @@ class Usrbin(Usrxxx):
             return None
         f = open(self.file, "rb")
         f.seek(self.statpos)
-        for i in range(n):
+        for _ in range(n):
             fortran.skip(f)  # Detector Data
         data = fortran.read(f)
         f.close()
@@ -777,8 +777,7 @@ class Mgdraw:
         if data is None:
             return None
         if len(data) == 20:
-            ndum, mdum, jdum, edum, wdum \
-                = struct.unpack("=iiiff", data)
+            ndum, mdum, jdum, edum, wdum = struct.unpack("=iiiff", data)
         else:
             raise IOError("Invalid MGREAD file")
 
