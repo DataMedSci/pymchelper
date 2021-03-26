@@ -3,7 +3,7 @@ import logging
 
 import numpy as np
 
-from pymchelper.estimator import MeshAxis
+from pymchelper.estimator import MeshAxis, Page
 from pymchelper.readers.shieldhit.reader_base import SHReader, _get_mesh_units, _bintyp, _get_detector_unit
 from pymchelper.shieldhit.detector.detector_type import SHDetType
 from pymchelper.shieldhit.detector.estimator_type import SHGeoType
@@ -160,9 +160,10 @@ class SHReaderBin2010(SHReader):
         estimator.y = MeshAxis(n=np.abs(ny), min_val=ymin, max_val=ymax, name=yname, unit=yunit, binning=_bintyp(ny))
         estimator.z = MeshAxis(n=np.abs(nz), min_val=zmin, max_val=zmax, name=zname, unit=zunit, binning=_bintyp(nz))
 
-        estimator.pages[0].dettyp = SHDetType(det_attribs.det_type)
-
-        estimator.unit, estimator.name = _get_detector_unit(estimator.pages[0].dettyp, estimator.geotyp)
+        page = Page(estimator=estimator)
+        page.dettyp = SHDetType(det_attribs.det_type)
+        page.unit, page.name = _get_detector_unit(page.dettyp, estimator.geotyp)
+        estimator.add_page(page)
 
         return True  # reading OK
 
@@ -182,6 +183,7 @@ class SHReaderBin2010(SHReader):
         record = np.fromfile(self.filename, record_dtype, count=-1)
         # BIN(*)  : a large array holding results. Accessed using pointers.
         estimator.pages[0].data_raw = np.array(record['bin2'][:][0])
+        estimator.pages[0].error_raw = np.empty_like(estimator.pages[0].data_raw)
 
         logger.debug("Raw data: {}".format(estimator.pages[0].data_raw))
 
