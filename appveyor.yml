@@ -8,21 +8,21 @@ build: off
 
 environment:
   matrix:
-    - platform: x64
-      PYTHON: "C:\\Python27-x64"
+#     - platform: x64
+#       PYTHON: "C:\\Python27-x64"
 
-    - platform: x64
-      PYTHON: "C:\\Python35-x64"
+#     - platform: x64
+#       PYTHON: "C:\\Python35-x64"
 
-    - platform: x64
-      PYTHON: "C:\\Python36-x64"
+#     - platform: x64
+#       PYTHON: "C:\\Python36-x64"
 
-    - platform: x64
-      PYTHON: "C:\\Python37-x64"
+#     - platform: x64
+#       PYTHON: "C:\\Python37-x64"
 
-    - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019
-      platform: x64
-      PYTHON: "C:\\Python38-x64"
+#     - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019
+#       platform: x64
+#       PYTHON: "C:\\Python38-x64"
 
     - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019
       platform: x64
@@ -69,26 +69,26 @@ install:
   - python -V
   - python -m pip -V
 
-test_script:
-# make wheel package
-  - python -m pip install wheel
-  - python setup.py bdist_wheel
-# clean build directory
-  - rd /s /q build
-# remove source directory, to be sure that we use only wheel package for testing
-  - rd /s /q pymchelper
-  - del setup.py
-# install wheel package via pip, as we do not know the wheel filename in advance, we loop over all *.whl files in dist directory
-# with current pip install the installation from the pymchelper project fails, hence we temporarily go somewhere else to call it
-  - ps: cd C:\ ; Get-ChildItem -Path C:\projects\pymchelper\dist\ -Recurse -Include *.whl | foreach-object { echo $_ | Out-Host ; python -m pip install $_}
-# check if pymchelper was installed
-  - python -c "import pymchelper;print(pymchelper.__version__)"
-# install optional dependencies
-  - python -m pip install pytrip98
-# run tests (normal py.test command may results in memory error on appveyor, so we run tests file-by-file)
-  - cd C:\\projects\\pymchelper\
-  - del tests\\test_default_converter.py # remove one of the problematic tests
-  - ps: Get-ChildItem -Path tests\ -Recurse -Include test*.py | foreach-object { $(echo $_ | Out-Host ; python -m pytest $_ | Out-Host; $?) -or $(break)}
+# test_script:
+# # make wheel package
+#   - python -m pip install wheel
+#   - python setup.py bdist_wheel
+# # clean build directory
+#   - rd /s /q build
+# # remove source directory, to be sure that we use only wheel package for testing
+#   - rd /s /q pymchelper
+#   - del setup.py
+# # install wheel package via pip, as we do not know the wheel filename in advance, we loop over all *.whl files in dist directory
+# # with current pip install the installation from the pymchelper project fails, hence we temporarily go somewhere else to call it
+#   - ps: cd C:\ ; Get-ChildItem -Path C:\projects\pymchelper\dist\ -Recurse -Include *.whl | foreach-object { echo $_ | Out-Host ; python -m pip install $_}
+# # check if pymchelper was installed
+#   - python -c "import pymchelper;print(pymchelper.__version__)"
+# # install optional dependencies
+#   - python -m pip install pytrip98
+# # run tests (normal py.test command may results in memory error on appveyor, so we run tests file-by-file)
+#   - cd C:\\projects\\pymchelper\
+#   - del tests\\test_default_converter.py # remove one of the problematic tests
+#   - ps: Get-ChildItem -Path tests\ -Recurse -Include test*.py | foreach-object { $(echo $_ | Out-Host ; python -m pytest $_ | Out-Host; $?) -or $(break)}
 
 # debugging RDP connection, uncomment to enable
 # more details here: https://www.appveyor.com/docs/how-to/rdp-to-build-worker/
