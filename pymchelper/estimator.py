@@ -208,7 +208,7 @@ class Page:
         >>> e.z = MeshAxis(n=1, min_val=0.0, max_val=1.0, name="Z", unit="cm", binning=MeshAxis.BinningType.linear)
         >>> p = Page(estimator=e)
         >>> p.data_raw = np.arange(6)
-        >>> p.data.shape
+        >>> tuple(int(n) for n in p.data.shape)
         (2, 3, 1, 1, 1)
         >>> p.data[1, 2, 0, 0, 0]
         5
