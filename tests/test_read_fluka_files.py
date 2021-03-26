@@ -8,7 +8,7 @@ import pymchelper.flair.Input as Input
 
 logger = logging.getLogger(__name__)
 
-
+@pytest.mark.smoke
 class TestDefaultConverter(unittest.TestCase):
     main_dir = os.path.join("tests", "res", "fluka")
     generated_dir = os.path.join(main_dir, "generated")
@@ -30,7 +30,6 @@ class TestDefaultConverter(unittest.TestCase):
                 logger.info("checking if more than one USRBIN present")
                 self.assertGreater(len(input.cards["USRBIN"]), 1)
 
-    @pytest.mark.smoke
     def test_load_input(self):
         self.check_directory(self.main_dir)
         self.check_directory(self.generated_dir)

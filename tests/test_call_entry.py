@@ -27,6 +27,7 @@ class TestCallMain(unittest.TestCase):
         except SystemExit as e:
             self.assertEqual(e.code, 0)
 
+    @pytest.mark.smoke
     def test_noarg(self):
         try:
             run.main([])
@@ -65,9 +66,9 @@ class TestCallMain(unittest.TestCase):
         self.assertEqual(len(png_files), len(bdo_files))
 
 
+@pytest.mark.smoke
 class TestCallExample(unittest.TestCase):
 
-    @pytest.mark.smoke
     def test_shieldhit(self):
         generate_detect_shieldhit.main()
         expected_filename = "detect.dat"
@@ -75,7 +76,6 @@ class TestCallExample(unittest.TestCase):
         logger.info("checking presence of {:s} file".format(expected_filename))
         self.assertTrue(os.path.isfile(expected_filename))
 
-    @pytest.mark.smoke
     def test_fluka(self):
         generate_fluka_input.main()
         expected_filename = "fl_sim.inp"

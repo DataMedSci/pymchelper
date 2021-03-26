@@ -18,9 +18,9 @@ from pymchelper.input_output import fromfile
 logger = logging.getLogger(__name__)
 
 
+@pytest.mark.smoke
 class TestPld2Sobp(unittest.TestCase):
 
-    @pytest.mark.smoke
     def test_help(self):
         """ Print help text and exit normally.
         """
@@ -29,7 +29,6 @@ class TestPld2Sobp(unittest.TestCase):
         except SystemExit as e:
             self.assertEqual(e.code, 0)
 
-    @pytest.mark.smoke
     def test_version(self):
         """ Print version and exit normally.
         """
@@ -46,7 +45,6 @@ class TestPld2Sobp(unittest.TestCase):
         except SystemExit as e:
             self.assertEqual(e.code, 2)
 
-    @pytest.mark.smoke
     def test_simple(self):
         """ Simple conversion including diagnostic output.
         """
@@ -61,9 +59,9 @@ class TestPld2Sobp(unittest.TestCase):
         self.assertTrue(os.path.isfile(out_path))
 
 
+@pytest.mark.smoke
 class TestTrip2Ddd(unittest.TestCase):
 
-    @pytest.mark.smoke
     def test_help(self):
         """ Print help text and exit normally.
         """
@@ -72,7 +70,6 @@ class TestTrip2Ddd(unittest.TestCase):
         except SystemExit as e:
             self.assertEqual(e.code, 0)
 
-    @pytest.mark.smoke
     def test_version(self):
         """ Print version and exit normally.
         """

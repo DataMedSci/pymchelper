@@ -9,9 +9,9 @@ from pymchelper.shieldhit.detector.geometry import CarthesianMesh, CylindricalMe
 from pymchelper.shieldhit.particle import SHParticleType, SHHeavyIonType
 
 
+@pytest.mark.smoke
 class TestSHDetector(unittest.TestCase):
 
-    @pytest.mark.smoke
     def test_create(self):
         d0 = SHDetType(0)
         self.assertEqual(d0, SHDetType.none)
@@ -27,9 +27,9 @@ class TestSHDetector(unittest.TestCase):
             self.assertIsInstance(e, ValueError)
 
 
+@pytest.mark.smoke
 class TestSHParticle(unittest.TestCase):
 
-    @pytest.mark.smoke
     def test_create(self):
         p_all = SHParticleType(-1)
         self.assertEqual(p_all, SHParticleType.all)
@@ -51,9 +51,9 @@ class TestSHParticle(unittest.TestCase):
             self.assertIsInstance(e, ValueError)
 
 
+@pytest.mark.smoke
 class TestFortranCard(unittest.TestCase):
 
-    @pytest.mark.smoke
     def test_create_string(self):
         comment = CardLine.comment
         self.assertEqual(len(comment), CardLine.no_of_elements * CardLine.element_length)
@@ -71,7 +71,6 @@ class TestFortranCard(unittest.TestCase):
         except Exception as e:
             self.assertIsInstance(e, Exception)
 
-    @pytest.mark.smoke
     def test_create_number(self):
         self.assertEqual(CardLine.any_to_element(""), " " * CardLine.element_length)
 
@@ -97,9 +96,9 @@ class TestFortranCard(unittest.TestCase):
             self.assertIsInstance(e, Exception)
 
 
+@pytest.mark.smoke
 class TestEstimatorWriter(unittest.TestCase):
 
-    @pytest.mark.smoke
     def test_write_msh(self):
         estimator = SHEstimator()
         estimator.estimator = SHGeoType.msh
