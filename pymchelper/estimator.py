@@ -320,7 +320,7 @@ class Estimator(object):
         self.error_type = ErrorEstimate.none
         self.geotyp = None  # MSH, CYL, etc...
 
-        self.pages = (Page(estimator=self),)  # empty page at the beginning
+        self.pages = ()  # empty tuple of pages at the beginning
 
     def add_page(self, page):
         """
