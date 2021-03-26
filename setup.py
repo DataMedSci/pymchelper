@@ -24,13 +24,37 @@ with open('README.rst') as readme_file:
 
 install_requires = []
 
-# packages specified in setup_requires are needed only when running setup.py, in our case it is only numpy
-# numpy is also added install_requires which is list of dependencies needed by pip when running `pip install`
+# here is table with corresponding numpy versions, and supported python and OS versions
+# it is based on inspection of https://pypi.org/project/numpy/
+# |---------------------------------------------------|
+# | numpy version | python versions |    OS support   |
+# |---------------------------------------------------|
+# |      1.20     |    3.7 - 3.9    | linux, mac, win |
+# |      1.19     |    3.6 - 3.8    | linux, mac, win |
+# |      1.18     |    3.5 - 3.8    | linux, mac, win |
+# |      1.17     |    3.5 - 3.7    | linux, mac, win |
+# |      1.16     | 2.7,  3.5 - 3.7 | linux, mac, win |
+# |      1.15     | 2.7,  3.4 - 3.7 | linux, mac, win |
+# |      1.14     | 2.7,  3.4 - 3.6 | linux, mac, win |
+# |      1.13     | 2.7,  3.4 - 3.6 | linux, mac, win |
+# |      1.12     | 2.7,  3.4 - 3.6 | linux, mac, win |
+# |      1.11     | 2.7,  3.4 - 3.5 | linux, mac, win |
+# |      1.10     | 2.7,  3.3 - 3.5 |      linux      |
+# |       1.9     | 2.7,  3.3 - 3.5 |      linux      |
+# |---------------------------------------------------|
 setup_requires = []
-if sys.version_info[0] == 3 and sys.version_info[1] == 5:
-    install_requires += ["numpy<1.19"]
-elif (sys.version_info[0] == 3 and sys.version_info[1] < 5) or (sys.version_info[0] == 2):
-    install_requires += ["numpy<1.16"]
+if sys.version_info[0] == 3 and sys.version_info[1] == 9:  # python 3.9
+    install_requires += ["numpy>=1.20"]
+elif sys.version_info[0] == 3 and sys.version_info[1] == 8:  # python 3.8
+    install_requires += ["numpy>=1.18"]
+elif sys.version_info[0] == 3 and sys.version_info[1] == 7:  # python 3.7
+    install_requires += ["numpy>=1.15"]
+elif sys.version_info[0] == 3 and sys.version_info[1] == 6:  # python 3.6
+    install_requires += ["numpy>=1.12,<1.20"]
+elif sys.version_info[0] == 3 and sys.version_info[1] == 5:  # python 3.5
+    install_requires += ["numpy>=1.11,<1.19"]
+elif (sys.version_info[0] == 3 and sys.version_info[1] < 5) or (sys.version_info[0] == 2):  # python 3.4 and 2.7
+    install_requires += ["numpy>=1.11,<1.16"]
     install_requires += ["enum34"]
 else:
     install_requires += ["numpy"]
