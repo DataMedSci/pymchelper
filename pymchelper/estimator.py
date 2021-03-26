@@ -246,7 +246,8 @@ class Page:
         >>> e.x = MeshAxis(n=1, min_val=0.0, max_val=1.0, name="X", unit="cm", binning=MeshAxis.BinningType.linear)
         >>> e.y = MeshAxis(n=3, min_val=0.0, max_val=150.0, name="Y", unit="cm", binning=MeshAxis.BinningType.linear)
         >>> e.z = MeshAxis(n=2, min_val=0.0, max_val=2.0, name="Z", unit="cm", binning=MeshAxis.BinningType.linear)
-        >>> p = e.pages[0]
+        >>> p = Page(estimator=e)
+        >>> e.add_page(page=p)
 
         First axis for plotting will be Y (as X axis holds only one bin):
         >>> p.plot_axis(0)
