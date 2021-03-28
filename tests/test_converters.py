@@ -46,13 +46,24 @@ class TestPld2Sobp(unittest.TestCase):
             self.assertEqual(e.code, 2)
 
     def test_simple(self):
-        """ Simple conversion including diagnostic output.
+        """ Simple conversion including diagnostic output and nozzle position.
         """
-        import os
         inp_path = os.path.join("tests", "res", "pld", "test.pld")
         out_path = os.path.join("tests", "res", "pld", "test.dat")  # TODO replace with temporary file
         try:
-            pymchelper.utils.pld2sobp.main(["-d", inp_path, out_path])
+            pymchelper.utils.pld2sobp.main(["-n", "-50.0", inp_path, out_path])
+        except SystemExit as e:
+            self.assertEqual(e.code, 0)
+
+        self.assertTrue(os.path.isfile(out_path))
+
+    def test_vsad(self):
+        """ Virtual source test
+        """
+        inp_path = os.path.join("tests", "res", "pld", "test.pld")
+        out_path = os.path.join("tests", "res", "pld", "test.dat")
+        try:
+            pymchelper.utils.pld2sobp.main(["-d", "-x", "200.0", "-y", "220.0", "-z", "180", inp_path, out_path])
         except SystemExit as e:
             self.assertEqual(e.code, 0)
 
