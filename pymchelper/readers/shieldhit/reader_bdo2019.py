@@ -89,8 +89,12 @@ class SHReaderBDO2019(SHReader):
                         estimator.z = estimator.z._replace(unit=_units[2])
                         _has_geo_units_in_ascii = True
 
-                # detector type
+                # page(detector) type
                 if token_id == SHBDOTagID.SHBDO_PAG_TYPE:
+                    # if no pages present, add first one
+                    if not estimator.pages:
+                        logger.debug("SHBDO_PAG_TYPE Creating first page")
+                        estimator.add_page(Page())
                     # check if detector type attribute present, if yes, then create new page
                     if estimator.pages[-1].dettyp is not None:  # the same tag appears again, looks like new page
                         logger.debug("SHBDO_PAG_TYPE Creating new page no {}".format(len(estimator.pages)))
@@ -98,8 +102,12 @@ class SHReaderBDO2019(SHReader):
                     logger.debug("Setting page.dettyp = {} ({})".format(SHDetType(payload), SHDetType(payload).name))
                     estimator.pages[-1].dettyp = SHDetType(payload)
 
-                # detector data
+                # page(detector) data
                 if token_id == SHBDOTagID.SHBDO_PAG_DATA:
+                    # if no pages present, add first one
+                    if not estimator.pages:
+                        logger.debug("SHBDO_PAG_TYPE Creating first page")
+                        estimator.add_page(Page())
                     # check if data attribute present, if yes, then create new page
                     if estimator.pages[-1].data_raw.size > 1:
                         logger.debug("SHBDO_PAG_DATA Creating new page no {}".format(len(estimator.pages)))
@@ -137,7 +145,7 @@ class SHReaderBDO2019(SHReader):
             # Copy the SH12A specific units into the general placeholders:
             for page in estimator.pages:
                 page.unit = page.data_unit
-                # in future, a user may optionially give a more specific name in SH12A detect.dat, which then
+                # in future, a user may optionally give a more specific name in SH12A detect.dat, which then
                 # may be written to the .bdo file. If the name is not set, use the official detector name instead:
                 if not page.name:
                     page.name = str(page.dettyp)
