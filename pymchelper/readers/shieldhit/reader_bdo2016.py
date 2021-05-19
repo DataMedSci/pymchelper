@@ -2,7 +2,7 @@ import logging
 
 import numpy as np
 
-from pymchelper.estimator import MeshAxis
+from pymchelper.estimator import MeshAxis, Page
 from pymchelper.readers.shieldhit.reader_base import SHReader, _get_mesh_units, _bintyp, _get_detector_unit, \
     read_next_token
 from pymchelper.readers.shieldhit.binary_spec import SHBDOTagID, detector_name_from_bdotag
@@ -28,6 +28,10 @@ class SHReaderBDO2016(SHReader):
             logger.debug("Magic : " + _x['magic'][0].decode('ASCII'))
             logger.debug("Endian: " + _x['end'][0].decode('ASCII'))
             logger.debug("VerStr: " + _x['vstr'][0].decode('ASCII'))
+
+            # if no pages are present, add first one
+            if not estimator.pages:
+                estimator.add_page(Page())
 
             while f:
                 token = read_next_token(f)
