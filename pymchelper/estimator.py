@@ -237,7 +237,7 @@ class Page:
         """
         if self.estimator:
             order = 'C'
-            if self.estimator.file_format == 'bdo2019':
+            if self.estimator.file_format in ('bdo2016', 'bdo2019'):
                 order = 'F'
             return self.error_raw.reshape((self.estimator.x.n, self.estimator.y.n, self.estimator.z.n,
                                            self.diff_axis1.n, self.diff_axis2.n), order=order)
