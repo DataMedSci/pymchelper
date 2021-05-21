@@ -217,8 +217,13 @@ class Page:
         """
 
         if self.estimator:
+            # in SHIELD-HIT12A recent binary format data is stored as fortran array
+            # TODO investigate other file formats
+            order = 'C'
+            if self.estimator.file_format == 'bdo2019':
+                order = 'F'
             return self.data_raw.reshape((self.estimator.x.n, self.estimator.y.n, self.estimator.z.n,
-                                          self.diff_axis1.n, self.diff_axis2.n))
+                                          self.diff_axis1.n, self.diff_axis2.n), order=order)
         else:
             return None
 
@@ -231,8 +236,11 @@ class Page:
         :return:
         """
         if self.estimator:
+            order = 'C'
+            if self.estimator.file_format == 'bdo2019':
+                order = 'F'
             return self.error_raw.reshape((self.estimator.x.n, self.estimator.y.n, self.estimator.z.n,
-                                           self.diff_axis1.n, self.diff_axis2.n))
+                                           self.diff_axis1.n, self.diff_axis2.n), order=order)
         else:
             return None
 
