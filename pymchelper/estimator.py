@@ -216,9 +216,10 @@ class Page:
         :return: reshaped view of ``data_raw``
         """
         if self.estimator:
-            return self._reshape(self.data_raw, (self.estimator.x.n, self.estimator.y.n, self.estimator.z.n, self.diff_axis1.n, self.diff_axis2.n))
+            return self._reshape(data_1d=self.data_raw,
+                                 shape=(self.estimator.x.n, self.estimator.y.n, self.estimator.z.n,
+                                        self.diff_axis1.n, self.diff_axis2.n))
         return None
-
 
     @property
     def error(self):
@@ -229,7 +230,9 @@ class Page:
         :return:
         """
         if self.estimator:
-            return self._reshape(self.error_raw, (self.estimator.x.n, self.estimator.y.n, self.estimator.z.n, self.diff_axis1.n, self.diff_axis2.n))
+            return self._reshape(data_1d=self.error_raw,
+                                 shape=(self.estimator.x.n, self.estimator.y.n, self.estimator.z.n,
+                                        self.diff_axis1.n, self.diff_axis2.n))
         return None
 
     def _reshape(self, data_1d, shape):
