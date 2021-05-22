@@ -215,17 +215,10 @@ class Page:
 
         :return: reshaped view of ``data_raw``
         """
-
         if self.estimator:
-            # in SHIELD-HIT12A recent binary format data is stored as fortran array
-            # TODO investigate other file formats
-            order = 'C'
-            if self.estimator.file_format in ('bdo2016', 'bdo2019'):
-                order = 'F'
-            return self.data_raw.reshape((self.estimator.x.n, self.estimator.y.n, self.estimator.z.n,
-                                          self.diff_axis1.n, self.diff_axis2.n), order=order)
-        else:
-            return None
+            return self._reshape(self.data_raw, (self.estimator.x.n, self.estimator.y.n, self.estimator.z.n, self.diff_axis1.n, self.diff_axis2.n))
+        return None
+
 
     @property
     def error(self):
@@ -236,11 +229,16 @@ class Page:
         :return:
         """
         if self.estimator:
+            return self._reshape(self.error_raw, (self.estimator.x.n, self.estimator.y.n, self.estimator.z.n, self.diff_axis1.n, self.diff_axis2.n))
+        return None
+
+    def _reshape(self, data_1d, shape):
+        # TODO check also  tests/res/shieldhit/single/ex_yzmsh.bdo as it is saved in bin2010 format
+        if self.estimator:
             order = 'C'
-            if self.estimator.file_format in ('bdo2016', 'bdo2019'):
+            if self.estimator.file_format in ('bdo2016', 'bdo2019', 'fluka_binary'):
                 order = 'F'
-            return self.error_raw.reshape((self.estimator.x.n, self.estimator.y.n, self.estimator.z.n,
-                                           self.diff_axis1.n, self.diff_axis2.n), order=order)
+            return data_1d.reshape(shape, order=order)
         else:
             return None
 
