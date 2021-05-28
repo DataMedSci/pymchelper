@@ -176,11 +176,11 @@ class ImageWriter:
             from matplotlib import colors
         except ImportError:
             logger.error("Matplotlib not installed, output won't be generated")
-            return 1
+            return None
 
         # skip plotting 1-D and 3-D and higher dimensional data
         if page.dimension not in (1, 2):
-            return 0
+            return None
 
         data_raw = page.data_raw
         error_raw = page.error_raw
@@ -248,13 +248,13 @@ class ImageWriter:
         return fig
 
     def write(self, estimator):
-
-        # save to single page to a file without number (i.e. output.png)
+        # save single page to a file without number (i.e. output.png)
         if len(estimator.pages) == 1:
             fig = self.get_page_figure(estimator.pages[0])
-            fig.savefig(self.plot_filename)
+            if fig:
+                logger.info("Writing {}".format(self.plot_filename))
+                fig.savefig(self.plot_filename)
         else:
-
             # split output path into directory, basename and extension
             dir_path = os.path.dirname(self.plot_filename)
             if not os.path.exists(dir_path):
@@ -273,8 +273,9 @@ class ImageWriter:
                 output_path = os.path.join(dir_path, output_filename)
 
                 # save the output file
-                logger.info("Writing {}".format(output_path))
                 fig = self.get_page_figure(page)
-                fig.savefig(output_path)
+                if fig:
+                    logger.info("Writing {}".format(output_path))
+                    fig.savefig(output_path)
 
         return 0
