@@ -139,7 +139,16 @@ class SHReaderBDO2019(SHReader):
                                                min_val=page.dif_start[0],
                                                max_val=page.dif_stop[0],
                                                name="",
-                                               unit=page.diff_units.split(";")[0],
+                                               unit=page.dif_units.split(";")[0],
+                                               binning=MeshAxis.BinningType.linear)
+
+                diff_level_2_size = getattr(page, 'dif_size', [0, 0])[1]
+                if diff_level_2_size > 1 and hasattr(page, 'dif_start') and hasattr(page, 'dif_stop'):
+                    page.diff_axis2 = MeshAxis(n=diff_level_2_size,
+                                               min_val=page.dif_start[1],
+                                               max_val=page.dif_stop[1],
+                                               name="",
+                                               unit=page.dif_units.split(";")[1],
                                                binning=MeshAxis.BinningType.linear)
 
             # Copy the SH12A specific units into the general placeholders:
