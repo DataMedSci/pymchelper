@@ -215,12 +215,11 @@ class Page:
 
         :return: reshaped view of ``data_raw``
         """
-
         if self.estimator:
-            return self.data_raw.reshape((self.estimator.x.n, self.estimator.y.n, self.estimator.z.n,
-                                          self.diff_axis1.n, self.diff_axis2.n))
-        else:
-            return None
+            return self._reshape(data_1d=self.data_raw,
+                                 shape=(self.estimator.x.n, self.estimator.y.n, self.estimator.z.n,
+                                        self.diff_axis1.n, self.diff_axis2.n))
+        return None
 
     @property
     def error(self):
@@ -231,8 +230,18 @@ class Page:
         :return:
         """
         if self.estimator:
-            return self.error_raw.reshape((self.estimator.x.n, self.estimator.y.n, self.estimator.z.n,
-                                           self.diff_axis1.n, self.diff_axis2.n))
+            return self._reshape(data_1d=self.error_raw,
+                                 shape=(self.estimator.x.n, self.estimator.y.n, self.estimator.z.n,
+                                        self.diff_axis1.n, self.diff_axis2.n))
+        return None
+
+    def _reshape(self, data_1d, shape):
+        # TODO check also  tests/res/shieldhit/single/ex_yzmsh.bdo as it is saved in bin2010 format
+        if self.estimator:
+            order = 'C'
+            if self.estimator.file_format in ('bdo2016', 'bdo2019', 'fluka_binary'):
+                order = 'F'
+            return data_1d.reshape(shape, order=order)
         else:
             return None
 
@@ -274,11 +283,11 @@ class Page:
 
 class Estimator(object):
     """
-    Detector data including scoring mesh description.
+    Estimator data including scoring mesh description.
 
     This class handles in universal way data generated with MC code.
     It includes data (``data`` and ``data_raw`` fields) and optional errors (``error`` and ``error_raw``).
-    Detector holds also up to 3 binning axis (``x``, ``y`` and ``z`` fields).
+    Estimator holds also up to 3 binning axis (``x``, ``y`` and ``z`` fields).
     Scored quantity can be assigned a ``name`` (i.e. dose) and ``unit`` (i.e. Gy).
     Several other fields are also used:
       - nstat: number of simulated histories
@@ -286,7 +295,7 @@ class Estimator(object):
       - corename: common core part of input files defining a name of detector
       - error_type: none, stderr or stddev - error type
 
-    Detector data can be either read from the file (see ``fromfile`` method in ``io`` module
+    Estimator data can be either read from the file (see ``fromfile`` method in ``input_output`` module
     or constructed directly:
 
     >>> d = Estimator()
@@ -303,8 +312,8 @@ class Estimator(object):
 
     def __init__(self):
         """
-        Create dummy detector object.
-        >>> d = Estimator()
+        Create dummy estimator object.
+        >>> e = Estimator()
         """
         self.x = MeshAxis(n=1,
                           min_val=float("NaN"),
@@ -318,6 +327,7 @@ class Estimator(object):
         self.number_of_primaries = 0  # number of histories simulated
         self.file_counter = 0  # number of files read
         self.file_corename = ""  # common core for paths of contributing files
+        self.file_format = ""  # binary file format of the input files
         self.error_type = ErrorEstimate.none
         self.geotyp = None  # MSH, CYL, etc...
 
