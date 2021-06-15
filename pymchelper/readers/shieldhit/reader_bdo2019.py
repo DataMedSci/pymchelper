@@ -99,33 +99,16 @@ class SHReaderBDO2019(SHReader):
                         estimator.z = estimator.z._replace(unit=_units[2])
                         _has_geo_units_in_ascii = True
 
-                # page(detector) type
+                # page(detector) type, it begins new page block
                 if SHBDOTagID.detector_type == token_id:
-                    # if no pages present, add first one
-                    if not estimator.pages:
-                        logger.debug("SHBDO_PAG_TYPE Creating first page")
-                        estimator.add_page(Page())
-                    # check if detector type attribute present, if yes, then create new page
-                    if estimator.pages[-1].dettyp is not None:  # the same tag appears again, looks like new page
-                        logger.debug("SHBDO_PAG_TYPE Creating new page no {}".format(len(estimator.pages)))
-                        estimator.add_page(Page())
+                    # here new page is added to the estimator structure
+                    estimator.add_page(Page())
                     logger.debug("Setting page.dettyp = {} ({})".format(SHDetType(payload), SHDetType(payload).name))
                     estimator.pages[-1].dettyp = SHDetType(payload)
 
                 # page(detector) data is the last thing related to page that is saved in binary file
                 # at this point all other page related tags should already be processed
                 if SHBDOTagID.data_block == token_id:
-                    # if no pages present, add first one
-                    if not estimator.pages:
-                        logger.debug("Page data token found, no pages in estimator, creating first one")
-                        estimator.add_page(Page())
-                    # check if data attribute present, if yes, then create new page
-                    if estimator.pages[-1].data_raw.size > 1:
-                        logger.debug("Page data token found, creating new page no {}".format(len(estimator.pages)))
-                        estimator.add_page(Page())
-                    elif estimator.pages[-1].data_raw.size == 1 and not np.isnan(estimator.pages[-1].data_raw[0]):
-                        logger.debug("Page data token found, creating new page no {}".format(len(estimator.pages)))
-                        estimator.add_page(Page())
                     logger.debug("Setting page data = {}".format(np.asarray(payload)))
                     estimator.pages[-1].data_raw = np.asarray(payload)
 
@@ -136,12 +119,10 @@ class SHReaderBDO2019(SHReader):
 
                 # read tokens based on tag <-> name mapping for pages
                 if token_id in page_tags_to_save:
-                    if len(estimator.pages) == 0 or hasattr(estimator.pages[-1], SHBDOTagID(token_id).name):
-                        logger.debug("page_name_from_bdotag Creating new page no {}".format(len(estimator.pages)))
-                        estimator.add_page(Page())
                     logger.debug("Setting page.{} = {}".format(SHBDOTagID(token_id).name, payload))
                     setattr(estimator.pages[-1], SHBDOTagID(token_id).name, payload)
 
+            # Loop over the file is over here
             # Check if we have differential scoring, i.e. data dimension is larger than 1:
             for page in estimator.pages:
                 try:

@@ -88,7 +88,7 @@ class SHBDOTagID(IntEnum):
 
     # Page: meta-data */
     # Group 0xDD30 - 0xDDFF : page specific tags. */
-    detector_type = 0xDD30  # /* detector_type */
+    detector_type = 0xDD30  # /* detector_type, this starts new page */
     page_number = 0xDD31  # /* Number of this detector */
     page_normalized = 0xDD32  # Flags for page->postproc on how to postprocess the data in SHBDO_PAG_DATA
     """
@@ -107,7 +107,7 @@ class SHBDOTagID(IntEnum):
 
     page_scale_factor = 0xDD33  # /* if set and != 1.0 the data set was multiplied with this factor */
     page_offset = 0xDD34  # /* if set and != 0.0 the data set was offset with this value */
-    page_mediun_transport = 0xDD35  # /* [future] ASCII-string for detector medium set in geo.dat */
+    page_medium_transport = 0xDD35  # /* [future] ASCII-string for detector medium set in geo.dat */
     page_medium_scoring = 0xDD36  # /* [future] ASCII-string for detector medium set in detect.dat scoring */
     page_unit_ids = 0xDD37  # /* Unit IDs according to sh_units.h. Set for detector and the two diff. bins */
 
