@@ -56,32 +56,32 @@ class SHReaderBDO2019(SHReader):
                 ))
 
                 # geometry type
-                if token_id == SHBDOTagID.est_geo_type:
+                if token_id == SHBDOTagID.geometry_type:
                     estimator.geotyp = SHGeoType[payload.strip().lower()]
 
-                if token_id == SHBDOTagID.SHBDO_GEO_N:
+                if token_id == SHBDOTagID.geo_n_bins:
                     estimator.x = estimator.x._replace(n=payload[0])
                     estimator.y = estimator.y._replace(n=payload[1])
                     estimator.z = estimator.z._replace(n=payload[2])
 
-                if token_id == SHBDOTagID.SHBDO_GEO_P:
+                if token_id == SHBDOTagID.geo_p_start:
                     estimator.x = estimator.x._replace(min_val=payload[0])
                     estimator.y = estimator.y._replace(min_val=payload[1])
                     estimator.z = estimator.z._replace(min_val=payload[2])
 
-                if token_id == SHBDOTagID.SHBDO_GEO_Q:
+                if token_id == SHBDOTagID.geo_q_stop:
                     estimator.x = estimator.x._replace(max_val=payload[0])
                     estimator.y = estimator.y._replace(max_val=payload[1])
                     estimator.z = estimator.z._replace(max_val=payload[2])
 
-                if token_id == SHBDOTagID.SHBDO_GEO_UNITIDS and not _has_geo_units_in_ascii:
+                if token_id == SHBDOTagID.geo_unit_ids and not _has_geo_units_in_ascii:
                     estimator.x = estimator.x._replace(unit=unit_name_from_unit_id.get(payload[0], ""))
                     estimator.y = estimator.y._replace(unit=unit_name_from_unit_id.get(payload[1], ""))
                     estimator.z = estimator.z._replace(unit=unit_name_from_unit_id.get(payload[2], ""))
 
                 # Units may also be given as pure ASCII directly from SHIELD-HIT12A new .bdo format.
                 # If this is available, then use those embedded in the .bdo file, instead of pymchelper setting them.
-                if token_id == SHBDOTagID.SHBDO_GEO_UNITS:
+                if token_id == SHBDOTagID.geo_units:
                     _units = payload.split(";")
                     if len(_units) == 3:
                         estimator.x = estimator.x._replace(unit=_units[0])
@@ -90,7 +90,7 @@ class SHReaderBDO2019(SHReader):
                         _has_geo_units_in_ascii = True
 
                 # page(detector) type
-                if token_id == SHBDOTagID.SHBDO_PAG_TYPE:
+                if token_id == SHBDOTagID.detector_type:
                     # if no pages present, add first one
                     if not estimator.pages:
                         logger.debug("SHBDO_PAG_TYPE Creating first page")
@@ -103,7 +103,7 @@ class SHReaderBDO2019(SHReader):
                     estimator.pages[-1].dettyp = SHDetType(payload)
 
                 # page(detector) data
-                if token_id == SHBDOTagID.SHBDO_PAG_DATA:
+                if token_id == SHBDOTagID.data_block:
                     # if no pages present, add first one
                     if not estimator.pages:
                         logger.debug("SHBDO_PAG_TYPE Creating first page")

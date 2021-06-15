@@ -2,7 +2,8 @@ from enum import IntEnum
 
 
 class SHBDOTagID(IntEnum):
-    """ List of Tag ID numbers. Must be synchronized with bdotags in sh_detect.h in SH12A.
+    """ List of Tag ID numbers for BDO 2016 and 2019 formats.
+    Must be synchronized with tags in sh_bdo.h and sh_detect.h in SH12A.
     """
 
     # Hex values are used for better recognition in binary files, should they be inspected by humans.
@@ -17,25 +18,26 @@ class SHBDOTagID(IntEnum):
     # Group 0xAA00 - 0xAAFF : Runtime variables
     rt_nstat = 0xAA00  # number of actually simulated particles
     rt_time = 0xAA01  # [unsigned long int] optional runtime in seconds
+    rt_timesim = 0xAA02  # optional simulation time in seconds, excluding initialization.
 
     # Group 0xCB00 - 0xCBFF : Beam configuration
-    jpart0 = 0xCB00  # [int] primary particle id
-    apro0 = 0xCB01  # [float] number of nucleons a of the beam particles.
-    zpro0 = 0xCB02  # [float] charge z of the beam particles.
-    beamx = 0xCB03  # [float] start position of the beam - x coordinate
-    beamy = 0xCB04  # [float] start position of the beam - y coordinate
-    beamz = 0xCB05  # [float] start position of the beam - z coordinate
-    sigmax = 0xCB06  # [float] lateral extension of the beam in x direction
-    sigmay = 0xCB07  # [float] lateral extension of the beam in y direction
-    tmax0 = 0xCB08  # [float] the initial energy of the primary particle
+    jpart0 = 0xCB00  # [int] primary particle ID, in SH12A JPART terminology (32768 = INVALID)
+    apro0 = 0xCB01  # [int] number of nucleons A of the projectile - only written if nucleons > 0
+    zpro0 = 0xCB02  # [int] charge Z of the projectile, may also be negative (32768 = INVALID)
+    beamx = 0xCB03  # [float] start position of the beam - X coordinate
+    beamy = 0xCB04  # [float] start position of the beam - Y coordinate
+    beamz = 0xCB05  # [float] start position of the beam - Z coordinate
+    sigmax = 0xCB06  # [float] lateral extension of the beam in X direction
+    sigmay = 0xCB07  # [float] lateral extension of the beam in Y direction
+    tmax0 = 0xCB08  # [float] initial projectile energy (unit depends on projectile type)
     sigmat0 = 0xCB09  # [float] energy spread of the primary particle
     beamtheta = 0xCB0A  # [float] polar angle
     beamphi = 0xCB0B  # [float] azimuth angle
-    beamdivx = 0xCB0C  # [float] beam divergence - x coordinate
-    beamdivy = 0xCB0D  # [float] beam divergence - y coordinate
+    beamdivx = 0xCB0C  # [float] beam divergence - X coordinate
+    beamdivy = 0xCB0D  # [float] beam divergence - Y coordinate
     beamdivk = 0xCB0E  # [float] beam divergence - focus
     tmax0mev = 0xCB0F  # [double] initial projectile energy, always in [MeV]
-    tmax0amu = 0xCB10  # [double] initial projectile energy in [MeV/amu] - only written if mass > 0.001 u
+    tmax0amu = 0xCB10  # [double] initial projectile energy in [MeV/amu] - only written if mass > 1e-6 u
     tmax0nuc = 0xCB11  # [double] initial projectile energy in [MeV/nucl] - only written if nucleons > 0
 
     # Group 0xCC00 - 0xCCFF : Configuration
@@ -63,7 +65,7 @@ class SHBDOTagID(IntEnum):
     ct_icnt = 0xCE01  # holds three
     ct_len = 0xCE02  # holds three
 
-    # Group 0xDD00 - 0xDDFF : Detector/page specific tags
+    # Group 0xDD00 - 0xDD11 : old detect.f fortran Detector / page specific tags. See sh_detect.h
     det_geotyp = 0xDD00  # may differ from est_geotyp in case of spc
     det_nbin = 0xDD01  # idet(1-3) (len=3) number of bins x,y,z
     det_part = 0xDD02  # idet(4) particle type which was scored
@@ -86,58 +88,75 @@ class SHBDOTagID(IntEnum):
 
     # Page: meta-data */
     # Group 0xDD30 - 0xDDFF : page specific tags. */
-    SHBDO_PAG_TYPE = 0xDD30  # /* detector_type */
-    SHBDO_PAG_COUNT = 0xDD31  # /* Number of this detector */
-    SHBDO_PAG_NORMALIZE = 0xDD32  # /* == 1 quantity is "per particle", == 0 if not.*/
-    SHBDO_PAG_RESCALE = 0xDD33  # /* if set and != 1.0 the data set was multiplied with this factor */
-    SHBDO_PAG_OFFSET = 0xDD34  # /* if set and != 0.0 the data set was offset with this value */
-    SHBDO_PAG_MEDIUM_TRANSP = 0xDD35  # /* [future] ASCII-string for detector medium set in geo.dat */
-    SHBDO_PAG_MEDIUM_SCORE = 0xDD36  # /* [future] ASCII-string for detector medium set in detect.dat scoring */
-    SHBDO_PAG_UNITIDS = 0xDD37  # /* Unit IDs according to sh_units.h. Set for detector and the two diff. bins */
+    detector_type = 0xDD30  # /* detector_type */
+    page_number = 0xDD31  # /* Number of this detector */
+    page_normalized = 0xDD32  # Flags for page->postproc on how to postprocess the data in SHBDO_PAG_DATA
+    """
+    Given:
+        - the data in page->data as x_j
+        - for j instances of this simulation
+        - which was done with I_j number of paritcles.
+
+        The resulting data will be termed X and has the units given by SHBDO_PAG_DATA_UNIT
+
+        0: X = x_1                                for GEOMAP type scorers
+        1: X = sum_j x_j                          COUNT, ...
+        2: X = (sum_j x_j) / (sum_j I_j)          NORMCOUNT, ...
+        3: X = (sum_j x_j * I_j) / (sum_j I_j)    LET, ...
+    """
+
+    page_scale_factor = 0xDD33  # /* if set and != 1.0 the data set was multiplied with this factor */
+    page_offset = 0xDD34  # /* if set and != 0.0 the data set was offset with this value */
+    page_mediun_transport = 0xDD35  # /* [future] ASCII-string for detector medium set in geo.dat */
+    page_medium_scoring = 0xDD36  # /* [future] ASCII-string for detector medium set in detect.dat scoring */
+    page_unit_ids = 0xDD37  # /* Unit IDs according to sh_units.h. Set for detector and the two diff. bins */
 
     # /* page data */
-    det_data = 0xDDBB  # data block
-    SHBDO_PAG_DATA = 0xDDBB  # /* data block, identical to SHBDO_DET_DATA */
-    SHBDO_PAG_DATA_UNIT = 0xDDBC  # /* ASCII string unit, including any differentials */
+    data_block = 0xDDBB  # /* data block, identical to SHBDO_DET_DATA */
+    detector_unit = 0xDDBC  # /* ASCII string unit, including any differentials */
 
     # /* Page differential data */
-    SHBDO_PAG_DIF_SET = 0xDDD0  # /* flags if 1 or 2 differential binning was set. 1 for set, -1 for set as log10. */
-    SHBDO_PAG_DIF_TYPE = 0xDDD1  # /* array holding 1 or 2 number of bins, for type of differential */
-    SHBDO_PAG_DIF_START = 0xDDD2  # /* array holding 1 or 2 lower bounds, for 1-D or 2-D respectively */
-    SHBDO_PAG_DIF_STOP = 0xDDD3  # /* array holding 1 or 2 upper bounds, for 1-D or 2-D respectively */
-    SHBDO_PAG_DIF_SIZE = 0xDDD4  # /* array holding 1 or 2 number of bins, for 1-D or 2-D respectively */
-    SHBDO_PAG_DIF_UNITS = 0xDDD5  # /* ASCII string of ;-separated units along each dimension. */
+    page_diff_flag = 0xDDD0  # /* flags if 1 or 2 differential binning was set. 1 for set, -1 for set as log10. */
+    page_diff_type = 0xDDD1  # /* array holding 1 or 2 number of bins, for type of differential */
+    page_diff_start = 0xDDD2  # /* array holding 1 or 2 lower bounds, for 1-D or 2-D respectively */
+    page_diff_stop = 0xDDD3  # /* array holding 1 or 2 upper bounds, for 1-D or 2-D respectively */
+    page_diff_size = 0xDDD4  # /* array holding 1 or 2 number of bins, for 1-D or 2-D respectively */
+    page_diff_units = 0xDDD5  # /* ASCII string of ;-separated units along each dimension. %s;%s;%s where latter
+    #          two %s are the differential units, and the first is the data in
+    #          non-differential form. */
 
     # /* Filter data attached to page */
-    SHBDO_PAG_FILTER_NAME = 0xDDF0  # /* name of filter containing one or more rules */
-    SHBDO_PAG_FILTER_NRULES = 0xDDF1  # /* number of filter rules applied */
-    SHBDO_PAG_FILTER_EMIN = 0xDDF2  # /* lower energy threshold, emin */
-    SHBDO_PAG_FILTER_EMAX = 0xDDF3  # /* upper energy threshold, emin */
+    page_filter_name = 0xDDF0  # /* name of filter containing one or more rules */
+    page_filter_rules_no = 0xDDF1  # /* number of filter rules applied */
+    page_filter_e_min = 0xDDF2  # /* lower energy threshold, emin */
+    page_filter_emax = 0xDDF3  # /* upper energy threshold, emin */
 
     # Group 0xEE00 - 0xEEFF : Estimator specific tags
     # Geometry, as in gE0metry
-    est_geo_type = 0xE000  # geometry type ID, see SH_SGEO_* in sh_scoredef.h
-    SHBDO_GEO_NAME = 0xE001  # /* User-given name of this geometry */
-    SHBDO_GEO_P = 0xE002  # /* start values, e.g xmin, ymin, zmin */
-    SHBDO_GEO_Q = 0xE003  # /* stop values, e.g xmax, ymax, zmax */
-    SHBDO_GEO_N = 0xE004  # /* number of bins */
-    SHBDO_GEO_ROT = 0xE005  #
-    SHBDO_GEO_VOL = 0xE006  #
-    SHBDO_GEO_ZONES = 0xE007  #
-    SHBDO_GEO_NEQGRID = 0xE008  #
-    SHBDO_GEO_UNITS = 0xE009  #
-    SHBDO_GEO_UNITIDS = 0xE00A  # /* Unit IDs according to sh_units.h, one unit along each axis. */
+    geometry_type = 0xE000  # geometry type ID, see SH_SGEO_* in sh_scoredef.h
+    geometry_name = 0xE001  # /* User-given name of this geometry */
+    geo_p_start = 0xE002  # /* start values, e.g xmin, ymin, zmin */
+    geo_q_stop = 0xE003  # /* stop values, e.g xmax, ymax, zmax */
+    geo_n_bins = 0xE004  # /* number of bins */
+    geo_rotation = 0xE005  # [future] rotation of geometry
+    geo_volumt = 0xE006  # volume size in cm3 ... WARNING: may be a list in some future
+    geo_zones = 0xE007  # single GEMCA zone, or list of zones
+    geo_non_equidist_grid = 0xE008  # Array of non-equidistant z-grid. Tag only used if set.
+    geo_units = 0xE009  # [Future]: ASCII string of ;-separated units along each dimension.
+    geo_unit_ids = 0xE00A  # /* Unit IDs according to sh_units.h, one unit along each axis. */
 
     # Group 0xEF00 - 0xEFFF : Estimator
-    SHBDO_EST_FILENAME = 0xEE00  # /* number of detectors / pages for this estimator */
-    SHBDO_EST_COUNT = 0xEE01  # /* Unique number for this estimator, if several files were saved, starting at 0 */
-    SHBDO_EST_NPAGES = 0xEE02  # /* number of detectors / pages for this estimator */
-    SHBDO_EST_RESCALE_NSTAT = 0xEE03
+    filename_or_geotype = 0xEE00  # /* filename (bdo2019 format) or geometry name (bdo2016 format)*/
+    estimator_number = 0xEE01  # /* Unique number for this estimator, if several files were saved, starting at 0 */
+    number_of_pages = 0xEE02  # /* number of detectors / pages for this estimator */
+    estimator_rescale_per_particle = 0xEE03  # estimator "per particle" rescaling, absent or set to 1 if no rescaling
+    # note, that written data will *not* be multiplied with this value, it is up
+    # to the BDO reader to multiply with this, if SHBDO_PAGE_NORMALIZE was set
 
     # /* Group 0xFFCC - 0xFFFF : Diagnostics, may be ignored by readers. */
-    SHBDO_COMMENT = 0xFFCC  # /* 0xFFCC-omment */
-    SHBDO_DEBUG = 0xFFCD  # /* 0xFFCD-ebug */
-    SHBDO_ERROR = 0xFFCE  # /* 0xFFCE-rror */
+    comment = 0xFFCC  # /* 0xFFCC-omment */
+    debug = 0xFFCD  # /* 0xFFCD-ebug */
+    error = 0xFFCE  # /* 0xFFCE-rror */
 
 
 detector_name_from_bdotag = {
@@ -161,25 +180,25 @@ detector_name_from_bdotag = {
     SHBDOTagID.user: 'user',
     SHBDOTagID.host: 'host',
     SHBDOTagID.rt_nstat: 'number_of_primaries',
-    SHBDOTagID.SHBDO_EST_NPAGES: 'page_count',
-    SHBDOTagID.SHBDO_GEO_UNITIDS: 'geo_unit_ids',
-    SHBDOTagID.SHBDO_GEO_UNITS: 'geo_units',
-    SHBDOTagID.SHBDO_GEO_NAME: 'geo_name',
+    SHBDOTagID.number_of_pages: 'page_count',
+    SHBDOTagID.geo_unit_ids: 'geo_unit_ids',
+    SHBDOTagID.geo_units: 'geo_units',
+    SHBDOTagID.geometry_name: 'geo_name',
     SHBDOTagID.tmax0mev: 'Tmax_MeV',
     SHBDOTagID.tmax0amu: 'Tmax_MeV/amu',
     SHBDOTagID.tmax0nuc: 'Tmax_MeV/nucl'
 }
 
 page_name_from_bdotag = {
-    SHBDOTagID.SHBDO_PAG_RESCALE: 'rescale',
-    SHBDOTagID.SHBDO_PAG_OFFSET: 'offset',
-    SHBDOTagID.SHBDO_PAG_DIF_TYPE: 'dif_type',
-    SHBDOTagID.SHBDO_PAG_DIF_START: 'dif_start',
-    SHBDOTagID.SHBDO_PAG_DIF_STOP: 'dif_stop',
-    SHBDOTagID.SHBDO_PAG_DIF_SIZE: 'dif_size',
-    SHBDOTagID.SHBDO_PAG_DIF_UNITS: 'dif_units',
-    SHBDOTagID.SHBDO_PAG_DATA_UNIT: 'data_unit',
-    SHBDOTagID.SHBDO_PAG_UNITIDS: 'unit_ids',
+    SHBDOTagID.page_scale_factor: 'rescale',
+    SHBDOTagID.page_offset: 'offset',
+    SHBDOTagID.page_diff_type: 'dif_type',
+    SHBDOTagID.page_diff_start: 'dif_start',
+    SHBDOTagID.page_diff_stop: 'dif_stop',
+    SHBDOTagID.page_diff_size: 'dif_size',
+    SHBDOTagID.page_diff_units: 'dif_units',
+    SHBDOTagID.detector_unit: 'data_unit',
+    SHBDOTagID.page_unit_ids: 'unit_ids',
 }
 
 
