@@ -48,6 +48,7 @@ class Page:
     def dimension(self):
         """
         Let's take again detector d with YZ scoring.
+        >>> from pymchelper.estimator import Estimator
         >>> e = Estimator()
         >>> e.x = MeshAxis(n=1, min_val=0.0, max_val=1.0, name="X", unit="cm", binning=MeshAxis.BinningType.linear)
         >>> e.y = MeshAxis(n=3, min_val=0.0, max_val=150.0, name="Y", unit="cm", binning=MeshAxis.BinningType.linear)
@@ -75,6 +76,7 @@ class Page:
         Page data is stored originally in `data_raw` 1-D array.
         This property provides efficient view of data, suitable for numpy-like indexing.
 
+        >>> from pymchelper.estimator import Estimator
         >>> e = Estimator()
         >>> e.x = MeshAxis(n=2, min_val=0.0, max_val=10.0, name="X", unit="cm", binning=MeshAxis.BinningType.linear)
         >>> e.y = MeshAxis(n=3, min_val=0.0, max_val=150.0, name="Y", unit="cm", binning=MeshAxis.BinningType.linear)
@@ -124,6 +126,7 @@ class Page:
         Axes with constant value goes last.
 
         Let's take a detector d with YZ scoring.
+        >>> from pymchelper.estimator import Estimator
         >>> e = Estimator()
         >>> e.x = MeshAxis(n=1, min_val=0.0, max_val=1.0, name="X", unit="cm", binning=MeshAxis.BinningType.linear)
         >>> e.y = MeshAxis(n=3, min_val=0.0, max_val=150.0, name="Y", unit="cm", binning=MeshAxis.BinningType.linear)
