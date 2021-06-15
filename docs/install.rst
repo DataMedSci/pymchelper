@@ -22,7 +22,7 @@ Try if one of following commands (printing Python version) works::
 At the time of writing Python language interpreter has two popular versions: 2.x (Python 2) and 3.x (Python 3) families.
 Command ``python`` invokes either Python 2 or 3, while ``python3`` can invoke only Python 3.
 
-**pymchelper** supports most of the modern Python versions, mainly: 2.7, 3.2, 3.3, 3.4, 3.5 and 3.6.
+**pymchelper** supports most of the modern Python versions, mainly: 2.7, 3.4 - 3.9.
 Check if your interpreter version is supported.
 
 If none of ``python`` and ``python3`` commands are present, then Python interpreter has to be installed.

@@ -2,7 +2,8 @@ import logging
 
 import numpy as np
 
-from pymchelper.estimator import MeshAxis, Page
+from pymchelper.axis import MeshAxis
+from pymchelper.page import Page
 from pymchelper.readers.common import ReaderFactory, Reader
 from pymchelper.flair.Data import Usrbin, UsrTrack, unpackArray, Usrbdx, Resnuclei, Usrxxx
 

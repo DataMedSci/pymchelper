@@ -3,7 +3,7 @@ import os
 
 import numpy as np
 
-from pymchelper.estimator import MeshAxis
+from pymchelper.axis import MeshAxis
 from pymchelper.readers.common import Reader
 from pymchelper.shieldhit.detector.detector_type import SHDetType
 from pymchelper.shieldhit.detector.estimator_type import SHGeoType

@@ -52,18 +52,18 @@ def fromfile(filename):
         raise Exception("File format not compatible", filename)
     estimator = Estimator()
     estimator.file_counter = 1
-    if not reader.read(estimator):  # unsuccefful read
+    if not reader.read(estimator):  # some problems occured during read
         estimator = None
     return estimator
 
 
-def fromfilelist(input_file_list, error, nan):
+def fromfilelist(input_file_list, error=ErrorEstimate.stderr, nan=True):
     """
     Reads all files from a given list, and returns a list of averaged esimators.
 
     :param input_file_list: list of files to bre read
     :param error: error estimation, see class ErrorEstimate class in pymchelper.estimator
-    :param nan: if True, NaN (not a number) are excluded when averaing data.
+    :param nan: if True, NaN (not a number) are excluded when averaging data.
     :return: list of estimators
     """
     if not isinstance(input_file_list, list):  # probably a string instead of list
@@ -128,7 +128,7 @@ def fromfilelist(input_file_list, error, nan):
     return result
 
 
-def frompattern(pattern, error, nan, jobs=-1, verbose=0):
+def frompattern(pattern, error=ErrorEstimate.stderr, nan=True, jobs=-1, verbose=0):
     """
     Reads all files matching pattern, e.g.: 'foobar_*.bdo', and returns a list of averaged esimators.
 
