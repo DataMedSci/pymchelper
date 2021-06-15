@@ -166,7 +166,7 @@ Using as a library
 ------------------
 
 ``pymchelper`` is build around :doc:`Detector class <apidoc/pymchelper.detector>`.
-:doc:`I/O module <apidoc/pymchelper.io>` provides :bash:`fromfile` method
+:doc:`I/O module <apidoc/pymchelper.input_output>` provides :bash:`fromfile` method
 to get the data from binary file and is exposing to the user axis data, scoring information and data read from the file.
 See an example:
 

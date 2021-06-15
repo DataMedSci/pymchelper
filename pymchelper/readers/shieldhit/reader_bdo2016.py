@@ -2,7 +2,8 @@ import logging
 
 import numpy as np
 
-from pymchelper.estimator import MeshAxis, Page
+from pymchelper.axis import MeshAxis
+from pymchelper.page import Page
 from pymchelper.readers.shieldhit.reader_base import SHReader, _get_mesh_units, _bintyp, _get_detector_unit, \
     read_next_token
 from pymchelper.readers.shieldhit.binary_spec import SHBDOTagID, detector_name_from_bdotag
@@ -49,28 +50,37 @@ class SHReaderBDO2016(SHReader):
                 else:
                     pl = _pl
 
-                logger.debug("Read token {:s} (0x{:02x}) value {} type {:s} length {:d}".format(
-                    SHBDOTagID(pl_id).name,
-                    pl_id,
-                    _pl,
-                    _pl_type.decode('ASCII'),
-                    _pl_len
-                ))
+                try:
+                    token_name = SHBDOTagID(pl_id).name
+                    logger.debug("Read token {:s} (0x{:02x}) value {} type {:s} length {:d}".format(
+                        token_name,
+                        pl_id,
+                        _pl,
+                        _pl_type.decode('ASCII'),
+                        _pl_len
+                    ))
+                except ValueError:
+                    logger.info("Skipping token (0x{:02x}) value {} type {:s} length {:d}".format(
+                        pl_id,
+                        _pl,
+                        _pl_type.decode('ASCII'),
+                        _pl_len
+                    ))
 
-                if pl_id == SHBDOTagID.shversion:
+                if SHBDOTagID.shversion == pl_id:
                     estimator.mc_code_version = pl[0]
                     logger.debug("MC code version:" + estimator.mc_code_version)
 
-                if pl_id == SHBDOTagID.filedate:
+                if SHBDOTagID.filedate == pl_id:
                     estimator.filedate = pl[0]
 
-                if pl_id == SHBDOTagID.user:
+                if SHBDOTagID.user == pl_id:
                     estimator.user = pl[0]
 
-                if pl_id == SHBDOTagID.host:
+                if SHBDOTagID.host == pl_id:
                     estimator.host = pl[0]
 
-                if pl_id == SHBDOTagID.rt_nstat:
+                if SHBDOTagID.rt_nstat == pl_id:
                     estimator.number_of_primaries = pl[0]
 
                 # beam configuration etc...
@@ -78,37 +88,37 @@ class SHReaderBDO2016(SHReader):
                     setattr(estimator, detector_name_from_bdotag[pl_id], pl[0])
 
                 # estimator block here ---
-                if pl_id == SHBDOTagID.det_geotyp:
+                if SHBDOTagID.det_geotyp == pl_id:
                     estimator.geotyp = SHGeoType[pl[0].strip().lower()]
 
-                if pl_id == SHBDOTagID.ext_ptvdose:
+                if SHBDOTagID.ext_ptvdose == pl_id:
                     estimator.tripdose = 0.0
 
-                if pl_id == SHBDOTagID.ext_nproj:
+                if SHBDOTagID.ext_nproj == pl_id:
                     estimator.tripntot = -1
 
                 # read a single detector
-                if pl_id == SHBDOTagID.det_dtype:
+                if SHBDOTagID.det_dtype == pl_id:
                     estimator.pages[0].dettyp = SHDetType(pl[0])
 
-                if pl_id == SHBDOTagID.det_part:  # particle to be scored
+                if SHBDOTagID.det_part == pl_id:  # particle to be scored
                     estimator.scored_particle_code = pl[0]
-                if pl_id == SHBDOTagID.det_partz:  # particle to be scored
+                if SHBDOTagID.det_partz == pl_id:  # particle to be scored
                     estimator.scored_particle_z = pl[0]
-                if pl_id == SHBDOTagID.det_parta:  # particle to be scored
+                if SHBDOTagID.det_parta == pl_id:  # particle to be scored
                     estimator.scored_particle_a = pl[0]
 
-                if pl_id == SHBDOTagID.det_nbin:
+                if SHBDOTagID.det_nbin == pl_id:
                     nx = pl[0]
                     ny = pl[1]
                     nz = pl[2]
 
-                if pl_id == SHBDOTagID.det_xyz_start:
+                if SHBDOTagID.det_xyz_start == pl_id:
                     xmin = pl[0]
                     ymin = pl[1]
                     zmin = pl[2]
 
-                if pl_id == SHBDOTagID.det_xyz_stop:
+                if SHBDOTagID.det_xyz_stop == pl_id:
                     xmax = pl[0]
                     ymax = pl[1]
                     zmax = pl[2]
@@ -118,22 +128,22 @@ class SHReaderBDO2016(SHReader):
                 # TODO add support for logarithmic binning
                 diff_geotypes = {SHGeoType.dplane, SHGeoType.dmsh, SHGeoType.dcyl, SHGeoType.dzone}
                 if hasattr(estimator, 'geotyp') and estimator.geotyp in diff_geotypes:
-                    if pl_id == SHBDOTagID.det_dif_start:
+                    if SHBDOTagID.det_dif_start == pl_id:
                         estimator.dif_min = pl[0]
 
-                    if pl_id == SHBDOTagID.det_dif_stop:
+                    if SHBDOTagID.det_dif_stop == pl_id:
                         estimator.dif_max = pl[0]
 
-                    if pl_id == SHBDOTagID.det_nbine:
+                    if SHBDOTagID.det_nbine == pl_id:
                         estimator.dif_n = pl[0]
 
-                    if pl_id == SHBDOTagID.det_difftype:
+                    if SHBDOTagID.det_difftype == pl_id:
                         estimator.dif_type = pl[0]
 
-                if pl_id == SHBDOTagID.det_zonestart:
+                if SHBDOTagID.det_zonestart == pl_id:
                     estimator.zone_start = pl[0]
 
-                if pl_id == SHBDOTagID.det_data:
+                if SHBDOTagID.data_block == pl_id:
                     estimator.pages[0].data_raw = np.asarray(pl)
 
             # TODO: would be better to not overwrite x,y,z and make proper case for ZONE scoring later.

@@ -2,10 +2,11 @@ import logging
 
 import numpy as np
 
-from pymchelper.estimator import Page, MeshAxis
+from pymchelper.axis import MeshAxis
+from pymchelper.page import Page
+from pymchelper.readers.shieldhit.binary_spec import SHBDOTagID, detector_name_from_bdotag, unit_name_from_unit_id, \
+    page_tags_to_save
 from pymchelper.readers.shieldhit.reader_base import SHReader, read_next_token
-from pymchelper.readers.shieldhit.binary_spec import SHBDOTagID, detector_name_from_bdotag, page_name_from_bdotag, \
-    unit_name_from_unit_id
 from pymchelper.shieldhit.detector.detector_type import SHDetType
 from pymchelper.shieldhit.detector.estimator_type import SHGeoType
 
@@ -47,41 +48,50 @@ class SHReaderBDO2019(SHReader):
                 if payload_len == 1:
                     payload = payload[0]
 
-                logger.debug("Read token {:s} (0x{:02x}) value {} type {:s} length {:d}".format(
-                    SHBDOTagID(token_id).name,
-                    token_id,
-                    raw_payload,
-                    token_type.decode('ASCII'),
-                    payload_len
-                ))
+                try:
+                    token_name = SHBDOTagID(token_id).name
+                    logger.debug("Read token {:s} (0x{:02x}) value {} type {:s} length {:d}".format(
+                        token_name,
+                        token_id,
+                        raw_payload,
+                        token_type.decode('ASCII'),
+                        payload_len
+                    ))
+                except ValueError:
+                    logger.info("Found unknown token (0x{:02x}) value {} type {:s} length {:d}, skipping".format(
+                        token_id,
+                        raw_payload,
+                        token_type.decode('ASCII'),
+                        payload_len
+                    ))
 
                 # geometry type
-                if token_id == SHBDOTagID.est_geo_type:
+                if SHBDOTagID.geometry_type == token_id:
                     estimator.geotyp = SHGeoType[payload.strip().lower()]
 
-                if token_id == SHBDOTagID.SHBDO_GEO_N:
+                if SHBDOTagID.geo_n_bins == token_id:
                     estimator.x = estimator.x._replace(n=payload[0])
                     estimator.y = estimator.y._replace(n=payload[1])
                     estimator.z = estimator.z._replace(n=payload[2])
 
-                if token_id == SHBDOTagID.SHBDO_GEO_P:
+                if SHBDOTagID.geo_p_start == token_id:
                     estimator.x = estimator.x._replace(min_val=payload[0])
                     estimator.y = estimator.y._replace(min_val=payload[1])
                     estimator.z = estimator.z._replace(min_val=payload[2])
 
-                if token_id == SHBDOTagID.SHBDO_GEO_Q:
+                if SHBDOTagID.geo_q_stop == token_id:
                     estimator.x = estimator.x._replace(max_val=payload[0])
                     estimator.y = estimator.y._replace(max_val=payload[1])
                     estimator.z = estimator.z._replace(max_val=payload[2])
 
-                if token_id == SHBDOTagID.SHBDO_GEO_UNITIDS and not _has_geo_units_in_ascii:
+                if SHBDOTagID.geo_unit_ids == token_id and not _has_geo_units_in_ascii:
                     estimator.x = estimator.x._replace(unit=unit_name_from_unit_id.get(payload[0], ""))
                     estimator.y = estimator.y._replace(unit=unit_name_from_unit_id.get(payload[1], ""))
                     estimator.z = estimator.z._replace(unit=unit_name_from_unit_id.get(payload[2], ""))
 
                 # Units may also be given as pure ASCII directly from SHIELD-HIT12A new .bdo format.
                 # If this is available, then use those embedded in the .bdo file, instead of pymchelper setting them.
-                if token_id == SHBDOTagID.SHBDO_GEO_UNITS:
+                if SHBDOTagID.geo_units == token_id:
                     _units = payload.split(";")
                     if len(_units) == 3:
                         estimator.x = estimator.x._replace(unit=_units[0])
@@ -89,32 +99,16 @@ class SHReaderBDO2019(SHReader):
                         estimator.z = estimator.z._replace(unit=_units[2])
                         _has_geo_units_in_ascii = True
 
-                # page(detector) type
-                if token_id == SHBDOTagID.SHBDO_PAG_TYPE:
-                    # if no pages present, add first one
-                    if not estimator.pages:
-                        logger.debug("SHBDO_PAG_TYPE Creating first page")
-                        estimator.add_page(Page())
-                    # check if detector type attribute present, if yes, then create new page
-                    if estimator.pages[-1].dettyp is not None:  # the same tag appears again, looks like new page
-                        logger.debug("SHBDO_PAG_TYPE Creating new page no {}".format(len(estimator.pages)))
-                        estimator.add_page(Page())
+                # page(detector) type, it begins new page block
+                if SHBDOTagID.detector_type == token_id:
+                    # here new page is added to the estimator structure
+                    estimator.add_page(Page())
                     logger.debug("Setting page.dettyp = {} ({})".format(SHDetType(payload), SHDetType(payload).name))
                     estimator.pages[-1].dettyp = SHDetType(payload)
 
-                # page(detector) data
-                if token_id == SHBDOTagID.SHBDO_PAG_DATA:
-                    # if no pages present, add first one
-                    if not estimator.pages:
-                        logger.debug("SHBDO_PAG_TYPE Creating first page")
-                        estimator.add_page(Page())
-                    # check if data attribute present, if yes, then create new page
-                    if estimator.pages[-1].data_raw.size > 1:
-                        logger.debug("SHBDO_PAG_DATA Creating new page no {}".format(len(estimator.pages)))
-                        estimator.add_page(Page())
-                    elif estimator.pages[-1].data_raw.size == 1 and not np.isnan(estimator.pages[-1].data_raw[0]):
-                        logger.debug("SHBDO_PAG_DATA Creating new page no {}".format(len(estimator.pages)))
-                        estimator.add_page(Page())
+                # page(detector) data is the last thing related to page that is saved in binary file
+                # at this point all other page related tags should already be processed
+                if SHBDOTagID.data_block == token_id:
                     logger.debug("Setting page data = {}".format(np.asarray(payload)))
                     estimator.pages[-1].data_raw = np.asarray(payload)
 
@@ -124,36 +118,40 @@ class SHReaderBDO2019(SHReader):
                     setattr(estimator, detector_name_from_bdotag[token_id], payload)
 
                 # read tokens based on tag <-> name mapping for pages
-                if token_id in page_name_from_bdotag:
-                    if hasattr(estimator.pages[-1], page_name_from_bdotag[token_id]):
-                        logger.debug("page_name_from_bdotag Creating new page no {}".format(len(estimator.pages)))
-                        estimator.add_page(Page())
-                    logger.debug("Setting page.{} = {}".format(page_name_from_bdotag[token_id], payload))
-                    setattr(estimator.pages[-1], page_name_from_bdotag[token_id], payload)
+                if token_id in page_tags_to_save:
+                    logger.debug("Setting page.{} = {}".format(SHBDOTagID(token_id).name, payload))
+                    setattr(estimator.pages[-1], SHBDOTagID(token_id).name, payload)
 
+            # Loop over the file is over here
             # Check if we have differential scoring, i.e. data dimension is larger than 1:
             for page in estimator.pages:
-                diff_level_1_size = getattr(page, 'dif_size', [0, 0])[0]
-                if diff_level_1_size > 1 and hasattr(page, 'dif_start') and hasattr(page, 'dif_stop'):
-                    page.diff_axis1 = MeshAxis(n=diff_level_1_size,
-                                               min_val=page.dif_start[0],
-                                               max_val=page.dif_stop[0],
+                try:
+                    page.diff_axis1 = MeshAxis(n=page.page_diff_size[0],
+                                               min_val=page.page_diff_start[0],
+                                               max_val=page.page_diff_stop[0],
                                                name="",
-                                               unit=page.dif_units.split(";")[0],
+                                               unit=page.page_diff_units.split(";")[0],
                                                binning=MeshAxis.BinningType.linear)
+                except AttributeError:
+                    logger.info("Lack of data for first level differential scoring")
+                except IndexError:
+                    logger.info("Lack of units for first level differential scoring")
 
-                diff_level_2_size = getattr(page, 'dif_size', [0, 0])[1]
-                if diff_level_2_size > 1 and hasattr(page, 'dif_start') and hasattr(page, 'dif_stop'):
-                    page.diff_axis2 = MeshAxis(n=diff_level_2_size,
-                                               min_val=page.dif_start[1],
-                                               max_val=page.dif_stop[1],
+                try:
+                    page.diff_axis2 = MeshAxis(n=page.page_diff_size[1],
+                                               min_val=page.page_diff_start[1],
+                                               max_val=page.page_diff_stop[1],
                                                name="",
-                                               unit=page.dif_units.split(";")[1],
+                                               unit=page.page_diff_units.split(";")[1],
                                                binning=MeshAxis.BinningType.linear)
+                except AttributeError:
+                    logger.info("Lack of data for second level differential scoring")
+                except IndexError:
+                    logger.info("Lack of units for second level differential scoring")
 
             # Copy the SH12A specific units into the general placeholders:
             for page in estimator.pages:
-                page.unit = page.data_unit
+                page.unit = page.detector_unit
                 # in future, a user may optionally give a more specific name in SH12A detect.dat, which then
                 # may be written to the .bdo file. If the name is not set, use the official detector name instead:
                 if not page.name:
