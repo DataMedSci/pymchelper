@@ -49,13 +49,22 @@ class SHReaderBDO2016(SHReader):
                 else:
                     pl = _pl
 
-                logger.debug("Read token {:s} (0x{:02x}) value {} type {:s} length {:d}".format(
-                    SHBDOTagID(pl_id).name,
-                    pl_id,
-                    _pl,
-                    _pl_type.decode('ASCII'),
-                    _pl_len
-                ))
+                try:
+                    token_name = SHBDOTagID(pl_id).name
+                    logger.debug("Read token {:s} (0x{:02x}) value {} type {:s} length {:d}".format(
+                        token_name,
+                        pl_id,
+                        _pl,
+                        _pl_type.decode('ASCII'),
+                        _pl_len
+                    ))
+                except ValueError:
+                    logger.info("Skipping token (0x{:02x}) value {} type {:s} length {:d}".format(
+                        pl_id,
+                        _pl,
+                        _pl_type.decode('ASCII'),
+                        _pl_len
+                    ))
 
                 if SHBDOTagID.shversion == pl_id:
                     estimator.mc_code_version = pl[0]
