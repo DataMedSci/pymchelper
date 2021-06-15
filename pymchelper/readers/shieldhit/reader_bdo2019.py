@@ -47,41 +47,50 @@ class SHReaderBDO2019(SHReader):
                 if payload_len == 1:
                     payload = payload[0]
 
-                logger.debug("Read token {:s} (0x{:02x}) value {} type {:s} length {:d}".format(
-                    SHBDOTagID(token_id).name,
-                    token_id,
-                    raw_payload,
-                    token_type.decode('ASCII'),
-                    payload_len
-                ))
+                try:
+                    token_name = SHBDOTagID(token_id).name
+                    logger.debug("Read token {:s} (0x{:02x}) value {} type {:s} length {:d}".format(
+                        token_name,
+                        token_id,
+                        raw_payload,
+                        token_type.decode('ASCII'),
+                        payload_len
+                    ))
+                except ValueError:
+                    logger.info("Skipping token (0x{:02x}) value {} type {:s} length {:d}".format(
+                        token_id,
+                        raw_payload,
+                        token_type.decode('ASCII'),
+                        payload_len
+                    ))
 
                 # geometry type
-                if token_id == SHBDOTagID.geometry_type:
+                if SHBDOTagID.geometry_type == token_id:
                     estimator.geotyp = SHGeoType[payload.strip().lower()]
 
-                if token_id == SHBDOTagID.geo_n_bins:
+                if SHBDOTagID.geo_n_bins == token_id:
                     estimator.x = estimator.x._replace(n=payload[0])
                     estimator.y = estimator.y._replace(n=payload[1])
                     estimator.z = estimator.z._replace(n=payload[2])
 
-                if token_id == SHBDOTagID.geo_p_start:
+                if SHBDOTagID.geo_p_start == token_id:
                     estimator.x = estimator.x._replace(min_val=payload[0])
                     estimator.y = estimator.y._replace(min_val=payload[1])
                     estimator.z = estimator.z._replace(min_val=payload[2])
 
-                if token_id == SHBDOTagID.geo_q_stop:
+                if SHBDOTagID.geo_q_stop == token_id:
                     estimator.x = estimator.x._replace(max_val=payload[0])
                     estimator.y = estimator.y._replace(max_val=payload[1])
                     estimator.z = estimator.z._replace(max_val=payload[2])
 
-                if token_id == SHBDOTagID.geo_unit_ids and not _has_geo_units_in_ascii:
+                if SHBDOTagID.geo_unit_ids == token_id and not _has_geo_units_in_ascii:
                     estimator.x = estimator.x._replace(unit=unit_name_from_unit_id.get(payload[0], ""))
                     estimator.y = estimator.y._replace(unit=unit_name_from_unit_id.get(payload[1], ""))
                     estimator.z = estimator.z._replace(unit=unit_name_from_unit_id.get(payload[2], ""))
 
                 # Units may also be given as pure ASCII directly from SHIELD-HIT12A new .bdo format.
                 # If this is available, then use those embedded in the .bdo file, instead of pymchelper setting them.
-                if token_id == SHBDOTagID.geo_units:
+                if SHBDOTagID.geo_units == token_id:
                     _units = payload.split(";")
                     if len(_units) == 3:
                         estimator.x = estimator.x._replace(unit=_units[0])
@@ -90,7 +99,7 @@ class SHReaderBDO2019(SHReader):
                         _has_geo_units_in_ascii = True
 
                 # page(detector) type
-                if token_id == SHBDOTagID.detector_type:
+                if SHBDOTagID.detector_type == token_id:
                     # if no pages present, add first one
                     if not estimator.pages:
                         logger.debug("SHBDO_PAG_TYPE Creating first page")
@@ -103,7 +112,7 @@ class SHReaderBDO2019(SHReader):
                     estimator.pages[-1].dettyp = SHDetType(payload)
 
                 # page(detector) data
-                if token_id == SHBDOTagID.data_block:
+                if SHBDOTagID.data_block == token_id:
                     # if no pages present, add first one
                     if not estimator.pages:
                         logger.debug("SHBDO_PAG_TYPE Creating first page")
