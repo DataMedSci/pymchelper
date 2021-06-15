@@ -58,7 +58,7 @@ class SHReaderBDO2019(SHReader):
                         payload_len
                     ))
                 except ValueError:
-                    logger.info("Skipping token (0x{:02x}) value {} type {:s} length {:d}".format(
+                    logger.info("Found unknown token (0x{:02x}) value {} type {:s} length {:d}, skipping".format(
                         token_id,
                         raw_payload,
                         token_type.decode('ASCII'),
@@ -117,14 +117,14 @@ class SHReaderBDO2019(SHReader):
                 if SHBDOTagID.data_block == token_id:
                     # if no pages present, add first one
                     if not estimator.pages:
-                        logger.debug("SHBDO_PAG_TYPE Creating first page")
+                        logger.debug("Page data token found, no pages in estimator, creating first one")
                         estimator.add_page(Page())
                     # check if data attribute present, if yes, then create new page
                     if estimator.pages[-1].data_raw.size > 1:
-                        logger.debug("SHBDO_PAG_DATA Creating new page no {}".format(len(estimator.pages)))
+                        logger.debug("Page data token found, creating new page no {}".format(len(estimator.pages)))
                         estimator.add_page(Page())
                     elif estimator.pages[-1].data_raw.size == 1 and not np.isnan(estimator.pages[-1].data_raw[0]):
-                        logger.debug("SHBDO_PAG_DATA Creating new page no {}".format(len(estimator.pages)))
+                        logger.debug("Page data token found, creating new page no {}".format(len(estimator.pages)))
                         estimator.add_page(Page())
                     logger.debug("Setting page data = {}".format(np.asarray(payload)))
                     estimator.pages[-1].data_raw = np.asarray(payload)
