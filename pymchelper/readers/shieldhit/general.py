@@ -115,7 +115,6 @@ class SHReaderFactory(ReaderFactory):
     def get_reader(self):
         """
         Inspect binary file and return appropriate reader object
-        :param filename:
         :return:
         """
         reader = None

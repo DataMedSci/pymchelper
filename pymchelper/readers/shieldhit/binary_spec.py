@@ -139,7 +139,7 @@ class SHBDOTagID(IntEnum):
     geo_q_stop = 0xE003  # /* stop values, e.g xmax, ymax, zmax */
     geo_n_bins = 0xE004  # /* number of bins */
     geo_rotation = 0xE005  # [future] rotation of geometry
-    geo_volumt = 0xE006  # volume size in cm3 ... WARNING: may be a list in some future
+    geo_volume = 0xE006  # volume size in cm3 ... WARNING: may be a list in some future
     geo_zones = 0xE007  # single GEMCA zone, or list of zones
     geo_non_equidist_grid = 0xE008  # Array of non-equidistant z-grid. Tag only used if set.
     geo_units = 0xE009  # [Future]: ASCII string of ;-separated units along each dimension.
@@ -159,6 +159,34 @@ class SHBDOTagID(IntEnum):
     error = 0xFFCE  # /* 0xFFCE-rror */
 
 
+estimator_tags_to_save = (
+
+)
+
+page_tags_to_save = (
+    SHBDOTagID.detector_type,
+    SHBDOTagID.page_number,
+    SHBDOTagID.page_normalized,
+    SHBDOTagID.page_scale_factor,
+    SHBDOTagID.page_offset,
+    SHBDOTagID.page_unit_ids,
+
+    SHBDOTagID.detector_unit,
+
+    SHBDOTagID.page_diff_flag,
+    SHBDOTagID.page_diff_type,
+    SHBDOTagID.page_diff_start,
+    SHBDOTagID.page_diff_stop,
+    SHBDOTagID.page_diff_size,
+    SHBDOTagID.page_diff_units,
+
+    SHBDOTagID.page_filter_name,
+    SHBDOTagID.page_filter_rules_no,
+    SHBDOTagID.page_filter_e_min,
+    SHBDOTagID.page_filter_emax,
+)
+
+# replace this dictionary with tuple estimator_tags_to_save
 detector_name_from_bdotag = {
     SHBDOTagID.jpart0: 'projectile_code',
     SHBDOTagID.apro0: 'projectile_a',
@@ -187,18 +215,6 @@ detector_name_from_bdotag = {
     SHBDOTagID.tmax0mev: 'Tmax_MeV',
     SHBDOTagID.tmax0amu: 'Tmax_MeV/amu',
     SHBDOTagID.tmax0nuc: 'Tmax_MeV/nucl'
-}
-
-page_name_from_bdotag = {
-    SHBDOTagID.page_scale_factor: 'rescale',
-    SHBDOTagID.page_offset: 'offset',
-    SHBDOTagID.page_diff_type: 'dif_type',
-    SHBDOTagID.page_diff_start: 'dif_start',
-    SHBDOTagID.page_diff_stop: 'dif_stop',
-    SHBDOTagID.page_diff_size: 'dif_size',
-    SHBDOTagID.page_diff_units: 'dif_units',
-    SHBDOTagID.detector_unit: 'data_unit',
-    SHBDOTagID.page_unit_ids: 'unit_ids',
 }
 
 

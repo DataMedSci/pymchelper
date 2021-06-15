@@ -4,9 +4,9 @@ import numpy as np
 
 from pymchelper.axis import MeshAxis
 from pymchelper.page import Page
+from pymchelper.readers.shieldhit.binary_spec import SHBDOTagID, detector_name_from_bdotag, unit_name_from_unit_id, \
+    page_tags_to_save
 from pymchelper.readers.shieldhit.reader_base import SHReader, read_next_token
-from pymchelper.readers.shieldhit.binary_spec import SHBDOTagID, detector_name_from_bdotag, page_name_from_bdotag, \
-    unit_name_from_unit_id
 from pymchelper.shieldhit.detector.detector_type import SHDetType
 from pymchelper.shieldhit.detector.estimator_type import SHGeoType
 
@@ -112,7 +112,8 @@ class SHReaderBDO2019(SHReader):
                     logger.debug("Setting page.dettyp = {} ({})".format(SHDetType(payload), SHDetType(payload).name))
                     estimator.pages[-1].dettyp = SHDetType(payload)
 
-                # page(detector) data
+                # page(detector) data is the last thing related to page that is saved in binary file
+                # at this point all other page related tags should already be processed
                 if SHBDOTagID.data_block == token_id:
                     # if no pages present, add first one
                     if not estimator.pages:
@@ -134,36 +135,42 @@ class SHReaderBDO2019(SHReader):
                     setattr(estimator, detector_name_from_bdotag[token_id], payload)
 
                 # read tokens based on tag <-> name mapping for pages
-                if token_id in page_name_from_bdotag:
-                    if hasattr(estimator.pages[-1], page_name_from_bdotag[token_id]):
+                if token_id in page_tags_to_save:
+                    if len(estimator.pages) == 0 or hasattr(estimator.pages[-1], SHBDOTagID(token_id).name):
                         logger.debug("page_name_from_bdotag Creating new page no {}".format(len(estimator.pages)))
                         estimator.add_page(Page())
-                    logger.debug("Setting page.{} = {}".format(page_name_from_bdotag[token_id], payload))
-                    setattr(estimator.pages[-1], page_name_from_bdotag[token_id], payload)
+                    logger.debug("Setting page.{} = {}".format(SHBDOTagID(token_id).name, payload))
+                    setattr(estimator.pages[-1], SHBDOTagID(token_id).name, payload)
 
             # Check if we have differential scoring, i.e. data dimension is larger than 1:
             for page in estimator.pages:
-                diff_level_1_size = getattr(page, 'dif_size', [0, 0])[0]
-                if diff_level_1_size > 1 and hasattr(page, 'dif_start') and hasattr(page, 'dif_stop'):
-                    page.diff_axis1 = MeshAxis(n=diff_level_1_size,
-                                               min_val=page.dif_start[0],
-                                               max_val=page.dif_stop[0],
+                try:
+                    page.diff_axis1 = MeshAxis(n=page.page_diff_size[0],
+                                               min_val=page.page_diff_start[0],
+                                               max_val=page.page_diff_stop[0],
                                                name="",
-                                               unit=page.dif_units.split(";")[0],
+                                               unit=page.page_diff_units.split(";")[0],
                                                binning=MeshAxis.BinningType.linear)
+                except AttributeError:
+                    logger.info("Lack of data for first level differential scoring")
+                except IndexError:
+                    logger.info("Lack of units for first level differential scoring")
 
-                diff_level_2_size = getattr(page, 'dif_size', [0, 0])[1]
-                if diff_level_2_size > 1 and hasattr(page, 'dif_start') and hasattr(page, 'dif_stop'):
-                    page.diff_axis2 = MeshAxis(n=diff_level_2_size,
-                                               min_val=page.dif_start[1],
-                                               max_val=page.dif_stop[1],
+                try:
+                    page.diff_axis2 = MeshAxis(n=page.page_diff_size[1],
+                                               min_val=page.page_diff_start[1],
+                                               max_val=page.page_diff_stop[1],
                                                name="",
-                                               unit=page.dif_units.split(";")[1],
+                                               unit=page.page_diff_units.split(";")[1],
                                                binning=MeshAxis.BinningType.linear)
+                except AttributeError:
+                    logger.info("Lack of data for second level differential scoring")
+                except IndexError:
+                    logger.info("Lack of units for second level differential scoring")
 
             # Copy the SH12A specific units into the general placeholders:
             for page in estimator.pages:
-                page.unit = page.data_unit
+                page.unit = page.detector_unit
                 # in future, a user may optionally give a more specific name in SH12A detect.dat, which then
                 # may be written to the .bdo file. If the name is not set, use the official detector name instead:
                 if not page.name:
