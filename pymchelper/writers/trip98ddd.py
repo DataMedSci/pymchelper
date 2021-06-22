@@ -629,8 +629,8 @@ class DebuggingPlots(object):
         #         plt.savefig(out_filename)
         #         plt.close()
 
-    def fit_summary(self,
-                    fit_results):
+    @staticmethod
+    def fit_summary(fit_results):
         try:
             logging.getLogger('matplotlib').setLevel(logging.INFO)
             import matplotlib
