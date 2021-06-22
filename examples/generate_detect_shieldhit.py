@@ -10,13 +10,15 @@ from pymchelper.shieldhit.detector.geometry import CarthesianMesh
 from pymchelper.shieldhit.particle import SHParticleType
 
 
-def main(args=sys.argv[1:]):
+def main(args=None):
     """
     Compose programatically detect.dat SHIELDHIT-12A input file
     with fixed mesh and many combinations of detector and particle type.
     :param args: part of sys.argv, used here to simplify automated testing
     :return: None
     """
+    if args is None:
+        args = sys.argv[1:]
 
     # create empty estimator object
     estimator = SHEstimator()

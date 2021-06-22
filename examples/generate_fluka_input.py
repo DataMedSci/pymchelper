@@ -243,7 +243,9 @@ def add_scoring(input_file):
         card1.appendWhats(card2.whats()[1:])
 
 
-def main(args=sys.argv[1:]):
+def main(args=None):
+    if args is None:
+        args = sys.argv[1:]
 
     generate_fluka_file("fl_sim.inp")
 

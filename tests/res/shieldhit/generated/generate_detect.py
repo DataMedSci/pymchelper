@@ -317,7 +317,9 @@ def save_file(dirname, filename, content):
         f.write(CardLine.comment + "\n")
 
 
-def main(args=sys.argv[1:]):
+def main(args=None):
+    if args is None:
+        args = sys.argv[1:]
     parser = argparse.ArgumentParser()
     parser.add_argument("outputdir", help='output directory', type=str)
     parsed_args = parser.parse_args(args)
