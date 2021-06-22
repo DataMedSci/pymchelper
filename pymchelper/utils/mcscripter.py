@@ -291,10 +291,12 @@ class Generator():
             of.write()
 
 
-def main(args=sys.argv[1:]):
+def main(args=None):
     """
     Main function.
     """
+    if args is None:
+        args = sys.argv[1:]
 
     import pymchelper
     parser = argparse.ArgumentParser()

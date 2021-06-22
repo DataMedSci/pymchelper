@@ -110,9 +110,11 @@ class PLDRead(object):
                                          elements))  # array holding all elements for this layer
 
 
-def main(args=sys.argv[1:]):
+def main(args=None):
     """ Main function of the pld2sobp script.
     """
+    if args is None:
+        args = sys.argv[1:]
 
     import pymchelper
 

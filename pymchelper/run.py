@@ -36,7 +36,9 @@ def add_default_options(parser):
     parser.add_argument('-V', '--version', action='version', version=pymchelper.__version__)
 
 
-def main(args=sys.argv[1:]):
+def main(args=None):
+    if args is None:
+        args = sys.argv[1:]
     import pymchelper
     import os
 
