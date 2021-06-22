@@ -48,7 +48,6 @@ class TestPld2Sobp(unittest.TestCase):
     def test_simple(self):
         """ Simple conversion including diagnostic output.
         """
-        import os
         inp_path = os.path.join("tests", "res", "pld", "test.pld")
         out_path = os.path.join("tests", "res", "pld", "test.dat")  # TODO replace with temporary file
         try:

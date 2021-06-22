@@ -54,7 +54,6 @@ class TestMcScripter(unittest.TestCase):
     def test_simple(self):
         """ Simple conversion including diagnostic output.
         """
-        import os
         import sys
         inp_dir = os.path.join("tests", "res", "shieldhit", "mcscripter")
         inp_cfg = os.path.join(inp_dir, "test.cfg")
