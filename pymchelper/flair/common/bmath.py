@@ -1395,7 +1395,7 @@ def gauss(A, B):
     s = [0.0] * n
     X = [0.0] * n
 
-    p = [i for i in range(n)]
+    p = list(range(n))
     for i in range(n):
         s[i] = max([abs(x) for x in A[i]])
 
