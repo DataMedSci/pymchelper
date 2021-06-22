@@ -129,7 +129,7 @@ class TestDefaultConverter(unittest.TestCase):
                 if not comparison:
                     with open(shieldhit_output_moved, 'r') as f1, open(pymchelper_output, 'r') as f2:
                         diff = difflib.unified_diff(f1.readlines(), f2.readlines())
-                        diffs_to_print = list(next(diff) for _ in range(30))
+                        diffs_to_print = [next(diff) for _ in range(30)]
                         for item in diffs_to_print:
                             logger.info(item)
                 self.assertTrue(comparison)
