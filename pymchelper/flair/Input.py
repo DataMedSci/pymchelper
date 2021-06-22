@@ -511,7 +511,8 @@ class CardInfo:
     # and should be executed with:
     # eval(code)(x)
     # ----------------------------------------------------------------------
-    def compileConditions(self, rng):
+    @staticmethod
+    def compileConditions(rng):
         # the switch condition is given by the f() fields and
         # by the sdum if is defined
 
@@ -551,7 +552,8 @@ class CardInfo:
 
         return code
 
-    def compileAssert(self, assertStatement):
+    @staticmethod
+    def compileAssert(assertStatement):
         """
         Compile assert statement
         First detect all what references w(#) and replace them with:
@@ -2366,7 +2368,8 @@ class Card:
     # ----------------------------------------------------------------------
     # return end string
     # ----------------------------------------------------------------------
-    def _endStr(self, fmt=None):
+    @staticmethod
+    def _endStr(fmt=None):
         if fmt is None or fmt == FORMAT_FREE:
             return "END"
         else:
@@ -3697,7 +3700,8 @@ class Input:
         self._cardEnable = saveEnable
         return card
 
-    def _parseLattice(self, what):
+    @staticmethod
+    def _parseLattice(what):
         sdum = what[0]
         if sdum != "":
             usdum = sdum.upper().split('#')
@@ -3905,7 +3909,8 @@ class Input:
 
         return (tag, what)
 
-    def _parseFreeFormat(self, line):
+    @staticmethod
+    def _parseFreeFormat(line):
         """Remove unwanted characters from a free format line and separate everything with comma ,"""
         line = re.sub(" *[;:/,] *", ",", line.strip())
         what = re.sub(" +", ",", line).split(',')
@@ -4245,7 +4250,8 @@ class Input:
                 card.setSdum("COMBNAME")
             self.geoFormat = FORMAT_FREE
 
-    def checkCompound(self, card, all=False):
+    @staticmethod
+    def checkCompound(card, all=False):
         """Check COMPOUND cards for correct mixture"""
         # check sign of whats
         s1 = card.sign(1)
@@ -4338,7 +4344,8 @@ class Input:
         if "LATTICE" in self.cards:
             self.writeCards(fgeo, lambda x: x.tag == "LATTICE", fmt, 3)
 
-    def writeCard(self, f, card, fmt):
+    @staticmethod
+    def writeCard(f, card, fmt):
         """write a single card"""
         if not card.enable and (not card.info.disableComment or not commentedCards):
             if0 = True
@@ -4826,7 +4833,8 @@ class Input:
 
         return old
 
-    def _format(self, num):
+    @staticmethod
+    def _format(num):
         if abs(num) < zero:
             return 0.0
         return num
