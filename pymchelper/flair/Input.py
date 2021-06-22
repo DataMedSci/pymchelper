@@ -1150,7 +1150,7 @@ class Particle:
         # All particles
         Particle.list.append("")
         Particle.listAll.append("")
-        for p in Particle._db.keys():
+        for p in Particle._db:
             if isinstance(p, str):
                 part = Particle._db[p]
                 if p != "@LASTPAR":
