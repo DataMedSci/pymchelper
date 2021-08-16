@@ -1,3 +1,4 @@
+import logging
 import os
 import sys
 import tempfile
@@ -7,6 +8,8 @@ import numpy as np
 
 from pymchelper.executor.options import MCOptions
 from pymchelper.executor.runner import Runner
+
+logger = logging.getLogger(__name__)
 
 input_cfg = {
     'beam.dat': """
@@ -53,8 +56,8 @@ def run_sh12a(input_dict):
 
     for config_file in input_dict:
         file_path = os.path.join(dirpath, config_file)
-        with open(file_path, 'w') as f:
-            f.write(input_dict[config_file])
+        with open(file_path, 'w') as output_file:
+            output_file.write(input_dict[config_file])
 
     opt = MCOptions(input_cfg=dirpath,
                     executable_path=None,
@@ -77,7 +80,7 @@ def max_pos_at_energy(energy_MeV):
     return max_pos_cm
 
 
-def f(energy_MeV, pos_mm):
+def target_function(energy_MeV, pos_mm):
     return max_pos_at_energy(energy_MeV) - pos_mm
 
 
@@ -90,8 +93,12 @@ def main(args=None):
     if args is None:
         args = sys.argv[1:]
     pos_mm = 20.05
-    from scipy.optimize import brentq
-    brentq(f, a=20, b=400, args=(pos_mm,), xtol=0.01)
+    try:
+        from scipy.optimize import brentq
+        brentq(target_function, a=20, b=400, args=(pos_mm,), xtol=0.01)
+    except ImportError:
+        logger.error("scipy not installed, output won't be generated")
+        return None
 
 
 if __name__ == '__main__':
