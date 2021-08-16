@@ -188,8 +188,7 @@ def verify(str, ref, match=0, start=0):
     the result index of the first character in string that is in reference
     """
 
-    if start < 0:
-        start = 0
+    start = max(start, 0)
     if start >= len(str):
         return -1
 
