@@ -26,7 +26,9 @@ def set_logger_level(args):
     logging.basicConfig(level=level)
 
 
-def main(args=sys.argv[1:]):
+def main(args=None):
+    if args is None:
+        args = sys.argv[1:]
     import pymchelper
 
     parser = argparse.ArgumentParser()
@@ -61,9 +63,13 @@ def main(args=sys.argv[1:]):
 
     # strip MC arguments
     mc_args = parsed_args.mcopt
-    if mc_args is not None and len(mc_args) > 1:
-        if mc_args[0] == '[' and mc_args[-1] == ']':
-            mc_args = mc_args[1:-1]
+    if (
+        mc_args is not None
+        and len(mc_args) > 1
+        and mc_args[0] == '['
+        and mc_args[-1] == ']'
+    ):
+        mc_args = mc_args[1:-1]
 
     opt = MCOptions(input_cfg=parsed_args.input,
                     executable_path=parsed_args.executable,

@@ -45,18 +45,18 @@ class MCOptions:
     def _validate_user_opt(user_opt):
         options_list = user_opt.split()
         options_set = set(options_list)
-        unsupported = set(('-b', '--beamfile', '-g', '--geofile', '-m', '--matfile', '-d', '--detectfile'))
+        unsupported = {'-b', '--beamfile', '-g', '--geofile', '-m', '--matfile', '-d', '--detectfile'}
         if options_set & unsupported:
             raise SyntaxError("Unsupported option encountered: {:s}".format(",".join(options_set & unsupported)))
         if len(options_list) > 1:
             last_item = options_list[-1]
             before_last_item = options_list[-2]
-            single_options = set(('-h', '--help', '-V', '--version', '-v', '--verbose', '-s', '--silent',
-                                  '-l', '--legacy-bdo'))
+            single_options = {'-h', '--help', '-V', '--version', '-v', '--verbose', '-s', '--silent',
+                                  '-l', '--legacy-bdo'}
             if not last_item.startswith('-'):
                 if before_last_item in single_options:
                     raise SyntaxError("Seems like workspace: {:s}".format(last_item))
-                elif len(options_list) > 2 and options_list[-3].startswith('-'):
+                if len(options_list) > 2 and options_list[-3].startswith('-'):
                     raise SyntaxError("Seems like workspace: {:s}".format(last_item))
         if len(options_list) == 1 and not options_list[0].startswith('-'):
             raise SyntaxError("Seems like workspace: {:s}".format(options_list[0]))

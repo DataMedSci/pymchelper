@@ -45,7 +45,7 @@ class Runner:
             self.pool.terminate()
             logging.info('pool is terminated')
         except Exception as e:
-            logging.info('got exception: %r, terminating the pool' % (e,))
+            logging.info('got exception: %r, terminating the pool', e)
             self.pool.terminate()
             logging.info('pool is terminated')
 
@@ -54,7 +54,8 @@ class Runner:
         print("SH12A elapsed time {:.3f} seconds".format(elapsed))
         return res
 
-    def get_data(self, workspaces):
+    @staticmethod
+    def get_data(workspaces):
         if not workspaces:
             return None
         start_time = timeit.default_timer()
@@ -75,7 +76,8 @@ class Runner:
 
         return total_results
 
-    def clean(self, workspaces):
+    @staticmethod
+    def clean(workspaces):
         for w in workspaces:
             shutil.rmtree(w)
 

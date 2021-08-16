@@ -81,12 +81,14 @@ def f(energy_MeV, pos_mm):
     return max_pos_at_energy(energy_MeV) - pos_mm
 
 
-def main(args=sys.argv[1:]):
+def main(args=None):
     """
     Find such energy for which position of BP max is 20.05 mm
     :param args:
     :return:
     """
+    if args is None:
+        args = sys.argv[1:]
     pos_mm = 20.05
     from scipy.optimize import brentq
     brentq(f, a=20, b=400, args=(pos_mm,), xtol=0.01)
