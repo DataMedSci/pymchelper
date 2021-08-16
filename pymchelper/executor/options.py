@@ -3,18 +3,22 @@ import os
 import sys
 
 
-class FlukaEnviroment:
+class FlukaEnvironment:
     executable_file = 'rfluka'
 
 
-class SH12AEnviroment:
+class SH12AEnvironmentLinux:
     executable_file = 'shieldhit'
 
 
+class SH12AEnvironmentWindows:
+    executable_file = 'shieldhit.exe'
+
+
 class MCOptions:
-    def __init__(self, input_cfg, executable_path=None, user_opt=None):
-        self.input_cfg = input_cfg
-        self._mc_enviroment = self._discover_mc_engine()
+    def __init__(self, input_path, executable_path=None, user_opt=None):
+        self.input_path = input_path
+        self._mc_environment = self._discover_mc_engine()
         self.executable_path = executable_path
         if self.executable_path is None:
             self.executable_path = self._discover_mc_executable()
@@ -32,13 +36,13 @@ class MCOptions:
             options_list[location + 1] = str(rng_seed)
             self.user_opt = ' '.join(options_list)
 
-    def set_nstat(self, nstat):
+    def set_no_of_primaries(self, number_of_primaries):
         options_list = self.user_opt.split()
         if '-n' not in options_list:
-            self.user_opt += " -n {:d}".format(nstat)
+            self.user_opt += " -n {:d}".format(number_of_primaries)
         else:
             location = options_list.index('-n')
-            options_list[location + 1] = str(nstat)
+            options_list[location + 1] = str(number_of_primaries)
             self.user_opt = ' '.join(options_list)
 
     @staticmethod
@@ -62,25 +66,31 @@ class MCOptions:
             raise SyntaxError("Seems like workspace: {:s}".format(options_list[0]))
 
     def _discover_mc_engine(self):
-        if not os.path.exists(self.input_cfg):
-            raise Exception("Input path {:s} doesn't exists".format(self.input_cfg))
-        if os.path.isfile(self.input_cfg):
-            return FlukaEnviroment
-        if os.path.isdir(self.input_cfg):
-            return SH12AEnviroment
+        if not os.path.exists(self.input_path):
+            raise Exception("Input path {:s} doesn't exists".format(self.input_path))
+        if os.path.isfile(self.input_path):
+            return FlukaEnvironment
+        if os.path.isdir(self.input_path):
+            if sys.platform == 'win32':
+                return SH12AEnvironmentWindows
+            else:
+                return SH12AEnvironmentLinux
 
     def _discover_mc_executable(self):
         dirs_with_mc_exe = []
-        for item in os.environ['PATH'].split(':'):
+        split_char = ':'
+        if sys.platform == 'win32':
+            split_char = ';'
+        for item in os.environ['PATH'].split(split_char):
             logging.debug("Inspecting {:s}".format(item))
-            if os.path.exists(item) and os.path.isdir(item) and self._mc_enviroment.executable_file in os.listdir(item):
+            if os.path.exists(item) and os.path.isdir(item) and self._mc_environment.executable_file in os.listdir(item):
                 dirs_with_mc_exe.append(item)
 
         if not dirs_with_mc_exe:
-            raise Exception("Executable {:s} not found in PATH ({:s})".format(self._mc_enviroment.executable_file,
+            raise Exception("Executable {:s} not found in PATH ({:s})".format(self._mc_environment.executable_file,
                                                                               ",".join(sys.path)))
 
-        return os.path.join(dirs_with_mc_exe[0], self._mc_enviroment.executable_file)
+        return os.path.join(dirs_with_mc_exe[0], self._mc_environment.executable_file)
 
     def __str__(self):
         result = "{executable:s} {options:s} {workspace:s}".format(

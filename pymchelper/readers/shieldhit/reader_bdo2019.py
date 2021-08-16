@@ -41,7 +41,8 @@ class SHReaderBDO2019(SHReader):
                 # decode all strings (currently there will never be more than one per token)
                 if 'S' in token_type.decode('ASCII'):
                     for i, _j in enumerate(raw_payload):
-                        payload[i] = raw_payload[i].decode('ASCII').strip()
+                        # raw payload may contain non-ASCII characters (i.e. filedate on non-English Windows OS)
+                        payload[i] = raw_payload[i].decode('ASCII', 'replace').strip()
                 else:
                     payload = raw_payload
 

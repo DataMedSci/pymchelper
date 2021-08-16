@@ -71,7 +71,7 @@ def main(args=None):
     ):
         mc_args = mc_args[1:-1]
 
-    opt = MCOptions(input_cfg=parsed_args.input,
+    opt = MCOptions(input_path=parsed_args.input,
                     executable_path=parsed_args.executable,
                     user_opt=mc_args)
 

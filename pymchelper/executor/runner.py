@@ -47,16 +47,13 @@ class Runner:
         return res
 
     @staticmethod
-    def get_data(workspaces):
-        if not workspaces:
+    def get_data(output_dir):
+        if not output_dir:
             return None
         start_time = timeit.default_timer()
         total_results = {}
 
-        full_list = []
-        for d in workspaces:
-            tmp_list = sorted(glob.glob(os.path.join(d, "*.bdo")))
-            full_list += tmp_list
+        full_list = os.path.join(output_dir, "*", "*.bdo")
         logging.debug("List of files to merge {:s}".format(','.join(full_list)))
 
         estimators = frompattern(full_list)
@@ -83,19 +80,19 @@ class Executor:
         workspace = os.path.join(self.outdir, 'run_{:d}'.format(rng_seed))
         logging.info("Workspace {:s}".format(workspace))
         try:
-            if os.path.isdir(self.options.input_cfg):
+            if os.path.isdir(self.options.input_path):
                 # if path already exists, remove it before copying with copytree()
                 if os.path.exists(workspace):
                     shutil.rmtree(workspace)
-                shutil.copytree(self.options.input_cfg, workspace)
+                shutil.copytree(self.options.input_path, workspace)
                 logging.debug("Copying input files into {:s}".format(workspace))
-            elif os.path.isfile(self.options.input_cfg):
+            elif os.path.isfile(self.options.input_path):
                 if not os.path.exists(workspace):
                     os.makedirs(workspace)
-                shutil.copy2(self.options.input_cfg, workspace)
+                shutil.copy2(self.options.input_path, workspace)
                 logging.debug("Copying input files into {:s}".format(workspace))
             else:
-                logging.debug("Input files {:s} not a dir or file".format(self.options.input_cfg))
+                logging.debug("Input files {:s} not a dir or file".format(self.options.input_path))
             current_options = self.options
             current_options.set_rng_seed(rng_seed)
             current_options.workspace = workspace

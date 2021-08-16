@@ -59,7 +59,7 @@ def run_sh12a(input_dict):
         with open(file_path, 'w') as output_file:
             output_file.write(input_dict[config_file])
 
-    opt = MCOptions(input_cfg=dirpath,
+    opt = MCOptions(input_path=dirpath,
                     executable_path=None,
                     user_opt='-s')
 
