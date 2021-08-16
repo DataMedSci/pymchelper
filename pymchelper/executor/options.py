@@ -52,7 +52,7 @@ class MCOptions:
             last_item = options_list[-1]
             before_last_item = options_list[-2]
             single_options = {'-h', '--help', '-V', '--version', '-v', '--verbose', '-s', '--silent',
-                                  '-l', '--legacy-bdo'}
+                              '-l', '--legacy-bdo'}
             if not last_item.startswith('-'):
                 if before_last_item in single_options:
                     raise SyntaxError("Seems like workspace: {:s}".format(last_item))

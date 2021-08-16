@@ -15,14 +15,6 @@ class MCOutType(IntEnum):
     txt = 2
 
 
-class FlukaEnviroment:
-    executable_file = 'rfluka'
-
-
-class SH12AEnviroment:
-    executable_file = 'shieldhit'
-
-
 class KeyboardInterruptError(Exception):
     pass
 
