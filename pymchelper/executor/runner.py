@@ -9,12 +9,18 @@ from pymchelper.input_output import frompattern
 
 
 class MCOutType(IntEnum):
+    """
+    TODO
+    """
     raw = 0
     plot = 1
     txt = 2
 
 
 class KeyboardInterruptError(Exception):
+    """
+    TODO
+    """
     pass
 
 
@@ -28,6 +34,9 @@ class Runner:
         self.jobs = self.pool._processes  # always int
 
     def run(self, outdir):
+        """
+        TODO
+        """
         start_time = timeit.default_timer()
         rng_seeds = range(1, self.jobs + 1)
         e = Executor(outdir=outdir, options=self.options)
@@ -50,6 +59,9 @@ class Runner:
 
     @staticmethod
     def get_data(output_dir):
+        """
+        TODO
+        """
         if not output_dir:
             return None
         start_time = timeit.default_timer()
@@ -69,6 +81,9 @@ class Runner:
 
     @staticmethod
     def clean(workspaces):
+        """
+        TODO
+        """
         for w in workspaces:
             shutil.rmtree(w)
 

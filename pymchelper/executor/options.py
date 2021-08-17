@@ -4,18 +4,30 @@ import sys
 
 
 class FlukaEnvironment:
+    """
+    TODO
+    """
     executable_file = 'rfluka'
 
 
 class SH12AEnvironmentLinux:
+    """
+    TODO
+    """
     executable_file = 'shieldhit'
 
 
 class SH12AEnvironmentWindows:
+    """
+    TODO
+    """
     executable_file = 'shieldhit.exe'
 
 
 class MCOptions:
+    """
+    TODO
+    """
     def __init__(self, input_path, executable_path=None, user_opt=None):
         self.input_path = input_path
         self._mc_environment = self._discover_mc_engine()
@@ -28,6 +40,9 @@ class MCOptions:
         self.workspace = '.'
 
     def set_rng_seed(self, rng_seed):
+        """
+        TODO
+        """
         options_list = self.user_opt.split()
         if '-N' not in options_list:
             self.user_opt += " -N {:d}".format(rng_seed)
@@ -37,6 +52,9 @@ class MCOptions:
             self.user_opt = ' '.join(options_list)
 
     def set_no_of_primaries(self, number_of_primaries):
+        """
+        TODO
+        """
         options_list = self.user_opt.split()
         if '-n' not in options_list:
             self.user_opt += " -n {:d}".format(number_of_primaries)
@@ -47,6 +65,9 @@ class MCOptions:
 
     @staticmethod
     def _validate_user_opt(user_opt):
+        """
+        TODO
+        """
         options_list = user_opt.split()
         options_set = set(options_list)
         unsupported = {'-b', '--beamfile', '-g', '--geofile', '-m', '--matfile', '-d', '--detectfile'}
@@ -66,6 +87,9 @@ class MCOptions:
             raise SyntaxError("Seems like workspace: {:s}".format(options_list[0]))
 
     def _discover_mc_engine(self):
+        """
+        TODO
+        """
         if not os.path.exists(self.input_path):
             raise Exception("Input path {:s} doesn't exists".format(self.input_path))
             return None
@@ -77,6 +101,9 @@ class MCOptions:
             return SH12AEnvironmentLinux
 
     def _discover_mc_executable(self):
+        """
+        TODO
+        """
         dirs_with_mc_exe = []
         split_char = ':'
         if sys.platform == 'win32':
@@ -102,4 +129,7 @@ class MCOptions:
 
 
 class SH12AOptions(MCOptions):
+    """
+    TODO
+    """
     pass

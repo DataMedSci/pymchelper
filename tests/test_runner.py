@@ -21,12 +21,18 @@ class TestSHRunner(unittest.TestCase):
     """
 
     def setUp(self):
+        """
+        TODO
+        """
         self.exec_path = os.path.join("tests", "res", "shieldhit", "executable", "shieldhit")
         if sys.platform == 'win32':
             self.exec_path += '.exe'
         print(self.exec_path)
 
     def test_simple(self):
+        """
+        TODO
+        """
         input_cfg = {
             'beam.dat': """RNDSEED      	89736501     ! Random seed
 JPART0       	2           ! Incident particle type
