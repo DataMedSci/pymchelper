@@ -68,13 +68,13 @@ class MCOptions:
     def _discover_mc_engine(self):
         if not os.path.exists(self.input_path):
             raise Exception("Input path {:s} doesn't exists".format(self.input_path))
+            return None
         if os.path.isfile(self.input_path):
             return FlukaEnvironment
         if os.path.isdir(self.input_path):
             if sys.platform == 'win32':
                 return SH12AEnvironmentWindows
-            else:
-                return SH12AEnvironmentLinux
+            return SH12AEnvironmentLinux
 
     def _discover_mc_executable(self):
         dirs_with_mc_exe = []
@@ -83,7 +83,7 @@ class MCOptions:
             split_char = ';'
         for item in os.environ['PATH'].split(split_char):
             logging.debug("Inspecting {:s}".format(item))
-            if os.path.exists(item) and os.path.isdir(item) and self._mc_environment.executable_file in os.listdir(item):
+            if os.path.isdir(item) and self._mc_environment.executable_file in os.listdir(item):
                 dirs_with_mc_exe.append(item)
 
         if not dirs_with_mc_exe:

@@ -63,9 +63,9 @@ def run_sh12a(input_dict):
                     executable_path=None,
                     user_opt='-s')
 
-    r = Runner(jobs=None, options=opt)
-    workspaces = r.run(outdir=dirpath)
-    data = r.get_data(workspaces)
+    r = Runner(jobs=1, options=opt)
+    r.run(outdir=dirpath)
+    data = r.get_data(dirpath)
     shutil.rmtree(dirpath)
     return data['ex_zmsh']
 
@@ -74,7 +74,7 @@ def max_pos_at_energy(energy_MeV):
     input_dict = input_cfg.copy()
     input_dict['beam.dat'] = input_dict['beam.dat'].format(energy=energy_MeV)
     data = run_sh12a(input_dict)
-    index_of_max = np.argmax(data.data_raw)
+    index_of_max = np.argmax(data.pages[0].data[0,0,:,0,0])
     max_pos_cm = data.z.data[index_of_max]
     print("Maximum position {:4.3f} cm at energy {:3.3f} MeV".format(max_pos_cm, energy_MeV))
     return max_pos_cm

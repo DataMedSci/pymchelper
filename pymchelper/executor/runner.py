@@ -1,5 +1,4 @@
 import logging
-import glob
 import os
 import shutil
 import subprocess
@@ -20,6 +19,9 @@ class KeyboardInterruptError(Exception):
 
 
 class Runner:
+    """
+    TODO
+    """
     def __init__(self, jobs=None, options=None):
         self.options = options
         self.pool = Pool(processes=jobs)
@@ -53,15 +55,15 @@ class Runner:
         start_time = timeit.default_timer()
         total_results = {}
 
-        full_list = os.path.join(output_dir, "*", "*.bdo")
-        logging.debug("List of files to merge {:s}".format(','.join(full_list)))
+        output_files_pattern = os.path.join(output_dir, "*", "*.bdo")
+        logging.debug("Files to merge {:s}".format(output_files_pattern))
 
-        estimators = frompattern(full_list)
+        estimators = frompattern(output_files_pattern)
         for est in estimators:
             logging.debug("Appending estimator for {:s}".format(est.file_corename))
             total_results[est.file_corename] = est
         elapsed = timeit.default_timer() - start_time
-        print("Workspace reading {:.3f} seconds".format(elapsed))
+        logging.info("Workspace reading {:.3f} seconds".format(elapsed))
 
         return total_results
 

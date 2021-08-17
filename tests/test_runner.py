@@ -15,6 +15,9 @@ logger = logging.getLogger(__name__)
 
 @pytest.mark.smoke
 class TestSHRunner(unittest.TestCase):
+    """
+    TODO
+    """
 
     def setUp(self):
         self.exec_path = os.path.join("tests", "res", "shieldhit", "executable", "shieldhit")
