@@ -9,7 +9,6 @@ import numpy as np
 from pymchelper.executor.options import MCOptions
 from pymchelper.executor.runner import Runner
 
-logger = logging.getLogger(__name__)
 
 input_cfg = {
     'beam.dat': """
@@ -74,7 +73,7 @@ def max_pos_at_energy(energy_MeV):
     input_dict = input_cfg.copy()
     input_dict['beam.dat'] = input_dict['beam.dat'].format(energy=energy_MeV)
     data = run_sh12a(input_dict)
-    index_of_max = np.argmax(data.pages[0].data[0,0,:,0,0])
+    index_of_max = np.argmax(data.pages[0].data[0, 0, :, 0, 0])
     max_pos_cm = data.z.data[index_of_max]
     print("Maximum position {:4.3f} cm at energy {:3.3f} MeV".format(max_pos_cm, energy_MeV))
     return max_pos_cm
@@ -97,7 +96,7 @@ def main(args=None):
         from scipy.optimize import brentq
         brentq(target_function, a=20, b=400, args=(pos_mm,), xtol=0.01)
     except ImportError:
-        logger.error("scipy not installed, output won't be generated")
+        logging.error("scipy not installed, output won't be generated")
         return None
 
 
