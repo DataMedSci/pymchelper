@@ -113,7 +113,7 @@ class Executor:
             current_options.workspace = workspace
             logging.debug('dir {:s}, cmd {:s}'.format(workspace, str(current_options)))
 
-            # TODO handle standard output differently, i.e. redirect it to some file or save in some variable
+            # handle standard output differently, i.e. redirect it to some file or save in some variable
             DEVNULL = open(os.devnull, 'wb')
             subprocess.check_call(str(current_options).split(), cwd=workspace, stdout=DEVNULL, stderr=DEVNULL)
         except KeyboardInterrupt:
