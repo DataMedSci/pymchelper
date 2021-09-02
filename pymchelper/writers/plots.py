@@ -29,7 +29,7 @@ class PlotDataWriter:
         """
         # save to single page to a file without number (i.e. output.dat)
         if len(estimator.pages) == 1:
-            self.write_single_page(estimator, estimator.pages[0], self.filename)
+            self.write_single_page(estimator.pages[0], self.filename)
         else:
             # split output path into directory, basename and extension
             dir_path = os.path.dirname(self.filename)
@@ -50,11 +50,11 @@ class PlotDataWriter:
 
                 # save the output file
                 logger.info("Writing {}".format(output_path))
-                self.write_single_page(estimator, page, output_path)
+                self.write_single_page(page, output_path)
 
         return 0
 
-    def write_single_page(self, estimator, page, filename):
+    def write_single_page(self, page, filename):
         """
         TODO
         """

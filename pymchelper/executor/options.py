@@ -92,7 +92,6 @@ class MCOptions:
         """
         if not os.path.exists(self.input_path):
             raise Exception("Input path {:s} doesn't exists".format(self.input_path))
-            return None
         if os.path.isfile(self.input_path):
             return FlukaEnvironment
         if os.path.isdir(self.input_path):

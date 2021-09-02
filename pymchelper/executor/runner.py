@@ -46,10 +46,6 @@ class Runner:
             logging.info('got ^C while pool mapping, terminating the pool')
             self.pool.terminate()
             logging.info('pool is terminated')
-        except Exception as e:
-            logging.info('got exception: %r, terminating the pool', e)
-            self.pool.terminate()
-            logging.info('pool is terminated')
 
             logging.info(res)
         elapsed = timeit.default_timer() - start_time
