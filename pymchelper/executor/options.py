@@ -41,7 +41,7 @@ class MCOptions:
 
     def set_rng_seed(self, rng_seed):
         """
-        TODO
+        TODO this method is specific to SH12A, more general should be added
         """
         options_list = self.user_opt.split()
         if '-N' not in options_list:
@@ -53,7 +53,7 @@ class MCOptions:
 
     def set_no_of_primaries(self, number_of_primaries):
         """
-        TODO
+        TODO this method is specific to SH12A, more general should be added
         """
         options_list = self.user_opt.split()
         if '-n' not in options_list:
@@ -66,7 +66,7 @@ class MCOptions:
     @staticmethod
     def _validate_user_opt(user_opt):
         """
-        TODO
+        TODO this method is specific to SH12A, more general should be added
         """
         options_list = user_opt.split()
         options_set = set(options_list)
