@@ -99,6 +99,7 @@ class MCOptions:
             if sys.platform == 'win32':
                 return SH12AEnvironmentWindows
             return SH12AEnvironmentLinux
+        return None
 
     def _discover_mc_executable(self):
         """
@@ -132,4 +133,3 @@ class SH12AOptions(MCOptions):
     """
     TODO
     """
-    pass

@@ -21,7 +21,6 @@ class KeyboardInterruptError(Exception):
     """
     TODO
     """
-    pass
 
 
 class Runner:
@@ -89,6 +88,9 @@ class Runner:
 
 
 class Executor:
+    """
+    TODO
+    """
     def __init__(self, outdir, options):
         self.outdir = os.path.abspath(outdir)
         self.options = options

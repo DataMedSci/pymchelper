@@ -14,12 +14,19 @@ class PlotAxis(IntEnum):
 
 
 class PlotDataWriter:
+    """
+    TODO
+    """
+
     def __init__(self, filename, options):
         self.filename = filename
         if not self.filename.endswith(".dat"):
             self.filename += ".dat"
 
     def write(self, estimator):
+        """
+        TODO
+        """
         # save to single page to a file without number (i.e. output.dat)
         if len(estimator.pages) == 1:
             self.write_single_page(estimator, estimator.pages[0], self.filename)
@@ -48,6 +55,9 @@ class PlotDataWriter:
         return 0
 
     def write_single_page(self, estimator, page, filename):
+        """
+        TODO
+        """
         logger.info("Writing: " + filename)
 
         # special case for 0-dim data
@@ -84,6 +94,10 @@ class PlotDataWriter:
 
 
 class GnuplotDataWriter:
+    """
+    TODO
+    """
+
     def __init__(self, filename, options):
         self.data_filename = filename
         self.script_filename = filename
@@ -125,6 +139,9 @@ splot \"<awk -f addblanks.awk '{data_filename}'\" u 1:2:3 with pm3d
     }
 
     def write(self, estimator):
+        """
+        TODO
+        """
         if len(estimator.pages) > 1:
             print("Conversion of data with multiple pages not supported yet")
             return False
@@ -167,6 +184,10 @@ splot \"<awk -f addblanks.awk '{data_filename}'\" u 1:2:3 with pm3d
 
 
 class ImageWriter:
+    """
+    TODO
+    """
+
     def __init__(self, filename, options):
         self.plot_filename = filename
         if not self.plot_filename.endswith(".png"):
@@ -181,6 +202,9 @@ class ImageWriter:
         return name + " " + "[" + unit + "]"
 
     def get_page_figure(self, page):
+        """
+        TODO
+        """
 
         try:
             import matplotlib
@@ -261,6 +285,10 @@ class ImageWriter:
         return fig
 
     def write(self, estimator):
+        """
+        TODO
+        """
+
         # save single page to a file without number (i.e. output.png)
         if len(estimator.pages) == 1:
             fig = self.get_page_figure(estimator.pages[0])

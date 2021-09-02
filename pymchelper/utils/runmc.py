@@ -12,6 +12,10 @@ from pymchelper.writers.plots import PlotDataWriter, ImageWriter
 
 
 def set_logger_level(args):
+    """
+    TODO
+    """
+
     if args.quiet:
         if args.quiet == 1:
             level = "WARNING"
@@ -27,6 +31,10 @@ def set_logger_level(args):
 
 
 def main(args=None):
+    """
+    TODO
+    """
+
     if args is None:
         args = sys.argv[1:]
     import pymchelper

@@ -51,6 +51,10 @@ MSH             -5.0      -5.0       0.0       5.0       5.0      30.0
 
 
 def run_sh12a(input_dict):
+    """
+    TODO
+    """
+
     dirpath = tempfile.mkdtemp()
 
     for config_file in input_dict:
@@ -70,6 +74,10 @@ def run_sh12a(input_dict):
 
 
 def max_pos_at_energy(energy_MeV):
+    """
+    TODO
+    """
+
     input_dict = input_cfg.copy()
     input_dict['beam.dat'] = input_dict['beam.dat'].format(energy=energy_MeV)
     data = run_sh12a(input_dict)
@@ -80,6 +88,10 @@ def max_pos_at_energy(energy_MeV):
 
 
 def target_function(energy_MeV, pos_mm):
+    """
+    TODO
+    """
+
     return max_pos_at_energy(energy_MeV) - pos_mm
 
 
@@ -98,6 +110,7 @@ def main(args=None):
     except ImportError:
         logging.error("scipy not installed, output won't be generated")
         return None
+    return 0
 
 
 if __name__ == '__main__':
