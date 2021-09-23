@@ -48,7 +48,7 @@ class Runner:
             logging.info('pool is terminated')
 
             logging.info(res)
-            shutil.rmtree(outdir)
+            # shutil.rmtree(outdir)
         elapsed = timeit.default_timer() - start_time
         print("elapsed time {:.3f} seconds".format(elapsed))
         return res
