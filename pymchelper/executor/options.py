@@ -118,7 +118,7 @@ class SimulationSettings:
         unsupported = {'-b', '--beamfile', '-g', '--geofile', '-m', '--matfile', '-d', '--detectfile'}
         # raise an error if some of the unsupported option was provided by user (i.e. via -m option to `runmc` command)
         if options_set & unsupported:
-            # TODO replace exception with warning and ignore such options  # skipcq: PYL-W0622
+            # TODO replace exception with warning and ignore such options  # skipcq: PYL-W0511
             raise SyntaxError("Unsupported option encountered: {:s}".format(",".join(options_set & unsupported)))
 
     @staticmethod
@@ -133,11 +133,11 @@ class SimulationSettings:
             raise Exception("Input path {:s} doesn't exists".format(input_path))
 
         # Fluka input files are provided as the single file
-        # TODO cross-check if the `*.inp` extension is needed  # skipcq: PYL-W0622
+        # TODO cross-check if the `*.inp` extension is needed  # skipcq: PYL-W0511
         if os.path.isfile(input_path):
             return FlukaEnvironment
         # SHIELD-HIT12A input is in the form of directory with multiple files
-        # TODO add a check if the directory contains (beam.dat, mat.dat, geo.dat and detect.dat)  # skipcq: PYL-W0622
+        # TODO add a check if the directory contains (beam.dat, mat.dat, geo.dat and detect.dat)  # skipcq: PYL-W0511
         if os.path.isdir(input_path):
             # in case pymchelper runs on Windows choose a SHIELD-HIT12A environment which is Windows specific
             # (executable file being `shieldhit.exe` instead of `shieldhit`)
