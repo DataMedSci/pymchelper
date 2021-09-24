@@ -90,8 +90,10 @@ def main(args=None):
     #   here we strip these wrapping characters, if present
     # if no -m option is provided then we need to deal with empty string
     parsed_simulation_opts = parsed_args.mcopt
-    if parsed_simulation_opts:  # check if list is not None, and if it has at least one element
-        if parsed_simulation_opts[0] == '[' and parsed_simulation_opts[-1] == ']':  # check if embedded in [,]
+    # check if list is not None, and if it has at least one element
+    if parsed_simulation_opts:
+        # check if parsed options are embedded in [,]
+        if parsed_simulation_opts[0] == '[' and parsed_simulation_opts[-1] == ']':
             parsed_simulation_opts = parsed_simulation_opts[1:-1]  # strip the list from surrounding brackets
 
     # set MC simulation settings based on:

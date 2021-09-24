@@ -40,7 +40,7 @@ class Runner:
 
         # self.jobs will be either a value provided by user
         # or actual number of allocated processes, if `jobs` were set to None
-        # TODO check if `_pool._processes` is valid construct
+        # TODO check if `_pool._processes` is valid construct  # skipcq: PYL-W0622
         self.jobs = self._pool._processes
 
     def run(self, output_directory):
@@ -84,7 +84,7 @@ class Runner:
             return None
         start_time = timeit.default_timer()
 
-        # TODO line below is specific to SHIELD-HIT12A, should be generalised
+        # TODO line below is specific to SHIELD-HIT12A, should be generalised  # skipcq: PYL-W0622
         # scans output directory for MC simulation output files
         output_files_pattern = os.path.join(output_dir, "run_*", "*.bdo")
         logging.debug("Files to merge {:s}".format(output_files_pattern))
@@ -127,7 +127,7 @@ class Executor:
         logging.info("Workspace {:s}".format(workspace))
         try:
             # copy simulation input files into the workspace directory
-            # TODO extract this step into separate method
+            # TODO extract this step into separate method  # skipcq: PYL-W0622
             if os.path.isdir(self.settings.input_path):
                 # if path already exists, remove it before copying with copytree()
                 if os.path.exists(workspace):
@@ -164,7 +164,7 @@ class Executor:
             command_as_list.append(workspace)
 
             # execute the MC simulation on a spawned process
-            # TODO handle standard output differently, i.e. redirect it to some file or save in some variable
+            # TODO handle this differently, i.e. redirect it to file or save in some variable   # skipcq: PYL-W0622
             logging.debug('working directory {:s}, command {:s}'.format(workspace, ' '.join(command_as_list)))
             DEVNULL = open(os.devnull, 'wb')
             subprocess.check_call(command_as_list, cwd=workspace, stdout=DEVNULL, stderr=DEVNULL)
