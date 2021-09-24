@@ -34,7 +34,7 @@ class MCOptions:
         self.executable_path = executable_path
         if self.executable_path is None:
             self.executable_path = self._discover_mc_executable()
-        self.user_opt = user_opt if user_opt else ''
+        self.user_opt = user_opt if user_opt else ''  # sanity check for None value
         if self.user_opt:
             self._validate_user_opt(self.user_opt)
         self.workspace = '.'

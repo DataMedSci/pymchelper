@@ -3,8 +3,10 @@ import os
 import shutil
 import subprocess
 import timeit
-from enum import IntEnum
 from multiprocessing import Pool
+
+from enum import IntEnum
+
 from pymchelper.input_output import frompattern
 
 
@@ -12,7 +14,6 @@ class MCOutType(IntEnum):
     """
     Output type requested by user (raw files, i.e. bdo) or plots (i.e .png) or text data
     """
-    raw = 0
     plot = 1
     txt = 2
 
