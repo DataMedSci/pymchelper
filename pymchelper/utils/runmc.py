@@ -113,7 +113,7 @@ def main(args=None):
     # in case of successful execution this would return list of temporary workspaces directories
     # containing partial results from simultaneous parallel executions
     start_time = timeit.default_timer()
-    runner_obj.run(output_directory=parsed_args.outdir)
+    workspaces = runner_obj.run(output_directory=parsed_args.outdir)
     elapsed = timeit.default_timer() - start_time
     print("MC simulation took {:.3f} seconds".format(elapsed))
 
