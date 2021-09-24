@@ -67,7 +67,7 @@ def run_sh12a(input_dict):
                              cmdline_opts='-s')
 
     r = Runner(jobs=1, settings=opt)
-    r.run(outdir=dirpath)
+    r.run(output_directory=dirpath)
     data = r.get_data(dirpath)
     shutil.rmtree(dirpath)
     return data['ex_zmsh']

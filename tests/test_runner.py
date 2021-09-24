@@ -86,7 +86,7 @@ END
         opt.set_no_of_primaries(10)
 
         r = Runner(jobs=2, settings=opt)
-        workspaces = r.run(outdir=dirpath)
+        workspaces = r.run(output_directory=dirpath)
         self.assertIsNotNone(workspaces)
 
         data = r.get_data(dirpath)

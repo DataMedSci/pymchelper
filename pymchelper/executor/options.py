@@ -36,9 +36,9 @@ class SH12AEnvironmentWindows(MCEnvironment):
 class SimulationSettings:
     """
     This class is responsible for keeping track of options for MC simulation:
-      - location of the input files or directories
       - location of the MC simulator executable
       - additional options provided by the user
+      - location of the input files or directories
     Moreover this class performs automatic discovery of the MC input
     (i.e. whether this is SHIELD-HIT12A input or FLUKA input)
     """

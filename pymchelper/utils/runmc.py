@@ -7,7 +7,7 @@ import argparse
 import timeit
 
 from pymchelper.executor.options import SimulationSettings
-from pymchelper.executor.runner import MCOutType, Runner
+from pymchelper.executor.runner import OutputDataType, Runner
 from pymchelper.writers.plots import PlotDataWriter, ImageWriter
 
 
@@ -60,9 +60,9 @@ def main(args=None):
                         dest='mcopt', type=str, default='')
     parser.add_argument('-o', '--output-dir', help='Output directory (default: .)',
                         dest='outdir', type=str, default='.')
-    parser.add_argument('-t', '--out-type', help='output data type (default {:s})'.format(MCOutType.txt.name),
+    parser.add_argument('-t', '--out-type', help='output data type (default {:s})'.format(OutputDataType.txt.name),
                         dest='outtype', type=str, nargs='*',
-                        choices=[x.name for x in MCOutType], default=MCOutType.txt.name)
+                        choices=[x.name for x in OutputDataType], default=OutputDataType.txt.name)
     parser.add_argument('-w', '--work-dir', help='Workspace directory (default: .)',
                         dest='workspace', type=str, default='.')
     parser.add_argument('-k', '--keep', action='store_true', help='keep workspace directories')
@@ -113,7 +113,7 @@ def main(args=None):
     # in case of successful execution this would return list of temporary workspaces directories
     # containing partial results from simultaneous parallel executions
     start_time = timeit.default_timer()
-    workspaces = runner_obj.run(outdir=parsed_args.outdir)
+    workspaces = runner_obj.run(output_directory=parsed_args.outdir)
     elapsed = timeit.default_timer() - start_time
     print("MC simulation took {:.3f} seconds".format(elapsed))
 
@@ -130,7 +130,7 @@ def main(args=None):
     # if user requests combined results as text files, the code below is used to convert Estimator objects to them
     # note that multiple text files can be created here
     start_time = timeit.default_timer()
-    if data_dict and (MCOutType.txt.name in parsed_args.outtype):
+    if data_dict and (OutputDataType.txt.name in parsed_args.outtype):
         for core_filename in data_dict:
             logging.debug("Core filename {:s}".format(core_filename))
             output_file = os.path.join(parsed_args.outdir, core_filename)
@@ -139,7 +139,7 @@ def main(args=None):
 
     # if user requests combined results as PNG image, the code below is used to convert Estimator objects to them
     # note that multiple PNG files can be created here
-    if data_dict and (MCOutType.plot.name in parsed_args.outtype):
+    if data_dict and (OutputDataType.plot.name in parsed_args.outtype):
         for core_filename in data_dict:
             output_file = os.path.join(parsed_args.outdir, core_filename)
             writer = ImageWriter(output_file, argparse.Namespace(colormap='gnuplot2', log=''))
