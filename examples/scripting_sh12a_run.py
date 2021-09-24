@@ -6,7 +6,7 @@ import shutil
 
 import numpy as np
 
-from pymchelper.executor.options import MCOptions
+from pymchelper.executor.options import SimulationSettings
 from pymchelper.executor.runner import Runner
 
 
@@ -62,11 +62,11 @@ def run_sh12a(input_dict):
         with open(file_path, 'w') as output_file:
             output_file.write(input_dict[config_file])
 
-    opt = MCOptions(input_path=dirpath,
-                    executable_path=None,
-                    user_opt='-s')
+    opt = SimulationSettings(input_path=dirpath,
+                             simulator_exec_path=None,
+                             cmdline_opts='-s')
 
-    r = Runner(jobs=1, options=opt)
+    r = Runner(jobs=1, settings=opt)
     r.run(outdir=dirpath)
     data = r.get_data(dirpath)
     shutil.rmtree(dirpath)

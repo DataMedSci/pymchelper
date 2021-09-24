@@ -28,8 +28,8 @@ class Runner:
     """
     TODO
     """
-    def __init__(self, jobs=None, options=None):
-        self.options = options
+    def __init__(self, jobs=None, settings=None):
+        self.settings = settings
         self.pool = Pool(processes=jobs)
         self.jobs = self.pool._processes  # always int
 
@@ -39,7 +39,7 @@ class Runner:
         """
         start_time = timeit.default_timer()
         rng_seeds = range(1, self.jobs + 1)
-        e = Executor(outdir=outdir, options=self.options)
+        e = Executor(outdir=outdir, settings=self.settings)
         res = None
         try:
             res = self.pool.map(e, rng_seeds)
@@ -88,28 +88,28 @@ class Executor:
     """
     TODO
     """
-    def __init__(self, outdir, options):
+    def __init__(self, outdir, settings):
         self.outdir = os.path.abspath(outdir)
-        self.options = options
+        self.settings = settings
 
     def __call__(self, rng_seed, **kwargs):
         workspace = os.path.join(self.outdir, 'run_{:d}'.format(rng_seed))
         logging.info("Workspace {:s}".format(workspace))
         try:
-            if os.path.isdir(self.options.input_path):
+            if os.path.isdir(self.settings.input_path):
                 # if path already exists, remove it before copying with copytree()
                 if os.path.exists(workspace):
                     shutil.rmtree(workspace)
-                shutil.copytree(self.options.input_path, workspace)
+                shutil.copytree(self.settings.input_path, workspace)
                 logging.debug("Copying input files into {:s}".format(workspace))
-            elif os.path.isfile(self.options.input_path):
+            elif os.path.isfile(self.settings.input_path):
                 if not os.path.exists(workspace):
                     os.makedirs(workspace)
-                shutil.copy2(self.options.input_path, workspace)
+                shutil.copy2(self.settings.input_path, workspace)
                 logging.debug("Copying input files into {:s}".format(workspace))
             else:
-                logging.debug("Input files {:s} not a dir or file".format(self.options.input_path))
-            current_options = self.options
+                logging.debug("Input files {:s} not a dir or file".format(self.settings.input_path))
+            current_options = self.settings
             current_options.set_rng_seed(rng_seed)
             current_options.workspace = workspace
             logging.debug('dir {:s}, cmd {:s}'.format(workspace, str(current_options)))

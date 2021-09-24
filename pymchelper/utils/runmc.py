@@ -6,7 +6,7 @@ import sys
 import argparse
 import timeit
 
-from pymchelper.executor.options import MCOptions
+from pymchelper.executor.options import SimulationSettings
 from pymchelper.executor.runner import MCOutType, Runner
 from pymchelper.writers.plots import PlotDataWriter, ImageWriter
 
@@ -56,7 +56,7 @@ def main(args=None):
     parser.add_argument('-j', '--jobs',
                         help='Number of jobs to run simultaneously (default: {:d})'.format(os.cpu_count()),
                         type=int, default=None)
-    parser.add_argument('-m', '--mc-options', help='MC engine options (default: empty string)',
+    parser.add_argument('-m', '--mc-options', help='MC simulation options (default: empty string)',
                         dest='mcopt', type=str, default='')
     parser.add_argument('-o', '--output-dir', help='Output directory (default: .)',
                         dest='outdir', type=str, default='.')
@@ -80,7 +80,7 @@ def main(args=None):
     # set verbose and quietness options
     set_logger_level(parsed_args)
 
-    # strip MC arguments:
+    # strip MC simulation arguments:
     #   we have possibility to pass extra options to MS simulation executable
     #   passing these options in most obvious way, i.e. -m --time 00:15:30 won't work
     #   as argument parsing library will interpret --time as runmc option and not as -m option value
@@ -89,24 +89,24 @@ def main(args=None):
     #      -m "[--time 00:15:30 -v -n 1000]"
     #   here we strip these wrapping characters, if present
     # if no -m option is provided then we need to deal with empty string
-    mc_exec_args = parsed_args.mcopt
-    if mc_exec_args:  # check if list is not None, and if it has at least one element
-        if mc_exec_args[0] == '[' and mc_exec_args[-1] == ']':  # check if list starts with [ and ends with ]
-            mc_exec_args = mc_exec_args[1:-1]  # strip the list from surrounding brackets
+    parsed_simulation_opts = parsed_args.mcopt
+    if parsed_simulation_opts:  # check if list is not None, and if it has at least one element
+        if parsed_simulation_opts[0] == '[' and parsed_simulation_opts[-1] == ']':  # check if embedded in [,]
+            parsed_simulation_opts = parsed_simulation_opts[1:-1]  # strip the list from surrounding brackets
 
-    # set MC simulation options based on:
+    # set MC simulation settings based on:
     #   - MC simulation input file (i.e. *.inp file for FLUKA) or
     #     directories (i.e. directory with beam.dat, geo.dat etc for SHIELD-HIT12A)
     #   - location of MC simulator executable file (i.e. `shieldhit` or `rfluka`)
-    #   - extra options for the MC simulator provided via -m switch (i.e. --time or -v)
-    mc_opts = MCOptions(input_path=parsed_args.input,
-                        executable_path=parsed_args.executable,
-                        user_opt=mc_exec_args)
+    #   - simulation options for the MC engine provided via -m switch (i.e. --time or -v)
+    settings = SimulationSettings(input_path=parsed_args.input,
+                                  simulator_exec_path=parsed_args.executable,
+                                  cmdline_opts=parsed_simulation_opts)
 
     # create runner object based on MC options and dedicated parallel jobs number
     # note that runner object is only created here, no simulation is started at this point
     # and no directories are being created
-    runner_obj = Runner(jobs=parsed_args.jobs, options=mc_opts)
+    runner_obj = Runner(jobs=parsed_args.jobs, settings=settings)
 
     # start parallel execution of MC simulation
     # temporary directories needed for parallel execution as well as the output are being saved in `outdir`

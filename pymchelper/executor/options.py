@@ -3,132 +3,198 @@ import os
 import sys
 
 
-class FlukaEnvironment:
+class MCEnvironment:
     """
-    TODO
+    `MCEnvironment` subclasses are helpful to discover which MC engine (i.e. FLUKA or SHIELD-HIT12A) is being used
+    they provide information about expected executable filename, by inspecting the path to executable filename
+    (i.e. checking if it ends with `rfluka`) we can find corresponding code type
     """
-    executable_file = 'rfluka'
+    executable_filename = None
 
 
-class SH12AEnvironmentLinux:
+class FlukaEnvironment(MCEnvironment):
     """
-    TODO
+    FLUKA Environment
     """
-    executable_file = 'shieldhit'
+    executable_filename = 'rfluka'
 
 
-class SH12AEnvironmentWindows:
+class SH12AEnvironmentLinux(MCEnvironment):
     """
-    TODO
+    SHIELD-HIT12A Environment for Linux
     """
-    executable_file = 'shieldhit.exe'
+    executable_filename = 'shieldhit'
 
 
-class MCOptions:
+class SH12AEnvironmentWindows(MCEnvironment):
     """
-    TODO
+    SHIELD-HIT12A Environment for Windows
     """
-    def __init__(self, input_path, executable_path=None, user_opt=None):
+    executable_filename = 'shieldhit.exe'
+
+
+class SimulationSettings:
+    """
+    This class is responsible for keeping track of options for MC simulation:
+      - location of the input files or directories
+      - location of the MC simulator executable
+      - additional options provided by the user
+    Moreover this class performs automatic discovery of the MC input
+    (i.e. whether this is SHIELD-HIT12A input or FLUKA input)
+    """
+
+    def __init__(self, input_path, simulator_exec_path=None, cmdline_opts=None):
+        # input file or directory
         self.input_path = input_path
-        self._mc_environment = self._discover_mc_engine()
-        self.executable_path = executable_path
-        if self.executable_path is None:
-            self.executable_path = self._discover_mc_executable()
-        self.user_opt = user_opt if user_opt else ''  # sanity check for None value
-        if self.user_opt:
-            self._validate_user_opt(self.user_opt)
-        self.workspace = '.'
+
+        # discover the type of MC engine based on the type of input files/directories
+        # `self._mc_environment` is set to one of the `MCEnvironment` subclasses
+        self._mc_environment = self._discover_mc_engine(input_path)
+
+        # set `self.executable_path` to the value provided by user, or if it is missing
+        # perform automatic discovery of the *location* of MC engine executable file by scanning PATH env. variable
+        self.executable_path = simulator_exec_path
+        if not self.executable_path:
+            self.executable_path = self._discover_mc_exec_location(self._mc_environment.executable_filename)
+
+        # set extra options (i.e. `--time 00:15:30 -v`) for the MC engine
+        self.extra_opt = cmdline_opts if cmdline_opts else ''  # sanity check for None value
+        # if extra options are provided, perform options validation
+        # in case the options are not supported by MC engine, validation method will throw an exception
+        if self.extra_opt:
+            self._validate_cmdline_opt(self.extra_opt)
 
     def set_rng_seed(self, rng_seed):
         """
+        This methods modifies command line options of the MC engine by setting (or overriding) the value of RNG seed
         TODO this method is specific to SH12A, more general should be added
+        TODO add support for RNG seed provided as --seedofset, instead of -N
         """
-        options_list = self.user_opt.split()
+        # transform option list from plain string to a list of values for easier manipulation
+        options_list = self.extra_opt.split()
+
+        # If RNG seed is missing on the option list, then the code below will set it to given value
         if '-N' not in options_list:
-            self.user_opt += " -N {:d}".format(rng_seed)
+            self.extra_opt += " -N {:d}".format(rng_seed)
+        # if RNG is present on the option list, then we override its value
         else:
-            location = options_list.index('-N')
-            options_list[location + 1] = str(rng_seed)
-            self.user_opt = ' '.join(options_list)
+            # in SHIELD-HIT12A RNG seed is specified by -N option
+            index_of_rng_opt = options_list.index('-N')  # find index of '-N'
+            options_list[index_of_rng_opt + 1] = str(rng_seed)  # override the value of current -N option
+            self.extra_opt = ' '.join(options_list)  # reconstruct option string
 
     def set_no_of_primaries(self, number_of_primaries):
         """
+        This methods modifies command line options of the MC engine by setting (or overriding) the number of primaries
+        to be simulated by each of the parallel jobs
         TODO this method is specific to SH12A, more general should be added
+        TODO add support for no of primaries provided as --nstat, instead of -n
         """
-        options_list = self.user_opt.split()
+        # transform option list from plain string to a list of values for easier manipulation
+        options_list = self.extra_opt.split()
+
+        # If no of primaries is missing on the option list, then the code below will set it to given value
         if '-n' not in options_list:
-            self.user_opt += " -n {:d}".format(number_of_primaries)
+            self.extra_opt += " -n {:d}".format(number_of_primaries)
         else:
-            location = options_list.index('-n')
-            options_list[location + 1] = str(number_of_primaries)
-            self.user_opt = ' '.join(options_list)
+            # see `set_rng_seed` for the logic
+            index_of_prim_opt = options_list.index('-n')
+            options_list[index_of_prim_opt + 1] = str(number_of_primaries)
+            self.extra_opt = ' '.join(options_list)
 
     @staticmethod
-    def _validate_user_opt(user_opt):
+    def _validate_cmdline_opt(cmdline_opts):
         """
         TODO this method is specific to SH12A, more general should be added
         """
-        options_list = user_opt.split()
-        options_set = set(options_list)
-        unsupported = {'-b', '--beamfile', '-g', '--geofile', '-m', '--matfile', '-d', '--detectfile'}
-        if options_set & unsupported:
-            raise SyntaxError("Unsupported option encountered: {:s}".format(",".join(options_set & unsupported)))
-        if len(options_list) > 1:
-            last_item = options_list[-1]
-            before_last_item = options_list[-2]
-            single_options = {'-h', '--help', '-V', '--version', '-v', '--verbose', '-s', '--silent',
-                              '-l', '--legacy-bdo'}
-            if not last_item.startswith('-'):
-                if before_last_item in single_options:
-                    raise SyntaxError("Seems like workspace: {:s}".format(last_item))
-                if len(options_list) > 2 and options_list[-3].startswith('-'):
-                    raise SyntaxError("Seems like workspace: {:s}".format(last_item))
-        if len(options_list) == 1 and not options_list[0].startswith('-'):
-            raise SyntaxError("Seems like workspace: {:s}".format(options_list[0]))
+        # transform option list from plain string to a list of values for easier manipulation
+        options_list = cmdline_opts.split()
 
-    def _discover_mc_engine(self):
+        # transform option list to a set to ease finding common part of unsupported and current options
+        options_set = set(options_list)
+        # set of options which cannot be overwritten by the user
+        # these include locations of the input files which are fixed to the temporary workspace directories
+        # generated by the `pymchelper` code
+        unsupported = {'-b', '--beamfile', '-g', '--geofile', '-m', '--matfile', '-d', '--detectfile'}
+        # raise an error if some of the unsupported option was provided by user (i.e. via -m option to `runmc` command)
+        if options_set & unsupported:
+            # TODO replace exception with warning and ignore such options
+            raise SyntaxError("Unsupported option encountered: {:s}".format(",".join(options_set & unsupported)))
+
+    @staticmethod
+    def _discover_mc_engine(input_path):
         """
-        TODO
+        Analyse the input path and based on its type set proper MC engine
+        In case of failure return None
         """
-        if not os.path.exists(self.input_path):
-            raise Exception("Input path {:s} doesn't exists".format(self.input_path))
-        if os.path.isfile(self.input_path):
+
+        # raise exception if invalid path is provided
+        if not os.path.exists(input_path):
+            raise Exception("Input path {:s} doesn't exists".format(input_path))
+
+        # Fluka input files are provided as the single file
+        # TODO cross-check if the `*.inp` extension is needed
+        if os.path.isfile(input_path):
             return FlukaEnvironment
-        if os.path.isdir(self.input_path):
+        # SHIELD-HIT12A input is in the form of directory with multiple files
+        # TODO add a check if the directory contains (beam.dat, mat.dat, geo.dat and detect.dat)
+        if os.path.isdir(input_path):
+            # in case pymchelper runs on Windows choose a SHIELD-HIT12A environment which is Windows specific
+            # (executable file being `shieldhit.exe` instead of `shieldhit`)
             if sys.platform == 'win32':
                 return SH12AEnvironmentWindows
             return SH12AEnvironmentLinux
         return None
 
-    def _discover_mc_executable(self):
+    @staticmethod
+    def _discover_mc_exec_location(exec_filename):
         """
-        TODO
+        Scans PATH variable for the possible location of the MC engine exec_filename.
+        Works on POSIX (Linux and MacOSX) and Windows systems
         """
-        dirs_with_mc_exe = []
-        split_char = ':'
+
+        # PATH variable contains list of directories being separated by : on POSIX systems
+        # and by ; on Windows systems. Here we set proper separator
+        separator_char = ':'
         if sys.platform == 'win32':
-            split_char = ';'
-        for item in os.environ['PATH'].split(split_char):
-            logging.debug("Inspecting {:s}".format(item))
-            if os.path.isdir(item) and self._mc_environment.executable_file in os.listdir(item):
-                dirs_with_mc_exe.append(item)
+            separator_char = ';'
 
-        if not dirs_with_mc_exe:
-            raise Exception("Executable {:s} not found in PATH ({:s})".format(self._mc_environment.executable_file,
-                                                                              ",".join(sys.path)))
+        list_of_directories = []
+        # loop over all directories in PATH env variable
+        for path_directory_entry in os.environ['PATH'].split(separator_char):
 
-        return os.path.join(dirs_with_mc_exe[0], self._mc_environment.executable_file)
+            logging.debug("Inspecting {:s}".format(path_directory_entry))
+
+            # check if PATH entry is a proper directory
+            # some malicious users can add a files to PATH as well (although it doesn't make any sense)
+            if os.path.isdir(path_directory_entry):
+
+                # scan a PATH entry and loop over all filenames inside PATH entry directory using `os.listdir`
+                if exec_filename in os.listdir(path_directory_entry):
+
+                    # add a directories for which we encounter `exec_filename`
+                    # (MC engine filename, like `rfluka` or `shieldhit`)
+                    list_of_directories.append(path_directory_entry)
+
+        # raise exception if MC engine not found
+        if not list_of_directories:
+            raise Exception("Executable {:s} not found in PATH ({:s})".format(exec_filename, ",".join(sys.path)))
+
+        # if `exec_filename` is found in multiple location, return full path to the first location (directory+filename)
+        return os.path.join(list_of_directories[0], exec_filename)
 
     def __str__(self):
-        result = "{executable:s} {options:s} {workspace:s}".format(
-            executable=os.path.abspath(self.executable_path),
-            options=self.user_opt if self.user_opt else '',
-            workspace=os.path.abspath(self.workspace)
+        """
+        Dump all settings into a string
+        """
+        result = "{executable_path:s} {cmdline_opts:s}".format(
+            executable_path=os.path.abspath(self.executable_path),
+            cmdline_opts=self.cmdline_opts if self.cmdline_opts else ''
         )
         return result
 
 
-class SH12AOptions(MCOptions):
+class SH12ASettings(SimulationSettings):
     """
     TODO
     """
