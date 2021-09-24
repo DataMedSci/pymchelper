@@ -58,11 +58,11 @@ class SimulationSettings:
             self.executable_path = self._discover_mc_exec_location(self._mc_environment.executable_filename)
 
         # set extra options (i.e. `--time 00:15:30 -v`) for the MC engine
-        self.extra_opt = cmdline_opts if cmdline_opts else ''  # sanity check for None value
+        self.cmdline_opts = cmdline_opts if cmdline_opts else ''  # sanity check for None value
         # if extra options are provided, perform options validation
         # in case the options are not supported by MC engine, validation method will throw an exception
-        if self.extra_opt:
-            self._validate_cmdline_opt(self.extra_opt)
+        if self.cmdline_opts:
+            self._validate_cmdline_opt(self.cmdline_opts)
 
     def set_rng_seed(self, rng_seed):
         """
@@ -71,17 +71,17 @@ class SimulationSettings:
         TODO add support for RNG seed provided as --seedofset, instead of -N
         """
         # transform option list from plain string to a list of values for easier manipulation
-        options_list = self.extra_opt.split()
+        options_list = self.cmdline_opts.split()
 
         # If RNG seed is missing on the option list, then the code below will set it to given value
         if '-N' not in options_list:
-            self.extra_opt += " -N {:d}".format(rng_seed)
+            self.cmdline_opts += " -N {:d}".format(rng_seed)
         # if RNG is present on the option list, then we override its value
         else:
             # in SHIELD-HIT12A RNG seed is specified by -N option
             index_of_rng_opt = options_list.index('-N')  # find index of '-N'
             options_list[index_of_rng_opt + 1] = str(rng_seed)  # override the value of current -N option
-            self.extra_opt = ' '.join(options_list)  # reconstruct option string
+            self.cmdline_opts = ' '.join(options_list)  # reconstruct option string
 
     def set_no_of_primaries(self, number_of_primaries):
         """
@@ -91,16 +91,16 @@ class SimulationSettings:
         TODO add support for no of primaries provided as --nstat, instead of -n
         """
         # transform option list from plain string to a list of values for easier manipulation
-        options_list = self.extra_opt.split()
+        options_list = self.cmdline_opts.split()
 
         # If no of primaries is missing on the option list, then the code below will set it to given value
         if '-n' not in options_list:
-            self.extra_opt += " -n {:d}".format(number_of_primaries)
+            self.cmdline_opts += " -n {:d}".format(number_of_primaries)
         else:
             # see `set_rng_seed` for the logic
             index_of_prim_opt = options_list.index('-n')
             options_list[index_of_prim_opt + 1] = str(number_of_primaries)
-            self.extra_opt = ' '.join(options_list)
+            self.cmdline_opts = ' '.join(options_list)
 
     @staticmethod
     def _validate_cmdline_opt(cmdline_opts):

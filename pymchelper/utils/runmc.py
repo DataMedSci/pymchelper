@@ -113,19 +113,15 @@ def main(args=None):
     # in case of successful execution this would return list of temporary workspaces directories
     # containing partial results from simultaneous parallel executions
     start_time = timeit.default_timer()
-    workspaces = runner_obj.run(output_directory=parsed_args.outdir)
+    runner_obj.run(output_directory=parsed_args.outdir)
     elapsed = timeit.default_timer() - start_time
     print("MC simulation took {:.3f} seconds".format(elapsed))
-
-    # in case of problems during execution exit with failure status code
-    if not workspaces:
-        return -1
 
     # if simulation was successful proceed to data extraction by combining partial results from simultaneous executions
     # each simulation can produce multiple files
     # results are stored in a dictionary (`data_dict`) with keys being filenames
     # and values being pymchelper `Estimator` objects (which keep i.e. numpy arrays with results)
-    data_dict = runner_obj.get_data(workspaces)
+    data_dict = runner_obj.get_data(parsed_args.outdir)
 
     # if user requests combined results as text files, the code below is used to convert Estimator objects to them
     # note that multiple text files can be created here

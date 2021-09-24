@@ -78,6 +78,7 @@ class Runner:
         Takes all files from all workspace in `output_dir`, merges their content to form pymchelper Estimator objects.
         For each of the output file a single Estimator objects is created, which holds numpy arrays with results.
         Return dictionary with keys being output filenames, and values being Estimator objects
+        # TODO consider replace output_dir with list of workspace
         """
         if not output_dir:
             return None
