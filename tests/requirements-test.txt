@@ -2,5 +2,4 @@
 pytest
 pytest-xdist
 tox
-matplotlib
 flake8
