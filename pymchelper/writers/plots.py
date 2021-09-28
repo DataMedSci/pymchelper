@@ -14,28 +14,51 @@ class PlotAxis(IntEnum):
 
 
 class PlotDataWriter:
+    """
+    TODO
+    """
+
     def __init__(self, filename, options):
         self.filename = filename
         if not self.filename.endswith(".dat"):
             self.filename += ".dat"
 
     def write(self, estimator):
-        if len(estimator.pages) > 1:
-            print("Conversion of data with multiple pages not supported yet")
-            return False
+        """
+        TODO
+        """
+        # save to single page to a file without number (i.e. output.dat)
+        if len(estimator.pages) == 1:
+            self.write_single_page(estimator.pages[0], self.filename)
+        else:
+            # split output path into directory, basename and extension
+            dir_path = os.path.dirname(self.filename)
+            if not os.path.exists(dir_path):
+                logger.info("Creating {}".format(dir_path))
+                os.makedirs(dir_path)
+            file_base_part, file_ext = os.path.splitext(os.path.basename(self.filename))
 
-        logger.info("Writing: " + self.filename)
+            # loop over all pages and save an image for each of them
+            for i, page in enumerate(estimator.pages):
 
-        page = estimator.pages[0]
+                # calculate output filename. it will include page number padded with zeros.
+                # for 10-99 pages the filename would look like: output_p01.png, ... output_p99.png
+                # for 100-999 pages the filename would look like: output_p001.png, ... output_p999.png
+                zero_padded_page_no = str(i + 1).zfill(len(str(len(estimator.pages))))
+                output_filename = "{}_p{}{}".format(file_base_part, zero_padded_page_no, file_ext)
+                output_path = os.path.join(dir_path, output_filename)
 
-        # # change units for LET from MeV/cm to keV/um if necessary
-        # # a copy of data table is made here
-        # from pymchelper.shieldhit.detector.detector_type import SHDetType
-        # if estimator.dettyp in (SHDetType.dlet, SHDetType.dletg, SHDetType.tlet, SHDetType.tletg):
-        #     data_raw = data_raw * np.float64(0.1)  # 1 MeV / cm = 0.1 keV / um
-        #     if not np.all(np.isnan(error_raw)) and np.any(error_raw):
-        #         error_raw = error_raw * np.float64(0.1)  # 1 MeV / cm = 0.1 keV / um
-        # TODO move to reader
+                # save the output file
+                logger.info("Writing {}".format(output_path))
+                self.write_single_page(page, output_path)
+
+        return 0
+
+    def write_single_page(self, page, filename):
+        """
+        TODO
+        """
+        logger.info("Writing: " + filename)
 
         # special case for 0-dim data
         if page.dimension == 0:
@@ -66,11 +89,15 @@ class PlotDataWriter:
             data_columns = np.transpose(data_to_save)
 
             # save space-delimited text file
-            np.savetxt(self.filename, data_columns, fmt=fmt, delimiter=' ')
+            np.savetxt(filename, data_columns, fmt=fmt, delimiter=' ')
         return 0
 
 
 class GnuplotDataWriter:
+    """
+    TODO
+    """
+
     def __init__(self, filename, options):
         self.data_filename = filename
         self.script_filename = filename
@@ -112,6 +139,9 @@ splot \"<awk -f addblanks.awk '{data_filename}'\" u 1:2:3 with pm3d
     }
 
     def write(self, estimator):
+        """
+        TODO
+        """
         if len(estimator.pages) > 1:
             print("Conversion of data with multiple pages not supported yet")
             return False
@@ -154,6 +184,10 @@ splot \"<awk -f addblanks.awk '{data_filename}'\" u 1:2:3 with pm3d
 
 
 class ImageWriter:
+    """
+    TODO
+    """
+
     def __init__(self, filename, options):
         self.plot_filename = filename
         if not self.plot_filename.endswith(".png"):
@@ -168,6 +202,9 @@ class ImageWriter:
         return name + " " + "[" + unit + "]"
 
     def get_page_figure(self, page):
+        """
+        TODO
+        """
 
         try:
             import matplotlib
@@ -248,6 +285,10 @@ class ImageWriter:
         return fig
 
     def write(self, estimator):
+        """
+        TODO
+        """
+
         # save single page to a file without number (i.e. output.png)
         if len(estimator.pages) == 1:
             fig = self.get_page_figure(estimator.pages[0])

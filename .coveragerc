@@ -1,7 +1,6 @@
 [run]
 source = .
 branch = true
-disable_warnings = include-ignored
 parallel = true
 
 [report]
