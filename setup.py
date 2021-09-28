@@ -44,7 +44,7 @@ install_requires = []
 # |       1.9     | 2.7,  3.3 - 3.5 |      linux      |
 # |---------------------------------------------------|
 setup_requires = []
-extras_requires = {'all': ["matplotlib"]}
+extras_require = {'all': ["matplotlib"]}
 if sys.version_info[0] == 3 and sys.version_info[1] == 9:  # python 3.9
     install_requires += ["numpy>=1.20"]
 elif sys.version_info[0] == 3 and sys.version_info[1] == 8:  # python 3.8
@@ -113,6 +113,6 @@ setuptools.setup(
     },
     package_data={'pymchelper': ['flair/db/*', 'VERSION']},
     install_requires=install_requires,
-    extras_requires=extras_requires,
+    extras_require=extras_require,
     python_requires='>=2.7, !=3.0.*, !=3.1.*, !=3.3.*',
 )
