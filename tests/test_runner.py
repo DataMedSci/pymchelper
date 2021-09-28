@@ -7,7 +7,7 @@ import unittest
 
 import pytest
 
-from pymchelper.executor.options import MCOptions
+from pymchelper.executor.options import SimulationSettings
 from pymchelper.executor.runner import Runner
 
 logger = logging.getLogger(__name__)
@@ -80,13 +80,13 @@ END
             with open(file_path, 'w') as output_file:
                 output_file.write(input_cfg[config_file])
 
-        opt = MCOptions(input_path=dirpath,
-                        executable_path=self.exec_path,
-                        user_opt='-s')
+        opt = SimulationSettings(input_path=dirpath,
+                                 simulator_exec_path=self.exec_path,
+                                 cmdline_opts='-s')
         opt.set_no_of_primaries(10)
 
-        r = Runner(jobs=2, options=opt)
-        workspaces = r.run(outdir=dirpath)
+        r = Runner(jobs=2, settings=opt)
+        workspaces = r.run(output_directory=dirpath)
         self.assertIsNotNone(workspaces)
 
         data = r.get_data(dirpath)

@@ -6,16 +6,26 @@ import sys
 import argparse
 import timeit
 
-from pymchelper.executor.options import MCOptions
-from pymchelper.executor.runner import MCOutType, Runner
+from pymchelper.executor.options import SimulationSettings
+from pymchelper.executor.runner import OutputDataType, Runner
 from pymchelper.writers.plots import PlotDataWriter, ImageWriter
 
 
 def set_logger_level(args):
     """
-    TODO
+    Set logger verbosity and quietness based on parsed arguments
+    Checks for presence of quiet (-q) and verbose (-v) switches
     """
 
+    # set default logging level to INFO
+    level = "INFO"
+
+    # silence almost all warnings if quite option provided
+    # there are two levels:
+    #  - normal quiet (-q) with level set to WARNING
+    #  - very quiet (-qq)  with level set to ERROR
+    #  - very very quiet (-qqq and more)  with level set to CRITICAL
+    # quiet option is especially useful when using `runmc` commands in the scripts (i.e. in some loops)
     if args.quiet:
         if args.quiet == 1:
             level = "WARNING"
@@ -23,16 +33,16 @@ def set_logger_level(args):
             level = "ERROR"
         else:
             level = "CRITICAL"
+    # verbose option, useful in debugging sets DEBUG level
     elif args.verbose:
         level = "DEBUG"
-    else:
-        level = "INFO"
+
     logging.basicConfig(level=level)
 
 
 def main(args=None):
     """
-    TODO
+    Entry point to the `runmc` script: argument parsing and calling run method
     """
 
     if args is None:
@@ -41,20 +51,21 @@ def main(args=None):
 
     parser = argparse.ArgumentParser()
     parser.add_argument('-e', '--executable', help='path to MC executable '
-                                                   '(automatically detected if option not present)',
+                                                   '(automatically detected if not provided)',
                         type=str, default=None)
     parser.add_argument('-j', '--jobs',
                         help='Number of jobs to run simultaneously (default: {:d})'.format(os.cpu_count()),
                         type=int, default=None)
-    parser.add_argument('-m', '--mc-options', help='MC engine options (default: none)',
-                        dest='mcopt', type=str, default=None)
+    parser.add_argument('-m', '--mc-options', help='MC simulation options (default: empty string)',
+                        dest='mcopt', type=str, default='')
     parser.add_argument('-o', '--output-dir', help='Output directory (default: .)',
                         dest='outdir', type=str, default='.')
-    parser.add_argument('-t', '--out-type', help='output data type (default {:s})'.format(MCOutType.txt.name),
+    parser.add_argument('-t', '--out-type', help='output data type (default {:s})'.format(OutputDataType.txt.name),
                         dest='outtype', type=str, nargs='*',
-                        choices=[x.name for x in MCOutType], default=MCOutType.txt.name)
+                        choices=[x.name for x in OutputDataType], default=OutputDataType.txt.name)
     parser.add_argument('-w', '--work-dir', help='Workspace directory (default: .)',
                         dest='workspace', type=str, default='.')
+    parser.add_argument('-k', '--keep', action='store_true', help='keep workspace directories')
     parser.add_argument('-q', '--quiet', action='count', default=0, help='be silent')
     parser.add_argument('-v',
                         '--verbose',
@@ -66,51 +77,83 @@ def main(args=None):
 
     parsed_args = parser.parse_args(args)
 
-    status = 0
+    # set verbose and quietness options
     set_logger_level(parsed_args)
 
-    # strip MC arguments
-    mc_args = parsed_args.mcopt
-    if (
-        mc_args is not None
-        and len(mc_args) > 1
-        and mc_args[0] == '['
-        and mc_args[-1] == ']'
-    ):
-        mc_args = mc_args[1:-1]
+    # strip MC simulation arguments:
+    #   we have possibility to pass extra options to MS simulation executable
+    #   passing these options in most obvious way, i.e. -m --time 00:15:30 won't work
+    #   as argument parsing library will interpret --time as runmc option and not as -m option value
+    #   surrounding --time 00:15:30 with "" won't help, as they could be stripped away by shell (i.e. bash)
+    #   the only possible way is to embed the MC simulator options with custom wrapping characters, like [,]:
+    #      -m "[--time 00:15:30 -v -n 1000]"
+    #   here we strip these wrapping characters, if present
+    # if no -m option is provided then we need to deal with empty string
+    parsed_simulation_opts = parsed_args.mcopt
+    # check if list is not None, and if it has at least one element
+    if parsed_simulation_opts:
+        # check if parsed options are embedded in [,]
+        if parsed_simulation_opts[0] == '[' and parsed_simulation_opts[-1] == ']':
+            parsed_simulation_opts = parsed_simulation_opts[1:-1]  # strip the list from surrounding brackets
 
-    opt = MCOptions(input_path=parsed_args.input,
-                    executable_path=parsed_args.executable,
-                    user_opt=mc_args)
+    # set MC simulation settings based on:
+    #   - MC simulation input file (i.e. *.inp file for FLUKA) or
+    #     directories (i.e. directory with beam.dat, geo.dat etc for SHIELD-HIT12A)
+    #   - location of MC simulator executable file (i.e. `shieldhit` or `rfluka`)
+    #   - simulation options for the MC engine provided via -m switch (i.e. --time or -v)
+    settings = SimulationSettings(input_path=parsed_args.input,
+                                  simulator_exec_path=parsed_args.executable,
+                                  cmdline_opts=parsed_simulation_opts)
 
-    r = Runner(jobs=parsed_args.jobs, options=opt)
-    workspaces = r.run(outdir=parsed_args.outdir)
-    data = r.get_data(workspaces)
+    # create runner object based on MC options and dedicated parallel jobs number
+    # note that runner object is only created here, no simulation is started at this point
+    # and no directories are being created
+    runner_obj = Runner(jobs=parsed_args.jobs, settings=settings)
 
+    # start parallel execution of MC simulation
+    # temporary directories needed for parallel execution as well as the output are being saved in `outdir`
+    # in case of successful execution this would return list of temporary workspaces directories
+    # containing partial results from simultaneous parallel executions
     start_time = timeit.default_timer()
-    if data and (MCOutType.txt.name in parsed_args.outtype):
-        for key in data:
-            logging.debug("Key {:s}".format(key))
-            output_file = os.path.join(parsed_args.outdir, key)
+    workspaces = runner_obj.run(output_directory=parsed_args.outdir)
+    elapsed = timeit.default_timer() - start_time
+    print("MC simulation took {:.3f} seconds".format(elapsed))
+
+    # if simulation was successful proceed to data extraction by combining partial results from simultaneous executions
+    # each simulation can produce multiple files
+    # results are stored in a dictionary (`data_dict`) with keys being filenames
+    # and values being pymchelper `Estimator` objects (which keep i.e. numpy arrays with results)
+    data_dict = runner_obj.get_data(parsed_args.outdir)
+
+    # if user requests combined results as text files, the code below is used to convert Estimator objects to them
+    # note that multiple text files can be created here
+    start_time = timeit.default_timer()
+    if data_dict and (OutputDataType.txt.name in parsed_args.outtype):
+        for core_filename in data_dict:
+            logging.debug("Core filename {:s}".format(core_filename))
+            output_file = os.path.join(parsed_args.outdir, core_filename)
             writer = PlotDataWriter(output_file, None)
-            writer.write(data[key])
+            writer.write(data_dict[core_filename])
 
-    if data and (MCOutType.plot.name in parsed_args.outtype):
-        for key in data:
-            output_file = os.path.join(parsed_args.outdir, key)
+    # if user requests combined results as PNG image, the code below is used to convert Estimator objects to them
+    # note that multiple PNG files can be created here
+    if data_dict and (OutputDataType.plot.name in parsed_args.outtype):
+        for core_filename in data_dict:
+            output_file = os.path.join(parsed_args.outdir, core_filename)
             writer = ImageWriter(output_file, argparse.Namespace(colormap='gnuplot2', log=''))
-            writer.write(data[key])
+            writer.write(data_dict[core_filename])
 
     elapsed = timeit.default_timer() - start_time
-    print("Output saving {:.3f} seconds".format(elapsed))
+    print("Saving output {:.3f} seconds".format(elapsed))
 
-    start_time = timeit.default_timer()
-    if workspaces and (MCOutType.raw.name not in parsed_args.outtype):
-        r.clean(workspaces)
-    elapsed = timeit.default_timer() - start_time
-    print("Workspace cleaning {:.3f} seconds".format(elapsed))
+    # clean workspace directories only if user hasn't provided -k option
+    if not parsed_args.keep:
+        start_time = timeit.default_timer()
+        runner_obj.clean(workspaces)
+        elapsed = timeit.default_timer() - start_time
+        print("Cleaning {:.3f} seconds".format(elapsed))
 
-    return status
+    return 0
 
 
 if __name__ == '__main__':
