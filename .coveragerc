@@ -1,8 +1,0 @@
-[run]
-source = .
-branch = true
-parallel = true
-
-[report]
-show_missing = true
-include = pymchelper/*,tests/*
