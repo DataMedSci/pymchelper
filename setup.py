@@ -43,8 +43,11 @@ install_requires = []
 # |      1.10     | 2.7,  3.3 - 3.5 |      linux      |
 # |       1.9     | 2.7,  3.3 - 3.5 |      linux      |
 # |---------------------------------------------------|
-setup_requires = []
-extras_require = {'all': ["matplotlib", "xlwt"]}
+
+# extras_require will be used in two scenarios:
+#  - installation of pymchelper with all feature via pip using `pip install "pymchelper[all]"`
+#  - installation of requirements.txt when working with cloned source code: `pip install -r requirements.txt`
+extras_require = {'all': ["matplotlib", "xlwt", "scipy"]}
 if sys.version_info[0] == 3 and sys.version_info[1] == 9:  # python 3.9
     install_requires += ["numpy>=1.20"]
 elif sys.version_info[0] == 3 and sys.version_info[1] == 8:  # python 3.8
@@ -60,7 +63,6 @@ elif (sys.version_info[0] == 3 and sys.version_info[1] < 5) or (sys.version_info
     install_requires += ["enum34"]
 else:
     install_requires += ["numpy"]
-
 
 setuptools.setup(
     name='pymchelper',
