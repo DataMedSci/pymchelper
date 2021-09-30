@@ -17,7 +17,7 @@ No programming knowledge is required from user, but basic skills in working with
 Documentation
 -------------
 
-Full PyTRiP documentation can be found here: https://pymchelper.readthedocs.io/
+Full pymchelper documentation can be found here: https://pymchelper.readthedocs.io/
 
 See `Getting Started <https://pymchelper.readthedocs.org/en/stable/getting_started.html>`_ for installation and basic
 information, and the `User's Guide <https://pymchelper.readthedocs.org/en/stable/user_guide.html>`_ for an overview of

@@ -38,9 +38,14 @@ class Runner:
         # if jobs is not specified, os.cpu_count() would be used
         self._pool = Pool(processes=jobs)
 
-        # self.jobs will be either a value provided by user
-        # or actual number of allocated processes, if `jobs` were set to None
-        # TODO check if `_pool._processes` is valid construct  # skipcq: PYL-W0511
+        # User of the runner has two options: either to specify number of parallel jobs by 
+        # setting the self.jobs to given number, or to leave it as None. If self.jobs is None
+        # then multiprocessing library will automatically allocate number of parallel jobs to `os.cpu_count()`
+        # Therefore we cannot rely of self.jobs as the actual counter of parallel processes
+        # Instead we use undocumented feature of multiprocessing module, 
+        # extracting actual number of allocated processes from `_processes` attribute in Pool class
+        # To see how it is used internally in the Python (in v3.9) source code take a look at:
+        # https://github.com/python/cpython/blob/3.9/Lib/multiprocessing/pool.py#L210
         self.jobs = self._pool._processes
 
     def run(self, output_directory):
