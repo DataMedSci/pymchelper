@@ -30,7 +30,7 @@ As the simulation output we obtain a binary file, which is unpacked into a data 
 In order to obtain the beam range, we call a function which calculates which position in the dose scorer binning
 corresponds to the highest simulated dose.
 
-In case you downloaded only thr example file (`scripting_sh12a_run.py`), you need to install pymchelper package as well.
+In case you downloaded only the example file (`scripting_sh12a_run.py`), you need to install pymchelper package as well.
 There are two possible ways of doing that::
 
 Installing pymchelper package will all its extra features using::
