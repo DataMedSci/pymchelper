@@ -72,9 +72,9 @@ from pymchelper.executor.runner import Runner
 
 input_cfg_templ = {}
 # dictionary holding filenames and contents of four main input files for SHIELD-HIT12A simulation
-# the entry for beam.dat it not really a valid config, but a template with placeholder for incident particle energy
-# the template can be instantiated into proper config using standar python operations on strings
-# for example to set the primary particle energy to 100 MeV/n , first we make a fresh copy of the the template:
+# the entry for beam.dat is not really a valid config, but a template with placeholder for incident particle energy
+# the template can be instantiated into proper config using standard python operations on strings
+# for example to set the primary particle energy to 100 MeV/n , first we make a fresh copy of the template:
 #
 # input_cfg = input_cfg_templ.copy()
 #
