@@ -72,14 +72,15 @@ class Runner:
         # pool of processes would gather these paths in a combined list
         result_directories = self._pool.map(executor, rng_seeds)
         if self._terminated:
-            self._terminate_pool()
+            logging.info('Terminating the pool')
+            self._pool.terminate()
+            logging.info('Pool is terminated')
             self.clean(result_directories)
+            result_directories = None
 
         elapsed = timeit.default_timer() - start_time
         logging.info("run elapsed time {:.3f} seconds".format(elapsed))
 
-        if self._terminated:
-            return None
         return result_directories
 
     @staticmethod
@@ -123,11 +124,6 @@ class Runner:
                 shutil.rmtree(directory)
         elapsed = timeit.default_timer() - start_time
         print("Cleaning {:.3f} seconds".format(elapsed))
-
-    def _terminate_pool(self):
-        logging.info('Terminating the pool')
-        self._pool.terminate()
-        logging.info('Pool is terminated')
 
     class Executor:
         """
