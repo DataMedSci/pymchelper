@@ -129,7 +129,7 @@ class Runner:
         """
         Callable class responsible for execution of single MC simulation process.
         """
-        def __init__(self, parent_runner: Runner, output_directory, settings):
+        def __init__(self, parent_runner, output_directory, settings):
             self.parent_runner = parent_runner
             self.output_directory = os.path.abspath(output_directory)
             self.settings = settings
