@@ -33,7 +33,7 @@ corresponds to the highest simulated dose.
 In case you downloaded only the example file (`scripting_sh12a_run.py`), you need to install pymchelper package as well.
 There are two possible ways of doing that::
 
-Installing pymchelper package will all its extra features using::
+Installing `pymchelper` package with all its extra features using::
 
  pip install "pymchelper[all]"
 
