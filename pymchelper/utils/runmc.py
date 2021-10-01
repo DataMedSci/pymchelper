@@ -108,7 +108,7 @@ def main(args=None):
     # create runner object based on MC options and dedicated parallel jobs number
     # note that runner object is only created here, no simulation is started at this point
     # and no directories are being created
-    runner_obj = Runner(jobs=parsed_args.jobs, settings=settings)
+    runner_obj = Runner(jobs=parsed_args.jobs, settings=settings, keep_flag=parsed_args.keep)
 
     # start parallel execution of MC simulation
     # temporary directories needed for parallel execution as well as the output are being saved in `outdir`
@@ -146,12 +146,7 @@ def main(args=None):
     elapsed = timeit.default_timer() - start_time
     print("Saving output {:.3f} seconds".format(elapsed))
 
-    # clean workspace directories only if user hasn't provided -k option
-    if not parsed_args.keep:
-        start_time = timeit.default_timer()
-        runner_obj.clean(workspaces)
-        elapsed = timeit.default_timer() - start_time
-        print("Cleaning {:.3f} seconds".format(elapsed))
+    runner_obj.clean(workspaces)
 
     return 0
 
