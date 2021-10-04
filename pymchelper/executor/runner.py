@@ -1,3 +1,4 @@
+from copy import deepcopy
 import logging
 import os
 import shutil
@@ -59,7 +60,7 @@ class Runner:
         # TODO rework it somehow   # skipcq: PYL-W0511
         settings_list = []
         for rng_seed in rng_seeds:
-            current_settings = settings
+            current_settings = deepcopy(settings)  # do not modify original arguments
             current_settings.set_rng_seed(rng_seed)
             settings_list.append(current_settings)
 
@@ -140,6 +141,7 @@ class Executor:
             # execute the MC simulation on a spawned process
             # TODO handle this differently, i.e. redirect it to file or save in some variable   # skipcq: PYL-W0511
             logging.debug('working directory {:s}, command {:s}'.format(workspace, ' '.join(command_as_list)))
+            print('working directory {:s}, command {:s}'.format(workspace, ' '.join(command_as_list)))
             DEVNULL = open(os.devnull, 'wb')
             subprocess.check_call(command_as_list, cwd=workspace, stdout=DEVNULL, stderr=DEVNULL)
         except KeyboardInterrupt:
