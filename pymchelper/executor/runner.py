@@ -110,6 +110,9 @@ class Runner:
         return estimators_dict
 
     def clean(self):
+        """
+        cleaning
+        """
         self.dir_manager.clean(reset=False)
 
 
@@ -153,7 +156,7 @@ class DirectoryManager:
         self.keep_flag = keep_flag
         self.workspaces = []
 
-    def new_workspaces(self, input_path=None, rng_seeds=tuple()):
+    def new_workspaces(self, input_path=None, rng_seeds=()):
         """
         prepare workspaces
         """
