@@ -26,13 +26,8 @@ class KeyboardInterruptError(Exception):
 
 
 class Runner:
-    """
-    Main class responsible for configuring and starting multiple parallel MC simulation processes
-    It can be used to access combined averaged results of the simulation.
-    """
-    def __init__(self, jobs=None, settings=None, keep_flag=False):
-        # object of SimulationSettings class
-        self.settings = settings
+
+    def __init__(self, jobs=None, keep_flag=False, output_directory='.'):
 
         # create pool of processes, waiting to be started by run method
         # if jobs is not specified, os.cpu_count() would be used
@@ -48,10 +43,9 @@ class Runner:
         # https://github.com/python/cpython/blob/3.9/Lib/multiprocessing/pool.py#L210
         self.jobs = self._pool._processes
 
-        self.keep_flag = keep_flag
-        self._terminated = False
+        self.dir_manager = DirectoryManager(output_directory=output_directory, keep_flag=keep_flag)
 
-    def run(self, output_directory):
+    def run(self, settings=None):
         """
         Execute parallel simulation, creating temporary workspace in the `output_directory`
         In case of successful execution return list of directories with results, otherwise return None
@@ -62,29 +56,34 @@ class Runner:
         # each of the workers needs to have its own different RNG seed
         rng_seeds = range(1, self.jobs + 1)
 
-        # create executor callable object for current run
-        executor = self.Executor(parent_runner=self,
-                            output_directory=output_directory,
-                            settings=self.settings)
+        # create workspaces
+        workspaces = self.dir_manager.new_workspaces(input_path=settings.input_path, rng_seeds=rng_seeds)
 
-        # start execution using pool of workers, mapping the executor callable object to the different RNG seeds
-        # each of executor will return upon success path to a working directory with results
-        # pool of processes would gather these paths in a combined list
-        result_directories = self._pool.map(executor, rng_seeds)
-        if self._terminated:
+        # temporary rework of rng_seeds injection to settings (formerly executor was responsible for it)
+        # TODO rework it somehow
+        settings_list = []
+        for rng_seed in rng_seeds: 
+            current_settings = settings
+            current_settings.set_rng_seed(rng_seed)
+            settings_list.append(current_settings)
+
+        # create executor callable object for current run
+        executor = Executor()
+
+        try:
+            # start execution using pool of workers, mapping the executor callable object to the different settings
+            # and workspaces
+            self._pool.map(executor, zip(settings_list, workspaces))
+        except KeyboardInterrupt:
             logging.info('Terminating the pool')
             self._pool.terminate()
             logging.info('Pool is terminated')
-            self.clean(result_directories)
-            result_directories = None
+            self.dir_manager.clean()
 
         elapsed = timeit.default_timer() - start_time
         logging.info("run elapsed time {:.3f} seconds".format(elapsed))
 
-        return result_directories
-
-    @staticmethod
-    def get_data(output_dir):
+    def get_data(self):
         """
         Scans output directory for location of the workspaces (directories like run_1, run_2).
         Takes all files from all workspace in `output_dir`, merges their content to form pymchelper Estimator objects.
@@ -92,13 +91,13 @@ class Runner:
         Return dictionary with keys being output filenames, and values being Estimator objects
         # TODO consider replace output_dir with list of workspace
         """
-        if not output_dir:
+        if not self.dir_manager.output_directory:
             return None
         start_time = timeit.default_timer()
 
         # TODO line below is specific to SHIELD-HIT12A, should be generalised  # skipcq: PYL-W0511
         # scans output directory for MC simulation output files
-        output_files_pattern = os.path.join(output_dir, "run_*", "*.bdo")
+        output_files_pattern = os.path.join(self.dir_manager.output_directory, "run_*", "*.bdo")
         logging.debug("Files to merge {:s}".format(output_files_pattern))
 
         estimators_dict = {}
@@ -112,79 +111,83 @@ class Runner:
 
         return estimators_dict
 
-    def clean(self, directories_list):
-        """
-        Remove each directory from given list.
-        Useful to remove all workspace directories (run_1, run_2,...)
-        """
-        start_time = timeit.default_timer()
-        # clean workspace directories only if user didn't set keep_flag as True
-        if not self.keep_flag:
-            for directory in directories_list:
-                shutil.rmtree(directory)
-        elapsed = timeit.default_timer() - start_time
-        print("Cleaning {:.3f} seconds".format(elapsed))
+    def clean(self):
+        self.dir_manager.clean(reset=False)
 
-    class Executor:
-        """
-        Callable class responsible for execution of single MC simulation process.
-        """
-        def __init__(self, parent_runner, output_directory, settings):
-            self.parent_runner = parent_runner
-            self.output_directory = os.path.abspath(output_directory)
-            self.settings = settings
 
-        def __call__(self, rng_seed, **kwargs):
+class Executor:
+    """
+    Callable class responsible for execution of single MC simulation process.
+    """
+    def __init__(self):
+        pass
 
-            # set workspace to a subdirectory of the output_directory, with run_* pattern
-            # i.e. /home/user/output/run_3
-            workspace = os.path.join(self.output_directory, 'run_{:d}'.format(rng_seed))
+    def __call__(self, settings_and_workspace, **kwargs):
+        settings, workspace = zip(*settings_and_workspace)
+        try:
+            # combine MC engine executable with its command line options to form core of the command string
+            # this will form basis of the command, like:
+            # /usr/local/bin/shieldhit --time 00:30:50 -v -N 3
+            core_command_string = str(settings)
 
-            logging.info("Workspace {:s}".format(workspace))
-            try:
-                # copy simulation input files into the workspace directory
-                # TODO extract this step into separate method  # skipcq: PYL-W0511
-                if os.path.isdir(self.settings.input_path):
+            # for easier digesting by subprocess module, convert command string to a list
+            # and finally append the location of the input files
+            # finally we obtain a list like:
+            # ('/usr/local/bin/shieldhit', '--time', '00:30:50', '-v', '-N', '3', '/data/my/simulation/input')
+            command_as_list = core_command_string.split()
+            command_as_list.append(workspace)
+            
+            # execute the MC simulation on a spawned process
+            # TODO handle this differently, i.e. redirect it to file or save in some variable   # skipcq: PYL-W0511
+            logging.debug('working directory {:s}, command {:s}'.format(workspace, ' '.join(command_as_list)))
+            DEVNULL = open(os.devnull, 'wb')
+            subprocess.check_call(command_as_list, cwd=workspace, stdout=DEVNULL, stderr=DEVNULL)
+        except KeyboardInterrupt:
+            logging.debug("KeyboardInterrupt")
+            raise KeyboardInterrupt
+
+
+class DirectoryManager:
+    def __init__(self, output_directory='.', keep_flag=False):
+        self.output_directory = os.path.abspath(output_directory)
+        self.keep_flag = keep_flag
+        self.workspaces = []
+
+    def new_workspaces(self, input_path=None, rng_seeds=[]):
+        # self clean 
+        self.clean(reset=True)
+        if input_path:
+            for rng_seed in rng_seeds:
+                # set workspace to a subdirectory of the output_directory, with run_* pattern
+                # i.e. /home/user/output/run_3
+                workspace = os.path.join(self.output_directory, 'run_{:d}'.format(rng_seed))
+                logging.info("Workspace {:s}".format(workspace))
+
+                if os.path.isdir(input_path):
                     # if path already exists, remove it before copying with copytree()
                     if os.path.exists(workspace):
                         shutil.rmtree(workspace)
-                    shutil.copytree(self.settings.input_path, workspace)
+                    shutil.copytree(input_path, workspace)
                     logging.debug("Copying input files into {:s}".format(workspace))
-                elif os.path.isfile(self.settings.input_path):
+                elif os.path.isfile(input_path):
                     if not os.path.exists(workspace):
                         os.makedirs(workspace)
-                    shutil.copy2(self.settings.input_path, workspace)
+                    shutil.copy2(input_path, workspace)
                     logging.debug("Copying input files into {:s}".format(workspace))
                 else:
-                    logging.debug("Input files {:s} not a dir or file".format(self.settings.input_path))
-                # now we proceed to construction of the command which will execute MC engine
-                # the command usually consists of simulator executable path, followed by command line options
-                # and finally a location of the input file, for example
-                # /usr/local/bin/shieldhit --time 00:30:50 -v -N 3 /data/my/simulation/input
+                    logging.debug("Input files {:s} not a dir or file".format(input_path))
 
-                # adjust setting for this particular run with RNG seed being set
-                current_options = self.settings
-                current_options.set_rng_seed(rng_seed)
-
-                # combine MC engine executable with its command line options to form core of the command string
-                # this will form basis of the command, like:
-                # /usr/local/bin/shieldhit --time 00:30:50 -v -N 3
-                core_command_string = str(current_options)
-
-                # for easier digesting by subprocess module, convert command string to a list
-                # and finally append the location of the input files
-                # finally we obtain a list like:
-                # ('/usr/local/bin/shieldhit', '--time', '00:30:50', '-v', '-N', '3', '/data/my/simulation/input')
-                command_as_list = core_command_string.split()
-                command_as_list.append(workspace)
-
-                # execute the MC simulation on a spawned process
-                # TODO handle this differently, i.e. redirect it to file or save in some variable   # skipcq: PYL-W0511
-                logging.debug('working directory {:s}, command {:s}'.format(workspace, ' '.join(command_as_list)))
-                DEVNULL = open(os.devnull, 'wb')
-                subprocess.check_call(command_as_list, cwd=workspace, stdout=DEVNULL, stderr=DEVNULL)
-            except KeyboardInterrupt:
-                logging.debug("KeyboardInterrupt")
-                self.parent_runner._terminated = True
-
-            return workspace
+                self.workspaces.append(workspace)
+        return self.workspaces
+        
+    def clean(self, reset=False):
+        
+        # clean the directory only if keep_flag == False or reset is requested
+        if not self.keep_flag or reset:
+            start_time = timeit.default_timer()
+            if len(self.workspaces) > 0:
+                for workspace in self.workspaces:
+                    shutil.rmtree(workspace)
+            self.workspaces.clear()
+            elapsed = timeit.default_timer() - start_time
+            print("Cleaning {:.3f} seconds".format(elapsed))
