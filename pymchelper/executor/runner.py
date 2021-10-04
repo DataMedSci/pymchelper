@@ -18,15 +18,11 @@ class OutputDataType(IntEnum):
     txt = 2
 
 
-class KeyboardInterruptError(Exception):
-    """
-    Useful to handle process interruption via Ctrl-C
-    TODO consider simplifying try/catch ladder
-    """
-
-
 class Runner:
-
+    """
+    Main class responsible for configuring and starting multiple parallel MC simulation processes
+    It can be used to access combined averaged results of the simulation.
+    """
     def __init__(self, jobs=None, keep_flag=False, output_directory='.'):
 
         # create pool of processes, waiting to be started by run method
@@ -45,7 +41,7 @@ class Runner:
 
         self.dir_manager = DirectoryManager(output_directory=output_directory, keep_flag=keep_flag)
 
-    def run(self, settings=None):
+    def run(self, settings):
         """
         Execute parallel simulation, creating temporary workspace in the `output_directory`
         In case of successful execution return list of directories with results, otherwise return None
@@ -60,7 +56,7 @@ class Runner:
         workspaces = self.dir_manager.new_workspaces(input_path=settings.input_path, rng_seeds=rng_seeds)
 
         # temporary rework of rng_seeds injection to settings (formerly executor was responsible for it)
-        # TODO rework it somehow
+        # TODO rework it somehow   # skipcq: PYL-W0511
         settings_list = []
         for rng_seed in rng_seeds:
             current_settings = settings
@@ -91,7 +87,7 @@ class Runner:
         Takes all files from all workspace in `output_dir`, merges their content to form pymchelper Estimator objects.
         For each of the output file a single Estimator objects is created, which holds numpy arrays with results.
         Return dictionary with keys being output filenames, and values being Estimator objects
-        # TODO consider replace output_dir with list of workspace
+        # TODO consider replace output_dir with list of workspace   # skipcq: PYL-W0511
         """
         if not self.dir_manager.output_directory:
             return None
@@ -121,8 +117,6 @@ class Executor:
     """
     Callable class responsible for execution of single MC simulation process.
     """
-    def __init__(self):
-        pass
 
     def __call__(self, settings_and_workspace, **kwargs):
 
@@ -151,12 +145,18 @@ class Executor:
 
 
 class DirectoryManager:
+    """
+    DirectoryManager
+    """
     def __init__(self, output_directory='.', keep_flag=False):
         self.output_directory = os.path.abspath(output_directory)
         self.keep_flag = keep_flag
         self.workspaces = []
 
-    def new_workspaces(self, input_path=None, rng_seeds=[]):
+    def new_workspaces(self, input_path=None, rng_seeds=tuple()):
+        """
+        prepare workspaces
+        """
         self.clean(reset=True)
         if input_path:
             for rng_seed in rng_seeds:
