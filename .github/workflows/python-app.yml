@@ -101,23 +101,7 @@ jobs:
       run: |         
          tox -e py
          
-         
-  code_analysis:
-    if: "github.repository == 'DataMedSci/pymchelper' && !contains(github.event.head_commit.message, '[ci skip]') && !contains(github.event.head_commit.message, '[skip ci]')"
-    runs-on: ubuntu-latest
-    needs: [smoke_test]        
-    steps:
-    - uses: actions/checkout@v2
-    
-    - name: Initialize CodeQL
-      uses: github/codeql-action/init@v1
-      with:
-        languages: 'python'
-        
-    - name: Perform CodeQL Analysis
-      uses: github/codeql-action/analyze@v1
-      
-      
+
   make_and_upload_package:
     if: "github.repository == 'DataMedSci/pymchelper' && !contains(github.event.head_commit.message, '[ci skip]') && !contains(github.event.head_commit.message, '[skip ci]')"
 
