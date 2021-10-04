@@ -125,7 +125,8 @@ class Executor:
         pass
 
     def __call__(self, settings_and_workspace, **kwargs):
-        settings, workspace = zip(*settings_and_workspace)
+
+        settings, workspace = settings_and_workspace
         try:
             # combine MC engine executable with its command line options to form core of the command string
             # this will form basis of the command, like:
