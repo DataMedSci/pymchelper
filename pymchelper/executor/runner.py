@@ -172,7 +172,14 @@ class DirectoryManager:
                     # if path already exists, remove it before copying with copytree()
                     if os.path.exists(workspace):
                         shutil.rmtree(workspace)
-                    shutil.copytree(input_path, workspace)
+                    # if cleaned or not existing, then create it
+                    if not os.path.exists(workspace):
+                        os.makedirs(workspace)
+                    # copy all files from the directory
+                    for directory_entry in os.listdir(input_path):
+                        path_to_directory_entry = os.path.join(input_path, directory_entry)
+                        if os.path.isfile(path_to_directory_entry):
+                            shutil.copy2(path_to_directory_entry, workspace)
                     logging.debug("Copying input files into {:s}".format(workspace))
                 elif os.path.isfile(input_path):
                     if not os.path.exists(workspace):
