@@ -163,8 +163,8 @@ def run_sh12a(input_dict):
 
     # create pymchelper object which holds together all information needed to run the simulation
     settings = SimulationSettings(input_path=temp_directory_path,
-                             simulator_exec_path=simulator_exec_path,
-                             cmdline_opts='-s')  # additional option to avoid too much printout from SH12A
+                                  simulator_exec_path=simulator_exec_path,
+                                  cmdline_opts='-s')  # additional option to avoid too much printout from SH12A
 
     # create runner object, needed to start simulation
     # we set jobs to `None`, so pymchelper will automatically detect how many parallel workers to run
