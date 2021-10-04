@@ -81,8 +81,8 @@ END
                 output_file.write(input_cfg[config_file])
 
         settings = SimulationSettings(input_path=dirpath,
-                                 simulator_exec_path=self.exec_path,
-                                 cmdline_opts='-s')
+                                      simulator_exec_path=self.exec_path,
+                                      cmdline_opts='-s')
         settings.set_no_of_primaries(10)
 
         r = Runner(jobs=2, output_directory=dirpath)

@@ -62,7 +62,7 @@ class Runner:
         # temporary rework of rng_seeds injection to settings (formerly executor was responsible for it)
         # TODO rework it somehow
         settings_list = []
-        for rng_seed in rng_seeds: 
+        for rng_seed in rng_seeds:
             current_settings = settings
             current_settings.set_rng_seed(rng_seed)
             settings_list.append(current_settings)
@@ -139,7 +139,7 @@ class Executor:
             # ('/usr/local/bin/shieldhit', '--time', '00:30:50', '-v', '-N', '3', '/data/my/simulation/input')
             command_as_list = core_command_string.split()
             command_as_list.append(workspace)
-            
+
             # execute the MC simulation on a spawned process
             # TODO handle this differently, i.e. redirect it to file or save in some variable   # skipcq: PYL-W0511
             logging.debug('working directory {:s}, command {:s}'.format(workspace, ' '.join(command_as_list)))
@@ -157,7 +157,6 @@ class DirectoryManager:
         self.workspaces = []
 
     def new_workspaces(self, input_path=None, rng_seeds=[]):
-        # self clean 
         self.clean(reset=True)
         if input_path:
             for rng_seed in rng_seeds:
@@ -182,10 +181,11 @@ class DirectoryManager:
 
                 self.workspaces.append(workspace)
         return self.workspaces
-        
+
     def clean(self, reset=False):
-        
-        # clean the directory only if keep_flag == False or reset is requested
+        """
+        clean the directory only if keep_flag == False or reset is requested
+        """
         if not self.keep_flag or reset:
             start_time = timeit.default_timer()
             if len(self.workspaces) > 0:
