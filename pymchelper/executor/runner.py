@@ -201,6 +201,7 @@ class DirectoryManager:
         if not self.keep_flag or reset:
             start_time = timeit.default_timer()
             for workspace in self.workspaces:
-                shutil.rmtree(workspace)
+                if os.path.exists(workspace):
+                    shutil.rmtree(workspace)
             elapsed = timeit.default_timer() - start_time
             print("Cleaning {:.3f} seconds".format(elapsed))
