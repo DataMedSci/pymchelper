@@ -79,9 +79,11 @@ class Runner:
             self._pool.terminate()
             logging.info('Pool is terminated')
             self.dir_manager.clean()
+            return False
 
         elapsed = timeit.default_timer() - start_time
         logging.info("run elapsed time {:.3f} seconds".format(elapsed))
+        return True
 
     def get_data(self):
         """

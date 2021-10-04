@@ -162,20 +162,19 @@ def run_sh12a(input_dict):
     simulator_exec_path = None
 
     # create pymchelper object which holds together all information needed to run the simulation
-    opt = SimulationSettings(input_path=temp_directory_path,
+    settings = SimulationSettings(input_path=temp_directory_path,
                              simulator_exec_path=simulator_exec_path,
                              cmdline_opts='-s')  # additional option to avoid too much printout from SH12A
 
     # create runner object, needed to start simulation
     # we set jobs to `None`, so pymchelper will automatically detect how many parallel workers to run
-    runner = Runner(jobs=None,
-                    settings=opt)
+    runner = Runner(jobs=None, keep_flag=False, output_directory=temp_directory_path)
 
     # here simulation is started
-    runner.run(output_directory=temp_directory_path)
+    runner.run(settings=settings)
 
     # read all the simulation output files
-    data = runner.get_data(temp_directory_path)
+    data = runner.get_data()
 
     # remove temporary directory which includes simulation input and output files
     shutil.rmtree(temp_directory_path)

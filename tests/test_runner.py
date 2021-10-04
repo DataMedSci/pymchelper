@@ -80,16 +80,16 @@ END
             with open(file_path, 'w') as output_file:
                 output_file.write(input_cfg[config_file])
 
-        opt = SimulationSettings(input_path=dirpath,
+        settings = SimulationSettings(input_path=dirpath,
                                  simulator_exec_path=self.exec_path,
                                  cmdline_opts='-s')
-        opt.set_no_of_primaries(10)
+        settings.set_no_of_primaries(10)
 
-        r = Runner(jobs=2, settings=opt)
-        workspaces = r.run(output_directory=dirpath)
-        self.assertIsNotNone(workspaces)
+        r = Runner(jobs=2, output_directory=dirpath)
+        isRunOk = r.run(settings=settings)
+        self.assertTrue(isRunOk)
 
-        data = r.get_data(dirpath)
+        data = r.get_data()
         self.assertIsNotNone(data)
         shutil.rmtree(dirpath)
 
