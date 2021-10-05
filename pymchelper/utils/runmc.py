@@ -108,14 +108,16 @@ def main(args=None):
     # create runner object based on MC options and dedicated parallel jobs number
     # note that runner object is only created here, no simulation is started at this point
     # and no directories are being created
-    runner_obj = Runner(jobs=parsed_args.jobs, settings=settings)
+    runner_obj = Runner(jobs=parsed_args.jobs,
+                        keep_workspace_after_run=parsed_args.keep,
+                        output_directory=parsed_args.outdir)
 
     # start parallel execution of MC simulation
     # temporary directories needed for parallel execution as well as the output are being saved in `outdir`
     # in case of successful execution this would return list of temporary workspaces directories
     # containing partial results from simultaneous parallel executions
     start_time = timeit.default_timer()
-    workspaces = runner_obj.run(output_directory=parsed_args.outdir)
+    runner_obj.run(settings=settings)
     elapsed = timeit.default_timer() - start_time
     print("MC simulation took {:.3f} seconds".format(elapsed))
 
@@ -123,7 +125,7 @@ def main(args=None):
     # each simulation can produce multiple files
     # results are stored in a dictionary (`data_dict`) with keys being filenames
     # and values being pymchelper `Estimator` objects (which keep i.e. numpy arrays with results)
-    data_dict = runner_obj.get_data(parsed_args.outdir)
+    data_dict = runner_obj.get_data()
 
     # if user requests combined results as text files, the code below is used to convert Estimator objects to them
     # note that multiple text files can be created here
@@ -146,12 +148,7 @@ def main(args=None):
     elapsed = timeit.default_timer() - start_time
     print("Saving output {:.3f} seconds".format(elapsed))
 
-    # clean workspace directories only if user hasn't provided -k option
-    if not parsed_args.keep:
-        start_time = timeit.default_timer()
-        runner_obj.clean(workspaces)
-        elapsed = timeit.default_timer() - start_time
-        print("Cleaning {:.3f} seconds".format(elapsed))
+    runner_obj.clean()
 
     return 0
 
