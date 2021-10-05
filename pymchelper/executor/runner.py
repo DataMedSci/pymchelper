@@ -60,8 +60,8 @@ class Runner:
         self.workspace_manager.create_working_directories(simulation_input_path=settings.input_path,
                                                           rng_seeds=rng_seeds)
 
-        # temporary rework of rng_seeds injection to settings (formerly executor was responsible for it)
-        # TODO rework it somehow   # skipcq: PYL-W0511
+        # rng seeds injection to settings for each SingleSimulationExecutor call
+        # TODO consider better way of doing it  # skipcq: PYL-W0511
         settings_list = []
         for rng_seed in rng_seeds:
             current_settings = deepcopy(settings)  # do not modify original arguments
