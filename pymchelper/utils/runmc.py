@@ -108,7 +108,9 @@ def main(args=None):
     # create runner object based on MC options and dedicated parallel jobs number
     # note that runner object is only created here, no simulation is started at this point
     # and no directories are being created
-    runner_obj = Runner(jobs=parsed_args.jobs, keep_flag=parsed_args.keep, output_directory=parsed_args.outdir)
+    runner_obj = Runner(jobs=parsed_args.jobs,
+                        keep_workspace_after_run=parsed_args.keep,
+                        output_directory=parsed_args.outdir)
 
     # start parallel execution of MC simulation
     # temporary directories needed for parallel execution as well as the output are being saved in `outdir`
