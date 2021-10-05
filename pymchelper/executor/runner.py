@@ -40,13 +40,14 @@ class Runner:
         # https://github.com/python/cpython/blob/3.9/Lib/multiprocessing/pool.py#L210
         self.jobs = self._pool._processes
 
-        # TODO
+        # workspace is a collection of working directories
+        # this manager is responsible for creating and cleaning working directories
         self.workspace_manager = WorkspaceManager(output_directory=output_directory,
                                                   keep_workspace_after_run=keep_workspace_after_run)
 
     def run(self, settings):
         """
-        Execute parallel simulation, creating temporary workspace in the `output_directory`
+        Execute parallel simulation processes, creating workspace (and working directories) in the `output_directory`
         In case of successful execution return True, otherwise return False
         """
         start_time = timeit.default_timer()
@@ -87,8 +88,9 @@ class Runner:
 
     def get_data(self):
         """
-        Scans output directory for location of the workspaces (directories like run_1, run_2).
-        Takes all files from all workspace in `output_dir`, merges their content to form pymchelper Estimator objects.
+        Scans the output directory for location of the working directories (like run_1, run_2).
+        Takes all files from all working directories in `output_dir`,
+        merges their content to form pymchelper Estimator objects.
         For each of the output file a single Estimator objects is created, which holds numpy arrays with results.
         Return dictionary with keys being output filenames, and values being Estimator objects
         """
@@ -112,18 +114,21 @@ class Runner:
 
     def clean(self):
         """
-        cleaning
+        Removes all working directories (if exists)
         """
         self.workspace_manager.clean()
 
 
 class SingleSimulationExecutor:
     """
-    Callable class responsible for execution of single MC simulation process.
+    Callable class responsible for execution of the single MC simulation process.
     """
 
     def __call__(self, settings_and_working_dir, **kwargs):
 
+        # we deliberately combine settings and list of working directories
+        # in the single argument `settings_and_working_dir`
+        # as this would simplify using this class by multiprocessing module
         settings, working_dir_abs_path = settings_and_working_dir
         try:
             # combine MC engine executable with its command line options to form core of the command string
@@ -142,7 +147,6 @@ class SingleSimulationExecutor:
             # TODO handle this differently, i.e. redirect it to file or save in some variable   # skipcq: PYL-W0511
             logging.debug('working directory {:s}, command {:s}'.format(working_dir_abs_path,
                                                                         ' '.join(command_as_list)))
-            print('working directory {:s}, command {:s}'.format(working_dir_abs_path, ' '.join(command_as_list)))
             DEVNULL = open(os.devnull, 'wb')
             subprocess.check_call(command_as_list, cwd=working_dir_abs_path, stdout=DEVNULL, stderr=DEVNULL)
         except KeyboardInterrupt:
@@ -155,14 +159,14 @@ class WorkspaceManager:
     A workspace consists of multiple working directories (i.e. run_1, run_2),
     each per one of the parallel simulation run.
     """
-    def __init__(self, output_directory='.', keep_workspace_after_run=True):
+    def __init__(self, output_directory='.', keep_workspace_after_run=False):
         self.output_dir_absolute_path = os.path.abspath(output_directory)
         self.keep_workspace_after_run = keep_workspace_after_run
         self.working_directories_abs_paths = []
 
     def create_working_directories(self, simulation_input_path, rng_seeds=()):
         """
-        Create working directories
+        Create working directories and fill `self.working_directories_abs_paths`
         """
         self.working_directories_abs_paths = []
         for rng_seed in rng_seeds:
