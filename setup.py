@@ -1,7 +1,6 @@
 from itertools import chain
 import os
 import setuptools
-import sys
 
 from pymchelper.version import git_version
 
