@@ -1,3 +1,4 @@
+from itertools import chain
 import os
 import setuptools
 import sys
