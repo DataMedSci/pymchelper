@@ -22,7 +22,22 @@ write_version_py()
 with open('README.rst') as readme_file:
     readme = readme_file.read()
 
-install_requires = []
+
+# extras_require will be used in two scenarios:
+#  - installation of pymchelper with all feature via pip using `pip install "pymchelper[full]"`
+#  - installation of requirements.txt when working with cloned source code: `pip install -r requirements.txt`
+EXTRAS_REQUIRE = {
+    'image': ['matplotlib'],
+    'excel': ['xlwt'],
+    'hdf': ['h5py'],
+    'pytrip': ['pytrip98', 'scipy']
+}
+
+# inspired by https://github.com/pyimgui/pyimgui/blob/master/setup.py
+# construct special 'full' extra that adds requirements for all built-in
+# backend integrations and additional extra features.
+EXTRAS_REQUIRE['full'] = list(set(chain(*EXTRAS_REQUIRE.values())))
+EXTRAS_REQUIRE['full'].append(["hipsterplot", "bashplotlib"])  # these are needed by verbose inspect tool
 
 # here is table with corresponding numpy versions, and supported python and OS versions
 # it is based on inspection of https://pypi.org/project/numpy/
@@ -43,11 +58,7 @@ install_requires = []
 # |      1.10     | 2.7,  3.3 - 3.5 |      linux      |
 # |       1.9     | 2.7,  3.3 - 3.5 |      linux      |
 # |---------------------------------------------------|
-
-# extras_require will be used in two scenarios:
-#  - installation of pymchelper with all feature via pip using `pip install "pymchelper[all]"`
-#  - installation of requirements.txt when working with cloned source code: `pip install -r requirements.txt`
-extras_require = {'all': ["matplotlib", "xlwt", "scipy"]}
+install_requires = []
 if sys.version_info[0] == 3 and sys.version_info[1] == 9:  # python 3.9
     install_requires += ["numpy>=1.20"]
 elif sys.version_info[0] == 3 and sys.version_info[1] == 8:  # python 3.8
@@ -115,6 +126,6 @@ setuptools.setup(
     },
     package_data={'pymchelper': ['flair/db/*', 'VERSION']},
     install_requires=install_requires,
-    extras_require=extras_require,
+    extras_require=EXTRAS_REQUIRE,
     python_requires='>=2.7, !=3.0.*, !=3.1.*, !=3.3.*',
 )
