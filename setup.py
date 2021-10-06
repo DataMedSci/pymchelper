@@ -31,7 +31,7 @@ EXTRAS_REQUIRE = {
     'image': ['matplotlib'],
     'excel': ['xlwt'],
     'hdf': ['h5py'],
-    'pytrip': ['pytrip98', 'scipy']
+    'pytrip': ["pytrip98 ; python_version >= '3.5'", 'scipy']
 }
 
 # inspired by https://github.com/pyimgui/pyimgui/blob/master/setup.py
@@ -59,22 +59,16 @@ EXTRAS_REQUIRE['full'].append(["hipsterplot", "bashplotlib"])  # these are neede
 # |      1.10     | 2.7,  3.3 - 3.5 |      linux      |
 # |       1.9     | 2.7,  3.3 - 3.5 |      linux      |
 # |---------------------------------------------------|
-install_requires = []
-if sys.version_info[0] == 3 and sys.version_info[1] == 9:  # python 3.9
-    install_requires += ["numpy>=1.20"]
-elif sys.version_info[0] == 3 and sys.version_info[1] == 8:  # python 3.8
-    install_requires += ["numpy>=1.18"]
-elif sys.version_info[0] == 3 and sys.version_info[1] == 7:  # python 3.7
-    install_requires += ["numpy>=1.15"]
-elif sys.version_info[0] == 3 and sys.version_info[1] == 6:  # python 3.6
-    install_requires += ["numpy>=1.12,<1.20"]
-elif sys.version_info[0] == 3 and sys.version_info[1] == 5:  # python 3.5
-    install_requires += ["numpy>=1.11,<1.19"]
-elif (sys.version_info[0] == 3 and sys.version_info[1] < 5) or (sys.version_info[0] == 2):  # python 3.4 and 2.7
-    install_requires += ["numpy>=1.11,<1.16"]
-    install_requires += ["enum34"]
-else:
-    install_requires += ["numpy"]
+# see https://www.python.org/dev/peps/pep-0508/ for language specification
+install_requires = [
+    "numpy>=1.20 ; python_version == '3.9'",
+    "numpy>=1.18 ; python_version == '3.8'",
+    "numpy>=1.15 ; python_version == '3.7'",
+    "numpy>=1.12,<1.20 ; python_version == '3.6'",
+    "numpy>=1.11,<1.19 ; python_version == '3.5'",
+    "numpy>=1.11,<1.16 ; python_version == '3.4' or python_version == '2.7'",
+    "enum34 ; python_version == '3.4' or python_version == '2.7'"
+]
 
 setuptools.setup(
     name='pymchelper',
