@@ -26,6 +26,7 @@ def write_version_py(filename=os.path.join('pymchelper', 'VERSION')):
 # automatically generate VERSION file upon import or execution of this (setup.py) script
 write_version_py()
 
+
 # extract readme text from the markdown file
 with open('README.rst') as readme_file:
     readme = readme_file.read()
