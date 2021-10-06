@@ -23,6 +23,7 @@ def write_version_py(filename=os.path.join('pymchelper', 'VERSION')):
     finally:
         a.close()
 
+
 # automatically generate VERSION file upon import or execution of this (setup.py) script
 write_version_py()
 
