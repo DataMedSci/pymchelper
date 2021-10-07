@@ -21,12 +21,12 @@ Installation
     pip install pymchelper
 
 This would install just basic capabilities of the converter program `convertmc`: conversion to text file and inspection tool.
-If you want to use more features, select a specific set of requirements::
+If you want to use more features, select a specific set of requirements:
 
-  - to enable image converter use `pip install "pymchelper[image]"`
-  - to enable MS Excel converter use `pip install "pymchelper[excel]"`
-  - to enable HDF converter use `pip install "pymchelper[hdf]"`
-  - to enable TRiP98 converters use `pip install "pymchelper[pytrip]"`
+- to enable image converter use `pip install "pymchelper[image]"`
+- to enable MS Excel converter use `pip install "pymchelper[excel]"`
+- to enable HDF converter use `pip install "pymchelper[hdf]"`
+- to enable TRiP98 converters use `pip install "pymchelper[pytrip]"`
 
 Multiple converters can also be enabled, i.e. by using `pip install "pymchelper[image,excel]"`
 
