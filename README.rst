@@ -18,7 +18,7 @@ Installation
 
 **pymchelper** is available on PyPi, you can install install it using::
 
-```bash
+```shell
 pip install pymchelper
 ```
 
@@ -34,7 +34,7 @@ Multiple converters can also be enabled, i.e. by using `pip install "pymchelper[
 
 In order to use all feautures (i.e. all available converters), use::
 
-```bash
+```shell
 pip install "pymchelper[full]"
 ```
 
