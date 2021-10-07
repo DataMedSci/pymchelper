@@ -18,9 +18,7 @@ Installation
 
 **pymchelper** is available on PyPi, you can install install it using::
 
-```shell
-pip install pymchelper
-```
+    pip install pymchelper
 
 This would install just basic capabilities of the converter program `convertmc`: conversion to text file and inspection tool.
 If you want to use more features, select a specific set of requirements::
@@ -34,9 +32,7 @@ Multiple converters can also be enabled, i.e. by using `pip install "pymchelper[
 
 In order to use all feautures (i.e. all available converters), use::
 
-```shell
-pip install "pymchelper[full]"
-```
+    pip install "pymchelper[full]"
 
 Documentation
 -------------
