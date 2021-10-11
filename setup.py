@@ -75,7 +75,7 @@ install_requires = [
     "numpy>=1.15 ; python_version == '3.7'",
     "numpy>=1.12,<1.20 ; python_version == '3.6'",
     "numpy>=1.11,<1.19 ; python_version == '3.5'",
-    "numpy>=1.11,<1.16 ; python_version == '3.4' or python_version == '2.7'",
+    "numpy>=1.11,<1.22 ; python_version == '3.4' or python_version == '2.7'",
     "enum34 ; python_version == '3.4' or python_version == '2.7'"
 ]
 
