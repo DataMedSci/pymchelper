@@ -104,5 +104,3 @@ class TRiP98CubeWriter:
         else:
             logger.error("Tripcube target is only allowed with dose- or LET-type detectors.")
             raise Exception("Illegal detector for tripcube.")
-
-            return 1
