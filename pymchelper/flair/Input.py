@@ -1479,7 +1479,6 @@ class Card:
         self.info = CardInfo.get(tag)
         if self.info.name == ERROR:
             raise Exception("Incompatible tag \"{:s}\"".format(tag))
-            return
 
         if len(tag) == 3 and "Geometry" in self.info.group:
             self._geo = True
