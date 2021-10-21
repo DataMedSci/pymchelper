@@ -3099,7 +3099,8 @@ class Input:
             say("Reading input file", filename)
         if self.parse():
             return True
-        assert len(self._files) == 0
+        if len(self._files) != 0:
+            raise AssertionError
 
         # Process input
         self.scanUnits()
@@ -3184,8 +3185,10 @@ class Input:
         elif location == 3:
             inp._parseVolumes()
         else:
-            assert False
-        assert len(self._files) == 0
+            if not False:
+                raise AssertionError
+        if len(self._files) != 0:
+            raise AssertionError
 
         pos = fromid + 1
         for card in inp.cardlist:
@@ -4067,7 +4070,8 @@ class Input:
 
         self._closeFile()
         self.setFileTime()
-        assert (len(self._files) == 0)
+        if (len(self._files) != 0):
+            raise AssertionError
         return False
 
     def write(self, filename, backup=True):

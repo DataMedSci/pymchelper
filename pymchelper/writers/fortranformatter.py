@@ -142,8 +142,10 @@ def _output_float(w, d, e, state, ft, buff, sign_bit, zero_flag, ndigits, edigit
     sign = _calculate_sign(state, sign_bit)
     # Some debug
     if d != 0:
-        assert (buff[2] in ['.', ','])
-        assert (buff[ndigits + 2] == 'e')
+        if (buff[2] not in ['.', ',']):
+            raise AssertionError
+        if (buff[ndigits + 2] != 'e'):
+            raise AssertionError
     # Read in the exponent
     ex = int(buff[ndigits + 3:]) + 1
     # Handle zero case
@@ -231,7 +233,8 @@ def _output_float(w, d, e, state, ft, buff, sign_bit, zero_flag, ndigits, edigit
                 if (ex > 99) or (ex < -99):
                     expchar = ' '
         else:
-            assert (isinstance(ex, int))
+            if not (isinstance(ex, int)):
+                raise AssertionError
             edigits = len(str(abs(ex)))
             # Exponenet width specified, check it is wide enough
             if edigits > e:

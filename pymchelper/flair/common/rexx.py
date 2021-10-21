@@ -270,91 +270,167 @@ if __name__ == "__main__":
     from pymchelper.flair.common.log import say
 
     say("abbrev")
-    assert abbrev('information', 'info', 4)
-    assert abbrev('information', '', 0)
-    assert not abbrev('information', 'Info', 4)
-    assert not abbrev('information', 'info', 5)
-    assert not abbrev('information', 'info ')
-    assert abbrev('information', 'info', 3)
-    assert not abbrev('info', 'information', 3)
-    assert not abbrev('info', 'info', 5)
+    if not abbrev('information', 'info', 4):
+        raise AssertionError
+    if not abbrev('information', '', 0):
+        raise AssertionError
+    if abbrev('information', 'Info', 4):
+        raise AssertionError
+    if abbrev('information', 'info', 5):
+        raise AssertionError
+    if abbrev('information', 'info '):
+        raise AssertionError
+    if not abbrev('information', 'info', 3):
+        raise AssertionError
+    if abbrev('info', 'information', 3):
+        raise AssertionError
+    if abbrev('info', 'info', 5):
+        raise AssertionError
 
     say("center")
-    assert center('****', 0, '-') == ''
-    assert center('****', 8, '-') == '--****--'
-    assert center('****', 7, '-') == '-****--'
-    assert center('*****', 8, '-') == '-*****--'
-    assert center('*****', 7, '-') == '-*****-'
-    assert center('12345678', 4, '-') == '3456'
-    assert center('12345678', 5, '-') == '23456'
-    assert center('1234567', 4, '-') == '2345'
-    assert center('1234567', 5, '-') == '23456'
+    if center('****', 0, '-') != '':
+        raise AssertionError
+    if center('****', 8, '-') != '--****--':
+        raise AssertionError
+    if center('****', 7, '-') != '-****--':
+        raise AssertionError
+    if center('*****', 8, '-') != '-*****--':
+        raise AssertionError
+    if center('*****', 7, '-') != '-*****-':
+        raise AssertionError
+    if center('12345678', 4, '-') != '3456':
+        raise AssertionError
+    if center('12345678', 5, '-') != '23456':
+        raise AssertionError
+    if center('1234567', 4, '-') != '2345':
+        raise AssertionError
+    if center('1234567', 5, '-') != '23456':
+        raise AssertionError
 
     say("datatype")
-    assert not datatype("")
-    assert not datatype("foobar")
-    assert not datatype("foo bar")
-    assert not datatype("123.456.789")
-    assert datatype("123.456")
-    assert not datatype("DeadBeef")
-    assert not datatype("Dead Beef")
-    assert not datatype("1234ABCD")
-    assert datatype("01001101")
-    assert not datatype("0110 1101")
-    assert not datatype("0110 101")
-    assert datatype("1324.1234")
-    assert datatype("123")
-    assert datatype("12.3")
-    assert datatype('123.123')
-    assert datatype('123.123E3')
-    assert datatype('123.0000003')
-    assert datatype('123.0000004')
-    assert datatype('123.0000005')
-    assert datatype('123.0000006')
-    assert datatype(' 23')
-    assert datatype(' 23 ')
-    assert datatype('23 ')
-    assert datatype('123.00')
-    assert datatype('123000E-2')
-    assert datatype('123000E+2')
-    assert not datatype("A B C")
-    assert not datatype("123ABC")
-    assert not datatype("123AHC")
-    assert datatype('0.000E-2')
-    assert datatype('0.000E-1')
-    assert datatype('0.000E0')
-    assert datatype('0.000E1')
-    assert datatype('0.000E2')
-    assert datatype('0.000E3')
-    assert datatype('0.000E4')
-    assert datatype('0.000E5')
-    assert datatype('0.000E6')
-    assert datatype('0E-1')
-    assert datatype('0E0')
-    assert datatype('0E1')
-    assert datatype('0E2')
-    assert not datatype('+.')
-    assert not datatype('++0')
+    if datatype(""):
+        raise AssertionError
+    if datatype("foobar"):
+        raise AssertionError
+    if datatype("foo bar"):
+        raise AssertionError
+    if datatype("123.456.789"):
+        raise AssertionError
+    if not datatype("123.456"):
+        raise AssertionError
+    if datatype("DeadBeef"):
+        raise AssertionError
+    if datatype("Dead Beef"):
+        raise AssertionError
+    if datatype("1234ABCD"):
+        raise AssertionError
+    if not datatype("01001101"):
+        raise AssertionError
+    if datatype("0110 1101"):
+        raise AssertionError
+    if datatype("0110 101"):
+        raise AssertionError
+    if not datatype("1324.1234"):
+        raise AssertionError
+    if not datatype("123"):
+        raise AssertionError
+    if not datatype("12.3"):
+        raise AssertionError
+    if not datatype('123.123'):
+        raise AssertionError
+    if not datatype('123.123E3'):
+        raise AssertionError
+    if not datatype('123.0000003'):
+        raise AssertionError
+    if not datatype('123.0000004'):
+        raise AssertionError
+    if not datatype('123.0000005'):
+        raise AssertionError
+    if not datatype('123.0000006'):
+        raise AssertionError
+    if not datatype(' 23'):
+        raise AssertionError
+    if not datatype(' 23 '):
+        raise AssertionError
+    if not datatype('23 '):
+        raise AssertionError
+    if not datatype('123.00'):
+        raise AssertionError
+    if not datatype('123000E-2'):
+        raise AssertionError
+    if not datatype('123000E+2'):
+        raise AssertionError
+    if datatype("A B C"):
+        raise AssertionError
+    if datatype("123ABC"):
+        raise AssertionError
+    if datatype("123AHC"):
+        raise AssertionError
+    if not datatype('0.000E-2'):
+        raise AssertionError
+    if not datatype('0.000E-1'):
+        raise AssertionError
+    if not datatype('0.000E0'):
+        raise AssertionError
+    if not datatype('0.000E1'):
+        raise AssertionError
+    if not datatype('0.000E2'):
+        raise AssertionError
+    if not datatype('0.000E3'):
+        raise AssertionError
+    if not datatype('0.000E4'):
+        raise AssertionError
+    if not datatype('0.000E5'):
+        raise AssertionError
+    if not datatype('0.000E6'):
+        raise AssertionError
+    if not datatype('0E-1'):
+        raise AssertionError
+    if not datatype('0E0'):
+        raise AssertionError
+    if not datatype('0E1'):
+        raise AssertionError
+    if not datatype('0E2'):
+        raise AssertionError
+    if datatype('+.'):
+        raise AssertionError
+    if datatype('++0'):
+        raise AssertionError
 
     say("insert")
-    assert insert("abc", "def", 2) == "deabcf"
-    assert insert("abc", "def", 3) == "defabc"
-    assert insert("abc", "def", 5) == "def  abc"
-    assert insert("abc", "def", 5, '*') == "def**abc"
+    if insert("abc", "def", 2) != "deabcf":
+        raise AssertionError
+    if insert("abc", "def", 3) != "defabc":
+        raise AssertionError
+    if insert("abc", "def", 5) != "def  abc":
+        raise AssertionError
+    if insert("abc", "def", 5, '*') != "def**abc":
+        raise AssertionError
 
     say("translate")
-    assert translate("Foo Bar", "", "") == "Foo Bar"
-    assert translate("Foo Bar", xrange_string(1, 255)) == "Gpp!Cbs"
-    assert translate("", "klasjdf", "woieruw") == ""
-    assert translate("foobar", "abcdef", "fedcba") == "aooefr"
+    if translate("Foo Bar", "", "") != "Foo Bar":
+        raise AssertionError
+    if translate("Foo Bar", xrange_string(1, 255)) != "Gpp!Cbs":
+        raise AssertionError
+    if translate("", "klasjdf", "woieruw") != "":
+        raise AssertionError
+    if translate("foobar", "abcdef", "fedcba") != "aooefr":
+        raise AssertionError
 
     say("verify")
-    assert verify('foobar', 'barfo', 0, 0) == -1
-    assert verify('foobar', 'barfo', 1, 0) == 0
-    assert verify('', 'barfo') == -1
-    assert verify('foobar', '') == 0
-    assert verify('foobar', 'barf', 0, 2) == 2
-    assert verify('foobar', 'barf', 0, 3) == -1
-    assert verify('', '') == -1
+    if verify('foobar', 'barfo', 0, 0) != -1:
+        raise AssertionError
+    if verify('foobar', 'barfo', 1, 0) != 0:
+        raise AssertionError
+    if verify('', 'barfo') != -1:
+        raise AssertionError
+    if verify('foobar', '') != 0:
+        raise AssertionError
+    if verify('foobar', 'barf', 0, 2) != 2:
+        raise AssertionError
+    if verify('foobar', 'barf', 0, 3) != -1:
+        raise AssertionError
+    if verify('', '') != -1:
+        raise AssertionError
 
     say("All Test passed")
