@@ -817,7 +817,7 @@ class Matrix(list):
     def make(self, X, Y, Z=None, T=None):
         """Create a transformation matrix from 3 normalized vectors"""
         self.unary()
-        if (self.rows == 3 or self.rows == 4) and self.cols == self.rows:
+        if self.rows in (3, 4) and self.cols == self.rows:
             if Z is None:
                 Z = X ^ Y
                 Z.normalize()
@@ -1583,7 +1583,7 @@ def eigenvalues(M, eps=_accuracy, check=False):
 
         for i in range(n):
             for j in range(n):
-                if j != p and j != q:
+                if j not in (p, q):
                     ZW[i][j] = A[i][j]
                 else:
                     zw1 = 0
@@ -1593,7 +1593,7 @@ def eigenvalues(M, eps=_accuracy, check=False):
 
         for i in range(n):
             for j in range(n):
-                if i != p and i != q:
+                if i not in (p, q):
                     A[i][j] = ZW[i][j]
                 else:
                     zw1 = 0

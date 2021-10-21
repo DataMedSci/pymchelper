@@ -102,9 +102,9 @@ def datatype(str, check="N"):
 
     try:
         if len(str) == 0:
-            return check == "X" or check == "B"
+            return check in ("X", "B")
     except Exception:
-        return check == "X" or check == "B"
+        return check in ("X", "B")
 
     if check == "N":
         return _isnum(str)
@@ -215,7 +215,7 @@ def _isnum(str):
     if length == 0:
         return False
 
-    if str[i] == '-' or str[i] == '+':
+    if str[i] in ('-', '+'):
         i += 1
 
     # skip spaces after sign
@@ -247,10 +247,10 @@ def _isnum(str):
             return False
 
     # accept one e/E/d/D
-    if i < length and (str[i] == 'e' or str[i] == 'E' or str[i] == 'd' or str[i] == 'D'):
+    if i < length and str[i] in ('e', 'E', 'd', 'D'):
         i += 1
         # accept one sign
-        if i < length and (str[i] == '-' or str[i] == '+'):
+        if i < length and str[i] in ('-', '+'):
             i += 1
 
         # accept many digits
