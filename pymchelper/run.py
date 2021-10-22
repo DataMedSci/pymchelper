@@ -62,8 +62,14 @@ def main(args=None):
                               choices=axis_names,
                               default={},
                               type=str)
+    parser_image.add_argument("-g", "--grid",
+                              help='add grid lines for specific plots (by default only to 1D)',
+                              nargs='+',
+                              choices=('1D', '2D'),
+                              default='1D',
+                              type=str)
     parser_image.add_argument("--colormap",
-                              help='image color map, see http://matplotlib.org/users/colormaps.html '
+                              help='image color map, see https://matplotlib.org/stable/tutorials/colors/colormaps.html '
                                    'for list of possible options (default: ' + ImageWriter.default_colormap + ')',
                               default=ImageWriter.default_colormap,
                               type=str)
