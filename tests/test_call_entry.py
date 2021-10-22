@@ -5,8 +5,8 @@ import logging
 import pytest
 
 from pymchelper import run
-from examples import generate_detect_shieldhit, generate_fluka_input
 from pymchelper.flair import Input
+from examples import generate_detect_shieldhit, generate_fluka_input
 
 logger = logging.getLogger(__name__)
 
