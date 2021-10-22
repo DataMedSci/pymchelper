@@ -2536,7 +2536,7 @@ class Card:
             nwhats = min(6, nwhats)
         elif fmt == FORMAT_FREE:
             # Count real whats
-            while (nwhats > 0):
+            while nwhats > 0:
                 i = nwhats - 1
                 if self._what[i] == "":
                     nwhats = i
