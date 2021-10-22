@@ -189,7 +189,7 @@ class ImageWriter:
     """
 
     def __init__(self, filename, options):
-        logger.info("{:s} options:  {:s}".format(repr(self.__class__), repr(options)) )
+        logger.info("{:s} options:  {:s}".format(repr(self.__class__), repr(options)))
         self.plot_filename = filename
         if not self.plot_filename.endswith(".png"):
             self.plot_filename += ".png"
