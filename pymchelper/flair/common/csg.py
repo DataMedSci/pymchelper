@@ -219,7 +219,7 @@ def exp2rpn(expr):
     while i < len(expr):
         tcur = expr[i]
         # Check for special leading chars
-        if newproduct and (tcur == '|' or tcur == '+'):
+        if newproduct and tcur in ('|', '+'):
             newproduct = (tcur == '|')
             i += 1
             continue
@@ -228,7 +228,7 @@ def exp2rpn(expr):
             expr.insert(i, '*')  # insert space in ith position
             tcur = '@'  # Universe
 
-        newproduct = (tcur == '(' or tcur == '|')
+        newproduct = tcur in ('(', '|')
 
         # Find priorities
         try:
@@ -327,7 +327,7 @@ def _subTerms(expr, n):
 
     while n >= 0:
         t = expr[n]
-        if t == '+' or t == '-' or t == '|':
+        if t in ('+', '-', '|'):
             nop += 1
         else:
             nop -= 1
@@ -379,7 +379,7 @@ def _rpnrule(expr, n):
 
     # Top-most operator
     op = expr[n]
-    if op != '+' and op != '-' and op != '|':
+    if op not in ('+', '-', '|'):
         return rule
 
     # Right operator
@@ -529,7 +529,7 @@ def _rpnrule(expr, n):
 
     #  9. (X|Y)-Z -> (X-Z)|(Y-Z)     X Y | Z -  ->  X Z - Y Z - |
     # 10. (X|Y)+Z -> (X+Z)|(Y+Z)     X Y | Z +  ->  X Z + Y Z + |
-    elif rule == 9 or rule == 10:
+    elif rule in (9, 10):
         # Leave X
         # Copy "Z -" or "Z +" after X
         L = Zu - Zl + 2
@@ -564,7 +564,7 @@ def rpn2exp(rpn):
     endprod = 0
     while i < len(rpn):
         tx = rpn[i]
-        if tx == '+' or tx == '-' or tx == '|':
+        if tx in ('+', '-', '|'):
             nstack -= 1
         else:
             # First term is always a plus

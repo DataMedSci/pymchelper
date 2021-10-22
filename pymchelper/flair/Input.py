@@ -706,7 +706,7 @@ class CardInfo:
                 except Exception:
                     pass
 
-            elif f == "pi" or f == "spi":
+            elif f in ("pi", "spi"):
                 try:
                     x = float(x)
                     if x > -100.0 and abs(int(x)) not in Particle._db:
@@ -928,7 +928,7 @@ class CardInfo:
         range_ = self.range[case]
         for i in range(len(range_)):
             r = range_[i]
-            if r == target or r == starget:
+            if r in (target, starget):
                 found.append(i)
             if r == "i" and len(found) == 2:
                 found.append(i)
@@ -1898,7 +1898,7 @@ class Card:
     def absWhat(self, w):
         """return the absolute value of what[w]"""
         n = self.what(w)
-        if n == "" or n == 0.0:
+        if n in ("", 0.0):
             return n
         try:
             return abs(float(n))
@@ -2138,7 +2138,7 @@ class Card:
         """change the absolute value of what keeping the same sign"""
         s = self.sign(w)
 
-        if v == "" or v == 0.0:
+        if v in ("", 0.0):
             self.setWhat(w, v)
             return
 
@@ -2150,7 +2150,7 @@ class Card:
                     v = -v
 
             except Exception:
-                if v[0] == "+" or v[0] == "-":
+                if v[0] in ("+", "-"):
                     if s:
                         v = "-" + v[1:]
                     else:
@@ -2175,7 +2175,7 @@ class Card:
         self._sign[w] = s
         n = self.what(w)
 
-        if n == "" or n == 0.0:
+        if n in ("", 0.0):
             return
         try:
             n = abs(float(n))
@@ -2640,7 +2640,7 @@ class Card:
 
         elif self.tag == "PLOTGEOM":
             w6 = self.intWhat(6)
-            if w6 == 0 or w6 == 5:
+            if w6 in (0, 5):
                 line += "\n%s" % (self._extra)
                 line += "\n%10s%10s%10s%10s%10s%10s" \
                         % (bmath.format_number(self.numWhat(7), 10),
@@ -3156,7 +3156,7 @@ class Input:
 
             elif card.tag == "GLOBAL":
                 w4 = card.intWhat(4)
-                if w4 == 2 or w4 == 3:
+                if w4 in (2, 3):
                     inp.format = FORMAT_FREE
                 if card.intWhat(5) > 0:
                     inp.geoFormat = FORMAT_FREE
@@ -3283,7 +3283,7 @@ class Input:
 
             elif tag == "GLOBAL" and self._cardEnable:
                 w4 = _intWhat(what, 4)
-                if w4 == 2 or w4 == 3:
+                if w4 in (2, 3):
                     self.format = FORMAT_FREE
                 if _intWhat(what, 5) > 0:
                     self.geoFormat = FORMAT_FREE
@@ -3448,7 +3448,7 @@ class Input:
             (tag, name) = self._parseBodyLine(line, what)
             name = _body2name(name)
 
-            if tag == "END" or line == "END":
+            if "END" in (tag, line):
                 self._addEND()
                 return
 
@@ -3665,7 +3665,7 @@ class Input:
                         raise Exception("Error parsing region %s: Invalid bodyname found \"%s\" column=%d" %
                                         (name, e[i + 2:i + width], i + 2))
                     sign = body[0]
-                    if sign == "+" or sign == "-":
+                    if sign in ("+", "-"):
                         efree += " %s%s" % (sign, _body2name(body[1:]))
                     else:
                         efree += " +%s" % (_body2name(body))
@@ -3704,7 +3704,7 @@ class Input:
         sdum = what[0]
         if sdum != "":
             usdum = sdum.upper().split('#')
-            if usdum[0] == "ROT" or usdum[0] == "RO":
+            if usdum[0] in ("ROT", "RO"):
                 try:
                     id = int(usdum[-1])
                 except Exception:
@@ -4230,7 +4230,7 @@ class Input:
             self.format = FORMAT_SINGLE
         elif tag == "GLOBAL":
             w = card.intWhat(4)
-            if w == 2 or w == 3:
+            if w in (2, 3):
                 self.format = FORMAT_FREE
             w = card.intWhat(5)
             if w > 0:
@@ -4941,17 +4941,17 @@ class Input:
         radius = card.numWhat(3)
         dirCheck = dir.direction(zero)
 
-        if dirCheck == "X" or dirCheck == "-X":
+        if dirCheck in ("X", "-X"):
             self.changeTag(card, "XCC")
             card.setWhat(1, self._format(point[1]))
             card.setWhat(2, self._format(point[2]))
 
-        elif dirCheck == "Y" or dirCheck == "-Y":
+        elif dirCheck in ("Y", "-Y"):
             self.changeTag(card, "YCC")
             card.setWhat(1, self._format(point[2]))
             card.setWhat(2, self._format(point[0]))
 
-        elif dirCheck == "Z" or dirCheck == "-Z":
+        elif dirCheck in ("Z", "-Z"):
             self.changeTag(card, "ZCC")
             card.setWhat(1, self._format(point[0]))
             card.setWhat(2, self._format(point[1]))
@@ -5032,7 +5032,7 @@ class Input:
         dirY = Y.direction(zero)
         dirZ = Z.direction(zero)
 
-        if dirX == "N" or dirY == "N" or dirZ == "N":
+        if "N" in (dirX, dirY, dirZ):
             if _useQUA:
                 # convert card to "QUA" and then transform it
                 tag = card.tag
@@ -5073,7 +5073,7 @@ class Input:
                 card.setWhat(11, self._format(Y[1]))
                 card.setWhat(12, self._format(Y[2]))
 
-        elif dirZ == "X" or dirZ == "-X":
+        elif dirZ in ("X", "-X"):
             self.changeTag(card, "XEC")
             card.setWhat(1, self._format(center[1]))
             card.setWhat(2, self._format(center[2]))
@@ -5081,7 +5081,7 @@ class Input:
             card.setWhat(3, self._format(abs(XY.y())))
             card.setWhat(4, self._format(abs(XY.z())))
 
-        elif dirZ == "Y" or dirZ == "-Y":
+        elif dirZ in ("Y", "-Y"):
             self.changeTag(card, "YEC")
             card.setWhat(1, self._format(center[2]))
             card.setWhat(2, self._format(center[0]))
@@ -5108,7 +5108,7 @@ class Input:
         YD = Y.direction(zero)
         ZD = Z.direction(zero)
 
-        if XD != "N" and YD != "N" and ZD != "N":
+        if "N" not in (XD, YD, ZD):
             self.changeTag(card, "RPP")
             diagonal = X + Y + Z
             card.setWhat(1, self._format(min(point[0], point[0] + diagonal[0])))
@@ -5405,7 +5405,7 @@ class Input:
             elif active13 and tag == "#undef" and useInputDefines:
                 define[var] = 0
 
-            elif tag == "#if" or tag == "#ifdef":
+            elif tag in ("#if", "#ifdef"):
                 if active13:
                     nest.append(define.get(var, 0))
                 else:
@@ -6033,7 +6033,7 @@ class Input:
                     rotdefi["rot#%03d" % (i)] = i
 
             else:
-                if i != idx and card.sdum() != idx:
+                if idx not in (i, card.sdum()):
                     continue
 
             if j == 0:
