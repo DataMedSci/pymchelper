@@ -69,7 +69,7 @@ def abbrev(information, info, length=0):
     with minimum length l
     """
     if length > 0:
-        length = length
+        pass
     else:
         length = len(info)
 
