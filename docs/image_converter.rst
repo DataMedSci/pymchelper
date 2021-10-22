@@ -63,7 +63,7 @@ Colormap
 ^^^^^^^^
 
 When generating heatmaps it is also possible to specify colormap. List of available colormaps is
-available here: http://matplotlib.org/users/colormaps.html. By default colormap called `gnuplot2` is used.
+available here: https://matplotlib.org/stable/tutorials/colors/colormaps.html. By default colormap called `gnuplot2` is used.
 An example plot obtained with other colormap (`Greys`) can be obtained with following command::
 
     convertmc image --many "*.bdo" --colormap Greys
@@ -71,3 +71,16 @@ An example plot obtained with other colormap (`Greys`) can be obtained with foll
 .. figure:: ex_yzmsh_grey.png
     :scale: 80 %
     :alt: sample file ex_yzmsh_grey.png generated with image converter
+
+
+Grid Lines
+^^^^^^^^^^
+
+It is also possible to specify grid lines for all types of plots. By default grid lines are enabled for 1D plots.
+To enable grid lines for 2D plots type::
+
+    convertmc image --many "*.bdo" --grid 2D
+
+.. figure:: ex_yzmsh_grid.png
+    :scale: 80 %
+    :alt: sample file ex_yzmsh_grid.png generated with image converter
