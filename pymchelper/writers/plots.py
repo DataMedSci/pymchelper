@@ -272,7 +272,7 @@ class ImageWriter:
             plt.xlabel(x_axis_label)
             plt.ylabel(y_axis_label)
 
-            plt.grid(True)
+            plt.grid(True, alpha=0.3)
 
             im = ax.pcolorfast(xspan, yspan, zdata, cmap=self.colormap, norm=norm)
             cbar = plt.colorbar(im)
