@@ -195,7 +195,6 @@ class ImageWriter:
             self.plot_filename += ".png"
         self.colormap = options.colormap
         self.axis_with_logscale = {PlotAxis[name] for name in options.log}
-        self.grid = options.grid
 
     default_colormap = 'gnuplot2'
 
@@ -251,9 +250,7 @@ class ImageWriter:
                                 (data_raw + error_raw).clip(0.0, 1.05 * data_raw.max()),
                                 alpha=0.2, edgecolor='#CC4F1B', facecolor='#FF9848', antialiased=True)
             ax.set_ylabel(self._make_label(page.unit, page.name))
-            # add grid lines for 1D plots if necessary (enabled by default in option parser)
-            if '1D' in self.grid:
-                ax.grid(True)
+            ax.grid(True)
             ax.plot(plot_x_axis.data, data_raw)
         elif page.dimension == 2:
             plot_y_axis = page.plot_axis(1)
@@ -275,9 +272,7 @@ class ImageWriter:
             plt.xlabel(x_axis_label)
             plt.ylabel(y_axis_label)
 
-            # add grid lines for 2D plots if necessary (disabled by default in option parser)
-            if '2D' in self.grid:
-                plt.grid(True)
+            plt.grid(True)
 
             im = ax.pcolorfast(xspan, yspan, zdata, cmap=self.colormap, norm=norm)
             cbar = plt.colorbar(im)
