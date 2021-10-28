@@ -72,15 +72,3 @@ An example plot obtained with other colormap (`Greys`) can be obtained with foll
     :scale: 80 %
     :alt: sample file ex_yzmsh_grey.png generated with image converter
 
-
-Grid Lines
-^^^^^^^^^^
-
-It is also possible to specify grid lines for all types of plots. By default grid lines are enabled for 1D plots.
-To enable grid lines for 2D plots type::
-
-    convertmc image --many "*.bdo" --grid 2D
-
-.. figure:: ex_yzmsh_grid.png
-    :scale: 80 %
-    :alt: sample file ex_yzmsh_grid.png generated with image converter
