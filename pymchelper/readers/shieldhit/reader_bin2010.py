@@ -5,7 +5,7 @@ import numpy as np
 
 from pymchelper.axis import MeshAxis
 from pymchelper.page import Page
-from pymchelper.readers.shieldhit.reader_base import SHReader, _get_mesh_units, _bintyp, _get_detector_unit
+from pymchelper.readers.shieldhit.reader_base import SHReader, mesh_name_and_unit, _bintyp, _get_detector_unit
 from pymchelper.shieldhit.detector.detector_type import SHDetType
 from pymchelper.shieldhit.detector.estimator_type import SHGeoType
 
@@ -153,9 +153,9 @@ class SHReaderBin2010(SHReader):
             ymax = ymin
             zmax = zmin
 
-        xunit, xname = _get_mesh_units(estimator, 0)
-        yunit, yname = _get_mesh_units(estimator, 1)
-        zunit, zname = _get_mesh_units(estimator, 2)
+        xunit, xname = mesh_name_and_unit(estimator, 0)
+        yunit, yname = mesh_name_and_unit(estimator, 1)
+        zunit, zname = mesh_name_and_unit(estimator, 2)
 
         estimator.x = MeshAxis(n=np.abs(nx), min_val=xmin, max_val=xmax, name=xname, unit=xunit, binning=_bintyp(nx))
         estimator.y = MeshAxis(n=np.abs(ny), min_val=ymin, max_val=ymax, name=yname, unit=yunit, binning=_bintyp(ny))
