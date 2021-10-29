@@ -6,7 +6,7 @@ from pymchelper.axis import MeshAxis
 from pymchelper.page import Page
 from pymchelper.readers.shieldhit.binary_spec import SHBDOTagID, detector_name_from_bdotag, unit_name_from_unit_id, \
     page_tags_to_save
-from pymchelper.readers.shieldhit.reader_base import SHReader, read_next_token
+from pymchelper.readers.shieldhit.reader_base import SHReader, read_next_token, _get_mesh_units
 from pymchelper.shieldhit.detector.detector_type import SHDetType
 from pymchelper.shieldhit.detector.estimator_type import SHGeoType
 
@@ -149,6 +149,15 @@ class SHReaderBDO2019(SHReader):
                     logger.info("Lack of data for second level differential scoring")
                 except IndexError:
                     logger.info("Lack of units for second level differential scoring")
+
+            # Fix names of the axis objects for different mesh type,
+            # units are directly extracted from BDO tags in 2019 format
+            _, xname = _get_mesh_units(estimator, 0)
+            _, yname = _get_mesh_units(estimator, 1)
+            _, zname = _get_mesh_units(estimator, 2)
+            estimator.x = estimator.x._replace(name=xname)
+            estimator.y = estimator.y._replace(name=yname)
+            estimator.z = estimator.z._replace(name=zname)
 
             # Copy the SH12A specific units into the general placeholders:
             for page in estimator.pages:
