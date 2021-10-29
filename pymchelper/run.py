@@ -63,7 +63,7 @@ def main(args=None):
                               default={},
                               type=str)
     parser_image.add_argument("--colormap",
-                              help='image color map, see http://matplotlib.org/users/colormaps.html '
+                              help='image color map, see https://matplotlib.org/stable/tutorials/colors/colormaps.html '
                                    'for list of possible options (default: ' + ImageWriter.default_colormap + ')',
                               default=ImageWriter.default_colormap,
                               type=str)

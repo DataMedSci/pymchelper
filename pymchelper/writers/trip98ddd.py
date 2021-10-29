@@ -489,6 +489,8 @@ class DebuggingPlots(object):
             import matplotlib
             matplotlib.use('Agg')
             import matplotlib.pyplot as plt
+            # set matplotlib logging level to ERROR, in order not to pollute our log space
+            logging.getLogger('matplotlib').setLevel(logging.ERROR)
         except ImportError:
             logger.error("Matplotlib not installed, output won't be generated")
             return 1
@@ -636,6 +638,8 @@ class DebuggingPlots(object):
             import matplotlib
             matplotlib.use('Agg')
             import matplotlib.pyplot as plt
+            # set matplotlib logging level to ERROR, in order not to pollute our log space
+            logging.getLogger('matplotlib').setLevel(logging.ERROR)
         except ImportError:
             logger.error("Matplotlib not installed, output won't be generated")
             return 1

@@ -185,10 +185,11 @@ splot \"<awk -f addblanks.awk '{data_filename}'\" u 1:2:3 with pm3d
 
 class ImageWriter:
     """
-    TODO
+    Writer responsible for creating PNG images using matplotlib library
     """
 
     def __init__(self, filename, options):
+        logger.info("{:s} options:  {:s}".format(repr(self.__class__), repr(options)))
         self.plot_filename = filename
         if not self.plot_filename.endswith(".png"):
             self.plot_filename += ".png"
@@ -199,11 +200,14 @@ class ImageWriter:
 
     @staticmethod
     def _make_label(unit, name):
+        """
+        Make label for plot axis
+        """
         return name + " " + "[" + unit + "]"
 
     def get_page_figure(self, page):
         """
-        TODO
+        Calculate matplotlib figure object for a single page in estimator
         """
 
         try:
@@ -211,6 +215,8 @@ class ImageWriter:
             matplotlib.use('Agg')
             import matplotlib.pyplot as plt
             from matplotlib import colors
+            # set matplotlib logging level to ERROR, in order not to pollute our log space
+            logging.getLogger('matplotlib').setLevel(logging.ERROR)
         except ImportError:
             logger.error("Matplotlib not installed, output won't be generated")
             return None
@@ -221,15 +227,6 @@ class ImageWriter:
 
         data_raw = page.data_raw
         error_raw = page.error_raw
-
-        # change units for LET from MeV/cm to keV/um if necessary
-        # a copy of datatable is made here
-        # from pymchelper.shieldhit.detector.detector_type import SHDetType
-        # if estimator.dettyp in (SHDetType.dlet, SHDetType.dletg, SHDetType.tlet, SHDetType.tletg):
-        #     data_raw = data_raw * np.float64(0.1)  # 1 MeV / cm = 0.1 keV / um
-        #     if not np.all(np.isnan(error_raw)) and np.any(error_raw):
-        #         error_raw = error_raw * np.float64(0.1)  # 1 MeV / cm = 0.1 keV / um
-        # TODO - move units change to reader !
 
         plot_x_axis = page.plot_axis(0)
 
@@ -253,6 +250,7 @@ class ImageWriter:
                                 (data_raw + error_raw).clip(0.0, 1.05 * data_raw.max()),
                                 alpha=0.2, edgecolor='#CC4F1B', facecolor='#FF9848', antialiased=True)
             ax.set_ylabel(self._make_label(page.unit, page.name))
+            ax.grid(True, alpha=0.3)
             ax.plot(plot_x_axis.data, data_raw)
         elif page.dimension == 2:
             plot_y_axis = page.plot_axis(1)
@@ -274,8 +272,9 @@ class ImageWriter:
             plt.xlabel(x_axis_label)
             plt.ylabel(y_axis_label)
 
-            im = ax.pcolorfast(xspan, yspan, zdata, cmap=self.colormap, norm=norm)
+            plt.grid(True, alpha=0.3)
 
+            im = ax.pcolorfast(xspan, yspan, zdata, cmap=self.colormap, norm=norm)
             cbar = plt.colorbar(im)
             if PlotAxis.z in self.axis_with_logscale:
                 import matplotlib.ticker as ticker
@@ -286,7 +285,7 @@ class ImageWriter:
 
     def write(self, estimator):
         """
-        TODO
+        Go through all pages in estimator and save corresponding figure to an output file
         """
 
         # save single page to a file without number (i.e. output.png)

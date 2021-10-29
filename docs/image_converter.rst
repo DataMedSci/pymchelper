@@ -63,7 +63,7 @@ Colormap
 ^^^^^^^^
 
 When generating heatmaps it is also possible to specify colormap. List of available colormaps is
-available here: http://matplotlib.org/users/colormaps.html. By default colormap called `gnuplot2` is used.
+available here: https://matplotlib.org/stable/tutorials/colors/colormaps.html. By default colormap called `gnuplot2` is used.
 An example plot obtained with other colormap (`Greys`) can be obtained with following command::
 
     convertmc image --many "*.bdo" --colormap Greys
@@ -71,3 +71,4 @@ An example plot obtained with other colormap (`Greys`) can be obtained with foll
 .. figure:: ex_yzmsh_grey.png
     :scale: 80 %
     :alt: sample file ex_yzmsh_grey.png generated with image converter
+
