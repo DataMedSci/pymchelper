@@ -46,8 +46,8 @@ class SHReader(Reader):
         return core_name
 
 
-def mesh_name_and_unit(estimator, axis):
-    """ Gets names and units depending on detector type.
+def mesh_unit_and_name(estimator, axis):
+    """ Gets units and names depending on detector type.
     """
 
     _geotyp_units = {

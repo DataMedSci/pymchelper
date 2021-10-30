@@ -4,7 +4,7 @@ import numpy as np
 
 from pymchelper.axis import MeshAxis
 from pymchelper.page import Page
-from pymchelper.readers.shieldhit.reader_base import SHReader, mesh_name_and_unit, _bintyp, _get_detector_unit, \
+from pymchelper.readers.shieldhit.reader_base import SHReader, mesh_unit_and_name, _bintyp, _get_detector_unit, \
     read_next_token
 from pymchelper.readers.shieldhit.binary_spec import SHBDOTagID, detector_name_from_bdotag
 from pymchelper.shieldhit.detector.estimator_type import SHGeoType
@@ -194,9 +194,9 @@ class SHReaderBDO2016(SHReader):
                     xmax = estimator.dif_max
                     estimator.dif_axis = 0
 
-            xunit, xname = mesh_name_and_unit(estimator, 0)
-            yunit, yname = mesh_name_and_unit(estimator, 1)
-            zunit, zname = mesh_name_and_unit(estimator, 2)
+            xunit, xname = mesh_unit_and_name(estimator, 0)
+            yunit, yname = mesh_unit_and_name(estimator, 1)
+            zunit, zname = mesh_unit_and_name(estimator, 2)
 
             estimator.x = MeshAxis(n=np.abs(nx),
                                    min_val=xmin,
