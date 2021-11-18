@@ -14,9 +14,7 @@ class PlotAxis(IntEnum):
 
 
 class PlotDataWriter:
-    """
-    TODO
-    """
+    """gnuplot data writer"""
 
     def __init__(self, filename, options):
         self.filename = filename
@@ -24,9 +22,7 @@ class PlotDataWriter:
             self.filename += ".dat"
 
     def write(self, estimator):
-        """
-        TODO
-        """
+        """TODO"""
         # save to single page to a file without number (i.e. output.dat)
         if len(estimator.pages) == 1:
             self.write_single_page(estimator.pages[0], self.filename)
@@ -55,9 +51,7 @@ class PlotDataWriter:
         return 0
 
     def write_single_page(self, page, filename):
-        """
-        TODO
-        """
+        """TODO"""
         logger.info("Writing: " + filename)
 
         # special case for 0-dim data
@@ -94,9 +88,7 @@ class PlotDataWriter:
 
 
 class GnuplotDataWriter:
-    """
-    TODO
-    """
+    """TODO"""
 
     def __init__(self, filename, options):
         self.data_filename = filename
@@ -139,9 +131,7 @@ splot \"<awk -f addblanks.awk '{data_filename}'\" u 1:2:3 with pm3d
     }
 
     def write(self, estimator):
-        """
-        TODO
-        """
+        """TODO"""
         if len(estimator.pages) > 1:
             print("Conversion of data with multiple pages not supported yet")
             return False
@@ -184,9 +174,7 @@ splot \"<awk -f addblanks.awk '{data_filename}'\" u 1:2:3 with pm3d
 
 
 class ImageWriter:
-    """
-    Writer responsible for creating PNG images using matplotlib library
-    """
+    """Writer responsible for creating PNG images using matplotlib library"""
 
     def __init__(self, filename, options):
         logger.info("{:s} options:  {:s}".format(repr(self.__class__), repr(options)))
@@ -200,15 +188,11 @@ class ImageWriter:
 
     @staticmethod
     def _make_label(unit, name):
-        """
-        Make label for plot axis
-        """
+        """Make label for plot axis"""
         return name + " " + "[" + unit + "]"
 
     def get_page_figure(self, page):
-        """
-        Calculate matplotlib figure object for a single page in estimator
-        """
+        """Calculate matplotlib figure object for a single page in estimator"""
 
         try:
             import matplotlib
@@ -233,7 +217,7 @@ class ImageWriter:
         fig, ax = plt.subplots()
         ax.set_xlabel(self._make_label(plot_x_axis.unit, plot_x_axis.name))
 
-        # we use symmetrical logarithmic scale as horizontal (X) axis for 1D and 2D plots 
+        # we use symmetrical logarithmic scale as horizontal (X) axis for 1D and 2D plots
         # can have negative values as well (i.e. span from -4. to 4.)
         if PlotAxis.x in self.axis_with_logscale:
             ax.set_xscale('symlog')
@@ -261,7 +245,7 @@ class ImageWriter:
             y_axis_label = self._make_label(plot_y_axis.unit, plot_y_axis.name)
             z_axis_label = self._make_label(page.unit, page.name)
 
-            # we use symmetrical logarithmic scale as vertical (Y) axis for 2D plots 
+            # we use symmetrical logarithmic scale as vertical (Y) axis for 2D plots
             # can have negative values as well (i.e. span from -4. to 4.)
             if PlotAxis.y in self.axis_with_logscale:
                 ax.set_yscale('symlog')
