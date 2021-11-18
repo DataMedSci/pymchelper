@@ -1,7 +1,10 @@
 #!/bin/bash
 
 # clean files which may be results from the previous execution of this script
-rm -rf ./*.tar.gz
+rm -f ./*.tar.gz
+rm -f ./*.bdo
+rm -f ./*.png
+rm -f ./for*
 rm -f shieldhit
 rm -rf shieldhit_demo.tar.gz
 
@@ -19,4 +22,4 @@ find . -wholename "*bin/shieldhit" -exec cp {} . \;
 ./shieldhit
 
 # generate images
-python -m pymchelper.run image --many "*.bdo"
+python -m pymchelper.run image cyl.bdo ex_cyl.png
