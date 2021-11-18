@@ -22,4 +22,10 @@ find . -wholename "*bin/shieldhit" -exec cp {} . \;
 ./shieldhit
 
 # generate images
-python -m pymchelper.run image cyl.bdo ex_cyl.png
+python -m pymchelper.run image cylz.bdo default_1d.png
+# TODO fix log x y conversion
+#python -m pymchelper.run image cylz.bdo logy_1d.png --log y
+#python -m pymchelper.run image cylz.bdo logxy_1d.png --log x y
+python -m pymchelper.run image yzmsh.bdo default_2d.png
+python -m pymchelper.run image yzmsh.bdo logz_2d.png --log z
+python -m pymchelper.run image yzmsh.bdo grey_2d.png --colormap Greys
