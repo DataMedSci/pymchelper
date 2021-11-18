@@ -33,6 +33,23 @@ Logarithmic scale
 
 User can also set logscale on one or more axis in the plots using `--log` option.
 
+An example plot with logarithmic scale on Y axis::
+
+    convertmc image --many "*.bdo" --log y
+
+.. figure:: logy_1d.png
+    :scale: 80 %
+    :alt: sample file logy_1d.png generated with image converter
+
+Scale can be also change on two axis at once::
+
+    convertmc image --many "*.bdo" --log x y
+
+.. figure:: logxy_1d.png
+    :scale: 80 %
+    :alt: sample file logxy_1d.png generated with image converter
+
+
 An example plot with 2-D heatmap and logarithmic scale on Z (color) axis::
 
     convertmc image --many "*.bdo" --log z

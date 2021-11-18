@@ -1,8 +1,7 @@
 *         Input file for the SHIELD-HIT12A Transport Code
 RNDSEED      	89736501     ! Random seed
-JPART0       	25           ! Incident particle type
-HIPROJ     	12.0    6.0      ! A and Z of heavy ion
-TMAX0      	300.0  0.0      ! Incident energy; (MeV/nucl)
+JPART0       	2            ! Incident particle type
+TMAX0      	150.0  1.5       ! Incident energy; (MeV/nucl)
 NSTAT       10000    0       ! NSTAT, Step of saving
 STRAGG          2            ! Straggling: 0-Off 1-Gauss, 2-Vavilov
 MSCAT           2            ! Mult. scatt 0-Off 1-Gauss, 2-Moliere
