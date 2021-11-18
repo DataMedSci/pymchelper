@@ -233,15 +233,17 @@ class ImageWriter:
         fig, ax = plt.subplots()
         ax.set_xlabel(self._make_label(plot_x_axis.unit, plot_x_axis.name))
 
-        # configure logscale on X and Y axis (both for positive and negative numbers)
+        # we use symmetrical logarithmic scale as horizontal (X) axis for 1D and 2D plots 
+        # can have negative values as well (i.e. span from -4. to 4.)
         if PlotAxis.x in self.axis_with_logscale:
             ax.set_xscale('symlog')
 
-        if PlotAxis.y in self.axis_with_logscale:
-            ax.set_yscale('symlog')
-
         # 1-D plotting
         if page.dimension == 1:
+
+            # scored values cannot be negative, hence we use purely logarithmic scale for vertical axis
+            if PlotAxis.y in self.axis_with_logscale:
+                ax.set_yscale('log')
 
             # add optional error area
             if np.any(page.error):
@@ -258,6 +260,11 @@ class ImageWriter:
             x_axis_label = self._make_label(plot_x_axis.unit, plot_x_axis.name)
             y_axis_label = self._make_label(plot_y_axis.unit, plot_y_axis.name)
             z_axis_label = self._make_label(page.unit, page.name)
+
+            # we use symmetrical logarithmic scale as vertical (Y) axis for 2D plots 
+            # can have negative values as well (i.e. span from -4. to 4.)
+            if PlotAxis.y in self.axis_with_logscale:
+                ax.set_yscale('symlog')
 
             # configure logscale on Z axis
             if PlotAxis.z in self.axis_with_logscale:
