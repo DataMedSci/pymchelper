@@ -1,0 +1,23 @@
+Geometry Cyl             # 1-dimensional cylinder scoring geometry along z
+    Name MyCyl
+    R  0.0  10.0    1
+    Z  0.0  40.0    400
+
+Geometry Mesh            # 2-dimensional Cartesian scoring geometry in the YZ plane
+    Name MyMesh_YZ
+    X -5.0  5.0    1
+    Y -5.0  5.0    100
+    Z  0.0  30.0   300
+
+
+Output
+    Filename ex_cyl.bdo
+    Fileformat BDO      # output this as human readable text
+    Geo MyCyl
+    Quantity Dose
+
+Output
+    Filename ex_yzmsh.bdo  # this will output as default binary .bdo format
+    Geo MyMesh_YZ
+    Quantity Dose
+    Quantity Zone       # plot the zone map, useful for viewing the geometry and debugging it.
