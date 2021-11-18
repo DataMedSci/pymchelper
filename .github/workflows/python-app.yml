@@ -101,6 +101,10 @@ jobs:
       run: |         
          tox -e py
          
+    - name: Check images generation for documentation
+      run: |         
+         cd docs/images_generation && ./run.sh
+
 
   make_and_upload_package:
     if: "github.repository == 'DataMedSci/pymchelper' && !contains(github.event.head_commit.message, '[ci skip]') && !contains(github.event.head_commit.message, '[skip ci]')"
