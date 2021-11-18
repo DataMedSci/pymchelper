@@ -14,7 +14,7 @@ class PlotAxis(IntEnum):
 
 
 class PlotDataWriter:
-    '''gnuplot data writer'''
+    """gnuplot data writer"""
 
     def __init__(self, filename, options):
         self.filename = filename
@@ -22,7 +22,7 @@ class PlotDataWriter:
             self.filename += ".dat"
 
     def write(self, estimator):
-        '''TODO'''
+        """TODO"""
         # save to single page to a file without number (i.e. output.dat)
         if len(estimator.pages) == 1:
             self.write_single_page(estimator.pages[0], self.filename)
@@ -51,7 +51,7 @@ class PlotDataWriter:
         return 0
 
     def write_single_page(self, page, filename):
-        '''TODO'''
+        """TODO"""
         logger.info("Writing: " + filename)
 
         # special case for 0-dim data
@@ -88,7 +88,7 @@ class PlotDataWriter:
 
 
 class GnuplotDataWriter:
-    '''TODO'''
+    """TODO"""
 
     def __init__(self, filename, options):
         self.data_filename = filename
@@ -105,33 +105,33 @@ class GnuplotDataWriter:
         dirname = os.path.split(self.script_filename)[0]
         self.awk_script_filename = os.path.join(dirname, "addblanks.awk")
 
-    _awk_2d_script_content = '''/^[[:blank:]]*#/ {next} # ignore comments (lines starting with #)
+    _awk_2d_script_content = """/^[[:blank:]]*#/ {next} # ignore comments (lines starting with #)
 NF < 3 {next} # ignore lines which don't have at least 3 columns
 $2 != prev {printf \"\\n\"; prev=$2} # print blank line
 {print} # print the line
-    '''
+    """
 
-    _header = '''set term png
+    _header = """set term png
 set output \"{plot_filename}\"
 set title \"{title}\"
 set xlabel \"{xlabel}\"
 set ylabel \"{ylabel}\"
-'''
+"""
 
     _error_plot_command = "'./{data_filename}' u 1:(max($2-$3,0.0)):($2+$3) w filledcurves " \
                           "fs transparent solid 0.2 lc 3 title '1-sigma confidence', "
 
     _plotting_command = {
-        1: '''max(x,y) = (x > y) ? x : y
+        1: """max(x,y) = (x > y) ? x : y
 plot {error_plot} './{data_filename}' u 1:2 w l lt 1 lw 2 lc -1 title 'mean value'
-        ''',
-        2: '''set view map
+        """,
+        2: """set view map
 splot \"<awk -f addblanks.awk '{data_filename}'\" u 1:2:3 with pm3d
-'''
+"""
     }
 
     def write(self, estimator):
-        '''TODO'''
+        """TODO"""
         if len(estimator.pages) > 1:
             print("Conversion of data with multiple pages not supported yet")
             return False
@@ -174,7 +174,7 @@ splot \"<awk -f addblanks.awk '{data_filename}'\" u 1:2:3 with pm3d
 
 
 class ImageWriter:
-    '''Writer responsible for creating PNG images using matplotlib library'''
+    """Writer responsible for creating PNG images using matplotlib library"""
 
     def __init__(self, filename, options):
         logger.info("{:s} options:  {:s}".format(repr(self.__class__), repr(options)))
@@ -188,11 +188,11 @@ class ImageWriter:
 
     @staticmethod
     def _make_label(unit, name):
-        '''Make label for plot axis'''
+        """Make label for plot axis"""
         return name + " " + "[" + unit + "]"
 
     def get_page_figure(self, page):
-        '''Calculate matplotlib figure object for a single page in estimator'''
+        """Calculate matplotlib figure object for a single page in estimator"""
         try:
             import matplotlib
             matplotlib.use('Agg')
@@ -274,7 +274,7 @@ class ImageWriter:
         return fig
 
     def write(self, estimator):
-        '''Go through all pages in estimator and save corresponding figure to an output file'''
+        """Go through all pages in estimator and save corresponding figure to an output file"""
         # save single page to a file without number (i.e. output.png)
         if len(estimator.pages) == 1:
             fig = self.get_page_figure(estimator.pages[0])
