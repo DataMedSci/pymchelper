@@ -6,7 +6,7 @@ name: Python application
 on:
   push:
     branches: [ master ]
-    tags: '*'
+    tags: ['*']
   pull_request:
     branches: [ master ]
   release:
@@ -14,7 +14,7 @@ on:
 
 jobs:
   smoke_test:
-    if: "github.repository == 'DataMedSci/pymchelper' && !contains(github.event.head_commit.message, '[ci skip]') && !contains(github.event.head_commit.message, '[skip ci]')"
+    if: "!contains(github.event.head_commit.message, '[ci skip]') && !contains(github.event.head_commit.message, '[skip ci]')"
     runs-on: ubuntu-latest        
     steps:
     - uses: actions/checkout@v2
@@ -30,10 +30,14 @@ jobs:
         pip install -r requirements.txt
         pip install -r tests/requirements-test.txt
 
-    - name: Smoke test with tox
+    - name: Lint with flake8
+      run: |
+          # stop the build if there are Python syntax errors or undefined names
+          flake8 --count --select=E9,F63,F7,F82 --show-source --statistics pymchelper tests examples
+
+    - name: Smoke test with pytest
       run: |         
-         tox -e py -- -k "smoke"
-         tox -e pep8
+         pytest -k "smoke" tests/
          
          
   normal_test:
@@ -71,9 +75,9 @@ jobs:
         pip install -r requirements.txt
         pip install -r tests/requirements-test.txt
 
-    - name: Test with tox
+    - name: Test with pytest
       run: |         
-         tox -e py -- -k "not slow"
+         pytest -k "not slow" tests/
          
          
   full_test:
@@ -97,9 +101,9 @@ jobs:
         pip install -r requirements.txt
         pip install -r tests/requirements-test.txt
 
-    - name: Run all test with tox
+    - name: Run all test with pytest
       run: |         
-         tox -e py
+         pytest tests/
          
     - name: Check images generation for documentation
       run: |         
