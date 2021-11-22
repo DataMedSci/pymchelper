@@ -92,12 +92,12 @@ To have the code working, the PYTHONPATH has to be adjusted::
 
 5. Make local changes to fix the bug or to implement a feature.
 
-6. When you're done making changes, check that your changes comply with PEP8 code quality standards (flake8 tests) and test against other Python versions with tox::
+6. When you're done making changes, check that your changes comply with PEP8 code quality standards (flake8 tests) and run unit tests with pytest::
 
     $ flake8 pymchelper tests
-    $ tox
+    $ pytest tests
 
-   To get flake8 and tox, just pip install them.
+   To get flake8 and pytest, just pip install them.
 
 7. Commit your changes and push your branch to GitHub::
 
@@ -143,10 +143,10 @@ Get Started for non-GIT developers
     (...)
 
 
-Make your changes and check that they comply with PEP8 code quality standards (flake8 tests) and test against other Python versions with tox::
+Make your changes and check that they comply with PEP8 code quality standards (flake8 tests) and run all unit tests with pytest::
 
     $ flake8 pymchelper tests
-    $ tox
+    $ pytest tests/
 
 3. Compress your working directory and send it to us by email (see :doc:`authors <authors>`), describing your changes.
 
@@ -156,11 +156,11 @@ Tips
 
 To run full tests type::
 
-   tox
+   pytest tests/
 
 To run only a single test type::
 
-   PYTHONPATH=. python tests/test_file_to_run.py
+   pytest tests/test_file_to_run.py
 
 .. _`bugs`: https://github.com/DataMedSci/pymchelper/issues
 .. _`features`: https://github.com/DataMedSci/pymchelper/issues

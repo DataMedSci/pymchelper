@@ -1,12 +1,9 @@
-# This workflow will install Python dependencies, run tests and lint with a single version of Python
-# For more information see: https://help.github.com/actions/language-and-framework-guides/using-python-with-github-actions
-
-name: Python application
+name: Automated tests
 
 on:
   push:
     branches: [ master ]
-    tags: '*'
+    tags: ['*']
   pull_request:
     branches: [ master ]
   release:
@@ -14,7 +11,7 @@ on:
 
 jobs:
   smoke_test:
-    if: "github.repository == 'DataMedSci/pymchelper' && !contains(github.event.head_commit.message, '[ci skip]') && !contains(github.event.head_commit.message, '[skip ci]')"
+    if: "!contains(github.event.head_commit.message, '[ci skip]') && !contains(github.event.head_commit.message, '[skip ci]')"
     runs-on: ubuntu-latest        
     steps:
     - uses: actions/checkout@v2
@@ -30,17 +27,21 @@ jobs:
         pip install -r requirements.txt
         pip install -r tests/requirements-test.txt
 
-    - name: Smoke test with tox
+    - name: Lint with flake8
+      run: |
+          # stop the build if there are Python syntax errors or undefined names
+          flake8 --count --select=E9,F63,F7,F82 --show-source --statistics pymchelper tests examples
+
+    - name: Smoke test with pytest
       run: |         
-         tox -e py -- -k "smoke"
-         tox -e pep8
+         pytest -k "smoke" tests/
          
          
   normal_test:
-    if: "github.repository == 'DataMedSci/pymchelper' && !contains(github.event.head_commit.message, '[ci skip]') && !contains(github.event.head_commit.message, '[skip ci]')"
+    if: "!contains(github.event.head_commit.message, '[ci skip]') && !contains(github.event.head_commit.message, '[skip ci]')"
     strategy:
       matrix:
-        python-version: [2.7, 3.5, 3.6, 3.7, 3.8, 3.9]
+        python-version: ['2.7', '3.5', '3.6', '3.7', '3.8', '3.9', '3.10']
         platform: [ubuntu-latest, macos-latest, windows-latest]
         exclude:
           - platform: macos-latest
@@ -51,6 +52,8 @@ jobs:
             python-version: 3.7
           - platform: macos-latest
             python-version: 3.8
+          - platform: macos-latest
+            python-version: 3.10
           - platform: windows-latest
             python-version: 3.5
           - platform: windows-latest
@@ -71,16 +74,16 @@ jobs:
         pip install -r requirements.txt
         pip install -r tests/requirements-test.txt
 
-    - name: Test with tox
+    - name: Test with pytest
       run: |         
-         tox -e py -- -k "not slow"
+         pytest -k "not slow" tests/
          
          
   full_test:
-    if: "github.repository == 'DataMedSci/pymchelper' && !contains(github.event.head_commit.message, '[ci skip]') && !contains(github.event.head_commit.message, '[skip ci]')"
+    if: "!contains(github.event.head_commit.message, '[ci skip]') && !contains(github.event.head_commit.message, '[skip ci]')"
     strategy:
       matrix:
-        python-version: [2.7, 3.5, 3.9]
+        python-version: ['2.7', '3.5', '3.9', '3.10']
     runs-on: ubuntu-latest
     needs: [normal_test]        
     steps:
@@ -97,9 +100,9 @@ jobs:
         pip install -r requirements.txt
         pip install -r tests/requirements-test.txt
 
-    - name: Run all test with tox
+    - name: Run all test with pytest
       run: |         
-         tox -e py
+         pytest tests/
          
     - name: Check images generation for documentation
       run: |         
@@ -107,7 +110,7 @@ jobs:
 
 
   make_and_upload_package:
-    if: "github.repository == 'DataMedSci/pymchelper' && !contains(github.event.head_commit.message, '[ci skip]') && !contains(github.event.head_commit.message, '[skip ci]')"
+    if: "!contains(github.event.head_commit.message, '[ci skip]') && !contains(github.event.head_commit.message, '[skip ci]')"
 
     runs-on: ubuntu-latest
     needs: [full_test]

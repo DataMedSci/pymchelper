@@ -40,7 +40,10 @@ EXTRAS_REQUIRE = {
     'image': ['matplotlib'],
     'excel': ['xlwt'],
     'hdf': ['h5py'],
-    'pytrip': ["pytrip98 ; python_version >= '3.5'", 'scipy']
+    'pytrip': [
+        'scipy',
+        "pytrip98>=3.6.1 ; python_version == '3.10'",
+        "pytrip98 ; python_version >= '3.5' and python_version < '3.10'"]
 }
 
 # inspired by https://github.com/pyimgui/pyimgui/blob/master/setup.py
@@ -70,6 +73,7 @@ EXTRAS_REQUIRE['full'].append(["hipsterplot", "bashplotlib"])  # these are neede
 # |---------------------------------------------------|
 # see https://www.python.org/dev/peps/pep-0508/ for language specification
 install_requires = [
+    "numpy>=1.21 ; python_version == '3.10'",
     "numpy>=1.20 ; python_version == '3.9'",
     "numpy>=1.18 ; python_version == '3.8'",
     "numpy>=1.15 ; python_version == '3.7'",
@@ -118,7 +122,8 @@ setuptools.setup(
         'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: 3.7',
         'Programming Language :: Python :: 3.8',
-        'Programming Language :: Python :: 3.9'
+        'Programming Language :: Python :: 3.9',
+        'Programming Language :: Python :: 3.10',
     ],
     entry_points={
         'console_scripts': [
