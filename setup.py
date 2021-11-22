@@ -43,7 +43,7 @@ EXTRAS_REQUIRE = {
     'pytrip': [
         'scipy',
         "pytrip98>=3.6.1 ; python_version == '3.10'",
-        "pytrip98 ; python_version >= '3.5' and python_version < '3.10'" ]
+        "pytrip98 ; python_version >= '3.5' and python_version < '3.10'"]
 }
 
 # inspired by https://github.com/pyimgui/pyimgui/blob/master/setup.py
