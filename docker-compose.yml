@@ -1,0 +1,8 @@
+version: '3.3'
+
+services:
+
+  installer:
+    build: .
+    image: installer
+    container_name: installer
