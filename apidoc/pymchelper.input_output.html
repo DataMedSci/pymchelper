@@ -1,0 +1,218 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>pymchelper.input_output module &#8212; pymchelper 1.10.0+rev3 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/classic.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/graphviz.css" />
+    
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/doctools.js"></script>
+    
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">pymchelper 1.10.0+rev3 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">pymchelper.input_output module</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <section id="module-pymchelper.input_output">
+<span id="pymchelper-input-output-module"></span><h1>pymchelper.input_output module<a class="headerlink" href="#module-pymchelper.input_output" title="Permalink to this headline">¶</a></h1>
+<dl class="py function">
+<dt class="sig sig-object py" id="pymchelper.input_output.convertfromlist">
+<span class="sig-prename descclassname"><span class="pre">pymchelper.input_output.</span></span><span class="sig-name descname"><span class="pre">convertfromlist</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filelist</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">error</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nan</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">outputdir</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">converter_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">options</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">outputfile</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymchelper/input_output.html#convertfromlist"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymchelper.input_output.convertfromlist" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>filelist</strong> – </p></li>
+<li><p><strong>error</strong> – error estimation, see class ErrorEstimate class in pymchelper.estimator</p></li>
+<li><p><strong>nan</strong> – if True, NaN (not a number) are excluded when averaing data.</p></li>
+<li><p><strong>outputdir</strong> – </p></li>
+<li><p><strong>converter_name</strong> – </p></li>
+<li><p><strong>options</strong> – </p></li>
+<li><p><strong>outputfile</strong> – </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pymchelper.input_output.convertfrompattern">
+<span class="sig-prename descclassname"><span class="pre">pymchelper.input_output.</span></span><span class="sig-name descname"><span class="pre">convertfrompattern</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pattern</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">outputdir</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">converter_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">options</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">error</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">ErrorEstimate.stderr</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nan</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">jobs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-</span> <span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymchelper/input_output.html#convertfrompattern"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymchelper.input_output.convertfrompattern" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>pattern</strong> – </p></li>
+<li><p><strong>outputdir</strong> – </p></li>
+<li><p><strong>converter_name</strong> – </p></li>
+<li><p><strong>options</strong> – </p></li>
+<li><p><strong>error</strong> – error estimation, see class ErrorEstimate class in pymchelper.estimator</p></li>
+<li><p><strong>nan</strong> – if True, NaN (not a number) are excluded when averaing data.</p></li>
+<li><p><strong>jobs</strong> – </p></li>
+<li><p><strong>verbose</strong> – </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pymchelper.input_output.fromfile">
+<span class="sig-prename descclassname"><span class="pre">pymchelper.input_output.</span></span><span class="sig-name descname"><span class="pre">fromfile</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymchelper/input_output.html#fromfile"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymchelper.input_output.fromfile" title="Permalink to this definition">¶</a></dt>
+<dd><p>Read estimator data from a binary file <code class="docutils literal notranslate"><span class="pre">`filename`</span></code></p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pymchelper.input_output.fromfilelist">
+<span class="sig-prename descclassname"><span class="pre">pymchelper.input_output.</span></span><span class="sig-name descname"><span class="pre">fromfilelist</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_file_list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">error</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">ErrorEstimate.stderr</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nan</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymchelper/input_output.html#fromfilelist"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymchelper.input_output.fromfilelist" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reads all files from a given list, and returns a list of averaged estimators.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>input_file_list</strong> – list of files to be read</p></li>
+<li><p><strong>error</strong> – error estimation, see class ErrorEstimate class in pymchelper.estimator</p></li>
+<li><p><strong>nan</strong> – if True, NaN (not a number) are excluded when averaging data.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>list of estimators</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pymchelper.input_output.frompattern">
+<span class="sig-prename descclassname"><span class="pre">pymchelper.input_output.</span></span><span class="sig-name descname"><span class="pre">frompattern</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pattern</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">error</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">ErrorEstimate.stderr</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nan</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">jobs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-</span> <span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymchelper/input_output.html#frompattern"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymchelper.input_output.frompattern" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reads all files matching pattern, e.g.: ‘foobar_*.bdo’, and returns a list of averaged estimators.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>pattern</strong> – pattern to be matched for reading.</p></li>
+<li><p><strong>error</strong> – error estimation, see class ErrorEstimate class in pymchelper.estimator</p></li>
+<li><p><strong>nan</strong> – if True, NaN (not a number) are excluded when averaing data.</p></li>
+<li><p><strong>jobs</strong> – optional number of threads for parallel processing</p></li>
+<li><p><strong>verbose</strong> – optional verbosity level.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>a list of estimators, or an empty list if no files were found.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pymchelper.input_output.group_input_files">
+<span class="sig-prename descclassname"><span class="pre">pymchelper.input_output.</span></span><span class="sig-name descname"><span class="pre">group_input_files</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_file_list</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymchelper/input_output.html#group_input_files"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymchelper.input_output.group_input_files" title="Permalink to this definition">¶</a></dt>
+<dd><p>Takes set of input file names, belonging to possibly different estimators.
+Input files are grouped according to the estimators and for each group
+merging is performed, as in &#64;merge_list method.
+Output file name is automatically generated.
+:param input_file_list: list of input files
+:return: core_names_dict</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pymchelper.input_output.guess_corename">
+<span class="sig-prename descclassname"><span class="pre">pymchelper.input_output.</span></span><span class="sig-name descname"><span class="pre">guess_corename</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymchelper/input_output.html#guess_corename"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymchelper.input_output.guess_corename" title="Permalink to this definition">¶</a></dt>
+<dd><p>Guess a reader based on file contents or extensions.
+In some cases (i.e. binary SH12A files) access to file contents is needed.
+:param filename:
+:return: the corename of the file (i.e. the basename without the running number for averaging)</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pymchelper.input_output.guess_reader">
+<span class="sig-prename descclassname"><span class="pre">pymchelper.input_output.</span></span><span class="sig-name descname"><span class="pre">guess_reader</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymchelper/input_output.html#guess_reader"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymchelper.input_output.guess_reader" title="Permalink to this definition">¶</a></dt>
+<dd><p>Guess a reader based on file contents or extensions.
+In some cases (i.e. binary SH12A files) access to file contents is needed.
+:param filename:
+:return: Instantiated reader object</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pymchelper.input_output.tofile">
+<span class="sig-prename descclassname"><span class="pre">pymchelper.input_output.</span></span><span class="sig-name descname"><span class="pre">tofile</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">estimator</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filename</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">converter_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">options</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymchelper/input_output.html#tofile"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymchelper.input_output.tofile" title="Permalink to this definition">¶</a></dt>
+<dd><p>Save a estimator data to a <code class="docutils literal notranslate"><span class="pre">filename</span></code> using converter defined by <code class="docutils literal notranslate"><span class="pre">converter_name</span></code>
+:param estimator:
+:param filename:
+:param converter_name:
+:param options:
+:return:</p>
+</dd></dl>
+
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/apidoc/pymchelper.input_output.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">pymchelper 1.10.0+rev3 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">pymchelper.input_output module</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2016, Leszek Grzanka.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 4.3.0.
+    </div>
+  </body>
+</html>

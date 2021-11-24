@@ -1,0 +1,166 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>Plain text &#8212; pymchelper 1.10.0+rev3 documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="_static/classic.css" />
+    <link rel="stylesheet" type="text/css" href="_static/graphviz.css" />
+    
+    <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="MS Excel file" href="excel_converter.html" />
+    <link rel="prev" title="User’s Guide" href="user_guide.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="excel_converter.html" title="MS Excel file"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="user_guide.html" title="User’s Guide"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">pymchelper 1.10.0+rev3 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="user_guide.html" accesskey="U">User’s Guide</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Plain text</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <section id="plain-text">
+<h1>Plain text<a class="headerlink" href="#plain-text" title="Permalink to this headline">¶</a></h1>
+<p>Plain text converter comes in two flavours: <code class="docutils literal notranslate"><span class="pre">txt</span></code> and <code class="docutils literal notranslate"><span class="pre">plotdata</span></code>.
+It accepts data with any dimension of scoring grid: 0-D (single number), 1-D, 2-D and 3-D.</p>
+<section id="txt-converter">
+<h2>txt converter<a class="headerlink" href="#txt-converter" title="Permalink to this headline">¶</a></h2>
+<p>First one (<code class="docutils literal notranslate"><span class="pre">txt</span></code>) generates 4- or 5- column text files.
+After running: <code class="code bash docutils literal notranslate"><span class="pre">convertmc</span> <span class="pre">txt</span> <span class="pre">proton0001_fort.21</span> <span class="pre">dose.txt</span></code>, new file <code class="code bash docutils literal notranslate"><span class="pre">dose.txt</span></code>
+will contain: X,Y,Z coordinates, data and error column:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="m">0</span>.0000000E+00  <span class="m">0</span>.0000000E+00  <span class="m">0</span>.5000000E-02  <span class="m">0</span>.1881775795482099E-02  <span class="m">0</span>.2157818940293169E-04
+<span class="m">0</span>.0000000E+00  <span class="m">0</span>.0000000E+00  <span class="m">0</span>.1500000E-01  <span class="m">0</span>.1893831696361303E-02  <span class="m">0</span>.2251415707395123E-04
+<span class="m">0</span>.0000000E+00  <span class="m">0</span>.0000000E+00  <span class="m">0</span>.2500000E-01  <span class="m">0</span>.1887728041037917E-02  <span class="m">0</span>.1936414681456153E-04
+<span class="m">0</span>.0000000E+00  <span class="m">0</span>.0000000E+00  <span class="m">0</span>.3500000E-01  <span class="m">0</span>.1897429465316236E-02  <span class="m">0</span>.1944586725074595E-04
+<span class="o">(</span>...<span class="o">)</span>
+</pre></div>
+</div>
+<p>When running <code class="code bash docutils literal notranslate"><span class="pre">convertmc</span> <span class="pre">txt</span> <span class="pre">proton0001_fort.21</span> <span class="pre">dose.txt</span> <span class="pre">--error</span> <span class="pre">none</span></code> fifth column will not be appended
+and file contents will be following:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="m">0</span>.0000000E+00  <span class="m">0</span>.0000000E+00  <span class="m">0</span>.5000000E-02  <span class="m">0</span>.1881775795482099E-02
+<span class="m">0</span>.0000000E+00  <span class="m">0</span>.0000000E+00  <span class="m">0</span>.1500000E-01  <span class="m">0</span>.1893831696361303E-02
+<span class="m">0</span>.0000000E+00  <span class="m">0</span>.0000000E+00  <span class="m">0</span>.2500000E-01  <span class="m">0</span>.1887728041037917E-02
+<span class="m">0</span>.0000000E+00  <span class="m">0</span>.0000000E+00  <span class="m">0</span>.3500000E-01  <span class="m">0</span>.1897429465316236E-02
+<span class="o">(</span>...<span class="o">)</span>
+</pre></div>
+</div>
+</section>
+<section id="plotdata-converter">
+<h2>plotdata converter<a class="headerlink" href="#plotdata-converter" title="Permalink to this headline">¶</a></h2>
+<p>In the examples shown above we could see that columns corresponding to X and Y axis contain fixed number (0.0).
+It comes from the fact that the 1-dimensional scoring grid spans along the Z axis.
+When plotting data from such file user needs to select third and fourth column.</p>
+<p><strong>convertmc</strong> can skip data of columns with fixed number and save to file only columns which contain
+plottable values. This can be achieved by running:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>convertmc plotdata proton0001_fort.21 dose.txt
+</pre></div>
+</div>
+<p>We will get a file containing following data - Z axis, data and error column:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="m">0</span>.5000000E-02  <span class="m">0</span>.1881775795482099E-02  <span class="m">0</span>.2157818940293169E-04
+<span class="m">0</span>.1500000E-01  <span class="m">0</span>.1893831696361303E-02  <span class="m">0</span>.2251415707395123E-04
+<span class="m">0</span>.2500000E-01  <span class="m">0</span>.1887728041037917E-02  <span class="m">0</span>.1936414681456153E-04
+<span class="m">0</span>.3500000E-01  <span class="m">0</span>.1897429465316236E-02  <span class="m">0</span>.1944586725074595E-04
+<span class="o">(</span>...<span class="o">)</span>
+</pre></div>
+</div>
+<p>Such file is easier to handle for plotting, as user can select only first and second column.</p>
+</section>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Plain text</a><ul>
+<li><a class="reference internal" href="#txt-converter">txt converter</a></li>
+<li><a class="reference internal" href="#plotdata-converter">plotdata converter</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="user_guide.html"
+                        title="previous chapter">User’s Guide</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="excel_converter.html"
+                        title="next chapter">MS Excel file</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/txt_converter.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="excel_converter.html" title="MS Excel file"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="user_guide.html" title="User’s Guide"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">pymchelper 1.10.0+rev3 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="user_guide.html" >User’s Guide</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Plain text</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2016, Leszek Grzanka.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 4.3.0.
+    </div>
+  </body>
+</html>

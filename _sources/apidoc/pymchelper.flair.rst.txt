@@ -1,0 +1,24 @@
+pymchelper.flair package
+========================
+
+.. automodule:: pymchelper.flair
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Subpackages
+-----------
+
+.. toctree::
+   :maxdepth: 4
+
+   pymchelper.flair.common
+
+Submodules
+----------
+
+.. toctree::
+   :maxdepth: 4
+
+   pymchelper.flair.Data
+   pymchelper.flair.Input

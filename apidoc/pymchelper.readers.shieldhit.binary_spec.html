@@ -1,0 +1,880 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>pymchelper.readers.shieldhit.binary_spec module &#8212; pymchelper 1.10.0+rev3 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/classic.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/graphviz.css" />
+    
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/doctools.js"></script>
+    
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="pymchelper.readers.shieldhit.general module" href="pymchelper.readers.shieldhit.general.html" />
+    <link rel="prev" title="pymchelper.readers.shieldhit package" href="pymchelper.readers.shieldhit.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="pymchelper.readers.shieldhit.general.html" title="pymchelper.readers.shieldhit.general module"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="pymchelper.readers.shieldhit.html" title="pymchelper.readers.shieldhit package"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">pymchelper 1.10.0+rev3 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../developer.html" >Developer documentation</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="modules.html" >Source code</a> &#187;</li>
+          <li class="nav-item nav-item-3"><a href="pymchelper.html" >pymchelper package</a> &#187;</li>
+          <li class="nav-item nav-item-4"><a href="pymchelper.readers.html" >pymchelper.readers package</a> &#187;</li>
+          <li class="nav-item nav-item-5"><a href="pymchelper.readers.shieldhit.html" accesskey="U">pymchelper.readers.shieldhit package</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">pymchelper.readers.shieldhit.binary_spec module</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <section id="module-pymchelper.readers.shieldhit.binary_spec">
+<span id="pymchelper-readers-shieldhit-binary-spec-module"></span><h1>pymchelper.readers.shieldhit.binary_spec module<a class="headerlink" href="#module-pymchelper.readers.shieldhit.binary_spec" title="Permalink to this headline">¶</a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="pymchelper.readers.shieldhit.binary_spec.SHBDOTagID">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pymchelper.readers.shieldhit.binary_spec.</span></span><span class="sig-name descname"><span class="pre">SHBDOTagID</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymchelper/readers/shieldhit/binary_spec.html#SHBDOTagID"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymchelper.readers.shieldhit.binary_spec.SHBDOTagID" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">enum.IntEnum</span></code></p>
+<p>List of Tag ID numbers for BDO 2016 and 2019 formats.
+Must be synchronized with tags in sh_bdo.h and sh_detect.h in SH12A.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymchelper.readers.shieldhit.binary_spec.SHBDOTagID.apro0">
+<span class="sig-name descname"><span class="pre">apro0</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">51969</span></em><a class="headerlink" href="#pymchelper.readers.shieldhit.binary_spec.SHBDOTagID.apro0" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymchelper.readers.shieldhit.binary_spec.SHBDOTagID.apzlscl">
+<span class="sig-name descname"><span class="pre">apzlscl</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">52234</span></em><a class="headerlink" href="#pymchelper.readers.shieldhit.binary_spec.SHBDOTagID.apzlscl" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymchelper.readers.shieldhit.binary_spec.SHBDOTagID.beamdivk">
+<span class="sig-name descname"><span class="pre">beamdivk</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">51982</span></em><a class="headerlink" href="#pymchelper.readers.shieldhit.binary_spec.SHBDOTagID.beamdivk" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymchelper.readers.shieldhit.binary_spec.SHBDOTagID.beamdivx">
+<span class="sig-name descname"><span class="pre">beamdivx</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">51980</span></em><a class="headerlink" href="#pymchelper.readers.shieldhit.binary_spec.SHBDOTagID.beamdivx" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymchelper.readers.shieldhit.binary_spec.SHBDOTagID.beamdivy">
+<span class="sig-name descname"><span class="pre">beamdivy</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">51981</span></em><a class="headerlink" href="#pymchelper.readers.shieldhit.binary_spec.SHBDOTagID.beamdivy" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymchelper.readers.shieldhit.binary_spec.SHBDOTagID.beamphi">
+<span class="sig-name descname"><span class="pre">beamphi</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">51979</span></em><a class="headerlink" href="#pymchelper.readers.shieldhit.binary_spec.SHBDOTagID.beamphi" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymchelper.readers.shieldhit.binary_spec.SHBDOTagID.beamtheta">
+<span class="sig-name descname"><span class="pre">beamtheta</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">51978</span></em><a class="headerlink" href="#pymchelper.readers.shieldhit.binary_spec.SHBDOTagID.beamtheta" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymchelper.readers.shieldhit.binary_spec.SHBDOTagID.beamx">
+<span class="sig-name descname"><span class="pre">beamx</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">51971</span></em><a class="headerlink" href="#pymchelper.readers.shieldhit.binary_spec.SHBDOTagID.beamx" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymchelper.readers.shieldhit.binary_spec.SHBDOTagID.beamy">
+<span class="sig-name descname"><span class="pre">beamy</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">51972</span></em><a class="headerlink" href="#pymchelper.readers.shieldhit.binary_spec.SHBDOTagID.beamy" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymchelper.readers.shieldhit.binary_spec.SHBDOTagID.beamz">
+<span class="sig-name descname"><span class="pre">beamz</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">51973</span></em><a class="headerlink" href="#pymchelper.readers.shieldhit.binary_spec.SHBDOTagID.beamz" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymchelper.readers.shieldhit.binary_spec.SHBDOTagID.comment">
+<span class="sig-name descname"><span class="pre">comment</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">65484</span></em><a class="headerlink" href="#pymchelper.readers.shieldhit.binary_spec.SHBDOTagID.comment" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymchelper.readers.shieldhit.binary_spec.SHBDOTagID.ct_ang">
+<span class="sig-name descname"><span class="pre">ct_ang</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">52736</span></em><a class="headerlink" href="#pymchelper.readers.shieldhit.binary_spec.SHBDOTagID.ct_ang" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymchelper.readers.shieldhit.binary_spec.SHBDOTagID.ct_icnt">
+<span class="sig-name descname"><span class="pre">ct_icnt</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">52737</span></em><a class="headerlink" href="#pymchelper.readers.shieldhit.binary_spec.SHBDOTagID.ct_icnt" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymchelper.readers.shieldhit.binary_spec.SHBDOTagID.ct_len">
+<span class="sig-name descname"><span class="pre">ct_len</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">52738</span></em><a class="headerlink" href="#pymchelper.readers.shieldhit.binary_spec.SHBDOTagID.ct_len" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymchelper.readers.shieldhit.binary_spec.SHBDOTagID.data_block">
+<span class="sig-name descname"><span class="pre">data_block</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">56763</span></em><a class="headerlink" href="#pymchelper.readers.shieldhit.binary_spec.SHBDOTagID.data_block" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymchelper.readers.shieldhit.binary_spec.SHBDOTagID.debug">
+<span class="sig-name descname"><span class="pre">debug</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">65485</span></em><a class="headerlink" href="#pymchelper.readers.shieldhit.binary_spec.SHBDOTagID.debug" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymchelper.readers.shieldhit.binary_spec.SHBDOTagID.dele">
+<span class="sig-name descname"><span class="pre">dele</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">52224</span></em><a class="headerlink" href="#pymchelper.readers.shieldhit.binary_spec.SHBDOTagID.dele" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymchelper.readers.shieldhit.binary_spec.SHBDOTagID.demin">
+<span class="sig-name descname"><span class="pre">demin</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">52225</span></em><a class="headerlink" href="#pymchelper.readers.shieldhit.binary_spec.SHBDOTagID.demin" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymchelper.readers.shieldhit.binary_spec.SHBDOTagID.det_dif_start">
+<span class="sig-name descname"><span class="pre">det_dif_start</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">56590</span></em><a class="headerlink" href="#pymchelper.readers.shieldhit.binary_spec.SHBDOTagID.det_dif_start" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymchelper.readers.shieldhit.binary_spec.SHBDOTagID.det_dif_stop">
+<span class="sig-name descname"><span class="pre">det_dif_stop</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">56591</span></em><a class="headerlink" href="#pymchelper.readers.shieldhit.binary_spec.SHBDOTagID.det_dif_stop" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymchelper.readers.shieldhit.binary_spec.SHBDOTagID.det_difftype">
+<span class="sig-name descname"><span class="pre">det_difftype</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">56584</span></em><a class="headerlink" href="#pymchelper.readers.shieldhit.binary_spec.SHBDOTagID.det_difftype" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymchelper.readers.shieldhit.binary_spec.SHBDOTagID.det_dmat">
+<span class="sig-name descname"><span class="pre">det_dmat</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">56582</span></em><a class="headerlink" href="#pymchelper.readers.shieldhit.binary_spec.SHBDOTagID.det_dmat" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymchelper.readers.shieldhit.binary_spec.SHBDOTagID.det_dsize">
+<span class="sig-name descname"><span class="pre">det_dsize</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">56586</span></em><a class="headerlink" href="#pymchelper.readers.shieldhit.binary_spec.SHBDOTagID.det_dsize" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymchelper.readers.shieldhit.binary_spec.SHBDOTagID.det_dsizexyz">
+<span class="sig-name descname"><span class="pre">det_dsizexyz</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">56587</span></em><a class="headerlink" href="#pymchelper.readers.shieldhit.binary_spec.SHBDOTagID.det_dsizexyz" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymchelper.readers.shieldhit.binary_spec.SHBDOTagID.det_dtype">
+<span class="sig-name descname"><span class="pre">det_dtype</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">56579</span></em><a class="headerlink" href="#pymchelper.readers.shieldhit.binary_spec.SHBDOTagID.det_dtype" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymchelper.readers.shieldhit.binary_spec.SHBDOTagID.det_geotyp">
+<span class="sig-name descname"><span class="pre">det_geotyp</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">56576</span></em><a class="headerlink" href="#pymchelper.readers.shieldhit.binary_spec.SHBDOTagID.det_geotyp" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymchelper.readers.shieldhit.binary_spec.SHBDOTagID.det_nbin">
+<span class="sig-name descname"><span class="pre">det_nbin</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">56577</span></em><a class="headerlink" href="#pymchelper.readers.shieldhit.binary_spec.SHBDOTagID.det_nbin" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymchelper.readers.shieldhit.binary_spec.SHBDOTagID.det_nbine">
+<span class="sig-name descname"><span class="pre">det_nbine</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">56583</span></em><a class="headerlink" href="#pymchelper.readers.shieldhit.binary_spec.SHBDOTagID.det_nbine" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymchelper.readers.shieldhit.binary_spec.SHBDOTagID.det_part">
+<span class="sig-name descname"><span class="pre">det_part</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">56578</span></em><a class="headerlink" href="#pymchelper.readers.shieldhit.binary_spec.SHBDOTagID.det_part" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymchelper.readers.shieldhit.binary_spec.SHBDOTagID.det_parta">
+<span class="sig-name descname"><span class="pre">det_parta</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">56581</span></em><a class="headerlink" href="#pymchelper.readers.shieldhit.binary_spec.SHBDOTagID.det_parta" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymchelper.readers.shieldhit.binary_spec.SHBDOTagID.det_partz">
+<span class="sig-name descname"><span class="pre">det_partz</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">56580</span></em><a class="headerlink" href="#pymchelper.readers.shieldhit.binary_spec.SHBDOTagID.det_partz" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymchelper.readers.shieldhit.binary_spec.SHBDOTagID.det_thresh">
+<span class="sig-name descname"><span class="pre">det_thresh</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">56593</span></em><a class="headerlink" href="#pymchelper.readers.shieldhit.binary_spec.SHBDOTagID.det_thresh" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymchelper.readers.shieldhit.binary_spec.SHBDOTagID.det_voxvol">
+<span class="sig-name descname"><span class="pre">det_voxvol</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">56592</span></em><a class="headerlink" href="#pymchelper.readers.shieldhit.binary_spec.SHBDOTagID.det_voxvol" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymchelper.readers.shieldhit.binary_spec.SHBDOTagID.det_xyz_start">
+<span class="sig-name descname"><span class="pre">det_xyz_start</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">56588</span></em><a class="headerlink" href="#pymchelper.readers.shieldhit.binary_spec.SHBDOTagID.det_xyz_start" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymchelper.readers.shieldhit.binary_spec.SHBDOTagID.det_xyz_stop">
+<span class="sig-name descname"><span class="pre">det_xyz_stop</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">56589</span></em><a class="headerlink" href="#pymchelper.readers.shieldhit.binary_spec.SHBDOTagID.det_xyz_stop" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymchelper.readers.shieldhit.binary_spec.SHBDOTagID.det_zonestart">
+<span class="sig-name descname"><span class="pre">det_zonestart</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">56585</span></em><a class="headerlink" href="#pymchelper.readers.shieldhit.binary_spec.SHBDOTagID.det_zonestart" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymchelper.readers.shieldhit.binary_spec.SHBDOTagID.detector_type">
+<span class="sig-name descname"><span class="pre">detector_type</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">56624</span></em><a class="headerlink" href="#pymchelper.readers.shieldhit.binary_spec.SHBDOTagID.detector_type" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymchelper.readers.shieldhit.binary_spec.SHBDOTagID.detector_unit">
+<span class="sig-name descname"><span class="pre">detector_unit</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">56764</span></em><a class="headerlink" href="#pymchelper.readers.shieldhit.binary_spec.SHBDOTagID.detector_unit" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymchelper.readers.shieldhit.binary_spec.SHBDOTagID.error">
+<span class="sig-name descname"><span class="pre">error</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">65486</span></em><a class="headerlink" href="#pymchelper.readers.shieldhit.binary_spec.SHBDOTagID.error" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymchelper.readers.shieldhit.binary_spec.SHBDOTagID.estimator_number">
+<span class="sig-name descname"><span class="pre">estimator_number</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">60929</span></em><a class="headerlink" href="#pymchelper.readers.shieldhit.binary_spec.SHBDOTagID.estimator_number" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymchelper.readers.shieldhit.binary_spec.SHBDOTagID.estimator_rescale_per_particle">
+<span class="sig-name descname"><span class="pre">estimator_rescale_per_particle</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">60931</span></em><a class="headerlink" href="#pymchelper.readers.shieldhit.binary_spec.SHBDOTagID.estimator_rescale_per_particle" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymchelper.readers.shieldhit.binary_spec.SHBDOTagID.ext_nproj">
+<span class="sig-name descname"><span class="pre">ext_nproj</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">52239</span></em><a class="headerlink" href="#pymchelper.readers.shieldhit.binary_spec.SHBDOTagID.ext_nproj" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymchelper.readers.shieldhit.binary_spec.SHBDOTagID.ext_ptvdose">
+<span class="sig-name descname"><span class="pre">ext_ptvdose</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">52240</span></em><a class="headerlink" href="#pymchelper.readers.shieldhit.binary_spec.SHBDOTagID.ext_ptvdose" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymchelper.readers.shieldhit.binary_spec.SHBDOTagID.filedate">
+<span class="sig-name descname"><span class="pre">filedate</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">2</span></em><a class="headerlink" href="#pymchelper.readers.shieldhit.binary_spec.SHBDOTagID.filedate" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymchelper.readers.shieldhit.binary_spec.SHBDOTagID.filename_or_geotype">
+<span class="sig-name descname"><span class="pre">filename_or_geotype</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">60928</span></em><a class="headerlink" href="#pymchelper.readers.shieldhit.binary_spec.SHBDOTagID.filename_or_geotype" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymchelper.readers.shieldhit.binary_spec.SHBDOTagID.format">
+<span class="sig-name descname"><span class="pre">format</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">5</span></em><a class="headerlink" href="#pymchelper.readers.shieldhit.binary_spec.SHBDOTagID.format" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymchelper.readers.shieldhit.binary_spec.SHBDOTagID.geo_n_bins">
+<span class="sig-name descname"><span class="pre">geo_n_bins</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">57348</span></em><a class="headerlink" href="#pymchelper.readers.shieldhit.binary_spec.SHBDOTagID.geo_n_bins" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymchelper.readers.shieldhit.binary_spec.SHBDOTagID.geo_non_equidist_grid">
+<span class="sig-name descname"><span class="pre">geo_non_equidist_grid</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">57352</span></em><a class="headerlink" href="#pymchelper.readers.shieldhit.binary_spec.SHBDOTagID.geo_non_equidist_grid" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymchelper.readers.shieldhit.binary_spec.SHBDOTagID.geo_p_start">
+<span class="sig-name descname"><span class="pre">geo_p_start</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">57346</span></em><a class="headerlink" href="#pymchelper.readers.shieldhit.binary_spec.SHBDOTagID.geo_p_start" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymchelper.readers.shieldhit.binary_spec.SHBDOTagID.geo_q_stop">
+<span class="sig-name descname"><span class="pre">geo_q_stop</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">57347</span></em><a class="headerlink" href="#pymchelper.readers.shieldhit.binary_spec.SHBDOTagID.geo_q_stop" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymchelper.readers.shieldhit.binary_spec.SHBDOTagID.geo_rotation">
+<span class="sig-name descname"><span class="pre">geo_rotation</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">57349</span></em><a class="headerlink" href="#pymchelper.readers.shieldhit.binary_spec.SHBDOTagID.geo_rotation" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymchelper.readers.shieldhit.binary_spec.SHBDOTagID.geo_unit_ids">
+<span class="sig-name descname"><span class="pre">geo_unit_ids</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">57354</span></em><a class="headerlink" href="#pymchelper.readers.shieldhit.binary_spec.SHBDOTagID.geo_unit_ids" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymchelper.readers.shieldhit.binary_spec.SHBDOTagID.geo_units">
+<span class="sig-name descname"><span class="pre">geo_units</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">57353</span></em><a class="headerlink" href="#pymchelper.readers.shieldhit.binary_spec.SHBDOTagID.geo_units" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymchelper.readers.shieldhit.binary_spec.SHBDOTagID.geo_volume">
+<span class="sig-name descname"><span class="pre">geo_volume</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">57350</span></em><a class="headerlink" href="#pymchelper.readers.shieldhit.binary_spec.SHBDOTagID.geo_volume" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymchelper.readers.shieldhit.binary_spec.SHBDOTagID.geo_zones">
+<span class="sig-name descname"><span class="pre">geo_zones</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">57351</span></em><a class="headerlink" href="#pymchelper.readers.shieldhit.binary_spec.SHBDOTagID.geo_zones" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymchelper.readers.shieldhit.binary_spec.SHBDOTagID.geometry_name">
+<span class="sig-name descname"><span class="pre">geometry_name</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">57345</span></em><a class="headerlink" href="#pymchelper.readers.shieldhit.binary_spec.SHBDOTagID.geometry_name" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymchelper.readers.shieldhit.binary_spec.SHBDOTagID.geometry_type">
+<span class="sig-name descname"><span class="pre">geometry_type</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">57344</span></em><a class="headerlink" href="#pymchelper.readers.shieldhit.binary_spec.SHBDOTagID.geometry_type" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymchelper.readers.shieldhit.binary_spec.SHBDOTagID.host">
+<span class="sig-name descname"><span class="pre">host</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">4</span></em><a class="headerlink" href="#pymchelper.readers.shieldhit.binary_spec.SHBDOTagID.host" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymchelper.readers.shieldhit.binary_spec.SHBDOTagID.iemtrans">
+<span class="sig-name descname"><span class="pre">iemtrans</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">52230</span></em><a class="headerlink" href="#pymchelper.readers.shieldhit.binary_spec.SHBDOTagID.iemtrans" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymchelper.readers.shieldhit.binary_spec.SHBDOTagID.iextspec">
+<span class="sig-name descname"><span class="pre">iextspec</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">52231</span></em><a class="headerlink" href="#pymchelper.readers.shieldhit.binary_spec.SHBDOTagID.iextspec" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymchelper.readers.shieldhit.binary_spec.SHBDOTagID.intrfast">
+<span class="sig-name descname"><span class="pre">intrfast</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">52232</span></em><a class="headerlink" href="#pymchelper.readers.shieldhit.binary_spec.SHBDOTagID.intrfast" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymchelper.readers.shieldhit.binary_spec.SHBDOTagID.intrslow">
+<span class="sig-name descname"><span class="pre">intrslow</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">52233</span></em><a class="headerlink" href="#pymchelper.readers.shieldhit.binary_spec.SHBDOTagID.intrslow" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymchelper.readers.shieldhit.binary_spec.SHBDOTagID.inucre">
+<span class="sig-name descname"><span class="pre">inucre</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">52229</span></em><a class="headerlink" href="#pymchelper.readers.shieldhit.binary_spec.SHBDOTagID.inucre" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymchelper.readers.shieldhit.binary_spec.SHBDOTagID.ioffset">
+<span class="sig-name descname"><span class="pre">ioffset</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">52235</span></em><a class="headerlink" href="#pymchelper.readers.shieldhit.binary_spec.SHBDOTagID.ioffset" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymchelper.readers.shieldhit.binary_spec.SHBDOTagID.irifimc">
+<span class="sig-name descname"><span class="pre">irifimc</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">52236</span></em><a class="headerlink" href="#pymchelper.readers.shieldhit.binary_spec.SHBDOTagID.irifimc" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymchelper.readers.shieldhit.binary_spec.SHBDOTagID.irifitrans">
+<span class="sig-name descname"><span class="pre">irifitrans</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">52237</span></em><a class="headerlink" href="#pymchelper.readers.shieldhit.binary_spec.SHBDOTagID.irifitrans" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymchelper.readers.shieldhit.binary_spec.SHBDOTagID.irifizone">
+<span class="sig-name descname"><span class="pre">irifizone</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">52238</span></em><a class="headerlink" href="#pymchelper.readers.shieldhit.binary_spec.SHBDOTagID.irifizone" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymchelper.readers.shieldhit.binary_spec.SHBDOTagID.itypms">
+<span class="sig-name descname"><span class="pre">itypms</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">52227</span></em><a class="headerlink" href="#pymchelper.readers.shieldhit.binary_spec.SHBDOTagID.itypms" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymchelper.readers.shieldhit.binary_spec.SHBDOTagID.itypst">
+<span class="sig-name descname"><span class="pre">itypst</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">52226</span></em><a class="headerlink" href="#pymchelper.readers.shieldhit.binary_spec.SHBDOTagID.itypst" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymchelper.readers.shieldhit.binary_spec.SHBDOTagID.ixfirs">
+<span class="sig-name descname"><span class="pre">ixfirs</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">52241</span></em><a class="headerlink" href="#pymchelper.readers.shieldhit.binary_spec.SHBDOTagID.ixfirs" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymchelper.readers.shieldhit.binary_spec.SHBDOTagID.jpart0">
+<span class="sig-name descname"><span class="pre">jpart0</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">51968</span></em><a class="headerlink" href="#pymchelper.readers.shieldhit.binary_spec.SHBDOTagID.jpart0" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymchelper.readers.shieldhit.binary_spec.SHBDOTagID.number_of_pages">
+<span class="sig-name descname"><span class="pre">number_of_pages</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">60930</span></em><a class="headerlink" href="#pymchelper.readers.shieldhit.binary_spec.SHBDOTagID.number_of_pages" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymchelper.readers.shieldhit.binary_spec.SHBDOTagID.oln">
+<span class="sig-name descname"><span class="pre">oln</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">52228</span></em><a class="headerlink" href="#pymchelper.readers.shieldhit.binary_spec.SHBDOTagID.oln" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymchelper.readers.shieldhit.binary_spec.SHBDOTagID.page_diff_flag">
+<span class="sig-name descname"><span class="pre">page_diff_flag</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">56784</span></em><a class="headerlink" href="#pymchelper.readers.shieldhit.binary_spec.SHBDOTagID.page_diff_flag" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymchelper.readers.shieldhit.binary_spec.SHBDOTagID.page_diff_size">
+<span class="sig-name descname"><span class="pre">page_diff_size</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">56788</span></em><a class="headerlink" href="#pymchelper.readers.shieldhit.binary_spec.SHBDOTagID.page_diff_size" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymchelper.readers.shieldhit.binary_spec.SHBDOTagID.page_diff_start">
+<span class="sig-name descname"><span class="pre">page_diff_start</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">56786</span></em><a class="headerlink" href="#pymchelper.readers.shieldhit.binary_spec.SHBDOTagID.page_diff_start" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymchelper.readers.shieldhit.binary_spec.SHBDOTagID.page_diff_stop">
+<span class="sig-name descname"><span class="pre">page_diff_stop</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">56787</span></em><a class="headerlink" href="#pymchelper.readers.shieldhit.binary_spec.SHBDOTagID.page_diff_stop" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymchelper.readers.shieldhit.binary_spec.SHBDOTagID.page_diff_type">
+<span class="sig-name descname"><span class="pre">page_diff_type</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">56785</span></em><a class="headerlink" href="#pymchelper.readers.shieldhit.binary_spec.SHBDOTagID.page_diff_type" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymchelper.readers.shieldhit.binary_spec.SHBDOTagID.page_diff_units">
+<span class="sig-name descname"><span class="pre">page_diff_units</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">56789</span></em><a class="headerlink" href="#pymchelper.readers.shieldhit.binary_spec.SHBDOTagID.page_diff_units" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymchelper.readers.shieldhit.binary_spec.SHBDOTagID.page_filter_e_min">
+<span class="sig-name descname"><span class="pre">page_filter_e_min</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">56818</span></em><a class="headerlink" href="#pymchelper.readers.shieldhit.binary_spec.SHBDOTagID.page_filter_e_min" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymchelper.readers.shieldhit.binary_spec.SHBDOTagID.page_filter_emax">
+<span class="sig-name descname"><span class="pre">page_filter_emax</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">56819</span></em><a class="headerlink" href="#pymchelper.readers.shieldhit.binary_spec.SHBDOTagID.page_filter_emax" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymchelper.readers.shieldhit.binary_spec.SHBDOTagID.page_filter_name">
+<span class="sig-name descname"><span class="pre">page_filter_name</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">56816</span></em><a class="headerlink" href="#pymchelper.readers.shieldhit.binary_spec.SHBDOTagID.page_filter_name" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymchelper.readers.shieldhit.binary_spec.SHBDOTagID.page_filter_rules_no">
+<span class="sig-name descname"><span class="pre">page_filter_rules_no</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">56817</span></em><a class="headerlink" href="#pymchelper.readers.shieldhit.binary_spec.SHBDOTagID.page_filter_rules_no" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymchelper.readers.shieldhit.binary_spec.SHBDOTagID.page_medium_scoring">
+<span class="sig-name descname"><span class="pre">page_medium_scoring</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">56630</span></em><a class="headerlink" href="#pymchelper.readers.shieldhit.binary_spec.SHBDOTagID.page_medium_scoring" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymchelper.readers.shieldhit.binary_spec.SHBDOTagID.page_medium_transport">
+<span class="sig-name descname"><span class="pre">page_medium_transport</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">56629</span></em><a class="headerlink" href="#pymchelper.readers.shieldhit.binary_spec.SHBDOTagID.page_medium_transport" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymchelper.readers.shieldhit.binary_spec.SHBDOTagID.page_normalized">
+<span class="sig-name descname"><span class="pre">page_normalized</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">56626</span></em><a class="headerlink" href="#pymchelper.readers.shieldhit.binary_spec.SHBDOTagID.page_normalized" title="Permalink to this definition">¶</a></dt>
+<dd><p>Given:
+- the data in page-&gt;data as x_j
+- for j instances of this simulation
+- which was done with I_j number of paritcles.</p>
+<p>The resulting data will be termed X and has the units given by SHBDO_PAG_DATA_UNIT</p>
+<p>0: X = x_1                                for GEOMAP type scorers
+1: X = sum_j x_j                          COUNT, …
+2: X = (sum_j x_j) / (sum_j I_j)          NORMCOUNT, …
+3: X = (sum_j x_j * I_j) / (sum_j I_j)    LET, …</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymchelper.readers.shieldhit.binary_spec.SHBDOTagID.page_number">
+<span class="sig-name descname"><span class="pre">page_number</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">56625</span></em><a class="headerlink" href="#pymchelper.readers.shieldhit.binary_spec.SHBDOTagID.page_number" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymchelper.readers.shieldhit.binary_spec.SHBDOTagID.page_offset">
+<span class="sig-name descname"><span class="pre">page_offset</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">56628</span></em><a class="headerlink" href="#pymchelper.readers.shieldhit.binary_spec.SHBDOTagID.page_offset" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymchelper.readers.shieldhit.binary_spec.SHBDOTagID.page_scale_factor">
+<span class="sig-name descname"><span class="pre">page_scale_factor</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">56627</span></em><a class="headerlink" href="#pymchelper.readers.shieldhit.binary_spec.SHBDOTagID.page_scale_factor" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymchelper.readers.shieldhit.binary_spec.SHBDOTagID.page_unit_ids">
+<span class="sig-name descname"><span class="pre">page_unit_ids</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">56631</span></em><a class="headerlink" href="#pymchelper.readers.shieldhit.binary_spec.SHBDOTagID.page_unit_ids" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymchelper.readers.shieldhit.binary_spec.SHBDOTagID.rt_nstat">
+<span class="sig-name descname"><span class="pre">rt_nstat</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">43520</span></em><a class="headerlink" href="#pymchelper.readers.shieldhit.binary_spec.SHBDOTagID.rt_nstat" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymchelper.readers.shieldhit.binary_spec.SHBDOTagID.rt_time">
+<span class="sig-name descname"><span class="pre">rt_time</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">43521</span></em><a class="headerlink" href="#pymchelper.readers.shieldhit.binary_spec.SHBDOTagID.rt_time" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymchelper.readers.shieldhit.binary_spec.SHBDOTagID.rt_timesim">
+<span class="sig-name descname"><span class="pre">rt_timesim</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">43522</span></em><a class="headerlink" href="#pymchelper.readers.shieldhit.binary_spec.SHBDOTagID.rt_timesim" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymchelper.readers.shieldhit.binary_spec.SHBDOTagID.shbuilddate">
+<span class="sig-name descname"><span class="pre">shbuilddate</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">1</span></em><a class="headerlink" href="#pymchelper.readers.shieldhit.binary_spec.SHBDOTagID.shbuilddate" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymchelper.readers.shieldhit.binary_spec.SHBDOTagID.shversion">
+<span class="sig-name descname"><span class="pre">shversion</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">0</span></em><a class="headerlink" href="#pymchelper.readers.shieldhit.binary_spec.SHBDOTagID.shversion" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymchelper.readers.shieldhit.binary_spec.SHBDOTagID.sigmat0">
+<span class="sig-name descname"><span class="pre">sigmat0</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">51977</span></em><a class="headerlink" href="#pymchelper.readers.shieldhit.binary_spec.SHBDOTagID.sigmat0" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymchelper.readers.shieldhit.binary_spec.SHBDOTagID.sigmax">
+<span class="sig-name descname"><span class="pre">sigmax</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">51974</span></em><a class="headerlink" href="#pymchelper.readers.shieldhit.binary_spec.SHBDOTagID.sigmax" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymchelper.readers.shieldhit.binary_spec.SHBDOTagID.sigmay">
+<span class="sig-name descname"><span class="pre">sigmay</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">51975</span></em><a class="headerlink" href="#pymchelper.readers.shieldhit.binary_spec.SHBDOTagID.sigmay" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymchelper.readers.shieldhit.binary_spec.SHBDOTagID.tmax0">
+<span class="sig-name descname"><span class="pre">tmax0</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">51976</span></em><a class="headerlink" href="#pymchelper.readers.shieldhit.binary_spec.SHBDOTagID.tmax0" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymchelper.readers.shieldhit.binary_spec.SHBDOTagID.tmax0amu">
+<span class="sig-name descname"><span class="pre">tmax0amu</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">51984</span></em><a class="headerlink" href="#pymchelper.readers.shieldhit.binary_spec.SHBDOTagID.tmax0amu" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymchelper.readers.shieldhit.binary_spec.SHBDOTagID.tmax0mev">
+<span class="sig-name descname"><span class="pre">tmax0mev</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">51983</span></em><a class="headerlink" href="#pymchelper.readers.shieldhit.binary_spec.SHBDOTagID.tmax0mev" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymchelper.readers.shieldhit.binary_spec.SHBDOTagID.tmax0nuc">
+<span class="sig-name descname"><span class="pre">tmax0nuc</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">51985</span></em><a class="headerlink" href="#pymchelper.readers.shieldhit.binary_spec.SHBDOTagID.tmax0nuc" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymchelper.readers.shieldhit.binary_spec.SHBDOTagID.user">
+<span class="sig-name descname"><span class="pre">user</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">3</span></em><a class="headerlink" href="#pymchelper.readers.shieldhit.binary_spec.SHBDOTagID.user" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymchelper.readers.shieldhit.binary_spec.SHBDOTagID.zpro0">
+<span class="sig-name descname"><span class="pre">zpro0</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">51970</span></em><a class="headerlink" href="#pymchelper.readers.shieldhit.binary_spec.SHBDOTagID.zpro0" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pymchelper.readers.shieldhit.binary_spec.SHBDOUnitID">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pymchelper.readers.shieldhit.binary_spec.</span></span><span class="sig-name descname"><span class="pre">SHBDOUnitID</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymchelper/readers/shieldhit/binary_spec.html#SHBDOUnitID"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymchelper.readers.shieldhit.binary_spec.SHBDOUnitID" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">enum.IntEnum</span></code></p>
+<p>An enumeration.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymchelper.readers.shieldhit.binary_spec.SHBDOUnitID.SH_SCORING_UNIT_AU">
+<span class="sig-name descname"><span class="pre">SH_SCORING_UNIT_AU</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">1</span></em><a class="headerlink" href="#pymchelper.readers.shieldhit.binary_spec.SHBDOUnitID.SH_SCORING_UNIT_AU" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymchelper.readers.shieldhit.binary_spec.SHBDOUnitID.SH_SCORING_UNIT_CM">
+<span class="sig-name descname"><span class="pre">SH_SCORING_UNIT_CM</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">10</span></em><a class="headerlink" href="#pymchelper.readers.shieldhit.binary_spec.SHBDOUnitID.SH_SCORING_UNIT_CM" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymchelper.readers.shieldhit.binary_spec.SHBDOUnitID.SH_SCORING_UNIT_CM2">
+<span class="sig-name descname"><span class="pre">SH_SCORING_UNIT_CM2</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">11</span></em><a class="headerlink" href="#pymchelper.readers.shieldhit.binary_spec.SHBDOUnitID.SH_SCORING_UNIT_CM2" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymchelper.readers.shieldhit.binary_spec.SHBDOUnitID.SH_SCORING_UNIT_CM3">
+<span class="sig-name descname"><span class="pre">SH_SCORING_UNIT_CM3</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">12</span></em><a class="headerlink" href="#pymchelper.readers.shieldhit.binary_spec.SHBDOUnitID.SH_SCORING_UNIT_CM3" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymchelper.readers.shieldhit.binary_spec.SHBDOUnitID.SH_SCORING_UNIT_COUNT">
+<span class="sig-name descname"><span class="pre">SH_SCORING_UNIT_COUNT</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">60</span></em><a class="headerlink" href="#pymchelper.readers.shieldhit.binary_spec.SHBDOUnitID.SH_SCORING_UNIT_COUNT" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymchelper.readers.shieldhit.binary_spec.SHBDOUnitID.SH_SCORING_UNIT_DEGREES">
+<span class="sig-name descname"><span class="pre">SH_SCORING_UNIT_DEGREES</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">50</span></em><a class="headerlink" href="#pymchelper.readers.shieldhit.binary_spec.SHBDOUnitID.SH_SCORING_UNIT_DEGREES" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymchelper.readers.shieldhit.binary_spec.SHBDOUnitID.SH_SCORING_UNIT_DOSERAD">
+<span class="sig-name descname"><span class="pre">SH_SCORING_UNIT_DOSERAD</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">45</span></em><a class="headerlink" href="#pymchelper.readers.shieldhit.binary_spec.SHBDOUnitID.SH_SCORING_UNIT_DOSERAD" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymchelper.readers.shieldhit.binary_spec.SHBDOUnitID.SH_SCORING_UNIT_DOSEREM">
+<span class="sig-name descname"><span class="pre">SH_SCORING_UNIT_DOSEREM</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">46</span></em><a class="headerlink" href="#pymchelper.readers.shieldhit.binary_spec.SHBDOUnitID.SH_SCORING_UNIT_DOSEREM" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymchelper.readers.shieldhit.binary_spec.SHBDOUnitID.SH_SCORING_UNIT_GPCM3">
+<span class="sig-name descname"><span class="pre">SH_SCORING_UNIT_GPCM3</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">22</span></em><a class="headerlink" href="#pymchelper.readers.shieldhit.binary_spec.SHBDOUnitID.SH_SCORING_UNIT_GPCM3" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymchelper.readers.shieldhit.binary_spec.SHBDOUnitID.SH_SCORING_UNIT_GY">
+<span class="sig-name descname"><span class="pre">SH_SCORING_UNIT_GY</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">41</span></em><a class="headerlink" href="#pymchelper.readers.shieldhit.binary_spec.SHBDOUnitID.SH_SCORING_UNIT_GY" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymchelper.readers.shieldhit.binary_spec.SHBDOUnitID.SH_SCORING_UNIT_GYRBE">
+<span class="sig-name descname"><span class="pre">SH_SCORING_UNIT_GYRBE</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">42</span></em><a class="headerlink" href="#pymchelper.readers.shieldhit.binary_spec.SHBDOUnitID.SH_SCORING_UNIT_GYRBE" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymchelper.readers.shieldhit.binary_spec.SHBDOUnitID.SH_SCORING_UNIT_GYRE">
+<span class="sig-name descname"><span class="pre">SH_SCORING_UNIT_GYRE</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">43</span></em><a class="headerlink" href="#pymchelper.readers.shieldhit.binary_spec.SHBDOUnitID.SH_SCORING_UNIT_GYRE" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymchelper.readers.shieldhit.binary_spec.SHBDOUnitID.SH_SCORING_UNIT_INVALID">
+<span class="sig-name descname"><span class="pre">SH_SCORING_UNIT_INVALID</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">-1</span></em><a class="headerlink" href="#pymchelper.readers.shieldhit.binary_spec.SHBDOUnitID.SH_SCORING_UNIT_INVALID" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymchelper.readers.shieldhit.binary_spec.SHBDOUnitID.SH_SCORING_UNIT_KEVPUM">
+<span class="sig-name descname"><span class="pre">SH_SCORING_UNIT_KEVPUM</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">30</span></em><a class="headerlink" href="#pymchelper.readers.shieldhit.binary_spec.SHBDOUnitID.SH_SCORING_UNIT_KEVPUM" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymchelper.readers.shieldhit.binary_spec.SHBDOUnitID.SH_SCORING_UNIT_KGPM3">
+<span class="sig-name descname"><span class="pre">SH_SCORING_UNIT_KGPM3</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">23</span></em><a class="headerlink" href="#pymchelper.readers.shieldhit.binary_spec.SHBDOUnitID.SH_SCORING_UNIT_KGPM3" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymchelper.readers.shieldhit.binary_spec.SHBDOUnitID.SH_SCORING_UNIT_M">
+<span class="sig-name descname"><span class="pre">SH_SCORING_UNIT_M</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">16</span></em><a class="headerlink" href="#pymchelper.readers.shieldhit.binary_spec.SHBDOUnitID.SH_SCORING_UNIT_M" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymchelper.readers.shieldhit.binary_spec.SHBDOUnitID.SH_SCORING_UNIT_M2">
+<span class="sig-name descname"><span class="pre">SH_SCORING_UNIT_M2</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">17</span></em><a class="headerlink" href="#pymchelper.readers.shieldhit.binary_spec.SHBDOUnitID.SH_SCORING_UNIT_M2" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymchelper.readers.shieldhit.binary_spec.SHBDOUnitID.SH_SCORING_UNIT_M3">
+<span class="sig-name descname"><span class="pre">SH_SCORING_UNIT_M3</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">18</span></em><a class="headerlink" href="#pymchelper.readers.shieldhit.binary_spec.SHBDOUnitID.SH_SCORING_UNIT_M3" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymchelper.readers.shieldhit.binary_spec.SHBDOUnitID.SH_SCORING_UNIT_MATID">
+<span class="sig-name descname"><span class="pre">SH_SCORING_UNIT_MATID</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">90</span></em><a class="headerlink" href="#pymchelper.readers.shieldhit.binary_spec.SHBDOUnitID.SH_SCORING_UNIT_MATID" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymchelper.readers.shieldhit.binary_spec.SHBDOUnitID.SH_SCORING_UNIT_MEV">
+<span class="sig-name descname"><span class="pre">SH_SCORING_UNIT_MEV</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">70</span></em><a class="headerlink" href="#pymchelper.readers.shieldhit.binary_spec.SHBDOUnitID.SH_SCORING_UNIT_MEV" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymchelper.readers.shieldhit.binary_spec.SHBDOUnitID.SH_SCORING_UNIT_MEVCM2PG">
+<span class="sig-name descname"><span class="pre">SH_SCORING_UNIT_MEVCM2PG</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">32</span></em><a class="headerlink" href="#pymchelper.readers.shieldhit.binary_spec.SHBDOUnitID.SH_SCORING_UNIT_MEVCM2PG" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymchelper.readers.shieldhit.binary_spec.SHBDOUnitID.SH_SCORING_UNIT_MEVPAMU">
+<span class="sig-name descname"><span class="pre">SH_SCORING_UNIT_MEVPAMU</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">72</span></em><a class="headerlink" href="#pymchelper.readers.shieldhit.binary_spec.SHBDOUnitID.SH_SCORING_UNIT_MEVPAMU" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymchelper.readers.shieldhit.binary_spec.SHBDOUnitID.SH_SCORING_UNIT_MEVPC2">
+<span class="sig-name descname"><span class="pre">SH_SCORING_UNIT_MEVPC2</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">81</span></em><a class="headerlink" href="#pymchelper.readers.shieldhit.binary_spec.SHBDOUnitID.SH_SCORING_UNIT_MEVPC2" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymchelper.readers.shieldhit.binary_spec.SHBDOUnitID.SH_SCORING_UNIT_MEVPCM">
+<span class="sig-name descname"><span class="pre">SH_SCORING_UNIT_MEVPCM</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">31</span></em><a class="headerlink" href="#pymchelper.readers.shieldhit.binary_spec.SHBDOUnitID.SH_SCORING_UNIT_MEVPCM" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymchelper.readers.shieldhit.binary_spec.SHBDOUnitID.SH_SCORING_UNIT_MEVPG">
+<span class="sig-name descname"><span class="pre">SH_SCORING_UNIT_MEVPG</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">40</span></em><a class="headerlink" href="#pymchelper.readers.shieldhit.binary_spec.SHBDOUnitID.SH_SCORING_UNIT_MEVPG" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymchelper.readers.shieldhit.binary_spec.SHBDOUnitID.SH_SCORING_UNIT_MEVPNUC">
+<span class="sig-name descname"><span class="pre">SH_SCORING_UNIT_MEVPNUC</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">71</span></em><a class="headerlink" href="#pymchelper.readers.shieldhit.binary_spec.SHBDOUnitID.SH_SCORING_UNIT_MEVPNUC" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymchelper.readers.shieldhit.binary_spec.SHBDOUnitID.SH_SCORING_UNIT_NONE">
+<span class="sig-name descname"><span class="pre">SH_SCORING_UNIT_NONE</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">0</span></em><a class="headerlink" href="#pymchelper.readers.shieldhit.binary_spec.SHBDOUnitID.SH_SCORING_UNIT_NONE" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymchelper.readers.shieldhit.binary_spec.SHBDOUnitID.SH_SCORING_UNIT_NUCN">
+<span class="sig-name descname"><span class="pre">SH_SCORING_UNIT_NUCN</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">80</span></em><a class="headerlink" href="#pymchelper.readers.shieldhit.binary_spec.SHBDOUnitID.SH_SCORING_UNIT_NUCN" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymchelper.readers.shieldhit.binary_spec.SHBDOUnitID.SH_SCORING_UNIT_NZONE">
+<span class="sig-name descname"><span class="pre">SH_SCORING_UNIT_NZONE</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">91</span></em><a class="headerlink" href="#pymchelper.readers.shieldhit.binary_spec.SHBDOUnitID.SH_SCORING_UNIT_NZONE" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymchelper.readers.shieldhit.binary_spec.SHBDOUnitID.SH_SCORING_UNIT_PCM">
+<span class="sig-name descname"><span class="pre">SH_SCORING_UNIT_PCM</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">13</span></em><a class="headerlink" href="#pymchelper.readers.shieldhit.binary_spec.SHBDOUnitID.SH_SCORING_UNIT_PCM" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymchelper.readers.shieldhit.binary_spec.SHBDOUnitID.SH_SCORING_UNIT_PCM2">
+<span class="sig-name descname"><span class="pre">SH_SCORING_UNIT_PCM2</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">14</span></em><a class="headerlink" href="#pymchelper.readers.shieldhit.binary_spec.SHBDOUnitID.SH_SCORING_UNIT_PCM2" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymchelper.readers.shieldhit.binary_spec.SHBDOUnitID.SH_SCORING_UNIT_PCM3">
+<span class="sig-name descname"><span class="pre">SH_SCORING_UNIT_PCM3</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">15</span></em><a class="headerlink" href="#pymchelper.readers.shieldhit.binary_spec.SHBDOUnitID.SH_SCORING_UNIT_PCM3" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymchelper.readers.shieldhit.binary_spec.SHBDOUnitID.SH_SCORING_UNIT_PCT">
+<span class="sig-name descname"><span class="pre">SH_SCORING_UNIT_PCT</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">2</span></em><a class="headerlink" href="#pymchelper.readers.shieldhit.binary_spec.SHBDOUnitID.SH_SCORING_UNIT_PCT" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymchelper.readers.shieldhit.binary_spec.SHBDOUnitID.SH_SCORING_UNIT_PM">
+<span class="sig-name descname"><span class="pre">SH_SCORING_UNIT_PM</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">19</span></em><a class="headerlink" href="#pymchelper.readers.shieldhit.binary_spec.SHBDOUnitID.SH_SCORING_UNIT_PM" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymchelper.readers.shieldhit.binary_spec.SHBDOUnitID.SH_SCORING_UNIT_PM2">
+<span class="sig-name descname"><span class="pre">SH_SCORING_UNIT_PM2</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">20</span></em><a class="headerlink" href="#pymchelper.readers.shieldhit.binary_spec.SHBDOUnitID.SH_SCORING_UNIT_PM2" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymchelper.readers.shieldhit.binary_spec.SHBDOUnitID.SH_SCORING_UNIT_PM3">
+<span class="sig-name descname"><span class="pre">SH_SCORING_UNIT_PM3</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">21</span></em><a class="headerlink" href="#pymchelper.readers.shieldhit.binary_spec.SHBDOUnitID.SH_SCORING_UNIT_PM3" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymchelper.readers.shieldhit.binary_spec.SHBDOUnitID.SH_SCORING_UNIT_PMIL">
+<span class="sig-name descname"><span class="pre">SH_SCORING_UNIT_PMIL</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">3</span></em><a class="headerlink" href="#pymchelper.readers.shieldhit.binary_spec.SHBDOUnitID.SH_SCORING_UNIT_PMIL" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymchelper.readers.shieldhit.binary_spec.SHBDOUnitID.SH_SCORING_UNIT_RADIANS">
+<span class="sig-name descname"><span class="pre">SH_SCORING_UNIT_RADIANS</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">51</span></em><a class="headerlink" href="#pymchelper.readers.shieldhit.binary_spec.SHBDOUnitID.SH_SCORING_UNIT_RADIANS" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymchelper.readers.shieldhit.binary_spec.SHBDOUnitID.SH_SCORING_UNIT_RELATIVE">
+<span class="sig-name descname"><span class="pre">SH_SCORING_UNIT_RELATIVE</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">4</span></em><a class="headerlink" href="#pymchelper.readers.shieldhit.binary_spec.SHBDOUnitID.SH_SCORING_UNIT_RELATIVE" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymchelper.readers.shieldhit.binary_spec.SHBDOUnitID.SH_SCORING_UNIT_SR">
+<span class="sig-name descname"><span class="pre">SH_SCORING_UNIT_SR</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">52</span></em><a class="headerlink" href="#pymchelper.readers.shieldhit.binary_spec.SHBDOUnitID.SH_SCORING_UNIT_SR" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymchelper.readers.shieldhit.binary_spec.SHBDOUnitID.SH_SCORING_UNIT_SV">
+<span class="sig-name descname"><span class="pre">SH_SCORING_UNIT_SV</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">44</span></em><a class="headerlink" href="#pymchelper.readers.shieldhit.binary_spec.SHBDOUnitID.SH_SCORING_UNIT_SV" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymchelper.readers.shieldhit.binary_spec.SHBDOUnitID.SH_SCORING_UNIT_U">
+<span class="sig-name descname"><span class="pre">SH_SCORING_UNIT_U</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">82</span></em><a class="headerlink" href="#pymchelper.readers.shieldhit.binary_spec.SHBDOUnitID.SH_SCORING_UNIT_U" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymchelper.readers.shieldhit.binary_spec.SHBDOUnitID.SH_SCORING_UNIT_UNKNOWN">
+<span class="sig-name descname"><span class="pre">SH_SCORING_UNIT_UNKNOWN</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">-2</span></em><a class="headerlink" href="#pymchelper.readers.shieldhit.binary_spec.SHBDOUnitID.SH_SCORING_UNIT_UNKNOWN" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="pymchelper.readers.shieldhit.html"
+                        title="previous chapter">pymchelper.readers.shieldhit package</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="pymchelper.readers.shieldhit.general.html"
+                        title="next chapter">pymchelper.readers.shieldhit.general module</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/apidoc/pymchelper.readers.shieldhit.binary_spec.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="pymchelper.readers.shieldhit.general.html" title="pymchelper.readers.shieldhit.general module"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="pymchelper.readers.shieldhit.html" title="pymchelper.readers.shieldhit package"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">pymchelper 1.10.0+rev3 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../developer.html" >Developer documentation</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="modules.html" >Source code</a> &#187;</li>
+          <li class="nav-item nav-item-3"><a href="pymchelper.html" >pymchelper package</a> &#187;</li>
+          <li class="nav-item nav-item-4"><a href="pymchelper.readers.html" >pymchelper.readers package</a> &#187;</li>
+          <li class="nav-item nav-item-5"><a href="pymchelper.readers.shieldhit.html" >pymchelper.readers.shieldhit package</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">pymchelper.readers.shieldhit.binary_spec module</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2016, Leszek Grzanka.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 4.3.0.
+    </div>
+  </body>
+</html>

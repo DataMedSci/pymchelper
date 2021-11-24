@@ -1,0 +1,255 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>pymchelper.readers.shieldhit.general &#8212; pymchelper 1.10.0+rev3 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/classic.css" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/graphviz.css" />
+    
+    <script data-url_root="../../../../" id="documentation_options" src="../../../../_static/documentation_options.js"></script>
+    <script src="../../../../_static/jquery.js"></script>
+    <script src="../../../../_static/underscore.js"></script>
+    <script src="../../../../_static/doctools.js"></script>
+    
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../../index.html">pymchelper 1.10.0+rev3 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../../index.html" accesskey="U">Module code</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">pymchelper.readers.shieldhit.general</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for pymchelper.readers.shieldhit.general</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">enum</span> <span class="k">import</span> <span class="n">IntEnum</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<span class="kn">from</span> <span class="nn">pymchelper.readers.common</span> <span class="k">import</span> <span class="n">ReaderFactory</span>
+<span class="kn">from</span> <span class="nn">pymchelper.readers.shieldhit.reader_base</span> <span class="k">import</span> <span class="n">read_next_token</span>
+<span class="kn">from</span> <span class="nn">pymchelper.readers.shieldhit.reader_bdo2016</span> <span class="k">import</span> <span class="n">SHReaderBDO2016</span>
+<span class="kn">from</span> <span class="nn">pymchelper.readers.shieldhit.reader_bdo2019</span> <span class="k">import</span> <span class="n">SHReaderBDO2019</span>
+<span class="kn">from</span> <span class="nn">pymchelper.readers.shieldhit.reader_bin2010</span> <span class="k">import</span> <span class="n">SHReaderBin2010</span>
+<span class="kn">from</span> <span class="nn">pymchelper.readers.shieldhit.binary_spec</span> <span class="k">import</span> <span class="n">SHBDOTagID</span>
+
+<span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="file_has_sh_magic_number"><a class="viewcode-back" href="../../../../apidoc/pymchelper.readers.shieldhit.general.html#pymchelper.readers.shieldhit.general.file_has_sh_magic_number">[docs]</a><span class="k">def</span> <span class="nf">file_has_sh_magic_number</span><span class="p">(</span><span class="n">filename</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    BDO binary files, introduced in 2016 (BDO2016 and BDO2019 formats) starts with 6 magic bytes xSH12A</span>
+<span class="sd">    :param filename: Binary file filename</span>
+<span class="sd">    :return: True if binary file starts with SH magic number</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">sh_bdo_magic_number</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">&#39;xSH12A&#39;</span>
+    <span class="n">has_bdo_magic_number</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s2">&quot;rb&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+        <span class="n">d1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dtype</span><span class="p">([(</span><span class="s1">&#39;magic&#39;</span><span class="p">,</span> <span class="s1">&#39;S6&#39;</span><span class="p">)])</span>  <span class="c1"># TODO add a check if file has less than 6 bytes or is empty</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">fromfile</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">d1</span><span class="p">,</span> <span class="n">count</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">x</span><span class="p">:</span>
+            <span class="c1"># compare first 6 bytes with reference string</span>
+            <span class="n">has_bdo_magic_number</span> <span class="o">=</span> <span class="p">(</span><span class="n">sh_bdo_magic_number</span> <span class="o">==</span> <span class="n">x</span><span class="p">[</span><span class="s1">&#39;magic&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span>
+
+    <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;File </span><span class="si">{:s}</span><span class="s2"> has magic number: </span><span class="si">{:s}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">has_bdo_magic_number</span><span class="p">)))</span>
+    <span class="k">return</span> <span class="n">has_bdo_magic_number</span></div>
+
+
+<div class="viewcode-block" id="extract_sh_ver"><a class="viewcode-back" href="../../../../apidoc/pymchelper.readers.shieldhit.general.html#pymchelper.readers.shieldhit.general.extract_sh_ver">[docs]</a><span class="k">def</span> <span class="nf">extract_sh_ver</span><span class="p">(</span><span class="n">filename</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    BDO binary files, introduced in 2016 (BDO2016 and BDO2019 formats) contain information about SH VER</span>
+<span class="sd">    :param filename: Binary file filename</span>
+<span class="sd">    :return: SH12 version (as a string, i.e. 0.7) or None if version information was not found in the file</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">ver</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s2">&quot;rb&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+        <span class="n">d1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dtype</span><span class="p">([(</span><span class="s1">&#39;magic&#39;</span><span class="p">,</span> <span class="s1">&#39;S6&#39;</span><span class="p">),</span>
+                       <span class="p">(</span><span class="s1">&#39;end&#39;</span><span class="p">,</span> <span class="s1">&#39;S2&#39;</span><span class="p">),</span>
+                       <span class="p">(</span><span class="s1">&#39;vstr&#39;</span><span class="p">,</span> <span class="s1">&#39;S16&#39;</span><span class="p">)])</span>  <span class="c1"># TODO add a check if file has less than 6 bytes or is empty</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">fromfile</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">d1</span><span class="p">,</span> <span class="n">count</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;File </span><span class="si">{:s}</span><span class="s2">, raw version info </span><span class="si">{:s}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="s1">&#39;vstr&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">])))</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">ver</span> <span class="o">=</span> <span class="n">x</span><span class="p">[</span><span class="s1">&#39;vstr&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s1">&#39;ASCII&#39;</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">UnicodeDecodeError</span><span class="p">:</span>
+            <span class="n">ver</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;File </span><span class="si">{:s}</span><span class="s2">, SH12A version: </span><span class="si">{:s}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">ver</span><span class="p">)))</span>
+    <span class="k">return</span> <span class="n">ver</span></div>
+
+
+<div class="viewcode-block" id="SHFileFormatId"><a class="viewcode-back" href="../../../../apidoc/pymchelper.readers.shieldhit.general.html#pymchelper.readers.shieldhit.general.SHFileFormatId">[docs]</a><span class="k">class</span> <span class="nc">SHFileFormatId</span><span class="p">(</span><span class="n">IntEnum</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    SHIELD-HIT12A file format ids, as described in sh_file_format.h file</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">bin2010</span> <span class="o">=</span> <span class="mi">0</span>   <span class="c1"># Old binary format from 2010, the first version David wrote back then</span>
+    <span class="n">bdo2016</span> <span class="o">=</span> <span class="mi">1</span>   <span class="c1"># year 2016 .bdo file format, now with proper tags, used from SH 0.6.0</span>
+    <span class="n">bdo2019</span> <span class="o">=</span> <span class="mi">2</span>   <span class="c1"># year 2019 .bdo style, introduced June 2019</span>
+    <span class="n">ascii</span> <span class="o">=</span> <span class="mi">3</span>     <span class="c1"># raw text format</span>
+    <span class="n">csv</span> <span class="o">=</span> <span class="mi">4</span>       <span class="c1"># comma separated file format</span></div>
+
+
+<div class="viewcode-block" id="read_token"><a class="viewcode-back" href="../../../../apidoc/pymchelper.readers.shieldhit.general.html#pymchelper.readers.shieldhit.general.read_token">[docs]</a><span class="k">def</span> <span class="nf">read_token</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">token_id</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    TODO</span>
+<span class="sd">    :param filename:</span>
+<span class="sd">    :param token_id:</span>
+<span class="sd">    :return:</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s2">&quot;rb&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+
+        <span class="c1"># skip ASCII header</span>
+        <span class="n">d1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dtype</span><span class="p">([(</span><span class="s1">&#39;magic&#39;</span><span class="p">,</span> <span class="s1">&#39;S6&#39;</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;endiannes&#39;</span><span class="p">,</span> <span class="s1">&#39;S2&#39;</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;vstr&#39;</span><span class="p">,</span> <span class="s1">&#39;S16&#39;</span><span class="p">)])</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">fromfile</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">d1</span><span class="p">,</span> <span class="n">count</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+        <span class="c1"># read tokens from rest of the file</span>
+        <span class="k">while</span> <span class="n">f</span><span class="p">:</span>
+            <span class="n">token</span> <span class="o">=</span> <span class="n">read_next_token</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">token</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">break</span>
+            <span class="n">pl_id</span><span class="p">,</span> <span class="n">_pl_type</span><span class="p">,</span> <span class="n">_pl_len</span><span class="p">,</span> <span class="n">_pl</span> <span class="o">=</span> <span class="n">token</span>
+            <span class="k">if</span> <span class="n">pl_id</span> <span class="o">==</span> <span class="n">token_id</span><span class="p">:</span>
+
+                <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Read token </span><span class="si">{:s}</span><span class="s2"> (0x</span><span class="si">{:02x}</span><span class="s2">) value </span><span class="si">{}</span><span class="s2"> type </span><span class="si">{:s}</span><span class="s2"> length </span><span class="si">{:d}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                    <span class="n">SHBDOTagID</span><span class="p">(</span><span class="n">pl_id</span><span class="p">)</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+                    <span class="n">pl_id</span><span class="p">,</span>
+                    <span class="n">_pl</span><span class="p">,</span>
+                    <span class="n">_pl_type</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s1">&#39;ASCII&#39;</span><span class="p">),</span>
+                    <span class="n">_pl_len</span>
+                <span class="p">))</span>
+
+                <span class="n">pl</span> <span class="o">=</span> <span class="p">[</span><span class="kc">None</span><span class="p">]</span> <span class="o">*</span> <span class="n">_pl_len</span>
+
+                <span class="c1"># decode all strings (currently there will never be more than one per token)</span>
+                <span class="k">if</span> <span class="s1">&#39;S&#39;</span> <span class="ow">in</span> <span class="n">_pl_type</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s1">&#39;ASCII&#39;</span><span class="p">):</span>
+                    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">_j</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">_pl</span><span class="p">):</span>
+                        <span class="n">pl</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">_pl</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s1">&#39;ASCII&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">pl</span> <span class="o">=</span> <span class="n">_pl</span>
+
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">pl</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                    <span class="n">pl</span> <span class="o">=</span> <span class="n">pl</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+                <span class="k">return</span> <span class="n">pl</span>
+        <span class="k">return</span> <span class="kc">None</span></div>
+
+
+<div class="viewcode-block" id="SHReaderFactory"><a class="viewcode-back" href="../../../../apidoc/pymchelper.readers.shieldhit.general.html#pymchelper.readers.shieldhit.general.SHReaderFactory">[docs]</a><span class="k">class</span> <span class="nc">SHReaderFactory</span><span class="p">(</span><span class="n">ReaderFactory</span><span class="p">):</span>
+<div class="viewcode-block" id="SHReaderFactory.get_reader"><a class="viewcode-back" href="../../../../apidoc/pymchelper.readers.shieldhit.general.html#pymchelper.readers.shieldhit.general.SHReaderFactory.get_reader">[docs]</a>    <span class="k">def</span> <span class="nf">get_reader</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Inspect binary file and return appropriate reader object</span>
+<span class="sd">        :return:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">reader</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="c1"># TODO add ZIP file unpacking</span>
+
+        <span class="c1"># magic number was introduced together with first token-based BDO file format (BDO2016)</span>
+        <span class="c1"># presence of magic number means we could have BDO2016 or BDO2019 format</span>
+        <span class="k">if</span> <span class="n">file_has_sh_magic_number</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">filename</span><span class="p">):</span>
+            <span class="n">reader</span> <span class="o">=</span> <span class="n">SHReaderBDO2019</span>
+
+            <span class="c1"># format tag specifying binary standard was introduced in SH12A v0.7.4-dev on  07.06.2019 (commit 6eddf98)</span>
+            <span class="n">file_format</span> <span class="o">=</span> <span class="n">read_token</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">filename</span><span class="p">,</span> <span class="n">SHBDOTagID</span><span class="o">.</span><span class="n">format</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">file_format</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;File format: </span><span class="si">{}</span><span class="s2"> </span><span class="si">{:s}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">file_format</span><span class="p">,</span> <span class="n">SHFileFormatId</span><span class="p">(</span><span class="n">file_format</span><span class="p">)</span><span class="o">.</span><span class="n">name</span><span class="p">))</span>
+                <span class="k">if</span> <span class="n">file_format</span> <span class="o">==</span> <span class="n">SHFileFormatId</span><span class="o">.</span><span class="n">bdo2019</span><span class="p">:</span>
+                    <span class="n">reader</span> <span class="o">=</span> <span class="n">SHReaderBDO2019</span>
+                <span class="k">elif</span> <span class="n">file_format</span> <span class="o">==</span> <span class="n">SHFileFormatId</span><span class="o">.</span><span class="n">bdo2016</span><span class="p">:</span>
+                    <span class="n">reader</span> <span class="o">=</span> <span class="n">SHReaderBDO2016</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;What shall we do ?&quot;</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c1"># in case format tag is missing we default to BDO2016 format</span>
+                <span class="c1"># this mean we cannot read BDO2019 files generated with SH12A built before 07.06.2019</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;File format information missing (token)&quot;</span><span class="p">)</span>
+                <span class="n">reader</span> <span class="o">=</span> <span class="n">SHReaderBDO2016</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># lack of magic number means we expect Fortran-style binary format (BIN2010)</span>
+            <span class="n">reader</span> <span class="o">=</span> <span class="n">SHReaderBin2010</span>
+
+        <span class="c1"># ver_short = extract_sh_ver(self.filename)</span>
+        <span class="c1"># logger.info(&quot;Short version: {:s}&quot;.format(str(ver_short)))</span>
+        <span class="c1"># ver_long = read_token(self.filename, SHBDOTagID.shversion)</span>
+        <span class="c1"># logger.info(&quot;Long version: {:s}&quot;.format(str(ver_long)))</span>
+
+        <span class="k">return</span> <span class="n">reader</span></div></div>
+
+
+<div class="viewcode-block" id="SHReaderASCII"><a class="viewcode-back" href="../../../../apidoc/pymchelper.readers.shieldhit.general.html#pymchelper.readers.shieldhit.general.SHReaderASCII">[docs]</a><span class="k">class</span> <span class="nc">SHReaderASCII</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Reads plain text files with data saved by binary-to-ascii converter.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">filename</span> <span class="o">=</span> <span class="n">filename</span>
+
+<div class="viewcode-block" id="SHReaderASCII.read_header"><a class="viewcode-back" href="../../../../apidoc/pymchelper.readers.shieldhit.general.html#pymchelper.readers.shieldhit.general.SHReaderASCII.read_header">[docs]</a>    <span class="k">def</span> <span class="nf">read_header</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">detector</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span></div>
+
+<div class="viewcode-block" id="SHReaderASCII.read_payload"><a class="viewcode-back" href="../../../../apidoc/pymchelper.readers.shieldhit.general.html#pymchelper.readers.shieldhit.general.SHReaderASCII.read_payload">[docs]</a>    <span class="k">def</span> <span class="nf">read_payload</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">detector</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span></div>
+
+<div class="viewcode-block" id="SHReaderASCII.read"><a class="viewcode-back" href="../../../../apidoc/pymchelper.readers.shieldhit.general.html#pymchelper.readers.shieldhit.general.SHReaderASCII.read">[docs]</a>    <span class="k">def</span> <span class="nf">read</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">detector</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">read_header</span><span class="p">(</span><span class="n">detector</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">read_payload</span><span class="p">(</span><span class="n">detector</span><span class="p">)</span></div></div>
+</pre></div>
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../../index.html">pymchelper 1.10.0+rev3 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../../index.html" >Module code</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">pymchelper.readers.shieldhit.general</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2016, Leszek Grzanka.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 4.3.0.
+    </div>
+  </body>
+</html>

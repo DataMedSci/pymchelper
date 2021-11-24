@@ -1,0 +1,125 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>HDF file &#8212; pymchelper 1.10.0+rev3 documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="_static/classic.css" />
+    <link rel="stylesheet" type="text/css" href="_static/graphviz.css" />
+    
+    <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">pymchelper 1.10.0+rev3 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">HDF file</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <section id="hdf-file">
+<h1>HDF file<a class="headerlink" href="#hdf-file" title="Permalink to this headline">¶</a></h1>
+<p>Saves data in HDF binary file format.
+HDF is designed to store large amounts of data organized in convenient way.
+One HDF file can handle many single- or multi-dimensional tables.
+For every detector a single file with <code class="code bash docutils literal notranslate"><span class="pre">.h5</span></code> extension is written.</p>
+<section id="an-example-usage">
+<h2>An example usage<a class="headerlink" href="#an-example-usage" title="Permalink to this headline">¶</a></h2>
+<p>Conversion is done using standard command:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>convertmc HDF --many <span class="s2">&quot;*.bdo&quot;</span>
+</pre></div>
+</div>
+<p>Assuming that we had “dose” detector output saved to <code class="code bash docutils literal notranslate"><span class="pre">dose0001.bdo</span></code>, <code class="code bash docutils literal notranslate"><span class="pre">dose0002.bdo</span></code> and <code class="code bash docutils literal notranslate"><span class="pre">dose0003.bdo</span></code>,
+we should expect to get <code class="code bash docutils literal notranslate"><span class="pre">dose.h5</span></code> as an output file.</p>
+</section>
+<section id="data-reconstruction">
+<h2>Data reconstruction<a class="headerlink" href="#data-reconstruction" title="Permalink to this headline">¶</a></h2>
+<p>Data can be extracted from HDF file with following Python code:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+
+<span class="c1"># reading data and attributes from HDF file</span>
+ <span class="k">with</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="s1">&#39;dose.h5&#39;</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">hf</span><span class="p">:</span>
+     <span class="n">data</span> <span class="o">=</span> <span class="n">hf</span><span class="p">[</span><span class="s1">&#39;data&#39;</span><span class="p">][:]</span>  <span class="c1"># numpy array with data storage</span>
+     <span class="n">attr</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">hf</span><span class="p">[</span><span class="s1">&#39;data&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">attrs</span><span class="o">.</span><span class="n">items</span><span class="p">())</span>  <span class="c1"># dictionary with metadata</span>
+</pre></div>
+</div>
+</section>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">HDF file</a><ul>
+<li><a class="reference internal" href="#an-example-usage">An example usage</a></li>
+<li><a class="reference internal" href="#data-reconstruction">Data reconstruction</a></li>
+</ul>
+</li>
+</ul>
+
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/hdf_converter.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">pymchelper 1.10.0+rev3 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">HDF file</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2016, Leszek Grzanka.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 4.3.0.
+    </div>
+  </body>
+</html>

@@ -1,0 +1,17 @@
+pymchelper.utils package
+========================
+
+.. automodule:: pymchelper.utils
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Submodules
+----------
+
+.. toctree::
+   :maxdepth: 4
+
+   pymchelper.utils.mcscripter
+   pymchelper.utils.pld2sobp
+   pymchelper.utils.runmc

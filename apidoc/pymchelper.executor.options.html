@@ -1,0 +1,181 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>pymchelper.executor.options module &#8212; pymchelper 1.10.0+rev3 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/classic.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/graphviz.css" />
+    
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/doctools.js"></script>
+    
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">pymchelper 1.10.0+rev3 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">pymchelper.executor.options module</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <section id="module-pymchelper.executor.options">
+<span id="pymchelper-executor-options-module"></span><h1>pymchelper.executor.options module<a class="headerlink" href="#module-pymchelper.executor.options" title="Permalink to this headline">¶</a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="pymchelper.executor.options.FlukaEnvironment">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pymchelper.executor.options.</span></span><span class="sig-name descname"><span class="pre">FlukaEnvironment</span></span><a class="reference internal" href="../_modules/pymchelper/executor/options.html#FlukaEnvironment"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymchelper.executor.options.FlukaEnvironment" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#pymchelper.executor.options.MCEnvironment" title="pymchelper.executor.options.MCEnvironment"><code class="xref py py-class docutils literal notranslate"><span class="pre">pymchelper.executor.options.MCEnvironment</span></code></a></p>
+<p>FLUKA Environment</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymchelper.executor.options.FlukaEnvironment.executable_filename">
+<span class="sig-name descname"><span class="pre">executable_filename</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'rfluka'</span></em><a class="headerlink" href="#pymchelper.executor.options.FlukaEnvironment.executable_filename" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pymchelper.executor.options.MCEnvironment">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pymchelper.executor.options.</span></span><span class="sig-name descname"><span class="pre">MCEnvironment</span></span><a class="reference internal" href="../_modules/pymchelper/executor/options.html#MCEnvironment"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymchelper.executor.options.MCEnvironment" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p><cite>MCEnvironment</cite> subclasses are helpful to discover which MC engine (i.e. FLUKA or SHIELD-HIT12A) is being used
+they provide information about expected executable filename, by inspecting the path to executable filename
+(i.e. checking if it ends with <cite>rfluka</cite>) we can find corresponding code type</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymchelper.executor.options.MCEnvironment.executable_filename">
+<span class="sig-name descname"><span class="pre">executable_filename</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#pymchelper.executor.options.MCEnvironment.executable_filename" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pymchelper.executor.options.SH12AEnvironmentLinux">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pymchelper.executor.options.</span></span><span class="sig-name descname"><span class="pre">SH12AEnvironmentLinux</span></span><a class="reference internal" href="../_modules/pymchelper/executor/options.html#SH12AEnvironmentLinux"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymchelper.executor.options.SH12AEnvironmentLinux" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#pymchelper.executor.options.MCEnvironment" title="pymchelper.executor.options.MCEnvironment"><code class="xref py py-class docutils literal notranslate"><span class="pre">pymchelper.executor.options.MCEnvironment</span></code></a></p>
+<p>SHIELD-HIT12A Environment for Linux</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymchelper.executor.options.SH12AEnvironmentLinux.executable_filename">
+<span class="sig-name descname"><span class="pre">executable_filename</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'shieldhit'</span></em><a class="headerlink" href="#pymchelper.executor.options.SH12AEnvironmentLinux.executable_filename" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pymchelper.executor.options.SH12AEnvironmentWindows">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pymchelper.executor.options.</span></span><span class="sig-name descname"><span class="pre">SH12AEnvironmentWindows</span></span><a class="reference internal" href="../_modules/pymchelper/executor/options.html#SH12AEnvironmentWindows"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymchelper.executor.options.SH12AEnvironmentWindows" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#pymchelper.executor.options.MCEnvironment" title="pymchelper.executor.options.MCEnvironment"><code class="xref py py-class docutils literal notranslate"><span class="pre">pymchelper.executor.options.MCEnvironment</span></code></a></p>
+<p>SHIELD-HIT12A Environment for Windows</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymchelper.executor.options.SH12AEnvironmentWindows.executable_filename">
+<span class="sig-name descname"><span class="pre">executable_filename</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'shieldhit.exe'</span></em><a class="headerlink" href="#pymchelper.executor.options.SH12AEnvironmentWindows.executable_filename" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pymchelper.executor.options.SH12ASettings">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pymchelper.executor.options.</span></span><span class="sig-name descname"><span class="pre">SH12ASettings</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">simulator_exec_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cmdline_opts</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymchelper/executor/options.html#SH12ASettings"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymchelper.executor.options.SH12ASettings" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#pymchelper.executor.options.SimulationSettings" title="pymchelper.executor.options.SimulationSettings"><code class="xref py py-class docutils literal notranslate"><span class="pre">pymchelper.executor.options.SimulationSettings</span></code></a></p>
+<p>TODO</p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pymchelper.executor.options.SimulationSettings">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pymchelper.executor.options.</span></span><span class="sig-name descname"><span class="pre">SimulationSettings</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">simulator_exec_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cmdline_opts</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymchelper/executor/options.html#SimulationSettings"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymchelper.executor.options.SimulationSettings" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="simple">
+<dt>This class is responsible for keeping track of options for MC simulation:</dt><dd><ul class="simple">
+<li><p>location of the MC simulator executable</p></li>
+<li><p>additional options provided by the user</p></li>
+<li><p>location of the input files or directories</p></li>
+</ul>
+</dd>
+</dl>
+<p>Moreover this class performs automatic discovery of the MC input
+(i.e. whether this is SHIELD-HIT12A input or FLUKA input)</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="pymchelper.executor.options.SimulationSettings.set_no_of_primaries">
+<span class="sig-name descname"><span class="pre">set_no_of_primaries</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">number_of_primaries</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymchelper/executor/options.html#SimulationSettings.set_no_of_primaries"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymchelper.executor.options.SimulationSettings.set_no_of_primaries" title="Permalink to this definition">¶</a></dt>
+<dd><p>This methods modifies command line options of the MC engine by setting (or overriding) the number of primaries
+to be simulated by each of the parallel jobs
+TODO this method is specific to SH12A, more general should be added
+TODO add support for no of primaries provided as –nstat, instead of -n</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymchelper.executor.options.SimulationSettings.set_rng_seed">
+<span class="sig-name descname"><span class="pre">set_rng_seed</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rng_seed</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymchelper/executor/options.html#SimulationSettings.set_rng_seed"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymchelper.executor.options.SimulationSettings.set_rng_seed" title="Permalink to this definition">¶</a></dt>
+<dd><p>This methods modifies command line options of the MC engine by setting (or overriding) the value of RNG seed
+TODO this method is specific to SH12A, more general should be added
+TODO add support for RNG seed provided as –seedofset, instead of -N</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/apidoc/pymchelper.executor.options.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">pymchelper 1.10.0+rev3 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">pymchelper.executor.options module</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2016, Leszek Grzanka.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 4.3.0.
+    </div>
+  </body>
+</html>

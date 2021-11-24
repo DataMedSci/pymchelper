@@ -1,0 +1,205 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>pymchelper.estimator module &#8212; pymchelper 1.10.0+rev3 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/classic.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/graphviz.css" />
+    
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/doctools.js"></script>
+    
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">pymchelper 1.10.0+rev3 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">pymchelper.estimator module</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <section id="module-pymchelper.estimator">
+<span id="pymchelper-estimator-module"></span><h1>pymchelper.estimator module<a class="headerlink" href="#module-pymchelper.estimator" title="Permalink to this headline">¶</a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="pymchelper.estimator.ErrorEstimate">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pymchelper.estimator.</span></span><span class="sig-name descname"><span class="pre">ErrorEstimate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymchelper/estimator.html#ErrorEstimate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymchelper.estimator.ErrorEstimate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">enum.IntEnum</span></code></p>
+<p>When averaging data multiple files we could estimate statistical error of scored quantity.
+Such error can be calculated as: none (error information missing), standard error or standard deviation.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymchelper.estimator.ErrorEstimate.none">
+<span class="sig-name descname"><span class="pre">none</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">0</span></em><a class="headerlink" href="#pymchelper.estimator.ErrorEstimate.none" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymchelper.estimator.ErrorEstimate.stddev">
+<span class="sig-name descname"><span class="pre">stddev</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">2</span></em><a class="headerlink" href="#pymchelper.estimator.ErrorEstimate.stddev" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymchelper.estimator.ErrorEstimate.stderr">
+<span class="sig-name descname"><span class="pre">stderr</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">1</span></em><a class="headerlink" href="#pymchelper.estimator.ErrorEstimate.stderr" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pymchelper.estimator.Estimator">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pymchelper.estimator.</span></span><span class="sig-name descname"><span class="pre">Estimator</span></span><a class="reference internal" href="../_modules/pymchelper/estimator.html#Estimator"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymchelper.estimator.Estimator" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Estimator data including scoring mesh description.</p>
+<p>This class handles in universal way data generated with MC code.
+It includes data (<code class="docutils literal notranslate"><span class="pre">data</span></code> and <code class="docutils literal notranslate"><span class="pre">data_raw</span></code> fields) and optional errors (<code class="docutils literal notranslate"><span class="pre">error</span></code> and <code class="docutils literal notranslate"><span class="pre">error_raw</span></code>).
+Estimator holds also up to 3 binning axis (<code class="docutils literal notranslate"><span class="pre">x</span></code>, <code class="docutils literal notranslate"><span class="pre">y</span></code> and <code class="docutils literal notranslate"><span class="pre">z</span></code> fields).
+Scored quantity can be assigned a <code class="docutils literal notranslate"><span class="pre">name</span></code> (i.e. dose) and <code class="docutils literal notranslate"><span class="pre">unit</span></code> (i.e. Gy).
+Several other fields are also used:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>nstat: number of simulated histories</p></li>
+<li><p>counter: number of files read to construct detector object</p></li>
+<li><p>corename: common core part of input files defining a name of detector</p></li>
+<li><p>error_type: none, stderr or stddev - error type</p></li>
+</ul>
+</div></blockquote>
+<p>Estimator data can be either read from the file (see <code class="docutils literal notranslate"><span class="pre">fromfile</span></code> method in <code class="docutils literal notranslate"><span class="pre">input_output</span></code> module
+or constructed directly:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">d</span> <span class="o">=</span> <span class="n">Estimator</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">d</span><span class="o">.</span><span class="n">x</span> <span class="o">=</span> <span class="n">MeshAxis</span><span class="p">(</span><span class="n">n</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">min_val</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">max_val</span><span class="o">=</span><span class="mf">10.0</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;X&quot;</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s2">&quot;cm&quot;</span><span class="p">,</span> <span class="n">binning</span><span class="o">=</span><span class="n">MeshAxis</span><span class="o">.</span><span class="n">BinningType</span><span class="o">.</span><span class="n">linear</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">d</span><span class="o">.</span><span class="n">x</span><span class="o">.</span><span class="n">data</span>
+<span class="go">array([ 2.5,  7.5])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">d</span><span class="o">.</span><span class="n">y</span> <span class="o">=</span> <span class="n">MeshAxis</span><span class="p">(</span><span class="n">n</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">min_val</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">max_val</span><span class="o">=</span><span class="mf">150.0</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;Y&quot;</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s2">&quot;cm&quot;</span><span class="p">,</span> <span class="n">binning</span><span class="o">=</span><span class="n">MeshAxis</span><span class="o">.</span><span class="n">BinningType</span><span class="o">.</span><span class="n">linear</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">d</span><span class="o">.</span><span class="n">y</span><span class="o">.</span><span class="n">data</span>
+<span class="go">array([  25.,   75.,  125.])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">d</span><span class="o">.</span><span class="n">z</span> <span class="o">=</span> <span class="n">MeshAxis</span><span class="p">(</span><span class="n">n</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">min_val</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">max_val</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;Z&quot;</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s2">&quot;cm&quot;</span><span class="p">,</span> <span class="n">binning</span><span class="o">=</span><span class="n">MeshAxis</span><span class="o">.</span><span class="n">BinningType</span><span class="o">.</span><span class="n">linear</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">d</span><span class="o">.</span><span class="n">z</span><span class="o">.</span><span class="n">data</span>
+<span class="go">array([ 0.5])</span>
+</pre></div>
+</div>
+<dl class="py method">
+<dt class="sig sig-object py" id="pymchelper.estimator.Estimator.add_page">
+<span class="sig-name descname"><span class="pre">add_page</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">page</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymchelper/estimator.html#Estimator.add_page"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymchelper.estimator.Estimator.add_page" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add a page to the estimator object.
+New copy of page is made and page estimator pointer is set to the estimator object holding this page.
+:param page:
+:return: None</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymchelper.estimator.Estimator.axis">
+<span class="sig-name descname"><span class="pre">axis</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">axis_id</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymchelper/estimator.html#Estimator.axis"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymchelper.estimator.Estimator.axis" title="Permalink to this definition">¶</a></dt>
+<dd><p>Mesh axis selector method based on integer id’s.</p>
+<p>Instead of getting mesh axis data by calling <cite>d.x</cite>, <cite>d.y</cite> or <cite>d.z</cite> (assuming <cite>d</cite> an object of <cite>Detector</cite>
+class) we can get that data by calling <cite>d.axis(0)</cite>, <cite>d.axis(1)</cite> or <cite>d.axis(2)</cite>. See for example:
+&gt;&gt;&gt; d = Estimator()
+&gt;&gt;&gt; d.x = MeshAxis(n=2, min_val=0.0, max_val=10.0, name=”X”, unit=”cm”, binning=MeshAxis.BinningType.linear)
+&gt;&gt;&gt; d.y = MeshAxis(n=3, min_val=0.0, max_val=150.0, name=”Y”, unit=”cm”, binning=MeshAxis.BinningType.linear)
+&gt;&gt;&gt; d.z = MeshAxis(n=1, min_val=0.0, max_val=1.0, name=”Z”, unit=”cm”, binning=MeshAxis.BinningType.linear)
+&gt;&gt;&gt; d.axis(1)
+MeshAxis(n=3, min_val=0.0, max_val=150.0, name=’Y’, unit=’cm’, binning=&lt;BinningType.linear: 0&gt;)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>axis_id</strong> – axis id (0, 1 or 2)</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>MeshAxis object</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pymchelper.estimator.Estimator.dimension">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">dimension</span></span><a class="headerlink" href="#pymchelper.estimator.Estimator.dimension" title="Permalink to this definition">¶</a></dt>
+<dd><p>Let’s take again detector d with YZ scoring.
+&gt;&gt;&gt; e = Estimator()
+&gt;&gt;&gt; e.x = MeshAxis(n=1, min_val=0.0, max_val=1.0, name=”X”, unit=”cm”, binning=MeshAxis.BinningType.linear)
+&gt;&gt;&gt; e.y = MeshAxis(n=3, min_val=0.0, max_val=150.0, name=”Y”, unit=”cm”, binning=MeshAxis.BinningType.linear)
+&gt;&gt;&gt; e.z = MeshAxis(n=2, min_val=0.0, max_val=2.0, name=”Z”, unit=”cm”, binning=MeshAxis.BinningType.linear)
+&gt;&gt;&gt; e.dimension
+2</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>number of axes (among X,Y,Z) which have more than one bin</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pymchelper.estimator.average_with_nan">
+<span class="sig-prename descclassname"><span class="pre">pymchelper.estimator.</span></span><span class="sig-name descname"><span class="pre">average_with_nan</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">estimator_list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">error_estimate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">ErrorEstimate.stderr</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymchelper/estimator.html#average_with_nan"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymchelper.estimator.average_with_nan" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate average estimator object, excluding malformed data (NaN) from averaging.
+:param estimator_list:
+:param error_estimate:
+:return:</p>
+</dd></dl>
+
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/apidoc/pymchelper.estimator.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">pymchelper 1.10.0+rev3 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">pymchelper.estimator module</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2016, Leszek Grzanka.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 4.3.0.
+    </div>
+  </body>
+</html>

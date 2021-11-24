@@ -1,0 +1,256 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>pymchelper.readers.shieldhit.reader_bdo2019 &#8212; pymchelper 1.10.0+rev3 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/classic.css" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/graphviz.css" />
+    
+    <script data-url_root="../../../../" id="documentation_options" src="../../../../_static/documentation_options.js"></script>
+    <script src="../../../../_static/jquery.js"></script>
+    <script src="../../../../_static/underscore.js"></script>
+    <script src="../../../../_static/doctools.js"></script>
+    
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../../index.html">pymchelper 1.10.0+rev3 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../../index.html" accesskey="U">Module code</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">pymchelper.readers.shieldhit.reader_bdo2019</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for pymchelper.readers.shieldhit.reader_bdo2019</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">logging</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<span class="kn">from</span> <span class="nn">pymchelper.axis</span> <span class="k">import</span> <span class="n">MeshAxis</span>
+<span class="kn">from</span> <span class="nn">pymchelper.page</span> <span class="k">import</span> <span class="n">Page</span>
+<span class="kn">from</span> <span class="nn">pymchelper.readers.shieldhit.binary_spec</span> <span class="k">import</span> <span class="n">SHBDOTagID</span><span class="p">,</span> <span class="n">detector_name_from_bdotag</span><span class="p">,</span> <span class="n">unit_name_from_unit_id</span><span class="p">,</span> \
+    <span class="n">page_tags_to_save</span>
+<span class="kn">from</span> <span class="nn">pymchelper.readers.shieldhit.reader_base</span> <span class="k">import</span> <span class="n">SHReader</span><span class="p">,</span> <span class="n">read_next_token</span><span class="p">,</span> <span class="n">mesh_unit_and_name</span>
+<span class="kn">from</span> <span class="nn">pymchelper.shieldhit.detector.detector_type</span> <span class="k">import</span> <span class="n">SHDetType</span>
+<span class="kn">from</span> <span class="nn">pymchelper.shieldhit.detector.estimator_type</span> <span class="k">import</span> <span class="n">SHGeoType</span>
+
+<span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="SHReaderBDO2019"><a class="viewcode-back" href="../../../../apidoc/pymchelper.readers.shieldhit.reader_bdo2019.html#pymchelper.readers.shieldhit.reader_bdo2019.SHReaderBDO2019">[docs]</a><span class="k">class</span> <span class="nc">SHReaderBDO2019</span><span class="p">(</span><span class="n">SHReader</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Experimental binary format reader version &gt;= 0.7</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+<div class="viewcode-block" id="SHReaderBDO2019.read_data"><a class="viewcode-back" href="../../../../apidoc/pymchelper.readers.shieldhit.reader_bdo2019.html#pymchelper.readers.shieldhit.reader_bdo2019.SHReaderBDO2019.read_data">[docs]</a>    <span class="k">def</span> <span class="nf">read_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">estimator</span><span class="p">):</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Reading: &quot;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">filename</span><span class="p">)</span>
+
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">filename</span><span class="p">,</span> <span class="s2">&quot;rb&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="n">d1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dtype</span><span class="p">([(</span><span class="s1">&#39;magic&#39;</span><span class="p">,</span> <span class="s1">&#39;S6&#39;</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;end&#39;</span><span class="p">,</span> <span class="s1">&#39;S2&#39;</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;vstr&#39;</span><span class="p">,</span> <span class="s1">&#39;S16&#39;</span><span class="p">)])</span>
+
+            <span class="n">_x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">fromfile</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">d1</span><span class="p">,</span> <span class="n">count</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>  <span class="c1"># read the data into numpy</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Magic : &quot;</span> <span class="o">+</span> <span class="n">_x</span><span class="p">[</span><span class="s1">&#39;magic&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s1">&#39;ASCII&#39;</span><span class="p">))</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Endiannes: &quot;</span> <span class="o">+</span> <span class="n">_x</span><span class="p">[</span><span class="s1">&#39;end&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s1">&#39;ASCII&#39;</span><span class="p">))</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;VerStr: &quot;</span> <span class="o">+</span> <span class="n">_x</span><span class="p">[</span><span class="s1">&#39;vstr&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s1">&#39;ASCII&#39;</span><span class="p">))</span>
+
+            <span class="k">while</span> <span class="n">f</span><span class="p">:</span>
+                <span class="n">token</span> <span class="o">=</span> <span class="n">read_next_token</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">token</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="k">break</span>
+
+                <span class="n">token_id</span><span class="p">,</span> <span class="n">token_type</span><span class="p">,</span> <span class="n">payload_len</span><span class="p">,</span> <span class="n">raw_payload</span> <span class="o">=</span> <span class="n">token</span>
+
+                <span class="n">payload</span> <span class="o">=</span> <span class="p">[</span><span class="kc">None</span><span class="p">]</span> <span class="o">*</span> <span class="n">payload_len</span>
+                <span class="n">_has_geo_units_in_ascii</span> <span class="o">=</span> <span class="kc">False</span>
+
+                <span class="c1"># decode all strings (currently there will never be more than one per token)</span>
+                <span class="k">if</span> <span class="s1">&#39;S&#39;</span> <span class="ow">in</span> <span class="n">token_type</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s1">&#39;ASCII&#39;</span><span class="p">):</span>
+                    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">_j</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">raw_payload</span><span class="p">):</span>
+                        <span class="c1"># raw payload may contain non-ASCII characters (i.e. filedate on non-English Windows OS)</span>
+                        <span class="n">payload</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">raw_payload</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s1">&#39;ASCII&#39;</span><span class="p">,</span> <span class="s1">&#39;replace&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">payload</span> <span class="o">=</span> <span class="n">raw_payload</span>
+
+                <span class="k">if</span> <span class="n">payload_len</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                    <span class="n">payload</span> <span class="o">=</span> <span class="n">payload</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">token_name</span> <span class="o">=</span> <span class="n">SHBDOTagID</span><span class="p">(</span><span class="n">token_id</span><span class="p">)</span><span class="o">.</span><span class="n">name</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Read token </span><span class="si">{:s}</span><span class="s2"> (0x</span><span class="si">{:02x}</span><span class="s2">) value </span><span class="si">{}</span><span class="s2"> type </span><span class="si">{:s}</span><span class="s2"> length </span><span class="si">{:d}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                        <span class="n">token_name</span><span class="p">,</span>
+                        <span class="n">token_id</span><span class="p">,</span>
+                        <span class="n">raw_payload</span><span class="p">,</span>
+                        <span class="n">token_type</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s1">&#39;ASCII&#39;</span><span class="p">),</span>
+                        <span class="n">payload_len</span>
+                    <span class="p">))</span>
+                <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Found unknown token (0x</span><span class="si">{:02x}</span><span class="s2">) value </span><span class="si">{}</span><span class="s2"> type </span><span class="si">{:s}</span><span class="s2"> length </span><span class="si">{:d}</span><span class="s2">, skipping&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                        <span class="n">token_id</span><span class="p">,</span>
+                        <span class="n">raw_payload</span><span class="p">,</span>
+                        <span class="n">token_type</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s1">&#39;ASCII&#39;</span><span class="p">),</span>
+                        <span class="n">payload_len</span>
+                    <span class="p">))</span>
+
+                <span class="c1"># geometry type</span>
+                <span class="k">if</span> <span class="n">SHBDOTagID</span><span class="o">.</span><span class="n">geometry_type</span> <span class="o">==</span> <span class="n">token_id</span><span class="p">:</span>
+                    <span class="n">estimator</span><span class="o">.</span><span class="n">geotyp</span> <span class="o">=</span> <span class="n">SHGeoType</span><span class="p">[</span><span class="n">payload</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">lower</span><span class="p">()]</span>
+
+                <span class="k">if</span> <span class="n">SHBDOTagID</span><span class="o">.</span><span class="n">geo_n_bins</span> <span class="o">==</span> <span class="n">token_id</span><span class="p">:</span>
+                    <span class="n">estimator</span><span class="o">.</span><span class="n">x</span> <span class="o">=</span> <span class="n">estimator</span><span class="o">.</span><span class="n">x</span><span class="o">.</span><span class="n">_replace</span><span class="p">(</span><span class="n">n</span><span class="o">=</span><span class="n">payload</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+                    <span class="n">estimator</span><span class="o">.</span><span class="n">y</span> <span class="o">=</span> <span class="n">estimator</span><span class="o">.</span><span class="n">y</span><span class="o">.</span><span class="n">_replace</span><span class="p">(</span><span class="n">n</span><span class="o">=</span><span class="n">payload</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+                    <span class="n">estimator</span><span class="o">.</span><span class="n">z</span> <span class="o">=</span> <span class="n">estimator</span><span class="o">.</span><span class="n">z</span><span class="o">.</span><span class="n">_replace</span><span class="p">(</span><span class="n">n</span><span class="o">=</span><span class="n">payload</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
+
+                <span class="k">if</span> <span class="n">SHBDOTagID</span><span class="o">.</span><span class="n">geo_p_start</span> <span class="o">==</span> <span class="n">token_id</span><span class="p">:</span>
+                    <span class="n">estimator</span><span class="o">.</span><span class="n">x</span> <span class="o">=</span> <span class="n">estimator</span><span class="o">.</span><span class="n">x</span><span class="o">.</span><span class="n">_replace</span><span class="p">(</span><span class="n">min_val</span><span class="o">=</span><span class="n">payload</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+                    <span class="n">estimator</span><span class="o">.</span><span class="n">y</span> <span class="o">=</span> <span class="n">estimator</span><span class="o">.</span><span class="n">y</span><span class="o">.</span><span class="n">_replace</span><span class="p">(</span><span class="n">min_val</span><span class="o">=</span><span class="n">payload</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+                    <span class="n">estimator</span><span class="o">.</span><span class="n">z</span> <span class="o">=</span> <span class="n">estimator</span><span class="o">.</span><span class="n">z</span><span class="o">.</span><span class="n">_replace</span><span class="p">(</span><span class="n">min_val</span><span class="o">=</span><span class="n">payload</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
+
+                <span class="k">if</span> <span class="n">SHBDOTagID</span><span class="o">.</span><span class="n">geo_q_stop</span> <span class="o">==</span> <span class="n">token_id</span><span class="p">:</span>
+                    <span class="n">estimator</span><span class="o">.</span><span class="n">x</span> <span class="o">=</span> <span class="n">estimator</span><span class="o">.</span><span class="n">x</span><span class="o">.</span><span class="n">_replace</span><span class="p">(</span><span class="n">max_val</span><span class="o">=</span><span class="n">payload</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+                    <span class="n">estimator</span><span class="o">.</span><span class="n">y</span> <span class="o">=</span> <span class="n">estimator</span><span class="o">.</span><span class="n">y</span><span class="o">.</span><span class="n">_replace</span><span class="p">(</span><span class="n">max_val</span><span class="o">=</span><span class="n">payload</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+                    <span class="n">estimator</span><span class="o">.</span><span class="n">z</span> <span class="o">=</span> <span class="n">estimator</span><span class="o">.</span><span class="n">z</span><span class="o">.</span><span class="n">_replace</span><span class="p">(</span><span class="n">max_val</span><span class="o">=</span><span class="n">payload</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
+
+                <span class="k">if</span> <span class="n">SHBDOTagID</span><span class="o">.</span><span class="n">geo_unit_ids</span> <span class="o">==</span> <span class="n">token_id</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">_has_geo_units_in_ascii</span><span class="p">:</span>
+                    <span class="n">estimator</span><span class="o">.</span><span class="n">x</span> <span class="o">=</span> <span class="n">estimator</span><span class="o">.</span><span class="n">x</span><span class="o">.</span><span class="n">_replace</span><span class="p">(</span><span class="n">unit</span><span class="o">=</span><span class="n">unit_name_from_unit_id</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">payload</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="s2">&quot;&quot;</span><span class="p">))</span>
+                    <span class="n">estimator</span><span class="o">.</span><span class="n">y</span> <span class="o">=</span> <span class="n">estimator</span><span class="o">.</span><span class="n">y</span><span class="o">.</span><span class="n">_replace</span><span class="p">(</span><span class="n">unit</span><span class="o">=</span><span class="n">unit_name_from_unit_id</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">payload</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="s2">&quot;&quot;</span><span class="p">))</span>
+                    <span class="n">estimator</span><span class="o">.</span><span class="n">z</span> <span class="o">=</span> <span class="n">estimator</span><span class="o">.</span><span class="n">z</span><span class="o">.</span><span class="n">_replace</span><span class="p">(</span><span class="n">unit</span><span class="o">=</span><span class="n">unit_name_from_unit_id</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">payload</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="s2">&quot;&quot;</span><span class="p">))</span>
+
+                <span class="c1"># Units may also be given as pure ASCII directly from SHIELD-HIT12A new .bdo format.</span>
+                <span class="c1"># If this is available, then use those embedded in the .bdo file, instead of pymchelper setting them.</span>
+                <span class="k">if</span> <span class="n">SHBDOTagID</span><span class="o">.</span><span class="n">geo_units</span> <span class="o">==</span> <span class="n">token_id</span><span class="p">:</span>
+                    <span class="n">_units</span> <span class="o">=</span> <span class="n">payload</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;;&quot;</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">_units</span><span class="p">)</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+                        <span class="n">estimator</span><span class="o">.</span><span class="n">x</span> <span class="o">=</span> <span class="n">estimator</span><span class="o">.</span><span class="n">x</span><span class="o">.</span><span class="n">_replace</span><span class="p">(</span><span class="n">unit</span><span class="o">=</span><span class="n">_units</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+                        <span class="n">estimator</span><span class="o">.</span><span class="n">y</span> <span class="o">=</span> <span class="n">estimator</span><span class="o">.</span><span class="n">y</span><span class="o">.</span><span class="n">_replace</span><span class="p">(</span><span class="n">unit</span><span class="o">=</span><span class="n">_units</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+                        <span class="n">estimator</span><span class="o">.</span><span class="n">z</span> <span class="o">=</span> <span class="n">estimator</span><span class="o">.</span><span class="n">z</span><span class="o">.</span><span class="n">_replace</span><span class="p">(</span><span class="n">unit</span><span class="o">=</span><span class="n">_units</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
+                        <span class="n">_has_geo_units_in_ascii</span> <span class="o">=</span> <span class="kc">True</span>
+
+                <span class="c1"># page(detector) type, it begins new page block</span>
+                <span class="k">if</span> <span class="n">SHBDOTagID</span><span class="o">.</span><span class="n">detector_type</span> <span class="o">==</span> <span class="n">token_id</span><span class="p">:</span>
+                    <span class="c1"># here new page is added to the estimator structure</span>
+                    <span class="n">estimator</span><span class="o">.</span><span class="n">add_page</span><span class="p">(</span><span class="n">Page</span><span class="p">())</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Setting page.dettyp = </span><span class="si">{}</span><span class="s2"> (</span><span class="si">{}</span><span class="s2">)&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">SHDetType</span><span class="p">(</span><span class="n">payload</span><span class="p">),</span> <span class="n">SHDetType</span><span class="p">(</span><span class="n">payload</span><span class="p">)</span><span class="o">.</span><span class="n">name</span><span class="p">))</span>
+                    <span class="n">estimator</span><span class="o">.</span><span class="n">pages</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">dettyp</span> <span class="o">=</span> <span class="n">SHDetType</span><span class="p">(</span><span class="n">payload</span><span class="p">)</span>
+
+                <span class="c1"># page(detector) data is the last thing related to page that is saved in binary file</span>
+                <span class="c1"># at this point all other page related tags should already be processed</span>
+                <span class="k">if</span> <span class="n">SHBDOTagID</span><span class="o">.</span><span class="n">data_block</span> <span class="o">==</span> <span class="n">token_id</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Setting page data = </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">payload</span><span class="p">)))</span>
+                    <span class="n">estimator</span><span class="o">.</span><span class="n">pages</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">data_raw</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">payload</span><span class="p">)</span>
+
+                <span class="c1"># read tokens based on tag &lt;-&gt; name mapping for detector</span>
+                <span class="k">if</span> <span class="n">token_id</span> <span class="ow">in</span> <span class="n">detector_name_from_bdotag</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Setting detector.</span><span class="si">{}</span><span class="s2"> = </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">detector_name_from_bdotag</span><span class="p">[</span><span class="n">token_id</span><span class="p">],</span> <span class="n">payload</span><span class="p">))</span>
+                    <span class="nb">setattr</span><span class="p">(</span><span class="n">estimator</span><span class="p">,</span> <span class="n">detector_name_from_bdotag</span><span class="p">[</span><span class="n">token_id</span><span class="p">],</span> <span class="n">payload</span><span class="p">)</span>
+
+                <span class="c1"># read tokens based on tag &lt;-&gt; name mapping for pages</span>
+                <span class="k">if</span> <span class="n">token_id</span> <span class="ow">in</span> <span class="n">page_tags_to_save</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Setting page.</span><span class="si">{}</span><span class="s2"> = </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">SHBDOTagID</span><span class="p">(</span><span class="n">token_id</span><span class="p">)</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">payload</span><span class="p">))</span>
+                    <span class="nb">setattr</span><span class="p">(</span><span class="n">estimator</span><span class="o">.</span><span class="n">pages</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">SHBDOTagID</span><span class="p">(</span><span class="n">token_id</span><span class="p">)</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">payload</span><span class="p">)</span>
+
+            <span class="c1"># Loop over the file is over here</span>
+            <span class="c1"># Check if we have differential scoring, i.e. data dimension is larger than 1:</span>
+            <span class="k">for</span> <span class="n">page</span> <span class="ow">in</span> <span class="n">estimator</span><span class="o">.</span><span class="n">pages</span><span class="p">:</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">page</span><span class="o">.</span><span class="n">diff_axis1</span> <span class="o">=</span> <span class="n">MeshAxis</span><span class="p">(</span><span class="n">n</span><span class="o">=</span><span class="n">page</span><span class="o">.</span><span class="n">page_diff_size</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+                                               <span class="n">min_val</span><span class="o">=</span><span class="n">page</span><span class="o">.</span><span class="n">page_diff_start</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+                                               <span class="n">max_val</span><span class="o">=</span><span class="n">page</span><span class="o">.</span><span class="n">page_diff_stop</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+                                               <span class="n">name</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span>
+                                               <span class="n">unit</span><span class="o">=</span><span class="n">page</span><span class="o">.</span><span class="n">page_diff_units</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;;&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">],</span>
+                                               <span class="n">binning</span><span class="o">=</span><span class="n">MeshAxis</span><span class="o">.</span><span class="n">BinningType</span><span class="o">.</span><span class="n">linear</span><span class="p">)</span>
+                <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Lack of data for first level differential scoring&quot;</span><span class="p">)</span>
+                <span class="k">except</span> <span class="ne">IndexError</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Lack of units for first level differential scoring&quot;</span><span class="p">)</span>
+
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">page</span><span class="o">.</span><span class="n">diff_axis2</span> <span class="o">=</span> <span class="n">MeshAxis</span><span class="p">(</span><span class="n">n</span><span class="o">=</span><span class="n">page</span><span class="o">.</span><span class="n">page_diff_size</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
+                                               <span class="n">min_val</span><span class="o">=</span><span class="n">page</span><span class="o">.</span><span class="n">page_diff_start</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
+                                               <span class="n">max_val</span><span class="o">=</span><span class="n">page</span><span class="o">.</span><span class="n">page_diff_stop</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
+                                               <span class="n">name</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span>
+                                               <span class="n">unit</span><span class="o">=</span><span class="n">page</span><span class="o">.</span><span class="n">page_diff_units</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;;&quot;</span><span class="p">)[</span><span class="mi">1</span><span class="p">],</span>
+                                               <span class="n">binning</span><span class="o">=</span><span class="n">MeshAxis</span><span class="o">.</span><span class="n">BinningType</span><span class="o">.</span><span class="n">linear</span><span class="p">)</span>
+                <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Lack of data for second level differential scoring&quot;</span><span class="p">)</span>
+                <span class="k">except</span> <span class="ne">IndexError</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Lack of units for second level differential scoring&quot;</span><span class="p">)</span>
+
+            <span class="c1"># Fix names of the axis objects for different mesh type,</span>
+            <span class="c1"># units are directly extracted from BDO tags in 2019 format</span>
+            <span class="n">_</span><span class="p">,</span> <span class="n">xname</span> <span class="o">=</span> <span class="n">mesh_unit_and_name</span><span class="p">(</span><span class="n">estimator</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+            <span class="n">_</span><span class="p">,</span> <span class="n">yname</span> <span class="o">=</span> <span class="n">mesh_unit_and_name</span><span class="p">(</span><span class="n">estimator</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+            <span class="n">_</span><span class="p">,</span> <span class="n">zname</span> <span class="o">=</span> <span class="n">mesh_unit_and_name</span><span class="p">(</span><span class="n">estimator</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+            <span class="n">estimator</span><span class="o">.</span><span class="n">x</span> <span class="o">=</span> <span class="n">estimator</span><span class="o">.</span><span class="n">x</span><span class="o">.</span><span class="n">_replace</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">xname</span><span class="p">)</span>
+            <span class="n">estimator</span><span class="o">.</span><span class="n">y</span> <span class="o">=</span> <span class="n">estimator</span><span class="o">.</span><span class="n">y</span><span class="o">.</span><span class="n">_replace</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">yname</span><span class="p">)</span>
+            <span class="n">estimator</span><span class="o">.</span><span class="n">z</span> <span class="o">=</span> <span class="n">estimator</span><span class="o">.</span><span class="n">z</span><span class="o">.</span><span class="n">_replace</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">zname</span><span class="p">)</span>
+
+            <span class="c1"># Copy the SH12A specific units into the general placeholders:</span>
+            <span class="k">for</span> <span class="n">page</span> <span class="ow">in</span> <span class="n">estimator</span><span class="o">.</span><span class="n">pages</span><span class="p">:</span>
+                <span class="n">page</span><span class="o">.</span><span class="n">unit</span> <span class="o">=</span> <span class="n">page</span><span class="o">.</span><span class="n">detector_unit</span>
+                <span class="c1"># in future, a user may optionally give a more specific name in SH12A detect.dat, which then</span>
+                <span class="c1"># may be written to the .bdo file. If the name is not set, use the official detector name instead:</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">page</span><span class="o">.</span><span class="n">name</span><span class="p">:</span>
+                    <span class="n">page</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">page</span><span class="o">.</span><span class="n">dettyp</span><span class="p">)</span>
+
+            <span class="n">estimator</span><span class="o">.</span><span class="n">file_format</span> <span class="o">=</span> <span class="s1">&#39;bdo2019&#39;</span>
+
+            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Done reading bdo file.&quot;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="kc">True</span></div></div>
+</pre></div>
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../../index.html">pymchelper 1.10.0+rev3 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../../index.html" >Module code</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">pymchelper.readers.shieldhit.reader_bdo2019</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2016, Leszek Grzanka.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 4.3.0.
+    </div>
+  </body>
+</html>

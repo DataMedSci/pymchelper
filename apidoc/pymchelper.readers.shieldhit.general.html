@@ -1,0 +1,213 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>pymchelper.readers.shieldhit.general module &#8212; pymchelper 1.10.0+rev3 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/classic.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/graphviz.css" />
+    
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/doctools.js"></script>
+    
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="pymchelper.readers.shieldhit.reader_base module" href="pymchelper.readers.shieldhit.reader_base.html" />
+    <link rel="prev" title="pymchelper.readers.shieldhit.binary_spec module" href="pymchelper.readers.shieldhit.binary_spec.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="pymchelper.readers.shieldhit.reader_base.html" title="pymchelper.readers.shieldhit.reader_base module"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="pymchelper.readers.shieldhit.binary_spec.html" title="pymchelper.readers.shieldhit.binary_spec module"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">pymchelper 1.10.0+rev3 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../developer.html" >Developer documentation</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="modules.html" >Source code</a> &#187;</li>
+          <li class="nav-item nav-item-3"><a href="pymchelper.html" >pymchelper package</a> &#187;</li>
+          <li class="nav-item nav-item-4"><a href="pymchelper.readers.html" >pymchelper.readers package</a> &#187;</li>
+          <li class="nav-item nav-item-5"><a href="pymchelper.readers.shieldhit.html" accesskey="U">pymchelper.readers.shieldhit package</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">pymchelper.readers.shieldhit.general module</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <section id="module-pymchelper.readers.shieldhit.general">
+<span id="pymchelper-readers-shieldhit-general-module"></span><h1>pymchelper.readers.shieldhit.general module<a class="headerlink" href="#module-pymchelper.readers.shieldhit.general" title="Permalink to this headline">¶</a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="pymchelper.readers.shieldhit.general.SHFileFormatId">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pymchelper.readers.shieldhit.general.</span></span><span class="sig-name descname"><span class="pre">SHFileFormatId</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymchelper/readers/shieldhit/general.html#SHFileFormatId"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymchelper.readers.shieldhit.general.SHFileFormatId" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">enum.IntEnum</span></code></p>
+<p>SHIELD-HIT12A file format ids, as described in sh_file_format.h file</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymchelper.readers.shieldhit.general.SHFileFormatId.ascii">
+<span class="sig-name descname"><span class="pre">ascii</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">3</span></em><a class="headerlink" href="#pymchelper.readers.shieldhit.general.SHFileFormatId.ascii" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymchelper.readers.shieldhit.general.SHFileFormatId.bdo2016">
+<span class="sig-name descname"><span class="pre">bdo2016</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">1</span></em><a class="headerlink" href="#pymchelper.readers.shieldhit.general.SHFileFormatId.bdo2016" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymchelper.readers.shieldhit.general.SHFileFormatId.bdo2019">
+<span class="sig-name descname"><span class="pre">bdo2019</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">2</span></em><a class="headerlink" href="#pymchelper.readers.shieldhit.general.SHFileFormatId.bdo2019" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymchelper.readers.shieldhit.general.SHFileFormatId.bin2010">
+<span class="sig-name descname"><span class="pre">bin2010</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">0</span></em><a class="headerlink" href="#pymchelper.readers.shieldhit.general.SHFileFormatId.bin2010" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymchelper.readers.shieldhit.general.SHFileFormatId.csv">
+<span class="sig-name descname"><span class="pre">csv</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">4</span></em><a class="headerlink" href="#pymchelper.readers.shieldhit.general.SHFileFormatId.csv" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pymchelper.readers.shieldhit.general.SHReaderASCII">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pymchelper.readers.shieldhit.general.</span></span><span class="sig-name descname"><span class="pre">SHReaderASCII</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymchelper/readers/shieldhit/general.html#SHReaderASCII"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymchelper.readers.shieldhit.general.SHReaderASCII" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Reads plain text files with data saved by binary-to-ascii converter.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="pymchelper.readers.shieldhit.general.SHReaderASCII.read">
+<span class="sig-name descname"><span class="pre">read</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">detector</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymchelper/readers/shieldhit/general.html#SHReaderASCII.read"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymchelper.readers.shieldhit.general.SHReaderASCII.read" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymchelper.readers.shieldhit.general.SHReaderASCII.read_header">
+<span class="sig-name descname"><span class="pre">read_header</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">detector</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymchelper/readers/shieldhit/general.html#SHReaderASCII.read_header"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymchelper.readers.shieldhit.general.SHReaderASCII.read_header" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymchelper.readers.shieldhit.general.SHReaderASCII.read_payload">
+<span class="sig-name descname"><span class="pre">read_payload</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">detector</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymchelper/readers/shieldhit/general.html#SHReaderASCII.read_payload"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymchelper.readers.shieldhit.general.SHReaderASCII.read_payload" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pymchelper.readers.shieldhit.general.SHReaderFactory">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pymchelper.readers.shieldhit.general.</span></span><span class="sig-name descname"><span class="pre">SHReaderFactory</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymchelper/readers/shieldhit/general.html#SHReaderFactory"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymchelper.readers.shieldhit.general.SHReaderFactory" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="pymchelper.readers.common.html#pymchelper.readers.common.ReaderFactory" title="pymchelper.readers.common.ReaderFactory"><code class="xref py py-class docutils literal notranslate"><span class="pre">pymchelper.readers.common.ReaderFactory</span></code></a></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="pymchelper.readers.shieldhit.general.SHReaderFactory.get_reader">
+<span class="sig-name descname"><span class="pre">get_reader</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymchelper/readers/shieldhit/general.html#SHReaderFactory.get_reader"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymchelper.readers.shieldhit.general.SHReaderFactory.get_reader" title="Permalink to this definition">¶</a></dt>
+<dd><p>Inspect binary file and return appropriate reader object
+:return:</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pymchelper.readers.shieldhit.general.extract_sh_ver">
+<span class="sig-prename descclassname"><span class="pre">pymchelper.readers.shieldhit.general.</span></span><span class="sig-name descname"><span class="pre">extract_sh_ver</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymchelper/readers/shieldhit/general.html#extract_sh_ver"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymchelper.readers.shieldhit.general.extract_sh_ver" title="Permalink to this definition">¶</a></dt>
+<dd><p>BDO binary files, introduced in 2016 (BDO2016 and BDO2019 formats) contain information about SH VER
+:param filename: Binary file filename
+:return: SH12 version (as a string, i.e. 0.7) or None if version information was not found in the file</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pymchelper.readers.shieldhit.general.file_has_sh_magic_number">
+<span class="sig-prename descclassname"><span class="pre">pymchelper.readers.shieldhit.general.</span></span><span class="sig-name descname"><span class="pre">file_has_sh_magic_number</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymchelper/readers/shieldhit/general.html#file_has_sh_magic_number"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymchelper.readers.shieldhit.general.file_has_sh_magic_number" title="Permalink to this definition">¶</a></dt>
+<dd><p>BDO binary files, introduced in 2016 (BDO2016 and BDO2019 formats) starts with 6 magic bytes xSH12A
+:param filename: Binary file filename
+:return: True if binary file starts with SH magic number</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pymchelper.readers.shieldhit.general.read_token">
+<span class="sig-prename descclassname"><span class="pre">pymchelper.readers.shieldhit.general.</span></span><span class="sig-name descname"><span class="pre">read_token</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">token_id</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymchelper/readers/shieldhit/general.html#read_token"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymchelper.readers.shieldhit.general.read_token" title="Permalink to this definition">¶</a></dt>
+<dd><p>TODO
+:param filename:
+:param token_id:
+:return:</p>
+</dd></dl>
+
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="pymchelper.readers.shieldhit.binary_spec.html"
+                        title="previous chapter">pymchelper.readers.shieldhit.binary_spec module</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="pymchelper.readers.shieldhit.reader_base.html"
+                        title="next chapter">pymchelper.readers.shieldhit.reader_base module</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/apidoc/pymchelper.readers.shieldhit.general.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="pymchelper.readers.shieldhit.reader_base.html" title="pymchelper.readers.shieldhit.reader_base module"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="pymchelper.readers.shieldhit.binary_spec.html" title="pymchelper.readers.shieldhit.binary_spec module"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">pymchelper 1.10.0+rev3 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../developer.html" >Developer documentation</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="modules.html" >Source code</a> &#187;</li>
+          <li class="nav-item nav-item-3"><a href="pymchelper.html" >pymchelper package</a> &#187;</li>
+          <li class="nav-item nav-item-4"><a href="pymchelper.readers.html" >pymchelper.readers package</a> &#187;</li>
+          <li class="nav-item nav-item-5"><a href="pymchelper.readers.shieldhit.html" >pymchelper.readers.shieldhit package</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">pymchelper.readers.shieldhit.general module</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2016, Leszek Grzanka.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 4.3.0.
+    </div>
+  </body>
+</html>

@@ -1,0 +1,7 @@
+pymchelper.utils.mcscripter module
+==================================
+
+.. automodule:: pymchelper.utils.mcscripter
+   :members:
+   :undoc-members:
+   :show-inheritance:

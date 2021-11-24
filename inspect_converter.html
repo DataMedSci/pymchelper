@@ -1,0 +1,252 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>Inspect data &#8212; pymchelper 1.10.0+rev3 documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="_static/classic.css" />
+    <link rel="stylesheet" type="text/css" href="_static/graphviz.css" />
+    
+    <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Detailed Installation Guide" href="install.html" />
+    <link rel="prev" title="Sparse matrix data" href="sparse_converter.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="install.html" title="Detailed Installation Guide"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="sparse_converter.html" title="Sparse matrix data"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">pymchelper 1.10.0+rev3 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="user_guide.html" accesskey="U">User’s Guide</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Inspect data</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <section id="inspect-data">
+<h1>Inspect data<a class="headerlink" href="#inspect-data" title="Permalink to this headline">¶</a></h1>
+<p>Inspector converter (not being in fact a true converter) is not producing any files,
+but prints on the screen metadata of the input binary file.</p>
+<section id="an-example-usage">
+<h2>An example usage<a class="headerlink" href="#an-example-usage" title="Permalink to this headline">¶</a></h2>
+<p>As usual we can apply standard command:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>convertmc inspect ex_dose.bdo
+</pre></div>
+</div>
+<p>We should expect to see following output on the screen:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>INFO:pymchelper.readers.shieldhit:Reading: ex_dose.bdo
+dettyp                  : <span class="s1">&#39;DOSE&#39;</span>
+filedate                : <span class="s1">&#39;Fri, 06 Oct 2017 23:05:49 +0200&#39;</span>
+geotyp                  : <span class="s1">&#39;CYL&#39;</span>
+host                    : <span class="s1">&#39;nz61-6&#39;</span>
+mc_code_version         : <span class="s1">&#39;0.6.0-dev&#39;</span>
+nstat                   : <span class="s1">&#39;10000&#39;</span>
+nx                      : <span class="s1">&#39;1&#39;</span>
+ny                      : <span class="s1">&#39;1&#39;</span>
+nz                      : <span class="s1">&#39;1000&#39;</span>
+pages                   : <span class="s1">&#39;1&#39;</span>
+particle                : <span class="s1">&#39;-1&#39;</span>
+particle_a              : <span class="s1">&#39;-1&#39;</span>
+particle_z              : <span class="s1">&#39;-1&#39;</span>
+title                   : <span class="s1">&#39;Dose&#39;</span>
+tripdose                : <span class="s1">&#39;0.0&#39;</span>
+tripntot                : <span class="s1">&#39;-1&#39;</span>
+units                   : <span class="s1">&#39;[&#39;</span>cm<span class="s1">&#39;, &#39;</span>radians<span class="s1">&#39;, &#39;</span>cm<span class="s1">&#39;, &#39;</span><span class="o">(</span>nil<span class="o">)</span><span class="s1">&#39;, &#39;</span> MeV/g/primary<span class="s1">&#39;, &#39;</span>Dose<span class="s1">&#39;, &#39;</span>Radius <span class="o">(</span>R<span class="o">)</span><span class="s1">&#39;, &#39;</span>Angle <span class="o">(</span>PHI<span class="o">)</span><span class="s1">&#39;, &#39;</span>Position <span class="o">(</span>Z<span class="o">)</span><span class="s1">&#39;, &#39;&#39;, &#39;&#39;]&#39;</span>
+xmax                    : <span class="s1">&#39;10.0&#39;</span>
+xmin                    : <span class="s1">&#39;0.0&#39;</span>
+ymax                    : <span class="s1">&#39;6.28318530718&#39;</span>
+ymin                    : <span class="s1">&#39;0.0&#39;</span>
+zmax                    : <span class="s1">&#39;30.0&#39;</span>
+zmin                    : <span class="s1">&#39;0.0&#39;</span>
+zone_start              : <span class="s1">&#39;-1&#39;</span>
+***************************************************************************
+Data min: <span class="m">3</span>.04792e-05, max: <span class="m">0</span>.0715219
+</pre></div>
+</div>
+</section>
+<section id="advanced-usage">
+<h2>Advanced usage<a class="headerlink" href="#advanced-usage" title="Permalink to this headline">¶</a></h2>
+<dl>
+<dt>Very simple ASCII-art plots can be also printed on the screen, assuming that two libraries: bashplotlib and hipsterplot</dt><dd><p>will be installed first:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip install bashplotlib hipsterplot
+</pre></div>
+</div>
+</dd>
+</dl>
+<p>To activate plotting additional option has to be used:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>convertmc inspect ex_dose.bdo --details
+INFO:pymchelper.readers.shieldhit:Reading: ex_dose.bdo
+dettyp                  : <span class="s1">&#39;DOSE&#39;</span>
+filedate                : <span class="s1">&#39;Fri, 06 Oct 2017 23:05:49 +0200&#39;</span>
+geotyp                  : <span class="s1">&#39;CYL&#39;</span>
+host                    : <span class="s1">&#39;nz61-6&#39;</span>
+mc_code_version         : <span class="s1">&#39;0.6.0-dev&#39;</span>
+nstat                   : <span class="s1">&#39;10000&#39;</span>
+nx                      : <span class="s1">&#39;1&#39;</span>
+ny                      : <span class="s1">&#39;1&#39;</span>
+nz                      : <span class="s1">&#39;1000&#39;</span>
+pages                   : <span class="s1">&#39;1&#39;</span>
+particle                : <span class="s1">&#39;-1&#39;</span>
+particle_a              : <span class="s1">&#39;-1&#39;</span>
+particle_z              : <span class="s1">&#39;-1&#39;</span>
+title                   : <span class="s1">&#39;Dose&#39;</span>
+tripdose                : <span class="s1">&#39;0.0&#39;</span>
+tripntot                : <span class="s1">&#39;-1&#39;</span>
+units                   : <span class="s1">&#39;[&#39;</span>cm<span class="s1">&#39;, &#39;</span>radians<span class="s1">&#39;, &#39;</span>cm<span class="s1">&#39;, &#39;</span><span class="o">(</span>nil<span class="o">)</span><span class="s1">&#39;, &#39;</span> MeV/g/primary<span class="s1">&#39;, &#39;</span>Dose<span class="s1">&#39;, &#39;</span>Radius <span class="o">(</span>R<span class="o">)</span><span class="s1">&#39;, &#39;</span>Angle <span class="o">(</span>PHI<span class="o">)</span><span class="s1">&#39;, &#39;</span>Position <span class="o">(</span>Z<span class="o">)</span><span class="s1">&#39;, &#39;&#39;, &#39;&#39;]&#39;</span>
+xmax                    : <span class="s1">&#39;10.0&#39;</span>
+xmin                    : <span class="s1">&#39;0.0&#39;</span>
+ymax                    : <span class="s1">&#39;6.28318530718&#39;</span>
+ymin                    : <span class="s1">&#39;0.0&#39;</span>
+zmax                    : <span class="s1">&#39;30.0&#39;</span>
+zmin                    : <span class="s1">&#39;0.0&#39;</span>
+zone_start              : <span class="s1">&#39;-1&#39;</span>
+***************************************************************************
+Data min: <span class="m">3</span>.04792e-05, max: <span class="m">0</span>.0715219
+***************************************************************************
+Data scatter plot
+    <span class="m">0</span>.0691                                                            <span class="c1">#:</span>
+    <span class="m">0</span>.0644                                                            <span class="p">|</span>.
+    <span class="m">0</span>.0596                                                           :.<span class="p">|</span>
+    <span class="m">0</span>.0548                                                           <span class="c1"># .</span>
+    <span class="m">0</span>.0501                                                           <span class="c1"># .</span>
+    <span class="m">0</span>.0453                                                          <span class="c1">#: .</span>
+    <span class="m">0</span>.0405                                                         <span class="c1">##  :</span>
+    <span class="m">0</span>.0358                                                        <span class="c1">##</span>
+    <span class="m">0</span>.0310                                                    .###.    :
+    <span class="m">0</span>.0262                                            . <span class="c1">#######        .</span>
+    <span class="m">0</span>.0215                       <span class="c1">#:.####################|               :</span>
+    <span class="m">0</span>.0167 <span class="c1">######################### .                                  .</span>
+    <span class="m">0</span>.0119                                                              <span class="p">|</span>
+    <span class="m">0</span>.0072                                                              :
+    <span class="m">0</span>.0024                                                              <span class="c1">#########</span>
+***************************************************************************
+Data histogram
+
+ <span class="m">106</span><span class="p">|</span>  o
+ <span class="m">100</span><span class="p">|</span>  o                  o
+  <span class="m">95</span><span class="p">|</span>  o                o o
+  <span class="m">89</span><span class="p">|</span>  o                ooo
+  <span class="m">84</span><span class="p">|</span>  o                ooo
+  <span class="m">78</span><span class="p">|</span>  o                ooo
+  <span class="m">73</span><span class="p">|</span>  o               ooooo
+  <span class="m">67</span><span class="p">|</span>  o              oooooo
+  <span class="m">62</span><span class="p">|</span>  o              oooooo
+  <span class="m">56</span><span class="p">|</span>  o              oooooo
+  <span class="m">50</span><span class="p">|</span>  o              oooooo
+  <span class="m">45</span><span class="p">|</span>  o             ooooooo
+  <span class="m">39</span><span class="p">|</span>  o             ooooooo o
+  <span class="m">34</span><span class="p">|</span>  o             ooooooooo
+  <span class="m">28</span><span class="p">|</span>  o             oooooooooo
+  <span class="m">23</span><span class="p">|</span>  o             oooooooooo o
+  <span class="m">17</span><span class="p">|</span>  o             oooooooooooo oo
+  <span class="m">12</span><span class="p">|</span>  o             ooooooooooooooo
+   <span class="m">6</span><span class="p">|</span>  o             ooooooooooooooooo o o    o
+   <span class="m">1</span><span class="p">|</span> ooooooo o o   ooooooooooooooooooooooooo oooooooooooooo ooo oooooooooo o
+     -----------------------------------------------------------------------
+
+------------------------------------
+<span class="p">|</span>             Summary              <span class="p">|</span>
+------------------------------------
+<span class="p">|</span>        observations: <span class="m">1000</span>        <span class="p">|</span>
+<span class="p">|</span>       min value: <span class="m">0</span>.000030        <span class="p">|</span>
+<span class="p">|</span>         mean : <span class="m">0</span>.020207          <span class="p">|</span>
+<span class="p">|</span>       max value: <span class="m">0</span>.071522        <span class="p">|</span>
+------------------------------------
+</pre></div>
+</div>
+</section>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Inspect data</a><ul>
+<li><a class="reference internal" href="#an-example-usage">An example usage</a></li>
+<li><a class="reference internal" href="#advanced-usage">Advanced usage</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="sparse_converter.html"
+                        title="previous chapter">Sparse matrix data</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="install.html"
+                        title="next chapter">Detailed Installation Guide</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/inspect_converter.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="install.html" title="Detailed Installation Guide"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="sparse_converter.html" title="Sparse matrix data"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">pymchelper 1.10.0+rev3 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="user_guide.html" >User’s Guide</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Inspect data</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2016, Leszek Grzanka.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 4.3.0.
+    </div>
+  </body>
+</html>

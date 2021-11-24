@@ -1,0 +1,7 @@
+pymchelper.readers.shieldhit.general module
+===========================================
+
+.. automodule:: pymchelper.readers.shieldhit.general
+   :members:
+   :undoc-members:
+   :show-inheritance:

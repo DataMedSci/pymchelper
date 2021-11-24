@@ -1,0 +1,7 @@
+pymchelper.writers.excel module
+===============================
+
+.. automodule:: pymchelper.writers.excel
+   :members:
+   :undoc-members:
+   :show-inheritance:

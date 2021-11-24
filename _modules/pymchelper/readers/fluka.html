@@ -1,0 +1,353 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>pymchelper.readers.fluka &#8212; pymchelper 1.10.0+rev3 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/classic.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css" />
+    
+    <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+    <script src="../../../_static/jquery.js"></script>
+    <script src="../../../_static/underscore.js"></script>
+    <script src="../../../_static/doctools.js"></script>
+    
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">pymchelper 1.10.0+rev3 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">pymchelper.readers.fluka</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for pymchelper.readers.fluka</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">logging</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<span class="kn">from</span> <span class="nn">pymchelper.axis</span> <span class="k">import</span> <span class="n">MeshAxis</span>
+<span class="kn">from</span> <span class="nn">pymchelper.page</span> <span class="k">import</span> <span class="n">Page</span>
+<span class="kn">from</span> <span class="nn">pymchelper.readers.common</span> <span class="k">import</span> <span class="n">ReaderFactory</span><span class="p">,</span> <span class="n">Reader</span>
+<span class="kn">from</span> <span class="nn">pymchelper.flair.Data</span> <span class="k">import</span> <span class="n">Usrbin</span><span class="p">,</span> <span class="n">UsrTrack</span><span class="p">,</span> <span class="n">unpackArray</span><span class="p">,</span> <span class="n">Usrbdx</span><span class="p">,</span> <span class="n">Resnuclei</span><span class="p">,</span> <span class="n">Usrxxx</span>
+
+<span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="FlukaReaderFactory"><a class="viewcode-back" href="../../../apidoc/pymchelper.readers.fluka.html#pymchelper.readers.fluka.FlukaReaderFactory">[docs]</a><span class="k">class</span> <span class="nc">FlukaReaderFactory</span><span class="p">(</span><span class="n">ReaderFactory</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Class responsible for discovery of filetype.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+<div class="viewcode-block" id="FlukaReaderFactory.get_reader"><a class="viewcode-back" href="../../../apidoc/pymchelper.readers.fluka.html#pymchelper.readers.fluka.FlukaReaderFactory.get_reader">[docs]</a>    <span class="k">def</span> <span class="nf">get_reader</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Try reading header of Fluka binary file and return a corresponding FlukaReader object</span>
+
+<span class="sd">        :return: FlukaReader class if file is digested by Usrxxx Flair reader. None is returned otherwise</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">Usrxxx</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">filename</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">FlukaReader</span>
+        <span class="k">except</span> <span class="ne">IOError</span><span class="p">:</span>
+            <span class="k">pass</span>
+        <span class="k">return</span> <span class="kc">None</span></div></div>
+
+
+<div class="viewcode-block" id="FlukaReader"><a class="viewcode-back" href="../../../apidoc/pymchelper.readers.fluka.html#pymchelper.readers.fluka.FlukaReader">[docs]</a><span class="k">class</span> <span class="nc">FlukaReader</span><span class="p">(</span><span class="n">Reader</span><span class="p">):</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">corename</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Fluka output filenames follow this pattern: corename_fort.XX.</span>
+<span class="sd">        :return: corename part of output file or None in case filename doesn&#39;t follow Fluka naming pattern</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">core_name</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="s2">&quot;_fort&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">filename</span><span class="p">:</span>
+            <span class="n">core_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">filename</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">:]</span>
+        <span class="k">return</span> <span class="n">core_name</span>
+
+<div class="viewcode-block" id="FlukaReader.parse_usrbin"><a class="viewcode-back" href="../../../apidoc/pymchelper.readers.fluka.html#pymchelper.readers.fluka.FlukaReader.parse_usrbin">[docs]</a>    <span class="k">def</span> <span class="nf">parse_usrbin</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">estimator</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        USRBIN scores distribution of one of several quantities in a regular spatial</span>
+<span class="sd">        structure (binning detector) independent from the geometry.</span>
+<span class="sd">        :param estimator: an Estimator object, will be modified here and filled with data</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">usr_object</span> <span class="o">=</span> <span class="n">Usrbin</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">filename</span><span class="p">)</span>
+
+            <span class="c1"># loop over all detectors (pages) in USRBIN object</span>
+            <span class="k">for</span> <span class="n">det_no</span><span class="p">,</span> <span class="n">detector</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">usr_object</span><span class="o">.</span><span class="n">detector</span><span class="p">):</span>
+                <span class="n">page</span> <span class="o">=</span> <span class="n">Page</span><span class="p">(</span><span class="n">estimator</span><span class="o">=</span><span class="n">estimator</span><span class="p">)</span>
+                <span class="n">page</span><span class="o">.</span><span class="n">title</span> <span class="o">=</span> <span class="n">detector</span><span class="o">.</span><span class="n">name</span>
+
+                <span class="c1"># USRBIN doesn&#39;t support differential binning type, only spatial binning is allowed</span>
+                <span class="n">estimator</span><span class="o">.</span><span class="n">x</span> <span class="o">=</span> <span class="n">MeshAxis</span><span class="p">(</span><span class="n">n</span><span class="o">=</span><span class="n">detector</span><span class="o">.</span><span class="n">nx</span><span class="p">,</span>
+                                       <span class="n">min_val</span><span class="o">=</span><span class="n">detector</span><span class="o">.</span><span class="n">xlow</span><span class="p">,</span>
+                                       <span class="n">max_val</span><span class="o">=</span><span class="n">detector</span><span class="o">.</span><span class="n">xhigh</span><span class="p">,</span>
+                                       <span class="n">name</span><span class="o">=</span><span class="s2">&quot;X&quot;</span><span class="p">,</span>
+                                       <span class="n">unit</span><span class="o">=</span><span class="s2">&quot;cm&quot;</span><span class="p">,</span>
+                                       <span class="n">binning</span><span class="o">=</span><span class="n">MeshAxis</span><span class="o">.</span><span class="n">BinningType</span><span class="o">.</span><span class="n">linear</span><span class="p">)</span>
+                <span class="n">estimator</span><span class="o">.</span><span class="n">y</span> <span class="o">=</span> <span class="n">MeshAxis</span><span class="p">(</span><span class="n">n</span><span class="o">=</span><span class="n">detector</span><span class="o">.</span><span class="n">ny</span><span class="p">,</span>
+                                       <span class="n">min_val</span><span class="o">=</span><span class="n">detector</span><span class="o">.</span><span class="n">ylow</span><span class="p">,</span>
+                                       <span class="n">max_val</span><span class="o">=</span><span class="n">detector</span><span class="o">.</span><span class="n">yhigh</span><span class="p">,</span>
+                                       <span class="n">name</span><span class="o">=</span><span class="s2">&quot;Y&quot;</span><span class="p">,</span>
+                                       <span class="n">unit</span><span class="o">=</span><span class="s2">&quot;cm&quot;</span><span class="p">,</span>
+                                       <span class="n">binning</span><span class="o">=</span><span class="n">MeshAxis</span><span class="o">.</span><span class="n">BinningType</span><span class="o">.</span><span class="n">linear</span><span class="p">)</span>
+                <span class="n">estimator</span><span class="o">.</span><span class="n">z</span> <span class="o">=</span> <span class="n">MeshAxis</span><span class="p">(</span><span class="n">n</span><span class="o">=</span><span class="n">detector</span><span class="o">.</span><span class="n">nz</span><span class="p">,</span>
+                                       <span class="n">min_val</span><span class="o">=</span><span class="n">detector</span><span class="o">.</span><span class="n">zlow</span><span class="p">,</span>
+                                       <span class="n">max_val</span><span class="o">=</span><span class="n">detector</span><span class="o">.</span><span class="n">zhigh</span><span class="p">,</span>
+                                       <span class="n">name</span><span class="o">=</span><span class="s2">&quot;Z&quot;</span><span class="p">,</span>
+                                       <span class="n">unit</span><span class="o">=</span><span class="s2">&quot;cm&quot;</span><span class="p">,</span>
+                                       <span class="n">binning</span><span class="o">=</span><span class="n">MeshAxis</span><span class="o">.</span><span class="n">BinningType</span><span class="o">.</span><span class="n">linear</span><span class="p">)</span>
+
+                <span class="n">page</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="s2">&quot;scorer </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">detector</span><span class="o">.</span><span class="n">score</span><span class="p">)</span>
+                <span class="n">page</span><span class="o">.</span><span class="n">unit</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+
+                <span class="c1"># unpack detector data</span>
+                <span class="c1"># TODO cross-check if reshaping is needed</span>
+                <span class="n">page</span><span class="o">.</span><span class="n">data_raw</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">unpackArray</span><span class="p">(</span><span class="n">usr_object</span><span class="o">.</span><span class="n">readData</span><span class="p">(</span><span class="n">det_no</span><span class="p">)))</span>
+                <span class="n">page</span><span class="o">.</span><span class="n">error_raw</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty_like</span><span class="p">(</span><span class="n">page</span><span class="o">.</span><span class="n">data_raw</span><span class="p">)</span>
+
+                <span class="n">estimator</span><span class="o">.</span><span class="n">add_page</span><span class="p">(</span><span class="n">page</span><span class="p">)</span>
+
+            <span class="k">return</span> <span class="n">usr_object</span>
+        <span class="k">except</span> <span class="ne">IOError</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">None</span></div>
+
+<div class="viewcode-block" id="FlukaReader.parse_usrbdx"><a class="viewcode-back" href="../../../apidoc/pymchelper.readers.fluka.html#pymchelper.readers.fluka.FlukaReader.parse_usrbdx">[docs]</a>    <span class="k">def</span> <span class="nf">parse_usrbdx</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">estimator</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        USRBDX defines a detector for a boundary crossing fluence or current estimator</span>
+<span class="sd">        :param estimator: an Estimator object, will be modified here and filled with data</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">usr_object</span> <span class="o">=</span> <span class="n">Usrbdx</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">filename</span><span class="p">)</span>
+
+            <span class="c1"># loop over all detectors (pages) in USRBDX object</span>
+            <span class="k">for</span> <span class="n">det_no</span><span class="p">,</span> <span class="n">detector</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">usr_object</span><span class="o">.</span><span class="n">detector</span><span class="p">):</span>
+                <span class="n">page</span> <span class="o">=</span> <span class="n">Page</span><span class="p">(</span><span class="n">estimator</span><span class="o">=</span><span class="n">estimator</span><span class="p">)</span>
+                <span class="n">page</span><span class="o">.</span><span class="n">title</span> <span class="o">=</span> <span class="n">detector</span><span class="o">.</span><span class="n">name</span>
+                <span class="n">page</span><span class="o">.</span><span class="n">area</span> <span class="o">=</span> <span class="n">detector</span><span class="o">.</span><span class="n">area</span>  <span class="c1"># area of the detector in cm**2</span>
+
+                <span class="k">if</span> <span class="n">detector</span><span class="o">.</span><span class="n">nb</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                    <span class="n">energy_binning</span> <span class="o">=</span> <span class="n">MeshAxis</span><span class="o">.</span><span class="n">BinningType</span><span class="o">.</span><span class="n">linear</span>
+                    <span class="n">angle_binning</span> <span class="o">=</span> <span class="n">MeshAxis</span><span class="o">.</span><span class="n">BinningType</span><span class="o">.</span><span class="n">linear</span>
+                <span class="k">elif</span> <span class="n">detector</span><span class="o">.</span><span class="n">nb</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+                    <span class="n">energy_binning</span> <span class="o">=</span> <span class="n">MeshAxis</span><span class="o">.</span><span class="n">BinningType</span><span class="o">.</span><span class="n">logarithmic</span>
+                    <span class="n">angle_binning</span> <span class="o">=</span> <span class="n">MeshAxis</span><span class="o">.</span><span class="n">BinningType</span><span class="o">.</span><span class="n">linear</span>
+                <span class="k">elif</span> <span class="n">detector</span><span class="o">.</span><span class="n">nb</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+                    <span class="n">energy_binning</span> <span class="o">=</span> <span class="n">MeshAxis</span><span class="o">.</span><span class="n">BinningType</span><span class="o">.</span><span class="n">linear</span>
+                    <span class="n">angle_binning</span> <span class="o">=</span> <span class="n">MeshAxis</span><span class="o">.</span><span class="n">BinningType</span><span class="o">.</span><span class="n">logarithmic</span>
+                <span class="k">elif</span> <span class="n">detector</span><span class="o">.</span><span class="n">nb</span> <span class="o">==</span> <span class="o">-</span><span class="mi">2</span><span class="p">:</span>
+                    <span class="n">energy_binning</span> <span class="o">=</span> <span class="n">MeshAxis</span><span class="o">.</span><span class="n">BinningType</span><span class="o">.</span><span class="n">logarithmic</span>
+                    <span class="n">angle_binning</span> <span class="o">=</span> <span class="n">MeshAxis</span><span class="o">.</span><span class="n">BinningType</span><span class="o">.</span><span class="n">logarithmic</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">return</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Invalid binning type&quot;</span><span class="p">)</span>
+
+                <span class="c1"># USRBDX doesn&#39;t support spatial (XYZ) binning type</span>
+                <span class="c1"># USRBDX provides double differential binning, first axis is kinetic energy (in GeV)</span>
+                <span class="n">page</span><span class="o">.</span><span class="n">diff_axis1</span> <span class="o">=</span> <span class="n">MeshAxis</span><span class="p">(</span><span class="n">n</span><span class="o">=</span><span class="n">detector</span><span class="o">.</span><span class="n">ne</span><span class="p">,</span>  <span class="c1"># number of energy intervals for scoring</span>
+                                           <span class="n">min_val</span><span class="o">=</span><span class="n">detector</span><span class="o">.</span><span class="n">elow</span><span class="p">,</span>  <span class="c1"># minimum kinetic energy for scoring (GeV)</span>
+                                           <span class="n">max_val</span><span class="o">=</span><span class="n">detector</span><span class="o">.</span><span class="n">ehigh</span><span class="p">,</span>  <span class="c1"># maximum kinetic energy for scoring (GeV)</span>
+                                           <span class="n">name</span><span class="o">=</span><span class="s2">&quot;kinetic energy&quot;</span><span class="p">,</span>
+                                           <span class="n">unit</span><span class="o">=</span><span class="s2">&quot;GeV&quot;</span><span class="p">,</span>
+                                           <span class="n">binning</span><span class="o">=</span><span class="n">energy_binning</span><span class="p">)</span>
+
+                <span class="c1"># second axis is solid angle (in steradians)</span>
+                <span class="n">page</span><span class="o">.</span><span class="n">diff_axis2</span> <span class="o">=</span> <span class="n">MeshAxis</span><span class="p">(</span><span class="n">n</span><span class="o">=</span><span class="n">detector</span><span class="o">.</span><span class="n">na</span><span class="p">,</span>  <span class="c1"># number of angular bins</span>
+                                           <span class="n">min_val</span><span class="o">=</span><span class="n">detector</span><span class="o">.</span><span class="n">alow</span><span class="p">,</span>  <span class="c1"># minimum solid angle for scoring</span>
+                                           <span class="n">max_val</span><span class="o">=</span><span class="n">detector</span><span class="o">.</span><span class="n">ahigh</span><span class="p">,</span>  <span class="c1"># maximum solid angle for scoring</span>
+                                           <span class="n">name</span><span class="o">=</span><span class="s2">&quot;solid angle&quot;</span><span class="p">,</span>
+                                           <span class="n">unit</span><span class="o">=</span><span class="s2">&quot;sr&quot;</span><span class="p">,</span>
+                                           <span class="n">binning</span><span class="o">=</span><span class="n">angle_binning</span><span class="p">)</span>
+
+                <span class="c1"># detector.fluence corresponds to i2 in WHAT(1) in first card of USBDX</span>
+                <span class="k">if</span> <span class="n">detector</span><span class="o">.</span><span class="n">fluence</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                    <span class="n">page</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="s2">&quot;fluence&quot;</span>
+                <span class="k">elif</span> <span class="n">detector</span><span class="o">.</span><span class="n">fluence</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="n">page</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="s2">&quot;current&quot;</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">page</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+                <span class="n">page</span><span class="o">.</span><span class="n">unit</span> <span class="o">=</span> <span class="s2">&quot;cm-2 GeV-1 sr-1&quot;</span>
+
+                <span class="c1"># TODO If the generalised particle is 208.0 (ENERGY) or 211.0 (EM-ENRGY),</span>
+                <span class="c1">#             the quantity scored is differential energy fluence (if</span>
+                <span class="c1">#             cosine-weighted) or differential energy current (energy crossing the</span>
+                <span class="c1">#             surface). In both cases the quantity will be expressed in GeV per</span>
+                <span class="c1">#             cm2 per energy unit per steradian per primary</span>
+
+                <span class="c1"># unpack detector data</span>
+                <span class="c1"># TODO cross-check if reshaping is needed</span>
+                <span class="n">page</span><span class="o">.</span><span class="n">data_raw</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">unpackArray</span><span class="p">(</span><span class="n">usr_object</span><span class="o">.</span><span class="n">readData</span><span class="p">(</span><span class="n">det_no</span><span class="p">)))</span>
+                <span class="n">page</span><span class="o">.</span><span class="n">error_raw</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty_like</span><span class="p">(</span><span class="n">page</span><span class="o">.</span><span class="n">data_raw</span><span class="p">)</span>
+
+                <span class="n">estimator</span><span class="o">.</span><span class="n">add_page</span><span class="p">(</span><span class="n">page</span><span class="p">)</span>
+
+            <span class="k">return</span> <span class="n">usr_object</span>
+        <span class="k">except</span> <span class="ne">IOError</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">None</span></div>
+
+<div class="viewcode-block" id="FlukaReader.parse_usrtrack"><a class="viewcode-back" href="../../../apidoc/pymchelper.readers.fluka.html#pymchelper.readers.fluka.FlukaReader.parse_usrtrack">[docs]</a>    <span class="k">def</span> <span class="nf">parse_usrtrack</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">estimator</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        :param estimator: an Estimator object, will be modified here and filled with data</span>
+<span class="sd">        USRTRACK defines a detector for a track-length fluence estimator</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">usr_object</span> <span class="o">=</span> <span class="n">UsrTrack</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">filename</span><span class="p">)</span>
+
+            <span class="c1"># loop over all detectors (pages) in USRTRACK object</span>
+            <span class="k">for</span> <span class="n">det_no</span><span class="p">,</span> <span class="n">detector</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">usr_object</span><span class="o">.</span><span class="n">detector</span><span class="p">):</span>
+                <span class="n">page</span> <span class="o">=</span> <span class="n">Page</span><span class="p">(</span><span class="n">estimator</span><span class="o">=</span><span class="n">estimator</span><span class="p">)</span>
+                <span class="n">page</span><span class="o">.</span><span class="n">title</span> <span class="o">=</span> <span class="n">detector</span><span class="o">.</span><span class="n">name</span>
+                <span class="n">page</span><span class="o">.</span><span class="n">volume</span> <span class="o">=</span> <span class="n">detector</span><span class="o">.</span><span class="n">volume</span>   <span class="c1"># volume of the detector in cm**3</span>
+
+                <span class="c1"># USRTRACK doesn&#39;t support spatial (XYZ) binning type</span>
+                <span class="k">if</span> <span class="n">detector</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                    <span class="n">energy_binning</span> <span class="o">=</span> <span class="n">MeshAxis</span><span class="o">.</span><span class="n">BinningType</span><span class="o">.</span><span class="n">linear</span>
+                <span class="k">elif</span> <span class="n">detector</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+                    <span class="n">energy_binning</span> <span class="o">=</span> <span class="n">MeshAxis</span><span class="o">.</span><span class="n">BinningType</span><span class="o">.</span><span class="n">logarithmic</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">return</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Invalid binning type&quot;</span><span class="p">)</span>
+
+                <span class="c1"># USRTRACK provides single differential binning, with diff axis in kinetic energy (in GeV)</span>
+                <span class="n">page</span><span class="o">.</span><span class="n">diff_axis1</span> <span class="o">=</span> <span class="n">MeshAxis</span><span class="p">(</span><span class="n">n</span><span class="o">=</span><span class="n">detector</span><span class="o">.</span><span class="n">ne</span><span class="p">,</span>  <span class="c1"># number of energy intervals for scoring</span>
+                                           <span class="n">min_val</span><span class="o">=</span><span class="n">detector</span><span class="o">.</span><span class="n">elow</span><span class="p">,</span>  <span class="c1"># minimum kinetic energy for scoring (GeV)</span>
+                                           <span class="n">max_val</span><span class="o">=</span><span class="n">detector</span><span class="o">.</span><span class="n">ehigh</span><span class="p">,</span>  <span class="c1"># maximum kinetic energy for scoring (GeV)</span>
+                                           <span class="n">name</span><span class="o">=</span><span class="s2">&quot;kinetic energy&quot;</span><span class="p">,</span>
+                                           <span class="n">unit</span><span class="o">=</span><span class="s2">&quot;GeV&quot;</span><span class="p">,</span>
+                                           <span class="n">binning</span><span class="o">=</span><span class="n">energy_binning</span><span class="p">)</span>
+
+                <span class="n">page</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="s2">&quot;fluence&quot;</span>
+                <span class="n">page</span><span class="o">.</span><span class="n">unit</span> <span class="o">=</span> <span class="s2">&quot;cm-2 GeV-1&quot;</span>
+
+                <span class="c1"># TODO IMPORTANT! The results of USRTRACK are always given as DIFFERENTIAL</span>
+                <span class="c1">#             distributions of fluence (or tracklength, if the detector region</span>
+                <span class="c1">#             volume is not specified) in energy, in units of cm-2 GeV-1 (or</span>
+                <span class="c1">#             cm GeV-1) per incident primary unit weight. Thus, for example, when</span>
+                <span class="c1">#             requesting a fluence energy spectrum, to obtain INTEGRAL BINNED</span>
+                <span class="c1">#             results (fluence in cm-2 or tracklength in cm PER ENERGY BIN per</span>
+                <span class="c1">#             primary) one must multiply the value of each energy bin by the width</span>
+                <span class="c1">#             of the bin (even for logarithmic binning)</span>
+
+                <span class="c1"># TODO If the generalised particle is 208 (ENERGY) or 211 (EM-ENRGY), the</span>
+                <span class="c1">#             quantity scored is differential energy fluence (or tracklength, if</span>
+                <span class="c1">#             the detector region volume is not specified), expressed in GeV per</span>
+                <span class="c1">#             cm2 (or cm GeV) per energy unit per primary. That can sometimes lead</span>
+                <span class="c1">#             to confusion since GeV cm-2 GeV-1 = cm-2, where energy does not appear.</span>
+                <span class="c1">#             Note that integrating over energy one gets GeV/cm2.</span>
+
+                <span class="c1"># unpack detector data</span>
+                <span class="c1"># TODO cross-check if reshaping is needed</span>
+                <span class="n">page</span><span class="o">.</span><span class="n">data_raw</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">unpackArray</span><span class="p">(</span><span class="n">usr_object</span><span class="o">.</span><span class="n">readData</span><span class="p">(</span><span class="n">det_no</span><span class="p">)))</span>
+                <span class="n">page</span><span class="o">.</span><span class="n">error_raw</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty_like</span><span class="p">(</span><span class="n">page</span><span class="o">.</span><span class="n">data_raw</span><span class="p">)</span>
+
+                <span class="n">estimator</span><span class="o">.</span><span class="n">add_page</span><span class="p">(</span><span class="n">page</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">usr_object</span>
+        <span class="k">except</span> <span class="ne">IOError</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">None</span></div>
+
+<div class="viewcode-block" id="FlukaReader.parse_resnuclei"><a class="viewcode-back" href="../../../apidoc/pymchelper.readers.fluka.html#pymchelper.readers.fluka.FlukaReader.parse_resnuclei">[docs]</a>    <span class="k">def</span> <span class="nf">parse_resnuclei</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">estimator</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        TODO add support for resnuclei</span>
+<span class="sd">        RESNUCLEi Scores residual nuclei produced in inelastic interactions on a region basis</span>
+<span class="sd">        :param estimator: an Estimator object, will be modified here and filled with data</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">usr_object</span> <span class="o">=</span> <span class="n">Resnuclei</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">filename</span><span class="p">)</span>
+            <span class="c1"># loop over all detectors (pages) in USRTRACK object</span>
+            <span class="k">for</span> <span class="n">det_no</span><span class="p">,</span> <span class="n">detector</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">usr_object</span><span class="o">.</span><span class="n">detector</span><span class="p">):</span>
+                <span class="n">page</span> <span class="o">=</span> <span class="n">Page</span><span class="p">(</span><span class="n">estimator</span><span class="o">=</span><span class="n">estimator</span><span class="p">)</span>
+
+                <span class="c1"># unpack detector data</span>
+                <span class="c1"># TODO cross-check if reshaping is needed</span>
+                <span class="n">page</span><span class="o">.</span><span class="n">data_raw</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">unpackArray</span><span class="p">(</span><span class="n">usr_object</span><span class="o">.</span><span class="n">readData</span><span class="p">(</span><span class="n">det_no</span><span class="p">)))</span>
+                <span class="n">page</span><span class="o">.</span><span class="n">error_raw</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty_like</span><span class="p">(</span><span class="n">page</span><span class="o">.</span><span class="n">data_raw</span><span class="p">)</span>
+
+                <span class="n">estimator</span><span class="o">.</span><span class="n">add_page</span><span class="p">(</span><span class="n">page</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">usr_object</span>
+        <span class="k">except</span> <span class="ne">IOError</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">None</span></div>
+
+<div class="viewcode-block" id="FlukaReader.parse_data"><a class="viewcode-back" href="../../../apidoc/pymchelper.readers.fluka.html#pymchelper.readers.fluka.FlukaReader.parse_data">[docs]</a>    <span class="k">def</span> <span class="nf">parse_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">estimator</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        TODO</span>
+<span class="sd">        :param estimator: an Estimator object, will be modified here and filled with data</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">parse_function</span> <span class="ow">in</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parse_usrbin</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">parse_usrtrack</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">parse_usrbdx</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">parse_resnuclei</span><span class="p">):</span>
+            <span class="n">usr_object</span> <span class="o">=</span> <span class="n">parse_function</span><span class="p">(</span><span class="n">estimator</span><span class="p">)</span>
+
+            <span class="c1"># stop on first method which return not-None results and return it back</span>
+            <span class="k">if</span> <span class="n">usr_object</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">usr_object</span></div>
+
+<div class="viewcode-block" id="FlukaReader.read_data"><a class="viewcode-back" href="../../../apidoc/pymchelper.readers.fluka.html#pymchelper.readers.fluka.FlukaReader.read_data">[docs]</a>    <span class="k">def</span> <span class="nf">read_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">estimator</span><span class="p">,</span> <span class="n">nscale</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        TODO</span>
+<span class="sd">        :param estimator: an Estimator object, will be modified here and filled with data</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">usr_object</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parse_data</span><span class="p">(</span><span class="n">estimator</span><span class="p">)</span>
+
+        <span class="n">estimator</span><span class="o">.</span><span class="n">file_counter</span> <span class="o">=</span> <span class="n">usr_object</span><span class="o">.</span><span class="n">nbatch</span>
+        <span class="n">estimator</span><span class="o">.</span><span class="n">number_of_primaries</span> <span class="o">=</span> <span class="n">usr_object</span><span class="o">.</span><span class="n">ncase</span>
+        <span class="n">estimator</span><span class="o">.</span><span class="n">time</span> <span class="o">=</span> <span class="n">usr_object</span><span class="o">.</span><span class="n">time</span>
+        <span class="n">estimator</span><span class="o">.</span><span class="n">title</span> <span class="o">=</span> <span class="n">usr_object</span><span class="o">.</span><span class="n">title</span>
+
+        <span class="n">estimator</span><span class="o">.</span><span class="n">file_format</span> <span class="o">=</span> <span class="s1">&#39;fluka_binary&#39;</span>
+        <span class="k">return</span> <span class="kc">True</span></div></div>
+</pre></div>
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">pymchelper 1.10.0+rev3 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">pymchelper.readers.fluka</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2016, Leszek Grzanka.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 4.3.0.
+    </div>
+  </body>
+</html>

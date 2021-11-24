@@ -1,0 +1,7 @@
+pymchelper.version module
+=========================
+
+.. automodule:: pymchelper.version
+   :members:
+   :undoc-members:
+   :show-inheritance:

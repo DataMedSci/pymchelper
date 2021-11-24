@@ -1,0 +1,23 @@
+pymchelper.shieldhit package
+============================
+
+.. automodule:: pymchelper.shieldhit
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Subpackages
+-----------
+
+.. toctree::
+   :maxdepth: 4
+
+   pymchelper.shieldhit.detector
+
+Submodules
+----------
+
+.. toctree::
+   :maxdepth: 4
+
+   pymchelper.shieldhit.particle

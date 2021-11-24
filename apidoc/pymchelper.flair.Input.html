@@ -1,0 +1,1290 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>pymchelper.flair.Input module &#8212; pymchelper 1.10.0+rev3 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/classic.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/graphviz.css" />
+    
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/doctools.js"></script>
+    
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">pymchelper 1.10.0+rev3 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">pymchelper.flair.Input module</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <section id="module-pymchelper.flair.Input">
+<span id="pymchelper-flair-input-module"></span><h1>pymchelper.flair.Input module<a class="headerlink" href="#module-pymchelper.flair.Input" title="Permalink to this headline">¶</a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="pymchelper.flair.Input.Card">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pymchelper.flair.Input.</span></span><span class="sig-name descname"><span class="pre">Card</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tag</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">what</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">comment</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">extra</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymchelper/flair/Input.html#Card"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymchelper.flair.Input.Card" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Base class for a fluka card</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymchelper.flair.Input.Card.BODY">
+<span class="sig-name descname"><span class="pre">BODY</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">1</span></em><a class="headerlink" href="#pymchelper.flair.Input.Card.BODY" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymchelper.flair.Input.Card.GENERIC">
+<span class="sig-name descname"><span class="pre">GENERIC</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">0</span></em><a class="headerlink" href="#pymchelper.flair.Input.Card.GENERIC" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymchelper.flair.Input.Card.OBJECT">
+<span class="sig-name descname"><span class="pre">OBJECT</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">3</span></em><a class="headerlink" href="#pymchelper.flair.Input.Card.OBJECT" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymchelper.flair.Input.Card.REGION">
+<span class="sig-name descname"><span class="pre">REGION</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">2</span></em><a class="headerlink" href="#pymchelper.flair.Input.Card.REGION" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymchelper.flair.Input.Card.absWhat">
+<span class="sig-name descname"><span class="pre">absWhat</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">w</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymchelper/flair/Input.html#Card.absWhat"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymchelper.flair.Input.Card.absWhat" title="Permalink to this definition">¶</a></dt>
+<dd><p>return the absolute value of what[w]</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymchelper.flair.Input.Card.addUserInvalid">
+<span class="sig-name descname"><span class="pre">addUserInvalid</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">item</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymchelper/flair/Input.html#Card.addUserInvalid"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymchelper.flair.Input.Card.addUserInvalid" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymchelper.flair.Input.Card.addZone">
+<span class="sig-name descname"><span class="pre">addZone</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">zone</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymchelper/flair/Input.html#Card.addZone"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymchelper.flair.Input.Card.addZone" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add zone to card</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymchelper.flair.Input.Card.appendComment">
+<span class="sig-name descname"><span class="pre">appendComment</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">comment</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymchelper/flair/Input.html#Card.appendComment"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymchelper.flair.Input.Card.appendComment" title="Permalink to this definition">¶</a></dt>
+<dd><p>append comment</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymchelper.flair.Input.Card.appendWhats">
+<span class="sig-name descname"><span class="pre">appendWhats</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">what</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pos</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymchelper/flair/Input.html#Card.appendWhats"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymchelper.flair.Input.Card.appendWhats" title="Permalink to this definition">¶</a></dt>
+<dd><p>append what’s</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymchelper.flair.Input.Card.bodyN">
+<span class="sig-name descname"><span class="pre">bodyN</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymchelper/flair/Input.html#Card.bodyN"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymchelper.flair.Input.Card.bodyN" title="Permalink to this definition">¶</a></dt>
+<dd><p>Normal of body</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymchelper.flair.Input.Card.bodyP">
+<span class="sig-name descname"><span class="pre">bodyP</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymchelper/flair/Input.html#Card.bodyP"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymchelper.flair.Input.Card.bodyP" title="Permalink to this definition">¶</a></dt>
+<dd><p>Position of body</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymchelper.flair.Input.Card.bodyP1">
+<span class="sig-name descname"><span class="pre">bodyP1</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pymchelper.flair.Input.Card.bodyP1" title="Permalink to this definition">¶</a></dt>
+<dd><p>Position of body</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymchelper.flair.Input.Card.bodyP2">
+<span class="sig-name descname"><span class="pre">bodyP2</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymchelper/flair/Input.html#Card.bodyP2"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymchelper.flair.Input.Card.bodyP2" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymchelper.flair.Input.Card.bodyPn">
+<span class="sig-name descname"><span class="pre">bodyPn</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymchelper/flair/Input.html#Card.bodyPn"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymchelper.flair.Input.Card.bodyPn" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymchelper.flair.Input.Card.bodyR">
+<span class="sig-name descname"><span class="pre">bodyR</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymchelper/flair/Input.html#Card.bodyR"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymchelper.flair.Input.Card.bodyR" title="Permalink to this definition">¶</a></dt>
+<dd><p>Radius (or x-radius) of body</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymchelper.flair.Input.Card.bodyX">
+<span class="sig-name descname"><span class="pre">bodyX</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymchelper/flair/Input.html#Card.bodyX"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymchelper.flair.Input.Card.bodyX" title="Permalink to this definition">¶</a></dt>
+<dd><p>X-vector of body</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymchelper.flair.Input.Card.bodyY">
+<span class="sig-name descname"><span class="pre">bodyY</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymchelper/flair/Input.html#Card.bodyY"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymchelper.flair.Input.Card.bodyY" title="Permalink to this definition">¶</a></dt>
+<dd><p>Y-vector of body</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymchelper.flair.Input.Card.bodyZ">
+<span class="sig-name descname"><span class="pre">bodyZ</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymchelper/flair/Input.html#Card.bodyZ"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymchelper.flair.Input.Card.bodyZ" title="Permalink to this definition">¶</a></dt>
+<dd><p>Z-vector of body</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymchelper.flair.Input.Card.case">
+<span class="sig-name descname"><span class="pre">case</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymchelper/flair/Input.html#Card.case"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymchelper.flair.Input.Card.case" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymchelper.flair.Input.Card.changeTag">
+<span class="sig-name descname"><span class="pre">changeTag</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tag</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">truncate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymchelper/flair/Input.html#Card.changeTag"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymchelper.flair.Input.Card.changeTag" title="Permalink to this definition">¶</a></dt>
+<dd><p>change tag of card</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymchelper.flair.Input.Card.clearUserInvalid">
+<span class="sig-name descname"><span class="pre">clearUserInvalid</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymchelper/flair/Input.html#Card.clearUserInvalid"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymchelper.flair.Input.Card.clearUserInvalid" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymchelper.flair.Input.Card.clone">
+<span class="sig-name descname"><span class="pre">clone</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymchelper/flair/Input.html#Card.clone"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymchelper.flair.Input.Card.clone" title="Permalink to this definition">¶</a></dt>
+<dd><p>clone card object</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymchelper.flair.Input.Card.cmpPos_key">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">cmpPos_key</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">a</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymchelper/flair/Input.html#Card.cmpPos_key"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymchelper.flair.Input.Card.cmpPos_key" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymchelper.flair.Input.Card.comment">
+<span class="sig-name descname"><span class="pre">comment</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymchelper/flair/Input.html#Card.comment"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymchelper.flair.Input.Card.comment" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymchelper.flair.Input.Card.commentStr">
+<span class="sig-name descname"><span class="pre">commentStr</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymchelper/flair/Input.html#Card.commentStr"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymchelper.flair.Input.Card.commentStr" title="Permalink to this definition">¶</a></dt>
+<dd><p>return a comment string</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymchelper.flair.Input.Card.convert">
+<span class="sig-name descname"><span class="pre">convert</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tonames</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymchelper/flair/Input.html#Card.convert"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymchelper.flair.Input.Card.convert" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymchelper.flair.Input.Card.copyProperties">
+<span class="sig-name descname"><span class="pre">copyProperties</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">card</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymchelper/flair/Input.html#Card.copyProperties"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymchelper.flair.Input.Card.copyProperties" title="Permalink to this definition">¶</a></dt>
+<dd><p>Copy properties from card</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymchelper.flair.Input.Card.diff">
+<span class="sig-name descname"><span class="pre">diff</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">card</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymchelper/flair/Input.html#Card.diff"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymchelper.flair.Input.Card.diff" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return differences of the two cards as a list of integers
+-3 = enable/disable
+-2 = Comment
+-1 = Extra
+0 = Sdum
+1..n = What’s
+:param card:
+:return:</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymchelper.flair.Input.Card.disable">
+<span class="sig-name descname"><span class="pre">disable</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymchelper/flair/Input.html#Card.disable"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymchelper.flair.Input.Card.disable" title="Permalink to this definition">¶</a></dt>
+<dd><p>disable card</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymchelper.flair.Input.Card.dump">
+<span class="sig-name descname"><span class="pre">dump</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pickler</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymchelper/flair/Input.html#Card.dump"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymchelper.flair.Input.Card.dump" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymchelper.flair.Input.Card.errorMessage">
+<span class="sig-name descname"><span class="pre">errorMessage</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">labels</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">()</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymchelper/flair/Input.html#Card.errorMessage"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymchelper.flair.Input.Card.errorMessage" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymchelper.flair.Input.Card.evalWhat">
+<span class="sig-name descname"><span class="pre">evalWhat</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dollar</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymchelper/flair/Input.html#Card.evalWhat"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymchelper.flair.Input.Card.evalWhat" title="Permalink to this definition">¶</a></dt>
+<dd><p>return evaluated what if needed</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymchelper.flair.Input.Card.evalWhat0">
+<span class="sig-name descname"><span class="pre">evalWhat0</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dollar</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymchelper/flair/Input.html#Card.evalWhat0"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymchelper.flair.Input.Card.evalWhat0" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymchelper.flair.Input.Card.evalWhatStr">
+<span class="sig-name descname"><span class="pre">evalWhatStr</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymchelper/flair/Input.html#Card.evalWhatStr"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymchelper.flair.Input.Card.evalWhatStr" title="Permalink to this definition">¶</a></dt>
+<dd><p>return string for special evaluated whats</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymchelper.flair.Input.Card.extra">
+<span class="sig-name descname"><span class="pre">extra</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymchelper/flair/Input.html#Card.extra"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymchelper.flair.Input.Card.extra" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymchelper.flair.Input.Card.findType">
+<span class="sig-name descname"><span class="pre">findType</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">target</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymchelper/flair/Input.html#Card.findType"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymchelper.flair.Input.Card.findType" title="Permalink to this definition">¶</a></dt>
+<dd><p>return whats with a specific type from the card, pi, mi, …</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymchelper.flair.Input.Card.get">
+<span class="sig-name descname"><span class="pre">get</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">t</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pymchelper.flair.Input.Card.get" title="Permalink to this definition">¶</a></dt>
+<dd><p>get card information</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymchelper.flair.Input.Card.getProperty">
+<span class="sig-name descname"><span class="pre">getProperty</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">t</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymchelper/flair/Input.html#Card.getProperty"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymchelper.flair.Input.Card.getProperty" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymchelper.flair.Input.Card.ignore">
+<span class="sig-name descname"><span class="pre">ignore</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymchelper/flair/Input.html#Card.ignore"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymchelper.flair.Input.Card.ignore" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymchelper.flair.Input.Card.indent">
+<span class="sig-name descname"><span class="pre">indent</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymchelper/flair/Input.html#Card.indent"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymchelper.flair.Input.Card.indent" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymchelper.flair.Input.Card.intWhat">
+<span class="sig-name descname"><span class="pre">intWhat</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymchelper/flair/Input.html#Card.intWhat"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymchelper.flair.Input.Card.intWhat" title="Permalink to this definition">¶</a></dt>
+<dd><p>try to return an integer from what</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymchelper.flair.Input.Card.isEvalWhat">
+<span class="sig-name descname"><span class="pre">isEvalWhat</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">w</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymchelper/flair/Input.html#Card.isEvalWhat"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymchelper.flair.Input.Card.isEvalWhat" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymchelper.flair.Input.Card.isGeo">
+<span class="sig-name descname"><span class="pre">isGeo</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymchelper/flair/Input.html#Card.isGeo"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymchelper.flair.Input.Card.isGeo" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymchelper.flair.Input.Card.load">
+<span class="sig-name descname"><span class="pre">load</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">unpickler</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymchelper/flair/Input.html#Card.load"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymchelper.flair.Input.Card.load" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymchelper.flair.Input.Card.loadVoxel">
+<span class="sig-name descname"><span class="pre">loadVoxel</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymchelper/flair/Input.html#Card.loadVoxel"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymchelper.flair.Input.Card.loadVoxel" title="Permalink to this definition">¶</a></dt>
+<dd><p>Load voxel information</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymchelper.flair.Input.Card.longWhat">
+<span class="sig-name descname"><span class="pre">longWhat</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymchelper/flair/Input.html#Card.longWhat"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymchelper.flair.Input.Card.longWhat" title="Permalink to this definition">¶</a></dt>
+<dd><p>try to return a long integer from what</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymchelper.flair.Input.Card.name">
+<span class="sig-name descname"><span class="pre">name</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pymchelper.flair.Input.Card.name" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymchelper.flair.Input.Card.notIgnore">
+<span class="sig-name descname"><span class="pre">notIgnore</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymchelper/flair/Input.html#Card.notIgnore"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymchelper.flair.Input.Card.notIgnore" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymchelper.flair.Input.Card.numWhat">
+<span class="sig-name descname"><span class="pre">numWhat</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymchelper/flair/Input.html#Card.numWhat"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymchelper.flair.Input.Card.numWhat" title="Permalink to this definition">¶</a></dt>
+<dd><p>try to return a number from what</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymchelper.flair.Input.Card.nwhats">
+<span class="sig-name descname"><span class="pre">nwhats</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymchelper/flair/Input.html#Card.nwhats"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymchelper.flair.Input.Card.nwhats" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymchelper.flair.Input.Card.pos">
+<span class="sig-name descname"><span class="pre">pos</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymchelper/flair/Input.html#Card.pos"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymchelper.flair.Input.Card.pos" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymchelper.flair.Input.Card.sdum">
+<span class="sig-name descname"><span class="pre">sdum</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymchelper/flair/Input.html#Card.sdum"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymchelper.flair.Input.Card.sdum" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymchelper.flair.Input.Card.set">
+<span class="sig-name descname"><span class="pre">set</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">t</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">v</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pymchelper.flair.Input.Card.set" title="Permalink to this definition">¶</a></dt>
+<dd><p>set value to what(#, sdum, comment, extra)</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymchelper.flair.Input.Card.setAbsWhat">
+<span class="sig-name descname"><span class="pre">setAbsWhat</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">w</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">v</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymchelper/flair/Input.html#Card.setAbsWhat"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymchelper.flair.Input.Card.setAbsWhat" title="Permalink to this definition">¶</a></dt>
+<dd><p>change the absolute value of what keeping the same sign</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymchelper.flair.Input.Card.setActive">
+<span class="sig-name descname"><span class="pre">setActive</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">a</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymchelper/flair/Input.html#Card.setActive"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymchelper.flair.Input.Card.setActive" title="Permalink to this definition">¶</a></dt>
+<dd><p>set active state of card</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymchelper.flair.Input.Card.setComment">
+<span class="sig-name descname"><span class="pre">setComment</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">comment</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymchelper/flair/Input.html#Card.setComment"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymchelper.flair.Input.Card.setComment" title="Permalink to this definition">¶</a></dt>
+<dd><p>set comment string</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymchelper.flair.Input.Card.setEnable">
+<span class="sig-name descname"><span class="pre">setEnable</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">e</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymchelper/flair/Input.html#Card.setEnable"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymchelper.flair.Input.Card.setEnable" title="Permalink to this definition">¶</a></dt>
+<dd><p>set state enable(True)/disable(False)</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymchelper.flair.Input.Card.setExtra">
+<span class="sig-name descname"><span class="pre">setExtra</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">e</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymchelper/flair/Input.html#Card.setExtra"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymchelper.flair.Input.Card.setExtra" title="Permalink to this definition">¶</a></dt>
+<dd><p>set extra information</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymchelper.flair.Input.Card.setModified">
+<span class="sig-name descname"><span class="pre">setModified</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymchelper/flair/Input.html#Card.setModified"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymchelper.flair.Input.Card.setModified" title="Permalink to this definition">¶</a></dt>
+<dd><p>set last time modified</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymchelper.flair.Input.Card.setNWhats">
+<span class="sig-name descname"><span class="pre">setNWhats</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymchelper/flair/Input.html#Card.setNWhats"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymchelper.flair.Input.Card.setNWhats" title="Permalink to this definition">¶</a></dt>
+<dd><p>set the total number of whats</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymchelper.flair.Input.Card.setName">
+<span class="sig-name descname"><span class="pre">setName</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">s</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pymchelper.flair.Input.Card.setName" title="Permalink to this definition">¶</a></dt>
+<dd><p>set sdum</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymchelper.flair.Input.Card.setProperty">
+<span class="sig-name descname"><span class="pre">setProperty</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">t</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">v</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymchelper/flair/Input.html#Card.setProperty"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymchelper.flair.Input.Card.setProperty" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymchelper.flair.Input.Card.setSdum">
+<span class="sig-name descname"><span class="pre">setSdum</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">s</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymchelper/flair/Input.html#Card.setSdum"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymchelper.flair.Input.Card.setSdum" title="Permalink to this definition">¶</a></dt>
+<dd><p>set sdum</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymchelper.flair.Input.Card.setSign">
+<span class="sig-name descname"><span class="pre">setSign</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">w</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">s</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymchelper/flair/Input.html#Card.setSign"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymchelper.flair.Input.Card.setSign" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymchelper.flair.Input.Card.setWhat">
+<span class="sig-name descname"><span class="pre">setWhat</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">w</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">v</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymchelper/flair/Input.html#Card.setWhat"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymchelper.flair.Input.Card.setWhat" title="Permalink to this definition">¶</a></dt>
+<dd><p>set what value</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymchelper.flair.Input.Card.setWhats">
+<span class="sig-name descname"><span class="pre">setWhats</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">whats</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymchelper/flair/Input.html#Card.setWhats"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymchelper.flair.Input.Card.setWhats" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymchelper.flair.Input.Card.setZones">
+<span class="sig-name descname"><span class="pre">setZones</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">zones</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymchelper/flair/Input.html#Card.setZones"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymchelper.flair.Input.Card.setZones" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set a list of zones as expression… removing empty zones</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymchelper.flair.Input.Card.sign">
+<span class="sig-name descname"><span class="pre">sign</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">w</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymchelper/flair/Input.html#Card.sign"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymchelper.flair.Input.Card.sign" title="Permalink to this definition">¶</a></dt>
+<dd><p>return sign of a number: False=+, True=-</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymchelper.flair.Input.Card.splitExpr">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">splitExpr</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">expr</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">maxlength</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">100</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymchelper/flair/Input.html#Card.splitExpr"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymchelper.flair.Input.Card.splitExpr" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymchelper.flair.Input.Card.test">
+<span class="sig-name descname"><span class="pre">test</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">func</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">var</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">val</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">case</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymchelper/flair/Input.html#Card.test"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymchelper.flair.Input.Card.test" title="Permalink to this definition">¶</a></dt>
+<dd><blockquote>
+<div><p>test card against a filter-function
+Filter format  type [function]</p>
+</div></blockquote>
+<p>what
+value</p>
+<blockquote>
+<div><dl>
+<dt>func: [type][function]</dt><dd><dl class="simple">
+<dt>type:       i=int</dt><dd><p>f=float
+s=string</p>
+</dd>
+<dt>function:</dt><dd><p>a=abs</p>
+</dd>
+</dl>
+</dd>
+<dt>var:</dt><dd><dl>
+<dt>0..9 = whats</dt><dd><blockquote>
+<div><ul class="simple">
+<li><p>= anywhere</p></li>
+</ul>
+</div></blockquote>
+<p>b  = body
+d  = detector
+s  = sdum</p>
+<blockquote>
+<div><p>m  = material
+p  = particle   (range if tuple)
+r  = region             (range if tuple)</p>
+</div></blockquote>
+<dl class="simple">
+<dt>t  = transformation</dt><dd><p>u  = unit</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">param func</dt>
+<dd class="field-odd"><p></p></dd>
+<dt class="field-even">param var</dt>
+<dd class="field-even"><p></p></dd>
+<dt class="field-odd">param val</dt>
+<dd class="field-odd"><p>anything int, float or string</p>
+</dd>
+<dt class="field-even">param case</dt>
+<dd class="field-even"><p>True for matching case</p>
+</dd>
+<dt class="field-odd">return</dt>
+<dd class="field-odd"><p></p></dd>
+</dl>
+</div></blockquote>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymchelper.flair.Input.Card.toStr">
+<span class="sig-name descname"><span class="pre">toStr</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fmt</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymchelper/flair/Input.html#Card.toStr"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymchelper.flair.Input.Card.toStr" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymchelper.flair.Input.Card.type">
+<span class="sig-name descname"><span class="pre">type</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymchelper/flair/Input.html#Card.type"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymchelper.flair.Input.Card.type" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymchelper.flair.Input.Card.units">
+<span class="sig-name descname"><span class="pre">units</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">absolute</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymchelper/flair/Input.html#Card.units"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymchelper.flair.Input.Card.units" title="Permalink to this definition">¶</a></dt>
+<dd><p>return unit from card</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymchelper.flair.Input.Card.validate">
+<span class="sig-name descname"><span class="pre">validate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">case</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymchelper/flair/Input.html#Card.validate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymchelper.flair.Input.Card.validate" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymchelper.flair.Input.Card.what">
+<span class="sig-name descname"><span class="pre">what</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymchelper/flair/Input.html#Card.what"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymchelper.flair.Input.Card.what" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymchelper.flair.Input.Card.whats">
+<span class="sig-name descname"><span class="pre">whats</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymchelper/flair/Input.html#Card.whats"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymchelper.flair.Input.Card.whats" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pymchelper.flair.Input.CardInfo">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pymchelper.flair.Input.</span></span><span class="sig-name descname"><span class="pre">CardInfo</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">group</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">range_</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">extra</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">assert_</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">meaning</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymchelper/flair/Input.html#CardInfo"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymchelper.flair.Input.CardInfo" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="pymchelper.flair.Input.CardInfo.compileAssert">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">compileAssert</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">assertStatement</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymchelper/flair/Input.html#CardInfo.compileAssert"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymchelper.flair.Input.CardInfo.compileAssert" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compile assert statement
+First detect all what references w(#) and replace them with:</p>
+<blockquote>
+<div><p>w(#) -&gt; c.numWhat(#)
+W(#) -&gt; c.what(#)</p>
+</div></blockquote>
+<p>identify all what-indexes to report as problems
+and request in the code that are not zero!</p>
+<p>finally compile the code
+example: w(8)&gt;w(7)</p>
+<blockquote>
+<div><p>lambda c: c.numWhat(7)==0 or c.numWhat(8)==0 or c.numWhat(8)&gt;c.numWhat(7)</p>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>assertStatement</strong> – </p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymchelper.flair.Input.CardInfo.compileConditions">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">compileConditions</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rng</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymchelper/flair/Input.html#CardInfo.compileConditions"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymchelper.flair.Input.CardInfo.compileConditions" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymchelper.flair.Input.CardInfo.find">
+<span class="sig-name descname"><span class="pre">find</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">target</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">case</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymchelper/flair/Input.html#CardInfo.find"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymchelper.flair.Input.CardInfo.find" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>target</strong> – </p></li>
+<li><p><strong>case</strong> – </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>list  - of references, tuple - for a range</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymchelper.flair.Input.CardInfo.findCase">
+<span class="sig-name descname"><span class="pre">findCase</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">card</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymchelper/flair/Input.html#CardInfo.findCase"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymchelper.flair.Input.CardInfo.findCase" title="Permalink to this definition">¶</a></dt>
+<dd><p>Find card’s range(case)</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymchelper.flair.Input.CardInfo.get">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">card</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymchelper/flair/Input.html#CardInfo.get"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymchelper.flair.Input.CardInfo.get" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymchelper.flair.Input.CardInfo.none">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">none</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymchelper/flair/Input.html#CardInfo.none"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymchelper.flair.Input.CardInfo.none" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymchelper.flair.Input.CardInfo.setDisableComment">
+<span class="sig-name descname"><span class="pre">setDisableComment</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">c</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymchelper/flair/Input.html#CardInfo.setDisableComment"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymchelper.flair.Input.CardInfo.setDisableComment" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymchelper.flair.Input.CardInfo.toNames">
+<span class="sig-name descname"><span class="pre">toNames</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">card</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">case</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymchelper/flair/Input.html#CardInfo.toNames"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymchelper.flair.Input.CardInfo.toNames" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymchelper.flair.Input.CardInfo.validate">
+<span class="sig-name descname"><span class="pre">validate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">card</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">case</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymchelper/flair/Input.html#CardInfo.validate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymchelper.flair.Input.CardInfo.validate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Validate card: return a list of failing variables.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pymchelper.flair.Input.Input">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pymchelper.flair.Input.</span></span><span class="sig-name descname"><span class="pre">Input</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymchelper/flair/Input.html#Input"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymchelper.flair.Input.Input" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="pymchelper.flair.Input.Input.addCard">
+<span class="sig-name descname"><span class="pre">addCard</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">card</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pos</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">renumber</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymchelper/flair/Input.html#Input.addCard"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymchelper.flair.Input.Input.addCard" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add a card to list at position pos
+WARNING: renumber is False (on contrast with delCard, moveCard)
+:param card:
+:param pos:
+:param renumber:
+:return:</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymchelper.flair.Input.Input.addCardProperty">
+<span class="sig-name descname"><span class="pre">addCardProperty</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tag</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">proptag</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prop</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">valueWhat</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fromWhat</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">toWhat</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-</span> <span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stepWhat</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-</span> <span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sdum</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">func</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymchelper/flair/Input.html#Input.addCardProperty"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymchelper.flair.Input.Input.addCardProperty" title="Permalink to this definition">¶</a></dt>
+<dd><p>Append to card’s properties the additional value from tag’s
+:param tag: cards to append the extra property
+:param proptag: cards from where to get the property
+:param prop: property name to add in cards
+:param valueWhat: which value to add as property
+:param fromWhat: range of cards
+:param toWhat: range of cards
+:param stepWhat: range of cards
+:param sdum: filter cards with the specific sdum
+:param func: apply a function to value
+:return:</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymchelper.flair.Input.Input.allcards">
+<span class="sig-name descname"><span class="pre">allcards</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymchelper/flair/Input.html#Input.allcards"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymchelper.flair.Input.Input.allcards" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return an extend list with all cards including the ones from the voxel</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymchelper.flair.Input.Input.bestPosition">
+<span class="sig-name descname"><span class="pre">bestPosition</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tag</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymchelper/flair/Input.html#Input.bestPosition"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymchelper.flair.Input.Input.bestPosition" title="Permalink to this definition">¶</a></dt>
+<dd><p>Find best position from the sorting order in the file search which card is closer to one we’ve asked
+:param tag:
+:return:</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymchelper.flair.Input.Input.bodyProperties">
+<span class="sig-name descname"><span class="pre">bodyProperties</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymchelper/flair/Input.html#Input.bodyProperties"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymchelper.flair.Input.Input.bodyProperties" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the body properties as a dictionary of the active/enabled bodies
+:return:</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymchelper.flair.Input.Input.cardsCache">
+<span class="sig-name descname"><span class="pre">cardsCache</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tag</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">what</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymchelper/flair/Input.html#Input.cardsCache"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymchelper.flair.Input.Input.cardsCache" title="Permalink to this definition">¶</a></dt>
+<dd><p>Cache lists when they are requested</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymchelper.flair.Input.Input.cardsSorted">
+<span class="sig-name descname"><span class="pre">cardsSorted</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tag</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">which</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymchelper/flair/Input.html#Input.cardsSorted"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymchelper.flair.Input.Input.cardsSorted" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return cards of a specific tag sorted with _pos
+Possibilities on which:</p>
+<blockquote>
+<div><p>0: enabled and active       (requires a call to preprocess before)
+1: enabled
+2: all</p>
+</div></blockquote>
+<p>Warning on REGION maybe the “&amp;” you want to get rid off
+:param tag:
+:param which:
+:return:</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymchelper.flair.Input.Input.changeAllTags">
+<span class="sig-name descname"><span class="pre">changeAllTags</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">old</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">new</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">show</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymchelper/flair/Input.html#Input.changeAllTags"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymchelper.flair.Input.Input.changeAllTags" title="Permalink to this definition">¶</a></dt>
+<dd><p>Changing all cards tag from old to new</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymchelper.flair.Input.Input.changeName">
+<span class="sig-name descname"><span class="pre">changeName</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">old</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">new</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymchelper/flair/Input.html#Input.changeName"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymchelper.flair.Input.Input.changeName" title="Permalink to this definition">¶</a></dt>
+<dd><p>Change name to all cards</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymchelper.flair.Input.Input.changeTag">
+<span class="sig-name descname"><span class="pre">changeTag</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">card</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">newtag</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymchelper/flair/Input.html#Input.changeTag"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymchelper.flair.Input.Input.changeTag" title="Permalink to this definition">¶</a></dt>
+<dd><p>Change card tag</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymchelper.flair.Input.Input.checkCompound">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">checkCompound</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">card</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">all</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymchelper/flair/Input.html#Input.checkCompound"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymchelper.flair.Input.Input.checkCompound" title="Permalink to this definition">¶</a></dt>
+<dd><p>Check COMPOUND cards for correct mixture</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymchelper.flair.Input.Input.checkFormat">
+<span class="sig-name descname"><span class="pre">checkFormat</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">card</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymchelper/flair/Input.html#Input.checkFormat"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymchelper.flair.Input.Input.checkFormat" title="Permalink to this definition">¶</a></dt>
+<dd><p>Find current format
+FIXME #defines and state!
+:param card:
+:return:</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymchelper.flair.Input.Input.checkInputFile">
+<span class="sig-name descname"><span class="pre">checkInputFile</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymchelper/flair/Input.html#Input.checkInputFile"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymchelper.flair.Input.Input.checkInputFile" title="Permalink to this definition">¶</a></dt>
+<dd><p>Check if a new input file exists</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymchelper.flair.Input.Input.checkNumbering">
+<span class="sig-name descname"><span class="pre">checkNumbering</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymchelper/flair/Input.html#Input.checkNumbering"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymchelper.flair.Input.Input.checkNumbering" title="Permalink to this definition">¶</a></dt>
+<dd><p>Verify the internal order of the cards</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymchelper.flair.Input.Input.clearCache">
+<span class="sig-name descname"><span class="pre">clearCache</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tag</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymchelper/flair/Input.html#Input.clearCache"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymchelper.flair.Input.Input.clearCache" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymchelper.flair.Input.Input.clone">
+<span class="sig-name descname"><span class="pre">clone</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymchelper/flair/Input.html#Input.clone"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymchelper.flair.Input.Input.clone" title="Permalink to this definition">¶</a></dt>
+<dd><p>return a clone of current input</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymchelper.flair.Input.Input.convert2Names">
+<span class="sig-name descname"><span class="pre">convert2Names</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymchelper/flair/Input.html#Input.convert2Names"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymchelper.flair.Input.Input.convert2Names" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert input to names and check for obsolete and/or non-valid cards</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymchelper.flair.Input.Input.delCard">
+<span class="sig-name descname"><span class="pre">delCard</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pos</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">renumber</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymchelper/flair/Input.html#Input.delCard"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymchelper.flair.Input.Input.delCard" title="Permalink to this definition">¶</a></dt>
+<dd><p>Delete card by position</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymchelper.flair.Input.Input.delGeometryCards">
+<span class="sig-name descname"><span class="pre">delGeometryCards</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymchelper/flair/Input.html#Input.delGeometryCards"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymchelper.flair.Input.Input.delGeometryCards" title="Permalink to this definition">¶</a></dt>
+<dd><p>Delete geometry cards</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymchelper.flair.Input.Input.delTag">
+<span class="sig-name descname"><span class="pre">delTag</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tag</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">renumber</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymchelper/flair/Input.html#Input.delTag"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymchelper.flair.Input.Input.delTag" title="Permalink to this definition">¶</a></dt>
+<dd><p>Delete all cards with a specific tag</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymchelper.flair.Input.Input.dump">
+<span class="sig-name descname"><span class="pre">dump</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pickler</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymchelper/flair/Input.html#Input.dump"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymchelper.flair.Input.Input.dump" title="Permalink to this definition">¶</a></dt>
+<dd><p>dump input to pickler</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymchelper.flair.Input.Input.filenames">
+<span class="sig-name descname"><span class="pre">filenames</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymchelper/flair/Input.html#Input.filenames"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymchelper.flair.Input.Input.filenames" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return input filename</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymchelper.flair.Input.Input.getTransformation">
+<span class="sig-name descname"><span class="pre">getTransformation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">idx</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rotdefi</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inv</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymchelper/flair/Input.html#Input.getTransformation"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymchelper.flair.Input.Input.getTransformation" title="Permalink to this definition">¶</a></dt>
+<dd><p>FIXME I should combine the rotdefi with the self.cache!
+:param idx:  rotation to return, Can be prefixed with “-”, None to return a dictionary
+:param rotdefi:  cached dictionary
+:param inv: return the inverse of the idx matrix. Accepted even if idx is prefixed with “-”
+:return: rotation matrix from a rot-defi cards or a dictionary with all transformations</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymchelper.flair.Input.Input.include">
+<span class="sig-name descname"><span class="pre">include</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">includecard</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymchelper/flair/Input.html#Input.include"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymchelper.flair.Input.Input.include" title="Permalink to this definition">¶</a></dt>
+<dd><p>include card has been modified take appropriate action
+:param includecard:
+:return: True if #include has modified the input, False if nothing happened</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymchelper.flair.Input.Input.load">
+<span class="sig-name descname"><span class="pre">load</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">unpickler</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymchelper/flair/Input.html#Input.load"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymchelper.flair.Input.Input.load" title="Permalink to this definition">¶</a></dt>
+<dd><p>load input from unpickle</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymchelper.flair.Input.Input.material">
+<span class="sig-name descname"><span class="pre">material</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mat</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">toName</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymchelper/flair/Input.html#Input.material"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymchelper.flair.Input.Input.material" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert material to name/number
+:param mat:
+:param toName:
+:return:</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymchelper.flair.Input.Input.materialDict">
+<span class="sig-name descname"><span class="pre">materialDict</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymchelper/flair/Input.html#Input.materialDict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymchelper.flair.Input.Input.materialDict" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymchelper.flair.Input.Input.materialList">
+<span class="sig-name descname"><span class="pre">materialList</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">which</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">icru</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">assigned</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymchelper/flair/Input.html#Input.materialList"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymchelper.flair.Input.Input.materialList" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymchelper.flair.Input.Input.materialZAID">
+<span class="sig-name descname"><span class="pre">materialZAID</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">material</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymchelper/flair/Input.html#Input.materialZAID"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymchelper.flair.Input.Input.materialZAID" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymchelper.flair.Input.Input.minimumInput">
+<span class="sig-name descname"><span class="pre">minimumInput</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymchelper/flair/Input.html#Input.minimumInput"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymchelper.flair.Input.Input.minimumInput" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create bare minimum input file</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymchelper.flair.Input.Input.moveCard">
+<span class="sig-name descname"><span class="pre">moveCard</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">src</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dest</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">renumber</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymchelper/flair/Input.html#Input.moveCard"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymchelper.flair.Input.Input.moveCard" title="Permalink to this definition">¶</a></dt>
+<dd><p>Move card (src) at position (dest)</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymchelper.flair.Input.Input.parse">
+<span class="sig-name descname"><span class="pre">parse</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymchelper/flair/Input.html#Input.parse"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymchelper.flair.Input.Input.parse" title="Permalink to this definition">¶</a></dt>
+<dd><p>Import/parse a file including geometry</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymchelper.flair.Input.Input.preprocess">
+<span class="sig-name descname"><span class="pre">preprocess</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">activeDefines</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymchelper/flair/Input.html#Input.preprocess"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymchelper.flair.Input.Input.preprocess" title="Permalink to this definition">¶</a></dt>
+<dd><p>Pre-process all cards and set correspondingly the card.active flag
+nest[] contains the evaluation of the nesting
+-1: inactive - do not include any subsequent #if..</p>
+<blockquote>
+<div><p>0: false &amp; active - include substitute #if..
+1: true  &amp; active
+2: false &amp; active after else
+3: true  &amp; active after else</p>
+</div></blockquote>
+<p>FIXME values do not WORK!
+:param activeDefines:
+:return: list of error cards</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymchelper.flair.Input.Input.read">
+<span class="sig-name descname"><span class="pre">read</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymchelper/flair/Input.html#Input.read"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymchelper.flair.Input.Input.read" title="Permalink to this definition">¶</a></dt>
+<dd><p>Open and read a fluka input file, return True if error</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymchelper.flair.Input.Input.refresh">
+<span class="sig-name descname"><span class="pre">refresh</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymchelper/flair/Input.html#Input.refresh"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymchelper.flair.Input.Input.refresh" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymchelper.flair.Input.Input.region">
+<span class="sig-name descname"><span class="pre">region</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">reg</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">toName</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymchelper/flair/Input.html#Input.region"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymchelper.flair.Input.Input.region" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert region to name/number
+:param reg:
+:param toName:
+:return:</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymchelper.flair.Input.Input.regionProperties">
+<span class="sig-name descname"><span class="pre">regionProperties</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymchelper/flair/Input.html#Input.regionProperties"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymchelper.flair.Input.Input.regionProperties" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the region properties as a dictionary of the active/enabled regions
+:return:</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymchelper.flair.Input.Input.renumber">
+<span class="sig-name descname"><span class="pre">renumber</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fromPos</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">toPos</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-</span> <span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymchelper/flair/Input.html#Input.renumber"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymchelper.flair.Input.Input.renumber" title="Permalink to this definition">¶</a></dt>
+<dd><p>Put the correct index to cards in the range given by fromPos:toPos</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymchelper.flair.Input.Input.replaceCard">
+<span class="sig-name descname"><span class="pre">replaceCard</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pos</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">card</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymchelper/flair/Input.html#Input.replaceCard"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymchelper.flair.Input.Input.replaceCard" title="Permalink to this definition">¶</a></dt>
+<dd><p>replace card at position (pos) with card</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymchelper.flair.Input.Input.rotdefiCards">
+<span class="sig-name descname"><span class="pre">rotdefiCards</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">idx</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymchelper/flair/Input.html#Input.rotdefiCards"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymchelper.flair.Input.Input.rotdefiCards" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymchelper.flair.Input.Input.rotdefiList">
+<span class="sig-name descname"><span class="pre">rotdefiList</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">negative</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymchelper/flair/Input.html#Input.rotdefiList"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymchelper.flair.Input.Input.rotdefiList" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymchelper.flair.Input.Input.scanUnits">
+<span class="sig-name descname"><span class="pre">scanUnits</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymchelper/flair/Input.html#Input.scanUnits"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymchelper.flair.Input.Input.scanUnits" title="Permalink to this definition">¶</a></dt>
+<dd><p>Scan for units</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymchelper.flair.Input.Input.setFileTime">
+<span class="sig-name descname"><span class="pre">setFileTime</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymchelper/flair/Input.html#Input.setFileTime"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymchelper.flair.Input.Input.setFileTime" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set as input/modified time the latest time from files</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymchelper.flair.Input.Input.setModified">
+<span class="sig-name descname"><span class="pre">setModified</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymchelper/flair/Input.html#Input.setModified"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymchelper.flair.Input.Input.setModified" title="Permalink to this definition">¶</a></dt>
+<dd><p>set last time modified</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymchelper.flair.Input.Input.transformBody">
+<span class="sig-name descname"><span class="pre">transformBody</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">card</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">matrix</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymchelper/flair/Input.html#Input.transformBody"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymchelper.flair.Input.Input.transformBody" title="Permalink to this definition">¶</a></dt>
+<dd><p>Transform a body card, using a 4x4 transformation matrix</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymchelper.flair.Input.Input.validate">
+<span class="sig-name descname"><span class="pre">validate</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymchelper/flair/Input.html#Input.validate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymchelper.flair.Input.Input.validate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Validate all active cards</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymchelper.flair.Input.Input.write">
+<span class="sig-name descname"><span class="pre">write</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">backup</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymchelper/flair/Input.html#Input.write"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymchelper.flair.Input.Input.write" title="Permalink to this definition">¶</a></dt>
+<dd><p>Open and write the input to file (specified either by filename, or by file pointer).
+Optionally use a different geometry file and a different format</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymchelper.flair.Input.Input.writeCard">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">writeCard</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">f</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">card</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fmt</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymchelper/flair/Input.html#Input.writeCard"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymchelper.flair.Input.Input.writeCard" title="Permalink to this definition">¶</a></dt>
+<dd><p>write a single card</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymchelper.flair.Input.Input.writeCards">
+<span class="sig-name descname"><span class="pre">writeCards</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">f</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">condition</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">format</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">geolevel</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">from_</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">to_</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-</span> <span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymchelper/flair/Input.html#Input.writeCards"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymchelper.flair.Input.Input.writeCards" title="Permalink to this definition">¶</a></dt>
+<dd><p>Write cards of that fulfill a given condition(lambda)
+with all the preprocessor cards around them
+FIXME Write also non empty blocks: #if .. #define/#undef .. #endif</p>
+<blockquote>
+<div><p>Might end up in duplicate blocks when only #define/#undef
+exist inside the geometry</p>
+</div></blockquote>
+<dl class="simple">
+<dt>geolevel</dt><dd><dl class="simple">
+<dt>-1 before defines</dt><dd><p>0 before geobegin
+1 bodies and voxels
+2 regions
+3 lattices
+4 after geoend</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<p><a href="#id1"><span class="problematic" id="id2">from_</span></a> .. <a href="#id3"><span class="problematic" id="id4">to_</span></a>   (<a href="#id5"><span class="problematic" id="id6">to_</span></a> is not included)
+:param f:
+:param condition:
+:param format:
+:param geolevel:
+:param <a href="#id7"><span class="problematic" id="id8">from_</span></a>:
+:param <a href="#id9"><span class="problematic" id="id10">to_</span></a>:
+:return:</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymchelper.flair.Input.Input.writeGeometry">
+<span class="sig-name descname"><span class="pre">writeGeometry</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fgeo</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">geoFmt</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fmt</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymchelper/flair/Input.html#Input.writeGeometry"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymchelper.flair.Input.Input.writeGeometry" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="simple">
+<dt>Write geometry only</dt><dd><p>preprocessor cards are written only when cards
+are in the correct position</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>fgeo</strong> – </p></li>
+<li><p><strong>geoFmt</strong> – </p></li>
+<li><p><strong>fmt</strong> – </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymchelper.flair.Input.Input.writeWithInclude">
+<span class="sig-name descname"><span class="pre">writeWithInclude</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">backup</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymchelper/flair/Input.html#Input.writeWithInclude"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymchelper.flair.Input.Input.writeWithInclude" title="Permalink to this definition">¶</a></dt>
+<dd><p>Open and write the input to file (specified either by filename, or by file pointer).
+Optionally use a different geometry file and a different format
+# WARNING FIXME no testing is done for the correctness of the file</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pymchelper.flair.Input.LocalDict">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pymchelper.flair.Input.</span></span><span class="sig-name descname"><span class="pre">LocalDict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymchelper/flair/Input.html#LocalDict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymchelper.flair.Input.LocalDict" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></p>
+<p>Implement the local dictionary</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="pymchelper.flair.Input.LocalDict.bodyWhat">
+<span class="sig-name descname"><span class="pre">bodyWhat</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">what</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymchelper/flair/Input.html#LocalDict.bodyWhat"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymchelper.flair.Input.LocalDict.bodyWhat" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymchelper.flair.Input.LocalDict.cardWhat">
+<span class="sig-name descname"><span class="pre">cardWhat</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tag</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">what</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymchelper/flair/Input.html#LocalDict.cardWhat"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymchelper.flair.Input.LocalDict.cardWhat" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymchelper.flair.Input.LocalDict.clear">
+<span class="sig-name descname"><span class="pre">clear</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymchelper/flair/Input.html#LocalDict.clear"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymchelper.flair.Input.LocalDict.clear" title="Permalink to this definition">¶</a></dt>
+<dd><p>Clear dictionary and set default variables</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pymchelper.flair.Input.LogicalUnits">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pymchelper.flair.Input.</span></span><span class="sig-name descname"><span class="pre">LogicalUnits</span></span><a class="reference internal" href="../_modules/pymchelper/flair/Input.html#LogicalUnits"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymchelper.flair.Input.LogicalUnits" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="pymchelper.flair.Input.LogicalUnits.assign">
+<span class="sig-name descname"><span class="pre">assign</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">unit</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tag</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fn</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymchelper/flair/Input.html#LogicalUnits.assign"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymchelper.flair.Input.LogicalUnits.assign" title="Permalink to this definition">¶</a></dt>
+<dd><p>Assign a new unit to tag</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymchelper.flair.Input.LogicalUnits.clear">
+<span class="sig-name descname"><span class="pre">clear</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">unit</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymchelper/flair/Input.html#LogicalUnits.clear"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymchelper.flair.Input.LogicalUnits.clear" title="Permalink to this definition">¶</a></dt>
+<dd><p>Clear a unit from list</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymchelper.flair.Input.LogicalUnits.filterList">
+<span class="sig-name descname"><span class="pre">filterList</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">card</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymchelper/flair/Input.html#LogicalUnits.filterList"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymchelper.flair.Input.LogicalUnits.filterList" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a list of all units, filtered for a card</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymchelper.flair.Input.LogicalUnits.free">
+<span class="sig-name descname"><span class="pre">free</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymchelper/flair/Input.html#LogicalUnits.free"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymchelper.flair.Input.LogicalUnits.free" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return first free unit</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymchelper.flair.Input.LogicalUnits.get">
+<span class="sig-name descname"><span class="pre">get</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">u</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymchelper/flair/Input.html#LogicalUnits.get"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymchelper.flair.Input.LogicalUnits.get" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return unit information</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymchelper.flair.Input.LogicalUnits.reset">
+<span class="sig-name descname"><span class="pre">reset</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymchelper/flair/Input.html#LogicalUnits.reset"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymchelper.flair.Input.LogicalUnits.reset" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymchelper.flair.Input.LogicalUnits.scan">
+<span class="sig-name descname"><span class="pre">scan</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymchelper/flair/Input.html#LogicalUnits.scan"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymchelper.flair.Input.LogicalUnits.scan" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pymchelper.flair.Input.LowNeutMaterial">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pymchelper.flair.Input.</span></span><span class="sig-name descname"><span class="pre">LowNeutMaterial</span></span><a class="reference internal" href="../_modules/pymchelper/flair/Input.html#LowNeutMaterial"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymchelper.flair.Input.LowNeutMaterial" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Structures as placeholders</p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pymchelper.flair.Input.Particle">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pymchelper.flair.Input.</span></span><span class="sig-name descname"><span class="pre">Particle</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mass</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">comment</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pdg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymchelper/flair/Input.html#Particle"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymchelper.flair.Input.Particle" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="pymchelper.flair.Input.Particle.add">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">add</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mass</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">comment</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pdg</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymchelper/flair/Input.html#Particle.add"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymchelper.flair.Input.Particle.add" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymchelper.flair.Input.Particle.beam">
+<span class="sig-name descname"><span class="pre">beam</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">['',</span> <span class="pre">'3-HELIUM',</span> <span class="pre">'4-HELIUM',</span> <span class="pre">'AKAONZER',</span> <span class="pre">'ALAMBDA',</span> <span class="pre">'ALAMBDC-',</span> <span class="pre">'ANEUTRIE',</span> <span class="pre">'ANEUTRIM',</span> <span class="pre">'ANEUTRIT',</span> <span class="pre">'ANEUTRON',</span> <span class="pre">'AOMEGA+',</span> <span class="pre">'AOMEGAC0',</span> <span class="pre">'APROTON',</span> <span class="pre">'ASIGMA+',</span> <span class="pre">'ASIGMA-',</span> <span class="pre">'ASIGMAZE',</span> <span class="pre">'AXSI+',</span> <span class="pre">'AXSIC-',</span> <span class="pre">'AXSIC0',</span> <span class="pre">'AXSIPC-',</span> <span class="pre">'AXSIPC0',</span> <span class="pre">'AXSIZERO',</span> <span class="pre">'D+',</span> <span class="pre">'D-',</span> <span class="pre">'D0',</span> <span class="pre">'D0BAR',</span> <span class="pre">'DEUTERON',</span> <span class="pre">'DS+',</span> <span class="pre">'DS-',</span> <span class="pre">'ELECTRON',</span> <span class="pre">'HEAVYION',</span> <span class="pre">'ISOTOPE',</span> <span class="pre">'KAON+',</span> <span class="pre">'KAON-',</span> <span class="pre">'KAONLONG',</span> <span class="pre">'KAONSHRT',</span> <span class="pre">'KAONZERO',</span> <span class="pre">'LAMBDA',</span> <span class="pre">'LAMBDAC+',</span> <span class="pre">'MUON+',</span> <span class="pre">'MUON-',</span> <span class="pre">'NEUTRIE',</span> <span class="pre">'NEUTRIM',</span> <span class="pre">'NEUTRIT',</span> <span class="pre">'NEUTRON',</span> <span class="pre">'OMEGA-',</span> <span class="pre">'OMEGAC0',</span> <span class="pre">'OPTIPHOT',</span> <span class="pre">'PHOTON',</span> <span class="pre">'PION+',</span> <span class="pre">'PION-',</span> <span class="pre">'PIZERO',</span> <span class="pre">'POSITRON',</span> <span class="pre">'PROTON',</span> <span class="pre">'RAY',</span> <span class="pre">'SIGMA+',</span> <span class="pre">'SIGMA-',</span> <span class="pre">'SIGMAZER',</span> <span class="pre">'TAU+',</span> <span class="pre">'TAU-',</span> <span class="pre">'TRITON',</span> <span class="pre">'WWLOWNEU',</span> <span class="pre">'XSI-',</span> <span class="pre">'XSIC+',</span> <span class="pre">'XSIC0',</span> <span class="pre">'XSIPC+',</span> <span class="pre">'XSIPC0',</span> <span class="pre">'XSIZERO']</span></em><a class="headerlink" href="#pymchelper.flair.Input.Particle.beam" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymchelper.flair.Input.Particle.convert">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">convert</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pid</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tonames</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymchelper/flair/Input.html#Particle.convert"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymchelper.flair.Input.Particle.convert" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert particle from name to number
+particle type
+:param tonames: True/False
+:return:</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymchelper.flair.Input.Particle.get">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">idx</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymchelper/flair/Input.html#Particle.get"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymchelper.flair.Input.Particle.get" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymchelper.flair.Input.Particle.list">
+<span class="sig-name descname"><span class="pre">list</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">['',</span> <span class="pre">'3-HELIUM',</span> <span class="pre">'4-HELIUM',</span> <span class="pre">'AKAONZER',</span> <span class="pre">'ALAMBDA',</span> <span class="pre">'ALAMBDC-',</span> <span class="pre">'ANEUTRIE',</span> <span class="pre">'ANEUTRIM',</span> <span class="pre">'ANEUTRIT',</span> <span class="pre">'ANEUTRON',</span> <span class="pre">'AOMEGA+',</span> <span class="pre">'AOMEGAC0',</span> <span class="pre">'APROTON',</span> <span class="pre">'ASIGMA+',</span> <span class="pre">'ASIGMA-',</span> <span class="pre">'ASIGMAZE',</span> <span class="pre">'AXSI+',</span> <span class="pre">'AXSIC-',</span> <span class="pre">'AXSIC0',</span> <span class="pre">'AXSIPC-',</span> <span class="pre">'AXSIPC0',</span> <span class="pre">'AXSIZERO',</span> <span class="pre">'D+',</span> <span class="pre">'D-',</span> <span class="pre">'D0',</span> <span class="pre">'D0BAR',</span> <span class="pre">'DEUTERON',</span> <span class="pre">'DS+',</span> <span class="pre">'DS-',</span> <span class="pre">'ELECTRON',</span> <span class="pre">'HEAVYION',</span> <span class="pre">'KAON+',</span> <span class="pre">'KAON-',</span> <span class="pre">'KAONLONG',</span> <span class="pre">'KAONSHRT',</span> <span class="pre">'KAONZERO',</span> <span class="pre">'LAMBDA',</span> <span class="pre">'LAMBDAC+',</span> <span class="pre">'MUON+',</span> <span class="pre">'MUON-',</span> <span class="pre">'NEUTRIE',</span> <span class="pre">'NEUTRIM',</span> <span class="pre">'NEUTRIT',</span> <span class="pre">'NEUTRON',</span> <span class="pre">'OMEGA-',</span> <span class="pre">'OMEGAC0',</span> <span class="pre">'OPTIPHOT',</span> <span class="pre">'PHOTON',</span> <span class="pre">'PION+',</span> <span class="pre">'PION-',</span> <span class="pre">'PIZERO',</span> <span class="pre">'POSITRON',</span> <span class="pre">'PROTON',</span> <span class="pre">'RAY',</span> <span class="pre">'SIGMA+',</span> <span class="pre">'SIGMA-',</span> <span class="pre">'SIGMAZER',</span> <span class="pre">'TAU+',</span> <span class="pre">'TAU-',</span> <span class="pre">'TRITON',</span> <span class="pre">'WWLOWNEU',</span> <span class="pre">'XSI-',</span> <span class="pre">'XSIC+',</span> <span class="pre">'XSIC0',</span> <span class="pre">'XSIPC+',</span> <span class="pre">'XSIPC0',</span> <span class="pre">'XSIZERO',</span> <span class="pre">'&#64;LASTPAR']</span></em><a class="headerlink" href="#pymchelper.flair.Input.Particle.list" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymchelper.flair.Input.Particle.listAll">
+<span class="sig-name descname"><span class="pre">listAll</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">['',</span> <span class="pre">'3-HELIUM',</span> <span class="pre">'4-HELIUM',</span> <span class="pre">'ACTIVITY',</span> <span class="pre">'ACTOMASS',</span> <span class="pre">'AKAONZER',</span> <span class="pre">'ALAMBDA',</span> <span class="pre">'ALAMBDC-',</span> <span class="pre">'ALL-CHAR',</span> <span class="pre">'ALL-IONS',</span> <span class="pre">'ALL-NEGA',</span> <span class="pre">'ALL-NEUT',</span> <span class="pre">'ALL-PART',</span> <span class="pre">'ALL-POSI',</span> <span class="pre">'ALPHA-D',</span> <span class="pre">'ANEUTRIE',</span> <span class="pre">'ANEUTRIM',</span> <span class="pre">'ANEUTRIT',</span> <span class="pre">'ANEUTRON',</span> <span class="pre">'ANNIHRST',</span> <span class="pre">'AOMEGA+',</span> <span class="pre">'AOMEGAC0',</span> <span class="pre">'AP&amp;AN',</span> <span class="pre">'APROTON',</span> <span class="pre">'ASIGMA+',</span> <span class="pre">'ASIGMA-',</span> <span class="pre">'ASIGMAZE',</span> <span class="pre">'AXSI+',</span> <span class="pre">'AXSIC-',</span> <span class="pre">'AXSIC0',</span> <span class="pre">'AXSIPC-',</span> <span class="pre">'AXSIPC0',</span> <span class="pre">'AXSIZERO',</span> <span class="pre">'BEAMPART',</span> <span class="pre">'C-(A)BAR',</span> <span class="pre">'C-MESONS',</span> <span class="pre">'CHARMED',</span> <span class="pre">'D+',</span> <span class="pre">'D-',</span> <span class="pre">'D0',</span> <span class="pre">'D0BAR',</span> <span class="pre">'DEUTERON',</span> <span class="pre">'DOSE',</span> <span class="pre">'DOSE-EM',</span> <span class="pre">'DOSE-EQ',</span> <span class="pre">'DOSE-H2O',</span> <span class="pre">'DOSEQLET',</span> <span class="pre">'DPA-NRES',</span> <span class="pre">'DPA-SCO',</span> <span class="pre">'DS+',</span> <span class="pre">'DS-',</span> <span class="pre">'E+&amp;E-',</span> <span class="pre">'E+E-GAMM',</span> <span class="pre">'ELECTRON',</span> <span class="pre">'EM-ENRGY',</span> <span class="pre">'ENERGY',</span> <span class="pre">'FISSIONS',</span> <span class="pre">'HAD-CHAR',</span> <span class="pre">'HAD-NEUT',</span> <span class="pre">'HADGT20M',</span> <span class="pre">'HE-FISS',</span> <span class="pre">'HEAVYION',</span> <span class="pre">'HEHAD-EQ',</span> <span class="pre">'HVY-IONS',</span> <span class="pre">'ISOTOPE',</span> <span class="pre">'KAON+',</span> <span class="pre">'KAON-',</span> <span class="pre">'KAONLONG',</span> <span class="pre">'KAONS',</span> <span class="pre">'KAONS+-',</span> <span class="pre">'KAONS0',</span> <span class="pre">'KAONSHRT',</span> <span class="pre">'KAONZERO',</span> <span class="pre">'LAMBDA',</span> <span class="pre">'LAMBDAC+',</span> <span class="pre">'LE-FISS',</span> <span class="pre">'LGH-IONS',</span> <span class="pre">'LOWENNEU',</span> <span class="pre">'MUON+',</span> <span class="pre">'MUON-',</span> <span class="pre">'MUONS',</span> <span class="pre">'NET-CHRG',</span> <span class="pre">'NEU-BALA',</span> <span class="pre">'NEUTRIE',</span> <span class="pre">'NEUTRIM',</span> <span class="pre">'NEUTRIT',</span> <span class="pre">'NEUTRON',</span> <span class="pre">'NIEL-DEP',</span> <span class="pre">'NTLOWENE',</span> <span class="pre">'NUC&amp;PI+-',</span> <span class="pre">'NUCLEONS',</span> <span class="pre">'OMEGA-',</span> <span class="pre">'OMEGAC0',</span> <span class="pre">'OPTIPHOT',</span> <span class="pre">'PHOTON',</span> <span class="pre">'PION+',</span> <span class="pre">'PION-',</span> <span class="pre">'PIONS+-',</span> <span class="pre">'PIZERO',</span> <span class="pre">'POSITRON',</span> <span class="pre">'PROTON',</span> <span class="pre">'RAY',</span> <span class="pre">'RES-NIEL',</span> <span class="pre">'RES-NUCL',</span> <span class="pre">'SI1MEVNE',</span> <span class="pre">'SIGMA+',</span> <span class="pre">'SIGMA-',</span> <span class="pre">'SIGMAZER',</span> <span class="pre">'SQBETA-D',</span> <span class="pre">'STRANGE',</span> <span class="pre">'TAU+',</span> <span class="pre">'TAU-',</span> <span class="pre">'THNEU-EQ',</span> <span class="pre">'TRITON',</span> <span class="pre">'UNB-EMEN',</span> <span class="pre">'UNB-ENER',</span> <span class="pre">'WWLOWNEU',</span> <span class="pre">'X-MOMENT',</span> <span class="pre">'XSI-',</span> <span class="pre">'XSIC+',</span> <span class="pre">'XSIC0',</span> <span class="pre">'XSIPC+',</span> <span class="pre">'XSIPC0',</span> <span class="pre">'XSIZERO',</span> <span class="pre">'Y-MOMENT',</span> <span class="pre">'Z-MOMENT',</span> <span class="pre">'&#64;LASTPAR']</span></em><a class="headerlink" href="#pymchelper.flair.Input.Particle.listAll" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymchelper.flair.Input.Particle.makeLists">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">makeLists</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymchelper/flair/Input.html#Particle.makeLists"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymchelper.flair.Input.Particle.makeLists" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymchelper.flair.Input.Particle.particles">
+<span class="sig-name descname"><span class="pre">particles</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">['',</span> <span class="pre">'3-HELIUM',</span> <span class="pre">'4-HELIUM',</span> <span class="pre">'AKAONZER',</span> <span class="pre">'ALAMBDA',</span> <span class="pre">'ALAMBDC-',</span> <span class="pre">'ALL-CHAR',</span> <span class="pre">'ALL-NEGA',</span> <span class="pre">'ALL-NEUT',</span> <span class="pre">'ALL-PART',</span> <span class="pre">'ALL-POSI',</span> <span class="pre">'ANEUTRIE',</span> <span class="pre">'ANEUTRIM',</span> <span class="pre">'ANEUTRIT',</span> <span class="pre">'ANEUTRON',</span> <span class="pre">'AOMEGA+',</span> <span class="pre">'AOMEGAC0',</span> <span class="pre">'AP&amp;AN',</span> <span class="pre">'APROTON',</span> <span class="pre">'ASIGMA+',</span> <span class="pre">'ASIGMA-',</span> <span class="pre">'ASIGMAZE',</span> <span class="pre">'AXSI+',</span> <span class="pre">'AXSIC-',</span> <span class="pre">'AXSIC0',</span> <span class="pre">'AXSIPC-',</span> <span class="pre">'AXSIPC0',</span> <span class="pre">'AXSIZERO',</span> <span class="pre">'BEAMPART',</span> <span class="pre">'C-(A)BAR',</span> <span class="pre">'C-MESONS',</span> <span class="pre">'CHARMED',</span> <span class="pre">'D+',</span> <span class="pre">'D-',</span> <span class="pre">'D0',</span> <span class="pre">'D0BAR',</span> <span class="pre">'DEUTERON',</span> <span class="pre">'DS+',</span> <span class="pre">'DS-',</span> <span class="pre">'E+&amp;E-',</span> <span class="pre">'ELECTRON',</span> <span class="pre">'HAD-CHAR',</span> <span class="pre">'HAD-NEUT',</span> <span class="pre">'HEAVYION',</span> <span class="pre">'KAON+',</span> <span class="pre">'KAON-',</span> <span class="pre">'KAONLONG',</span> <span class="pre">'KAONS',</span> <span class="pre">'KAONS+-',</span> <span class="pre">'KAONS0',</span> <span class="pre">'KAONSHRT',</span> <span class="pre">'KAONZERO',</span> <span class="pre">'LAMBDA',</span> <span class="pre">'LAMBDAC+',</span> <span class="pre">'MUON+',</span> <span class="pre">'MUON-',</span> <span class="pre">'MUONS',</span> <span class="pre">'NEUTRIE',</span> <span class="pre">'NEUTRIM',</span> <span class="pre">'NEUTRIT',</span> <span class="pre">'NEUTRON',</span> <span class="pre">'NUC&amp;PI+-',</span> <span class="pre">'NUCLEONS',</span> <span class="pre">'OMEGA-',</span> <span class="pre">'OMEGAC0',</span> <span class="pre">'OPTIPHOT',</span> <span class="pre">'PHOTON',</span> <span class="pre">'PION+',</span> <span class="pre">'PION-',</span> <span class="pre">'PIONS+-',</span> <span class="pre">'PIZERO',</span> <span class="pre">'POSITRON',</span> <span class="pre">'PROTON',</span> <span class="pre">'RAY',</span> <span class="pre">'SIGMA+',</span> <span class="pre">'SIGMA-',</span> <span class="pre">'SIGMAZER',</span> <span class="pre">'STRANGE',</span> <span class="pre">'TAU+',</span> <span class="pre">'TAU-',</span> <span class="pre">'TRITON',</span> <span class="pre">'WWLOWNEU',</span> <span class="pre">'XSI-',</span> <span class="pre">'XSIC+',</span> <span class="pre">'XSIC0',</span> <span class="pre">'XSIPC+',</span> <span class="pre">'XSIPC0',</span> <span class="pre">'XSIZERO']</span></em><a class="headerlink" href="#pymchelper.flair.Input.Particle.particles" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymchelper.flair.Input.Particle.scan">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">scan</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymchelper/flair/Input.html#Particle.scan"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymchelper.flair.Input.Particle.scan" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymchelper.flair.Input.Particle.signedList">
+<span class="sig-name descname"><span class="pre">signedList</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">['',</span> <span class="pre">'3-HELIUM',</span> <span class="pre">'-3-HELIUM',</span> <span class="pre">'4-HELIUM',</span> <span class="pre">'-4-HELIUM',</span> <span class="pre">'AKAONZER',</span> <span class="pre">'-AKAONZER',</span> <span class="pre">'ALAMBDA',</span> <span class="pre">'-ALAMBDA',</span> <span class="pre">'ALAMBDC-',</span> <span class="pre">'-ALAMBDC-',</span> <span class="pre">'ANEUTRIE',</span> <span class="pre">'-ANEUTRIE',</span> <span class="pre">'ANEUTRIM',</span> <span class="pre">'-ANEUTRIM',</span> <span class="pre">'ANEUTRIT',</span> <span class="pre">'-ANEUTRIT',</span> <span class="pre">'ANEUTRON',</span> <span class="pre">'-ANEUTRON',</span> <span class="pre">'AOMEGA+',</span> <span class="pre">'-AOMEGA+',</span> <span class="pre">'AOMEGAC0',</span> <span class="pre">'-AOMEGAC0',</span> <span class="pre">'APROTON',</span> <span class="pre">'-APROTON',</span> <span class="pre">'ASIGMA+',</span> <span class="pre">'-ASIGMA+',</span> <span class="pre">'ASIGMA-',</span> <span class="pre">'-ASIGMA-',</span> <span class="pre">'ASIGMAZE',</span> <span class="pre">'-ASIGMAZE',</span> <span class="pre">'AXSI+',</span> <span class="pre">'-AXSI+',</span> <span class="pre">'AXSIC-',</span> <span class="pre">'-AXSIC-',</span> <span class="pre">'AXSIC0',</span> <span class="pre">'-AXSIC0',</span> <span class="pre">'AXSIPC-',</span> <span class="pre">'-AXSIPC-',</span> <span class="pre">'AXSIPC0',</span> <span class="pre">'-AXSIPC0',</span> <span class="pre">'AXSIZERO',</span> <span class="pre">'-AXSIZERO',</span> <span class="pre">'D+',</span> <span class="pre">'-D+',</span> <span class="pre">'D-',</span> <span class="pre">'-D-',</span> <span class="pre">'D0',</span> <span class="pre">'-D0',</span> <span class="pre">'D0BAR',</span> <span class="pre">'-D0BAR',</span> <span class="pre">'DEUTERON',</span> <span class="pre">'-DEUTERON',</span> <span class="pre">'DS+',</span> <span class="pre">'-DS+',</span> <span class="pre">'DS-',</span> <span class="pre">'-DS-',</span> <span class="pre">'ELECTRON',</span> <span class="pre">'-ELECTRON',</span> <span class="pre">'HEAVYION',</span> <span class="pre">'-HEAVYION',</span> <span class="pre">'KAON+',</span> <span class="pre">'-KAON+',</span> <span class="pre">'KAON-',</span> <span class="pre">'-KAON-',</span> <span class="pre">'KAONLONG',</span> <span class="pre">'-KAONLONG',</span> <span class="pre">'KAONSHRT',</span> <span class="pre">'-KAONSHRT',</span> <span class="pre">'KAONZERO',</span> <span class="pre">'-KAONZERO',</span> <span class="pre">'LAMBDA',</span> <span class="pre">'-LAMBDA',</span> <span class="pre">'LAMBDAC+',</span> <span class="pre">'-LAMBDAC+',</span> <span class="pre">'MUON+',</span> <span class="pre">'-MUON+',</span> <span class="pre">'MUON-',</span> <span class="pre">'-MUON-',</span> <span class="pre">'NEUTRIE',</span> <span class="pre">'-NEUTRIE',</span> <span class="pre">'NEUTRIM',</span> <span class="pre">'-NEUTRIM',</span> <span class="pre">'NEUTRIT',</span> <span class="pre">'-NEUTRIT',</span> <span class="pre">'NEUTRON',</span> <span class="pre">'-NEUTRON',</span> <span class="pre">'OMEGA-',</span> <span class="pre">'-OMEGA-',</span> <span class="pre">'OMEGAC0',</span> <span class="pre">'-OMEGAC0',</span> <span class="pre">'OPTIPHOT',</span> <span class="pre">'-OPTIPHOT',</span> <span class="pre">'PHOTON',</span> <span class="pre">'-PHOTON',</span> <span class="pre">'PION+',</span> <span class="pre">'-PION+',</span> <span class="pre">'PION-',</span> <span class="pre">'-PION-',</span> <span class="pre">'PIZERO',</span> <span class="pre">'-PIZERO',</span> <span class="pre">'POSITRON',</span> <span class="pre">'-POSITRON',</span> <span class="pre">'PROTON',</span> <span class="pre">'-PROTON',</span> <span class="pre">'RAY',</span> <span class="pre">'-RAY',</span> <span class="pre">'SIGMA+',</span> <span class="pre">'-SIGMA+',</span> <span class="pre">'SIGMA-',</span> <span class="pre">'-SIGMA-',</span> <span class="pre">'SIGMAZER',</span> <span class="pre">'-SIGMAZER',</span> <span class="pre">'TAU+',</span> <span class="pre">'-TAU+',</span> <span class="pre">'TAU-',</span> <span class="pre">'-TAU-',</span> <span class="pre">'TRITON',</span> <span class="pre">'-TRITON',</span> <span class="pre">'WWLOWNEU',</span> <span class="pre">'-WWLOWNEU',</span> <span class="pre">'XSI-',</span> <span class="pre">'-XSI-',</span> <span class="pre">'XSIC+',</span> <span class="pre">'-XSIC+',</span> <span class="pre">'XSIC0',</span> <span class="pre">'-XSIC0',</span> <span class="pre">'XSIPC+',</span> <span class="pre">'-XSIPC+',</span> <span class="pre">'XSIPC0',</span> <span class="pre">'-XSIPC0',</span> <span class="pre">'XSIZERO',</span> <span class="pre">'-XSIZERO',</span> <span class="pre">'&#64;LASTPAR']</span></em><a class="headerlink" href="#pymchelper.flair.Input.Particle.signedList" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymchelper.flair.Input.Particle.signedListAll">
+<span class="sig-name descname"><span class="pre">signedListAll</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">['',</span> <span class="pre">'3-HELIUM',</span> <span class="pre">'-3-HELIUM',</span> <span class="pre">'4-HELIUM',</span> <span class="pre">'-4-HELIUM',</span> <span class="pre">'ACTIVITY',</span> <span class="pre">'-ACTIVITY',</span> <span class="pre">'ACTOMASS',</span> <span class="pre">'-ACTOMASS',</span> <span class="pre">'AKAONZER',</span> <span class="pre">'-AKAONZER',</span> <span class="pre">'ALAMBDA',</span> <span class="pre">'-ALAMBDA',</span> <span class="pre">'ALAMBDC-',</span> <span class="pre">'-ALAMBDC-',</span> <span class="pre">'ALL-CHAR',</span> <span class="pre">'-ALL-CHAR',</span> <span class="pre">'ALL-IONS',</span> <span class="pre">'-ALL-IONS',</span> <span class="pre">'ALL-NEGA',</span> <span class="pre">'-ALL-NEGA',</span> <span class="pre">'ALL-NEUT',</span> <span class="pre">'-ALL-NEUT',</span> <span class="pre">'ALL-PART',</span> <span class="pre">'-ALL-PART',</span> <span class="pre">'ALL-POSI',</span> <span class="pre">'-ALL-POSI',</span> <span class="pre">'ALPHA-D',</span> <span class="pre">'-ALPHA-D',</span> <span class="pre">'ANEUTRIE',</span> <span class="pre">'-ANEUTRIE',</span> <span class="pre">'ANEUTRIM',</span> <span class="pre">'-ANEUTRIM',</span> <span class="pre">'ANEUTRIT',</span> <span class="pre">'-ANEUTRIT',</span> <span class="pre">'ANEUTRON',</span> <span class="pre">'-ANEUTRON',</span> <span class="pre">'ANNIHRST',</span> <span class="pre">'-ANNIHRST',</span> <span class="pre">'AOMEGA+',</span> <span class="pre">'-AOMEGA+',</span> <span class="pre">'AOMEGAC0',</span> <span class="pre">'-AOMEGAC0',</span> <span class="pre">'AP&amp;AN',</span> <span class="pre">'-AP&amp;AN',</span> <span class="pre">'APROTON',</span> <span class="pre">'-APROTON',</span> <span class="pre">'ASIGMA+',</span> <span class="pre">'-ASIGMA+',</span> <span class="pre">'ASIGMA-',</span> <span class="pre">'-ASIGMA-',</span> <span class="pre">'ASIGMAZE',</span> <span class="pre">'-ASIGMAZE',</span> <span class="pre">'AXSI+',</span> <span class="pre">'-AXSI+',</span> <span class="pre">'AXSIC-',</span> <span class="pre">'-AXSIC-',</span> <span class="pre">'AXSIC0',</span> <span class="pre">'-AXSIC0',</span> <span class="pre">'AXSIPC-',</span> <span class="pre">'-AXSIPC-',</span> <span class="pre">'AXSIPC0',</span> <span class="pre">'-AXSIPC0',</span> <span class="pre">'AXSIZERO',</span> <span class="pre">'-AXSIZERO',</span> <span class="pre">'BEAMPART',</span> <span class="pre">'-BEAMPART',</span> <span class="pre">'C-(A)BAR',</span> <span class="pre">'-C-(A)BAR',</span> <span class="pre">'C-MESONS',</span> <span class="pre">'-C-MESONS',</span> <span class="pre">'CHARMED',</span> <span class="pre">'-CHARMED',</span> <span class="pre">'D+',</span> <span class="pre">'-D+',</span> <span class="pre">'D-',</span> <span class="pre">'-D-',</span> <span class="pre">'D0',</span> <span class="pre">'-D0',</span> <span class="pre">'D0BAR',</span> <span class="pre">'-D0BAR',</span> <span class="pre">'DEUTERON',</span> <span class="pre">'-DEUTERON',</span> <span class="pre">'DOSE',</span> <span class="pre">'-DOSE',</span> <span class="pre">'DOSE-EM',</span> <span class="pre">'-DOSE-EM',</span> <span class="pre">'DOSE-EQ',</span> <span class="pre">'-DOSE-EQ',</span> <span class="pre">'DOSE-H2O',</span> <span class="pre">'-DOSE-H2O',</span> <span class="pre">'DOSEQLET',</span> <span class="pre">'-DOSEQLET',</span> <span class="pre">'DPA-NRES',</span> <span class="pre">'-DPA-NRES',</span> <span class="pre">'DPA-SCO',</span> <span class="pre">'-DPA-SCO',</span> <span class="pre">'DS+',</span> <span class="pre">'-DS+',</span> <span class="pre">'DS-',</span> <span class="pre">'-DS-',</span> <span class="pre">'E+&amp;E-',</span> <span class="pre">'-E+&amp;E-',</span> <span class="pre">'E+E-GAMM',</span> <span class="pre">'-E+E-GAMM',</span> <span class="pre">'ELECTRON',</span> <span class="pre">'-ELECTRON',</span> <span class="pre">'EM-ENRGY',</span> <span class="pre">'-EM-ENRGY',</span> <span class="pre">'ENERGY',</span> <span class="pre">'-ENERGY',</span> <span class="pre">'FISSIONS',</span> <span class="pre">'-FISSIONS',</span> <span class="pre">'HAD-CHAR',</span> <span class="pre">'-HAD-CHAR',</span> <span class="pre">'HAD-NEUT',</span> <span class="pre">'-HAD-NEUT',</span> <span class="pre">'HADGT20M',</span> <span class="pre">'-HADGT20M',</span> <span class="pre">'HE-FISS',</span> <span class="pre">'-HE-FISS',</span> <span class="pre">'HEAVYION',</span> <span class="pre">'-HEAVYION',</span> <span class="pre">'HEHAD-EQ',</span> <span class="pre">'-HEHAD-EQ',</span> <span class="pre">'HVY-IONS',</span> <span class="pre">'-HVY-IONS',</span> <span class="pre">'ISOTOPE',</span> <span class="pre">'-ISOTOPE',</span> <span class="pre">'KAON+',</span> <span class="pre">'-KAON+',</span> <span class="pre">'KAON-',</span> <span class="pre">'-KAON-',</span> <span class="pre">'KAONLONG',</span> <span class="pre">'-KAONLONG',</span> <span class="pre">'KAONS',</span> <span class="pre">'-KAONS',</span> <span class="pre">'KAONS+-',</span> <span class="pre">'-KAONS+-',</span> <span class="pre">'KAONS0',</span> <span class="pre">'-KAONS0',</span> <span class="pre">'KAONSHRT',</span> <span class="pre">'-KAONSHRT',</span> <span class="pre">'KAONZERO',</span> <span class="pre">'-KAONZERO',</span> <span class="pre">'LAMBDA',</span> <span class="pre">'-LAMBDA',</span> <span class="pre">'LAMBDAC+',</span> <span class="pre">'-LAMBDAC+',</span> <span class="pre">'LE-FISS',</span> <span class="pre">'-LE-FISS',</span> <span class="pre">'LGH-IONS',</span> <span class="pre">'-LGH-IONS',</span> <span class="pre">'LOWENNEU',</span> <span class="pre">'-LOWENNEU',</span> <span class="pre">'MUON+',</span> <span class="pre">'-MUON+',</span> <span class="pre">'MUON-',</span> <span class="pre">'-MUON-',</span> <span class="pre">'MUONS',</span> <span class="pre">'-MUONS',</span> <span class="pre">'NET-CHRG',</span> <span class="pre">'-NET-CHRG',</span> <span class="pre">'NEU-BALA',</span> <span class="pre">'-NEU-BALA',</span> <span class="pre">'NEUTRIE',</span> <span class="pre">'-NEUTRIE',</span> <span class="pre">'NEUTRIM',</span> <span class="pre">'-NEUTRIM',</span> <span class="pre">'NEUTRIT',</span> <span class="pre">'-NEUTRIT',</span> <span class="pre">'NEUTRON',</span> <span class="pre">'-NEUTRON',</span> <span class="pre">'NIEL-DEP',</span> <span class="pre">'-NIEL-DEP',</span> <span class="pre">'NTLOWENE',</span> <span class="pre">'-NTLOWENE',</span> <span class="pre">'NUC&amp;PI+-',</span> <span class="pre">'-NUC&amp;PI+-',</span> <span class="pre">'NUCLEONS',</span> <span class="pre">'-NUCLEONS',</span> <span class="pre">'OMEGA-',</span> <span class="pre">'-OMEGA-',</span> <span class="pre">'OMEGAC0',</span> <span class="pre">'-OMEGAC0',</span> <span class="pre">'OPTIPHOT',</span> <span class="pre">'-OPTIPHOT',</span> <span class="pre">'PHOTON',</span> <span class="pre">'-PHOTON',</span> <span class="pre">'PION+',</span> <span class="pre">'-PION+',</span> <span class="pre">'PION-',</span> <span class="pre">'-PION-',</span> <span class="pre">'PIONS+-',</span> <span class="pre">'-PIONS+-',</span> <span class="pre">'PIZERO',</span> <span class="pre">'-PIZERO',</span> <span class="pre">'POSITRON',</span> <span class="pre">'-POSITRON',</span> <span class="pre">'PROTON',</span> <span class="pre">'-PROTON',</span> <span class="pre">'RAY',</span> <span class="pre">'-RAY',</span> <span class="pre">'RES-NIEL',</span> <span class="pre">'-RES-NIEL',</span> <span class="pre">'RES-NUCL',</span> <span class="pre">'-RES-NUCL',</span> <span class="pre">'SI1MEVNE',</span> <span class="pre">'-SI1MEVNE',</span> <span class="pre">'SIGMA+',</span> <span class="pre">'-SIGMA+',</span> <span class="pre">'SIGMA-',</span> <span class="pre">'-SIGMA-',</span> <span class="pre">'SIGMAZER',</span> <span class="pre">'-SIGMAZER',</span> <span class="pre">'SQBETA-D',</span> <span class="pre">'-SQBETA-D',</span> <span class="pre">'STRANGE',</span> <span class="pre">'-STRANGE',</span> <span class="pre">'TAU+',</span> <span class="pre">'-TAU+',</span> <span class="pre">'TAU-',</span> <span class="pre">'-TAU-',</span> <span class="pre">'THNEU-EQ',</span> <span class="pre">'-THNEU-EQ',</span> <span class="pre">'TRITON',</span> <span class="pre">'-TRITON',</span> <span class="pre">'UNB-EMEN',</span> <span class="pre">'-UNB-EMEN',</span> <span class="pre">'UNB-ENER',</span> <span class="pre">'-UNB-ENER',</span> <span class="pre">'WWLOWNEU',</span> <span class="pre">'-WWLOWNEU',</span> <span class="pre">'X-MOMENT',</span> <span class="pre">'-X-MOMENT',</span> <span class="pre">'XSI-',</span> <span class="pre">'-XSI-',</span> <span class="pre">'XSIC+',</span> <span class="pre">'-XSIC+',</span> <span class="pre">'XSIC0',</span> <span class="pre">'-XSIC0',</span> <span class="pre">'XSIPC+',</span> <span class="pre">'-XSIPC+',</span> <span class="pre">'XSIPC0',</span> <span class="pre">'-XSIPC0',</span> <span class="pre">'XSIZERO',</span> <span class="pre">'-XSIZERO',</span> <span class="pre">'Y-MOMENT',</span> <span class="pre">'-Y-MOMENT',</span> <span class="pre">'Z-MOMENT',</span> <span class="pre">'-Z-MOMENT',</span> <span class="pre">'&#64;LASTPAR']</span></em><a class="headerlink" href="#pymchelper.flair.Input.Particle.signedListAll" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pymchelper.flair.Input.Vector">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pymchelper.flair.Input.</span></span><span class="sig-name descname"><span class="pre">Vector</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymchelper/flair/Input.html#Vector"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymchelper.flair.Input.Vector" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="pymchelper.flair.common.bmath.html#pymchelper.flair.common.bmath.Vector" title="pymchelper.flair.common.bmath.Vector"><code class="xref py py-class docutils literal notranslate"><span class="pre">pymchelper.flair.common.bmath.Vector</span></code></a></p>
+<p>flair vector returning a string with {} representation</p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pymchelper.flair.Input.Voxel">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pymchelper.flair.Input.</span></span><span class="sig-name descname"><span class="pre">Voxel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymchelper/flair/Input.html#Voxel"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymchelper.flair.Input.Voxel" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl>
+<dt>Voxel class</dt><dd><dl class="simple">
+<dt>parse the voxel file and create fake cards for the</dt><dd><p>materials, assignmats and corrfact</p>
+</dd>
+</dl>
+<p>that might be embedded in the voxel file</p>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="pymchelper.flair.Input.Voxel.cleanup">
+<span class="sig-name descname"><span class="pre">cleanup</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymchelper/flair/Input.html#Voxel.cleanup"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymchelper.flair.Input.Voxel.cleanup" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymchelper.flair.Input.Voxel.read">
+<span class="sig-name descname"><span class="pre">read</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymchelper/flair/Input.html#Voxel.read"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymchelper.flair.Input.Voxel.read" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymchelper.flair.Input.Voxel.regionName">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">regionName</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">idx</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymchelper/flair/Input.html#Voxel.regionName"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymchelper.flair.Input.Voxel.regionName" title="Permalink to this definition">¶</a></dt>
+<dd><p>return a valid region name</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pymchelper.flair.Input.init">
+<span class="sig-prename descclassname"><span class="pre">pymchelper.flair.Input.</span></span><span class="sig-name descname"><span class="pre">init</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymchelper/flair/Input.html#init"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymchelper.flair.Input.init" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="simple">
+<dt>Initialize classes:</dt><dd><p>CardInfo
+Particle</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>filename</strong> – </p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pymchelper.flair.Input.isEvalStr">
+<span class="sig-prename descclassname"><span class="pre">pymchelper.flair.Input.</span></span><span class="sig-name descname"><span class="pre">isEvalStr</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">w</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymchelper/flair/Input.html#isEvalStr"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymchelper.flair.Input.isEvalStr" title="Permalink to this definition">¶</a></dt>
+<dd><p>return is the what string is an evaluated function</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pymchelper.flair.Input.utfReadline">
+<span class="sig-prename descclassname"><span class="pre">pymchelper.flair.Input.</span></span><span class="sig-name descname"><span class="pre">utfReadline</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">f</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymchelper/flair/Input.html#utfReadline"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymchelper.flair.Input.utfReadline" title="Permalink to this definition">¶</a></dt>
+<dd><p>Readline and convert it to unicode if necessary</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pymchelper.flair.Input.utfWrite">
+<span class="sig-prename descclassname"><span class="pre">pymchelper.flair.Input.</span></span><span class="sig-name descname"><span class="pre">utfWrite</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">f</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">s</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymchelper/flair/Input.html#utfWrite"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymchelper.flair.Input.utfWrite" title="Permalink to this definition">¶</a></dt>
+<dd><p>Write in utf format if necessary</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pymchelper.flair.Input.utfWriteln">
+<span class="sig-prename descclassname"><span class="pre">pymchelper.flair.Input.</span></span><span class="sig-name descname"><span class="pre">utfWriteln</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">f</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">s</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymchelper/flair/Input.html#utfWriteln"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymchelper.flair.Input.utfWriteln" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pymchelper.flair.Input.writeln">
+<span class="sig-prename descclassname"><span class="pre">pymchelper.flair.Input.</span></span><span class="sig-name descname"><span class="pre">writeln</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">f</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">s</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymchelper/flair/Input.html#writeln"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymchelper.flair.Input.writeln" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/apidoc/pymchelper.flair.Input.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">pymchelper 1.10.0+rev3 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">pymchelper.flair.Input module</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2016, Leszek Grzanka.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 4.3.0.
+    </div>
+  </body>
+</html>

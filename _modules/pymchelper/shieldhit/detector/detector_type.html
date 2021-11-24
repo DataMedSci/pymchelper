@@ -1,0 +1,169 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>pymchelper.shieldhit.detector.detector_type &#8212; pymchelper 1.10.0+rev3 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/classic.css" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/graphviz.css" />
+    
+    <script data-url_root="../../../../" id="documentation_options" src="../../../../_static/documentation_options.js"></script>
+    <script src="../../../../_static/jquery.js"></script>
+    <script src="../../../../_static/underscore.js"></script>
+    <script src="../../../../_static/doctools.js"></script>
+    
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../../index.html">pymchelper 1.10.0+rev3 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../../index.html" accesskey="U">Module code</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">pymchelper.shieldhit.detector.detector_type</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for pymchelper.shieldhit.detector.detector_type</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">enum</span> <span class="k">import</span> <span class="n">IntEnum</span>
+
+
+<div class="viewcode-block" id="SHDetType"><a class="viewcode-back" href="../../../../apidoc/pymchelper.shieldhit.detector.detector_type.html#pymchelper.shieldhit.detector.detector_type.SHDetType">[docs]</a><span class="k">class</span> <span class="nc">SHDetType</span><span class="p">(</span><span class="n">IntEnum</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    List of available detector types below is based on IDET(5,*) in detect.f in SHIELD-HIT12A.</span>
+<span class="sd">    If new detectors are added, class SHEstimator in estimator.py should also be updated.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># TODO comments needed, see sh_scoredef.h</span>
+
+    <span class="n">none</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">energy</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="n">fluence</span> <span class="o">=</span> <span class="mi">2</span>
+    <span class="n">crossflu</span> <span class="o">=</span> <span class="mi">3</span>
+    <span class="n">letflu</span> <span class="o">=</span> <span class="mi">4</span>
+
+    <span class="n">dose</span> <span class="o">=</span> <span class="mi">5</span>
+    <span class="n">dlet</span> <span class="o">=</span> <span class="mi">6</span>
+    <span class="n">tlet</span> <span class="o">=</span> <span class="mi">7</span>
+    <span class="n">avg_energy</span> <span class="o">=</span> <span class="mi">8</span>
+    <span class="n">avg_beta</span> <span class="o">=</span> <span class="mi">9</span>
+
+    <span class="n">spc</span> <span class="o">=</span> <span class="mi">10</span>
+    <span class="n">material</span> <span class="o">=</span> <span class="mi">11</span>
+    <span class="n">ddd</span> <span class="o">=</span> <span class="mi">12</span>
+    <span class="n">alanine</span> <span class="o">=</span> <span class="mi">13</span>
+    <span class="n">counter</span> <span class="o">=</span> <span class="mi">14</span>
+
+    <span class="n">pet</span> <span class="o">=</span> <span class="mi">15</span>
+    <span class="n">dletg</span> <span class="o">=</span> <span class="mi">16</span>
+    <span class="n">tletg</span> <span class="o">=</span> <span class="mi">17</span>
+    <span class="n">zone</span> <span class="o">=</span> <span class="mi">18</span>
+    <span class="n">medium</span> <span class="o">=</span> <span class="mi">19</span>
+
+    <span class="n">rho</span> <span class="o">=</span> <span class="mi">20</span>
+    <span class="n">q</span> <span class="o">=</span> <span class="mi">21</span>
+    <span class="n">flu_char</span> <span class="o">=</span> <span class="mi">22</span>
+    <span class="n">flu_neut</span> <span class="o">=</span> <span class="mi">23</span>
+    <span class="n">flu_neqv</span> <span class="o">=</span> <span class="mi">24</span>
+
+    <span class="n">angle</span> <span class="o">=</span> <span class="mi">25</span>
+    <span class="n">trace</span> <span class="o">=</span> <span class="mi">26</span>
+    <span class="n">kinetic_energy</span> <span class="o">=</span> <span class="mi">27</span>
+    <span class="n">energy_nuc</span> <span class="o">=</span> <span class="mi">28</span>
+    <span class="n">energy_amu</span> <span class="o">=</span> <span class="mi">29</span>
+
+    <span class="n">a</span> <span class="o">=</span> <span class="mi">30</span>
+    <span class="n">amass</span> <span class="o">=</span> <span class="mi">31</span>
+    <span class="n">amu</span> <span class="o">=</span> <span class="mi">32</span>
+    <span class="n">gen</span> <span class="o">=</span> <span class="mi">33</span>
+    <span class="nb">id</span> <span class="o">=</span> <span class="mi">34</span>
+
+    <span class="n">dedx</span> <span class="o">=</span> <span class="mi">35</span>
+    <span class="n">mass_dedx</span> <span class="o">=</span> <span class="mi">36</span>
+    <span class="n">track_length</span> <span class="o">=</span> <span class="mi">37</span>
+    <span class="n">nkerma</span> <span class="o">=</span> <span class="mi">38</span>
+    <span class="n">dose_gy</span> <span class="o">=</span> <span class="mi">39</span>
+
+    <span class="n">dose_eqv</span> <span class="o">=</span> <span class="mi">40</span>
+    <span class="n">eqv_dose</span> <span class="o">=</span> <span class="mi">41</span>
+    <span class="n">user1</span> <span class="o">=</span> <span class="mi">42</span>
+    <span class="n">user2</span> <span class="o">=</span> <span class="mi">43</span>
+    <span class="n">n_eqv_dose</span> <span class="o">=</span> <span class="mi">44</span>  <span class="c1"># Neutron equivalent dose, ICRP 103 protection quantity.</span>
+
+    <span class="n">z2beta2</span> <span class="o">=</span> <span class="mi">45</span>
+    <span class="n">dose_av_z2beta2</span> <span class="o">=</span> <span class="mi">46</span>
+    <span class="n">track_av_z2beta2</span> <span class="o">=</span> <span class="mi">47</span>
+    <span class="n">dose_av_q</span> <span class="o">=</span> <span class="mi">48</span>
+    <span class="n">track_av_q</span> <span class="o">=</span> <span class="mi">49</span>
+
+    <span class="n">z</span> <span class="o">=</span> <span class="mi">50</span>
+    <span class="n">zeff</span> <span class="o">=</span> <span class="mi">51</span>
+    <span class="n">zeff2beta2</span> <span class="o">=</span> <span class="mi">52</span>
+    <span class="n">tzeff2beta2</span> <span class="o">=</span> <span class="mi">53</span>
+    <span class="n">dzeff2beta2</span> <span class="o">=</span> <span class="mi">54</span>
+
+    <span class="n">let_bdo2016</span> <span class="o">=</span> <span class="mi">120</span>  <span class="c1"># for differential scoring</span>
+    <span class="n">angle_bdo2016</span> <span class="o">=</span> <span class="mi">121</span>  <span class="c1"># for differential scoring</span>
+    <span class="n">dose_gy_bdo2016</span> <span class="o">=</span> <span class="mi">205</span>
+    <span class="n">alanine_gy_bdo2016</span> <span class="o">=</span> <span class="mi">213</span>
+
+    <span class="n">invalid</span> <span class="o">=</span> <span class="mi">32767</span>
+
+    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;_&#39;</span><span class="p">,</span> <span class="s1">&#39;-&#39;</span><span class="p">)</span></div>
+</pre></div>
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../../index.html">pymchelper 1.10.0+rev3 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../../index.html" >Module code</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">pymchelper.shieldhit.detector.detector_type</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2016, Leszek Grzanka.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 4.3.0.
+    </div>
+  </body>
+</html>

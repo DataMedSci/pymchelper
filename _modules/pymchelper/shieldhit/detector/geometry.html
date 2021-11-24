@@ -1,0 +1,216 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>pymchelper.shieldhit.detector.geometry &#8212; pymchelper 1.10.0+rev3 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/classic.css" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/graphviz.css" />
+    
+    <script data-url_root="../../../../" id="documentation_options" src="../../../../_static/documentation_options.js"></script>
+    <script src="../../../../_static/jquery.js"></script>
+    <script src="../../../../_static/underscore.js"></script>
+    <script src="../../../../_static/doctools.js"></script>
+    
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../../index.html">pymchelper 1.10.0+rev3 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../../index.html" accesskey="U">Module code</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">pymchelper.shieldhit.detector.geometry</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for pymchelper.shieldhit.detector.geometry</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">pymchelper.shieldhit.detector.estimator_type</span> <span class="k">import</span> <span class="n">SHGeoType</span>
+
+
+<div class="viewcode-block" id="Axis"><a class="viewcode-back" href="../../../../apidoc/pymchelper.shieldhit.detector.geometry.html#pymchelper.shieldhit.detector.geometry.Axis">[docs]</a><span class="k">class</span> <span class="nc">Axis</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Represents named sequence of nbins numbers, with known start and end position.</span>
+<span class="sd">    Can be used as container to describe scoring geometry along one of the axis.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">stop</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">nbins</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">number</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">start</span><span class="o">=</span><span class="n">start</span><span class="p">,</span> <span class="n">stop</span><span class="o">=</span><span class="n">stop</span><span class="p">,</span> <span class="n">nbins</span><span class="o">=</span><span class="n">nbins</span><span class="p">,</span> <span class="n">number</span><span class="o">=</span><span class="n">number</span><span class="p">)</span>
+
+<div class="viewcode-block" id="Axis.set"><a class="viewcode-back" href="../../../../apidoc/pymchelper.shieldhit.detector.geometry.html#pymchelper.shieldhit.detector.geometry.Axis.set">[docs]</a>    <span class="k">def</span> <span class="nf">set</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">stop</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">nbins</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">number</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">start</span> <span class="o">=</span> <span class="n">start</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">stop</span> <span class="o">=</span> <span class="n">stop</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">nbins</span> <span class="o">=</span> <span class="n">nbins</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">number</span> <span class="o">=</span> <span class="n">number</span></div></div>
+
+
+<div class="viewcode-block" id="Geometry"><a class="viewcode-back" href="../../../../apidoc/pymchelper.shieldhit.detector.geometry.html#pymchelper.shieldhit.detector.geometry.Geometry">[docs]</a><span class="k">class</span> <span class="nc">Geometry</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Base class for all types of scoring geometries. Holds information about three axes.</span>
+<span class="sd">    Three axis are used to allow scoring up to 3 dimensions.</span>
+<span class="sd">    Lower number of dimensions (i.e. scoring on square) are achieved by setting nbins=1 in the axis.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">axis</span> <span class="o">=</span> <span class="p">(</span><span class="n">Axis</span><span class="p">(),</span> <span class="n">Axis</span><span class="p">(),</span> <span class="n">Axis</span><span class="p">())</span>
+
+<div class="viewcode-block" id="Geometry.allowed_estimators"><a class="viewcode-back" href="../../../../apidoc/pymchelper.shieldhit.detector.geometry.html#pymchelper.shieldhit.detector.geometry.Geometry.allowed_estimators">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">allowed_estimators</span><span class="p">():</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        :return: List of compatible estimators for this scoring geometry.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="p">()</span></div>
+
+<div class="viewcode-block" id="Geometry.set_axis"><a class="viewcode-back" href="../../../../apidoc/pymchelper.shieldhit.detector.geometry.html#pymchelper.shieldhit.detector.geometry.Geometry.set_axis">[docs]</a>    <span class="k">def</span> <span class="nf">set_axis</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">axis_no</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">stop</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">nbins</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Fill axis data</span>
+<span class="sd">        :param axis_no: integer number, from 0 to 2, specifies axis number</span>
+<span class="sd">        :param start: start position</span>
+<span class="sd">        :param stop:  stop position</span>
+<span class="sd">        :param nbins: number of elements</span>
+<span class="sd">        :return: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">axis_no</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">axis</span><span class="p">)):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">axis</span><span class="p">[</span><span class="n">axis_no</span><span class="p">]</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">start</span><span class="o">=</span><span class="n">start</span><span class="p">,</span> <span class="n">stop</span><span class="o">=</span><span class="n">stop</span><span class="p">,</span> <span class="n">nbins</span><span class="o">=</span><span class="n">nbins</span><span class="p">,</span> <span class="n">number</span><span class="o">=</span><span class="n">axis_no</span><span class="p">)</span></div>
+
+    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s2">&quot;general&quot;</span></div>
+
+
+<div class="viewcode-block" id="CarthesianMesh"><a class="viewcode-back" href="../../../../apidoc/pymchelper.shieldhit.detector.geometry.html#pymchelper.shieldhit.detector.geometry.CarthesianMesh">[docs]</a><span class="k">class</span> <span class="nc">CarthesianMesh</span><span class="p">(</span><span class="n">Geometry</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Carthesian mesh along X,Y and Z axis</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">Geometry</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">axis</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="s2">&quot;X&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">axis</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="s2">&quot;Y&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">axis</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="s2">&quot;Z&quot;</span>
+
+<div class="viewcode-block" id="CarthesianMesh.allowed_estimators"><a class="viewcode-back" href="../../../../apidoc/pymchelper.shieldhit.detector.geometry.html#pymchelper.shieldhit.detector.geometry.CarthesianMesh.allowed_estimators">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">allowed_estimators</span><span class="p">():</span>
+        <span class="k">return</span> <span class="n">SHGeoType</span><span class="o">.</span><span class="n">msh</span><span class="p">,</span> <span class="n">SHGeoType</span><span class="o">.</span><span class="n">dmsh</span><span class="p">,</span> <span class="n">SHGeoType</span><span class="o">.</span><span class="n">geomap</span></div>
+
+    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s2">&quot;carthesian&quot;</span></div>
+
+
+<div class="viewcode-block" id="CylindricalMesh"><a class="viewcode-back" href="../../../../apidoc/pymchelper.shieldhit.detector.geometry.html#pymchelper.shieldhit.detector.geometry.CylindricalMesh">[docs]</a><span class="k">class</span> <span class="nc">CylindricalMesh</span><span class="p">(</span><span class="n">Geometry</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Cylindrical mesh along R, PHI and Z axis</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">Geometry</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">axis</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="s2">&quot;R&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">axis</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="s2">&quot;PHI&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">axis</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="s2">&quot;Z&quot;</span>
+
+<div class="viewcode-block" id="CylindricalMesh.allowed_estimators"><a class="viewcode-back" href="../../../../apidoc/pymchelper.shieldhit.detector.geometry.html#pymchelper.shieldhit.detector.geometry.CylindricalMesh.allowed_estimators">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">allowed_estimators</span><span class="p">():</span>
+        <span class="k">return</span> <span class="n">SHGeoType</span><span class="o">.</span><span class="n">cyl</span><span class="p">,</span> <span class="n">SHGeoType</span><span class="o">.</span><span class="n">dcyl</span></div>
+
+    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s2">&quot;cylindrical&quot;</span></div>
+
+
+<div class="viewcode-block" id="Zone"><a class="viewcode-back" href="../../../../apidoc/pymchelper.shieldhit.detector.geometry.html#pymchelper.shieldhit.detector.geometry.Zone">[docs]</a><span class="k">class</span> <span class="nc">Zone</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Zone scoring geometry - start and stop</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">start</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">stop</span> <span class="o">=</span> <span class="kc">None</span>
+
+<div class="viewcode-block" id="Zone.allowed_estimators"><a class="viewcode-back" href="../../../../apidoc/pymchelper.shieldhit.detector.geometry.html#pymchelper.shieldhit.detector.geometry.Zone.allowed_estimators">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">allowed_estimators</span><span class="p">():</span>
+        <span class="k">return</span> <span class="n">SHGeoType</span><span class="o">.</span><span class="n">zone</span><span class="p">,</span> <span class="n">SHGeoType</span><span class="o">.</span><span class="n">dzone</span></div>
+
+    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s2">&quot;zone&quot;</span></div>
+
+
+<div class="viewcode-block" id="Plane"><a class="viewcode-back" href="../../../../apidoc/pymchelper.shieldhit.detector.geometry.html#pymchelper.shieldhit.detector.geometry.Plane">[docs]</a><span class="k">class</span> <span class="nc">Plane</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Plane scoring geometry</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">set_point</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">set_normal</span><span class="p">()</span>
+
+<div class="viewcode-block" id="Plane.set_point"><a class="viewcode-back" href="../../../../apidoc/pymchelper.shieldhit.detector.geometry.html#pymchelper.shieldhit.detector.geometry.Plane.set_point">[docs]</a>    <span class="k">def</span> <span class="nf">set_point</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">z</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">point_x</span> <span class="o">=</span> <span class="n">x</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">point_y</span> <span class="o">=</span> <span class="n">y</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">point_z</span> <span class="o">=</span> <span class="n">z</span></div>
+
+<div class="viewcode-block" id="Plane.set_normal"><a class="viewcode-back" href="../../../../apidoc/pymchelper.shieldhit.detector.geometry.html#pymchelper.shieldhit.detector.geometry.Plane.set_normal">[docs]</a>    <span class="k">def</span> <span class="nf">set_normal</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">z</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">normal_x</span> <span class="o">=</span> <span class="n">x</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">normal_y</span> <span class="o">=</span> <span class="n">y</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">normal_z</span> <span class="o">=</span> <span class="n">z</span></div>
+
+<div class="viewcode-block" id="Plane.allowed_estimators"><a class="viewcode-back" href="../../../../apidoc/pymchelper.shieldhit.detector.geometry.html#pymchelper.shieldhit.detector.geometry.Plane.allowed_estimators">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">allowed_estimators</span><span class="p">():</span>
+        <span class="k">return</span> <span class="n">SHGeoType</span><span class="o">.</span><span class="n">plane</span><span class="p">,</span> <span class="n">SHGeoType</span><span class="o">.</span><span class="n">dplane</span></div>
+
+    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s2">&quot;plane&quot;</span></div>
+</pre></div>
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../../index.html">pymchelper 1.10.0+rev3 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../../index.html" >Module code</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">pymchelper.shieldhit.detector.geometry</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2016, Leszek Grzanka.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 4.3.0.
+    </div>
+  </body>
+</html>

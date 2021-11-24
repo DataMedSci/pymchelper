@@ -1,0 +1,177 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>Getting Started &#8212; pymchelper 1.10.0+rev3 documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="_static/classic.css" />
+    <link rel="stylesheet" type="text/css" href="_static/graphviz.css" />
+    
+    <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="User’s Guide" href="user_guide.html" />
+    <link rel="prev" title="Welcome to pymchelper’s documentation!" href="index.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="user_guide.html" title="User’s Guide"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="index.html" title="Welcome to pymchelper’s documentation!"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">pymchelper 1.10.0+rev3 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Getting Started</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <section id="getting-started">
+<span id="id1"></span><h1>Getting Started<a class="headerlink" href="#getting-started" title="Permalink to this headline">¶</a></h1>
+<p class="rubric">Brief overview of pymchelper and how to install it.</p>
+<section id="introduction">
+<h2>Introduction<a class="headerlink" href="#introduction" title="Permalink to this headline">¶</a></h2>
+<p>Let us assume we are running particle transport simulation using Fluka MC code.
+Two estimators: particle fluence and deposited energy are defined in the input file.
+To get high statistics run is parallelised into 100 different jobs, each of them producing 2 binary files.
+That gives 200 binary output files, typically following <code class="code bash docutils literal notranslate"><span class="pre">*_fort.*</span></code> pattern.</p>
+<p>pymchelper comes with <strong>convertmc</strong> program which simplifies postprocessing of such binary data.</p>
+<p>To convert all binary files into two text files (one for energy and one for particle fluence scorer) type</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>convertmc txt --many <span class="s2">&quot;*_fort.*&quot;</span>
+</pre></div>
+</div>
+<p>pymchelper will automatically figure out how many scorers were defined and which files to merge.
+Two new files will be created: <code class="code bash docutils literal notranslate"><span class="literal number"><span class="pre">21</span></span><span class="pre">.txt</span></code> and <code class="code bash docutils literal notranslate"><span class="literal number"><span class="pre">22</span></span><span class="pre">.txt</span></code> which can further processed.
+By default they will contain 5 columns: X,Y,Z coordinates, data and error column:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="m">0</span>.0000000E+00  <span class="m">0</span>.0000000E+00  <span class="m">0</span>.5000000E-02  <span class="m">0</span>.1881775795482099E-02  <span class="m">0</span>.2157818940293169E-04
+<span class="m">0</span>.0000000E+00  <span class="m">0</span>.0000000E+00  <span class="m">0</span>.1500000E-01  <span class="m">0</span>.1893831696361303E-02  <span class="m">0</span>.2251415707395123E-04
+<span class="m">0</span>.0000000E+00  <span class="m">0</span>.0000000E+00  <span class="m">0</span>.2500000E-01  <span class="m">0</span>.1887728041037917E-02  <span class="m">0</span>.1936414681456153E-04
+<span class="m">0</span>.0000000E+00  <span class="m">0</span>.0000000E+00  <span class="m">0</span>.3500000E-01  <span class="m">0</span>.1897429465316236E-02  <span class="m">0</span>.1944586725074595E-04
+</pre></div>
+</div>
+<p>In case estimated value was scored on 1-dimensional grid, it can be easily plotted.
+Same thing might be done if 2-D scoring grid was used - then a heatmap type plot can be produced.
+In order to get such plots instead of text files, replace first argument with <code class="code bash docutils literal notranslate"><span class="pre">image</span></code>:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>convertmc image --many <span class="s2">&quot;*_fort*&quot;</span>
+</pre></div>
+</div>
+<p>Two new PNG files will be created which can be directly opened, for example</p>
+<figure class="align-default">
+<a class="reference internal image-reference" href="21.txt.png"><img alt="sample file 21.txt.png generated with image converter" src="21.txt.png" /></a>
+</figure>
+<p>If you are SHIELD-HIT12A user, same effect can be achieved by processing <code class="code bash docutils literal notranslate"><span class="pre">*.bdo</span></code> binary files.</p>
+<p>These are just basic examples. To learn more about additional features, proceed to <a class="reference internal" href="user_guide.html"><span class="doc">User’s Guide</span></a>.
+Among these features are:</p>
+<ul class="simple">
+<li><p>reading binary <code class="code bash docutils literal notranslate"><span class="pre">*.bdo</span></code> files generated by SHIELD-HIT12A code</p></li>
+<li><p>reading binary <code class="code bash docutils literal notranslate"><span class="pre">*_fort*</span></code> files generated by FLUKA</p></li>
+<li><p>calculating standard error when averaging many files</p></li>
+<li><p>writing PNG images (1 and 2D plots)</p></li>
+<li><p>writing tabulated text files</p></li>
+<li><p>writing gnuplot scripts</p></li>
+</ul>
+</section>
+<section id="quick-installation-guide">
+<h2>Quick Installation Guide<a class="headerlink" href="#quick-installation-guide" title="Permalink to this headline">¶</a></h2>
+<p>Be sure to have Python framework installed, then type:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip install pymchelper
+</pre></div>
+</div>
+<p>In case you don’t have administrator rights, add <code class="code bash docutils literal notranslate"><span class="pre">--user</span></code> flag to <code class="code bash docutils literal notranslate"><span class="pre">pip</span></code> command.
+In this situation converter will be probably installed in <code class="code bash docutils literal notranslate"><span class="pre">~/.local/bin</span></code> directory.</p>
+</section>
+<section id="license">
+<h2>License<a class="headerlink" href="#license" title="Permalink to this headline">¶</a></h2>
+<p>pymchelper is licensed under <cite>MIT LICENCE</cite>.</p>
+</section>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Getting Started</a><ul>
+<li><a class="reference internal" href="#introduction">Introduction</a></li>
+<li><a class="reference internal" href="#quick-installation-guide">Quick Installation Guide</a></li>
+<li><a class="reference internal" href="#license">License</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="index.html"
+                        title="previous chapter">Welcome to pymchelper’s documentation!</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="user_guide.html"
+                        title="next chapter">User’s Guide</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/getting_started.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="user_guide.html" title="User’s Guide"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="index.html" title="Welcome to pymchelper’s documentation!"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">pymchelper 1.10.0+rev3 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Getting Started</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2016, Leszek Grzanka.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 4.3.0.
+    </div>
+  </body>
+</html>

@@ -1,0 +1,24 @@
+pymchelper.writers package
+==========================
+
+.. automodule:: pymchelper.writers
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Submodules
+----------
+
+.. toctree::
+   :maxdepth: 4
+
+   pymchelper.writers.common
+   pymchelper.writers.excel
+   pymchelper.writers.fortranformatter
+   pymchelper.writers.hdf
+   pymchelper.writers.inspector
+   pymchelper.writers.plots
+   pymchelper.writers.shieldhit
+   pymchelper.writers.sparse
+   pymchelper.writers.trip98cube
+   pymchelper.writers.trip98ddd

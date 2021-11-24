@@ -1,0 +1,129 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>pymchelper.utils.pld2sobp module &#8212; pymchelper 1.10.0+rev3 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/classic.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/graphviz.css" />
+    
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/doctools.js"></script>
+    
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">pymchelper 1.10.0+rev3 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">pymchelper.utils.pld2sobp module</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <section id="module-pymchelper.utils.pld2sobp">
+<span id="pymchelper-utils-pld2sobp-module"></span><h1>pymchelper.utils.pld2sobp module<a class="headerlink" href="#module-pymchelper.utils.pld2sobp" title="Permalink to this headline">¶</a></h1>
+<p>Reads PLD file in IBA format and convert to sobp.dat
+which is readable by FLUKA with source_sampler.f and by SHIELD-HIT12A.</p>
+<p>TODO: Translate energy to spotsize.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="pymchelper.utils.pld2sobp.Layer">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pymchelper.utils.pld2sobp.</span></span><span class="sig-name descname"><span class="pre">Layer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">spotsize</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">energy</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">meterset</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">elsum</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">repaints</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">elements</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymchelper/utils/pld2sobp.html#Layer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymchelper.utils.pld2sobp.Layer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Class for handling Layers.</p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pymchelper.utils.pld2sobp.PLDRead">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pymchelper.utils.pld2sobp.</span></span><span class="sig-name descname"><span class="pre">PLDRead</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fpld</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymchelper/utils/pld2sobp.html#PLDRead"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymchelper.utils.pld2sobp.PLDRead" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Class for handling PLD files.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pymchelper.utils.pld2sobp.dedx_air">
+<span class="sig-prename descclassname"><span class="pre">pymchelper.utils.pld2sobp.</span></span><span class="sig-name descname"><span class="pre">dedx_air</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">energy</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymchelper/utils/pld2sobp.html#dedx_air"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymchelper.utils.pld2sobp.dedx_air" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate the mass stopping power of protons in air following ICRU 49.
+Valid from 1 to 500 MeV only.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Params energy</dt>
+<dd class="field-odd"><p>Proton energy in MeV</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>mass stopping power in MeV cm2/g</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pymchelper.utils.pld2sobp.main">
+<span class="sig-prename descclassname"><span class="pre">pymchelper.utils.pld2sobp.</span></span><span class="sig-name descname"><span class="pre">main</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">args</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymchelper/utils/pld2sobp.html#main"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymchelper.utils.pld2sobp.main" title="Permalink to this definition">¶</a></dt>
+<dd><p>Main function of the pld2sobp script.</p>
+</dd></dl>
+
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/apidoc/pymchelper.utils.pld2sobp.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">pymchelper 1.10.0+rev3 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">pymchelper.utils.pld2sobp module</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2016, Leszek Grzanka.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 4.3.0.
+    </div>
+  </body>
+</html>

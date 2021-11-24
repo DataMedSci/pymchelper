@@ -1,0 +1,7 @@
+pymchelper.writers.trip98ddd module
+===================================
+
+.. automodule:: pymchelper.writers.trip98ddd
+   :members:
+   :undoc-members:
+   :show-inheritance:

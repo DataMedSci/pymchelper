@@ -1,0 +1,24 @@
+pymchelper.readers package
+==========================
+
+.. automodule:: pymchelper.readers
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Subpackages
+-----------
+
+.. toctree::
+   :maxdepth: 4
+
+   pymchelper.readers.shieldhit
+
+Submodules
+----------
+
+.. toctree::
+   :maxdepth: 4
+
+   pymchelper.readers.common
+   pymchelper.readers.fluka

@@ -1,0 +1,132 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>pymchelper.writers.common &#8212; pymchelper 1.10.0+rev3 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/classic.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css" />
+    
+    <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+    <script src="../../../_static/jquery.js"></script>
+    <script src="../../../_static/underscore.js"></script>
+    <script src="../../../_static/doctools.js"></script>
+    
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">pymchelper 1.10.0+rev3 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">pymchelper.writers.common</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for pymchelper.writers.common</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">enum</span> <span class="k">import</span> <span class="n">IntEnum</span>
+
+<span class="kn">from</span> <span class="nn">pymchelper.writers.excel</span> <span class="k">import</span> <span class="n">ExcelWriter</span>
+<span class="kn">from</span> <span class="nn">pymchelper.writers.inspector</span> <span class="k">import</span> <span class="n">Inspector</span>
+<span class="kn">from</span> <span class="nn">pymchelper.writers.plots</span> <span class="k">import</span> <span class="n">GnuplotDataWriter</span><span class="p">,</span> <span class="n">PlotDataWriter</span><span class="p">,</span> <span class="n">ImageWriter</span>
+<span class="kn">from</span> <span class="nn">pymchelper.writers.shieldhit</span> <span class="k">import</span> <span class="n">TxtWriter</span>
+<span class="kn">from</span> <span class="nn">pymchelper.writers.sparse</span> <span class="k">import</span> <span class="n">SparseWriter</span>
+<span class="kn">from</span> <span class="nn">pymchelper.writers.trip98cube</span> <span class="k">import</span> <span class="n">TRiP98CubeWriter</span>
+<span class="kn">from</span> <span class="nn">pymchelper.writers.trip98ddd</span> <span class="k">import</span> <span class="n">TRiP98DDDWriter</span>
+<span class="kn">from</span> <span class="nn">pymchelper.writers.hdf</span> <span class="k">import</span> <span class="n">HdfWriter</span>
+
+
+<div class="viewcode-block" id="Converters"><a class="viewcode-back" href="../../../apidoc/pymchelper.writers.common.html#pymchelper.writers.common.Converters">[docs]</a><span class="k">class</span> <span class="nc">Converters</span><span class="p">(</span><span class="n">IntEnum</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Available converters</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">txt</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">plotdata</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="n">gnuplot</span> <span class="o">=</span> <span class="mi">2</span>
+    <span class="n">image</span> <span class="o">=</span> <span class="mi">3</span>
+    <span class="n">tripcube</span> <span class="o">=</span> <span class="mi">4</span>
+    <span class="n">tripddd</span> <span class="o">=</span> <span class="mi">5</span>
+    <span class="n">excel</span> <span class="o">=</span> <span class="mi">6</span>
+    <span class="n">sparse</span> <span class="o">=</span> <span class="mi">7</span>
+    <span class="n">inspect</span> <span class="o">=</span> <span class="mi">8</span>
+    <span class="n">hdf</span> <span class="o">=</span> <span class="mi">9</span>
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">_converter_mapping</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">item</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="bp">cls</span><span class="o">.</span><span class="n">txt</span><span class="p">:</span> <span class="n">TxtWriter</span><span class="p">,</span>
+            <span class="bp">cls</span><span class="o">.</span><span class="n">gnuplot</span><span class="p">:</span> <span class="n">GnuplotDataWriter</span><span class="p">,</span>
+            <span class="bp">cls</span><span class="o">.</span><span class="n">plotdata</span><span class="p">:</span> <span class="n">PlotDataWriter</span><span class="p">,</span>
+            <span class="bp">cls</span><span class="o">.</span><span class="n">image</span><span class="p">:</span> <span class="n">ImageWriter</span><span class="p">,</span>
+            <span class="bp">cls</span><span class="o">.</span><span class="n">tripcube</span><span class="p">:</span> <span class="n">TRiP98CubeWriter</span><span class="p">,</span>
+            <span class="bp">cls</span><span class="o">.</span><span class="n">tripddd</span><span class="p">:</span> <span class="n">TRiP98DDDWriter</span><span class="p">,</span>
+            <span class="bp">cls</span><span class="o">.</span><span class="n">excel</span><span class="p">:</span> <span class="n">ExcelWriter</span><span class="p">,</span>
+            <span class="bp">cls</span><span class="o">.</span><span class="n">sparse</span><span class="p">:</span> <span class="n">SparseWriter</span><span class="p">,</span>
+            <span class="bp">cls</span><span class="o">.</span><span class="n">inspect</span><span class="p">:</span> <span class="n">Inspector</span><span class="p">,</span>
+            <span class="bp">cls</span><span class="o">.</span><span class="n">hdf</span><span class="p">:</span> <span class="n">HdfWriter</span>
+        <span class="p">}</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
+
+<div class="viewcode-block" id="Converters.fromname"><a class="viewcode-back" href="../../../apidoc/pymchelper.writers.common.html#pymchelper.writers.common.Converters.fromname">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">fromname</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_converter_mapping</span><span class="p">(</span><span class="n">Converters</span><span class="p">[</span><span class="n">name</span><span class="p">])</span></div>
+
+<div class="viewcode-block" id="Converters.fromnumber"><a class="viewcode-back" href="../../../apidoc/pymchelper.writers.common.html#pymchelper.writers.common.Converters.fromnumber">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">fromnumber</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">number</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_converter_mapping</span><span class="p">[</span><span class="n">Converters</span><span class="p">(</span><span class="n">number</span><span class="p">)]</span></div></div>
+</pre></div>
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">pymchelper 1.10.0+rev3 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">pymchelper.writers.common</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2016, Leszek Grzanka.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 4.3.0.
+    </div>
+  </body>
+</html>

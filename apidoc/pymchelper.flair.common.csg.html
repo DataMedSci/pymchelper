@@ -1,0 +1,285 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>pymchelper.flair.common.csg module &#8212; pymchelper 1.10.0+rev3 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/classic.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/graphviz.css" />
+    
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/doctools.js"></script>
+    
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">pymchelper 1.10.0+rev3 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">pymchelper.flair.common.csg module</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <section id="module-pymchelper.flair.common.csg">
+<span id="pymchelper-flair-common-csg-module"></span><h1>pymchelper.flair.common.csg module<a class="headerlink" href="#module-pymchelper.flair.common.csg" title="Permalink to this headline">¶</a></h1>
+<dl class="py exception">
+<dt class="sig sig-object py" id="pymchelper.flair.common.csg.CSGException">
+<em class="property"><span class="pre">exception</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pymchelper.flair.common.csg.</span></span><span class="sig-name descname"><span class="pre">CSGException</span></span><a class="reference internal" href="../_modules/pymchelper/flair/common/csg.html#CSGException"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymchelper.flair.common.csg.CSGException" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Exception</span></code></p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pymchelper.flair.common.csg.check">
+<span class="sig-prename descclassname"><span class="pre">pymchelper.flair.common.csg.</span></span><span class="sig-name descname"><span class="pre">check</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">expr</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymchelper/flair/common/csg.html#check"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymchelper.flair.common.csg.check" title="Permalink to this definition">¶</a></dt>
+<dd><p>check depth of an rpn expression</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pymchelper.flair.common.csg.exp2rpn">
+<span class="sig-prename descclassname"><span class="pre">pymchelper.flair.common.csg.</span></span><span class="sig-name descname"><span class="pre">exp2rpn</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">expr</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymchelper/flair/common/csg.html#exp2rpn"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymchelper.flair.common.csg.exp2rpn" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert the FLUKA Boolean expression to Reverse Polish Notation (RPN)
+Since the normalization routine does not accept the +/- as signs to
+objects, the routine is converting the leading - to &#64;- (Universe minus)
+where the special symbol &#64; is treated as the universe.
+Furthermore the leading + is ignored as well as the leading | which is
+accepted by fluka.</p>
+<dl>
+<dt>WARNING: No check is done for the correctness of the expression apart</dt><dd><p>from the parenthesis nesting</p>
+</dd>
+<dt>ie.</dt><dd><blockquote>
+<div><p>A+B         -&gt; A B +</p>
+</div></blockquote>
+<p>(A+B)|C      -&gt; A B + C |
+(A|B)|C+D|E  -&gt; A B | C D + | E |
+-A           -&gt; &#64; A -
+-(-A)        -&gt; &#64; &#64; A - -</p>
+</dd>
+</dl>
+<p>The routine is using the same array for returning the Reverse Polish
+expression, since the format is more compact.
+This is generally true apart one case -A -&gt; &#64; A -</p>
+<dl>
+<dt>Priorities are treated as:</dt><dd><p>Operator  Priority         In     Out
+——–  ——–        —     —</p>
+<blockquote>
+<div><div class="line-block">
+<div class="line">lower             1       2</div>
+</div>
+<ul class="simple">
+<li><p>high              3       4</p></li>
+</ul>
+<ul class="simple">
+<li><p>high              3       4</p></li>
+</ul>
+<p>(       higher           99       0
+)       higher            0      99
+object  highest         101     100</p>
+</div></blockquote>
+</dd>
+<dt>Algorithm</dt><dd><p>Consider the expression as a train moving on a railroad with a
+T-shape, where each token is one wagon</p>
+<blockquote>
+<div><blockquote>
+<div><p>&lt;-  (A|B)|C+D</p>
+</div></blockquote>
+<p>————.   .————
+RPN-End      | /      Exp-End</p>
+<blockquote>
+<div><blockquote>
+<div><div class="line-block">
+<div class="line"><br /></div>
+</div>
+</div></blockquote>
+<p>S|
+t|
+a|
+c|
+k|</p>
+</div></blockquote>
+</div></blockquote>
+<p>Each wagon to move from the Exp-End to the RPN-End it has to make
+a stop first in the Stack-End. Before entering in the stack, the
+priority-IN will be checked against the objects in the stack.
+All top-most objects currently present in the stack with
+higher priority-OUT will be transfered from the stack to the
+RPN-End. Apart from the opening parenthesis ( which is discarded.</p>
+<p>Example:
+(1)                         A+B|C (1)
+(2) A                        +B|C (2)
+(3) A                         B|C (3)
+(4) A                          <a href="#id1"><span class="problematic" id="id2">|</span></a>C (4)
+(5) A B +                       C (5)
+(6) A B + C
+(7) A B + C |</p>
+<blockquote>
+<div><p>————.   .————
+RPN-End      | /      Exp-End</p>
+<blockquote>
+<div><blockquote>
+<div><div class="line-block">
+<div class="line"><br /></div>
+</div>
+</div></blockquote>
+<p>S|
+t|
+a|
+c|     B   C
+k| A + + | | |</p>
+<blockquote>
+<div><p>1 2 3 4 5 6 7</p>
+</div></blockquote>
+</div></blockquote>
+</div></blockquote>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>expr</strong> – </p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pymchelper.flair.common.csg.optZone">
+<span class="sig-prename descclassname"><span class="pre">pymchelper.flair.common.csg.</span></span><span class="sig-name descname"><span class="pre">optZone</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">plus</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">minus</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymchelper/flair/common/csg.html#optZone"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymchelper.flair.common.csg.optZone" title="Permalink to this definition">¶</a></dt>
+<dd><p>Optimize a product, by removing the universe &#64;, duplicated terms like
+A+A, A-A, -A-A, and finally calling the geometrical optimizations and
+sorting by name the primitives in both the plus and minus terms.</p>
+<p>The product is described by 2 arrays the PLUS,NPLUS and MINUS,NMINUS
+with all the plus and minus terms of the product</p>
+<p>WARNING: It doesn’t delete the term from the arrays but changes the
+name to space.
+:param plus:
+:param minus:
+:return:</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pymchelper.flair.common.csg.rmDoubles">
+<span class="sig-prename descclassname"><span class="pre">pymchelper.flair.common.csg.</span></span><span class="sig-name descname"><span class="pre">rmDoubles</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">zones</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymchelper/flair/common/csg.html#rmDoubles"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymchelper.flair.common.csg.rmDoubles" title="Permalink to this definition">¶</a></dt>
+<dd><p>Remove duplicates of products A+B|A+B|C+D  -&gt;  A+B|C+D
+:param zones:
+:return:</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pymchelper.flair.common.csg.rpn2exp">
+<span class="sig-prename descclassname"><span class="pre">pymchelper.flair.common.csg.</span></span><span class="sig-name descname"><span class="pre">rpn2exp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rpn</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymchelper/flair/common/csg.html#rpn2exp"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymchelper.flair.common.csg.rpn2exp" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert a NORMALIZED Reverse Polish notation to a standard expression
+WARNING: The routine expects an expression where for each UNION
+operator the right-sub-expression is a product while the left can be
+UNION or a product
+:param rpn:
+:return:</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pymchelper.flair.common.csg.rpnorm">
+<span class="sig-prename descclassname"><span class="pre">pymchelper.flair.common.csg.</span></span><span class="sig-name descname"><span class="pre">rpnorm</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">expr</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymchelper/flair/common/csg.html#rpnorm"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymchelper.flair.common.csg.rpnorm" title="Permalink to this definition">¶</a></dt>
+<dd><p>Normalize a CG expression given in Reverse Polish Notation.
+Normalized CG expression is an expression given as sum (Boolean OR) of
+products (Boolean intersection or subtraction).
+The normalization (expansion of parenthesis and operator priorities)
+should be performed by recursively calling the RPNRULE subroutine.
+Since Fortran-77 doesn’t have recursion, call the RPNRULE for every
+operator starting from the right-most one, until no rule is found.
+:param expr:
+:return:</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pymchelper.flair.common.csg.split">
+<span class="sig-prename descclassname"><span class="pre">pymchelper.flair.common.csg.</span></span><span class="sig-name descname"><span class="pre">split</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">expr</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymchelper/flair/common/csg.html#split"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymchelper.flair.common.csg.split" title="Permalink to this definition">¶</a></dt>
+<dd><p>Break products into lists
+:param expr:
+:return:</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pymchelper.flair.common.csg.splitZones">
+<span class="sig-prename descclassname"><span class="pre">pymchelper.flair.common.csg.</span></span><span class="sig-name descname"><span class="pre">splitZones</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">expr</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymchelper/flair/common/csg.html#splitZones"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymchelper.flair.common.csg.splitZones" title="Permalink to this definition">¶</a></dt>
+<dd><p>split a tokenized expression into zones</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pymchelper.flair.common.csg.toString">
+<span class="sig-prename descclassname"><span class="pre">pymchelper.flair.common.csg.</span></span><span class="sig-name descname"><span class="pre">toString</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">expr</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymchelper/flair/common/csg.html#toString"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymchelper.flair.common.csg.toString" title="Permalink to this definition">¶</a></dt>
+<dd><p>return a string version of a tokenize expression</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pymchelper.flair.common.csg.tokenize">
+<span class="sig-prename descclassname"><span class="pre">pymchelper.flair.common.csg.</span></span><span class="sig-name descname"><span class="pre">tokenize</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">expr</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymchelper/flair/common/csg.html#tokenize"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymchelper.flair.common.csg.tokenize" title="Permalink to this definition">¶</a></dt>
+<dd><p>return a list of expression tokens</p>
+</dd></dl>
+
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/apidoc/pymchelper.flair.common.csg.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">pymchelper 1.10.0+rev3 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">pymchelper.flair.common.csg module</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2016, Leszek Grzanka.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 4.3.0.
+    </div>
+  </body>
+</html>

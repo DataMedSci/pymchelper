@@ -1,0 +1,240 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>pymchelper.page &#8212; pymchelper 1.10.0+rev3 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/classic.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css" />
+    
+    <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+    <script src="../../_static/jquery.js"></script>
+    <script src="../../_static/underscore.js"></script>
+    <script src="../../_static/doctools.js"></script>
+    
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">pymchelper 1.10.0+rev3 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" accesskey="U">Module code</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">pymchelper.page</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for pymchelper.page</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<span class="kn">from</span> <span class="nn">pymchelper.axis</span> <span class="k">import</span> <span class="n">MeshAxis</span><span class="p">,</span> <span class="n">AxisId</span>
+
+
+<div class="viewcode-block" id="Page"><a class="viewcode-back" href="../../apidoc/pymchelper.page.html#pymchelper.page.Page">[docs]</a><span class="k">class</span> <span class="nc">Page</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">estimator</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">estimator</span> <span class="o">=</span> <span class="n">estimator</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">data_raw</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="nb">float</span><span class="p">(</span><span class="s2">&quot;NaN&quot;</span><span class="p">)])</span>  <span class="c1"># linear data storage</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">error_raw</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="nb">float</span><span class="p">(</span><span class="s2">&quot;NaN&quot;</span><span class="p">)])</span>  <span class="c1"># linear data storage</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">unit</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">dettyp</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># Dose, Fluence, LET etc...</span>
+
+        <span class="c1"># optional first differential axis</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">diff_axis1</span> <span class="o">=</span> <span class="n">MeshAxis</span><span class="p">(</span><span class="n">n</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+                                   <span class="n">min_val</span><span class="o">=</span><span class="nb">float</span><span class="p">(</span><span class="s2">&quot;NaN&quot;</span><span class="p">),</span>
+                                   <span class="n">max_val</span><span class="o">=</span><span class="nb">float</span><span class="p">(</span><span class="s2">&quot;NaN&quot;</span><span class="p">),</span>
+                                   <span class="n">name</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span>
+                                   <span class="n">unit</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span>
+                                   <span class="n">binning</span><span class="o">=</span><span class="n">MeshAxis</span><span class="o">.</span><span class="n">BinningType</span><span class="o">.</span><span class="n">linear</span><span class="p">)</span>
+
+        <span class="c1"># optional second differential axis</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">diff_axis2</span> <span class="o">=</span> <span class="n">MeshAxis</span><span class="p">(</span><span class="n">n</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+                                   <span class="n">min_val</span><span class="o">=</span><span class="nb">float</span><span class="p">(</span><span class="s2">&quot;NaN&quot;</span><span class="p">),</span>
+                                   <span class="n">max_val</span><span class="o">=</span><span class="nb">float</span><span class="p">(</span><span class="s2">&quot;NaN&quot;</span><span class="p">),</span>
+                                   <span class="n">name</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span>
+                                   <span class="n">unit</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span>
+                                   <span class="n">binning</span><span class="o">=</span><span class="n">MeshAxis</span><span class="o">.</span><span class="n">BinningType</span><span class="o">.</span><span class="n">linear</span><span class="p">)</span>
+
+<div class="viewcode-block" id="Page.axis"><a class="viewcode-back" href="../../apidoc/pymchelper.page.html#pymchelper.page.Page.axis">[docs]</a>    <span class="k">def</span> <span class="nf">axis</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">axis_id</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        TODO</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">axis_id</span> <span class="o">==</span> <span class="n">AxisId</span><span class="o">.</span><span class="n">diff1</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">diff_axis1</span>
+        <span class="k">elif</span> <span class="n">axis_id</span> <span class="o">==</span> <span class="n">AxisId</span><span class="o">.</span><span class="n">diff2</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">diff_axis2</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">estimator</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">estimator</span><span class="o">.</span><span class="n">axis</span><span class="p">(</span><span class="n">axis_id</span><span class="p">)</span>
+        <span class="k">return</span> <span class="kc">None</span></div>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">dimension</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Let&#39;s take again detector d with YZ scoring.</span>
+<span class="sd">        &gt;&gt;&gt; from pymchelper.estimator import Estimator</span>
+<span class="sd">        &gt;&gt;&gt; e = Estimator()</span>
+<span class="sd">        &gt;&gt;&gt; e.x = MeshAxis(n=1, min_val=0.0, max_val=1.0, name=&quot;X&quot;, unit=&quot;cm&quot;, binning=MeshAxis.BinningType.linear)</span>
+<span class="sd">        &gt;&gt;&gt; e.y = MeshAxis(n=3, min_val=0.0, max_val=150.0, name=&quot;Y&quot;, unit=&quot;cm&quot;, binning=MeshAxis.BinningType.linear)</span>
+<span class="sd">        &gt;&gt;&gt; e.z = MeshAxis(n=2, min_val=0.0, max_val=2.0, name=&quot;Z&quot;, unit=&quot;cm&quot;, binning=MeshAxis.BinningType.linear)</span>
+<span class="sd">        &gt;&gt;&gt; e.dimension</span>
+<span class="sd">        2</span>
+<span class="sd">        &gt;&gt;&gt; p = Page(e)</span>
+<span class="sd">        &gt;&gt;&gt; p.diff_axis1 = MeshAxis(n=10, min_val=0.0, max_val=100.0, name=&quot;E&quot;, unit=&quot;MeV&quot;,</span>
+<span class="sd">        ...                         binning=MeshAxis.BinningType.linear)</span>
+<span class="sd">        &gt;&gt;&gt; p.dimension</span>
+<span class="sd">        3</span>
+
+<span class="sd">        :return: number of page axes (including differential) which have more than one bin</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">estimator</span><span class="p">:</span>
+            <span class="k">return</span> <span class="mi">2</span> <span class="o">-</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">diff_axis1</span><span class="o">.</span><span class="n">n</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">diff_axis2</span><span class="o">.</span><span class="n">n</span><span class="p">)</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">estimator</span><span class="o">.</span><span class="n">dimension</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">None</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">data</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        3-D view of page data.</span>
+
+<span class="sd">        Page data is stored originally in `data_raw` 1-D array.</span>
+<span class="sd">        This property provides efficient view of data, suitable for numpy-like indexing.</span>
+
+<span class="sd">        &gt;&gt;&gt; from pymchelper.estimator import Estimator</span>
+<span class="sd">        &gt;&gt;&gt; e = Estimator()</span>
+<span class="sd">        &gt;&gt;&gt; e.x = MeshAxis(n=2, min_val=0.0, max_val=10.0, name=&quot;X&quot;, unit=&quot;cm&quot;, binning=MeshAxis.BinningType.linear)</span>
+<span class="sd">        &gt;&gt;&gt; e.y = MeshAxis(n=3, min_val=0.0, max_val=150.0, name=&quot;Y&quot;, unit=&quot;cm&quot;, binning=MeshAxis.BinningType.linear)</span>
+<span class="sd">        &gt;&gt;&gt; e.z = MeshAxis(n=1, min_val=0.0, max_val=1.0, name=&quot;Z&quot;, unit=&quot;cm&quot;, binning=MeshAxis.BinningType.linear)</span>
+<span class="sd">        &gt;&gt;&gt; p = Page(estimator=e)</span>
+<span class="sd">        &gt;&gt;&gt; p.data_raw = np.arange(6)</span>
+<span class="sd">        &gt;&gt;&gt; tuple(int(n) for n in p.data.shape)</span>
+<span class="sd">        (2, 3, 1, 1, 1)</span>
+<span class="sd">        &gt;&gt;&gt; p.data[1, 2, 0, 0, 0]</span>
+<span class="sd">        5</span>
+
+<span class="sd">        :return: reshaped view of ``data_raw``</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">estimator</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_reshape</span><span class="p">(</span><span class="n">data_1d</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">data_raw</span><span class="p">,</span>
+                                 <span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">estimator</span><span class="o">.</span><span class="n">x</span><span class="o">.</span><span class="n">n</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">estimator</span><span class="o">.</span><span class="n">y</span><span class="o">.</span><span class="n">n</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">estimator</span><span class="o">.</span><span class="n">z</span><span class="o">.</span><span class="n">n</span><span class="p">,</span>
+                                        <span class="bp">self</span><span class="o">.</span><span class="n">diff_axis1</span><span class="o">.</span><span class="n">n</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">diff_axis2</span><span class="o">.</span><span class="n">n</span><span class="p">))</span>
+        <span class="k">return</span> <span class="kc">None</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">error</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        3-D view of page error</span>
+
+<span class="sd">        For more details see ``data`` property.</span>
+<span class="sd">        :return:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">estimator</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_reshape</span><span class="p">(</span><span class="n">data_1d</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">error_raw</span><span class="p">,</span>
+                                 <span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">estimator</span><span class="o">.</span><span class="n">x</span><span class="o">.</span><span class="n">n</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">estimator</span><span class="o">.</span><span class="n">y</span><span class="o">.</span><span class="n">n</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">estimator</span><span class="o">.</span><span class="n">z</span><span class="o">.</span><span class="n">n</span><span class="p">,</span>
+                                        <span class="bp">self</span><span class="o">.</span><span class="n">diff_axis1</span><span class="o">.</span><span class="n">n</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">diff_axis2</span><span class="o">.</span><span class="n">n</span><span class="p">))</span>
+        <span class="k">return</span> <span class="kc">None</span>
+
+    <span class="k">def</span> <span class="nf">_reshape</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data_1d</span><span class="p">,</span> <span class="n">shape</span><span class="p">):</span>
+        <span class="c1"># TODO check also  tests/res/shieldhit/single/ex_yzmsh.bdo as it is saved in bin2010 format</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">estimator</span><span class="p">:</span>
+            <span class="n">order</span> <span class="o">=</span> <span class="s1">&#39;C&#39;</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">estimator</span><span class="o">.</span><span class="n">file_format</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;bdo2016&#39;</span><span class="p">,</span> <span class="s1">&#39;bdo2019&#39;</span><span class="p">,</span> <span class="s1">&#39;fluka_binary&#39;</span><span class="p">):</span>
+                <span class="n">order</span> <span class="o">=</span> <span class="s1">&#39;F&#39;</span>
+            <span class="k">return</span> <span class="n">data_1d</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">shape</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="n">order</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">None</span>
+
+<div class="viewcode-block" id="Page.plot_axis"><a class="viewcode-back" href="../../apidoc/pymchelper.page.html#pymchelper.page.Page.plot_axis">[docs]</a>    <span class="k">def</span> <span class="nf">plot_axis</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">id</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Calculate new order of detector axis, axis with data (n&gt;1) comes first</span>
+<span class="sd">        Axes with constant value goes last.</span>
+
+<span class="sd">        Let&#39;s take a detector d with YZ scoring.</span>
+<span class="sd">        &gt;&gt;&gt; from pymchelper.estimator import Estimator</span>
+<span class="sd">        &gt;&gt;&gt; e = Estimator()</span>
+<span class="sd">        &gt;&gt;&gt; e.x = MeshAxis(n=1, min_val=0.0, max_val=1.0, name=&quot;X&quot;, unit=&quot;cm&quot;, binning=MeshAxis.BinningType.linear)</span>
+<span class="sd">        &gt;&gt;&gt; e.y = MeshAxis(n=3, min_val=0.0, max_val=150.0, name=&quot;Y&quot;, unit=&quot;cm&quot;, binning=MeshAxis.BinningType.linear)</span>
+<span class="sd">        &gt;&gt;&gt; e.z = MeshAxis(n=2, min_val=0.0, max_val=2.0, name=&quot;Z&quot;, unit=&quot;cm&quot;, binning=MeshAxis.BinningType.linear)</span>
+<span class="sd">        &gt;&gt;&gt; p = Page(estimator=e)</span>
+<span class="sd">        &gt;&gt;&gt; e.add_page(page=p)</span>
+
+<span class="sd">        First axis for plotting will be Y (as X axis holds only one bin):</span>
+<span class="sd">        &gt;&gt;&gt; p.plot_axis(0)</span>
+<span class="sd">        MeshAxis(n=3, min_val=0.0, max_val=150.0, name=&#39;Y&#39;, unit=&#39;cm&#39;, binning=&lt;BinningType.linear: 0&gt;)</span>
+
+<span class="sd">        Second axis for plotting will be Z (its the next after Y with n &gt; 1 bins)</span>
+<span class="sd">        &gt;&gt;&gt; p.plot_axis(1)</span>
+<span class="sd">        MeshAxis(n=2, min_val=0.0, max_val=2.0, name=&#39;Z&#39;, unit=&#39;cm&#39;, binning=&lt;BinningType.linear: 0&gt;)</span>
+
+<span class="sd">        Finally the third axis will be X, but it cannot be used for plotting as it has only one bin.</span>
+<span class="sd">        &gt;&gt;&gt; p.plot_axis(2)</span>
+<span class="sd">        MeshAxis(n=1, min_val=0.0, max_val=1.0, name=&#39;X&#39;, unit=&#39;cm&#39;, binning=&lt;BinningType.linear: 0&gt;)</span>
+
+
+<span class="sd">        :param id: axis number (0, 1, 2, 3 or 4)</span>
+<span class="sd">        :return: axis object</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">plotting_order</span> <span class="o">=</span> <span class="p">(</span><span class="n">AxisId</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">AxisId</span><span class="o">.</span><span class="n">y</span><span class="p">,</span> <span class="n">AxisId</span><span class="o">.</span><span class="n">z</span><span class="p">,</span> <span class="n">AxisId</span><span class="o">.</span><span class="n">diff1</span><span class="p">,</span> <span class="n">AxisId</span><span class="o">.</span><span class="n">diff2</span><span class="p">)</span>
+        <span class="n">variable_axes_id</span> <span class="o">=</span> <span class="p">[</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">plotting_order</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">axis</span><span class="p">(</span><span class="n">i</span><span class="p">)</span><span class="o">.</span><span class="n">n</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">]</span>
+        <span class="n">constant_axes_id</span> <span class="o">=</span> <span class="p">[</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">plotting_order</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">axis</span><span class="p">(</span><span class="n">i</span><span class="p">)</span><span class="o">.</span><span class="n">n</span> <span class="o">==</span> <span class="mi">1</span><span class="p">]</span>
+        <span class="n">plotting_order</span> <span class="o">=</span> <span class="n">variable_axes_id</span> <span class="o">+</span> <span class="n">constant_axes_id</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">axis</span><span class="p">(</span><span class="n">plotting_order</span><span class="p">[</span><span class="nb">id</span><span class="p">])</span></div></div>
+</pre></div>
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">pymchelper 1.10.0+rev3 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" >Module code</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">pymchelper.page</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2016, Leszek Grzanka.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 4.3.0.
+    </div>
+  </body>
+</html>

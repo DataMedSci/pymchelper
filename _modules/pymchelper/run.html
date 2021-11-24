@@ -1,0 +1,246 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>pymchelper.run &#8212; pymchelper 1.10.0+rev3 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/classic.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css" />
+    
+    <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+    <script src="../../_static/jquery.js"></script>
+    <script src="../../_static/underscore.js"></script>
+    <script src="../../_static/doctools.js"></script>
+    
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">pymchelper 1.10.0+rev3 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" accesskey="U">Module code</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">pymchelper.run</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for pymchelper.run</h1><div class="highlight"><pre>
+<span></span><span class="ch">#!/usr/bin/env python</span>
+
+<span class="kn">import</span> <span class="nn">glob</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+
+<span class="kn">import</span> <span class="nn">argparse</span>
+
+<span class="kn">from</span> <span class="nn">pymchelper.estimator</span> <span class="k">import</span> <span class="n">ErrorEstimate</span>
+<span class="kn">from</span> <span class="nn">pymchelper.input_output</span> <span class="k">import</span> <span class="n">convertfrompattern</span><span class="p">,</span> <span class="n">convertfromlist</span>
+<span class="kn">from</span> <span class="nn">pymchelper.writers.common</span> <span class="k">import</span> <span class="n">Converters</span>
+<span class="kn">from</span> <span class="nn">pymchelper.writers.plots</span> <span class="k">import</span> <span class="n">ImageWriter</span><span class="p">,</span> <span class="n">PlotAxis</span>
+
+<span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="add_default_options"><a class="viewcode-back" href="../../apidoc/pymchelper.run.html#pymchelper.run.add_default_options">[docs]</a><span class="k">def</span> <span class="nf">add_default_options</span><span class="p">(</span><span class="n">parser</span><span class="p">):</span>
+    <span class="kn">import</span> <span class="nn">pymchelper</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;input&#39;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s1">&#39;input filename, file list or pattern&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">str</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;output&#39;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s1">&#39;output filename or directory&#39;</span><span class="p">,</span> <span class="n">nargs</span><span class="o">=</span><span class="s1">&#39;?&#39;</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;-j&#39;</span><span class="p">,</span> <span class="s1">&#39;--jobs&#39;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s1">&#39;number of parallel jobs to use (-1 means all CPUs)&#39;</span><span class="p">,</span> <span class="n">default</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--many&#39;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s1">&#39;automatically merge data from various sources&#39;</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s2">&quot;store_true&quot;</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;-a&#39;</span><span class="p">,</span> <span class="s1">&#39;--nan&#39;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s1">&#39;ignore NaN in averaging&#39;</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s2">&quot;store_true&quot;</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;-e&#39;</span><span class="p">,</span> <span class="s1">&#39;--error&#39;</span><span class="p">,</span>
+                        <span class="n">help</span><span class="o">=</span><span class="s1">&#39;type of error estimate to add (default: &#39;</span> <span class="o">+</span> <span class="n">ErrorEstimate</span><span class="o">.</span><span class="n">stderr</span><span class="o">.</span><span class="n">name</span> <span class="o">+</span> <span class="s1">&#39;)&#39;</span><span class="p">,</span>
+                        <span class="n">default</span><span class="o">=</span><span class="n">ErrorEstimate</span><span class="o">.</span><span class="n">stderr</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+                        <span class="n">choices</span><span class="o">=</span><span class="p">[</span><span class="n">x</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">ErrorEstimate</span><span class="p">],</span>
+                        <span class="nb">type</span><span class="o">=</span><span class="nb">str</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;-n&#39;</span><span class="p">,</span> <span class="s1">&#39;--nscale&#39;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s1">&#39;scale with number of primaries N.&#39;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;-v&#39;</span><span class="p">,</span>
+                        <span class="s1">&#39;--verbose&#39;</span><span class="p">,</span>
+                        <span class="n">action</span><span class="o">=</span><span class="s1">&#39;count&#39;</span><span class="p">,</span>
+                        <span class="n">default</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+                        <span class="n">help</span><span class="o">=</span><span class="s1">&#39;give more output. Option is additive, and can be used up to 3 times&#39;</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;-q&#39;</span><span class="p">,</span> <span class="s1">&#39;--quiet&#39;</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s1">&#39;count&#39;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s1">&#39;be silent&#39;</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;-V&#39;</span><span class="p">,</span> <span class="s1">&#39;--version&#39;</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s1">&#39;version&#39;</span><span class="p">,</span> <span class="n">version</span><span class="o">=</span><span class="n">pymchelper</span><span class="o">.</span><span class="n">__version__</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="main"><a class="viewcode-back" href="../../apidoc/pymchelper.run.html#pymchelper.run.main">[docs]</a><span class="k">def</span> <span class="nf">main</span><span class="p">(</span><span class="n">args</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">args</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">args</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
+    <span class="kn">import</span> <span class="nn">pymchelper</span>
+    <span class="kn">import</span> <span class="nn">os</span>
+
+    <span class="n">_progname</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+    <span class="n">_helptxt</span> <span class="o">=</span> <span class="s1">&#39;Universal converter for FLUKA and SHIELD-HIT12A output files.&#39;</span>
+    <span class="n">_epitxt</span> <span class="o">=</span> <span class="s1">&#39;&#39;&#39;Type &#39;</span><span class="si">{:s}</span><span class="s1"> &lt;converter&gt; --help&#39; for help on a specific converter.&#39;&#39;&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">_progname</span><span class="p">)</span>
+
+    <span class="n">parser</span> <span class="o">=</span> <span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentParser</span><span class="p">(</span><span class="n">description</span><span class="o">=</span><span class="n">_helptxt</span><span class="p">,</span> <span class="n">epilog</span><span class="o">=</span><span class="n">_epitxt</span><span class="p">)</span>
+
+    <span class="n">subparsers</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">add_subparsers</span><span class="p">(</span><span class="n">dest</span><span class="o">=</span><span class="s1">&#39;command&#39;</span><span class="p">,</span> <span class="n">metavar</span><span class="o">=</span><span class="s1">&#39;converter&#39;</span><span class="p">)</span>
+
+    <span class="n">parser_txt</span> <span class="o">=</span> <span class="n">subparsers</span><span class="o">.</span><span class="n">add_parser</span><span class="p">(</span><span class="n">Converters</span><span class="o">.</span><span class="n">txt</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s1">&#39;converts to plain txt file&#39;</span><span class="p">)</span>
+    <span class="n">add_default_options</span><span class="p">(</span><span class="n">parser_txt</span><span class="p">)</span>
+
+    <span class="n">parser_image</span> <span class="o">=</span> <span class="n">subparsers</span><span class="o">.</span><span class="n">add_parser</span><span class="p">(</span><span class="n">Converters</span><span class="o">.</span><span class="n">image</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s1">&#39;converts to PNG images&#39;</span><span class="p">)</span>
+    <span class="n">add_default_options</span><span class="p">(</span><span class="n">parser_image</span><span class="p">)</span>
+    <span class="n">axis_names</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">PlotAxis</span><span class="p">]</span>
+    <span class="n">parser_image</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;-l&#39;</span><span class="p">,</span> <span class="s1">&#39;--log&#39;</span><span class="p">,</span>
+                              <span class="n">help</span><span class="o">=</span><span class="s1">&#39;set logscale for plot axis&#39;</span><span class="p">,</span>
+                              <span class="n">nargs</span><span class="o">=</span><span class="s1">&#39;+&#39;</span><span class="p">,</span>
+                              <span class="n">choices</span><span class="o">=</span><span class="n">axis_names</span><span class="p">,</span>
+                              <span class="n">default</span><span class="o">=</span><span class="p">{},</span>
+                              <span class="nb">type</span><span class="o">=</span><span class="nb">str</span><span class="p">)</span>
+    <span class="n">parser_image</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">&quot;--colormap&quot;</span><span class="p">,</span>
+                              <span class="n">help</span><span class="o">=</span><span class="s1">&#39;image color map, see https://matplotlib.org/stable/tutorials/colors/colormaps.html &#39;</span>
+                                   <span class="s1">&#39;for list of possible options (default: &#39;</span> <span class="o">+</span> <span class="n">ImageWriter</span><span class="o">.</span><span class="n">default_colormap</span> <span class="o">+</span> <span class="s1">&#39;)&#39;</span><span class="p">,</span>
+                              <span class="n">default</span><span class="o">=</span><span class="n">ImageWriter</span><span class="o">.</span><span class="n">default_colormap</span><span class="p">,</span>
+                              <span class="nb">type</span><span class="o">=</span><span class="nb">str</span><span class="p">)</span>
+
+    <span class="n">parser_excel</span> <span class="o">=</span> <span class="n">subparsers</span><span class="o">.</span><span class="n">add_parser</span><span class="p">(</span><span class="n">Converters</span><span class="o">.</span><span class="n">excel</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s1">&#39;converts to MS Excel file&#39;</span><span class="p">)</span>
+    <span class="n">add_default_options</span><span class="p">(</span><span class="n">parser_excel</span><span class="p">)</span>
+
+    <span class="n">parser_hdf</span> <span class="o">=</span> <span class="n">subparsers</span><span class="o">.</span><span class="n">add_parser</span><span class="p">(</span><span class="n">Converters</span><span class="o">.</span><span class="n">hdf</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s1">&#39;converts to HDF file&#39;</span><span class="p">)</span>
+    <span class="n">add_default_options</span><span class="p">(</span><span class="n">parser_hdf</span><span class="p">)</span>
+
+    <span class="n">parser_plotdata</span> <span class="o">=</span> <span class="n">subparsers</span><span class="o">.</span><span class="n">add_parser</span><span class="p">(</span><span class="n">Converters</span><span class="o">.</span><span class="n">plotdata</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s1">&#39;converts to gnuplot data&#39;</span><span class="p">)</span>
+    <span class="n">add_default_options</span><span class="p">(</span><span class="n">parser_plotdata</span><span class="p">)</span>
+
+    <span class="n">parser_gnuplot</span> <span class="o">=</span> <span class="n">subparsers</span><span class="o">.</span><span class="n">add_parser</span><span class="p">(</span><span class="n">Converters</span><span class="o">.</span><span class="n">gnuplot</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s1">&#39;converts to gnuplot script&#39;</span><span class="p">)</span>
+    <span class="n">add_default_options</span><span class="p">(</span><span class="n">parser_gnuplot</span><span class="p">)</span>
+
+    <span class="n">parser_inspect</span> <span class="o">=</span> <span class="n">subparsers</span><span class="o">.</span><span class="n">add_parser</span><span class="p">(</span><span class="n">Converters</span><span class="o">.</span><span class="n">inspect</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s1">&#39;prints metadata&#39;</span><span class="p">)</span>
+    <span class="n">add_default_options</span><span class="p">(</span><span class="n">parser_inspect</span><span class="p">)</span>
+    <span class="n">parser_inspect</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;-d&#39;</span><span class="p">,</span> <span class="s1">&#39;--details&#39;</span><span class="p">,</span>
+                                <span class="n">help</span><span class="o">=</span><span class="s1">&#39;print detailed information about data attribute&#39;</span><span class="p">,</span>
+                                <span class="n">action</span><span class="o">=</span><span class="s2">&quot;store_true&quot;</span><span class="p">)</span>
+
+    <span class="n">parser_sparse</span> <span class="o">=</span> <span class="n">subparsers</span><span class="o">.</span><span class="n">add_parser</span><span class="p">(</span><span class="n">Converters</span><span class="o">.</span><span class="n">sparse</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s1">&#39;converts to sparse matrix format&#39;</span><span class="p">)</span>
+    <span class="n">add_default_options</span><span class="p">(</span><span class="n">parser_sparse</span><span class="p">)</span>
+    <span class="n">parser_sparse</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">&quot;--threshold&quot;</span><span class="p">,</span>
+                               <span class="n">help</span><span class="o">=</span><span class="s1">&#39;only values greater than threshold are saved&#39;</span><span class="p">,</span>
+                               <span class="nb">type</span><span class="o">=</span><span class="nb">float</span><span class="p">,</span>
+                               <span class="n">default</span><span class="o">=</span><span class="mf">0.0</span><span class="p">)</span>
+
+    <span class="n">parser_tripcube</span> <span class="o">=</span> <span class="n">subparsers</span><span class="o">.</span><span class="n">add_parser</span><span class="p">(</span><span class="n">Converters</span><span class="o">.</span><span class="n">tripcube</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s1">&#39;converts to TRiP98 data cube&#39;</span><span class="p">)</span>
+    <span class="n">add_default_options</span><span class="p">(</span><span class="n">parser_tripcube</span><span class="p">)</span>
+
+    <span class="n">parser_tripddd</span> <span class="o">=</span> <span class="n">subparsers</span><span class="o">.</span><span class="n">add_parser</span><span class="p">(</span><span class="n">Converters</span><span class="o">.</span><span class="n">tripddd</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s1">&#39;converts to TRiP98 DDD file&#39;</span><span class="p">)</span>
+    <span class="n">add_default_options</span><span class="p">(</span><span class="n">parser_tripddd</span><span class="p">)</span>
+    <span class="n">parser_tripddd</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">&quot;--energy&quot;</span><span class="p">,</span>
+                                <span class="n">help</span><span class="o">=</span><span class="s1">&#39;energy of the beam [MeV/amu] (guess from data if option missing)&#39;</span><span class="p">,</span>
+                                <span class="nb">type</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+    <span class="n">parser_tripddd</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">&quot;--projectile&quot;</span><span class="p">,</span>
+                                <span class="n">help</span><span class="o">=</span><span class="s1">&#39;projectile (guess from data if option missing)&#39;</span><span class="p">,</span>
+                                <span class="nb">type</span><span class="o">=</span><span class="nb">str</span><span class="p">)</span>
+    <span class="n">parser_tripddd</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">&quot;--ngauss&quot;</span><span class="p">,</span>
+                                <span class="n">help</span><span class="o">=</span><span class="s1">&#39;number of Gaussian functions to fit (default: 0)&#39;</span><span class="p">,</span>
+                                <span class="n">choices</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span>
+                                <span class="n">default</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+                                <span class="nb">type</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
+
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;-V&#39;</span><span class="p">,</span> <span class="s1">&#39;--version&#39;</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s1">&#39;version&#39;</span><span class="p">,</span> <span class="n">version</span><span class="o">=</span><span class="n">pymchelper</span><span class="o">.</span><span class="n">__version__</span><span class="p">)</span>
+
+    <span class="n">parsed_args</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">parse_args</span><span class="p">(</span><span class="n">args</span><span class="p">)</span>
+
+    <span class="n">verbose_flag</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">parsed_args</span><span class="p">,</span> <span class="s1">&#39;verbose&#39;</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">verbose_flag</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">basicConfig</span><span class="p">(</span><span class="n">level</span><span class="o">=</span><span class="n">logging</span><span class="o">.</span><span class="n">INFO</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">verbose_flag</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">basicConfig</span><span class="p">(</span><span class="n">level</span><span class="o">=</span><span class="n">logging</span><span class="o">.</span><span class="n">DEBUG</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">basicConfig</span><span class="p">()</span>
+
+    <span class="n">status</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">if</span> <span class="n">parsed_args</span><span class="o">.</span><span class="n">command</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="c1"># TODO add filename discovery</span>
+        <span class="n">files</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">glob</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="n">parsed_args</span><span class="o">.</span><span class="n">input</span><span class="p">))</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">files</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;File does not exist: &#39;</span> <span class="o">+</span> <span class="n">parsed_args</span><span class="o">.</span><span class="n">input</span><span class="p">)</span>
+
+        <span class="c1"># check if output should be interpreted as a filename</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">parsed_args</span><span class="o">.</span><span class="n">many</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">files</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">output_file</span> <span class="o">=</span> <span class="n">parsed_args</span><span class="o">.</span><span class="n">output</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">output_file</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="k">if</span> <span class="n">parsed_args</span><span class="o">.</span><span class="n">output</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">output_file</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">output_dir</span> <span class="o">=</span> <span class="n">parsed_args</span><span class="o">.</span><span class="n">output</span>
+            <span class="c1"># check if output directory exists</span>
+            <span class="k">if</span> <span class="n">output_dir</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">output_dir</span><span class="p">):</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;Directory </span><span class="si">{:s}</span><span class="s2"> does not exist, creating.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">output_dir</span><span class="p">))</span>
+                <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">output_dir</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">output_dir</span> <span class="o">=</span> <span class="s1">&#39;.&#39;</span>
+
+        <span class="n">parsed_args</span><span class="o">.</span><span class="n">error</span> <span class="o">=</span> <span class="n">ErrorEstimate</span><span class="p">[</span><span class="n">parsed_args</span><span class="o">.</span><span class="n">error</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="n">parsed_args</span><span class="o">.</span><span class="n">many</span><span class="p">:</span>
+            <span class="n">status</span> <span class="o">=</span> <span class="n">convertfrompattern</span><span class="p">(</span><span class="n">parsed_args</span><span class="o">.</span><span class="n">input</span><span class="p">,</span> <span class="n">output_dir</span><span class="p">,</span>
+                                        <span class="n">converter_name</span><span class="o">=</span><span class="n">parsed_args</span><span class="o">.</span><span class="n">command</span><span class="p">,</span> <span class="n">options</span><span class="o">=</span><span class="n">parsed_args</span><span class="p">,</span>
+                                        <span class="n">error</span><span class="o">=</span><span class="n">parsed_args</span><span class="o">.</span><span class="n">error</span><span class="p">,</span> <span class="n">nan</span><span class="o">=</span><span class="n">parsed_args</span><span class="o">.</span><span class="n">nan</span><span class="p">,</span>
+                                        <span class="n">jobs</span><span class="o">=</span><span class="n">parsed_args</span><span class="o">.</span><span class="n">jobs</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="n">parsed_args</span><span class="o">.</span><span class="n">verbose</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">status</span> <span class="o">=</span> <span class="n">convertfromlist</span><span class="p">(</span><span class="n">parsed_args</span><span class="o">.</span><span class="n">input</span><span class="p">,</span>
+                                     <span class="n">error</span><span class="o">=</span><span class="n">parsed_args</span><span class="o">.</span><span class="n">error</span><span class="p">,</span> <span class="n">nan</span><span class="o">=</span><span class="n">parsed_args</span><span class="o">.</span><span class="n">nan</span><span class="p">,</span> <span class="n">outputdir</span><span class="o">=</span><span class="n">output_dir</span><span class="p">,</span>
+                                     <span class="n">converter_name</span><span class="o">=</span><span class="n">parsed_args</span><span class="o">.</span><span class="n">command</span><span class="p">,</span> <span class="n">options</span><span class="o">=</span><span class="n">parsed_args</span><span class="p">,</span> <span class="n">outputfile</span><span class="o">=</span><span class="n">output_file</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">status</span></div>
+
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
+    <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="n">main</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">[</span><span class="mi">1</span><span class="p">:]))</span>
+</pre></div>
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">pymchelper 1.10.0+rev3 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" >Module code</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">pymchelper.run</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2016, Leszek Grzanka.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 4.3.0.
+    </div>
+  </body>
+</html>

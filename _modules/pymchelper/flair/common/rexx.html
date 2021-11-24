@@ -1,0 +1,443 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>pymchelper.flair.common.rexx &#8212; pymchelper 1.10.0+rev3 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/classic.css" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/graphviz.css" />
+    
+    <script data-url_root="../../../../" id="documentation_options" src="../../../../_static/documentation_options.js"></script>
+    <script src="../../../../_static/jquery.js"></script>
+    <script src="../../../../_static/underscore.js"></script>
+    <script src="../../../../_static/doctools.js"></script>
+    
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../../index.html">pymchelper 1.10.0+rev3 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../../index.html" accesskey="U">Module code</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">pymchelper.flair.common.rexx</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for pymchelper.flair.common.rexx</h1><div class="highlight"><pre>
+<span></span><span class="c1"># $Id: rexx.py 3312 2014-10-17 07:25:38Z bnv $</span>
+<span class="c1">#</span>
+<span class="c1"># Copyright and User License</span>
+<span class="c1"># ~~~~~~~~~~~~~~~~~~~~~~~~~~</span>
+<span class="c1"># Copyright Vasilis.Vlachoudis@cern.ch for the</span>
+<span class="c1"># European Organization for Nuclear Research (CERN)</span>
+<span class="c1">#</span>
+<span class="c1"># All rights not expressly granted under this license are reserved.</span>
+<span class="c1">#</span>
+<span class="c1"># Installation, use, reproduction, display of the</span>
+<span class="c1"># software (&quot;flair&quot;), in source and binary forms, are</span>
+<span class="c1"># permitted free of charge on a non-exclusive basis for</span>
+<span class="c1"># internal scientific, non-commercial and non-weapon-related</span>
+<span class="c1"># use by non-profit organizations only.</span>
+<span class="c1">#</span>
+<span class="c1"># For commercial use of the software, please contact the main</span>
+<span class="c1"># author Vasilis.Vlachoudis@cern.ch for further information.</span>
+<span class="c1">#</span>
+<span class="c1"># Redistribution and use in source and binary forms, with or without</span>
+<span class="c1"># modification, are permitted provided that the following</span>
+<span class="c1"># conditions are met:</span>
+<span class="c1">#</span>
+<span class="c1"># 1. Redistributions of source code must retain the above copyright</span>
+<span class="c1">#    notice, this list of conditions and the following disclaimer.</span>
+<span class="c1"># 2. Redistributions in binary form must reproduce the above copyright</span>
+<span class="c1">#    notice, this list of conditions and the following disclaimer in the</span>
+<span class="c1">#    documentation and/or other materials provided with the</span>
+<span class="c1">#    distribution.</span>
+<span class="c1">#</span>
+<span class="c1"># DISCLAIMER</span>
+<span class="c1"># ~~~~~~~~~~</span>
+<span class="c1"># THIS SOFTWARE IS PROVIDED BY THE AUTHOR &quot;AS IS&quot;</span>
+<span class="c1"># AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT</span>
+<span class="c1"># NOT LIMITED TO, IMPLIED WARRANTIES OF MERCHANTABILITY, OF</span>
+<span class="c1"># SATISFACTORY QUALITY, AND FITNESS FOR A PARTICULAR PURPOSE</span>
+<span class="c1"># OR USE ARE DISCLAIMED. THE COPYRIGHT HOLDERS AND THE</span>
+<span class="c1"># AUTHORS MAKE NO REPRESENTATION THAT THE SOFTWARE AND</span>
+<span class="c1"># MODIFICATIONS THEREOF, WILL NOT INFRINGE ANY PATENT,</span>
+<span class="c1"># COPYRIGHT, TRADE SECRET OR OTHER PROPRIETARY RIGHT.</span>
+<span class="c1">#</span>
+<span class="c1"># LIMITATION OF LIABILITY</span>
+<span class="c1"># ~~~~~~~~~~~~~~~~~~~~~~~</span>
+<span class="c1"># THE COPYRIGHT HOLDERS AND THE AUTHORS SHALL HAVE NO</span>
+<span class="c1"># LIABILITY FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL,</span>
+<span class="c1"># CONSEQUENTIAL, EXEMPLARY, OR PUNITIVE DAMAGES OF ANY</span>
+<span class="c1"># CHARACTER INCLUDING, WITHOUT LIMITATION, PROCUREMENT OF</span>
+<span class="c1"># SUBSTITUTE GOODS OR SERVICES, LOSS OF USE, DATA OR PROFITS,</span>
+<span class="c1"># OR BUSINESS INTERRUPTION, HOWEVER CAUSED AND ON ANY THEORY</span>
+<span class="c1"># OF CONTRACT, WARRANTY, TORT (INCLUDING NEGLIGENCE), PRODUCT</span>
+<span class="c1"># LIABILITY OR OTHERWISE, ARISING IN ANY WAY OUT OF THE USE OF</span>
+<span class="c1"># THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH</span>
+<span class="c1">#</span>
+<span class="c1"># Author:	Vasilis.Vlachoudis@cern.ch</span>
+<span class="c1"># Date:	14-May-2004</span>
+
+<span class="kn">import</span> <span class="nn">string</span>
+
+<span class="n">__author__</span> <span class="o">=</span> <span class="s2">&quot;Vasilis Vlachoudis&quot;</span>
+<span class="n">__email__</span> <span class="o">=</span> <span class="s2">&quot;Vasilis.Vlachoudis@cern.ch&quot;</span>
+
+<span class="n">_letters_digits</span> <span class="o">=</span> <span class="n">string</span><span class="o">.</span><span class="n">ascii_letters</span> <span class="o">+</span> <span class="n">string</span><span class="o">.</span><span class="n">digits</span>
+<span class="n">_letters_digits_symbol</span> <span class="o">=</span> <span class="n">_letters_digits</span> <span class="o">+</span> <span class="s2">&quot;_.&quot;</span>
+
+
+<span class="c1"># abbrev</span>
+<div class="viewcode-block" id="abbrev"><a class="viewcode-back" href="../../../../apidoc/pymchelper.flair.common.rexx.html#pymchelper.flair.common.rexx.abbrev">[docs]</a><span class="k">def</span> <span class="nf">abbrev</span><span class="p">(</span><span class="n">information</span><span class="p">,</span> <span class="n">info</span><span class="p">,</span> <span class="n">length</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    return true if the info is an abbreviation of information</span>
+<span class="sd">    with minimum length l</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">length</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">pass</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">length</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">info</span><span class="p">)</span>
+
+    <span class="n">cond1</span> <span class="o">=</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">information</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="nb">len</span><span class="p">(</span><span class="n">info</span><span class="p">))</span>
+    <span class="n">cond2</span> <span class="o">=</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">info</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="n">length</span><span class="p">)</span>
+    <span class="n">cond3</span> <span class="o">=</span> <span class="p">(</span><span class="n">information</span><span class="p">[:</span><span class="nb">len</span><span class="p">(</span><span class="n">info</span><span class="p">)]</span> <span class="o">==</span> <span class="n">info</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">cond1</span> <span class="ow">and</span> <span class="n">cond2</span> <span class="ow">and</span> <span class="n">cond3</span></div>
+
+
+<span class="c1"># center</span>
+<div class="viewcode-block" id="center"><a class="viewcode-back" href="../../../../apidoc/pymchelper.flair.common.rexx.html#pymchelper.flair.common.rexx.center">[docs]</a><span class="k">def</span> <span class="nf">center</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">length</span><span class="p">,</span> <span class="n">pad</span><span class="o">=</span><span class="s1">&#39; &#39;</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">length</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s2">&quot;&quot;</span>
+
+    <span class="n">i</span> <span class="o">=</span> <span class="n">length</span> <span class="o">-</span> <span class="nb">len</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">i</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">s</span>
+    <span class="k">elif</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">i</span> <span class="o">=</span> <span class="o">-</span><span class="n">i</span>
+        <span class="n">a</span> <span class="o">=</span> <span class="n">i</span> <span class="o">//</span> <span class="mi">2</span>
+        <span class="k">return</span> <span class="n">s</span><span class="p">[</span><span class="n">a</span><span class="p">:</span><span class="n">a</span> <span class="o">+</span> <span class="n">length</span><span class="p">]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">a</span> <span class="o">=</span> <span class="n">i</span> <span class="o">//</span> <span class="mi">2</span>
+        <span class="k">return</span> <span class="s2">&quot;</span><span class="si">%s%s%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">pad</span> <span class="o">*</span> <span class="n">a</span><span class="p">,</span> <span class="n">s</span><span class="p">,</span> <span class="n">pad</span> <span class="o">*</span> <span class="p">(</span><span class="n">i</span> <span class="o">-</span> <span class="n">a</span><span class="p">))</span></div>
+
+
+<span class="c1"># datatype</span>
+<div class="viewcode-block" id="datatype"><a class="viewcode-back" href="../../../../apidoc/pymchelper.flair.common.rexx.html#pymchelper.flair.common.rexx.datatype">[docs]</a><span class="k">def</span> <span class="nf">datatype</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">check</span><span class="o">=</span><span class="s2">&quot;N&quot;</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;rexx datatype function&quot;&quot;&quot;</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="nb">str</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">check</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;X&quot;</span><span class="p">,</span> <span class="s2">&quot;B&quot;</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">check</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;X&quot;</span><span class="p">,</span> <span class="s2">&quot;B&quot;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">check</span> <span class="o">==</span> <span class="s2">&quot;N&quot;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">_isnum</span><span class="p">(</span><span class="nb">str</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">check</span> <span class="o">==</span> <span class="s2">&quot;A&quot;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">verify</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">_letters_digits</span><span class="p">)</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span>
+    <span class="k">elif</span> <span class="n">check</span> <span class="o">==</span> <span class="s2">&quot;L&quot;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">verify</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">string</span><span class="o">.</span><span class="n">ascii_lowercase</span><span class="p">)</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span>
+    <span class="k">elif</span> <span class="n">check</span> <span class="o">==</span> <span class="s2">&quot;M&quot;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">verify</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">string</span><span class="o">.</span><span class="n">ascii_letters</span><span class="p">)</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span>
+    <span class="k">elif</span> <span class="n">check</span> <span class="o">==</span> <span class="s2">&quot;U&quot;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">verify</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">string</span><span class="o">.</span><span class="n">ascii_uppercase</span><span class="p">)</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span>
+    <span class="k">elif</span> <span class="n">check</span> <span class="o">==</span> <span class="s2">&quot;O&quot;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">verify</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">string</span><span class="o">.</span><span class="n">octdigits</span><span class="p">)</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span>
+    <span class="k">elif</span> <span class="n">check</span> <span class="o">==</span> <span class="s2">&quot;X&quot;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">verify</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">string</span><span class="o">.</span><span class="n">hexdigits</span><span class="p">)</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span>
+    <span class="k">elif</span> <span class="n">check</span> <span class="o">==</span> <span class="s2">&quot;S&quot;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">(</span><span class="nb">str</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">in</span> <span class="n">string</span><span class="o">.</span><span class="n">ascii_letters</span><span class="p">)</span> <span class="ow">and</span> \
+               <span class="p">(</span><span class="n">verify</span><span class="p">(</span><span class="nb">str</span><span class="p">[</span><span class="mi">1</span><span class="p">:],</span> <span class="n">_letters_digits_symbol</span><span class="p">)</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">_isnum</span><span class="p">(</span><span class="nb">str</span><span class="p">)</span></div>
+
+
+<span class="c1"># insert</span>
+<div class="viewcode-block" id="insert"><a class="viewcode-back" href="../../../../apidoc/pymchelper.flair.common.rexx.html#pymchelper.flair.common.rexx.insert">[docs]</a><span class="k">def</span> <span class="nf">insert</span><span class="p">(</span><span class="n">new</span><span class="p">,</span> <span class="n">target</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">pad</span><span class="o">=</span><span class="s2">&quot; &quot;</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    insert new string to target as position n padded with pad characters</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">n</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">new</span> <span class="o">+</span> <span class="n">target</span>
+    <span class="k">elif</span> <span class="n">n</span> <span class="o">&gt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">target</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">target</span> <span class="o">+</span> <span class="n">pad</span> <span class="o">*</span> <span class="p">(</span><span class="n">n</span> <span class="o">-</span> <span class="nb">len</span><span class="p">(</span><span class="n">target</span><span class="p">))</span> <span class="o">+</span> <span class="n">new</span>
+
+    <span class="k">return</span> <span class="n">target</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="n">n</span><span class="p">]</span> <span class="o">+</span> <span class="n">new</span> <span class="o">+</span> <span class="n">target</span><span class="p">[</span><span class="n">n</span><span class="p">:]</span></div>
+
+
+<span class="c1"># left</span>
+<div class="viewcode-block" id="left"><a class="viewcode-back" href="../../../../apidoc/pymchelper.flair.common.rexx.html#pymchelper.flair.common.rexx.left">[docs]</a><span class="k">def</span> <span class="nf">left</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">length</span><span class="p">,</span> <span class="n">pad</span><span class="o">=</span><span class="s2">&quot; &quot;</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;return left of string str of length padded with pad chars&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">length</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="nb">str</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">str</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="n">length</span><span class="p">]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="nb">str</span> <span class="o">+</span> <span class="p">(</span><span class="n">pad</span> <span class="o">*</span> <span class="p">(</span><span class="n">length</span> <span class="o">-</span> <span class="nb">len</span><span class="p">(</span><span class="nb">str</span><span class="p">)))</span></div>
+
+
+<span class="c1"># translate</span>
+<div class="viewcode-block" id="translate"><a class="viewcode-back" href="../../../../apidoc/pymchelper.flair.common.rexx.html#pymchelper.flair.common.rexx.translate">[docs]</a><span class="k">def</span> <span class="nf">translate</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">tableo</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">tablei</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">pad</span><span class="o">=</span><span class="s2">&quot; &quot;</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;translate string&quot;&quot;&quot;</span>
+    <span class="c1"># If neither input nor output tables, uppercase.</span>
+    <span class="k">if</span> <span class="n">tableo</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">tablei</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="nb">str</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="n">tableo</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">tableo</span> <span class="o">=</span> <span class="n">xrange_string</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">255</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">tablei</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">tablei</span> <span class="o">=</span> <span class="n">xrange_string</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">255</span><span class="p">)</span>
+
+    <span class="c1"># The input table defaults to all characters.</span>
+    <span class="n">dl</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">tablei</span><span class="p">)</span> <span class="o">-</span> <span class="nb">len</span><span class="p">(</span><span class="n">tableo</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">dl</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">tableo</span> <span class="o">+=</span> <span class="n">pad</span> <span class="o">*</span> <span class="n">dl</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">tablei</span> <span class="o">+=</span> <span class="n">pad</span> <span class="o">*</span> <span class="p">(</span><span class="o">-</span><span class="n">dl</span><span class="p">)</span>
+
+    <span class="n">tbl</span> <span class="o">=</span> <span class="n">string</span><span class="o">.</span><span class="n">maketrans</span><span class="p">(</span><span class="n">tablei</span><span class="p">,</span> <span class="n">tableo</span><span class="p">)</span>
+    <span class="k">return</span> <span class="nb">str</span><span class="o">.</span><span class="n">translate</span><span class="p">(</span><span class="n">tbl</span><span class="p">)</span></div>
+
+
+<span class="c1"># reverse</span>
+<div class="viewcode-block" id="reverse"><a class="viewcode-back" href="../../../../apidoc/pymchelper.flair.common.rexx.html#pymchelper.flair.common.rexx.reverse">[docs]</a><span class="k">def</span> <span class="nf">reverse</span><span class="p">(</span><span class="nb">str</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;reverse string&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="nb">str</span><span class="p">[::</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span></div>
+
+
+<span class="c1"># verify</span>
+<div class="viewcode-block" id="verify"><a class="viewcode-back" href="../../../../apidoc/pymchelper.flair.common.rexx.html#pymchelper.flair.common.rexx.verify">[docs]</a><span class="k">def</span> <span class="nf">verify</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">ref</span><span class="p">,</span> <span class="n">match</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    return the index of the first character in string that</span>
+<span class="sd">    is not also in reference. if &quot;Match&quot; is given, then return</span>
+<span class="sd">    the result index of the first character in string that is in reference</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">start</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">start</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">start</span> <span class="o">&gt;=</span> <span class="nb">len</span><span class="p">(</span><span class="nb">str</span><span class="p">):</span>
+        <span class="k">return</span> <span class="o">-</span><span class="mi">1</span>
+
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">start</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="nb">str</span><span class="p">)):</span>
+        <span class="n">found</span> <span class="o">=</span> <span class="n">ref</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="nb">str</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span>
+        <span class="k">if</span> <span class="n">found</span> <span class="o">^</span> <span class="n">match</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">i</span>
+    <span class="k">return</span> <span class="o">-</span><span class="mi">1</span></div>
+
+
+<span class="c1"># xrange</span>
+<div class="viewcode-block" id="xrange_string"><a class="viewcode-back" href="../../../../apidoc/pymchelper.flair.common.rexx.html#pymchelper.flair.common.rexx.xrange_string">[docs]</a><span class="k">def</span> <span class="nf">xrange_string</span><span class="p">(</span><span class="n">start</span><span class="p">,</span> <span class="n">stop</span><span class="p">):</span>
+    <span class="k">return</span> <span class="s2">&quot;&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="nb">chr</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">start</span><span class="p">,</span> <span class="n">stop</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)])</span></div>
+
+
+<span class="k">def</span> <span class="nf">_isnum</span><span class="p">(</span><span class="nb">str</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;true if string is number&quot;&quot;&quot;</span>
+    <span class="nb">str</span> <span class="o">=</span> <span class="nb">str</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+
+    <span class="c1"># accept one sign</span>
+    <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">length</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="nb">str</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">length</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">False</span>
+
+    <span class="k">if</span> <span class="nb">str</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;-&#39;</span><span class="p">,</span> <span class="s1">&#39;+&#39;</span><span class="p">):</span>
+        <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+
+    <span class="c1"># skip spaces after sign</span>
+    <span class="k">while</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">length</span> <span class="ow">and</span> <span class="nb">str</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">isspace</span><span class="p">():</span>
+        <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+
+    <span class="c1"># accept many digits</span>
+    <span class="k">if</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">length</span> <span class="ow">and</span> <span class="s1">&#39;0&#39;</span> <span class="o">&lt;=</span> <span class="nb">str</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="s1">&#39;9&#39;</span><span class="p">:</span>
+        <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="n">F</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="k">while</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">length</span> <span class="ow">and</span> <span class="s1">&#39;0&#39;</span> <span class="o">&lt;=</span> <span class="nb">str</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="s1">&#39;9&#39;</span><span class="p">:</span>
+            <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">F</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="c1"># accept one dot</span>
+    <span class="k">if</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">length</span> <span class="ow">and</span> <span class="nb">str</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;.&#39;</span><span class="p">:</span>
+        <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+
+        <span class="c1"># accept many digits</span>
+        <span class="k">if</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">length</span> <span class="ow">and</span> <span class="s1">&#39;0&#39;</span> <span class="o">&lt;=</span> <span class="nb">str</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="s1">&#39;9&#39;</span><span class="p">:</span>
+            <span class="k">while</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">length</span> <span class="ow">and</span> <span class="s1">&#39;0&#39;</span> <span class="o">&lt;=</span> <span class="nb">str</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="s1">&#39;9&#39;</span><span class="p">:</span>
+                <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">F</span><span class="p">:</span>
+                <span class="k">return</span> <span class="kc">False</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">F</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">False</span>
+
+    <span class="c1"># accept one e/E/d/D</span>
+    <span class="k">if</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">length</span> <span class="ow">and</span> <span class="nb">str</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;e&#39;</span><span class="p">,</span> <span class="s1">&#39;E&#39;</span><span class="p">,</span> <span class="s1">&#39;d&#39;</span><span class="p">,</span> <span class="s1">&#39;D&#39;</span><span class="p">):</span>
+        <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="c1"># accept one sign</span>
+        <span class="k">if</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">length</span> <span class="ow">and</span> <span class="nb">str</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;-&#39;</span><span class="p">,</span> <span class="s1">&#39;+&#39;</span><span class="p">):</span>
+            <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+
+        <span class="c1"># accept many digits</span>
+        <span class="k">if</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">length</span> <span class="ow">and</span> <span class="s1">&#39;0&#39;</span> <span class="o">&lt;=</span> <span class="nb">str</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="s1">&#39;9&#39;</span><span class="p">:</span>
+            <span class="k">while</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">length</span> <span class="ow">and</span> <span class="s1">&#39;0&#39;</span> <span class="o">&lt;=</span> <span class="nb">str</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="s1">&#39;9&#39;</span><span class="p">:</span>
+                <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">False</span>
+
+    <span class="k">if</span> <span class="n">i</span> <span class="o">!=</span> <span class="n">length</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">False</span>
+
+    <span class="k">return</span> <span class="kc">True</span>
+
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">pymchelper.flair.common.log</span> <span class="k">import</span> <span class="n">say</span>
+
+    <span class="n">say</span><span class="p">(</span><span class="s2">&quot;abbrev&quot;</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">abbrev</span><span class="p">(</span><span class="s1">&#39;information&#39;</span><span class="p">,</span> <span class="s1">&#39;info&#39;</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">abbrev</span><span class="p">(</span><span class="s1">&#39;information&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="ow">not</span> <span class="n">abbrev</span><span class="p">(</span><span class="s1">&#39;information&#39;</span><span class="p">,</span> <span class="s1">&#39;Info&#39;</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="ow">not</span> <span class="n">abbrev</span><span class="p">(</span><span class="s1">&#39;information&#39;</span><span class="p">,</span> <span class="s1">&#39;info&#39;</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="ow">not</span> <span class="n">abbrev</span><span class="p">(</span><span class="s1">&#39;information&#39;</span><span class="p">,</span> <span class="s1">&#39;info &#39;</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">abbrev</span><span class="p">(</span><span class="s1">&#39;information&#39;</span><span class="p">,</span> <span class="s1">&#39;info&#39;</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="ow">not</span> <span class="n">abbrev</span><span class="p">(</span><span class="s1">&#39;info&#39;</span><span class="p">,</span> <span class="s1">&#39;information&#39;</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="ow">not</span> <span class="n">abbrev</span><span class="p">(</span><span class="s1">&#39;info&#39;</span><span class="p">,</span> <span class="s1">&#39;info&#39;</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span>
+
+    <span class="n">say</span><span class="p">(</span><span class="s2">&quot;center&quot;</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">center</span><span class="p">(</span><span class="s1">&#39;****&#39;</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="s1">&#39;-&#39;</span><span class="p">)</span> <span class="o">==</span> <span class="s1">&#39;&#39;</span>
+    <span class="k">assert</span> <span class="n">center</span><span class="p">(</span><span class="s1">&#39;****&#39;</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="s1">&#39;-&#39;</span><span class="p">)</span> <span class="o">==</span> <span class="s1">&#39;--****--&#39;</span>
+    <span class="k">assert</span> <span class="n">center</span><span class="p">(</span><span class="s1">&#39;****&#39;</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="s1">&#39;-&#39;</span><span class="p">)</span> <span class="o">==</span> <span class="s1">&#39;-****--&#39;</span>
+    <span class="k">assert</span> <span class="n">center</span><span class="p">(</span><span class="s1">&#39;*****&#39;</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="s1">&#39;-&#39;</span><span class="p">)</span> <span class="o">==</span> <span class="s1">&#39;-*****--&#39;</span>
+    <span class="k">assert</span> <span class="n">center</span><span class="p">(</span><span class="s1">&#39;*****&#39;</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="s1">&#39;-&#39;</span><span class="p">)</span> <span class="o">==</span> <span class="s1">&#39;-*****-&#39;</span>
+    <span class="k">assert</span> <span class="n">center</span><span class="p">(</span><span class="s1">&#39;12345678&#39;</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="s1">&#39;-&#39;</span><span class="p">)</span> <span class="o">==</span> <span class="s1">&#39;3456&#39;</span>
+    <span class="k">assert</span> <span class="n">center</span><span class="p">(</span><span class="s1">&#39;12345678&#39;</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="s1">&#39;-&#39;</span><span class="p">)</span> <span class="o">==</span> <span class="s1">&#39;23456&#39;</span>
+    <span class="k">assert</span> <span class="n">center</span><span class="p">(</span><span class="s1">&#39;1234567&#39;</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="s1">&#39;-&#39;</span><span class="p">)</span> <span class="o">==</span> <span class="s1">&#39;2345&#39;</span>
+    <span class="k">assert</span> <span class="n">center</span><span class="p">(</span><span class="s1">&#39;1234567&#39;</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="s1">&#39;-&#39;</span><span class="p">)</span> <span class="o">==</span> <span class="s1">&#39;23456&#39;</span>
+
+    <span class="n">say</span><span class="p">(</span><span class="s2">&quot;datatype&quot;</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="ow">not</span> <span class="n">datatype</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="ow">not</span> <span class="n">datatype</span><span class="p">(</span><span class="s2">&quot;foobar&quot;</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="ow">not</span> <span class="n">datatype</span><span class="p">(</span><span class="s2">&quot;foo bar&quot;</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="ow">not</span> <span class="n">datatype</span><span class="p">(</span><span class="s2">&quot;123.456.789&quot;</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">datatype</span><span class="p">(</span><span class="s2">&quot;123.456&quot;</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="ow">not</span> <span class="n">datatype</span><span class="p">(</span><span class="s2">&quot;DeadBeef&quot;</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="ow">not</span> <span class="n">datatype</span><span class="p">(</span><span class="s2">&quot;Dead Beef&quot;</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="ow">not</span> <span class="n">datatype</span><span class="p">(</span><span class="s2">&quot;1234ABCD&quot;</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">datatype</span><span class="p">(</span><span class="s2">&quot;01001101&quot;</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="ow">not</span> <span class="n">datatype</span><span class="p">(</span><span class="s2">&quot;0110 1101&quot;</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="ow">not</span> <span class="n">datatype</span><span class="p">(</span><span class="s2">&quot;0110 101&quot;</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">datatype</span><span class="p">(</span><span class="s2">&quot;1324.1234&quot;</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">datatype</span><span class="p">(</span><span class="s2">&quot;123&quot;</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">datatype</span><span class="p">(</span><span class="s2">&quot;12.3&quot;</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">datatype</span><span class="p">(</span><span class="s1">&#39;123.123&#39;</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">datatype</span><span class="p">(</span><span class="s1">&#39;123.123E3&#39;</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">datatype</span><span class="p">(</span><span class="s1">&#39;123.0000003&#39;</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">datatype</span><span class="p">(</span><span class="s1">&#39;123.0000004&#39;</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">datatype</span><span class="p">(</span><span class="s1">&#39;123.0000005&#39;</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">datatype</span><span class="p">(</span><span class="s1">&#39;123.0000006&#39;</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">datatype</span><span class="p">(</span><span class="s1">&#39; 23&#39;</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">datatype</span><span class="p">(</span><span class="s1">&#39; 23 &#39;</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">datatype</span><span class="p">(</span><span class="s1">&#39;23 &#39;</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">datatype</span><span class="p">(</span><span class="s1">&#39;123.00&#39;</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">datatype</span><span class="p">(</span><span class="s1">&#39;123000E-2&#39;</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">datatype</span><span class="p">(</span><span class="s1">&#39;123000E+2&#39;</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="ow">not</span> <span class="n">datatype</span><span class="p">(</span><span class="s2">&quot;A B C&quot;</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="ow">not</span> <span class="n">datatype</span><span class="p">(</span><span class="s2">&quot;123ABC&quot;</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="ow">not</span> <span class="n">datatype</span><span class="p">(</span><span class="s2">&quot;123AHC&quot;</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">datatype</span><span class="p">(</span><span class="s1">&#39;0.000E-2&#39;</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">datatype</span><span class="p">(</span><span class="s1">&#39;0.000E-1&#39;</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">datatype</span><span class="p">(</span><span class="s1">&#39;0.000E0&#39;</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">datatype</span><span class="p">(</span><span class="s1">&#39;0.000E1&#39;</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">datatype</span><span class="p">(</span><span class="s1">&#39;0.000E2&#39;</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">datatype</span><span class="p">(</span><span class="s1">&#39;0.000E3&#39;</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">datatype</span><span class="p">(</span><span class="s1">&#39;0.000E4&#39;</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">datatype</span><span class="p">(</span><span class="s1">&#39;0.000E5&#39;</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">datatype</span><span class="p">(</span><span class="s1">&#39;0.000E6&#39;</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">datatype</span><span class="p">(</span><span class="s1">&#39;0E-1&#39;</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">datatype</span><span class="p">(</span><span class="s1">&#39;0E0&#39;</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">datatype</span><span class="p">(</span><span class="s1">&#39;0E1&#39;</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">datatype</span><span class="p">(</span><span class="s1">&#39;0E2&#39;</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="ow">not</span> <span class="n">datatype</span><span class="p">(</span><span class="s1">&#39;+.&#39;</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="ow">not</span> <span class="n">datatype</span><span class="p">(</span><span class="s1">&#39;++0&#39;</span><span class="p">)</span>
+
+    <span class="n">say</span><span class="p">(</span><span class="s2">&quot;insert&quot;</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">insert</span><span class="p">(</span><span class="s2">&quot;abc&quot;</span><span class="p">,</span> <span class="s2">&quot;def&quot;</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span> <span class="o">==</span> <span class="s2">&quot;deabcf&quot;</span>
+    <span class="k">assert</span> <span class="n">insert</span><span class="p">(</span><span class="s2">&quot;abc&quot;</span><span class="p">,</span> <span class="s2">&quot;def&quot;</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span> <span class="o">==</span> <span class="s2">&quot;defabc&quot;</span>
+    <span class="k">assert</span> <span class="n">insert</span><span class="p">(</span><span class="s2">&quot;abc&quot;</span><span class="p">,</span> <span class="s2">&quot;def&quot;</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span> <span class="o">==</span> <span class="s2">&quot;def  abc&quot;</span>
+    <span class="k">assert</span> <span class="n">insert</span><span class="p">(</span><span class="s2">&quot;abc&quot;</span><span class="p">,</span> <span class="s2">&quot;def&quot;</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="s1">&#39;*&#39;</span><span class="p">)</span> <span class="o">==</span> <span class="s2">&quot;def**abc&quot;</span>
+
+    <span class="n">say</span><span class="p">(</span><span class="s2">&quot;translate&quot;</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">translate</span><span class="p">(</span><span class="s2">&quot;Foo Bar&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span> <span class="o">==</span> <span class="s2">&quot;Foo Bar&quot;</span>
+    <span class="k">assert</span> <span class="n">translate</span><span class="p">(</span><span class="s2">&quot;Foo Bar&quot;</span><span class="p">,</span> <span class="n">xrange_string</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">255</span><span class="p">))</span> <span class="o">==</span> <span class="s2">&quot;Gpp!Cbs&quot;</span>
+    <span class="k">assert</span> <span class="n">translate</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="s2">&quot;klasjdf&quot;</span><span class="p">,</span> <span class="s2">&quot;woieruw&quot;</span><span class="p">)</span> <span class="o">==</span> <span class="s2">&quot;&quot;</span>
+    <span class="k">assert</span> <span class="n">translate</span><span class="p">(</span><span class="s2">&quot;foobar&quot;</span><span class="p">,</span> <span class="s2">&quot;abcdef&quot;</span><span class="p">,</span> <span class="s2">&quot;fedcba&quot;</span><span class="p">)</span> <span class="o">==</span> <span class="s2">&quot;aooefr&quot;</span>
+
+    <span class="n">say</span><span class="p">(</span><span class="s2">&quot;verify&quot;</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">verify</span><span class="p">(</span><span class="s1">&#39;foobar&#39;</span><span class="p">,</span> <span class="s1">&#39;barfo&#39;</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span>
+    <span class="k">assert</span> <span class="n">verify</span><span class="p">(</span><span class="s1">&#39;foobar&#39;</span><span class="p">,</span> <span class="s1">&#39;barfo&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span>
+    <span class="k">assert</span> <span class="n">verify</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="s1">&#39;barfo&#39;</span><span class="p">)</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span>
+    <span class="k">assert</span> <span class="n">verify</span><span class="p">(</span><span class="s1">&#39;foobar&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span>
+    <span class="k">assert</span> <span class="n">verify</span><span class="p">(</span><span class="s1">&#39;foobar&#39;</span><span class="p">,</span> <span class="s1">&#39;barf&#39;</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span>
+    <span class="k">assert</span> <span class="n">verify</span><span class="p">(</span><span class="s1">&#39;foobar&#39;</span><span class="p">,</span> <span class="s1">&#39;barf&#39;</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span>
+    <span class="k">assert</span> <span class="n">verify</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span>
+
+    <span class="n">say</span><span class="p">(</span><span class="s2">&quot;All Test passed&quot;</span><span class="p">)</span>
+</pre></div>
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../../index.html">pymchelper 1.10.0+rev3 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../../index.html" >Module code</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">pymchelper.flair.common.rexx</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2016, Leszek Grzanka.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 4.3.0.
+    </div>
+  </body>
+</html>

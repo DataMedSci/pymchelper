@@ -1,0 +1,192 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>pymchelper.flair.common.fortran &#8212; pymchelper 1.10.0+rev3 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/classic.css" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/graphviz.css" />
+    
+    <script data-url_root="../../../../" id="documentation_options" src="../../../../_static/documentation_options.js"></script>
+    <script src="../../../../_static/jquery.js"></script>
+    <script src="../../../../_static/underscore.js"></script>
+    <script src="../../../../_static/doctools.js"></script>
+    
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../../index.html">pymchelper 1.10.0+rev3 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../../index.html" accesskey="U">Module code</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">pymchelper.flair.common.fortran</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for pymchelper.flair.common.fortran</h1><div class="highlight"><pre>
+<span></span><span class="ch">#!/bin/env python</span>
+<span class="c1"># $Id: fortran.py 2947 2014-01-17 16:24:41Z bnv $</span>
+<span class="c1">#</span>
+<span class="c1"># Copyright and User License</span>
+<span class="c1"># ~~~~~~~~~~~~~~~~~~~~~~~~~~</span>
+<span class="c1"># Copyright Vasilis.Vlachoudis@cern.ch for the</span>
+<span class="c1"># European Organization for Nuclear Research (CERN)</span>
+<span class="c1">#</span>
+<span class="c1"># All rights not expressly granted under this license are reserved.</span>
+<span class="c1">#</span>
+<span class="c1"># Installation, use, reproduction, display of the</span>
+<span class="c1"># software (&quot;flair&quot;), in source and binary forms, are</span>
+<span class="c1"># permitted free of charge on a non-exclusive basis for</span>
+<span class="c1"># internal scientific, non-commercial and non-weapon-related</span>
+<span class="c1"># use by non-profit organizations only.</span>
+<span class="c1">#</span>
+<span class="c1"># For commercial use of the software, please contact the main</span>
+<span class="c1"># author Vasilis.Vlachoudis@cern.ch for further information.</span>
+<span class="c1">#</span>
+<span class="c1"># Redistribution and use in source and binary forms, with or without</span>
+<span class="c1"># modification, are permitted provided that the following</span>
+<span class="c1"># conditions are met:</span>
+<span class="c1">#</span>
+<span class="c1"># 1. Redistributions of source code must retain the above copyright</span>
+<span class="c1">#    notice, this list of conditions and the following disclaimer.</span>
+<span class="c1"># 2. Redistributions in binary form must reproduce the above copyright</span>
+<span class="c1">#    notice, this list of conditions and the following disclaimer in the</span>
+<span class="c1">#    documentation and/or other materials provided with the</span>
+<span class="c1">#    distribution.</span>
+<span class="c1">#</span>
+<span class="c1"># DISCLAIMER</span>
+<span class="c1"># ~~~~~~~~~~</span>
+<span class="c1"># THIS SOFTWARE IS PROVIDED BY THE AUTHOR &quot;AS IS&quot;</span>
+<span class="c1"># AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT</span>
+<span class="c1"># NOT LIMITED TO, IMPLIED WARRANTIES OF MERCHANTABILITY, OF</span>
+<span class="c1"># SATISFACTORY QUALITY, AND FITNESS FOR A PARTICULAR PURPOSE</span>
+<span class="c1"># OR USE ARE DISCLAIMED. THE COPYRIGHT HOLDERS AND THE</span>
+<span class="c1"># AUTHORS MAKE NO REPRESENTATION THAT THE SOFTWARE AND</span>
+<span class="c1"># MODIFICATIONS THEREOF, WILL NOT INFRINGE ANY PATENT,</span>
+<span class="c1"># COPYRIGHT, TRADE SECRET OR OTHER PROPRIETARY RIGHT.</span>
+<span class="c1">#</span>
+<span class="c1"># LIMITATION OF LIABILITY</span>
+<span class="c1"># ~~~~~~~~~~~~~~~~~~~~~~~</span>
+<span class="c1"># THE COPYRIGHT HOLDERS AND THE AUTHORS SHALL HAVE NO</span>
+<span class="c1"># LIABILITY FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL,</span>
+<span class="c1"># CONSEQUENTIAL, EXEMPLARY, OR PUNITIVE DAMAGES OF ANY</span>
+<span class="c1"># CHARACTER INCLUDING, WITHOUT LIMITATION, PROCUREMENT OF</span>
+<span class="c1"># SUBSTITUTE GOODS OR SERVICES, LOSS OF USE, DATA OR PROFITS,</span>
+<span class="c1"># OR BUSINESS INTERRUPTION, HOWEVER CAUSED AND ON ANY THEORY</span>
+<span class="c1"># OF CONTRACT, WARRANTY, TORT (INCLUDING NEGLIGENCE), PRODUCT</span>
+<span class="c1"># LIABILITY OR OTHERWISE, ARISING IN ANY WAY OUT OF THE USE OF</span>
+<span class="c1"># THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH</span>
+<span class="c1"># DAMAGES.</span>
+<span class="c1">#</span>
+<span class="c1"># Author:	Vasilis.Vlachoudis@cern.ch</span>
+<span class="c1"># Date:	24-Oct-2006</span>
+
+<span class="kn">import</span> <span class="nn">struct</span>
+
+<span class="n">__author__</span> <span class="o">=</span> <span class="s2">&quot;Vasilis Vlachoudis&quot;</span>
+<span class="n">__email__</span> <span class="o">=</span> <span class="s2">&quot;Vasilis.Vlachoudis@cern.ch&quot;</span>
+
+
+<div class="viewcode-block" id="skip"><a class="viewcode-back" href="../../../../apidoc/pymchelper.flair.common.fortran.html#pymchelper.flair.common.fortran.skip">[docs]</a><span class="k">def</span> <span class="nf">skip</span><span class="p">(</span><span class="n">f</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Skip a fortran block from a binary file</span>
+<span class="sd">    :param f: file to read from</span>
+<span class="sd">    :return: size, None for EOF</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">blen</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">blen</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">return</span> <span class="mi">0</span>
+    <span class="p">(</span><span class="n">size</span><span class="p">,</span> <span class="p">)</span> <span class="o">=</span> <span class="n">struct</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="s2">&quot;=i&quot;</span><span class="p">,</span> <span class="n">blen</span><span class="p">)</span>
+    <span class="n">f</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="n">size</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="n">blen2</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">blen</span> <span class="o">!=</span> <span class="n">blen2</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">IOError</span><span class="p">(</span><span class="s2">&quot;Skipping fortran block&quot;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">size</span></div>
+
+
+<div class="viewcode-block" id="read"><a class="viewcode-back" href="../../../../apidoc/pymchelper.flair.common.fortran.html#pymchelper.flair.common.fortran.read">[docs]</a><span class="k">def</span> <span class="nf">read</span><span class="p">(</span><span class="n">f</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Read a fortran structure from a binary file</span>
+<span class="sd">    :param f: file to read from</span>
+<span class="sd">    :return: data, None for EOF</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">blen</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">blen</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">None</span>
+    <span class="p">(</span><span class="n">size</span><span class="p">,</span> <span class="p">)</span> <span class="o">=</span> <span class="n">struct</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="s2">&quot;=i&quot;</span><span class="p">,</span> <span class="n">blen</span><span class="p">)</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">size</span><span class="p">)</span>
+    <span class="n">blen2</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">blen</span> <span class="o">!=</span> <span class="n">blen2</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">f</span><span class="o">.</span><span class="n">closed</span><span class="p">:</span>
+            <span class="n">f</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+        <span class="k">raise</span> <span class="ne">IOError</span><span class="p">(</span><span class="s2">&quot;Reading fortran block&quot;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">data</span></div>
+
+
+<div class="viewcode-block" id="write"><a class="viewcode-back" href="../../../../apidoc/pymchelper.flair.common.fortran.html#pymchelper.flair.common.fortran.write">[docs]</a><span class="k">def</span> <span class="nf">write</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">d</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Write a block of data (string) to file as a fortran block</span>
+<span class="sd">    :param f: file to write to</span>
+<span class="sd">    :param d: data to write</span>
+<span class="sd">    :return: output of last write statement</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">struct</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="s2">&quot;=i&quot;</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">d</span><span class="p">)))</span>
+    <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">d</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">struct</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="s2">&quot;=i&quot;</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">d</span><span class="p">)))</span></div>
+</pre></div>
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../../index.html">pymchelper 1.10.0+rev3 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../../index.html" >Module code</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">pymchelper.flair.common.fortran</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2016, Leszek Grzanka.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 4.3.0.
+    </div>
+  </body>
+</html>

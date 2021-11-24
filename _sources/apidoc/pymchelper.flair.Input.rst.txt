@@ -1,0 +1,7 @@
+pymchelper.flair.Input module
+=============================
+
+.. automodule:: pymchelper.flair.Input
+   :members:
+   :undoc-members:
+   :show-inheritance:

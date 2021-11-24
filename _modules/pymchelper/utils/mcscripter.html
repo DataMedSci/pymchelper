@@ -1,0 +1,407 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>pymchelper.utils.mcscripter &#8212; pymchelper 1.10.0+rev3 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/classic.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css" />
+    
+    <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+    <script src="../../../_static/jquery.js"></script>
+    <script src="../../../_static/underscore.js"></script>
+    <script src="../../../_static/doctools.js"></script>
+    
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">pymchelper 1.10.0+rev3 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">pymchelper.utils.mcscripter</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for pymchelper.utils.mcscripter</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Tool for creating MC input files using user-specified tables and ranges.</span>
+
+<span class="sd">2019 - Niels Bassler</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">import</span> <span class="nn">errno</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">argparse</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="Config"><a class="viewcode-back" href="../../../apidoc/pymchelper.utils.mcscripter.html#pymchelper.utils.mcscripter.Config">[docs]</a><span class="k">class</span> <span class="nc">Config</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Reading the config file.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fn</span><span class="p">):</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">fn</span><span class="p">)</span> <span class="k">as</span> <span class="n">_f</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">lines</span> <span class="o">=</span> <span class="n">_f</span><span class="o">.</span><span class="n">readlines</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">base_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">fn</span><span class="p">)</span>
+
+            <span class="c1"># script must run relative to location of config file.</span>
+            <span class="c1"># this is needed, otherwise symlink creation will fail, as these are relative</span>
+            <span class="c1"># and expect that the target exists.</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">base_dir</span><span class="p">:</span>
+                <span class="n">os</span><span class="o">.</span><span class="n">chdir</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">base_dir</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">parse</span><span class="p">()</span>
+
+<div class="viewcode-block" id="Config.parse"><a class="viewcode-back" href="../../../apidoc/pymchelper.utils.mcscripter.html#pymchelper.utils.mcscripter.Config.parse">[docs]</a>    <span class="k">def</span> <span class="nf">parse</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Parse configuration file.</span>
+<span class="sd">        All data are read into dicts. There are two dicts: a constant and variable (tabluated) one.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">const_dict</span> <span class="o">=</span> <span class="p">{}</span>  <span class="c1"># list of contant assignments</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">table_dict</span> <span class="o">=</span> <span class="p">{}</span>  <span class="c1"># list of table assignments</span>
+
+        <span class="n">keys</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">vals</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="n">_first_line_in_table</span> <span class="o">=</span> <span class="kc">True</span>
+
+        <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">lines</span><span class="p">:</span>
+            <span class="c1"># skip comments</span>
+            <span class="k">if</span> <span class="n">line</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;#&#39;</span><span class="p">):</span>
+                <span class="k">continue</span>
+
+            <span class="c1"># constant assigments</span>
+            <span class="k">if</span> <span class="s2">&quot;=&quot;</span> <span class="ow">in</span> <span class="n">line</span><span class="p">:</span>
+                <span class="n">_v</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;=&quot;</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">const_dict</span><span class="p">[</span><span class="n">_v</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()]</span> <span class="o">=</span> <span class="n">_v</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+                <span class="k">continue</span>
+
+            <span class="c1"># check if we are starting a table</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">())</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">_first_line_in_table</span><span class="p">:</span>
+                    <span class="n">keys</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
+                    <span class="n">_first_line_in_table</span> <span class="o">=</span> <span class="kc">False</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">vals</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">())</span>
+
+        <span class="c1"># after parsing all lines setup the variable table, if it exists:</span>
+        <span class="k">if</span> <span class="n">keys</span> <span class="ow">and</span> <span class="n">vals</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">key</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">keys</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">table_dict</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">val</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">vals</span><span class="p">]</span>
+
+        <span class="n">_files</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">const_dict</span><span class="p">[</span><span class="s2">&quot;FILES&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;,&quot;</span><span class="p">):</span>
+            <span class="n">_files</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">item</span><span class="o">.</span><span class="n">strip</span><span class="p">())</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">const_dict</span><span class="p">[</span><span class="s2">&quot;FILES&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">_files</span>
+
+        <span class="n">_files</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">const_dict</span><span class="p">[</span><span class="s2">&quot;SYMLINKS&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;,&quot;</span><span class="p">):</span>
+            <span class="n">_files</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">item</span><span class="o">.</span><span class="n">strip</span><span class="p">())</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">const_dict</span><span class="p">[</span><span class="s2">&quot;SYMLINKS&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">_files</span></div></div>
+
+
+<div class="viewcode-block" id="McFile"><a class="viewcode-back" href="../../../apidoc/pymchelper.utils.mcscripter.html#pymchelper.utils.mcscripter.McFile">[docs]</a><span class="k">class</span> <span class="nc">McFile</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    General MC single file object.</span>
+<span class="sd">    This will be used for the template files as well as the generated output files.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fname</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>  <span class="c1"># filename</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">path</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>   <span class="c1"># full path to this file (may be relative)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">lines</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># list of lines inside this file</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">symlink</span> <span class="o">=</span> <span class="kc">False</span>  <span class="c1"># marker if file is a symlink</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">templ_dir</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>  <span class="c1"># template directory</span>
+
+<div class="viewcode-block" id="McFile.write"><a class="viewcode-back" href="../../../apidoc/pymchelper.utils.mcscripter.html#pymchelper.utils.mcscripter.McFile.write">[docs]</a>    <span class="k">def</span> <span class="nf">write</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Write self to disk, create symlink if that is the case.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># check if target directory exists, create it, if not.</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">))</span>
+        <span class="k">except</span> <span class="ne">OSError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>  <span class="c1"># when python 2.7 is dropped this can be replaced with FileExistsError: pass</span>
+            <span class="k">if</span> <span class="n">e</span><span class="o">.</span><span class="n">errno</span> <span class="o">==</span> <span class="n">errno</span><span class="o">.</span><span class="n">EEXIST</span><span class="p">:</span>
+                <span class="k">pass</span>  <span class="c1"># silently accept existing directories</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;Directory not created.&#39;</span><span class="p">)</span>
+                <span class="k">raise</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">symlink</span><span class="p">:</span>
+            <span class="n">link_file</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">templ_dir</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">fname</span><span class="p">)</span>
+            <span class="n">link_target</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">)</span>
+            <span class="n">link_name</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">relpath</span><span class="p">(</span><span class="n">link_file</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">link_target</span><span class="p">))</span>
+
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">os</span><span class="o">.</span><span class="n">symlink</span><span class="p">(</span><span class="n">link_name</span><span class="p">,</span> <span class="n">link_target</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">AttributeError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>  <span class="c1"># python 2.7 on Windows cannot create symlinks</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;Symlink not created.&#39;</span><span class="p">)</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Cannot create a link to the file, please check if you are using Linux or Python 3.&quot;</span><span class="p">)</span>
+                <span class="k">raise</span> <span class="n">e</span>
+            <span class="k">except</span> <span class="ne">OSError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>  <span class="c1"># when python 2.7 is dropped this can be replaced with FileExistsError: pass</span>
+                <span class="k">if</span> <span class="n">e</span><span class="o">.</span><span class="n">errno</span> <span class="o">==</span> <span class="n">errno</span><span class="o">.</span><span class="n">EEXIST</span><span class="p">:</span>
+                    <span class="k">pass</span>  <span class="c1"># silently accept existing symlinks</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;Symlink not created.&#39;</span><span class="p">)</span>
+                    <span class="k">raise</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">_f</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Writing </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">))</span>
+                <span class="n">_f</span><span class="o">.</span><span class="n">writelines</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lines</span><span class="p">)</span></div></div>
+
+
+<div class="viewcode-block" id="Template"><a class="viewcode-back" href="../../../apidoc/pymchelper.utils.mcscripter.html#pymchelper.utils.mcscripter.Template">[docs]</a><span class="k">class</span> <span class="nc">Template</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Read all files and symlinks specified in the config file, and place them in a list of McFile objects.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cfg</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">files</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">cfg</span><span class="p">)</span>
+
+<div class="viewcode-block" id="Template.read"><a class="viewcode-back" href="../../../apidoc/pymchelper.utils.mcscripter.html#pymchelper.utils.mcscripter.Template.read">[docs]</a>    <span class="k">def</span> <span class="nf">read</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cfg</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Reads all template files, and creates a list of McFile objects in self.files.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">fname_list</span> <span class="o">=</span> <span class="n">cfg</span><span class="o">.</span><span class="n">const_dict</span><span class="p">[</span><span class="s2">&quot;FILES&quot;</span><span class="p">]</span> <span class="o">+</span> <span class="n">cfg</span><span class="o">.</span><span class="n">const_dict</span><span class="p">[</span><span class="s2">&quot;SYMLINKS&quot;</span><span class="p">]</span>
+
+        <span class="k">for</span> <span class="n">fname</span> <span class="ow">in</span> <span class="n">fname_list</span><span class="p">:</span>
+            <span class="n">tf</span> <span class="o">=</span> <span class="n">McFile</span><span class="p">()</span>
+            <span class="n">tf</span><span class="o">.</span><span class="n">fname</span> <span class="o">=</span> <span class="n">fname</span>
+            <span class="n">tf</span><span class="o">.</span><span class="n">path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">cfg</span><span class="o">.</span><span class="n">const_dict</span><span class="p">[</span><span class="s2">&quot;TDIR&quot;</span><span class="p">],</span> <span class="n">fname</span><span class="p">)</span>
+            <span class="n">tf</span><span class="o">.</span><span class="n">templ_dir</span> <span class="o">=</span> <span class="n">cfg</span><span class="o">.</span><span class="n">const_dict</span><span class="p">[</span><span class="s2">&quot;TDIR&quot;</span><span class="p">]</span>
+
+            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">path</span><span class="p">)</span> <span class="k">as</span> <span class="n">_f</span><span class="p">:</span>
+                <span class="n">tf</span><span class="o">.</span><span class="n">lines</span> <span class="o">=</span> <span class="n">_f</span><span class="o">.</span><span class="n">readlines</span><span class="p">()</span>
+
+            <span class="k">if</span> <span class="n">fname</span> <span class="ow">in</span> <span class="n">cfg</span><span class="o">.</span><span class="n">const_dict</span><span class="p">[</span><span class="s2">&quot;SYMLINKS&quot;</span><span class="p">]:</span>
+                <span class="n">tf</span><span class="o">.</span><span class="n">symlink</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">tf</span><span class="o">.</span><span class="n">symlink</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">files</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">tf</span><span class="p">)</span></div></div>
+
+
+<div class="viewcode-block" id="Generator"><a class="viewcode-back" href="../../../apidoc/pymchelper.utils.mcscripter.html#pymchelper.utils.mcscripter.Generator">[docs]</a><span class="k">class</span> <span class="nc">Generator</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This generates and writes the output files based on the loaded template files and the config file.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">templ</span><span class="p">,</span> <span class="n">cfg</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Logic attached to the various keys is in here.</span>
+<span class="sd">        templ is a Template object and cfg is a Config object.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># create a new dict, with all keys, but single unique values only:</span>
+        <span class="c1"># this is the &quot;current unique dictionary&quot;</span>
+        <span class="n">u_dict</span> <span class="o">=</span> <span class="n">cfg</span><span class="o">.</span><span class="n">const_dict</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+
+        <span class="c1"># loop_keys are special keys which cover a numerical range in discrete steps.</span>
+        <span class="c1"># here we will identify them, and for each loop_key, there will be a range setup.</span>
+        <span class="c1"># loop_keys are identified by the &quot;_MIN&quot; suffix:</span>
+        <span class="n">loop_keys</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">cfg</span><span class="o">.</span><span class="n">table_dict</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="k">if</span> <span class="s2">&quot;_MIN&quot;</span> <span class="ow">in</span> <span class="n">key</span><span class="p">:</span>
+                <span class="n">loop_keys</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">key</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s2">&quot;_MIN&quot;</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;_&quot;</span><span class="p">)</span>
+
+        <span class="c1"># reuse any key from table to calculate the length of the table</span>
+        <span class="c1"># this means that the table must be homogenous, i.e. every key must have the same amount of values.</span>
+        <span class="n">_vals</span> <span class="o">=</span> <span class="n">cfg</span><span class="o">.</span><span class="n">table_dict</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">_vals</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">cfg</span><span class="o">.</span><span class="n">table_dict</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+                <span class="n">u_dict</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">cfg</span><span class="o">.</span><span class="n">table_dict</span><span class="p">[</span><span class="n">key</span><span class="p">][</span><span class="n">i</span><span class="p">]</span>  <span class="c1"># only copy the ith value</span>
+
+            <span class="c1"># now prepare the ranges for every loop_key</span>
+            <span class="k">for</span> <span class="n">loop_key</span> <span class="ow">in</span> <span class="n">loop_keys</span><span class="p">:</span>
+                <span class="n">_lmin</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">cfg</span><span class="o">.</span><span class="n">table_dict</span><span class="p">[</span><span class="n">loop_key</span> <span class="o">+</span> <span class="s2">&quot;MIN&quot;</span><span class="p">][</span><span class="n">i</span><span class="p">])</span>
+                <span class="n">_lmax</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">cfg</span><span class="o">.</span><span class="n">table_dict</span><span class="p">[</span><span class="n">loop_key</span> <span class="o">+</span> <span class="s2">&quot;MAX&quot;</span><span class="p">][</span><span class="n">i</span><span class="p">])</span>
+                <span class="n">_lst</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">cfg</span><span class="o">.</span><span class="n">table_dict</span><span class="p">[</span><span class="n">loop_key</span> <span class="o">+</span> <span class="s2">&quot;STEP&quot;</span><span class="p">][</span><span class="n">i</span><span class="p">])</span>
+                <span class="n">loop_vals</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">_lmin</span><span class="p">,</span> <span class="n">_lmax</span><span class="p">,</span> <span class="n">_lst</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">loop_val</span> <span class="ow">in</span> <span class="n">loop_vals</span><span class="p">:</span>
+                    <span class="n">u_dict</span><span class="p">[</span><span class="n">loop_key</span><span class="p">]</span> <span class="o">=</span> <span class="n">loop_val</span>
+
+                    <span class="c1"># set the relative energy spread:</span>
+                    <span class="k">if</span> <span class="s2">&quot;E_&quot;</span> <span class="ow">in</span> <span class="n">u_dict</span> <span class="ow">and</span> <span class="s2">&quot;DE_FACTOR&quot;</span> <span class="ow">in</span> <span class="n">u_dict</span><span class="p">:</span>
+                        <span class="n">_de</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">u_dict</span><span class="p">[</span><span class="s2">&quot;E_&quot;</span><span class="p">])</span> <span class="o">*</span> <span class="nb">float</span><span class="p">(</span><span class="n">u_dict</span><span class="p">[</span><span class="s2">&quot;DE_FACTOR&quot;</span><span class="p">])</span>
+                        <span class="n">u_dict</span><span class="p">[</span><span class="s2">&quot;DE_&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">{:.3f}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">_de</span><span class="p">)</span>  <span class="c1"># HARDCODED float format for DE_</span>
+
+            <span class="c1"># at this point, the dict is fully set.</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">templ</span><span class="p">,</span> <span class="n">u_dict</span><span class="p">)</span>
+
+<div class="viewcode-block" id="Generator.get_keys"><a class="viewcode-back" href="../../../apidoc/pymchelper.utils.mcscripter.html#pymchelper.utils.mcscripter.Generator.get_keys">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">get_keys</span><span class="p">(</span><span class="n">s</span><span class="p">):</span>  <span class="c1"># This is currently not used, but kept for future use.</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        return list of ${} keys in string</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">r</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="k">if</span> <span class="s2">&quot;${&quot;</span> <span class="ow">in</span> <span class="n">s</span><span class="p">:</span>
+            <span class="n">_i</span> <span class="o">=</span> <span class="p">[</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">d</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">s</span><span class="p">)</span> <span class="k">if</span> <span class="n">d</span> <span class="o">==</span> <span class="s2">&quot;{&quot;</span><span class="p">]</span>
+            <span class="n">_ii</span> <span class="o">=</span> <span class="p">[</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">d</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">s</span><span class="p">)</span> <span class="k">if</span> <span class="n">d</span> <span class="o">==</span> <span class="s2">&quot;}&quot;</span><span class="p">]</span>
+
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">_i</span><span class="p">,</span> <span class="n">_ii</span><span class="p">):</span>
+                <span class="n">r</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">s</span><span class="p">[</span><span class="n">i</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span><span class="p">:</span><span class="n">i</span><span class="p">[</span><span class="mi">1</span><span class="p">]])</span>
+        <span class="k">return</span> <span class="n">r</span></div>
+
+<div class="viewcode-block" id="Generator.lreplace"><a class="viewcode-back" href="../../../apidoc/pymchelper.utils.mcscripter.html#pymchelper.utils.mcscripter.Generator.lreplace">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">lreplace</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">r</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Left adjusted replacement of string f with string r, in string s.</span>
+
+<span class="sd">        This function is implemented in order to fill in data in FORTRAN77 fields,</span>
+<span class="sd">        which are tied to certain positions on the line, i.e. subsequent values</span>
+<span class="sd">        may not be shifted.</span>
+
+<span class="sd">        Finds string f in string s and replaces it with string r, but left adjusted, retaining line length.</span>
+<span class="sd">        If length of r is shorter than length of f, remaining chars will be space padded.</span>
+<span class="sd">        If length of r is larger than length of f, then characters will be overwritten.</span>
+<span class="sd">        A copy of s with the replacement is returned.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">s</span><span class="p">:</span>
+            <span class="n">_idx</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">r</span><span class="p">)</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">f</span><span class="p">):</span>
+                <span class="n">_r</span> <span class="o">=</span> <span class="n">r</span> <span class="o">+</span> <span class="s2">&quot; &quot;</span> <span class="o">*</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">f</span><span class="p">)</span> <span class="o">-</span> <span class="nb">len</span><span class="p">(</span><span class="n">r</span><span class="p">))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">_r</span> <span class="o">=</span> <span class="n">r</span>
+            <span class="n">text</span> <span class="o">=</span> <span class="n">s</span><span class="p">[:</span><span class="n">_idx</span><span class="p">]</span> <span class="o">+</span> <span class="n">_r</span> <span class="o">+</span> <span class="n">s</span><span class="p">[</span><span class="n">_idx</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">_r</span><span class="p">):]</span>
+            <span class="k">return</span> <span class="n">text</span></div>
+
+<div class="viewcode-block" id="Generator.write"><a class="viewcode-back" href="../../../apidoc/pymchelper.utils.mcscripter.html#pymchelper.utils.mcscripter.Generator.write">[docs]</a>    <span class="k">def</span> <span class="nf">write</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">u_dict</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Write a copy of the template, using the substitutions as specifed in</span>
+<span class="sd">        the unique dictionary u_dict.</span>
+
+<span class="sd">        &quot;Unique&quot;, means that any _MIN _MAX _STEP type variables have been set.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">_wd</span> <span class="o">=</span> <span class="n">u_dict</span><span class="p">[</span><span class="s2">&quot;WDIR&quot;</span><span class="p">]</span>
+
+        <span class="c1"># check if any keys are in WDIR subsitutions</span>
+        <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">u_dict</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="n">token</span> <span class="o">=</span> <span class="s2">&quot;${&quot;</span> <span class="o">+</span> <span class="n">key</span> <span class="o">+</span> <span class="s2">&quot;}&quot;</span>
+            <span class="k">if</span> <span class="n">token</span> <span class="ow">in</span> <span class="n">_wd</span><span class="p">:</span>
+
+                <span class="n">_s</span> <span class="o">=</span> <span class="n">u_dict</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">_s</span><span class="p">,</span> <span class="nb">float</span><span class="p">):</span>
+                    <span class="n">_s</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">{:08.3f}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">u_dict</span><span class="p">[</span><span class="n">key</span><span class="p">])</span>  <span class="c1"># HARDCODED float format for directory string</span>
+                <span class="n">_wd</span> <span class="o">=</span> <span class="n">_wd</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">token</span><span class="p">,</span> <span class="n">_s</span><span class="p">)</span>
+        <span class="n">work_dir</span> <span class="o">=</span> <span class="n">_wd</span>
+
+        <span class="k">for</span> <span class="n">tf</span> <span class="ow">in</span> <span class="n">t</span><span class="o">.</span><span class="n">files</span><span class="p">:</span>  <span class="c1"># tf = template filename</span>
+            <span class="n">of</span> <span class="o">=</span> <span class="n">McFile</span><span class="p">()</span>  <span class="c1"># of = output file object</span>
+            <span class="n">of</span><span class="o">.</span><span class="n">fname</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">fname</span>
+            <span class="n">of</span><span class="o">.</span><span class="n">path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">work_dir</span><span class="p">,</span> <span class="n">tf</span><span class="o">.</span><span class="n">fname</span><span class="p">)</span>
+            <span class="n">of</span><span class="o">.</span><span class="n">templ_dir</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">templ_dir</span>
+
+            <span class="c1"># symlinks should not be parsed for tokens.</span>
+            <span class="k">if</span> <span class="n">tf</span><span class="o">.</span><span class="n">symlink</span><span class="p">:</span>
+                <span class="n">of</span><span class="o">.</span><span class="n">symlink</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">of</span><span class="o">.</span><span class="n">symlink</span> <span class="o">=</span> <span class="kc">False</span>
+
+                <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">tf</span><span class="o">.</span><span class="n">lines</span><span class="p">:</span>
+                    <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">u_dict</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+                        <span class="n">token</span> <span class="o">=</span> <span class="s2">&quot;${&quot;</span> <span class="o">+</span> <span class="n">key</span> <span class="o">+</span> <span class="s2">&quot;}&quot;</span>
+                        <span class="k">while</span> <span class="n">token</span> <span class="ow">in</span> <span class="n">line</span><span class="p">:</span>
+                            <span class="n">_s</span> <span class="o">=</span> <span class="n">u_dict</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+                            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">_s</span><span class="p">,</span> <span class="nb">float</span><span class="p">):</span>
+                                <span class="n">_s</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">{:.3f}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">u_dict</span><span class="p">[</span><span class="n">key</span><span class="p">])</span>  <span class="c1"># HARDCODED float format for loop_keys</span>
+                            <span class="n">line</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">lreplace</span><span class="p">(</span><span class="n">line</span><span class="p">,</span> <span class="n">token</span><span class="p">,</span> <span class="n">_s</span><span class="p">)</span>
+                    <span class="n">of</span><span class="o">.</span><span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
+            <span class="c1"># end loop over t.files</span>
+            <span class="n">of</span><span class="o">.</span><span class="n">write</span><span class="p">()</span></div></div>
+
+
+<div class="viewcode-block" id="main"><a class="viewcode-back" href="../../../apidoc/pymchelper.utils.mcscripter.html#pymchelper.utils.mcscripter.main">[docs]</a><span class="k">def</span> <span class="nf">main</span><span class="p">(</span><span class="n">args</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Main function.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">args</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">args</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
+
+    <span class="kn">import</span> <span class="nn">pymchelper</span>
+    <span class="n">parser</span> <span class="o">=</span> <span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentParser</span><span class="p">()</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;fconf&#39;</span><span class="p">,</span> <span class="n">metavar</span><span class="o">=</span><span class="s2">&quot;config.txt&quot;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="n">argparse</span><span class="o">.</span><span class="n">FileType</span><span class="p">(</span><span class="s1">&#39;r&#39;</span><span class="p">),</span>
+                        <span class="n">help</span><span class="o">=</span><span class="s2">&quot;path to config file.&quot;</span><span class="p">,</span>
+                        <span class="n">default</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stdin</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;-v&#39;</span><span class="p">,</span> <span class="s1">&#39;--verbosity&#39;</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s1">&#39;count&#39;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s2">&quot;increase output verbosity&quot;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;-V&#39;</span><span class="p">,</span> <span class="s1">&#39;--version&#39;</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s1">&#39;version&#39;</span><span class="p">,</span> <span class="n">version</span><span class="o">=</span><span class="n">pymchelper</span><span class="o">.</span><span class="n">__version__</span><span class="p">)</span>
+    <span class="n">args</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">parse_args</span><span class="p">(</span><span class="n">args</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">verbosity</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">basicConfig</span><span class="p">(</span><span class="n">level</span><span class="o">=</span><span class="n">logging</span><span class="o">.</span><span class="n">INFO</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">args</span><span class="o">.</span><span class="n">verbosity</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">basicConfig</span><span class="p">(</span><span class="n">level</span><span class="o">=</span><span class="n">logging</span><span class="o">.</span><span class="n">DEBUG</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">basicConfig</span><span class="p">()</span>
+
+    <span class="n">cfg</span> <span class="o">=</span> <span class="n">Config</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">fconf</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+    <span class="n">t</span> <span class="o">=</span> <span class="n">Template</span><span class="p">(</span><span class="n">cfg</span><span class="p">)</span>
+
+    <span class="n">Generator</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">cfg</span><span class="p">)</span></div>
+
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
+    <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="n">main</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">[</span><span class="mi">1</span><span class="p">:]))</span>
+</pre></div>
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">pymchelper 1.10.0+rev3 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">pymchelper.utils.mcscripter</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2016, Leszek Grzanka.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 4.3.0.
+    </div>
+  </body>
+</html>

@@ -1,0 +1,7 @@
+pymchelper.writers.shieldhit module
+===================================
+
+.. automodule:: pymchelper.writers.shieldhit
+   :members:
+   :undoc-members:
+   :show-inheritance:

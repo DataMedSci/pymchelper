@@ -1,0 +1,19 @@
+pymchelper.flair.common package
+===============================
+
+.. automodule:: pymchelper.flair.common
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Submodules
+----------
+
+.. toctree::
+   :maxdepth: 4
+
+   pymchelper.flair.common.bmath
+   pymchelper.flair.common.csg
+   pymchelper.flair.common.fortran
+   pymchelper.flair.common.log
+   pymchelper.flair.common.rexx

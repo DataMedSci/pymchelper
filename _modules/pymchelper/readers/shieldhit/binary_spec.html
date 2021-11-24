@@ -1,0 +1,413 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>pymchelper.readers.shieldhit.binary_spec &#8212; pymchelper 1.10.0+rev3 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/classic.css" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/graphviz.css" />
+    
+    <script data-url_root="../../../../" id="documentation_options" src="../../../../_static/documentation_options.js"></script>
+    <script src="../../../../_static/jquery.js"></script>
+    <script src="../../../../_static/underscore.js"></script>
+    <script src="../../../../_static/doctools.js"></script>
+    
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../../index.html">pymchelper 1.10.0+rev3 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../../index.html" accesskey="U">Module code</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">pymchelper.readers.shieldhit.binary_spec</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for pymchelper.readers.shieldhit.binary_spec</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">enum</span> <span class="k">import</span> <span class="n">IntEnum</span>
+
+
+<div class="viewcode-block" id="SHBDOTagID"><a class="viewcode-back" href="../../../../apidoc/pymchelper.readers.shieldhit.binary_spec.html#pymchelper.readers.shieldhit.binary_spec.SHBDOTagID">[docs]</a><span class="k">class</span> <span class="nc">SHBDOTagID</span><span class="p">(</span><span class="n">IntEnum</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; List of Tag ID numbers for BDO 2016 and 2019 formats.</span>
+<span class="sd">    Must be synchronized with tags in sh_bdo.h and sh_detect.h in SH12A.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># Hex values are used for better recognition in binary files, should they be inspected by humans.</span>
+    <span class="c1"># Group 0x0000 - 0x00FF : Miscellaneous info</span>
+    <span class="n">shversion</span> <span class="o">=</span> <span class="mh">0x00</span>  <span class="c1"># [char*] full version string of SHIELD-HIT12A</span>
+    <span class="n">shbuilddate</span> <span class="o">=</span> <span class="mh">0x01</span>  <span class="c1"># [char*] date of build</span>
+    <span class="n">filedate</span> <span class="o">=</span> <span class="mh">0x02</span>  <span class="c1"># [char*] bdo file creation date, RFC 2822 compliant</span>
+    <span class="n">user</span> <span class="o">=</span> <span class="mh">0x03</span>  <span class="c1"># [char *] optional login name</span>
+    <span class="n">host</span> <span class="o">=</span> <span class="mh">0x04</span>  <span class="c1"># [char *] optional host where this file was created</span>
+    <span class="nb">format</span> <span class="o">=</span> <span class="mh">0x05</span>  <span class="c1"># [int]   optional ID describing which flavour the format is, to help .bdo parsers</span>
+
+    <span class="c1"># Group 0xAA00 - 0xAAFF : Runtime variables</span>
+    <span class="n">rt_nstat</span> <span class="o">=</span> <span class="mh">0xAA00</span>  <span class="c1"># number of actually simulated particles</span>
+    <span class="n">rt_time</span> <span class="o">=</span> <span class="mh">0xAA01</span>  <span class="c1"># [unsigned long int] optional runtime in seconds</span>
+    <span class="n">rt_timesim</span> <span class="o">=</span> <span class="mh">0xAA02</span>  <span class="c1"># optional simulation time in seconds, excluding initialization.</span>
+
+    <span class="c1"># Group 0xCB00 - 0xCBFF : Beam configuration</span>
+    <span class="n">jpart0</span> <span class="o">=</span> <span class="mh">0xCB00</span>  <span class="c1"># [int] primary particle ID, in SH12A JPART terminology (32768 = INVALID)</span>
+    <span class="n">apro0</span> <span class="o">=</span> <span class="mh">0xCB01</span>  <span class="c1"># [int] number of nucleons A of the projectile - only written if nucleons &gt; 0</span>
+    <span class="n">zpro0</span> <span class="o">=</span> <span class="mh">0xCB02</span>  <span class="c1"># [int] charge Z of the projectile, may also be negative (32768 = INVALID)</span>
+    <span class="n">beamx</span> <span class="o">=</span> <span class="mh">0xCB03</span>  <span class="c1"># [float] start position of the beam - X coordinate</span>
+    <span class="n">beamy</span> <span class="o">=</span> <span class="mh">0xCB04</span>  <span class="c1"># [float] start position of the beam - Y coordinate</span>
+    <span class="n">beamz</span> <span class="o">=</span> <span class="mh">0xCB05</span>  <span class="c1"># [float] start position of the beam - Z coordinate</span>
+    <span class="n">sigmax</span> <span class="o">=</span> <span class="mh">0xCB06</span>  <span class="c1"># [float] lateral extension of the beam in X direction</span>
+    <span class="n">sigmay</span> <span class="o">=</span> <span class="mh">0xCB07</span>  <span class="c1"># [float] lateral extension of the beam in Y direction</span>
+    <span class="n">tmax0</span> <span class="o">=</span> <span class="mh">0xCB08</span>  <span class="c1"># [float] initial projectile energy (unit depends on projectile type)</span>
+    <span class="n">sigmat0</span> <span class="o">=</span> <span class="mh">0xCB09</span>  <span class="c1"># [float] energy spread of the primary particle</span>
+    <span class="n">beamtheta</span> <span class="o">=</span> <span class="mh">0xCB0A</span>  <span class="c1"># [float] polar angle</span>
+    <span class="n">beamphi</span> <span class="o">=</span> <span class="mh">0xCB0B</span>  <span class="c1"># [float] azimuth angle</span>
+    <span class="n">beamdivx</span> <span class="o">=</span> <span class="mh">0xCB0C</span>  <span class="c1"># [float] beam divergence - X coordinate</span>
+    <span class="n">beamdivy</span> <span class="o">=</span> <span class="mh">0xCB0D</span>  <span class="c1"># [float] beam divergence - Y coordinate</span>
+    <span class="n">beamdivk</span> <span class="o">=</span> <span class="mh">0xCB0E</span>  <span class="c1"># [float] beam divergence - focus</span>
+    <span class="n">tmax0mev</span> <span class="o">=</span> <span class="mh">0xCB0F</span>  <span class="c1"># [double] initial projectile energy, always in [MeV]</span>
+    <span class="n">tmax0amu</span> <span class="o">=</span> <span class="mh">0xCB10</span>  <span class="c1"># [double] initial projectile energy in [MeV/amu] - only written if mass &gt; 1e-6 u</span>
+    <span class="n">tmax0nuc</span> <span class="o">=</span> <span class="mh">0xCB11</span>  <span class="c1"># [double] initial projectile energy in [MeV/nucl] - only written if nucleons &gt; 0</span>
+
+    <span class="c1"># Group 0xCC00 - 0xCCFF : Configuration</span>
+    <span class="n">dele</span> <span class="o">=</span> <span class="mh">0xCC00</span>
+    <span class="n">demin</span> <span class="o">=</span> <span class="mh">0xCC01</span>
+    <span class="n">itypst</span> <span class="o">=</span> <span class="mh">0xCC02</span>
+    <span class="n">itypms</span> <span class="o">=</span> <span class="mh">0xCC03</span>
+    <span class="n">oln</span> <span class="o">=</span> <span class="mh">0xCC04</span>
+    <span class="n">inucre</span> <span class="o">=</span> <span class="mh">0xCC05</span>
+    <span class="n">iemtrans</span> <span class="o">=</span> <span class="mh">0xCC06</span>
+    <span class="n">iextspec</span> <span class="o">=</span> <span class="mh">0xCC07</span>
+    <span class="n">intrfast</span> <span class="o">=</span> <span class="mh">0xCC08</span>
+    <span class="n">intrslow</span> <span class="o">=</span> <span class="mh">0xCC09</span>
+    <span class="n">apzlscl</span> <span class="o">=</span> <span class="mh">0xCC0A</span>
+    <span class="n">ioffset</span> <span class="o">=</span> <span class="mh">0xCC0B</span>
+    <span class="n">irifimc</span> <span class="o">=</span> <span class="mh">0xCC0C</span>
+    <span class="n">irifitrans</span> <span class="o">=</span> <span class="mh">0xCC0D</span>
+    <span class="n">irifizone</span> <span class="o">=</span> <span class="mh">0xCC0E</span>
+    <span class="n">ext_nproj</span> <span class="o">=</span> <span class="mh">0xCC0F</span>
+    <span class="n">ext_ptvdose</span> <span class="o">=</span> <span class="mh">0xCC10</span>
+    <span class="n">ixfirs</span> <span class="o">=</span> <span class="mh">0xCC11</span>
+
+    <span class="c1"># Group 0xCE00 - 0xCEFF : CT specific tags</span>
+    <span class="n">ct_ang</span> <span class="o">=</span> <span class="mh">0xCE00</span>  <span class="c1"># holds two doubles with the couch and gantry angle</span>
+    <span class="n">ct_icnt</span> <span class="o">=</span> <span class="mh">0xCE01</span>  <span class="c1"># holds three</span>
+    <span class="n">ct_len</span> <span class="o">=</span> <span class="mh">0xCE02</span>  <span class="c1"># holds three</span>
+
+    <span class="c1"># Group 0xDD00 - 0xDD11 : old detect.f fortran Detector / page specific tags. See sh_detect.h</span>
+    <span class="n">det_geotyp</span> <span class="o">=</span> <span class="mh">0xDD00</span>  <span class="c1"># may differ from est_geotyp in case of spc</span>
+    <span class="n">det_nbin</span> <span class="o">=</span> <span class="mh">0xDD01</span>  <span class="c1"># idet(1-3) (len=3) number of bins x,y,z</span>
+    <span class="n">det_part</span> <span class="o">=</span> <span class="mh">0xDD02</span>  <span class="c1"># idet(4) particle type which was scored</span>
+    <span class="n">det_dtype</span> <span class="o">=</span> <span class="mh">0xDD03</span>  <span class="c1"># idet(5) detector type</span>
+    <span class="n">det_partz</span> <span class="o">=</span> <span class="mh">0xDD04</span>  <span class="c1"># idet(6)</span>
+    <span class="n">det_parta</span> <span class="o">=</span> <span class="mh">0xDD05</span>  <span class="c1"># idet(7)</span>
+    <span class="n">det_dmat</span> <span class="o">=</span> <span class="mh">0xDD06</span>  <span class="c1"># idet(8)</span>
+    <span class="n">det_nbine</span> <span class="o">=</span> <span class="mh">0xDD07</span>  <span class="c1"># idet(9) number of bins in diff scorer, negative means log binning</span>
+    <span class="n">det_difftype</span> <span class="o">=</span> <span class="mh">0xDD08</span>  <span class="c1"># idet(10) detector type for differential scorer (i.e. angle, energy, let)</span>
+    <span class="n">det_zonestart</span> <span class="o">=</span> <span class="mh">0xDD09</span>  <span class="c1"># idet(11)</span>
+    <span class="n">det_dsize</span> <span class="o">=</span> <span class="mh">0xDD0A</span>  <span class="c1"># idet(12)</span>
+    <span class="n">det_dsizexyz</span> <span class="o">=</span> <span class="mh">0xDD0B</span>  <span class="c1"># idet(13)</span>
+
+    <span class="n">det_xyz_start</span> <span class="o">=</span> <span class="mh">0xDD0C</span>  <span class="c1"># det(1-3)</span>
+    <span class="n">det_xyz_stop</span> <span class="o">=</span> <span class="mh">0xDD0D</span>  <span class="c1"># det(4-6)</span>
+    <span class="n">det_dif_start</span> <span class="o">=</span> <span class="mh">0xDD0E</span>  <span class="c1"># det(7)</span>
+    <span class="n">det_dif_stop</span> <span class="o">=</span> <span class="mh">0xDD0F</span>  <span class="c1"># det(8)</span>
+    <span class="n">det_voxvol</span> <span class="o">=</span> <span class="mh">0xDD10</span>  <span class="c1"># det(9)</span>
+    <span class="n">det_thresh</span> <span class="o">=</span> <span class="mh">0xDD11</span>  <span class="c1"># det(10) lower energy scoring threshold</span>
+
+    <span class="c1"># Page: meta-data */</span>
+    <span class="c1"># Group 0xDD30 - 0xDDFF : page specific tags. */</span>
+    <span class="n">detector_type</span> <span class="o">=</span> <span class="mh">0xDD30</span>  <span class="c1"># /* detector_type, this starts new page */</span>
+    <span class="n">page_number</span> <span class="o">=</span> <span class="mh">0xDD31</span>  <span class="c1"># /* Number of this detector */</span>
+    <span class="n">page_normalized</span> <span class="o">=</span> <span class="mh">0xDD32</span>  <span class="c1"># Flags for page-&gt;postproc on how to postprocess the data in SHBDO_PAG_DATA</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Given:</span>
+<span class="sd">        - the data in page-&gt;data as x_j</span>
+<span class="sd">        - for j instances of this simulation</span>
+<span class="sd">        - which was done with I_j number of paritcles.</span>
+
+<span class="sd">        The resulting data will be termed X and has the units given by SHBDO_PAG_DATA_UNIT</span>
+
+<span class="sd">        0: X = x_1                                for GEOMAP type scorers</span>
+<span class="sd">        1: X = sum_j x_j                          COUNT, ...</span>
+<span class="sd">        2: X = (sum_j x_j) / (sum_j I_j)          NORMCOUNT, ...</span>
+<span class="sd">        3: X = (sum_j x_j * I_j) / (sum_j I_j)    LET, ...</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">page_scale_factor</span> <span class="o">=</span> <span class="mh">0xDD33</span>  <span class="c1"># /* if set and != 1.0 the data set was multiplied with this factor */</span>
+    <span class="n">page_offset</span> <span class="o">=</span> <span class="mh">0xDD34</span>  <span class="c1"># /* if set and != 0.0 the data set was offset with this value */</span>
+    <span class="n">page_medium_transport</span> <span class="o">=</span> <span class="mh">0xDD35</span>  <span class="c1"># /* [future] ASCII-string for detector medium set in geo.dat */</span>
+    <span class="n">page_medium_scoring</span> <span class="o">=</span> <span class="mh">0xDD36</span>  <span class="c1"># /* [future] ASCII-string for detector medium set in detect.dat scoring */</span>
+    <span class="n">page_unit_ids</span> <span class="o">=</span> <span class="mh">0xDD37</span>  <span class="c1"># /* Unit IDs according to sh_units.h. Set for detector and the two diff. bins */</span>
+
+    <span class="c1"># /* page data */</span>
+    <span class="n">data_block</span> <span class="o">=</span> <span class="mh">0xDDBB</span>  <span class="c1"># /* data block, identical to SHBDO_DET_DATA */</span>
+    <span class="n">detector_unit</span> <span class="o">=</span> <span class="mh">0xDDBC</span>  <span class="c1"># /* ASCII string unit, including any differentials */</span>
+
+    <span class="c1"># /* Page differential data */</span>
+    <span class="n">page_diff_flag</span> <span class="o">=</span> <span class="mh">0xDDD0</span>  <span class="c1"># /* flags if 1 or 2 differential binning was set. 1 for set, -1 for set as log10. */</span>
+    <span class="n">page_diff_type</span> <span class="o">=</span> <span class="mh">0xDDD1</span>  <span class="c1"># /* array holding 1 or 2 number of bins, for type of differential */</span>
+    <span class="n">page_diff_start</span> <span class="o">=</span> <span class="mh">0xDDD2</span>  <span class="c1"># /* array holding 1 or 2 lower bounds, for 1-D or 2-D respectively */</span>
+    <span class="n">page_diff_stop</span> <span class="o">=</span> <span class="mh">0xDDD3</span>  <span class="c1"># /* array holding 1 or 2 upper bounds, for 1-D or 2-D respectively */</span>
+    <span class="n">page_diff_size</span> <span class="o">=</span> <span class="mh">0xDDD4</span>  <span class="c1"># /* array holding 1 or 2 number of bins, for 1-D or 2-D respectively */</span>
+    <span class="n">page_diff_units</span> <span class="o">=</span> <span class="mh">0xDDD5</span>  <span class="c1"># /* ASCII string of ;-separated units along each dimension. %s;%s;%s where latter</span>
+    <span class="c1">#          two %s are the differential units, and the first is the data in</span>
+    <span class="c1">#          non-differential form. */</span>
+
+    <span class="c1"># /* Filter data attached to page */</span>
+    <span class="n">page_filter_name</span> <span class="o">=</span> <span class="mh">0xDDF0</span>  <span class="c1"># /* name of filter containing one or more rules */</span>
+    <span class="n">page_filter_rules_no</span> <span class="o">=</span> <span class="mh">0xDDF1</span>  <span class="c1"># /* number of filter rules applied */</span>
+    <span class="n">page_filter_e_min</span> <span class="o">=</span> <span class="mh">0xDDF2</span>  <span class="c1"># /* lower energy threshold, emin */</span>
+    <span class="n">page_filter_emax</span> <span class="o">=</span> <span class="mh">0xDDF3</span>  <span class="c1"># /* upper energy threshold, emin */</span>
+
+    <span class="c1"># Group 0xEE00 - 0xEEFF : Estimator specific tags</span>
+    <span class="c1"># Geometry, as in gE0metry</span>
+    <span class="n">geometry_type</span> <span class="o">=</span> <span class="mh">0xE000</span>  <span class="c1"># geometry type ID, see SH_SGEO_* in sh_scoredef.h</span>
+    <span class="n">geometry_name</span> <span class="o">=</span> <span class="mh">0xE001</span>  <span class="c1"># /* User-given name of this geometry */</span>
+    <span class="n">geo_p_start</span> <span class="o">=</span> <span class="mh">0xE002</span>  <span class="c1"># /* start values, e.g xmin, ymin, zmin */</span>
+    <span class="n">geo_q_stop</span> <span class="o">=</span> <span class="mh">0xE003</span>  <span class="c1"># /* stop values, e.g xmax, ymax, zmax */</span>
+    <span class="n">geo_n_bins</span> <span class="o">=</span> <span class="mh">0xE004</span>  <span class="c1"># /* number of bins */</span>
+    <span class="n">geo_rotation</span> <span class="o">=</span> <span class="mh">0xE005</span>  <span class="c1"># [future] rotation of geometry</span>
+    <span class="n">geo_volume</span> <span class="o">=</span> <span class="mh">0xE006</span>  <span class="c1"># volume size in cm3 ... WARNING: may be a list in some future</span>
+    <span class="n">geo_zones</span> <span class="o">=</span> <span class="mh">0xE007</span>  <span class="c1"># single GEMCA zone, or list of zones</span>
+    <span class="n">geo_non_equidist_grid</span> <span class="o">=</span> <span class="mh">0xE008</span>  <span class="c1"># Array of non-equidistant z-grid. Tag only used if set.</span>
+    <span class="n">geo_units</span> <span class="o">=</span> <span class="mh">0xE009</span>  <span class="c1"># [Future]: ASCII string of ;-separated units along each dimension.</span>
+    <span class="n">geo_unit_ids</span> <span class="o">=</span> <span class="mh">0xE00A</span>  <span class="c1"># /* Unit IDs according to sh_units.h, one unit along each axis. */</span>
+
+    <span class="c1"># Group 0xEF00 - 0xEFFF : Estimator</span>
+    <span class="n">filename_or_geotype</span> <span class="o">=</span> <span class="mh">0xEE00</span>  <span class="c1"># /* filename (bdo2019 format) or geometry name (bdo2016 format)*/</span>
+    <span class="n">estimator_number</span> <span class="o">=</span> <span class="mh">0xEE01</span>  <span class="c1"># /* Unique number for this estimator, if several files were saved, starting at 0 */</span>
+    <span class="n">number_of_pages</span> <span class="o">=</span> <span class="mh">0xEE02</span>  <span class="c1"># /* number of detectors / pages for this estimator */</span>
+    <span class="n">estimator_rescale_per_particle</span> <span class="o">=</span> <span class="mh">0xEE03</span>  <span class="c1"># estimator &quot;per particle&quot; rescaling, absent or set to 1 if no rescaling</span>
+    <span class="c1"># note, that written data will *not* be multiplied with this value, it is up</span>
+    <span class="c1"># to the BDO reader to multiply with this, if SHBDO_PAGE_NORMALIZE was set</span>
+
+    <span class="c1"># /* Group 0xFFCC - 0xFFFF : Diagnostics, may be ignored by readers. */</span>
+    <span class="n">comment</span> <span class="o">=</span> <span class="mh">0xFFCC</span>  <span class="c1"># /* 0xFFCC-omment */</span>
+    <span class="n">debug</span> <span class="o">=</span> <span class="mh">0xFFCD</span>  <span class="c1"># /* 0xFFCD-ebug */</span>
+    <span class="n">error</span> <span class="o">=</span> <span class="mh">0xFFCE</span>  <span class="c1"># /* 0xFFCE-rror */</span></div>
+
+
+<span class="n">estimator_tags_to_save</span> <span class="o">=</span> <span class="p">(</span>
+
+<span class="p">)</span>
+
+<span class="n">page_tags_to_save</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="n">SHBDOTagID</span><span class="o">.</span><span class="n">detector_type</span><span class="p">,</span>
+    <span class="n">SHBDOTagID</span><span class="o">.</span><span class="n">page_number</span><span class="p">,</span>
+    <span class="n">SHBDOTagID</span><span class="o">.</span><span class="n">page_normalized</span><span class="p">,</span>
+    <span class="n">SHBDOTagID</span><span class="o">.</span><span class="n">page_scale_factor</span><span class="p">,</span>
+    <span class="n">SHBDOTagID</span><span class="o">.</span><span class="n">page_offset</span><span class="p">,</span>
+    <span class="n">SHBDOTagID</span><span class="o">.</span><span class="n">page_unit_ids</span><span class="p">,</span>
+
+    <span class="n">SHBDOTagID</span><span class="o">.</span><span class="n">detector_unit</span><span class="p">,</span>
+
+    <span class="n">SHBDOTagID</span><span class="o">.</span><span class="n">page_diff_flag</span><span class="p">,</span>
+    <span class="n">SHBDOTagID</span><span class="o">.</span><span class="n">page_diff_type</span><span class="p">,</span>
+    <span class="n">SHBDOTagID</span><span class="o">.</span><span class="n">page_diff_start</span><span class="p">,</span>
+    <span class="n">SHBDOTagID</span><span class="o">.</span><span class="n">page_diff_stop</span><span class="p">,</span>
+    <span class="n">SHBDOTagID</span><span class="o">.</span><span class="n">page_diff_size</span><span class="p">,</span>
+    <span class="n">SHBDOTagID</span><span class="o">.</span><span class="n">page_diff_units</span><span class="p">,</span>
+
+    <span class="n">SHBDOTagID</span><span class="o">.</span><span class="n">page_filter_name</span><span class="p">,</span>
+    <span class="n">SHBDOTagID</span><span class="o">.</span><span class="n">page_filter_rules_no</span><span class="p">,</span>
+    <span class="n">SHBDOTagID</span><span class="o">.</span><span class="n">page_filter_e_min</span><span class="p">,</span>
+    <span class="n">SHBDOTagID</span><span class="o">.</span><span class="n">page_filter_emax</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="c1"># replace this dictionary with tuple estimator_tags_to_save</span>
+<span class="n">detector_name_from_bdotag</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="n">SHBDOTagID</span><span class="o">.</span><span class="n">jpart0</span><span class="p">:</span> <span class="s1">&#39;projectile_code&#39;</span><span class="p">,</span>
+    <span class="n">SHBDOTagID</span><span class="o">.</span><span class="n">apro0</span><span class="p">:</span> <span class="s1">&#39;projectile_a&#39;</span><span class="p">,</span>
+    <span class="n">SHBDOTagID</span><span class="o">.</span><span class="n">zpro0</span><span class="p">:</span> <span class="s1">&#39;projectile_z&#39;</span><span class="p">,</span>
+    <span class="n">SHBDOTagID</span><span class="o">.</span><span class="n">beamx</span><span class="p">:</span> <span class="s1">&#39;projectile_position_x&#39;</span><span class="p">,</span>
+    <span class="n">SHBDOTagID</span><span class="o">.</span><span class="n">beamy</span><span class="p">:</span> <span class="s1">&#39;projectile_position_y&#39;</span><span class="p">,</span>
+    <span class="n">SHBDOTagID</span><span class="o">.</span><span class="n">beamz</span><span class="p">:</span> <span class="s1">&#39;projectile_position_z&#39;</span><span class="p">,</span>
+    <span class="n">SHBDOTagID</span><span class="o">.</span><span class="n">sigmax</span><span class="p">:</span> <span class="s1">&#39;projectile_sigma_x&#39;</span><span class="p">,</span>
+    <span class="n">SHBDOTagID</span><span class="o">.</span><span class="n">sigmay</span><span class="p">:</span> <span class="s1">&#39;projectile_sigma_y&#39;</span><span class="p">,</span>
+    <span class="n">SHBDOTagID</span><span class="o">.</span><span class="n">sigmat0</span><span class="p">:</span> <span class="s1">&#39;projectile_sigma_energy&#39;</span><span class="p">,</span>
+    <span class="n">SHBDOTagID</span><span class="o">.</span><span class="n">beamtheta</span><span class="p">:</span> <span class="s1">&#39;projectile_polar_angle&#39;</span><span class="p">,</span>
+    <span class="n">SHBDOTagID</span><span class="o">.</span><span class="n">beamphi</span><span class="p">:</span> <span class="s1">&#39;projectile_azimuth_angle&#39;</span><span class="p">,</span>
+    <span class="n">SHBDOTagID</span><span class="o">.</span><span class="n">beamdivx</span><span class="p">:</span> <span class="s1">&#39;projectile_divergence_x&#39;</span><span class="p">,</span>
+    <span class="n">SHBDOTagID</span><span class="o">.</span><span class="n">beamdivy</span><span class="p">:</span> <span class="s1">&#39;projectile_divergence_y&#39;</span><span class="p">,</span>
+    <span class="n">SHBDOTagID</span><span class="o">.</span><span class="n">beamdivk</span><span class="p">:</span> <span class="s1">&#39;projectile_divergence_k&#39;</span><span class="p">,</span>
+    <span class="n">SHBDOTagID</span><span class="o">.</span><span class="n">shversion</span><span class="p">:</span> <span class="s1">&#39;mc_code_version&#39;</span><span class="p">,</span>
+    <span class="n">SHBDOTagID</span><span class="o">.</span><span class="n">shbuilddate</span><span class="p">:</span> <span class="s1">&#39;mc_code_build_date&#39;</span><span class="p">,</span>
+    <span class="n">SHBDOTagID</span><span class="o">.</span><span class="n">filedate</span><span class="p">:</span> <span class="s1">&#39;filedate&#39;</span><span class="p">,</span>
+    <span class="n">SHBDOTagID</span><span class="o">.</span><span class="n">user</span><span class="p">:</span> <span class="s1">&#39;user&#39;</span><span class="p">,</span>
+    <span class="n">SHBDOTagID</span><span class="o">.</span><span class="n">host</span><span class="p">:</span> <span class="s1">&#39;host&#39;</span><span class="p">,</span>
+    <span class="n">SHBDOTagID</span><span class="o">.</span><span class="n">rt_nstat</span><span class="p">:</span> <span class="s1">&#39;number_of_primaries&#39;</span><span class="p">,</span>
+    <span class="n">SHBDOTagID</span><span class="o">.</span><span class="n">number_of_pages</span><span class="p">:</span> <span class="s1">&#39;page_count&#39;</span><span class="p">,</span>
+    <span class="n">SHBDOTagID</span><span class="o">.</span><span class="n">geo_unit_ids</span><span class="p">:</span> <span class="s1">&#39;geo_unit_ids&#39;</span><span class="p">,</span>
+    <span class="n">SHBDOTagID</span><span class="o">.</span><span class="n">geo_units</span><span class="p">:</span> <span class="s1">&#39;geo_units&#39;</span><span class="p">,</span>
+    <span class="n">SHBDOTagID</span><span class="o">.</span><span class="n">geometry_name</span><span class="p">:</span> <span class="s1">&#39;geo_name&#39;</span><span class="p">,</span>
+    <span class="n">SHBDOTagID</span><span class="o">.</span><span class="n">tmax0mev</span><span class="p">:</span> <span class="s1">&#39;Tmax_MeV&#39;</span><span class="p">,</span>
+    <span class="n">SHBDOTagID</span><span class="o">.</span><span class="n">tmax0amu</span><span class="p">:</span> <span class="s1">&#39;Tmax_MeV/amu&#39;</span><span class="p">,</span>
+    <span class="n">SHBDOTagID</span><span class="o">.</span><span class="n">tmax0nuc</span><span class="p">:</span> <span class="s1">&#39;Tmax_MeV/nucl&#39;</span>
+<span class="p">}</span>
+
+
+<div class="viewcode-block" id="SHBDOUnitID"><a class="viewcode-back" href="../../../../apidoc/pymchelper.readers.shieldhit.binary_spec.html#pymchelper.readers.shieldhit.binary_spec.SHBDOUnitID">[docs]</a><span class="k">class</span> <span class="nc">SHBDOUnitID</span><span class="p">(</span><span class="n">IntEnum</span><span class="p">):</span>
+    <span class="n">SH_SCORING_UNIT_UNKNOWN</span> <span class="o">=</span> <span class="o">-</span><span class="mi">2</span>  <span class="c1"># /* e.g. for user defined scoring */</span>
+    <span class="n">SH_SCORING_UNIT_INVALID</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>  <span class="c1"># /* N/A (not applicable), or undefined */</span>
+
+    <span class="n">SH_SCORING_UNIT_NONE</span> <span class="o">=</span> <span class="mi">0</span>  <span class="c1"># /* dimensionless */</span>
+    <span class="n">SH_SCORING_UNIT_AU</span> <span class="o">=</span> <span class="mi">1</span>  <span class="c1"># /* arbitrary units */</span>
+    <span class="n">SH_SCORING_UNIT_PCT</span> <span class="o">=</span> <span class="mi">2</span>  <span class="c1"># /* percent (%) */</span>
+    <span class="n">SH_SCORING_UNIT_PMIL</span> <span class="o">=</span> <span class="mi">3</span>  <span class="c1"># /* promill (%%) */</span>
+    <span class="n">SH_SCORING_UNIT_RELATIVE</span> <span class="o">=</span> <span class="mi">4</span>  <span class="c1"># /* dimensionless relative fraction */</span>
+
+    <span class="n">SH_SCORING_UNIT_CM</span> <span class="o">=</span> <span class="mi">10</span>  <span class="c1"># /* cm */</span>
+    <span class="n">SH_SCORING_UNIT_CM2</span> <span class="o">=</span> <span class="mi">11</span>  <span class="c1"># /* cm^2 */</span>
+    <span class="n">SH_SCORING_UNIT_CM3</span> <span class="o">=</span> <span class="mi">12</span>  <span class="c1"># /* cm^3 */</span>
+    <span class="n">SH_SCORING_UNIT_PCM</span> <span class="o">=</span> <span class="mi">13</span>  <span class="c1"># /* cm^-1 */</span>
+    <span class="n">SH_SCORING_UNIT_PCM2</span> <span class="o">=</span> <span class="mi">14</span>  <span class="c1"># /* cm^-2 */</span>
+    <span class="n">SH_SCORING_UNIT_PCM3</span> <span class="o">=</span> <span class="mi">15</span>  <span class="c1"># /* cm^-3 */</span>
+
+    <span class="n">SH_SCORING_UNIT_M</span> <span class="o">=</span> <span class="mi">16</span>  <span class="c1"># /* m */</span>
+    <span class="n">SH_SCORING_UNIT_M2</span> <span class="o">=</span> <span class="mi">17</span>  <span class="c1"># /* m^2 */</span>
+    <span class="n">SH_SCORING_UNIT_M3</span> <span class="o">=</span> <span class="mi">18</span>  <span class="c1"># /* m^3 */</span>
+    <span class="n">SH_SCORING_UNIT_PM</span> <span class="o">=</span> <span class="mi">19</span>  <span class="c1"># /* m^-1 */</span>
+    <span class="n">SH_SCORING_UNIT_PM2</span> <span class="o">=</span> <span class="mi">20</span>  <span class="c1"># /* m^-2 */</span>
+    <span class="n">SH_SCORING_UNIT_PM3</span> <span class="o">=</span> <span class="mi">21</span>  <span class="c1"># /* m^-3 */</span>
+
+    <span class="n">SH_SCORING_UNIT_GPCM3</span> <span class="o">=</span> <span class="mi">22</span>  <span class="c1"># /* density g / cm^3 */</span>
+    <span class="n">SH_SCORING_UNIT_KGPM3</span> <span class="o">=</span> <span class="mi">23</span>  <span class="c1"># /* density kg / m^3 */</span>
+
+    <span class="n">SH_SCORING_UNIT_KEVPUM</span> <span class="o">=</span> <span class="mi">30</span>  <span class="c1"># /* keV / um */</span>
+    <span class="n">SH_SCORING_UNIT_MEVPCM</span> <span class="o">=</span> <span class="mi">31</span>  <span class="c1"># /* MeV / cm */</span>
+    <span class="n">SH_SCORING_UNIT_MEVCM2PG</span> <span class="o">=</span> <span class="mi">32</span>  <span class="c1"># /* MeV * cm^2 / g */</span>
+
+    <span class="n">SH_SCORING_UNIT_MEVPG</span> <span class="o">=</span> <span class="mi">40</span>  <span class="c1"># /* MeV / g) */</span>
+    <span class="n">SH_SCORING_UNIT_GY</span> <span class="o">=</span> <span class="mi">41</span>  <span class="c1"># /* Gy (J/kg) */</span>
+    <span class="n">SH_SCORING_UNIT_GYRBE</span> <span class="o">=</span> <span class="mi">42</span>  <span class="c1"># /* Gy * RBE */</span>
+    <span class="n">SH_SCORING_UNIT_GYRE</span> <span class="o">=</span> <span class="mi">43</span>  <span class="c1"># /* Gy * RE (quenching) */</span>
+    <span class="n">SH_SCORING_UNIT_SV</span> <span class="o">=</span> <span class="mi">44</span>  <span class="c1"># /* Sv (J/kg) */</span>
+    <span class="n">SH_SCORING_UNIT_DOSERAD</span> <span class="o">=</span> <span class="mi">45</span>  <span class="c1"># /* Rad ( = 1 cGy)  */</span>
+    <span class="n">SH_SCORING_UNIT_DOSEREM</span> <span class="o">=</span> <span class="mi">46</span>  <span class="c1"># /* Rem ( = 1 cSv)  */</span>
+
+    <span class="n">SH_SCORING_UNIT_DEGREES</span> <span class="o">=</span> <span class="mi">50</span>  <span class="c1"># /* degrees */</span>
+    <span class="n">SH_SCORING_UNIT_RADIANS</span> <span class="o">=</span> <span class="mi">51</span>  <span class="c1"># /* radians */</span>
+    <span class="n">SH_SCORING_UNIT_SR</span> <span class="o">=</span> <span class="mi">52</span>  <span class="c1"># /* steradian sr = rad^2*/</span>
+
+    <span class="n">SH_SCORING_UNIT_COUNT</span> <span class="o">=</span> <span class="mi">60</span>  <span class="c1"># /* number # */</span>
+
+    <span class="n">SH_SCORING_UNIT_MEV</span> <span class="o">=</span> <span class="mi">70</span>  <span class="c1"># /* MeV */</span>
+    <span class="n">SH_SCORING_UNIT_MEVPNUC</span> <span class="o">=</span> <span class="mi">71</span>  <span class="c1"># /* MeV / nucleon */</span>
+    <span class="n">SH_SCORING_UNIT_MEVPAMU</span> <span class="o">=</span> <span class="mi">72</span>  <span class="c1"># /* MeV / amu */</span>
+
+    <span class="n">SH_SCORING_UNIT_NUCN</span> <span class="o">=</span> <span class="mi">80</span>  <span class="c1"># /* number of nucleons */</span>
+    <span class="n">SH_SCORING_UNIT_MEVPC2</span> <span class="o">=</span> <span class="mi">81</span>  <span class="c1"># /* particle mass MeV / c^2 */</span>
+    <span class="n">SH_SCORING_UNIT_U</span> <span class="o">=</span> <span class="mi">82</span>  <span class="c1"># /* particle mass in terms of u */</span>
+
+    <span class="n">SH_SCORING_UNIT_MATID</span> <span class="o">=</span> <span class="mi">90</span>  <span class="c1"># /* material ID */</span>
+    <span class="n">SH_SCORING_UNIT_NZONE</span> <span class="o">=</span> <span class="mi">91</span>  <span class="c1"># /* zone number */</span></div>
+
+
+<span class="n">unit_name_from_unit_id</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="n">SHBDOUnitID</span><span class="o">.</span><span class="n">SH_SCORING_UNIT_NONE</span><span class="p">:</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
+    <span class="n">SHBDOUnitID</span><span class="o">.</span><span class="n">SH_SCORING_UNIT_AU</span><span class="p">:</span> <span class="s2">&quot;a.u.&quot;</span><span class="p">,</span>
+    <span class="n">SHBDOUnitID</span><span class="o">.</span><span class="n">SH_SCORING_UNIT_PCT</span><span class="p">:</span> <span class="s2">&quot;%&quot;</span><span class="p">,</span>
+    <span class="n">SHBDOUnitID</span><span class="o">.</span><span class="n">SH_SCORING_UNIT_PMIL</span><span class="p">:</span> <span class="s2">&quot;</span><span class="si">%%</span><span class="s2">&quot;</span><span class="p">,</span>
+    <span class="n">SHBDOUnitID</span><span class="o">.</span><span class="n">SH_SCORING_UNIT_RELATIVE</span><span class="p">:</span> <span class="s2">&quot;rel.units&quot;</span><span class="p">,</span>
+
+    <span class="n">SHBDOUnitID</span><span class="o">.</span><span class="n">SH_SCORING_UNIT_CM</span><span class="p">:</span> <span class="s2">&quot;cm&quot;</span><span class="p">,</span>
+    <span class="n">SHBDOUnitID</span><span class="o">.</span><span class="n">SH_SCORING_UNIT_CM2</span><span class="p">:</span> <span class="s2">&quot;cm^2&quot;</span><span class="p">,</span>
+    <span class="n">SHBDOUnitID</span><span class="o">.</span><span class="n">SH_SCORING_UNIT_CM3</span><span class="p">:</span> <span class="s2">&quot;cm^3&quot;</span><span class="p">,</span>
+    <span class="n">SHBDOUnitID</span><span class="o">.</span><span class="n">SH_SCORING_UNIT_PCM</span><span class="p">:</span> <span class="s2">&quot;/cm&quot;</span><span class="p">,</span>
+    <span class="n">SHBDOUnitID</span><span class="o">.</span><span class="n">SH_SCORING_UNIT_PCM2</span><span class="p">:</span> <span class="s2">&quot;/cm^2&quot;</span><span class="p">,</span>
+    <span class="n">SHBDOUnitID</span><span class="o">.</span><span class="n">SH_SCORING_UNIT_PCM3</span><span class="p">:</span> <span class="s2">&quot;/cm^3&quot;</span><span class="p">,</span>
+
+    <span class="n">SHBDOUnitID</span><span class="o">.</span><span class="n">SH_SCORING_UNIT_M</span><span class="p">:</span> <span class="s2">&quot;m&quot;</span><span class="p">,</span>
+    <span class="n">SHBDOUnitID</span><span class="o">.</span><span class="n">SH_SCORING_UNIT_M2</span><span class="p">:</span> <span class="s2">&quot;m^2&quot;</span><span class="p">,</span>
+    <span class="n">SHBDOUnitID</span><span class="o">.</span><span class="n">SH_SCORING_UNIT_M3</span><span class="p">:</span> <span class="s2">&quot;m^3&quot;</span><span class="p">,</span>
+    <span class="n">SHBDOUnitID</span><span class="o">.</span><span class="n">SH_SCORING_UNIT_PM</span><span class="p">:</span> <span class="s2">&quot;/m&quot;</span><span class="p">,</span>
+    <span class="n">SHBDOUnitID</span><span class="o">.</span><span class="n">SH_SCORING_UNIT_PM2</span><span class="p">:</span> <span class="s2">&quot;/m^2&quot;</span><span class="p">,</span>
+    <span class="n">SHBDOUnitID</span><span class="o">.</span><span class="n">SH_SCORING_UNIT_PM3</span><span class="p">:</span> <span class="s2">&quot;/m^3&quot;</span><span class="p">,</span>
+
+    <span class="n">SHBDOUnitID</span><span class="o">.</span><span class="n">SH_SCORING_UNIT_GPCM3</span><span class="p">:</span> <span class="s2">&quot;g/cm^3&quot;</span><span class="p">,</span>
+    <span class="n">SHBDOUnitID</span><span class="o">.</span><span class="n">SH_SCORING_UNIT_KGPM3</span><span class="p">:</span> <span class="s2">&quot;kg/m^3&quot;</span><span class="p">,</span>
+
+    <span class="n">SHBDOUnitID</span><span class="o">.</span><span class="n">SH_SCORING_UNIT_KEVPUM</span><span class="p">:</span> <span class="s2">&quot;keV/um&quot;</span><span class="p">,</span>
+    <span class="n">SHBDOUnitID</span><span class="o">.</span><span class="n">SH_SCORING_UNIT_MEVPCM</span><span class="p">:</span> <span class="s2">&quot;MeV/cm&quot;</span><span class="p">,</span>
+    <span class="n">SHBDOUnitID</span><span class="o">.</span><span class="n">SH_SCORING_UNIT_MEVCM2PG</span><span class="p">:</span> <span class="s2">&quot;MeV cm^2/g&quot;</span><span class="p">,</span>
+
+    <span class="n">SHBDOUnitID</span><span class="o">.</span><span class="n">SH_SCORING_UNIT_MEVPG</span><span class="p">:</span> <span class="s2">&quot;MeV/g&quot;</span><span class="p">,</span>
+    <span class="n">SHBDOUnitID</span><span class="o">.</span><span class="n">SH_SCORING_UNIT_GY</span><span class="p">:</span> <span class="s2">&quot;Gy&quot;</span><span class="p">,</span>
+    <span class="n">SHBDOUnitID</span><span class="o">.</span><span class="n">SH_SCORING_UNIT_GYRBE</span><span class="p">:</span> <span class="s2">&quot;Gy(RBE)&quot;</span><span class="p">,</span>  <span class="c1"># /* Probably there are new ICRU rules here */</span>
+    <span class="n">SHBDOUnitID</span><span class="o">.</span><span class="n">SH_SCORING_UNIT_GYRE</span><span class="p">:</span> <span class="s2">&quot;Gy(RE)&quot;</span><span class="p">,</span>
+    <span class="n">SHBDOUnitID</span><span class="o">.</span><span class="n">SH_SCORING_UNIT_SV</span><span class="p">:</span> <span class="s2">&quot;Sv&quot;</span><span class="p">,</span>
+    <span class="n">SHBDOUnitID</span><span class="o">.</span><span class="n">SH_SCORING_UNIT_DOSERAD</span><span class="p">:</span> <span class="s2">&quot;Rad&quot;</span><span class="p">,</span>
+    <span class="n">SHBDOUnitID</span><span class="o">.</span><span class="n">SH_SCORING_UNIT_DOSEREM</span><span class="p">:</span> <span class="s2">&quot;Rem&quot;</span><span class="p">,</span>
+
+    <span class="n">SHBDOUnitID</span><span class="o">.</span><span class="n">SH_SCORING_UNIT_DEGREES</span><span class="p">:</span> <span class="s2">&quot;deg&quot;</span><span class="p">,</span>
+    <span class="n">SHBDOUnitID</span><span class="o">.</span><span class="n">SH_SCORING_UNIT_RADIANS</span><span class="p">:</span> <span class="s2">&quot;rad&quot;</span><span class="p">,</span>
+    <span class="n">SHBDOUnitID</span><span class="o">.</span><span class="n">SH_SCORING_UNIT_SR</span><span class="p">:</span> <span class="s2">&quot;sr&quot;</span><span class="p">,</span>
+
+    <span class="n">SHBDOUnitID</span><span class="o">.</span><span class="n">SH_SCORING_UNIT_COUNT</span><span class="p">:</span> <span class="s2">&quot;#&quot;</span><span class="p">,</span>
+
+    <span class="n">SHBDOUnitID</span><span class="o">.</span><span class="n">SH_SCORING_UNIT_MEV</span><span class="p">:</span> <span class="s2">&quot;MeV&quot;</span><span class="p">,</span>
+    <span class="n">SHBDOUnitID</span><span class="o">.</span><span class="n">SH_SCORING_UNIT_MEVPNUC</span><span class="p">:</span> <span class="s2">&quot;MeV/nucleon&quot;</span><span class="p">,</span>
+    <span class="n">SHBDOUnitID</span><span class="o">.</span><span class="n">SH_SCORING_UNIT_MEVPAMU</span><span class="p">:</span> <span class="s2">&quot;MeV/amu&quot;</span><span class="p">,</span>
+
+    <span class="n">SHBDOUnitID</span><span class="o">.</span><span class="n">SH_SCORING_UNIT_NUCN</span><span class="p">:</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
+    <span class="n">SHBDOUnitID</span><span class="o">.</span><span class="n">SH_SCORING_UNIT_MEVPC2</span><span class="p">:</span> <span class="s2">&quot;MeV/c^2&quot;</span><span class="p">,</span>
+    <span class="n">SHBDOUnitID</span><span class="o">.</span><span class="n">SH_SCORING_UNIT_U</span><span class="p">:</span> <span class="s2">&quot;u&quot;</span><span class="p">,</span>
+
+    <span class="n">SHBDOUnitID</span><span class="o">.</span><span class="n">SH_SCORING_UNIT_MATID</span><span class="p">:</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
+    <span class="n">SHBDOUnitID</span><span class="o">.</span><span class="n">SH_SCORING_UNIT_NZONE</span><span class="p">:</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
+<span class="p">}</span>
+</pre></div>
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../../index.html">pymchelper 1.10.0+rev3 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../../index.html" >Module code</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">pymchelper.readers.shieldhit.binary_spec</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2016, Leszek Grzanka.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 4.3.0.
+    </div>
+  </body>
+</html>

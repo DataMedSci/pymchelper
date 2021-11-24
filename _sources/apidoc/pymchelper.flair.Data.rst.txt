@@ -1,0 +1,7 @@
+pymchelper.flair.Data module
+============================
+
+.. automodule:: pymchelper.flair.Data
+   :members:
+   :undoc-members:
+   :show-inheritance:

@@ -1,0 +1,301 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>User’s Guide &#8212; pymchelper 1.10.0+rev3 documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="_static/classic.css" />
+    <link rel="stylesheet" type="text/css" href="_static/graphviz.css" />
+    
+    <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Plain text" href="txt_converter.html" />
+    <link rel="prev" title="Getting Started" href="getting_started.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="txt_converter.html" title="Plain text"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="getting_started.html" title="Getting Started"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">pymchelper 1.10.0+rev3 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">User’s Guide</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <section id="user-s-guide">
+<span id="user-guide"></span><h1>User’s Guide<a class="headerlink" href="#user-s-guide" title="Permalink to this headline">¶</a></h1>
+<section id="available-converters">
+<h2>Available converters<a class="headerlink" href="#available-converters" title="Permalink to this headline">¶</a></h2>
+<p>Detailed documentation about available converters:</p>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="txt_converter.html">Plain text</a></li>
+<li class="toctree-l1"><a class="reference internal" href="excel_converter.html">MS Excel file</a></li>
+<li class="toctree-l1"><a class="reference internal" href="image_converter.html">Plots and images</a></li>
+<li class="toctree-l1"><a class="reference internal" href="gnuplot_converter.html">Gnuplot</a></li>
+<li class="toctree-l1"><a class="reference internal" href="sparse_converter.html">Sparse matrix data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="inspect_converter.html">Inspect data</a></li>
+</ul>
+</div>
+</section>
+<section id="common-options">
+<h2>Common options<a class="headerlink" href="#common-options" title="Permalink to this headline">¶</a></h2>
+<p><strong>convertmc</strong> command line program needs several options to work.
+The first one, obligatory is converter name. User might choose among: <code class="docutils literal notranslate"><span class="pre">txt</span></code>, <code class="docutils literal notranslate"><span class="pre">excel</span></code>, <code class="docutils literal notranslate"><span class="pre">image</span></code>, <code class="docutils literal notranslate"><span class="pre">gnuplot</span></code>,
+<code class="docutils literal notranslate"><span class="pre">plotdata</span></code> and <code class="docutils literal notranslate"><span class="pre">sparse</span></code>.</p>
+<p>All converters accepts following options:</p>
+<section id="input-files">
+<h3>Input files<a class="headerlink" href="#input-files" title="Permalink to this headline">¶</a></h3>
+<p>It is obligatory to specify location of the entities to convert. It can be a single file or a wildcard expression
+(like <code class="code bash docutils literal notranslate"><span class="pre">*.bdo</span></code>) specifying group of files.</p>
+<p>To convert a single binary file <code class="code bash docutils literal notranslate"><span class="pre">proton0001_fort.21</span></code> generated with Fluka to a text file you can use following command:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>convertmc txt proton0001_fort.21
+</pre></div>
+</div>
+<p>Converter will automatically figure out output filename <code class="code bash docutils literal notranslate"><span class="pre">proton0001_fort.txt</span></code></p>
+<p>It is also possible to merge group of files into single one to obtain better statistics.
+Let us assume we have input files <code class="code bash docutils literal notranslate"><span class="pre">proton0001_fort.21</span></code>, <code class="code bash docutils literal notranslate"><span class="pre">proton0002_fort.21</span></code> and <code class="code bash docutils literal notranslate"><span class="pre">proton0003_fort.21</span></code> corresponding
+to different runs but storing the output of the same scorer. To read data from these 3 files, average on-the-fly
+and save output to single file, type:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>convertmc txt <span class="s2">&quot;proton0001_fort.*&quot;</span>
+</pre></div>
+</div>
+<p>Again, a single file <code class="code bash docutils literal notranslate"><span class="pre">proton0001_fort.txt</span></code> will be generated, containing averaged data from 3 binary input files.</p>
+<p>Finally we could have many files, coming from many simulation runs and belonging to many different scorers.
+<strong>convertmc</strong> can read list of such files, automatically group them according to scorers.
+By adding <code class="code bash docutils literal notranslate"><span class="pre">---many</span></code> flag we ask converter to scan group of files, discover sub-groups belonging to same converter
+and perform averaging in each of sub-groups. Finally some number of output files will be generated (one output file
+for one scorer). An example:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>convertmc txt --many <span class="s2">&quot;proton0001_fort.*&quot;</span>
+</pre></div>
+</div>
+</section>
+<section id="output-files">
+<h3>Output files<a class="headerlink" href="#output-files" title="Permalink to this headline">¶</a></h3>
+<dl>
+<dt>When working in single-file conversion mode or when merging group of files into a single file</dt><dd><p>it is possible to provide a name of output file as a third argument:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>convertmc txt proton0001_fort.21 dose.txt
+</pre></div>
+</div>
+</dd>
+</dl>
+<p>When using <code class="code bash docutils literal notranslate"><span class="pre">--many</span></code> option <strong>convertmc</strong> will generate many files. In this case user might provide an
+existing directory as a third parameter. All output files will be generated there:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>convertmc txt --many <span class="s2">&quot;*_fort.*&quot;</span> /path/to/output/dir/
+</pre></div>
+</div>
+</section>
+<section id="scaling-factor">
+<h3>Scaling factor<a class="headerlink" href="#scaling-factor" title="Permalink to this headline">¶</a></h3>
+<p>Some of the scorers used in Monte-Carlo transport codes, such as dose or fluence dump the results per-primary-particle.
+For example dose is often reported in MeV/g/prim units. These units might be hard to interpret when doing
+dosimetric particle transport simulations. To report dose (or some other quantities) in more natural units knowledge
+of total particles in the experiment is necessary (not to be confused with number of simulated primaries).
+User can specify this number via option called <code class="code bash docutils literal notranslate"><span class="pre">--nscale</span></code>. <strong>convertmc</strong> will then report dose
+(and some other quantities) in natural units and per user-provided particle number (not per single primary).
+Let us assume that <code class="code bash docutils literal notranslate"><span class="pre">proton0001_fort.21</span></code> file was obtained by simulation of 10000 protons.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>convertmc txt proton0001_fort.21 dose_per_prim.txt
+</pre></div>
+</div>
+<p>will save a file <code class="code bash docutils literal notranslate"><span class="pre">dose_per_prim.txt</span></code> with dose-per-primary and MeV/g/prim units. While:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>convertmc txt proton0001_fort.21 dose.txt --nscale 1e8
+</pre></div>
+</div>
+<p>will save a file <code class="code bash docutils literal notranslate"><span class="pre">dose.txt</span></code> with rescaled dose of <span class="math notranslate nohighlight">\(10^8\)</span> protons in Gy units</p>
+</section>
+<section id="error-calculation">
+<h3>Error calculation<a class="headerlink" href="#error-calculation" title="Permalink to this headline">¶</a></h3>
+<p>In order to perform averaging converter needs to get at least two files per scorer. By default all <strong>convertermc</strong>
+during averaging will also calculate standard deviation, which can be presented to the user in various forms:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>additional column of numbers when saving data into text files (i.e. using <code class="docutils literal notranslate"><span class="pre">txt</span></code> converter)</p></li>
+<li><p>error band on the normal plot for 1-D scoring grid (when using <code class="docutils literal notranslate"><span class="pre">image</span></code> and <code class="docutils literal notranslate"><span class="pre">gnuplot</span></code> converters)</p></li>
+<li><p>additional heatmap error plot  for 2-D scoring grid (when using <code class="docutils literal notranslate"><span class="pre">image</span></code> and <code class="docutils literal notranslate"><span class="pre">gnuplot</span></code> converters)</p></li>
+</ul>
+</div></blockquote>
+<p>When working in single-file mode calculation of the startand deviation is not possible and user will
+not get such information. In this case output text files will have one column less and no error band is displayed
+on the plots.</p>
+<p>User can control presented information by means of <code class="code bash docutils literal notranslate"><span class="pre">--error</span></code> option. When this option is not specified <strong>convertmc</strong>
+will raport standard error if possible. Available options are:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p><code class="code bash docutils literal notranslate"><span class="pre">none</span></code> - no uncertainty information is reported</p></li>
+<li><p><code class="code bash docutils literal notranslate"><span class="pre">stderr</span></code> - standard error information is reported</p></li>
+<li><p><code class="code bash docutils literal notranslate"><span class="pre">stddev</span></code> - standard deviation information is reported</p></li>
+</ul>
+</div></blockquote>
+</section>
+<section id="handling-nans">
+<h3>Handling NaNs<a class="headerlink" href="#handling-nans" title="Permalink to this headline">¶</a></h3>
+<p>In case of some simulations the results might include numbers decoded as NaN (not-a-number).
+NaN has this property that if a regular number is added to NaN then the results is again NaN
+(1.0 + NaN = NaN). This property might lead to a problems when averaging. Single NaN version will
+make a NaN when averaged with other 99 regular numbers.
+We have a special flag in <strong>convertmc</strong> which will exclude NaN from averaging: if <code class="code bash docutils literal notranslate"><span class="pre">--nan</span></code> is used
+then average will be calculated only on regular numbers.</p>
+</section>
+<section id="obtaining-help">
+<h3>Obtaining help<a class="headerlink" href="#obtaining-help" title="Permalink to this headline">¶</a></h3>
+<p>To get a general help instructed printed on a screen type:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>convertmc --help
+</pre></div>
+</div>
+<p>or simply <code class="code bash docutils literal notranslate"><span class="pre">convertmc</span> <span class="pre">-h</span></code></p>
+<p>Each of the converter comes with dedicated help page which can be printed using i.e.:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>convertmc txt --help
+</pre></div>
+</div>
+</section>
+<section id="program-version">
+<h3>Program version<a class="headerlink" href="#program-version" title="Permalink to this headline">¶</a></h3>
+<p>To get program version type <code class="code bash docutils literal notranslate"><span class="pre">convertmc</span> <span class="pre">--version</span></code> or <code class="code bash docutils literal notranslate"><span class="pre">convertmc</span> <span class="pre">-V</span></code></p>
+</section>
+<section id="more-verbose-output">
+<h3>More verbose output<a class="headerlink" href="#more-verbose-output" title="Permalink to this headline">¶</a></h3>
+<p>To get more verbose output use <code class="code bash docutils literal notranslate"><span class="pre">-v</span></code> option (be careful, there is similar capital-V option for printing version number).
+Adding <code class="code bash docutils literal notranslate"><span class="pre">-v</span></code> or <code class="code bash docutils literal notranslate"><span class="pre">--verbose</span></code> will make the program printing more lines of comments explaining what is doing.
+By adding <code class="code bash docutils literal notranslate"><span class="pre">-vv</span></code> even more logging output will be generated. Maximum logging level is obtained using <code class="code bash docutils literal notranslate"><span class="pre">-vvv</span></code>.</p>
+</section>
+<section id="silent-execution">
+<h3>Silent execution<a class="headerlink" href="#silent-execution" title="Permalink to this headline">¶</a></h3>
+<p>If you do like the program printing any logging output on the screen, you can use <code class="code bash docutils literal notranslate"><span class="pre">-q</span></code> or <code class="code bash docutils literal notranslate"><span class="pre">--quiet</span></code> option.
+These options might be useful if your program is i.e. called repetitively in a script.</p>
+</section>
+</section>
+<section id="using-as-a-library">
+<h2>Using as a library<a class="headerlink" href="#using-as-a-library" title="Permalink to this headline">¶</a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">pymchelper</span></code> is build around <span class="xref std std-doc">Detector class</span>.
+<a class="reference internal" href="apidoc/pymchelper.input_output.html"><span class="doc">I/O module</span></a> provides <code class="code bash docutils literal notranslate"><span class="pre">fromfile</span></code> method
+to get the data from binary file and is exposing to the user axis data, scoring information and data read from the file.
+See an example:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="lineno"> 1 </span>    <span class="n">parsed_args</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">parse_args</span><span class="p">(</span><span class="n">args</span><span class="p">)</span>
+<span class="lineno"> 2 </span>
+<span class="lineno"> 3 </span>    <span class="c1"># paths to binary files</span>
+<span class="lineno"> 4 </span>    <span class="n">fluka_file_path</span> <span class="o">=</span> <span class="n">parsed_args</span><span class="o">.</span><span class="n">fluka</span>
+<span class="lineno"> 5 </span>    <span class="n">sh12a_file_path</span> <span class="o">=</span> <span class="n">parsed_args</span><span class="o">.</span><span class="n">shield</span>
+<span class="lineno"> 6 </span>
+<span class="lineno"> 7 </span>    <span class="c1"># creating empty Detector object and filling it with data read from Fluka file</span>
+<span class="lineno"> 8 </span>    <span class="n">fluka_data</span> <span class="o">=</span> <span class="n">fromfile</span><span class="p">(</span><span class="n">fluka_file_path</span><span class="p">)</span>
+<span class="lineno"> 9 </span>
+<span class="lineno">10 </span>    <span class="c1"># same as above but reading from SHIELD-HIT12A file</span>
+<span class="lineno">11 </span>    <span class="n">sh12a_data</span> <span class="o">=</span> <span class="n">fromfile</span><span class="p">(</span><span class="n">sh12a_file_path</span><span class="p">)</span>
+<span class="lineno">12 </span>
+<span class="lineno">13 </span>    <span class="c1"># printing some output on the screen</span>
+<span class="lineno">14 </span>    <span class="k">print</span><span class="p">(</span><span class="s2">&quot;Fluka bins in X: {:d}, Y: {:d}, Z: {:d}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">fluka_data</span><span class="o">.</span><span class="n">x</span><span class="o">.</span><span class="n">n</span><span class="p">,</span> <span class="n">fluka_data</span><span class="o">.</span><span class="n">y</span><span class="o">.</span><span class="n">n</span><span class="p">,</span> <span class="n">fluka_data</span><span class="o">.</span><span class="n">z</span><span class="o">.</span><span class="n">n</span><span class="p">))</span>
+<span class="lineno">15 </span>    <span class="k">print</span><span class="p">(</span><span class="s2">&quot;First bin of fluka data&quot;</span><span class="p">,</span> <span class="n">fluka_data</span><span class="o">.</span><span class="n">pages</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span>
+<span class="lineno">16 </span>
+<span class="lineno">17 </span>    <span class="k">print</span><span class="p">(</span><span class="s2">&quot;SHIELD-HIT12A bins in X: {:d}, Y: {:d}, Z: {:d}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">sh12a_data</span><span class="o">.</span><span class="n">x</span><span class="o">.</span><span class="n">n</span><span class="p">,</span> <span class="n">sh12a_data</span><span class="o">.</span><span class="n">y</span><span class="o">.</span><span class="n">n</span><span class="p">,</span> <span class="n">sh12a_data</span><span class="o">.</span><span class="n">z</span><span class="o">.</span><span class="n">n</span><span class="p">))</span>
+<span class="lineno">18 </span>    <span class="k">print</span><span class="p">(</span><span class="s2">&quot;First bin of SHIELD-HIT12A data&quot;</span><span class="p">,</span> <span class="n">sh12a_data</span><span class="o">.</span><span class="n">pages</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span>
+<span class="lineno">19 </span>
+</pre></div>
+</div>
+</section>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">User’s Guide</a><ul>
+<li><a class="reference internal" href="#available-converters">Available converters</a></li>
+<li><a class="reference internal" href="#common-options">Common options</a><ul>
+<li><a class="reference internal" href="#input-files">Input files</a></li>
+<li><a class="reference internal" href="#output-files">Output files</a></li>
+<li><a class="reference internal" href="#scaling-factor">Scaling factor</a></li>
+<li><a class="reference internal" href="#error-calculation">Error calculation</a></li>
+<li><a class="reference internal" href="#handling-nans">Handling NaNs</a></li>
+<li><a class="reference internal" href="#obtaining-help">Obtaining help</a></li>
+<li><a class="reference internal" href="#program-version">Program version</a></li>
+<li><a class="reference internal" href="#more-verbose-output">More verbose output</a></li>
+<li><a class="reference internal" href="#silent-execution">Silent execution</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#using-as-a-library">Using as a library</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="getting_started.html"
+                        title="previous chapter">Getting Started</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="txt_converter.html"
+                        title="next chapter">Plain text</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/user_guide.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="txt_converter.html" title="Plain text"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="getting_started.html" title="Getting Started"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">pymchelper 1.10.0+rev3 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">User’s Guide</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2016, Leszek Grzanka.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 4.3.0.
+    </div>
+  </body>
+</html>

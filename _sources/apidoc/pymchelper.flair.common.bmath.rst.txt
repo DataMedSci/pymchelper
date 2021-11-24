@@ -1,0 +1,7 @@
+pymchelper.flair.common.bmath module
+====================================
+
+.. automodule:: pymchelper.flair.common.bmath
+   :members:
+   :undoc-members:
+   :show-inheritance:

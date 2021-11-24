@@ -1,0 +1,7 @@
+pymchelper.run module
+=====================
+
+.. automodule:: pymchelper.run
+   :members:
+   :undoc-members:
+   :show-inheritance:

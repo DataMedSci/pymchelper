@@ -1,0 +1,298 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>pymchelper.executor.runner &#8212; pymchelper 1.10.0+rev3 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/classic.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css" />
+    
+    <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+    <script src="../../../_static/jquery.js"></script>
+    <script src="../../../_static/underscore.js"></script>
+    <script src="../../../_static/doctools.js"></script>
+    
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">pymchelper 1.10.0+rev3 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">pymchelper.executor.runner</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for pymchelper.executor.runner</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">copy</span> <span class="k">import</span> <span class="n">deepcopy</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">shutil</span>
+<span class="kn">import</span> <span class="nn">subprocess</span>
+<span class="kn">import</span> <span class="nn">timeit</span>
+<span class="kn">from</span> <span class="nn">multiprocessing</span> <span class="k">import</span> <span class="n">Pool</span>
+
+<span class="kn">from</span> <span class="nn">enum</span> <span class="k">import</span> <span class="n">IntEnum</span>
+
+<span class="kn">from</span> <span class="nn">pymchelper.input_output</span> <span class="k">import</span> <span class="n">frompattern</span>
+
+
+<div class="viewcode-block" id="OutputDataType"><a class="viewcode-back" href="../../../apidoc/pymchelper.executor.runner.html#pymchelper.executor.runner.OutputDataType">[docs]</a><span class="k">class</span> <span class="nc">OutputDataType</span><span class="p">(</span><span class="n">IntEnum</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Output type requested by user plots (i.e .png) or text data</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">plot</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="n">txt</span> <span class="o">=</span> <span class="mi">2</span></div>
+
+
+<div class="viewcode-block" id="Runner"><a class="viewcode-back" href="../../../apidoc/pymchelper.executor.runner.html#pymchelper.executor.runner.Runner">[docs]</a><span class="k">class</span> <span class="nc">Runner</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Main class responsible for configuring and starting multiple parallel MC simulation processes</span>
+<span class="sd">    It can be used to access combined averaged results of the simulation.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">jobs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">keep_workspace_after_run</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">output_directory</span><span class="o">=</span><span class="s1">&#39;.&#39;</span><span class="p">):</span>
+
+        <span class="c1"># create pool of processes, waiting to be started by run method</span>
+        <span class="c1"># if jobs is not specified, os.cpu_count() would be used</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_pool</span> <span class="o">=</span> <span class="n">Pool</span><span class="p">(</span><span class="n">processes</span><span class="o">=</span><span class="n">jobs</span><span class="p">)</span>
+
+        <span class="c1"># User of the runner has two options: either to specify number of parallel jobs by</span>
+        <span class="c1"># setting the self.jobs to given number, or to leave it as None. If self.jobs is None</span>
+        <span class="c1"># then multiprocessing library will automatically allocate number of parallel jobs to `os.cpu_count()`</span>
+        <span class="c1"># Therefore we cannot rely of self.jobs as the actual counter of parallel processes</span>
+        <span class="c1"># Instead we use undocumented feature of multiprocessing module,</span>
+        <span class="c1"># extracting actual number of allocated processes from `_processes` attribute in Pool class</span>
+        <span class="c1"># To see how it is used internally in the Python (in v3.9) source code take a look at:</span>
+        <span class="c1"># https://github.com/python/cpython/blob/3.9/Lib/multiprocessing/pool.py#L210</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">jobs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pool</span><span class="o">.</span><span class="n">_processes</span>
+
+        <span class="c1"># workspace is a collection of working directories</span>
+        <span class="c1"># this manager is responsible for creating and cleaning working directories</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">workspace_manager</span> <span class="o">=</span> <span class="n">WorkspaceManager</span><span class="p">(</span><span class="n">output_directory</span><span class="o">=</span><span class="n">output_directory</span><span class="p">,</span>
+                                                  <span class="n">keep_workspace_after_run</span><span class="o">=</span><span class="n">keep_workspace_after_run</span><span class="p">)</span>
+
+<div class="viewcode-block" id="Runner.run"><a class="viewcode-back" href="../../../apidoc/pymchelper.executor.runner.html#pymchelper.executor.runner.Runner.run">[docs]</a>    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">settings</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Execute parallel simulation processes, creating workspace (and working directories) in the `output_directory`</span>
+<span class="sd">        In case of successful execution return True, otherwise return False</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">start_time</span> <span class="o">=</span> <span class="n">timeit</span><span class="o">.</span><span class="n">default_timer</span><span class="p">()</span>
+
+        <span class="c1"># SHIELD-HIT12A and Fluka require RNG seeds to be integers greater or equal to 1</span>
+        <span class="c1"># each of the workers needs to have its own different RNG seed</span>
+        <span class="n">rng_seeds</span> <span class="o">=</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">jobs</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+
+        <span class="c1"># create working directories</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">workspace_manager</span><span class="o">.</span><span class="n">create_working_directories</span><span class="p">(</span><span class="n">simulation_input_path</span><span class="o">=</span><span class="n">settings</span><span class="o">.</span><span class="n">input_path</span><span class="p">,</span>
+                                                          <span class="n">rng_seeds</span><span class="o">=</span><span class="n">rng_seeds</span><span class="p">)</span>
+
+        <span class="c1"># rng seeds injection to settings for each SingleSimulationExecutor call</span>
+        <span class="c1"># TODO consider better way of doing it  # skipcq: PYL-W0511</span>
+        <span class="n">settings_list</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">rng_seed</span> <span class="ow">in</span> <span class="n">rng_seeds</span><span class="p">:</span>
+            <span class="n">current_settings</span> <span class="o">=</span> <span class="n">deepcopy</span><span class="p">(</span><span class="n">settings</span><span class="p">)</span>  <span class="c1"># do not modify original arguments</span>
+            <span class="n">current_settings</span><span class="o">.</span><span class="n">set_rng_seed</span><span class="p">(</span><span class="n">rng_seed</span><span class="p">)</span>
+            <span class="n">settings_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">current_settings</span><span class="p">)</span>
+
+        <span class="c1"># create executor callable object for current run</span>
+        <span class="n">executor</span> <span class="o">=</span> <span class="n">SingleSimulationExecutor</span><span class="p">()</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="c1"># start execution using pool of workers, mapping the executor callable object to the different settings</span>
+            <span class="c1"># and workspaces</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_pool</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="n">executor</span><span class="p">,</span> <span class="nb">zip</span><span class="p">(</span><span class="n">settings_list</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">workspace_manager</span><span class="o">.</span><span class="n">working_directories_abs_paths</span><span class="p">))</span>
+        <span class="k">except</span> <span class="ne">KeyboardInterrupt</span><span class="p">:</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Terminating the pool&#39;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_pool</span><span class="o">.</span><span class="n">terminate</span><span class="p">()</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Pool is terminated&#39;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">workspace_manager</span><span class="o">.</span><span class="n">clean</span><span class="p">()</span>
+            <span class="k">return</span> <span class="kc">False</span>
+
+        <span class="n">elapsed</span> <span class="o">=</span> <span class="n">timeit</span><span class="o">.</span><span class="n">default_timer</span><span class="p">()</span> <span class="o">-</span> <span class="n">start_time</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;run elapsed time </span><span class="si">{:.3f}</span><span class="s2"> seconds&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">elapsed</span><span class="p">))</span>
+        <span class="k">return</span> <span class="kc">True</span></div>
+
+<div class="viewcode-block" id="Runner.get_data"><a class="viewcode-back" href="../../../apidoc/pymchelper.executor.runner.html#pymchelper.executor.runner.Runner.get_data">[docs]</a>    <span class="k">def</span> <span class="nf">get_data</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Scans the output directory for location of the working directories (like run_1, run_2).</span>
+<span class="sd">        Takes all files from all working directories in `output_dir`,</span>
+<span class="sd">        merges their content to form pymchelper Estimator objects.</span>
+<span class="sd">        For each of the output file a single Estimator objects is created, which holds numpy arrays with results.</span>
+<span class="sd">        Return dictionary with keys being output filenames, and values being Estimator objects</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">start_time</span> <span class="o">=</span> <span class="n">timeit</span><span class="o">.</span><span class="n">default_timer</span><span class="p">()</span>
+
+        <span class="c1"># TODO line below is specific to SHIELD-HIT12A, should be generalised  # skipcq: PYL-W0511</span>
+        <span class="c1"># scans output directory for MC simulation output files</span>
+        <span class="n">output_files_pattern</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">workspace_manager</span><span class="o">.</span><span class="n">output_dir_absolute_path</span><span class="p">,</span> <span class="s2">&quot;run_*&quot;</span><span class="p">,</span> <span class="s2">&quot;*.bdo&quot;</span><span class="p">)</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Files to merge </span><span class="si">{:s}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">output_files_pattern</span><span class="p">))</span>
+
+        <span class="n">estimators_dict</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="c1"># convert output files to list of estimator objects</span>
+        <span class="n">estimators_list</span> <span class="o">=</span> <span class="n">frompattern</span><span class="p">(</span><span class="n">output_files_pattern</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">estimator</span> <span class="ow">in</span> <span class="n">estimators_list</span><span class="p">:</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Appending estimator for </span><span class="si">{:s}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">estimator</span><span class="o">.</span><span class="n">file_corename</span><span class="p">))</span>
+            <span class="n">estimators_dict</span><span class="p">[</span><span class="n">estimator</span><span class="o">.</span><span class="n">file_corename</span><span class="p">]</span> <span class="o">=</span> <span class="n">estimator</span>
+        <span class="n">elapsed</span> <span class="o">=</span> <span class="n">timeit</span><span class="o">.</span><span class="n">default_timer</span><span class="p">()</span> <span class="o">-</span> <span class="n">start_time</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Workspace reading </span><span class="si">{:.3f}</span><span class="s2"> seconds&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">elapsed</span><span class="p">))</span>
+
+        <span class="k">return</span> <span class="n">estimators_dict</span></div>
+
+<div class="viewcode-block" id="Runner.clean"><a class="viewcode-back" href="../../../apidoc/pymchelper.executor.runner.html#pymchelper.executor.runner.Runner.clean">[docs]</a>    <span class="k">def</span> <span class="nf">clean</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Removes all working directories (if exists)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">workspace_manager</span><span class="o">.</span><span class="n">clean</span><span class="p">()</span></div></div>
+
+
+<div class="viewcode-block" id="SingleSimulationExecutor"><a class="viewcode-back" href="../../../apidoc/pymchelper.executor.runner.html#pymchelper.executor.runner.SingleSimulationExecutor">[docs]</a><span class="k">class</span> <span class="nc">SingleSimulationExecutor</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Callable class responsible for execution of the single MC simulation process.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">settings_and_working_dir</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+
+        <span class="c1"># we deliberately combine settings and list of working directories</span>
+        <span class="c1"># in the single argument `settings_and_working_dir`</span>
+        <span class="c1"># as this would simplify using this class by multiprocessing module</span>
+        <span class="n">settings</span><span class="p">,</span> <span class="n">working_dir_abs_path</span> <span class="o">=</span> <span class="n">settings_and_working_dir</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="c1"># combine MC engine executable with its command line options to form core of the command string</span>
+            <span class="c1"># this will form basis of the command, like:</span>
+            <span class="c1"># /usr/local/bin/shieldhit --time 00:30:50 -v -N 3</span>
+            <span class="n">core_command_string</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">settings</span><span class="p">)</span>
+
+            <span class="c1"># for easier digesting by subprocess module, convert command string to a list</span>
+            <span class="c1"># and finally append the location of the input files</span>
+            <span class="c1"># finally we obtain a list like:</span>
+            <span class="c1"># (&#39;/usr/local/bin/shieldhit&#39;, &#39;--time&#39;, &#39;00:30:50&#39;, &#39;-v&#39;, &#39;-N&#39;, &#39;3&#39;, &#39;/data/my/simulation/input&#39;)</span>
+            <span class="n">command_as_list</span> <span class="o">=</span> <span class="n">core_command_string</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
+            <span class="n">command_as_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">working_dir_abs_path</span><span class="p">)</span>
+
+            <span class="c1"># execute the MC simulation on a spawned process</span>
+            <span class="c1"># TODO handle this differently, i.e. redirect it to file or save in some variable   # skipcq: PYL-W0511</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;working directory </span><span class="si">{:s}</span><span class="s1">, command </span><span class="si">{:s}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">working_dir_abs_path</span><span class="p">,</span>
+                                                                        <span class="s1">&#39; &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">command_as_list</span><span class="p">)))</span>
+            <span class="n">DEVNULL</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">devnull</span><span class="p">,</span> <span class="s1">&#39;wb&#39;</span><span class="p">)</span>
+            <span class="n">subprocess</span><span class="o">.</span><span class="n">check_call</span><span class="p">(</span><span class="n">command_as_list</span><span class="p">,</span> <span class="n">cwd</span><span class="o">=</span><span class="n">working_dir_abs_path</span><span class="p">,</span> <span class="n">stdout</span><span class="o">=</span><span class="n">DEVNULL</span><span class="p">,</span> <span class="n">stderr</span><span class="o">=</span><span class="n">DEVNULL</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">KeyboardInterrupt</span><span class="p">:</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;KeyboardInterrupt&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">KeyboardInterrupt</span></div>
+
+
+<div class="viewcode-block" id="WorkspaceManager"><a class="viewcode-back" href="../../../apidoc/pymchelper.executor.runner.html#pymchelper.executor.runner.WorkspaceManager">[docs]</a><span class="k">class</span> <span class="nc">WorkspaceManager</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A workspace consists of multiple working directories (i.e. run_1, run_2),</span>
+<span class="sd">    each per one of the parallel simulation run.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">output_directory</span><span class="o">=</span><span class="s1">&#39;.&#39;</span><span class="p">,</span> <span class="n">keep_workspace_after_run</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">output_dir_absolute_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">output_directory</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">keep_workspace_after_run</span> <span class="o">=</span> <span class="n">keep_workspace_after_run</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">working_directories_abs_paths</span> <span class="o">=</span> <span class="p">[]</span>
+
+<div class="viewcode-block" id="WorkspaceManager.create_working_directories"><a class="viewcode-back" href="../../../apidoc/pymchelper.executor.runner.html#pymchelper.executor.runner.WorkspaceManager.create_working_directories">[docs]</a>    <span class="k">def</span> <span class="nf">create_working_directories</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">simulation_input_path</span><span class="p">,</span> <span class="n">rng_seeds</span><span class="o">=</span><span class="p">()):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Create working directories and fill `self.working_directories_abs_paths`</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">working_directories_abs_paths</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">rng_seed</span> <span class="ow">in</span> <span class="n">rng_seeds</span><span class="p">:</span>
+            <span class="c1"># set workspace to a subdirectory of the output_directory, with run_* pattern</span>
+            <span class="c1"># i.e. /home/user/output/run_3</span>
+            <span class="n">working_dir_abs_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">output_dir_absolute_path</span><span class="p">,</span> <span class="s1">&#39;run_</span><span class="si">{:d}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">rng_seed</span><span class="p">))</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Workspace </span><span class="si">{:s}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">working_dir_abs_path</span><span class="p">))</span>
+
+            <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">simulation_input_path</span><span class="p">):</span>
+                <span class="c1"># if path already exists, remove it before copying with copytree()</span>
+                <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">working_dir_abs_path</span><span class="p">):</span>
+                    <span class="n">shutil</span><span class="o">.</span><span class="n">rmtree</span><span class="p">(</span><span class="n">working_dir_abs_path</span><span class="p">)</span>
+                <span class="c1"># if cleaned or not existing, then create it</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">working_dir_abs_path</span><span class="p">):</span>
+                    <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">working_dir_abs_path</span><span class="p">)</span>
+                <span class="c1"># copy all files from the directory</span>
+                <span class="k">for</span> <span class="n">directory_entry</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">simulation_input_path</span><span class="p">):</span>
+                    <span class="n">path_to_directory_entry</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">simulation_input_path</span><span class="p">,</span> <span class="n">directory_entry</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">path_to_directory_entry</span><span class="p">):</span>
+                        <span class="n">shutil</span><span class="o">.</span><span class="n">copy2</span><span class="p">(</span><span class="n">path_to_directory_entry</span><span class="p">,</span> <span class="n">working_dir_abs_path</span><span class="p">)</span>
+                <span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Copying input files into </span><span class="si">{:s}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">working_dir_abs_path</span><span class="p">))</span>
+            <span class="k">elif</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">simulation_input_path</span><span class="p">):</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">working_dir_abs_path</span><span class="p">):</span>
+                    <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">working_dir_abs_path</span><span class="p">)</span>
+                <span class="n">shutil</span><span class="o">.</span><span class="n">copy2</span><span class="p">(</span><span class="n">simulation_input_path</span><span class="p">,</span> <span class="n">working_dir_abs_path</span><span class="p">)</span>
+                <span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Copying input files into </span><span class="si">{:s}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">working_dir_abs_path</span><span class="p">))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Input files </span><span class="si">{:s}</span><span class="s2"> not a dir or file&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">simulation_input_path</span><span class="p">))</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">working_directories_abs_paths</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">working_dir_abs_path</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="WorkspaceManager.clean"><a class="viewcode-back" href="../../../apidoc/pymchelper.executor.runner.html#pymchelper.executor.runner.WorkspaceManager.clean">[docs]</a>    <span class="k">def</span> <span class="nf">clean</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        clean the workspace by removing all working directories</span>
+<span class="sd">        (only if requested by `keep_workspace_after_run` flag)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">keep_workspace_after_run</span><span class="p">:</span>
+            <span class="n">start_time</span> <span class="o">=</span> <span class="n">timeit</span><span class="o">.</span><span class="n">default_timer</span><span class="p">()</span>
+            <span class="k">for</span> <span class="n">working_dir_abs_path</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">working_directories_abs_paths</span><span class="p">:</span>
+                <span class="c1"># shutil.rmtree will throw exception if the directory we are trying to remove doesn&#39;t exist</span>
+                <span class="c1"># hence we only remove existing directories</span>
+                <span class="c1"># this allows safely to call `clean` method multiple times</span>
+                <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">working_dir_abs_path</span><span class="p">):</span>
+                    <span class="n">shutil</span><span class="o">.</span><span class="n">rmtree</span><span class="p">(</span><span class="n">working_dir_abs_path</span><span class="p">)</span>
+            <span class="n">elapsed</span> <span class="o">=</span> <span class="n">timeit</span><span class="o">.</span><span class="n">default_timer</span><span class="p">()</span> <span class="o">-</span> <span class="n">start_time</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Cleaning </span><span class="si">{:.3f}</span><span class="s2"> seconds&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">elapsed</span><span class="p">))</span></div></div>
+</pre></div>
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">pymchelper 1.10.0+rev3 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">pymchelper.executor.runner</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2016, Leszek Grzanka.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 4.3.0.
+    </div>
+  </body>
+</html>

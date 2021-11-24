@@ -1,0 +1,429 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>pymchelper.shieldhit.detector.detector_type module &#8212; pymchelper 1.10.0+rev3 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/classic.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/graphviz.css" />
+    
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/doctools.js"></script>
+    
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="pymchelper.shieldhit.detector.estimator module" href="pymchelper.shieldhit.detector.estimator.html" />
+    <link rel="prev" title="pymchelper.shieldhit.detector package" href="pymchelper.shieldhit.detector.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="pymchelper.shieldhit.detector.estimator.html" title="pymchelper.shieldhit.detector.estimator module"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="pymchelper.shieldhit.detector.html" title="pymchelper.shieldhit.detector package"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">pymchelper 1.10.0+rev3 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../developer.html" >Developer documentation</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="modules.html" >Source code</a> &#187;</li>
+          <li class="nav-item nav-item-3"><a href="pymchelper.html" >pymchelper package</a> &#187;</li>
+          <li class="nav-item nav-item-4"><a href="pymchelper.shieldhit.html" >pymchelper.shieldhit package</a> &#187;</li>
+          <li class="nav-item nav-item-5"><a href="pymchelper.shieldhit.detector.html" accesskey="U">pymchelper.shieldhit.detector package</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">pymchelper.shieldhit.detector.detector_type module</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <section id="module-pymchelper.shieldhit.detector.detector_type">
+<span id="pymchelper-shieldhit-detector-detector-type-module"></span><h1>pymchelper.shieldhit.detector.detector_type module<a class="headerlink" href="#module-pymchelper.shieldhit.detector.detector_type" title="Permalink to this headline">¶</a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="pymchelper.shieldhit.detector.detector_type.SHDetType">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pymchelper.shieldhit.detector.detector_type.</span></span><span class="sig-name descname"><span class="pre">SHDetType</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymchelper/shieldhit/detector/detector_type.html#SHDetType"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymchelper.shieldhit.detector.detector_type.SHDetType" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">enum.IntEnum</span></code></p>
+<p>List of available detector types below is based on IDET(5,*) in detect.f in SHIELD-HIT12A.
+If new detectors are added, class SHEstimator in estimator.py should also be updated.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymchelper.shieldhit.detector.detector_type.SHDetType.a">
+<span class="sig-name descname"><span class="pre">a</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">30</span></em><a class="headerlink" href="#pymchelper.shieldhit.detector.detector_type.SHDetType.a" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymchelper.shieldhit.detector.detector_type.SHDetType.alanine">
+<span class="sig-name descname"><span class="pre">alanine</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">13</span></em><a class="headerlink" href="#pymchelper.shieldhit.detector.detector_type.SHDetType.alanine" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymchelper.shieldhit.detector.detector_type.SHDetType.alanine_gy_bdo2016">
+<span class="sig-name descname"><span class="pre">alanine_gy_bdo2016</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">213</span></em><a class="headerlink" href="#pymchelper.shieldhit.detector.detector_type.SHDetType.alanine_gy_bdo2016" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymchelper.shieldhit.detector.detector_type.SHDetType.amass">
+<span class="sig-name descname"><span class="pre">amass</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">31</span></em><a class="headerlink" href="#pymchelper.shieldhit.detector.detector_type.SHDetType.amass" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymchelper.shieldhit.detector.detector_type.SHDetType.amu">
+<span class="sig-name descname"><span class="pre">amu</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">32</span></em><a class="headerlink" href="#pymchelper.shieldhit.detector.detector_type.SHDetType.amu" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymchelper.shieldhit.detector.detector_type.SHDetType.angle">
+<span class="sig-name descname"><span class="pre">angle</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">25</span></em><a class="headerlink" href="#pymchelper.shieldhit.detector.detector_type.SHDetType.angle" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymchelper.shieldhit.detector.detector_type.SHDetType.angle_bdo2016">
+<span class="sig-name descname"><span class="pre">angle_bdo2016</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">121</span></em><a class="headerlink" href="#pymchelper.shieldhit.detector.detector_type.SHDetType.angle_bdo2016" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymchelper.shieldhit.detector.detector_type.SHDetType.avg_beta">
+<span class="sig-name descname"><span class="pre">avg_beta</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">9</span></em><a class="headerlink" href="#pymchelper.shieldhit.detector.detector_type.SHDetType.avg_beta" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymchelper.shieldhit.detector.detector_type.SHDetType.avg_energy">
+<span class="sig-name descname"><span class="pre">avg_energy</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">8</span></em><a class="headerlink" href="#pymchelper.shieldhit.detector.detector_type.SHDetType.avg_energy" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymchelper.shieldhit.detector.detector_type.SHDetType.counter">
+<span class="sig-name descname"><span class="pre">counter</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">14</span></em><a class="headerlink" href="#pymchelper.shieldhit.detector.detector_type.SHDetType.counter" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymchelper.shieldhit.detector.detector_type.SHDetType.crossflu">
+<span class="sig-name descname"><span class="pre">crossflu</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">3</span></em><a class="headerlink" href="#pymchelper.shieldhit.detector.detector_type.SHDetType.crossflu" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymchelper.shieldhit.detector.detector_type.SHDetType.ddd">
+<span class="sig-name descname"><span class="pre">ddd</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">12</span></em><a class="headerlink" href="#pymchelper.shieldhit.detector.detector_type.SHDetType.ddd" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymchelper.shieldhit.detector.detector_type.SHDetType.dedx">
+<span class="sig-name descname"><span class="pre">dedx</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">35</span></em><a class="headerlink" href="#pymchelper.shieldhit.detector.detector_type.SHDetType.dedx" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymchelper.shieldhit.detector.detector_type.SHDetType.dlet">
+<span class="sig-name descname"><span class="pre">dlet</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">6</span></em><a class="headerlink" href="#pymchelper.shieldhit.detector.detector_type.SHDetType.dlet" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymchelper.shieldhit.detector.detector_type.SHDetType.dletg">
+<span class="sig-name descname"><span class="pre">dletg</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">16</span></em><a class="headerlink" href="#pymchelper.shieldhit.detector.detector_type.SHDetType.dletg" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymchelper.shieldhit.detector.detector_type.SHDetType.dose">
+<span class="sig-name descname"><span class="pre">dose</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">5</span></em><a class="headerlink" href="#pymchelper.shieldhit.detector.detector_type.SHDetType.dose" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymchelper.shieldhit.detector.detector_type.SHDetType.dose_av_q">
+<span class="sig-name descname"><span class="pre">dose_av_q</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">48</span></em><a class="headerlink" href="#pymchelper.shieldhit.detector.detector_type.SHDetType.dose_av_q" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymchelper.shieldhit.detector.detector_type.SHDetType.dose_av_z2beta2">
+<span class="sig-name descname"><span class="pre">dose_av_z2beta2</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">46</span></em><a class="headerlink" href="#pymchelper.shieldhit.detector.detector_type.SHDetType.dose_av_z2beta2" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymchelper.shieldhit.detector.detector_type.SHDetType.dose_eqv">
+<span class="sig-name descname"><span class="pre">dose_eqv</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">40</span></em><a class="headerlink" href="#pymchelper.shieldhit.detector.detector_type.SHDetType.dose_eqv" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymchelper.shieldhit.detector.detector_type.SHDetType.dose_gy">
+<span class="sig-name descname"><span class="pre">dose_gy</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">39</span></em><a class="headerlink" href="#pymchelper.shieldhit.detector.detector_type.SHDetType.dose_gy" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymchelper.shieldhit.detector.detector_type.SHDetType.dose_gy_bdo2016">
+<span class="sig-name descname"><span class="pre">dose_gy_bdo2016</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">205</span></em><a class="headerlink" href="#pymchelper.shieldhit.detector.detector_type.SHDetType.dose_gy_bdo2016" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymchelper.shieldhit.detector.detector_type.SHDetType.dzeff2beta2">
+<span class="sig-name descname"><span class="pre">dzeff2beta2</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">54</span></em><a class="headerlink" href="#pymchelper.shieldhit.detector.detector_type.SHDetType.dzeff2beta2" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymchelper.shieldhit.detector.detector_type.SHDetType.energy">
+<span class="sig-name descname"><span class="pre">energy</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">1</span></em><a class="headerlink" href="#pymchelper.shieldhit.detector.detector_type.SHDetType.energy" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymchelper.shieldhit.detector.detector_type.SHDetType.energy_amu">
+<span class="sig-name descname"><span class="pre">energy_amu</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">29</span></em><a class="headerlink" href="#pymchelper.shieldhit.detector.detector_type.SHDetType.energy_amu" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymchelper.shieldhit.detector.detector_type.SHDetType.energy_nuc">
+<span class="sig-name descname"><span class="pre">energy_nuc</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">28</span></em><a class="headerlink" href="#pymchelper.shieldhit.detector.detector_type.SHDetType.energy_nuc" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymchelper.shieldhit.detector.detector_type.SHDetType.eqv_dose">
+<span class="sig-name descname"><span class="pre">eqv_dose</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">41</span></em><a class="headerlink" href="#pymchelper.shieldhit.detector.detector_type.SHDetType.eqv_dose" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymchelper.shieldhit.detector.detector_type.SHDetType.flu_char">
+<span class="sig-name descname"><span class="pre">flu_char</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">22</span></em><a class="headerlink" href="#pymchelper.shieldhit.detector.detector_type.SHDetType.flu_char" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymchelper.shieldhit.detector.detector_type.SHDetType.flu_neqv">
+<span class="sig-name descname"><span class="pre">flu_neqv</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">24</span></em><a class="headerlink" href="#pymchelper.shieldhit.detector.detector_type.SHDetType.flu_neqv" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymchelper.shieldhit.detector.detector_type.SHDetType.flu_neut">
+<span class="sig-name descname"><span class="pre">flu_neut</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">23</span></em><a class="headerlink" href="#pymchelper.shieldhit.detector.detector_type.SHDetType.flu_neut" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymchelper.shieldhit.detector.detector_type.SHDetType.fluence">
+<span class="sig-name descname"><span class="pre">fluence</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">2</span></em><a class="headerlink" href="#pymchelper.shieldhit.detector.detector_type.SHDetType.fluence" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymchelper.shieldhit.detector.detector_type.SHDetType.gen">
+<span class="sig-name descname"><span class="pre">gen</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">33</span></em><a class="headerlink" href="#pymchelper.shieldhit.detector.detector_type.SHDetType.gen" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymchelper.shieldhit.detector.detector_type.SHDetType.id">
+<span class="sig-name descname"><span class="pre">id</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">34</span></em><a class="headerlink" href="#pymchelper.shieldhit.detector.detector_type.SHDetType.id" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymchelper.shieldhit.detector.detector_type.SHDetType.invalid">
+<span class="sig-name descname"><span class="pre">invalid</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">32767</span></em><a class="headerlink" href="#pymchelper.shieldhit.detector.detector_type.SHDetType.invalid" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymchelper.shieldhit.detector.detector_type.SHDetType.kinetic_energy">
+<span class="sig-name descname"><span class="pre">kinetic_energy</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">27</span></em><a class="headerlink" href="#pymchelper.shieldhit.detector.detector_type.SHDetType.kinetic_energy" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymchelper.shieldhit.detector.detector_type.SHDetType.let_bdo2016">
+<span class="sig-name descname"><span class="pre">let_bdo2016</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">120</span></em><a class="headerlink" href="#pymchelper.shieldhit.detector.detector_type.SHDetType.let_bdo2016" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymchelper.shieldhit.detector.detector_type.SHDetType.letflu">
+<span class="sig-name descname"><span class="pre">letflu</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">4</span></em><a class="headerlink" href="#pymchelper.shieldhit.detector.detector_type.SHDetType.letflu" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymchelper.shieldhit.detector.detector_type.SHDetType.mass_dedx">
+<span class="sig-name descname"><span class="pre">mass_dedx</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">36</span></em><a class="headerlink" href="#pymchelper.shieldhit.detector.detector_type.SHDetType.mass_dedx" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymchelper.shieldhit.detector.detector_type.SHDetType.material">
+<span class="sig-name descname"><span class="pre">material</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">11</span></em><a class="headerlink" href="#pymchelper.shieldhit.detector.detector_type.SHDetType.material" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymchelper.shieldhit.detector.detector_type.SHDetType.medium">
+<span class="sig-name descname"><span class="pre">medium</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">19</span></em><a class="headerlink" href="#pymchelper.shieldhit.detector.detector_type.SHDetType.medium" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymchelper.shieldhit.detector.detector_type.SHDetType.n_eqv_dose">
+<span class="sig-name descname"><span class="pre">n_eqv_dose</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">44</span></em><a class="headerlink" href="#pymchelper.shieldhit.detector.detector_type.SHDetType.n_eqv_dose" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymchelper.shieldhit.detector.detector_type.SHDetType.nkerma">
+<span class="sig-name descname"><span class="pre">nkerma</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">38</span></em><a class="headerlink" href="#pymchelper.shieldhit.detector.detector_type.SHDetType.nkerma" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymchelper.shieldhit.detector.detector_type.SHDetType.none">
+<span class="sig-name descname"><span class="pre">none</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">0</span></em><a class="headerlink" href="#pymchelper.shieldhit.detector.detector_type.SHDetType.none" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymchelper.shieldhit.detector.detector_type.SHDetType.pet">
+<span class="sig-name descname"><span class="pre">pet</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">15</span></em><a class="headerlink" href="#pymchelper.shieldhit.detector.detector_type.SHDetType.pet" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymchelper.shieldhit.detector.detector_type.SHDetType.q">
+<span class="sig-name descname"><span class="pre">q</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">21</span></em><a class="headerlink" href="#pymchelper.shieldhit.detector.detector_type.SHDetType.q" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymchelper.shieldhit.detector.detector_type.SHDetType.rho">
+<span class="sig-name descname"><span class="pre">rho</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">20</span></em><a class="headerlink" href="#pymchelper.shieldhit.detector.detector_type.SHDetType.rho" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymchelper.shieldhit.detector.detector_type.SHDetType.spc">
+<span class="sig-name descname"><span class="pre">spc</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">10</span></em><a class="headerlink" href="#pymchelper.shieldhit.detector.detector_type.SHDetType.spc" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymchelper.shieldhit.detector.detector_type.SHDetType.tlet">
+<span class="sig-name descname"><span class="pre">tlet</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">7</span></em><a class="headerlink" href="#pymchelper.shieldhit.detector.detector_type.SHDetType.tlet" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymchelper.shieldhit.detector.detector_type.SHDetType.tletg">
+<span class="sig-name descname"><span class="pre">tletg</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">17</span></em><a class="headerlink" href="#pymchelper.shieldhit.detector.detector_type.SHDetType.tletg" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymchelper.shieldhit.detector.detector_type.SHDetType.trace">
+<span class="sig-name descname"><span class="pre">trace</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">26</span></em><a class="headerlink" href="#pymchelper.shieldhit.detector.detector_type.SHDetType.trace" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymchelper.shieldhit.detector.detector_type.SHDetType.track_av_q">
+<span class="sig-name descname"><span class="pre">track_av_q</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">49</span></em><a class="headerlink" href="#pymchelper.shieldhit.detector.detector_type.SHDetType.track_av_q" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymchelper.shieldhit.detector.detector_type.SHDetType.track_av_z2beta2">
+<span class="sig-name descname"><span class="pre">track_av_z2beta2</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">47</span></em><a class="headerlink" href="#pymchelper.shieldhit.detector.detector_type.SHDetType.track_av_z2beta2" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymchelper.shieldhit.detector.detector_type.SHDetType.track_length">
+<span class="sig-name descname"><span class="pre">track_length</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">37</span></em><a class="headerlink" href="#pymchelper.shieldhit.detector.detector_type.SHDetType.track_length" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymchelper.shieldhit.detector.detector_type.SHDetType.tzeff2beta2">
+<span class="sig-name descname"><span class="pre">tzeff2beta2</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">53</span></em><a class="headerlink" href="#pymchelper.shieldhit.detector.detector_type.SHDetType.tzeff2beta2" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymchelper.shieldhit.detector.detector_type.SHDetType.user1">
+<span class="sig-name descname"><span class="pre">user1</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">42</span></em><a class="headerlink" href="#pymchelper.shieldhit.detector.detector_type.SHDetType.user1" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymchelper.shieldhit.detector.detector_type.SHDetType.user2">
+<span class="sig-name descname"><span class="pre">user2</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">43</span></em><a class="headerlink" href="#pymchelper.shieldhit.detector.detector_type.SHDetType.user2" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymchelper.shieldhit.detector.detector_type.SHDetType.z">
+<span class="sig-name descname"><span class="pre">z</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">50</span></em><a class="headerlink" href="#pymchelper.shieldhit.detector.detector_type.SHDetType.z" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymchelper.shieldhit.detector.detector_type.SHDetType.z2beta2">
+<span class="sig-name descname"><span class="pre">z2beta2</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">45</span></em><a class="headerlink" href="#pymchelper.shieldhit.detector.detector_type.SHDetType.z2beta2" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymchelper.shieldhit.detector.detector_type.SHDetType.zeff">
+<span class="sig-name descname"><span class="pre">zeff</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">51</span></em><a class="headerlink" href="#pymchelper.shieldhit.detector.detector_type.SHDetType.zeff" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymchelper.shieldhit.detector.detector_type.SHDetType.zeff2beta2">
+<span class="sig-name descname"><span class="pre">zeff2beta2</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">52</span></em><a class="headerlink" href="#pymchelper.shieldhit.detector.detector_type.SHDetType.zeff2beta2" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymchelper.shieldhit.detector.detector_type.SHDetType.zone">
+<span class="sig-name descname"><span class="pre">zone</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">18</span></em><a class="headerlink" href="#pymchelper.shieldhit.detector.detector_type.SHDetType.zone" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="pymchelper.shieldhit.detector.html"
+                        title="previous chapter">pymchelper.shieldhit.detector package</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="pymchelper.shieldhit.detector.estimator.html"
+                        title="next chapter">pymchelper.shieldhit.detector.estimator module</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/apidoc/pymchelper.shieldhit.detector.detector_type.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="pymchelper.shieldhit.detector.estimator.html" title="pymchelper.shieldhit.detector.estimator module"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="pymchelper.shieldhit.detector.html" title="pymchelper.shieldhit.detector package"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">pymchelper 1.10.0+rev3 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../developer.html" >Developer documentation</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="modules.html" >Source code</a> &#187;</li>
+          <li class="nav-item nav-item-3"><a href="pymchelper.html" >pymchelper package</a> &#187;</li>
+          <li class="nav-item nav-item-4"><a href="pymchelper.shieldhit.html" >pymchelper.shieldhit package</a> &#187;</li>
+          <li class="nav-item nav-item-5"><a href="pymchelper.shieldhit.detector.html" >pymchelper.shieldhit.detector package</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">pymchelper.shieldhit.detector.detector_type module</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2016, Leszek Grzanka.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 4.3.0.
+    </div>
+  </body>
+</html>

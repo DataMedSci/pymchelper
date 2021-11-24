@@ -1,0 +1,7 @@
+pymchelper.readers.shieldhit.reader\_bdo2016 module
+===================================================
+
+.. automodule:: pymchelper.readers.shieldhit.reader_bdo2016
+   :members:
+   :undoc-members:
+   :show-inheritance:

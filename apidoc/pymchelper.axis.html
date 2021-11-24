@@ -1,0 +1,204 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>pymchelper.axis module &#8212; pymchelper 1.10.0+rev3 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/classic.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/graphviz.css" />
+    
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/doctools.js"></script>
+    
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">pymchelper 1.10.0+rev3 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">pymchelper.axis module</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <section id="module-pymchelper.axis">
+<span id="pymchelper-axis-module"></span><h1>pymchelper.axis module<a class="headerlink" href="#module-pymchelper.axis" title="Permalink to this headline">¶</a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="pymchelper.axis.AxisId">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pymchelper.axis.</span></span><span class="sig-name descname"><span class="pre">AxisId</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymchelper/axis.html#AxisId"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymchelper.axis.AxisId" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">enum.IntEnum</span></code></p>
+<p>An enumeration.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymchelper.axis.AxisId.diff1">
+<span class="sig-name descname"><span class="pre">diff1</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">3</span></em><a class="headerlink" href="#pymchelper.axis.AxisId.diff1" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymchelper.axis.AxisId.diff2">
+<span class="sig-name descname"><span class="pre">diff2</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">4</span></em><a class="headerlink" href="#pymchelper.axis.AxisId.diff2" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymchelper.axis.AxisId.x">
+<span class="sig-name descname"><span class="pre">x</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">0</span></em><a class="headerlink" href="#pymchelper.axis.AxisId.x" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymchelper.axis.AxisId.y">
+<span class="sig-name descname"><span class="pre">y</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">1</span></em><a class="headerlink" href="#pymchelper.axis.AxisId.y" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymchelper.axis.AxisId.z">
+<span class="sig-name descname"><span class="pre">z</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">2</span></em><a class="headerlink" href="#pymchelper.axis.AxisId.z" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pymchelper.axis.MeshAxis">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pymchelper.axis.</span></span><span class="sig-name descname"><span class="pre">MeshAxis</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_val</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_val</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">unit</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">binning</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymchelper/axis.html#MeshAxis"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymchelper.axis.MeshAxis" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#pymchelper.axis.MeshAxis" title="pymchelper.axis.MeshAxis"><code class="xref py py-class docutils literal notranslate"><span class="pre">pymchelper.axis.MeshAxis</span></code></a></p>
+<p>Scoring mesh axis data.</p>
+<p>It can represent an axis variety of scorers:
+x,y or z in cartesian scoring, r, rho or z in cylindrical.
+An axis represents a sequence of <code class="docutils literal notranslate"><span class="pre">n</span></code> numbers, defining linear or logarithmic binning.
+This sequence of numbers is not stored in the memory, but can be generated using data property method.
+<code class="docutils literal notranslate"><span class="pre">min_val</span></code> is lowest bin left edge, max_val is highest bin right edge
+<code class="docutils literal notranslate"><span class="pre">name</span></code> can be used to define physical quantity (i.e. position, energy, angle).
+<code class="docutils literal notranslate"><span class="pre">unit</span></code> gives physical units (i.e. cm, MeV, mrad).</p>
+<p><code class="docutils literal notranslate"><span class="pre">MeshAxis</span></code> is constructed as immutable data structure, thus it is possible
+to set field values only upon object creation. Later they are available for read only.</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">x</span> <span class="o">=</span> <span class="n">MeshAxis</span><span class="p">(</span><span class="n">n</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">min_val</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">max_val</span><span class="o">=</span><span class="mf">30.0</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;Position&quot;</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s2">&quot;cm&quot;</span><span class="p">,</span> <span class="n">binning</span><span class="o">=</span><span class="n">MeshAxis</span><span class="o">.</span><span class="n">BinningType</span><span class="o">.</span><span class="n">linear</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">x</span><span class="o">.</span><span class="n">n</span><span class="p">,</span> <span class="n">x</span><span class="o">.</span><span class="n">min_val</span><span class="p">,</span> <span class="n">x</span><span class="o">.</span><span class="n">max_val</span>
+<span class="go">(10, 0.0, 30.0)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">x</span><span class="o">.</span><span class="n">n</span> <span class="o">=</span> <span class="mi">5</span>
+<span class="gt">Traceback (most recent call last):</span>
+<span class="c">...</span>
+<span class="gr">AttributeError</span>: <span class="n">can&#39;t set attribute</span>
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">binning</span></code> field (use internal <code class="docutils literal notranslate"><span class="pre">BinningType.linear</span></code> or <code class="docutils literal notranslate"><span class="pre">BinningType.logarithmic</span></code>) can distinguish
+log from linear binning</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="pymchelper.axis.MeshAxis.BinningType">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">BinningType</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymchelper/axis.html#MeshAxis.BinningType"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymchelper.axis.MeshAxis.BinningType" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">enum.IntEnum</span></code></p>
+<p>type of axis generator</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymchelper.axis.MeshAxis.BinningType.linear">
+<span class="sig-name descname"><span class="pre">linear</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">0</span></em><a class="headerlink" href="#pymchelper.axis.MeshAxis.BinningType.linear" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymchelper.axis.MeshAxis.BinningType.logarithmic">
+<span class="sig-name descname"><span class="pre">logarithmic</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">1</span></em><a class="headerlink" href="#pymchelper.axis.MeshAxis.BinningType.logarithmic" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pymchelper.axis.MeshAxis.data">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">data</span></span><a class="headerlink" href="#pymchelper.axis.MeshAxis.data" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generates linear or logarithmic sequence of <code class="docutils literal notranslate"><span class="pre">n</span></code> numbers.</p>
+<p>These numbers are middle points of the bins
+defined by <code class="docutils literal notranslate"><span class="pre">n</span></code>, <code class="docutils literal notranslate"><span class="pre">min_val</span></code> and <code class="docutils literal notranslate"><span class="pre">max_val</span></code> parameters.</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">x</span> <span class="o">=</span> <span class="n">MeshAxis</span><span class="p">(</span><span class="n">n</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">min_val</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">max_val</span><span class="o">=</span><span class="mf">10.0</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;X&quot;</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="s2">&quot;cm&quot;</span><span class="p">,</span> <span class="n">binning</span><span class="o">=</span><span class="n">MeshAxis</span><span class="o">.</span><span class="n">BinningType</span><span class="o">.</span><span class="n">linear</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">x</span><span class="o">.</span><span class="n">data</span>
+<span class="go">array([ 0.5,  1.5,  2.5,  3.5,  4.5,  5.5,  6.5,  7.5,  8.5,  9.5])</span>
+</pre></div>
+</div>
+<p>Binning may also consist of one bin:
+&gt;&gt;&gt; x = MeshAxis(n=1, min_val=0.0, max_val=5.0, name=”X”, unit=”cm”, binning=MeshAxis.BinningType.linear)
+&gt;&gt;&gt; x.data
+array([ 2.5])</p>
+<p>Logarithmic binning works as well, middle bin points are calculated as geometrical mean.
+Here we define 3 bins: [1,4], [4,16], [16,64].
+&gt;&gt;&gt; x = MeshAxis(n=3, min_val=1.0, max_val=64.0, name=”X”, unit=”cm”, binning=MeshAxis.BinningType.logarithmic)
+&gt;&gt;&gt; x.data
+array([  2.,   8.,  32.])</p>
+<p>For the same settings as below linear scale gives as expected different sequence:
+&gt;&gt;&gt; x = MeshAxis(n=3, min_val=1.0, max_val=64.0, name=”X”, unit=”cm”, binning=MeshAxis.BinningType.linear)
+&gt;&gt;&gt; x.data
+array([ 11.5,  32.5,  53.5])</p>
+<p>For logarithmic axis min_val has to be positive:
+&gt;&gt;&gt; x = MeshAxis(n=3, min_val=-2.0, max_val=64.0, name=”X”, unit=”cm”, binning=MeshAxis.BinningType.logarithmic)
+&gt;&gt;&gt; x.data
+Traceback (most recent call last):
+…
+Exception: Left edge of first bin (-2) is not positive</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/apidoc/pymchelper.axis.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">pymchelper 1.10.0+rev3 documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">pymchelper.axis module</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2016, Leszek Grzanka.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 4.3.0.
+    </div>
+  </body>
+</html>

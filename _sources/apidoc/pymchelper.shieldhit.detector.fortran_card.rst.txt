@@ -1,0 +1,7 @@
+pymchelper.shieldhit.detector.fortran\_card module
+==================================================
+
+.. automodule:: pymchelper.shieldhit.detector.fortran_card
+   :members:
+   :undoc-members:
+   :show-inheritance:

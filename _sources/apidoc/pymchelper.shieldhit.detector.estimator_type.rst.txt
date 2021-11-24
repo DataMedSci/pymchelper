@@ -1,0 +1,7 @@
+pymchelper.shieldhit.detector.estimator\_type module
+====================================================
+
+.. automodule:: pymchelper.shieldhit.detector.estimator_type
+   :members:
+   :undoc-members:
+   :show-inheritance:

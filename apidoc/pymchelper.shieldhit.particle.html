@@ -1,0 +1,272 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>pymchelper.shieldhit.particle module &#8212; pymchelper 1.10.0+rev3 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/classic.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/graphviz.css" />
+    
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/doctools.js"></script>
+    
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="pymchelper.writers package" href="pymchelper.writers.html" />
+    <link rel="prev" title="pymchelper.shieldhit.detector.geometry module" href="pymchelper.shieldhit.detector.geometry.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="pymchelper.writers.html" title="pymchelper.writers package"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="pymchelper.shieldhit.detector.geometry.html" title="pymchelper.shieldhit.detector.geometry module"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">pymchelper 1.10.0+rev3 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../developer.html" >Developer documentation</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="modules.html" >Source code</a> &#187;</li>
+          <li class="nav-item nav-item-3"><a href="pymchelper.html" >pymchelper package</a> &#187;</li>
+          <li class="nav-item nav-item-4"><a href="pymchelper.shieldhit.html" accesskey="U">pymchelper.shieldhit package</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">pymchelper.shieldhit.particle module</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <section id="module-pymchelper.shieldhit.particle">
+<span id="pymchelper-shieldhit-particle-module"></span><h1>pymchelper.shieldhit.particle module<a class="headerlink" href="#module-pymchelper.shieldhit.particle" title="Permalink to this headline">¶</a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="pymchelper.shieldhit.particle.SHHeavyIonType">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pymchelper.shieldhit.particle.</span></span><span class="sig-name descname"><span class="pre">SHHeavyIonType</span></span><a class="reference internal" href="../_modules/pymchelper/shieldhit/particle.html#SHHeavyIonType"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymchelper.shieldhit.particle.SHHeavyIonType" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymchelper.shieldhit.particle.SHHeavyIonType.particle_type">
+<span class="sig-name descname"><span class="pre">particle_type</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">25</span></em><a class="headerlink" href="#pymchelper.shieldhit.particle.SHHeavyIonType.particle_type" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pymchelper.shieldhit.particle.SHParticleType">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pymchelper.shieldhit.particle.</span></span><span class="sig-name descname"><span class="pre">SHParticleType</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymchelper/shieldhit/particle.html#SHParticleType"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymchelper.shieldhit.particle.SHParticleType" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">enum.IntEnum</span></code></p>
+<p>Particle list based on JPART from SHIELD-HIT12A, extended with ids 0 and -1.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymchelper.shieldhit.particle.SHParticleType.all">
+<span class="sig-name descname"><span class="pre">all</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">-1</span></em><a class="headerlink" href="#pymchelper.shieldhit.particle.SHParticleType.all" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymchelper.shieldhit.particle.SHParticleType.anti_neutrino_e">
+<span class="sig-name descname"><span class="pre">anti_neutrino_e</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">18</span></em><a class="headerlink" href="#pymchelper.shieldhit.particle.SHParticleType.anti_neutrino_e" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymchelper.shieldhit.particle.SHParticleType.anti_neutrino_mu">
+<span class="sig-name descname"><span class="pre">anti_neutrino_mu</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">20</span></em><a class="headerlink" href="#pymchelper.shieldhit.particle.SHParticleType.anti_neutrino_mu" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymchelper.shieldhit.particle.SHParticleType.anti_neutron">
+<span class="sig-name descname"><span class="pre">anti_neutron</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">6</span></em><a class="headerlink" href="#pymchelper.shieldhit.particle.SHParticleType.anti_neutron" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymchelper.shieldhit.particle.SHParticleType.anti_proton">
+<span class="sig-name descname"><span class="pre">anti_proton</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">7</span></em><a class="headerlink" href="#pymchelper.shieldhit.particle.SHParticleType.anti_proton" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymchelper.shieldhit.particle.SHParticleType.deuteron">
+<span class="sig-name descname"><span class="pre">deuteron</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">21</span></em><a class="headerlink" href="#pymchelper.shieldhit.particle.SHParticleType.deuteron" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymchelper.shieldhit.particle.SHParticleType.electron">
+<span class="sig-name descname"><span class="pre">electron</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">13</span></em><a class="headerlink" href="#pymchelper.shieldhit.particle.SHParticleType.electron" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymchelper.shieldhit.particle.SHParticleType.gamma">
+<span class="sig-name descname"><span class="pre">gamma</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">12</span></em><a class="headerlink" href="#pymchelper.shieldhit.particle.SHParticleType.gamma" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymchelper.shieldhit.particle.SHParticleType.heavy_ion">
+<span class="sig-name descname"><span class="pre">heavy_ion</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">25</span></em><a class="headerlink" href="#pymchelper.shieldhit.particle.SHParticleType.heavy_ion" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymchelper.shieldhit.particle.SHParticleType.helium_3">
+<span class="sig-name descname"><span class="pre">helium_3</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">23</span></em><a class="headerlink" href="#pymchelper.shieldhit.particle.SHParticleType.helium_3" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymchelper.shieldhit.particle.SHParticleType.helium_4">
+<span class="sig-name descname"><span class="pre">helium_4</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">24</span></em><a class="headerlink" href="#pymchelper.shieldhit.particle.SHParticleType.helium_4" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymchelper.shieldhit.particle.SHParticleType.kaon_minus">
+<span class="sig-name descname"><span class="pre">kaon_minus</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">8</span></em><a class="headerlink" href="#pymchelper.shieldhit.particle.SHParticleType.kaon_minus" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymchelper.shieldhit.particle.SHParticleType.kaon_plus">
+<span class="sig-name descname"><span class="pre">kaon_plus</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">9</span></em><a class="headerlink" href="#pymchelper.shieldhit.particle.SHParticleType.kaon_plus" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymchelper.shieldhit.particle.SHParticleType.kaon_tilde">
+<span class="sig-name descname"><span class="pre">kaon_tilde</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">11</span></em><a class="headerlink" href="#pymchelper.shieldhit.particle.SHParticleType.kaon_tilde" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymchelper.shieldhit.particle.SHParticleType.kaon_zero">
+<span class="sig-name descname"><span class="pre">kaon_zero</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">10</span></em><a class="headerlink" href="#pymchelper.shieldhit.particle.SHParticleType.kaon_zero" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymchelper.shieldhit.particle.SHParticleType.muon_minus">
+<span class="sig-name descname"><span class="pre">muon_minus</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">15</span></em><a class="headerlink" href="#pymchelper.shieldhit.particle.SHParticleType.muon_minus" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymchelper.shieldhit.particle.SHParticleType.muon_plus">
+<span class="sig-name descname"><span class="pre">muon_plus</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">16</span></em><a class="headerlink" href="#pymchelper.shieldhit.particle.SHParticleType.muon_plus" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymchelper.shieldhit.particle.SHParticleType.neutrino_e">
+<span class="sig-name descname"><span class="pre">neutrino_e</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">17</span></em><a class="headerlink" href="#pymchelper.shieldhit.particle.SHParticleType.neutrino_e" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymchelper.shieldhit.particle.SHParticleType.neutrino_mu">
+<span class="sig-name descname"><span class="pre">neutrino_mu</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">19</span></em><a class="headerlink" href="#pymchelper.shieldhit.particle.SHParticleType.neutrino_mu" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymchelper.shieldhit.particle.SHParticleType.neutron">
+<span class="sig-name descname"><span class="pre">neutron</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">1</span></em><a class="headerlink" href="#pymchelper.shieldhit.particle.SHParticleType.neutron" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymchelper.shieldhit.particle.SHParticleType.pi_minus">
+<span class="sig-name descname"><span class="pre">pi_minus</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">3</span></em><a class="headerlink" href="#pymchelper.shieldhit.particle.SHParticleType.pi_minus" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymchelper.shieldhit.particle.SHParticleType.pi_plus">
+<span class="sig-name descname"><span class="pre">pi_plus</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">4</span></em><a class="headerlink" href="#pymchelper.shieldhit.particle.SHParticleType.pi_plus" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymchelper.shieldhit.particle.SHParticleType.pi_zero">
+<span class="sig-name descname"><span class="pre">pi_zero</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">5</span></em><a class="headerlink" href="#pymchelper.shieldhit.particle.SHParticleType.pi_zero" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymchelper.shieldhit.particle.SHParticleType.positron">
+<span class="sig-name descname"><span class="pre">positron</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">14</span></em><a class="headerlink" href="#pymchelper.shieldhit.particle.SHParticleType.positron" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymchelper.shieldhit.particle.SHParticleType.proton">
+<span class="sig-name descname"><span class="pre">proton</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">2</span></em><a class="headerlink" href="#pymchelper.shieldhit.particle.SHParticleType.proton" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymchelper.shieldhit.particle.SHParticleType.triton">
+<span class="sig-name descname"><span class="pre">triton</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">22</span></em><a class="headerlink" href="#pymchelper.shieldhit.particle.SHParticleType.triton" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymchelper.shieldhit.particle.SHParticleType.unknown">
+<span class="sig-name descname"><span class="pre">unknown</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">0</span></em><a class="headerlink" href="#pymchelper.shieldhit.particle.SHParticleType.unknown" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="pymchelper.shieldhit.detector.geometry.html"
+                        title="previous chapter">pymchelper.shieldhit.detector.geometry module</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="pymchelper.writers.html"
+                        title="next chapter">pymchelper.writers package</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/apidoc/pymchelper.shieldhit.particle.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="pymchelper.writers.html" title="pymchelper.writers package"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="pymchelper.shieldhit.detector.geometry.html" title="pymchelper.shieldhit.detector.geometry module"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">pymchelper 1.10.0+rev3 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../developer.html" >Developer documentation</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="modules.html" >Source code</a> &#187;</li>
+          <li class="nav-item nav-item-3"><a href="pymchelper.html" >pymchelper package</a> &#187;</li>
+          <li class="nav-item nav-item-4"><a href="pymchelper.shieldhit.html" >pymchelper.shieldhit package</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">pymchelper.shieldhit.particle module</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2016, Leszek Grzanka.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 4.3.0.
+    </div>
+  </body>
+</html>
