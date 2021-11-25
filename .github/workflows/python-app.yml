@@ -11,7 +11,7 @@ on:
 
 env:
   REGISTRY: ghcr.io
-  IMAGE_NAME: test_pyinstaller_pymchelper
+  IMAGE_NAME: pymchelper
 
 jobs:
   build-and-push-image:
