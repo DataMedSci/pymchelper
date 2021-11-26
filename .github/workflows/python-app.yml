@@ -57,5 +57,4 @@ jobs:
       - name: Test
         run: |
           sudo docker images
-          sudo docker ps
-          sudo docker run -it pymchelper pwd
+          sudo docker run -it pymchelper:latest pwd
