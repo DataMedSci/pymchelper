@@ -60,5 +60,8 @@ jobs:
         run: |
           docker images
           docker run pymchelper:latest pwd
+          cat pymchelper/VERSION
           docker run -v `pwd`/dist:/app/dist pymchelper:latest pyinstaller --add-data 'pymchelper/VERSION:pymchelper' -F pymchelper/utils/mcscripter.py
           ./dist/mcscripter --version
+          docker run  -v `pwd`/dist:/test/ ubuntu:16.04 /test/mcscripter --version
+          docker run  -v `pwd`/dist:/test/ ubuntu:12.04 /test/mcscripter --version
