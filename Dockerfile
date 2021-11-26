@@ -1,4 +1,4 @@
-FROM ghcr.io/grzanka/centos6pyinstaller
+FROM ghcr.io/grzanka/centos6pyinstaller:main
 
 
 # pymchelper package and deps installation
