@@ -42,7 +42,6 @@ jobs:
         with:
           context: .
           push: false
-          tags: latest
           labels: ${{ steps.meta.outputs.labels }}
 
       # - name: Build and push Docker image
@@ -58,4 +57,4 @@ jobs:
         run: |
           sudo docker images
           sudo docker ps
-          sudo docker run -it ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest pwd
+          # sudo docker run -it ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest pwd
