@@ -24,6 +24,10 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v2
 
+      - name: Test
+        run: |
+          ls -alh pymchelper
+
       - name: Build Docker image
         uses: docker/build-push-action@v2.7.0
         with:
@@ -58,7 +62,9 @@ jobs:
 
       - name: Test
         run: |
-          docker images
+          ls -alh pymchelper
+          docker run -v `pwd`/dist:/app/dist pymchelper:latest ls -alh pymchelper/
+          docker run -v `pwd`/dist:/app/dist pymchelper:latest cat pymchelper/VERSION
           docker run -v `pwd`/dist:/app/dist pymchelper:latest pyinstaller --add-data 'pymchelper/VERSION:pymchelper' -F pymchelper/utils/mcscripter.py
           ./dist/mcscripter --version
           docker run  -v `pwd`/dist:/test/ ubuntu:16.04 /test/mcscripter --version
