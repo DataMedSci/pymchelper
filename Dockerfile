@@ -1,22 +1,22 @@
 FROM ghcr.io/grzanka/centos6pyinstaller:main
 
-
 # pymchelper package and deps installation
+# files and directories below are needed to install pymchelper in editable mode
 WORKDIR /app
 COPY requirements.txt .
-
-# disable pip cache to save some space
-ENV PIP_NO_CACHE_DIR=1
-RUN pip install --only-binary scipy,pillow -r requirements.txt
-
-# files and directories below are needed to install pymchelper in editable mode
 COPY setup.py .
 COPY README.rst .
 COPY pymchelper pymchelper
 COPY .git .git
 
+# disable pip cache to save some space
+ENV PIP_NO_CACHE_DIR=1
+RUN pip install --only-binary scipy,pillow -r requirements.txt
+
+# check if we run with correct version
 RUN python3 pymchelper/run.py --version
 
+# create directory for pymchelper products
 RUN mkdir dist
 
 # # producing single file distributions
