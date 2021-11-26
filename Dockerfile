@@ -14,6 +14,7 @@ ENV PIP_NO_CACHE_DIR=1
 RUN pip install --only-binary scipy,pillow -r requirements.txt
 
 # generate static VERSION file
+RUN ls -alh .git
 RUN python3 setup.py --help
 
 # create directory for pymchelper products
