@@ -1,4 +1,4 @@
-name: Automated tests
+ebname: Automated tests
 
 on:
   push:
@@ -33,13 +33,29 @@ jobs:
           push: false
           tags: pymchelper
 
-      - name: Generate single-file executables
+      - name: Generate single-file executables 1
         run: |
           docker run -v `pwd`/dist:/app/dist pymchelper:latest pyinstaller --add-data 'pymchelper/VERSION:pymchelper' -F pymchelper/utils/mcscripter.py
 
+      - name: Generate single-file executables 2
+        run: |
+          docker run -v `pwd`/dist:/app/dist pymchelper:latest pyinstaller --add-data 'pymchelper/VERSION:pymchelper' -F pymchelper/utils/pld2sobp.py
+
+      - name: Generate single-file executables 3
+        run: |
+          docker run -v `pwd`/dist:/app/dist pymchelper:latest pyinstaller --add-data 'pymchelper/VERSION:pymchelper' -F pymchelper/utils/runmc.py
+
+      - name: Generate single-file executables 4
+        run: |
+          docker run -v `pwd`/dist:/app/dist pymchelper:latest pyinstaller --add-data 'pymchelper/VERSION:pymchelper' -F pymchelper/run.py
+
       - name: Test single-file executables
         run: |
+          ls -alh ./dist/
           ./dist/mcscripter --version
+          ./dist/pld2sobp --version
+          ./dist/runmc --version
+          ./dist/run --version
           docker run  -v `pwd`/dist:/test/ ubuntu:16.04 /test/mcscripter --version
           docker run  -v `pwd`/dist:/test/ ubuntu:12.04 /test/mcscripter --version
 
