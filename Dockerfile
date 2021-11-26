@@ -13,8 +13,8 @@ COPY .git .git
 ENV PIP_NO_CACHE_DIR=1
 RUN pip install --only-binary scipy,pillow -r requirements.txt
 
-# check if we run with correct version
-RUN python3 pymchelper/run.py --version
+# generate static VERSION file
+RUN python3 setup.py --help
 
 # create directory for pymchelper products
 RUN mkdir dist
