@@ -32,4 +32,3 @@ RUN python3 setup.py --help
 
 # create directory for pymchelper products
 RUN mkdir dist
-

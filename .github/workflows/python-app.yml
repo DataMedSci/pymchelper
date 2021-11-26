@@ -1,3 +1,4 @@
+
 name: Automated tests
 
 on:
@@ -9,13 +10,175 @@ on:
   release:
     types: [published]
 
-env:
-  REGISTRY: ghcr.io
-  IMAGE_NAME: ${{ github.repository }}
-
 jobs:
-  build-and-push-image:
+  smoke_test:
+    if: "!contains(github.event.head_commit.message, '[ci skip]') && !contains(github.event.head_commit.message, '[skip ci]')"
+    runs-on: ubuntu-latest        
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Set up Python
+      uses: actions/setup-python@v2.3.0
+      with:
+        python-version: 3.9
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        pip install -r tests/requirements-test.txt
+
+    - name: Lint with flake8
+      run: |
+          # stop the build if there are Python syntax errors or undefined names
+          flake8 --count --select=E9,F63,F7,F82 --show-source --statistics pymchelper tests examples
+
+    - name: Smoke test with pytest
+      run: |         
+         pytest -k "smoke" tests/
+         
+         
+  normal_test:
+    if: "!contains(github.event.head_commit.message, '[ci skip]') && !contains(github.event.head_commit.message, '[skip ci]')"
+    strategy:
+      matrix:
+        python-version: ['2.7', '3.5', '3.6', '3.7', '3.8', '3.9', '3.10']
+        platform: [ubuntu-latest, macos-latest, windows-latest]
+        exclude:
+          - platform: macos-latest
+            python-version: 3.5
+          - platform: macos-latest
+            python-version: 3.6
+          - platform: macos-latest
+            python-version: 3.7
+          - platform: macos-latest
+            python-version: 3.8
+          - platform: macos-latest
+            python-version: 3.10
+          - platform: windows-latest
+            python-version: 3.5
+          - platform: windows-latest
+            python-version: 3.6
+    runs-on: ${{ matrix.platform }}
+    needs: [smoke_test]
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Set up Python
+      uses: actions/setup-python@v2.3.0
+      with:
+        python-version: ${{ matrix.python-version }}
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        pip install -r tests/requirements-test.txt
+
+    - name: Test with pytest
+      run: |         
+         pytest -k "not slow" tests/
+         
+         
+  full_test:
+    if: "!contains(github.event.head_commit.message, '[ci skip]') && !contains(github.event.head_commit.message, '[skip ci]')"
+    strategy:
+      matrix:
+        python-version: ['2.7', '3.5', '3.9', '3.10']
     runs-on: ubuntu-latest
+    needs: [normal_test]
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Set up Python
+      uses: actions/setup-python@v2.3.0
+      with:
+        python-version: ${{ matrix.python-version }}
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        pip install -r tests/requirements-test.txt
+
+    - name: Run all test with pytest
+      run: |         
+         pytest tests/
+         
+    - name: Check images generation for documentation
+      run: |         
+         cd docs/images_generation && ./run.sh
+
+
+
+  make_and_upload_package:
+    if: "!contains(github.event.head_commit.message, '[ci skip]') && !contains(github.event.head_commit.message, '[skip ci]')"
+
+    runs-on: ubuntu-latest
+    needs: [full_test]
+    steps:
+    - uses: actions/checkout@v2.3.4
+      with:
+        fetch-depth: 0
+        
+    - name: Set up Python
+      uses: actions/setup-python@v2.3.0
+      with:
+        python-version: 3.9
+        
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        
+    - name: Make wheel package
+      run: |         
+        pip install wheel
+        
+        # first call to version method would generate VERSION  file
+        PYTHONPATH=. python pymchelper/run.py --version
+        
+        python setup.py bdist_wheel
+
+        # makes source package
+        python setup.py sdist
+
+    - name: publish package to pypi
+      uses: pypa/gh-action-pypi-publish@v1.4.2
+      if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags')
+      with:
+        # Password for your PyPI user or an access token
+        password: ${{ secrets.TWINE_PASSWORD }}
+        # The repository URL to use
+        repository_url: "https://upload.pypi.org/legacy/"
+        # The target directory for distribution
+        packages_dir: dist/
+        # Show verbose output.
+        verbose: true
+
+  docs:
+    runs-on: ubuntu-latest
+    needs: [make_and_upload_package]
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2.4.0
+      with:
+        fetch-depth: 0 # otherwise, you will failed to push refs to dest repo
+    - name: Build and Commit
+      uses: sphinx-notes/pages@1.0
+      with:
+        documentation_path: docs
+    - name: Push changes to gh-pages branch
+      # this action is being triggered on release tags (named v*)
+      if: "github.event_name == 'push' && startsWith(github.event.ref, 'refs/tags/v')"
+      uses: ad-m/github-push-action@v0.6.0
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        branch: gh-pages
+
+  build-executables:
+    runs-on: ubuntu-latest
+    needs: [full_test]
     permissions:
       contents: read
       packages: write
@@ -58,25 +221,8 @@ jobs:
           ./dist/run --version
           docker run  -v `pwd`/dist:/test/ ubuntu:12.04 /test/mcscripter --version
 
-
-      # - name: Log in to the Container registry
-      #   uses: docker/login-action@v1.10.0
-      #   with:
-      #     registry: ${{ env.REGISTRY }}
-      #     username: ${{ github.actor }}
-      #     password: ${{ secrets.GITHUB_TOKEN }}
-
-      # - name: Extract metadata (tags, labels) for Docker
-      #   id: meta
-      #   uses: docker/metadata-action@v3.6.0
-      #   with:
-      #     images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
-
-
-      # - name: Build and push Docker image
-      #   uses: docker/build-push-action@v2.7.0
-      #   with:
-      #     context: .
-      #     push: true
-      #     tags: ${{ steps.meta.outputs.tags }}
-      #     labels: ${{ steps.meta.outputs.labels }}
+      - name: Archive produced executables as artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: executables
+          path: ./dist
