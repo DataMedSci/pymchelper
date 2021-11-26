@@ -15,7 +15,7 @@ logger = logging.getLogger(__name__)
 
 class Config():
     """Reading the config file."""
-    
+
     def __init__(self, fn):
         with open(fn) as _f:
             self.lines = _f.readlines()
@@ -33,7 +33,6 @@ class Config():
         Parse configuration file.
         All data are read into dicts. There are two dicts: a constant and variable (tabluated) one.
         """
-
         self.const_dict = {}  # list of contant assignments
         self.table_dict = {}  # list of table assignments
 
@@ -134,7 +133,6 @@ class Template():
 
     def read(self, cfg):
         """Reads all template files, and creates a list of McFile objects in self.files."""
-
         fname_list = cfg.const_dict["FILES"] + cfg.const_dict["SYMLINKS"]
 
         for fname in fname_list:
@@ -161,7 +159,6 @@ class Generator():
         Logic attached to the various keys is in here.
         templ is a Template object and cfg is a Config object.
         """
-
         # create a new dict, with all keys, but single unique values only:
         # this is the "current unique dictionary"
         u_dict = cfg.const_dict.copy()
