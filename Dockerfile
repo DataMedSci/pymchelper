@@ -1,5 +1,18 @@
 FROM ghcr.io/grzanka/centos6pyinstaller:main
 
+# build this image with following command
+# 
+# docker build --tag pymchelper 
+#
+# run docker container to generate single-file binary in `dist` directory for pymchelper/utils/mcscripter.py
+# 
+# docker run -it -v `pwd`/dist:/app/dist pymchelper:latest pyinstaller --add-data 'pymchelper/VERSION:pymchelper' -F pymchelper/utils/mcscripter.py
+#
+# test if produced executable works on some old distro:
+#
+# docker run  -v `pwd`/dist:/test/ ubuntu:16.04 /test/mcscripter --version
+
+
 # pymchelper package and deps installation
 # files and directories below are needed to install pymchelper in editable mode
 WORKDIR /app
@@ -20,13 +33,3 @@ RUN python3 setup.py --help
 # create directory for pymchelper products
 RUN mkdir dist
 
-# # producing single file distributions
-#RUN pyinstaller -F pymchelper/run.py
-#RUN pyinstaller -F pymchelper/utils/runmc.py
-#RUN pyinstaller -F pymchelper/utils/pld2sobp.py
-#RUN pyinstaller -F pymchelper/utils/mcscripter.py
-
-# generate images using 
-# docker run -it -v `pwd`/dist:/app/dist 60b000a9b0db pyinstaller --add-data 'pymchelper/VERSION:pymchelper' -F pymchelper/utils/mcscripter.py
-# test if produced:
-# ./dist/mcscripter --version

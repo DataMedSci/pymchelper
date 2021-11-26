@@ -1,4 +1,4 @@
-ebname: Automated tests
+name: Automated tests
 
 on:
   push:
@@ -56,7 +56,6 @@ jobs:
           ./dist/pld2sobp --version
           ./dist/runmc --version
           ./dist/run --version
-          docker run  -v `pwd`/dist:/test/ ubuntu:16.04 /test/mcscripter --version
           docker run  -v `pwd`/dist:/test/ ubuntu:12.04 /test/mcscripter --version
 
 
@@ -81,5 +80,3 @@ jobs:
       #     push: true
       #     tags: ${{ steps.meta.outputs.tags }}
       #     labels: ${{ steps.meta.outputs.labels }}
-
-
