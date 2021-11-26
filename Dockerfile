@@ -1,8 +1,4 @@
-# build image with `docker-compose up -d --build`
-
-# move to ghcr.io
-
-FROM pyinstaller
+FROM ghcr.io/grzanka/centos6pyinstaller
 
 
 # pymchelper package and deps installation
@@ -21,9 +17,9 @@ RUN pip install --only-binary scipy,pillow -r requirements.txt
 RUN python3 pymchelper/run.py --version
 
 # # producing single file distributions
-RUN pyinstaller -F pymchelper/run.py
-RUN pyinstaller -F pymchelper/utils/runmc.py
-RUN pyinstaller -F pymchelper/utils/pld2sobp.py
-RUN pyinstaller -F pymchelper/utils/mcscripter.py
+#RUN pyinstaller -F pymchelper/run.py
+#RUN pyinstaller -F pymchelper/utils/runmc.py
+#RUN pyinstaller -F pymchelper/utils/pld2sobp.py
+#RUN pyinstaller -F pymchelper/utils/mcscripter.py
 
 # copy produced binary to host OS with: `docker cp installer:/app/dist/run .`
