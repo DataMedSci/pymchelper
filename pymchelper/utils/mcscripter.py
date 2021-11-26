@@ -10,8 +10,6 @@ import errno
 import logging
 import argparse
 
-import numpy as np
-
 logger = logging.getLogger(__name__)
 
 
@@ -195,7 +193,7 @@ class Generator():
                 _lmin = float(cfg.table_dict[loop_key + "MIN"][i])
                 _lmax = float(cfg.table_dict[loop_key + "MAX"][i])
                 _lst = float(cfg.table_dict[loop_key + "STEP"][i])
-                loop_vals = np.arange(_lmin, _lmax, _lst)
+                loop_vals = range(_lmin, _lmax, _lst)
                 for loop_val in loop_vals:
                     u_dict[loop_key] = loop_val
 
