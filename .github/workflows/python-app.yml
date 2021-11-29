@@ -234,6 +234,5 @@ jobs:
         with:
           allowUpdates:  true
           # An optional set of paths representing artifacts to upload to the release. This may be a single path or a comma delimited list of paths (or globs)
-          artifact: 'utils_Linux.tar.gz'
-          # The Github token.
+          artifacts: 'utils_Linux.tar.gz'
           token:  ${{ secrets.GITHUB_TOKEN }}
