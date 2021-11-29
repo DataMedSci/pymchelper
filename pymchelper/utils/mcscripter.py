@@ -10,15 +10,12 @@ import errno
 import logging
 import argparse
 
-import numpy as np
-
 logger = logging.getLogger(__name__)
 
 
 class Config():
-    """
-    Reading the config file.
-    """
+    """Reading the config file."""
+
     def __init__(self, fn):
         with open(fn) as _f:
             self.lines = _f.readlines()
@@ -36,7 +33,6 @@ class Config():
         Parse configuration file.
         All data are read into dicts. There are two dicts: a constant and variable (tabluated) one.
         """
-
         self.const_dict = {}  # list of contant assignments
         self.table_dict = {}  # list of table assignments
 
@@ -85,6 +81,7 @@ class McFile():
     General MC single file object.
     This will be used for the template files as well as the generated output files.
     """
+
     def __init__(self):
         self.fname = ""  # filename
         self.path = ""   # full path to this file (may be relative)
@@ -93,9 +90,7 @@ class McFile():
         self.templ_dir = ""  # template directory
 
     def write(self):
-        """
-        Write self to disk, create symlink if that is the case.
-        """
+        """Write self to disk, create symlink if that is the case."""
         # check if target directory exists, create it, if not.
         try:
             os.makedirs(os.path.dirname(self.path))
@@ -130,18 +125,14 @@ class McFile():
 
 
 class Template():
-    """
-    Read all files and symlinks specified in the config file, and place them in a list of McFile objects.
-    """
+    """Read all files and symlinks specified in the config file, and place them in a list of McFile objects."""
+
     def __init__(self, cfg):
         self.files = []
         self.read(cfg)
 
     def read(self, cfg):
-        """
-        Reads all template files, and creates a list of McFile objects in self.files.
-        """
-
+        """Reads all template files, and creates a list of McFile objects in self.files."""
         fname_list = cfg.const_dict["FILES"] + cfg.const_dict["SYMLINKS"]
 
         for fname in fname_list:
@@ -161,15 +152,13 @@ class Template():
 
 
 class Generator():
-    """
-    This generates and writes the output files based on the loaded template files and the config file.
-    """
+    """This generates and writes the output files based on the loaded template files and the config file."""
+
     def __init__(self, templ, cfg):
         """
         Logic attached to the various keys is in here.
         templ is a Template object and cfg is a Config object.
         """
-
         # create a new dict, with all keys, but single unique values only:
         # this is the "current unique dictionary"
         u_dict = cfg.const_dict.copy()
@@ -195,7 +184,7 @@ class Generator():
                 _lmin = float(cfg.table_dict[loop_key + "MIN"][i])
                 _lmax = float(cfg.table_dict[loop_key + "MAX"][i])
                 _lst = float(cfg.table_dict[loop_key + "STEP"][i])
-                loop_vals = np.arange(_lmin, _lmax, _lst)
+                loop_vals = range(_lmin, _lmax, _lst)
                 for loop_val in loop_vals:
                     u_dict[loop_key] = loop_val
 
@@ -209,9 +198,7 @@ class Generator():
 
     @staticmethod
     def get_keys(s):  # This is currently not used, but kept for future use.
-        """
-        return list of ${} keys in string
-        """
+        """Return list of ${} keys in string"""
         r = []
 
         if "${" in s:
@@ -252,7 +239,6 @@ class Generator():
 
         "Unique", means that any _MIN _MAX _STEP type variables have been set.
         """
-
         _wd = u_dict["WDIR"]
 
         # check if any keys are in WDIR subsitutions
@@ -292,9 +278,7 @@ class Generator():
 
 
 def main(args=None):
-    """
-    Main function.
-    """
+    """Main function."""
     if args is None:
         args = sys.argv[1:]
 
