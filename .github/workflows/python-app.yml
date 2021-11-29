@@ -109,7 +109,6 @@ jobs:
          cd docs/images_generation && ./run.sh
 
 
-
   make_and_upload_package:
     if: "!contains(github.event.head_commit.message, '[ci skip]') && !contains(github.event.head_commit.message, '[skip ci]')"
 
@@ -225,3 +224,16 @@ jobs:
         with:
           name: executables
           path: ./dist
+
+      - name: Package release util files
+        run: tar -zcf utils_Linux.tar.gz dist/*
+
+      - name: Add artifact with util files to the release
+        uses: ncipollo/release-action@v1.9.0
+        if: startsWith(github.ref, 'refs/tags/v')
+        with:
+          allowUpdates:  true
+          # An optional set of paths representing artifacts to upload to the release. This may be a single path or a comma delimited list of paths (or globs)
+          artifact: 'utils_Linux.tar.gz'
+          # The Github token.
+          token:  ${{ secrets.GITHUB_TOKEN }}
