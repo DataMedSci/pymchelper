@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>pymchelper.utils.mcscripter &#8212; pymchelper 1.10.1 documentation</title>
+    <title>pymchelper.utils.mcscripter &#8212; pymchelper 1.10.2 documentation</title>
     
   <link href="../../../_static/css/theme.css" rel="stylesheet">
   <link href="../../../_static/css/index.ff1ffe594081f20da1ef19478df9384b.css" rel="stylesheet">
@@ -155,15 +155,12 @@
 <span class="kn">import</span> <span class="nn">logging</span>
 <span class="kn">import</span> <span class="nn">argparse</span>
 
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-
 <span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
 
 
 <div class="viewcode-block" id="Config"><a class="viewcode-back" href="../../../apidoc/pymchelper.utils.mcscripter.html#pymchelper.utils.mcscripter.Config">[docs]</a><span class="k">class</span> <span class="nc">Config</span><span class="p">():</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Reading the config file.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;Reading the config file.&quot;&quot;&quot;</span>
+
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fn</span><span class="p">):</span>
         <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">fn</span><span class="p">)</span> <span class="k">as</span> <span class="n">_f</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">lines</span> <span class="o">=</span> <span class="n">_f</span><span class="o">.</span><span class="n">readlines</span><span class="p">()</span>
@@ -181,7 +178,6 @@
 <span class="sd">        Parse configuration file.</span>
 <span class="sd">        All data are read into dicts. There are two dicts: a constant and variable (tabluated) one.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-
         <span class="bp">self</span><span class="o">.</span><span class="n">const_dict</span> <span class="o">=</span> <span class="p">{}</span>  <span class="c1"># list of contant assignments</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">table_dict</span> <span class="o">=</span> <span class="p">{}</span>  <span class="c1"># list of table assignments</span>
 
@@ -230,6 +226,7 @@
 <span class="sd">    General MC single file object.</span>
 <span class="sd">    This will be used for the template files as well as the generated output files.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">fname</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>  <span class="c1"># filename</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">path</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>   <span class="c1"># full path to this file (may be relative)</span>
@@ -238,9 +235,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">templ_dir</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>  <span class="c1"># template directory</span>
 
 <div class="viewcode-block" id="McFile.write"><a class="viewcode-back" href="../../../apidoc/pymchelper.utils.mcscripter.html#pymchelper.utils.mcscripter.McFile.write">[docs]</a>    <span class="k">def</span> <span class="nf">write</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Write self to disk, create symlink if that is the case.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="sd">&quot;&quot;&quot;Write self to disk, create symlink if that is the case.&quot;&quot;&quot;</span>
         <span class="c1"># check if target directory exists, create it, if not.</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">))</span>
@@ -275,18 +270,14 @@
 
 
 <div class="viewcode-block" id="Template"><a class="viewcode-back" href="../../../apidoc/pymchelper.utils.mcscripter.html#pymchelper.utils.mcscripter.Template">[docs]</a><span class="k">class</span> <span class="nc">Template</span><span class="p">():</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Read all files and symlinks specified in the config file, and place them in a list of McFile objects.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;Read all files and symlinks specified in the config file, and place them in a list of McFile objects.&quot;&quot;&quot;</span>
+
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cfg</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">files</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">cfg</span><span class="p">)</span>
 
 <div class="viewcode-block" id="Template.read"><a class="viewcode-back" href="../../../apidoc/pymchelper.utils.mcscripter.html#pymchelper.utils.mcscripter.Template.read">[docs]</a>    <span class="k">def</span> <span class="nf">read</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cfg</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Reads all template files, and creates a list of McFile objects in self.files.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-
+        <span class="sd">&quot;&quot;&quot;Reads all template files, and creates a list of McFile objects in self.files.&quot;&quot;&quot;</span>
         <span class="n">fname_list</span> <span class="o">=</span> <span class="n">cfg</span><span class="o">.</span><span class="n">const_dict</span><span class="p">[</span><span class="s2">&quot;FILES&quot;</span><span class="p">]</span> <span class="o">+</span> <span class="n">cfg</span><span class="o">.</span><span class="n">const_dict</span><span class="p">[</span><span class="s2">&quot;SYMLINKS&quot;</span><span class="p">]</span>
 
         <span class="k">for</span> <span class="n">fname</span> <span class="ow">in</span> <span class="n">fname_list</span><span class="p">:</span>
@@ -306,15 +297,13 @@
 
 
 <div class="viewcode-block" id="Generator"><a class="viewcode-back" href="../../../apidoc/pymchelper.utils.mcscripter.html#pymchelper.utils.mcscripter.Generator">[docs]</a><span class="k">class</span> <span class="nc">Generator</span><span class="p">():</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    This generates and writes the output files based on the loaded template files and the config file.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;This generates and writes the output files based on the loaded template files and the config file.&quot;&quot;&quot;</span>
+
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">templ</span><span class="p">,</span> <span class="n">cfg</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Logic attached to the various keys is in here.</span>
 <span class="sd">        templ is a Template object and cfg is a Config object.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-
         <span class="c1"># create a new dict, with all keys, but single unique values only:</span>
         <span class="c1"># this is the &quot;current unique dictionary&quot;</span>
         <span class="n">u_dict</span> <span class="o">=</span> <span class="n">cfg</span><span class="o">.</span><span class="n">const_dict</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
@@ -340,7 +329,7 @@
                 <span class="n">_lmin</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">cfg</span><span class="o">.</span><span class="n">table_dict</span><span class="p">[</span><span class="n">loop_key</span> <span class="o">+</span> <span class="s2">&quot;MIN&quot;</span><span class="p">][</span><span class="n">i</span><span class="p">])</span>
                 <span class="n">_lmax</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">cfg</span><span class="o">.</span><span class="n">table_dict</span><span class="p">[</span><span class="n">loop_key</span> <span class="o">+</span> <span class="s2">&quot;MAX&quot;</span><span class="p">][</span><span class="n">i</span><span class="p">])</span>
                 <span class="n">_lst</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">cfg</span><span class="o">.</span><span class="n">table_dict</span><span class="p">[</span><span class="n">loop_key</span> <span class="o">+</span> <span class="s2">&quot;STEP&quot;</span><span class="p">][</span><span class="n">i</span><span class="p">])</span>
-                <span class="n">loop_vals</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">_lmin</span><span class="p">,</span> <span class="n">_lmax</span><span class="p">,</span> <span class="n">_lst</span><span class="p">)</span>
+                <span class="n">loop_vals</span> <span class="o">=</span> <span class="nb">range</span><span class="p">(</span><span class="n">_lmin</span><span class="p">,</span> <span class="n">_lmax</span><span class="p">,</span> <span class="n">_lst</span><span class="p">)</span>
                 <span class="k">for</span> <span class="n">loop_val</span> <span class="ow">in</span> <span class="n">loop_vals</span><span class="p">:</span>
                     <span class="n">u_dict</span><span class="p">[</span><span class="n">loop_key</span><span class="p">]</span> <span class="o">=</span> <span class="n">loop_val</span>
 
@@ -354,9 +343,7 @@
 
 <div class="viewcode-block" id="Generator.get_keys"><a class="viewcode-back" href="../../../apidoc/pymchelper.utils.mcscripter.html#pymchelper.utils.mcscripter.Generator.get_keys">[docs]</a>    <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">get_keys</span><span class="p">(</span><span class="n">s</span><span class="p">):</span>  <span class="c1"># This is currently not used, but kept for future use.</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        return list of ${} keys in string</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="sd">&quot;&quot;&quot;Return list of ${} keys in string&quot;&quot;&quot;</span>
         <span class="n">r</span> <span class="o">=</span> <span class="p">[]</span>
 
         <span class="k">if</span> <span class="s2">&quot;${&quot;</span> <span class="ow">in</span> <span class="n">s</span><span class="p">:</span>
@@ -397,7 +384,6 @@
 
 <span class="sd">        &quot;Unique&quot;, means that any _MIN _MAX _STEP type variables have been set.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-
         <span class="n">_wd</span> <span class="o">=</span> <span class="n">u_dict</span><span class="p">[</span><span class="s2">&quot;WDIR&quot;</span><span class="p">]</span>
 
         <span class="c1"># check if any keys are in WDIR subsitutions</span>
@@ -437,9 +423,7 @@
 
 
 <div class="viewcode-block" id="main"><a class="viewcode-back" href="../../../apidoc/pymchelper.utils.mcscripter.html#pymchelper.utils.mcscripter.main">[docs]</a><span class="k">def</span> <span class="nf">main</span><span class="p">(</span><span class="n">args</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Main function.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;Main function.&quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="n">args</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">args</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
 
@@ -494,7 +478,7 @@
     
     <div class="footer-item">
       <p class="sphinx-version">
-Created using <a href="http://sphinx-doc.org/">Sphinx</a> 4.3.0.<br>
+Created using <a href="http://sphinx-doc.org/">Sphinx</a> 4.3.1.<br>
 </p>
     </div>
     
