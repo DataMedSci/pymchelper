@@ -213,7 +213,7 @@ jobs:
         run: |
           docker run -v `pwd`/dist:/app/dist pymchelper:latest pyinstaller --add-data 'pymchelper/VERSION:pymchelper' --onefile --name convertmc pymchelper/run.py
 
-      - name: Test single-file executables
+      - name: Test single-file executables, size and versions
         run: |
           ls -alh ./dist/
           ./dist/mcscripter --version
