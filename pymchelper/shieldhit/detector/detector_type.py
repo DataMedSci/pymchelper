@@ -74,6 +74,12 @@ class SHDetType(IntEnum):
     zeff2beta2 = 52
     tzeff2beta2 = 53
     dzeff2beta2 = 54
+    
+    count = 55 # simple counter, not normalized to per primary particle
+    norm_count_point = 56  # score_point counter, normalized per primary particle
+    count_point = 57  # score_point counter, not normalized per primary particle
+    moca_yf = 58  # frequency-averaged lineal energy from Moca
+    moca_yd = 59  # dose-averaged lineal energy from Moca
 
     let_bdo2016 = 120  # for differential scoring
     angle_bdo2016 = 121  # for differential scoring
