@@ -6,7 +6,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
-    <title>pymchelper.shieldhit.detector.detector_type module &#8212; pymchelper 1.10.4 documentation</title>
+    <title>pymchelper.shieldhit.detector.detector_type module &#8212; pymchelper 1.10.5 documentation</title>
     
   <link href="../_static/css/theme.css" rel="stylesheet">
   <link href="../_static/css/index.ff1ffe594081f20da1ef19478df9384b.css" rel="stylesheet">
@@ -322,7 +322,7 @@
 <dt class="sig sig-object py" id="pymchelper.shieldhit.detector.detector_type.SHDetType">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pymchelper.shieldhit.detector.detector_type.</span></span><span class="sig-name descname"><span class="pre">SHDetType</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pymchelper/shieldhit/detector/detector_type.html#SHDetType"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pymchelper.shieldhit.detector.detector_type.SHDetType" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">enum.IntEnum</span></code></p>
-<p>List of available detector types below is based on IDET(5,*) in detect.f in SHIELD-HIT12A.
+<p>List of available detector types below is based on IDET(5,*) in detect.f and sh_scoredef.h in SHIELD-HIT12A.
 If new detectors are added, class SHEstimator in estimator.py should also be updated.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pymchelper.shieldhit.detector.detector_type.SHDetType.a">
@@ -367,6 +367,16 @@ If new detectors are added, class SHEstimator in estimator.py should also be upd
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pymchelper.shieldhit.detector.detector_type.SHDetType.avg_energy">
 <span class="sig-name descname"><span class="pre">avg_energy</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">8</span></em><a class="headerlink" href="#pymchelper.shieldhit.detector.detector_type.SHDetType.avg_energy" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymchelper.shieldhit.detector.detector_type.SHDetType.count">
+<span class="sig-name descname"><span class="pre">count</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">55</span></em><a class="headerlink" href="#pymchelper.shieldhit.detector.detector_type.SHDetType.count" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymchelper.shieldhit.detector.detector_type.SHDetType.count_point">
+<span class="sig-name descname"><span class="pre">count_point</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">57</span></em><a class="headerlink" href="#pymchelper.shieldhit.detector.detector_type.SHDetType.count_point" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
@@ -427,6 +437,11 @@ If new detectors are added, class SHEstimator in estimator.py should also be upd
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pymchelper.shieldhit.detector.detector_type.SHDetType.dose_gy_bdo2016">
 <span class="sig-name descname"><span class="pre">dose_gy_bdo2016</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">205</span></em><a class="headerlink" href="#pymchelper.shieldhit.detector.detector_type.SHDetType.dose_gy_bdo2016" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymchelper.shieldhit.detector.detector_type.SHDetType.dq_eff">
+<span class="sig-name descname"><span class="pre">dq_eff</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">61</span></em><a class="headerlink" href="#pymchelper.shieldhit.detector.detector_type.SHDetType.dq_eff" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
@@ -520,6 +535,16 @@ If new detectors are added, class SHEstimator in estimator.py should also be upd
 <dd></dd></dl>
 
 <dl class="py attribute">
+<dt class="sig sig-object py" id="pymchelper.shieldhit.detector.detector_type.SHDetType.moca_yd">
+<span class="sig-name descname"><span class="pre">moca_yd</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">59</span></em><a class="headerlink" href="#pymchelper.shieldhit.detector.detector_type.SHDetType.moca_yd" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymchelper.shieldhit.detector.detector_type.SHDetType.moca_yf">
+<span class="sig-name descname"><span class="pre">moca_yf</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">58</span></em><a class="headerlink" href="#pymchelper.shieldhit.detector.detector_type.SHDetType.moca_yf" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
 <dt class="sig sig-object py" id="pymchelper.shieldhit.detector.detector_type.SHDetType.n_eqv_dose">
 <span class="sig-name descname"><span class="pre">n_eqv_dose</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">44</span></em><a class="headerlink" href="#pymchelper.shieldhit.detector.detector_type.SHDetType.n_eqv_dose" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
@@ -535,6 +560,11 @@ If new detectors are added, class SHEstimator in estimator.py should also be upd
 <dd></dd></dl>
 
 <dl class="py attribute">
+<dt class="sig sig-object py" id="pymchelper.shieldhit.detector.detector_type.SHDetType.norm_count_point">
+<span class="sig-name descname"><span class="pre">norm_count_point</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">56</span></em><a class="headerlink" href="#pymchelper.shieldhit.detector.detector_type.SHDetType.norm_count_point" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
 <dt class="sig sig-object py" id="pymchelper.shieldhit.detector.detector_type.SHDetType.pet">
 <span class="sig-name descname"><span class="pre">pet</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">15</span></em><a class="headerlink" href="#pymchelper.shieldhit.detector.detector_type.SHDetType.pet" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
@@ -542,6 +572,11 @@ If new detectors are added, class SHEstimator in estimator.py should also be upd
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pymchelper.shieldhit.detector.detector_type.SHDetType.q">
 <span class="sig-name descname"><span class="pre">q</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">21</span></em><a class="headerlink" href="#pymchelper.shieldhit.detector.detector_type.SHDetType.q" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymchelper.shieldhit.detector.detector_type.SHDetType.q_eff">
+<span class="sig-name descname"><span class="pre">q_eff</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">60</span></em><a class="headerlink" href="#pymchelper.shieldhit.detector.detector_type.SHDetType.q_eff" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
@@ -562,6 +597,11 @@ If new detectors are added, class SHEstimator in estimator.py should also be upd
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pymchelper.shieldhit.detector.detector_type.SHDetType.tletg">
 <span class="sig-name descname"><span class="pre">tletg</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">17</span></em><a class="headerlink" href="#pymchelper.shieldhit.detector.detector_type.SHDetType.tletg" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymchelper.shieldhit.detector.detector_type.SHDetType.tq_eff">
+<span class="sig-name descname"><span class="pre">tq_eff</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">62</span></em><a class="headerlink" href="#pymchelper.shieldhit.detector.detector_type.SHDetType.tq_eff" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">

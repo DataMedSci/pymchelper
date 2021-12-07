@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>pymchelper.shieldhit.detector.detector_type &#8212; pymchelper 1.10.4 documentation</title>
+    <title>pymchelper.shieldhit.detector.detector_type &#8212; pymchelper 1.10.5 documentation</title>
     
   <link href="../../../../_static/css/theme.css" rel="stylesheet">
   <link href="../../../../_static/css/index.ff1ffe594081f20da1ef19478df9384b.css" rel="stylesheet">
@@ -148,11 +148,9 @@
 
 <div class="viewcode-block" id="SHDetType"><a class="viewcode-back" href="../../../../apidoc/pymchelper.shieldhit.detector.detector_type.html#pymchelper.shieldhit.detector.detector_type.SHDetType">[docs]</a><span class="k">class</span> <span class="nc">SHDetType</span><span class="p">(</span><span class="n">IntEnum</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    List of available detector types below is based on IDET(5,*) in detect.f in SHIELD-HIT12A.</span>
+<span class="sd">    List of available detector types below is based on IDET(5,*) in detect.f and sh_scoredef.h in SHIELD-HIT12A.</span>
 <span class="sd">    If new detectors are added, class SHEstimator in estimator.py should also be updated.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-
-    <span class="c1"># TODO comments needed, see sh_scoredef.h</span>
 
     <span class="n">none</span> <span class="o">=</span> <span class="mi">0</span>
     <span class="n">energy</span> <span class="o">=</span> <span class="mi">1</span>
@@ -219,6 +217,16 @@
     <span class="n">zeff2beta2</span> <span class="o">=</span> <span class="mi">52</span>
     <span class="n">tzeff2beta2</span> <span class="o">=</span> <span class="mi">53</span>
     <span class="n">dzeff2beta2</span> <span class="o">=</span> <span class="mi">54</span>
+
+    <span class="n">count</span> <span class="o">=</span> <span class="mi">55</span>  <span class="c1"># simple counter, not normalized to per primary particle</span>
+    <span class="n">norm_count_point</span> <span class="o">=</span> <span class="mi">56</span>  <span class="c1"># score_point counter, normalized per primary particle</span>
+    <span class="n">count_point</span> <span class="o">=</span> <span class="mi">57</span>  <span class="c1"># score_point counter, not normalized per primary particle</span>
+    <span class="n">moca_yf</span> <span class="o">=</span> <span class="mi">58</span>  <span class="c1"># frequency-averaged lineal energy from Moca</span>
+    <span class="n">moca_yd</span> <span class="o">=</span> <span class="mi">59</span>  <span class="c1"># dose-averaged lineal energy from Moca</span>
+
+    <span class="n">q_eff</span> <span class="o">=</span> <span class="mi">60</span>  <span class="c1"># Effective Q, Q_eff, aka zeff2beta2</span>
+    <span class="n">dq_eff</span> <span class="o">=</span> <span class="mi">61</span>  <span class="c1"># Dose-averaged Q_eff</span>
+    <span class="n">tq_eff</span> <span class="o">=</span> <span class="mi">62</span>  <span class="c1"># Track-averaged Q_eff</span>
 
     <span class="n">let_bdo2016</span> <span class="o">=</span> <span class="mi">120</span>  <span class="c1"># for differential scoring</span>
     <span class="n">angle_bdo2016</span> <span class="o">=</span> <span class="mi">121</span>  <span class="c1"># for differential scoring</span>
