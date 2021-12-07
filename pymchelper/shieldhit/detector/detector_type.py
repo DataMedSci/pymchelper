@@ -3,11 +3,9 @@ from enum import IntEnum
 
 class SHDetType(IntEnum):
     """
-    List of available detector types below is based on IDET(5,*) in detect.f in SHIELD-HIT12A.
+    List of available detector types below is based on IDET(5,*) in detect.f and sh_scoredef.h in SHIELD-HIT12A.
     If new detectors are added, class SHEstimator in estimator.py should also be updated.
     """
-
-    # TODO comments needed, see sh_scoredef.h
 
     none = 0
     energy = 1
@@ -74,6 +72,16 @@ class SHDetType(IntEnum):
     zeff2beta2 = 52
     tzeff2beta2 = 53
     dzeff2beta2 = 54
+
+    count = 55  # simple counter, not normalized to per primary particle
+    norm_count_point = 56  # score_point counter, normalized per primary particle
+    count_point = 57  # score_point counter, not normalized per primary particle
+    moca_yf = 58  # frequency-averaged lineal energy from Moca
+    moca_yd = 59  # dose-averaged lineal energy from Moca
+
+    q_eff = 60  # Effective Q, Q_eff, aka zeff2beta2
+    dq_eff = 61  # Dose-averaged Q_eff
+    tq_eff = 62  # Track-averaged Q_eff
 
     let_bdo2016 = 120  # for differential scoring
     angle_bdo2016 = 121  # for differential scoring
