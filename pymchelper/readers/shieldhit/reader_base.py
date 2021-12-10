@@ -169,7 +169,7 @@ def read_next_token(f):
 
     x1 = np.fromfile(f, dtype=tag, count=1)  # read the data into numpy
 
-    if not x1:
+    if x1.size == 0:
         return None
     else:
         pl_id = x1['pl_id'][0]
