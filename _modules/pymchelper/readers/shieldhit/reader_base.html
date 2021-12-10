@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>pymchelper.readers.shieldhit.reader_base &#8212; pymchelper 1.10.5 documentation</title>
+    <title>pymchelper.readers.shieldhit.reader_base &#8212; pymchelper 1.10.6 documentation</title>
     
   <link href="../../../../_static/css/theme.css" rel="stylesheet">
   <link href="../../../../_static/css/index.ff1ffe594081f20da1ef19478df9384b.css" rel="stylesheet">
@@ -194,7 +194,6 @@
 <div class="viewcode-block" id="mesh_unit_and_name"><a class="viewcode-back" href="../../../../apidoc/pymchelper.readers.shieldhit.reader_base.html#pymchelper.readers.shieldhit.reader_base.mesh_unit_and_name">[docs]</a><span class="k">def</span> <span class="nf">mesh_unit_and_name</span><span class="p">(</span><span class="n">estimator</span><span class="p">,</span> <span class="n">axis</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot; Gets units and names depending on detector type.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-
     <span class="n">_geotyp_units</span> <span class="o">=</span> <span class="p">{</span>
         <span class="n">SHGeoType</span><span class="o">.</span><span class="n">msh</span><span class="p">:</span> <span class="p">(</span><span class="s2">&quot;cm&quot;</span><span class="p">,</span> <span class="s2">&quot;cm&quot;</span><span class="p">,</span> <span class="s2">&quot;cm&quot;</span><span class="p">),</span>
         <span class="n">SHGeoType</span><span class="o">.</span><span class="n">dmsh</span><span class="p">:</span> <span class="p">(</span><span class="s2">&quot;cm&quot;</span><span class="p">,</span> <span class="s2">&quot;cm&quot;</span><span class="p">,</span> <span class="s2">&quot;cm&quot;</span><span class="p">),</span>
@@ -307,14 +306,13 @@
 <span class="sd">    f is an open and readable file pointer.</span>
 <span class="sd">    returns None if no token was found / EOF</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-
     <span class="n">tag</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dtype</span><span class="p">([(</span><span class="s1">&#39;pl_id&#39;</span><span class="p">,</span> <span class="s1">&#39;&lt;u8&#39;</span><span class="p">),</span>
                     <span class="p">(</span><span class="s1">&#39;pl_type&#39;</span><span class="p">,</span> <span class="s1">&#39;S8&#39;</span><span class="p">),</span>
                     <span class="p">(</span><span class="s1">&#39;pl_len&#39;</span><span class="p">,</span> <span class="s1">&#39;&lt;u8&#39;</span><span class="p">)])</span>
 
     <span class="n">x1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">fromfile</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">tag</span><span class="p">,</span> <span class="n">count</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>  <span class="c1"># read the data into numpy</span>
 
-    <span class="k">if</span> <span class="ow">not</span> <span class="n">x1</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">x1</span><span class="o">.</span><span class="n">size</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
         <span class="k">return</span> <span class="kc">None</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">pl_id</span> <span class="o">=</span> <span class="n">x1</span><span class="p">[</span><span class="s1">&#39;pl_id&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
