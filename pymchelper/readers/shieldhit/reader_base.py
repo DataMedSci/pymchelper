@@ -49,7 +49,6 @@ class SHReader(Reader):
 def mesh_unit_and_name(estimator, axis):
     """ Gets units and names depending on detector type.
     """
-
     _geotyp_units = {
         SHGeoType.msh: ("cm", "cm", "cm"),
         SHGeoType.dmsh: ("cm", "cm", "cm"),
@@ -162,7 +161,6 @@ def read_next_token(f):
     f is an open and readable file pointer.
     returns None if no token was found / EOF
     """
-
     tag = np.dtype([('pl_id', '<u8'),
                     ('pl_type', 'S8'),
                     ('pl_len', '<u8')])
