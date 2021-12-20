@@ -165,7 +165,7 @@ jobs:
       with:
         fetch-depth: 0 # otherwise, you will failed to push refs to dest repo
     - name: Build and Commit
-      uses: sphinx-notes/pages@1.0
+      uses: sphinx-notes/pages@2.0
       with:
         documentation_path: docs
     - name: Push changes to gh-pages branch
