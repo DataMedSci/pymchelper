@@ -210,7 +210,8 @@ jobs:
 
       - name: Generate single-file executables for convertmc
         run: |
-          docker run -v `pwd`/dist:/app/dist pymchelper:latest pyinstaller --add-data 'pymchelper/VERSION:pymchelper' --onefile --name convertmc pymchelper/run.py
+          docker run -v `pwd`/dist:/app/dist pymchelper:latest pyinstaller convertmc.spec
+
 
       - name: Test single-file executables
         run: |

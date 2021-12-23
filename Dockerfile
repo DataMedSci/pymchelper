@@ -6,7 +6,7 @@ FROM ghcr.io/grzanka/centos6pyinstaller:main
 #
 # run docker container to generate single-file binary in `dist` directory for pymchelper/utils/mcscripter.py
 # 
-# docker run -it -v `pwd`/dist:/app/dist pymchelper:latest pyinstaller --add-data 'pymchelper/VERSION:pymchelper' -F pymchelper/utils/mcscripter.py
+# docker run -it -v `pwd`/dist:/app/dist pymchelper:latest pyinstaller --add-data 'pymchelper/VERSION:pymchelper' --onefile pymchelper/utils/mcscripter.py
 #
 # test if produced executable works on some old distro:
 #
@@ -32,3 +32,6 @@ RUN python3 setup.py --help
 
 # create directory for pymchelper products
 RUN mkdir dist
+
+# copy pyinstaller specification file
+COPY convertmc.spec .
