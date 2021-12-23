@@ -33,4 +33,5 @@ RUN python3 setup.py --help
 # create directory for pymchelper products
 RUN mkdir dist
 
-COPY run.spec .
+# copy pyinstaller specification file
+COPY convertmc.spec .
