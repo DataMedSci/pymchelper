@@ -12,7 +12,9 @@ on:
 jobs:
   # fast tests inluding linter and couple of fastests unit tests run with pytest
   smoke_test:
-    if: "!contains(github.event.head_commit.message, '[ci skip]') && !contains(github.event.head_commit.message, '[skip ci]')"
+    if: >
+      !contains(github.event.head_commit.message, '[ci skip]') &&
+       !contains(github.event.head_commit.message, '[skip ci]')
     runs-on: ubuntu-latest        
     steps:
     - uses: actions/checkout@v2
@@ -39,7 +41,6 @@ jobs:
          
   # all tests on matrix of all possible python versions and OSes
   normal_test:
-    if: "!contains(github.event.head_commit.message, '[ci skip]') && !contains(github.event.head_commit.message, '[skip ci]')"
     strategy:
       matrix:
         python-version: ['2.7', '3.5', '3.6', '3.7', '3.8', '3.9', '3.10']
@@ -81,7 +82,6 @@ jobs:
          
   # long running tests and check of image generation
   full_test:
-    if: "!contains(github.event.head_commit.message, '[ci skip]') && !contains(github.event.head_commit.message, '[skip ci]')"
     strategy:
       matrix:
         python-version: ['2.7', '3.5', '3.9', '3.10']
@@ -111,8 +111,6 @@ jobs:
 
   # test if package generation works and optional package upload to pypi (only on release)
   make_and_upload_package:
-    if: "!contains(github.event.head_commit.message, '[ci skip]') && !contains(github.event.head_commit.message, '[skip ci]')"
-
     runs-on: ubuntu-latest
     needs: [full_test]
     steps:
@@ -165,9 +163,10 @@ jobs:
       with:
         fetch-depth: 0 # otherwise, you will failed to push refs to dest repo
     - name: Build and Commit
-      uses: sphinx-notes/pages@1.0
+      uses: sphinx-notes/pages@2.0
       with:
         documentation_path: docs
+        requirements_path: docs/requirements.txt
     - name: Push changes to gh-pages branch
       # this action is being triggered on release tags (named v*)
       if: "github.event_name == 'push' && startsWith(github.event.ref, 'refs/tags/v')"
