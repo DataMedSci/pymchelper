@@ -179,7 +179,7 @@ jobs:
   # generation of single-file executables
   build-executables:
     runs-on: ubuntu-latest
-    #needs: [full_test]
+    needs: [full_test]
     permissions:
       contents: read
       packages: write
@@ -209,11 +209,7 @@ jobs:
         run: |
           docker run -v `pwd`/dist:/app/dist pymchelper:latest pyinstaller --add-data 'pymchelper/VERSION:pymchelper' --onefile --name runmc pymchelper/utils/runmc.py
 
-      - name: Generate single-file executables for convertmc (full)
-        run: |
-          docker run -v `pwd`/dist:/app/dist pymchelper:latest pyinstaller --add-data 'pymchelper/VERSION:pymchelper' --onefile --name convertmc_full pymchelper/run.py
-
-      - name: Generate single-file executables for convertmc (small)
+      - name: Generate single-file executables for convertmc
         run: |
           docker run -v `pwd`/dist:/app/dist pymchelper:latest pyinstaller convertmc.spec
 
