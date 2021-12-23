@@ -179,7 +179,7 @@ jobs:
   # generation of single-file executables
   build-executables:
     runs-on: ubuntu-latest
-    needs: [full_test]
+    #needs: [full_test]
     permissions:
       contents: read
       packages: write

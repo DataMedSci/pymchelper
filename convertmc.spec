@@ -45,7 +45,7 @@ def print_tuple_size(list_of_tuples):
     and print it. We also print total size of all files in a tuple.
     """
     total_size = 0
-    for item in sorted(list_of_tuples, key=size_b, reverse=True):
+    for item in sorted(list_of_tuples, key=lambda item: size_b(item[1]), reverse=True):
         size_to_print = pretty_size(size_b(item[1]))
         total_size += size_b(item[1])
         print(f"item {item} {size_to_print}")
@@ -60,19 +60,20 @@ def print_header(name):
     print("-"*120)
 
 
-a = Analysis(['pymchelper/run.py'],
-             pathex=['/home/ubuntu/workspace/pymchelper'],
+a = Analysis([os.path.join('pymchelper', 'run.py')],
+             pathex=['.'],
              binaries=[],
-             datas=[('pymchelper/VERSION', 'pymchelper')],
+             datas=[(os.path.join('pymchelper','VERSION'), 'pymchelper')],
              hiddenimports=[],
              hookspath=[],
              runtime_hooks=[],
-             excludes=['scipy', 'mpl-data/tests/res/shieldhit/executable/shieldhit'],
+             excludes=['scipy'],  # remove unwanted scipy, pytrip98 depends partially on it, but its not needed for our purposes
              win_no_prefer_redirects=False,
              win_private_assemblies=False,
              cipher=None,
              noarchive=False)
 
+# remove unwanted large files
 a.binaries = TOC([item for item in a.binaries if not item[0].startswith('mpl-data')])
 a.datas = TOC([item for item in a.datas if not item[0].startswith('mpl-data')])
 
