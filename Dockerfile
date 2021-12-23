@@ -20,6 +20,7 @@ COPY requirements.txt .
 COPY setup.py .
 COPY README.rst .
 COPY pymchelper pymchelper
+COPY *.spec .
 COPY .git .git
 
 # disable pip cache to save some space
