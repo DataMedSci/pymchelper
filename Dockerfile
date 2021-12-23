@@ -20,7 +20,6 @@ COPY requirements.txt .
 COPY setup.py .
 COPY README.rst .
 COPY pymchelper pymchelper
-COPY *.spec .
 COPY .git .git
 
 # disable pip cache to save some space
@@ -33,3 +32,5 @@ RUN python3 setup.py --help
 
 # create directory for pymchelper products
 RUN mkdir dist
+
+COPY run.spec .
