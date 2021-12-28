@@ -1,8 +1,9 @@
 pymchelper
 ==========
 
-**pymchelper** is a toolkit for manipulating output and input files of particle transport codes,
-such as FLUKA and SHIELD-HIT12A.
+**pymchelper** is a toolkit for aiding users of the particle transport codes, such as FLUKA and SHIELD-HIT12A.
+These codes produce binary files (especially when running on dedicated computing clusters). 
+
 It provides a command line program, called **convertmc** which simplifies process of converting binary output
 files to graphs, tabulated plain data files (which can be open by MS Excel) and other formats.
 Toolkit can also serve as a library in Python language, which can be used by programmers and data scientists 
