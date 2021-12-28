@@ -253,3 +253,78 @@ jobs:
           # An optional set of paths representing artifacts to upload to the release. This may be a single path or a comma delimited list of paths (or globs)
           artifacts: './dist/*'
           token:  ${{ secrets.GITHUB_TOKEN }}
+
+  
+  generate-deb-packages:
+    runs-on: ubuntu-latest
+    needs: [upload-executables]
+
+    steps:
+      - name: Checkout repository with full history
+        uses: actions/checkout@v2
+
+      - name: Generate deb packages
+        working-directory: debian_packages
+        run: ./generate_deb_packages.sh
+
+      - name: Archive deb package as artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: deb
+          path: 'debian_packages/*.deb'
+
+  test_deb:
+    runs-on: ubuntu-latest
+    needs: [generate-deb-packages]
+    strategy:
+      matrix:
+        docker-tag: ['debian:8', 'debian:9', 'debian:10', 'debian:11', 'debian:stable', 'ubuntu:14.04', 'ubuntu:16.04', 'ubuntu:18.04', 'ubuntu:20.04', 'ubuntu:21.04']
+    steps:
+      - uses: actions/download-artifact@v2
+        with:
+          name: deb
+          path: ./
+
+      - name: Inspect artifacts
+        run: |
+          dpkg-deb --contents pymchelper.deb
+          dpkg-deb --contents pymchelper-convertmc.deb
+          dpkg-deb --contents pymchelper-runmc.deb
+      - name: Test installation
+        run: docker run --volume `pwd`:/pkg ${{ matrix.docker-tag }} /bin/sh -c "ldd --version; dpkg --install /pkg/pymchelper-*.deb; convertmc --version; runmc --version"
+
+  repo_prepare:
+      runs-on: ubuntu-latest
+      needs: [generate-deb-packages]
+      steps:
+      - uses: actions/checkout@v2
+
+      - uses: actions/download-artifact@v2
+        with:
+          name: deb
+          path: debian_packages/
+    
+      - name: Import GPG key from a secret variable
+        id: import_gpg
+        uses: crazy-max/ghaction-import-gpg@v4
+        with:
+          gpg_private_key: ${{ secrets.GPG_PRIVATE_KEY }}          
+      
+      - name: Print GPG user IDs and save files to be included in repository
+        run: |
+          echo "fingerprint: ${{ steps.import_gpg.outputs.fingerprint }}"
+          echo "keyid:       ${{ steps.import_gpg.outputs.keyid }}"
+          echo "name:        ${{ steps.import_gpg.outputs.name }}"
+          echo "email:       ${{ steps.import_gpg.outputs.email }}"
+          echo "${{ steps.import_gpg.outputs.fingerprint }}" > key_fingerprint.txt
+          gpg --export --armor --output public.gpg
+
+      - name: Create reposity and add packages
+        working-directory: debian_packages
+        run: ./add_packages_to_repo.sh
+
+      - name: Archive directory with repository as artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: repo
+          path: 'debian_packages/public'
