@@ -22,7 +22,7 @@ for SCRIPT in "${SCRIPTS_NAMES[@]}"; do
     chmod +x ${BIN_DIR}/${SCRIPT}
 
     # adjust version number
-    VERSION=`${BIN_DIR}/${SCRIPT} --version`
+    VERSION=$(${BIN_DIR}/${SCRIPT} --version)
     sed --in-place "s/Version\:.*/Version\: ${VERSION}/g" pymchelper-${SCRIPT}/DEBIAN/control
 
     # adjust package names
@@ -59,4 +59,5 @@ sed --in-place "s/Depends\:.*/${DEPS}/g" pymchelper/DEBIAN/control
 # for all versions use newest format of deb packages, exit in case of failure
 dpkg-deb --root-owner-group --build pymchelper pymchelper.deb || exit 1;
 
-ls -alh *deb
+# check size of generated packages
+ls -alh ./*deb
