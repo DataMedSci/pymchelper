@@ -346,8 +346,12 @@ jobs:
           mv datamedsci.list public/
           touch public/.nojekyll
 
-      # - name: Deploy to GitHub Pages
-      #   uses: JamesIves/github-pages-deploy-action@4.1.7
-      #   with:
-      #     branch: gh-pages # The branch the action should deploy to.
-      #     folder: public # The folder the action should deploy.
+      - name: Deploy to GitHub Pages
+        uses: JamesIves/github-pages-deploy-action@4.1.7
+        with:
+          branch: gh-pages # The branch the action should deploy to.
+          folder: debian_packages/public # The folder the action should deploy.
+          repository-name: DataMedSci/deb_package_repository
+          ssh-key: ${{ secrets.DEB_REPO_PRIVATE_KEY }}
+          clean: true
+          single-commit: true
