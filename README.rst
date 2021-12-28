@@ -2,44 +2,53 @@ pymchelper
 ==========
 
 **pymchelper** is a toolkit for aiding users of the particle transport codes, such as FLUKA and SHIELD-HIT12A.
-These codes produce binary files (especially when running on dedicated computing clusters). 
+Particle transport codes produce binary files (especially when running on dedicated computing clusters). 
+It provides a command line program `convertmc` which can convert these binary files to graphs::
 
-It provides a command line program, called **convertmc** which simplifies process of converting binary output
-files to graphs, tabulated plain data files (which can be open by MS Excel) and other formats.
+    convertmc image --many "*.bdo"
+
+
+|pic1| |pic2|
+
+.. |pic1| image:: docs/default_1d.png
+   :width: 35%
+
+.. |pic2| image:: docs/default_2d.png
+   :width: 35%
+
+This converter is capable of converting binary output to many other formats, like CSV, XLS or HDF.
+
+Another feature of the toolkit is a command line utility `runmc` which speeds up particle transport simulation 
+by splitting the calculation on multiple processes and merging the results::
+
+    runmc --jobs 16 --out-type txt directory_with_input_files
+
 Toolkit can also serve as a library in Python language, which can be used by programmers and data scientists 
 to read data from binary files into convenient Python objects. 
 This allows further data processing using other Python tools and libraries.
 
-**pymchelper** works under Linux, Windows and Mac OSX operating systems
-(interpreter of Python programming language has to be also installed).
-No programming knowledge is required from user, but basic skills in working with terminal console are needed.
+**pymchelper** works under Linux, Windows and Mac OSX operating systems.
 
 Installation
 ------------
 
-**pymchelper** is available on PyPi, you can install install it using::
+To install **pymchelper** as a python package, type::
 
-    pip install pymchelper
+    pip install pymchelper[all]
 
-This would install just basic capabilities of the converter program `convertmc`: conversion to text file and inspection tool.
-If you want to use more features, select a specific set of requirements:
+On Linux systems from Debian family **pymchelper** can be installed using `apt` package manager::
 
-- to enable image converter use ``pip install "pymchelper[image]"``
-- to enable MS Excel converter use ``pip install "pymchelper[excel]"``
-- to enable HDF converter use ``pip install "pymchelper[hdf]"``
-- to enable TRiP98 converters use ``pip install "pymchelper[pytrip]"``
+    wget --quiet --output-document - https://datamedsci.github.io/deb_package_repository/public.gpg | sudo apt-key add -
+    sudo wget --quiet --output-document /etc/apt/sources.list.d/datamedsci.list https://datamedsci.github.io/deb_package_repository/datamedsci.list
+    sudo apt update
+    sudo apt install pymchelper
 
-Multiple converters can also be enabled, i.e. by using ``pip install "pymchelper[image,excel]"``
-
-In order to use all feautures (i.e. all available converters), use::
-
-    pip install "pymchelper[full]"
 
 Documentation
 -------------
 
-Full pymchelper documentation can be found here: https://pymchelper.readthedocs.io/
+Full pymchelper documentation can be found here: https://datamedsci.github.io/pymchelper/index.html
 
-See `Getting Started <https://pymchelper.readthedocs.org/en/stable/getting_started.html>`_ for installation and basic
-information, and the `User's Guide <https://pymchelper.readthedocs.org/en/stable/user_guide.html>`_ for an overview of
+See `Getting Started <https://datamedsci.github.io/pymchelper/getting_started.html>`_ for installation and basic
+information, and the `User's Guide <https://datamedsci.github.io/pymchelper/user_guide.html>`_ for an overview of
 how to use the project.
