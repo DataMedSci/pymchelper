@@ -1,14 +1,17 @@
 # pymchelper
 
   
-**pymchelper** is a toolkit for aiding users of the particle transport codes, such as FLUKA and SHIELD-HIT12A.
+**pymchelper** is a toolkit for aiding users of the particle transport codes, such as [FLUKA](http://fluka.cern/) and [SHIELD-HIT12A](https://shieldhit.org/).
 Particle transport codes produce binary files (especially when running on dedicated computing clusters).
 It provides a command line program `convertmc` which can convert these binary files to graphs:
 ```
 convertmc image --many "*.bdo"
 ```
 
-| ![](docs/default_1d.png "") | ![](docs/default_2d.png "") |
+<p float="left">
+  <img src="/docs/default_1d.png" width="30%" />
+  <img src="/docs/default_2d.png" width="30%" /> 
+</p>
 
 This converter is capable of converting binary output to many other formats, like CSV, XLS or HDF.
   

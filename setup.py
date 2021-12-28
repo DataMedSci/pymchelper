@@ -29,7 +29,7 @@ write_version_py()
 
 
 # extract readme text from the markdown file
-with open('README.rst') as readme_file:
+with open('README.md') as readme_file:
     readme = readme_file.read()
 
 
