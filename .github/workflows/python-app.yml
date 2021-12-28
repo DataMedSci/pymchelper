@@ -310,6 +310,7 @@ jobs:
           gpg_private_key: ${{ secrets.GPG_PRIVATE_KEY }}          
       
       - name: Print GPG user IDs and save files to be included in repository
+        working-directory: debian_packages
         run: |
           echo "fingerprint: ${{ steps.import_gpg.outputs.fingerprint }}"
           echo "keyid:       ${{ steps.import_gpg.outputs.keyid }}"
@@ -327,3 +328,26 @@ jobs:
         with:
           name: repo
           path: 'debian_packages/public'
+
+  repo_upload:
+      runs-on: ubuntu-latest
+      needs: [repo_prepare, test_deb]
+      steps:
+      - uses: actions/checkout@v2
+
+      - uses: actions/download-artifact@v2
+        with:
+          name: repo
+          path: debian_packages/public
+
+      - name: Tuning
+        working-directory: debian_packages
+        run: |
+          mv datamedsci.list public/
+          touch public/.nojekyll
+
+      # - name: Deploy to GitHub Pages
+      #   uses: JamesIves/github-pages-deploy-action@4.1.7
+      #   with:
+      #     branch: gh-pages # The branch the action should deploy to.
+      #     folder: public # The folder the action should deploy.
