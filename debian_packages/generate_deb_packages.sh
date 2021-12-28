@@ -23,7 +23,7 @@ for SCRIPT in "${SCRIPTS_NAMES[@]}"; do
 
     # adjust version number
     VERSION=$("${BIN_DIR}/${SCRIPT}" --version)
-    sed --in-place "s/Version\:.*/Version\: ${VERSION}/g" pymchelper-${SCRIPT}/DEBIAN/control
+    sed --in-place "s/Version\:.*/Version\: ${VERSION}/g" "pymchelper-${SCRIPT}/DEBIAN/control"
 
     # adjust package names
     sed --in-place "s/Package\:.*/Package\: pymchelper-${SCRIPT}/g" "pymchelper-${SCRIPT}/DEBIAN/control"
