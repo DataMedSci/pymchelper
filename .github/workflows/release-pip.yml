@@ -78,8 +78,6 @@ jobs:
       with:
         # Password for your PyPI user or an access token
         password: ${{ secrets.TWINE_PASSWORD }}
-        # The repository URL to use
-        repository_url: "https://upload.pypi.org/legacy/"
         # The target directory for distribution
         packages_dir: dist/
         # Show verbose output.
