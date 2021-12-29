@@ -36,4 +36,3 @@ RUN mkdir dist
 COPY debian_packages/single_file_executables/my_pyinstaller_utils.py .
 COPY debian_packages/single_file_executables/convertmc.spec .
 COPY debian_packages/single_file_executables/runmc.spec .
-#COPY debian_packages/single_file_executables/matplotlibrc .

@@ -2,27 +2,14 @@ import os
 
 from my_pyinstaller_utils import *
 
-# following https://github.com/FCS-analysis/PyCorrFit/blob/master/freeze_pyinstaller/PyCorrFit_win7.spec
-# patch matplotlib rc file to include only one backend which results in smaller size of generated files
 import matplotlib
-mplrc = matplotlib.matplotlib_fname()
-print("rcfile", mplrc)
-with open(mplrc) as fd:
-    data = fd.readlines()
-    print("data", data)
-for ii, l in enumerate(data):
-    if l.strip().startswith("backend "):
-        print("adding data")
-        data[ii] = "backend : agg\n"
-with open(mplrc, "w") as fd:
-    fd.writelines(data)
 
 a = Analysis([os.path.join('pymchelper', 'run.py')],
              pathex=['.'],
              binaries=[],
              datas=[ # pair of strings: location in system now, the name of the folder to contain the files at run-time.
                  (os.path.join('pymchelper','VERSION'), 'pymchelper'),
-                 (mplrc, 'matplotlib/mpl-data')
+                 (matplotlib.matplotlib_fname(), 'matplotlib/mpl-data')  # add matplotlibrc file
                  ],
              hiddenimports=[],
              hookspath=[],
@@ -41,14 +28,6 @@ def is_wanted_file(item):
     if item[0].startswith('mpl-data'):
         return False
     return True
-
-# debugging printouts
-print_header("OLD BINARIES")
-print_tuple_size(a.binaries, max_items=-1)
-
-# debugging printouts
-print_header("OLD DATAS")
-print_tuple_size(a.datas, max_items=-1)
 
 a.binaries = TOC([item for item in a.binaries if is_wanted_file(item)])
 a.datas = TOC([item for item in a.datas if is_wanted_file(item)])
