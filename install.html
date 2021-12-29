@@ -6,7 +6,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
-    <title>Detailed Installation Guide &#8212; pymchelper 1.10.8 documentation</title>
+    <title>Installation Guide &#8212; pymchelper 1.10.9 documentation</title>
     
   <link href="_static/css/theme.css" rel="stylesheet">
   <link href="_static/css/index.ff1ffe594081f20da1ef19478df9384b.css" rel="stylesheet">
@@ -85,7 +85,7 @@
 
 <li class="toctree-l1 current active nav-item">
  <a class="current reference internal nav-link" href="#">
-  Detailed Installation Guide
+  Installation Guide
  </a>
 </li>
 
@@ -144,26 +144,14 @@
 <nav id="bd-toc-nav">
     <ul class="visible nav section-nav flex-column">
  <li class="toc-h2 nav-item toc-entry">
-  <a class="reference internal nav-link" href="#prerequisites">
-   Prerequisites
+  <a class="reference internal nav-link" href="#python-package">
+   Python package
   </a>
  </li>
  <li class="toc-h2 nav-item toc-entry">
-  <a class="reference internal nav-link" href="#installing-using-pip-all-platforms">
-   Installing using pip (all platforms)
+  <a class="reference internal nav-link" href="#python-package-debian-based-linux">
+   Python package (Debian based Linux)
   </a>
-  <ul class="nav section-nav flex-column">
-   <li class="toc-h3 nav-item toc-entry">
-    <a class="reference internal nav-link" href="#administrator-installation-root-access">
-     Administrator installation (root access)
-    </a>
-   </li>
-   <li class="toc-h3 nav-item toc-entry">
-    <a class="reference internal nav-link" href="#user-installation-non-root-access">
-     User installation (non-root access)
-    </a>
-   </li>
-  </ul>
  </li>
 </ul>
 
@@ -186,87 +174,44 @@
               
               <div>
                 
-  <section id="detailed-installation-guide">
-<h1>Detailed Installation Guide<a class="headerlink" href="#detailed-installation-guide" title="Permalink to this headline">¶</a></h1>
-<p>Installation guide is divided in two phases: checking the prerequisites and main package installation.</p>
-<section id="prerequisites">
-<h2>Prerequisites<a class="headerlink" href="#prerequisites" title="Permalink to this headline">¶</a></h2>
-<p><strong>pymchelper</strong> works under Windows, Linux and Mac OSX operating systems.</p>
-<p>First we need to check if Python interpreter is installed.
-Try if one of following commands (printing Python version) works:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python --version
-python3 --version
+  <section id="installation-guide">
+<h1>Installation Guide<a class="headerlink" href="#installation-guide" title="Permalink to this headline">¶</a></h1>
+<section id="python-package">
+<h2>Python package<a class="headerlink" href="#python-package" title="Permalink to this headline">¶</a></h2>
+<p><strong>pymchelper</strong> is available on PyPi, you can install install it using:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip install pymchelper
 </pre></div>
 </div>
-<p>At the time of writing Python language interpreter has two popular versions: 2.x (Python 2) and 3.x (Python 3) families.
-Command <code class="docutils literal notranslate"><span class="pre">python</span></code> invokes either Python 2 or 3, while <code class="docutils literal notranslate"><span class="pre">python3</span></code> can invoke only Python 3.</p>
-<p><strong>pymchelper</strong> supports most of the modern Python versions, mainly: 2.7, 3.4 - 3.10.
-Check if your interpreter version is supported.</p>
-<p>If none of <code class="docutils literal notranslate"><span class="pre">python</span></code> and <code class="docutils literal notranslate"><span class="pre">python3</span></code> commands are present, then Python interpreter has to be installed.</p>
-<p>We suggest to use the newest version available (from 3.x family).</p>
-<p>Python installers can be found at the python web site (<a class="reference external" href="http://python.org/download/">http://python.org/download/</a>).</p>
-<p>pymchelper also relies on these packages:</p>
-<blockquote>
-<div><ul class="simple">
-<li><p><a class="reference external" href="http://www.numpy.org/">NumPy</a> – Better arrays and data processing.</p></li>
-<li><p><a class="reference external" href="http://matplotlib.org/">matplotlib</a> – Needed for plotting, optional.</p></li>
+<p>This would install just basic capabilities of the converter program <cite>convertmc</cite>: conversion to text file and inspection tool.
+If you want to use more features, select a specific set of requirements:</p>
+<ul class="simple">
+<li><p>to enable image converter use <code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">&quot;pymchelper[image]&quot;</span></code></p></li>
+<li><p>to enable MS Excel converter use <code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">&quot;pymchelper[excel]&quot;</span></code></p></li>
+<li><p>to enable HDF converter use <code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">&quot;pymchelper[hdf]&quot;</span></code></p></li>
+<li><p>to enable TRiP98 converters use <code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">&quot;pymchelper[pytrip]&quot;</span></code></p></li>
 </ul>
-</div></blockquote>
-<p>and if they are not installed beforehand, these will automatically be fetched by pip.</p>
-</section>
-<section id="installing-using-pip-all-platforms">
-<h2>Installing using pip (all platforms)<a class="headerlink" href="#installing-using-pip-all-platforms" title="Permalink to this headline">¶</a></h2>
-<p>The easiest way to install PyTRiP98 is using <a class="reference external" href="https://pypi.python.org/pypi/pip">pip</a></p>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>Starting from mid-2014 pip comes pre-installed with Python newer than 3.4 and 2.7.9 (for 2.x family)</p>
-</div>
-<section id="administrator-installation-root-access">
-<h3>Administrator installation (root access)<a class="headerlink" href="#administrator-installation-root-access" title="Permalink to this headline">¶</a></h3>
-<p>Administrator installation is very simple, but requires to save some files in system-wide directories (i.e. <cite>/usr</cite>):</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>sudo pip install pymchelper
-</pre></div>
-</div>
-<p>To upgrade the <strong>pymchelper</strong> to newer version, simply type:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>sudo pip install --upgrade pymchelper
-</pre></div>
-</div>
-<p>To completely remove <strong>pymchelper</strong> from your system, use following command:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>sudo pip uninstall pymchelper
-</pre></div>
-</div>
-<p>Now all <strong>pymchelper</strong> commands should be installed for all users:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>convertmc --help
+<p>Multiple converters can also be enabled, i.e. by using <code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">&quot;pymchelper[image,excel]&quot;</span></code></p>
+<p>In order to use all feautures (i.e. all available converters), use:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip install <span class="s2">&quot;pymchelper[full]&quot;</span>
 </pre></div>
 </div>
 </section>
-<section id="user-installation-non-root-access">
-<h3>User installation (non-root access)<a class="headerlink" href="#user-installation-non-root-access" title="Permalink to this headline">¶</a></h3>
-<p>User installation will put the <strong>pymchelper</strong> under hidden directory <cite>$HOME/.local</cite>.</p>
-<p>To install the package, type in the terminal:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip install pymchelper --user
+<section id="python-package-debian-based-linux">
+<h2>Python package (Debian based Linux)<a class="headerlink" href="#python-package-debian-based-linux" title="Permalink to this headline">¶</a></h2>
+<p>Deb packages are produced for 64-bit Linux distributions newer than debian 8 (jessie, released in 2015) or Ubuntu 16.04 (released in 2016).
+The contain a limited set of <strong>pymchelper</strong> functionality, mainly only the executable files.
+The files we provide in <cite>deb</cite> packages have no dependency on Python interpreter, therefore can run on quite old Linux distributions.
+With binary files there is no chance to use <strong>pymchelper</strong> as a Python library.
+We are maintaining our repository on Github Pages service. To add this repository on you system, download our GPG key and add an entry to <cite>sources.list</cite> directory:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>wget --quiet --output-document - https://datamedsci.github.io/deb_package_repository/public.gpg <span class="p">|</span> sudo apt-key add -
+sudo wget --quiet --output-document /etc/apt/sources.list.d/datamedsci.list https://datamedsci.github.io/deb_package_repository/datamedsci.list
 </pre></div>
 </div>
-<p>If <cite>pip</cite> command is missing on your system, replace <cite>pip</cite> with <cite>pip3</cite> in abovementioned instruction.</p>
-<p>To upgrade the <strong>pymchelper</strong> to newer version, simply type:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip install --upgrade pymchelper --user
+<p>Finally run <cite>apt update</cite> and install <cite>pymchelper</cite> metapackage (which should install all required packages for the executables that we ship):</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>sudo apt update
+sudo apt install pymchelper
 </pre></div>
 </div>
-<p>To completely remove <strong>pymchelper</strong> from your system, use following command:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip uninstall pymchelper
-</pre></div>
-</div>
-<p>In most of modern systems all executables found in <cite>$HOME/.local/bin</cite> directory can be called
-like normal commands (i.e. <cite>ls</cite>, <cite>cd</cite>). It means that after installation you should be able
-to simply type in terminal:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>convertmc --help
-</pre></div>
-</div>
-<p>If this is not the case, please prefix the command with <cite>$HOME/.local/bin</cite> and call it in the following way:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nv">$HOME</span>/.local/bin/convertmc --help
-</pre></div>
-</div>
-</section>
 </section>
 </section>
 
