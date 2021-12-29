@@ -18,7 +18,7 @@ FROM ghcr.io/grzanka/centos6pyinstaller:main
 WORKDIR /app
 COPY requirements.txt .
 COPY setup.py .
-COPY README.rst .
+COPY README.md .
 COPY pymchelper pymchelper
 COPY .git .git
 
