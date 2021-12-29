@@ -93,7 +93,7 @@ setuptools.setup(
     author_email='leszek.grzanka@gmail.com',
     description='Python toolkit for SHIELD-HIT12A and FLUKA',
     long_description=readme + '\n',
-    long_description_content_type='text/markdown',
+    #long_description_content_type='text/markdown',
     classifiers=[
         # How mature is this project? Common values are
         #   3 - Alpha

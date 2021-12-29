@@ -137,6 +137,8 @@ jobs:
         
         python setup.py bdist_wheel
 
+        twine check dist/*.whl
+
         # makes source package
         python setup.py sdist
 
