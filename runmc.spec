@@ -37,7 +37,7 @@ def size_b(filename):
         return 0
 
 
-def print_tuple_size(list_of_tuples):
+def print_tuple_size(list_of_tuples, max_items=100):
     """
     Pyinstaller deals in many cases with list of 3-elements tuples.
     Second element of such tuple is a path to a file.
@@ -45,7 +45,7 @@ def print_tuple_size(list_of_tuples):
     and print it. We also print total size of all files in a tuple.
     """
     total_size = 0
-    for item in sorted(list_of_tuples, key=lambda item: size_b(item[1]), reverse=True):
+    for item in sorted(list_of_tuples, key=lambda item: size_b(item[1]), reverse=True)[:max_items]:
         size_to_print = pretty_size(size_b(item[1]))
         total_size += size_b(item[1])
         print(f"item {item} {size_to_print}")

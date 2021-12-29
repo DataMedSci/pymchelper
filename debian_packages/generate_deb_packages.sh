@@ -3,8 +3,8 @@
 # Print commands and their arguments as they are executed
 set -x
 
-# List of executables being shipped by pymchelper
-SCRIPTS_NAMES=('convertmc' 'runmc' 'pld2sobp' 'mcscripter')
+# List of executables being shipped by pymchelper are passed as arguments
+SCRIPTS_NAMES=( "$@" )
 
 # Github Pages has limit 100 MB, therefore instead of making a single package with all executables we create several smaller packages to fit in the limit
 for SCRIPT in "${SCRIPTS_NAMES[@]}"; do
@@ -17,8 +17,8 @@ for SCRIPT in "${SCRIPTS_NAMES[@]}"; do
     BIN_DIR=pymchelper-${SCRIPT}/usr/bin
     mkdir --parents "${BIN_DIR}"
 
-    # download latest release of binary executable file, exit in case of failure
-    wget --quiet "https://github.com/DataMedSci/pymchelper/releases/latest/download/${SCRIPT}" --output-document="${BIN_DIR}/${SCRIPT}" || exit 1;
+    # get latest release of binary executable file, exit in case of failure
+    cp "../dist/${SCRIPT}" "${BIN_DIR}/${SCRIPT}" || exit 1;
     chmod +x "${BIN_DIR}/${SCRIPT}"
 
     # adjust version number
