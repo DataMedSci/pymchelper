@@ -83,7 +83,7 @@ jobs:
   
   generate-deb-packages:
     runs-on: ubuntu-latest
-    needs: [upload-executables]
+    needs: [build-executables]
     
     steps:
       - name: Checkout repository with full history
@@ -93,7 +93,7 @@ jobs:
         with:
           name: executables
           path: ./dist
-          
+
       - name: Generate deb packages
         working-directory: debian_packages
         run: ./generate_deb_packages.sh convertmc runmc pld2sobp mcscripter

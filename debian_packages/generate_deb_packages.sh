@@ -4,7 +4,7 @@
 set -x
 
 # List of executables being shipped by pymchelper are passed as arguments
-SCRIPTS_NAMES="$@"
+SCRIPTS_NAMES=( "$@" )
 
 # Github Pages has limit 100 MB, therefore instead of making a single package with all executables we create several smaller packages to fit in the limit
 for SCRIPT in "${SCRIPTS_NAMES[@]}"; do
