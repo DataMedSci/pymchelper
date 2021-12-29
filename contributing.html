@@ -6,7 +6,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
-    <title>Contributing Guide &#8212; pymchelper 1.10.9 documentation</title>
+    <title>Contributing Guide &#8212; pymchelper 1.10.11 documentation</title>
     
   <link href="_static/css/theme.css" rel="stylesheet">
   <link href="_static/css/index.ff1ffe594081f20da1ef19478df9384b.css" rel="stylesheet">
@@ -272,7 +272,7 @@
  </li>
  <li class="toctree-l1">
   <a class="reference internal" href="technical.html">
-   Badges and links
+   Technical documentation
   </a>
  </li>
  <li class="toctree-l1">
@@ -306,8 +306,8 @@
   </a>
   <ul class="nav section-nav flex-column">
    <li class="toc-h3 nav-item toc-entry">
-    <a class="reference internal nav-link" href="#report-bugs">
-     Report Bugs
+    <a class="reference internal nav-link" href="#report-bugs-or-propose-features">
+     Report Bugs or propose features
     </a>
    </li>
    <li class="toc-h3 nav-item toc-entry">
@@ -316,35 +316,20 @@
     </a>
    </li>
    <li class="toc-h3 nav-item toc-entry">
-    <a class="reference internal nav-link" href="#implement-features">
-     Implement Features
-    </a>
-   </li>
-   <li class="toc-h3 nav-item toc-entry">
     <a class="reference internal nav-link" href="#write-documentation">
      Write Documentation
-    </a>
-   </li>
-   <li class="toc-h3 nav-item toc-entry">
-    <a class="reference internal nav-link" href="#submit-feedback">
-     Submit Feedback
     </a>
    </li>
   </ul>
  </li>
  <li class="toc-h2 nav-item toc-entry">
-  <a class="reference internal nav-link" href="#get-started-for-git-aware-developers">
-   Get Started for GIT-aware developers
+  <a class="reference internal nav-link" href="#get-started-for-developers">
+   Get Started for developers
   </a>
  </li>
  <li class="toc-h2 nav-item toc-entry">
   <a class="reference internal nav-link" href="#pull-request-guidelines">
    Pull Request Guidelines
-  </a>
- </li>
- <li class="toc-h2 nav-item toc-entry">
-  <a class="reference internal nav-link" href="#get-started-for-non-git-developers">
-   Get Started for non-GIT developers
   </a>
  </li>
  <li class="toc-h2 nav-item toc-entry">
@@ -375,40 +360,20 @@
                 
   <section id="contributing-guide">
 <h1>Contributing Guide<a class="headerlink" href="#contributing-guide" title="Permalink to this headline">¶</a></h1>
-<p>Contributions are welcome, and they are greatly appreciated! Every
-little bit helps, and credit will always be given.</p>
+<p>Contributions are welcome, and they are greatly appreciated!
+Every little bit helps, and credit will always be given.</p>
 <p>You can contribute in many ways:</p>
 <section id="types-of-contributions">
 <h2>Types of Contributions<a class="headerlink" href="#types-of-contributions" title="Permalink to this headline">¶</a></h2>
-<section id="report-bugs">
-<h3>Report Bugs<a class="headerlink" href="#report-bugs" title="Permalink to this headline">¶</a></h3>
-<p>Report bugs at <a class="reference external" href="https://github.com/DataMedSci/pymchelper/issues">https://github.com/DataMedSci/pymchelper/issues</a></p>
+<section id="report-bugs-or-propose-features">
+<h3>Report Bugs or propose features<a class="headerlink" href="#report-bugs-or-propose-features" title="Permalink to this headline">¶</a></h3>
+<p>The best way to report a bug is to login to your Github account and fill the form at <a class="reference external" href="https://github.com/DataMedSci/pymchelper/issues">https://github.com/DataMedSci/pymchelper/issues</a></p>
 <p>If you are reporting a bug, please include:</p>
 <ul class="simple">
 <li><p>Your operating system name and version.</p></li>
 <li><p>Any details about your local setup that might be helpful in troubleshooting.</p></li>
 <li><p>Detailed steps to reproduce the bug.</p></li>
 </ul>
-</section>
-<section id="fix-bugs-or-implement-features">
-<h3>Fix Bugs or Implement Features<a class="headerlink" href="#fix-bugs-or-implement-features" title="Permalink to this headline">¶</a></h3>
-<p>Look through the GitHub issues for bugs or features.
-Anything tagged with “bug” or “feature” is open to whoever wants to implement it.</p>
-</section>
-<section id="implement-features">
-<h3>Implement Features<a class="headerlink" href="#implement-features" title="Permalink to this headline">¶</a></h3>
-<p>Look through the GitHub issues for features. Anything tagged with “feature”
-is open to whoever wants to implement it.</p>
-</section>
-<section id="write-documentation">
-<h3>Write Documentation<a class="headerlink" href="#write-documentation" title="Permalink to this headline">¶</a></h3>
-<p><cite>pymchelper</cite> could always use more documentation, whether as part of the
-official <cite>pymchelper</cite> docs, in docstrings, or even on the web in blog posts,
-articles, and such.</p>
-</section>
-<section id="submit-feedback">
-<h3>Submit Feedback<a class="headerlink" href="#submit-feedback" title="Permalink to this headline">¶</a></h3>
-<p>The best way to send feedback is to file an issue at <a class="reference external" href="https://github.com/DataMedSci/pymchelper/issues">https://github.com/DataMedSci/pymchelper/issues</a>.</p>
 <p>If you are proposing a feature:</p>
 <ul class="simple">
 <li><p>Explain in detail how it would work.</p></li>
@@ -417,9 +382,20 @@ articles, and such.</p>
 are welcome :)</p></li>
 </ul>
 </section>
+<section id="fix-bugs-or-implement-features">
+<h3>Fix Bugs or Implement Features<a class="headerlink" href="#fix-bugs-or-implement-features" title="Permalink to this headline">¶</a></h3>
+<p>Look through the GitHub issues for bugs or features.
+Anything tagged with “bug” or “feature” is open to whoever wants to implement it.</p>
 </section>
-<section id="get-started-for-git-aware-developers">
-<h2>Get Started for GIT-aware developers<a class="headerlink" href="#get-started-for-git-aware-developers" title="Permalink to this headline">¶</a></h2>
+<section id="write-documentation">
+<h3>Write Documentation<a class="headerlink" href="#write-documentation" title="Permalink to this headline">¶</a></h3>
+<p><cite>pymchelper</cite> could always use more documentation, whether as part of the
+official <cite>pymchelper</cite> docs, in docstrings, or even on the web in blog posts,
+articles, and such.</p>
+</section>
+</section>
+<section id="get-started-for-developers">
+<h2>Get Started for developers<a class="headerlink" href="#get-started-for-developers" title="Permalink to this headline">¶</a></h2>
 <p>Ready to contribute? Here’s how to set up <cite>pymchelper</cite> for local development.
 We assume you are familiar with GIT source control system. If not you will
 other instruction at the end of this page.</p>
@@ -471,48 +447,17 @@ $ git commit -m <span class="s2">&quot;Your detailed description of your changes
 </div>
 </li>
 <li><p>Submit a pull request through the GitHub website to the master branch of <code class="docutils literal notranslate"><span class="pre">git&#64;github.com:DataMedSci/pymchelper.git</span></code> repository.</p></li>
-<li><p>Check the status of automatic tests ran by Travis system.</p></li>
+<li><p>Check the status of automatic tests. In case some of the tests fails, fix the problem. Then commit and push your changes (steps 5-8).</p></li>
 </ol>
-<p>You can find them on the pull request webpage <a class="reference external" href="https://travis-ci.org/DataMedSci/pymchelper/pull_requests">https://travis-ci.org/DataMedSci/pymchelper/pull_requests</a>.
-In case some of the tests fails, fix the problem. Then commit and push your changes (steps 5-8).</p>
 </section>
 <section id="pull-request-guidelines">
 <h2>Pull Request Guidelines<a class="headerlink" href="#pull-request-guidelines" title="Permalink to this headline">¶</a></h2>
 <p>Before you submit a pull request, check that it meets these guidelines:</p>
 <ol class="arabic simple">
 <li><p>The pull request should include tests.</p></li>
-<li><p>If the pull request adds functionality, the docs should be updated. Put
-your new functionality into a function with a docstring, and extend the documentation where necessary.</p></li>
-<li><p>The pull request should work for Python 2.7, 3.2, 3.3, 3.4 and 3.5. Check
-<a class="reference external" href="https://travis-ci.org/DataMedSci/pymchelper/pull_requests">https://travis-ci.org/DataMedSci/pymchelper/pull_requests</a>
-and make sure that the tests pass for all supported Python versions.</p></li>
-</ol>
-</section>
-<section id="get-started-for-non-git-developers">
-<h2>Get Started for non-GIT developers<a class="headerlink" href="#get-started-for-non-git-developers" title="Permalink to this headline">¶</a></h2>
-<ol class="arabic">
-<li><p>Fetch the code from remote GIT repository to your local directory:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$ git clone git@github.com:DataMedSci/pymchelper.git
-</pre></div>
-</div>
-</li>
-<li><p>Follow steps 4-6 from the instruction for GIT-aware developers. To run code locally, prefix usual calls with <code class="docutils literal notranslate"><span class="pre">PYTHONPATH=.</span></code>:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$ <span class="nv">PYTHONPATH</span><span class="o">=</span>. python pymchelper/run.py --help
-</pre></div>
-</div>
-<blockquote>
-<div><p>usage: run.py [-h] [-V] converter …
-(…)</p>
-</div></blockquote>
-</li>
-</ol>
-<p>Make your changes and check that they comply with PEP8 code quality standards (flake8 tests) and run all unit tests with pytest:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$ flake8 pymchelper tests
-$ pytest tests/
-</pre></div>
-</div>
-<ol class="arabic simple" start="3">
-<li><p>Compress your working directory and send it to us by email (see <a class="reference internal" href="authors.html"><span class="doc">authors</span></a>), describing your changes.</p></li>
+<li><p>If the pull request adds functionality, the docs should be updated.
+Put your new functionality into a function with a docstring, and extend the documentation where necessary.</p></li>
+<li><p>Make sure that all tests triggered by the Pull Requests are passing.</p></li>
 </ol>
 </section>
 <section id="tips">

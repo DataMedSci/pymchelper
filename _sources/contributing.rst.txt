@@ -6,48 +6,24 @@
 Contributing Guide
 ==================
 
-Contributions are welcome, and they are greatly appreciated! Every
-little bit helps, and credit will always be given.
+Contributions are welcome, and they are greatly appreciated! 
+Every little bit helps, and credit will always be given.
 
 You can contribute in many ways:
 
 Types of Contributions
 ----------------------
 
-Report Bugs
-~~~~~~~~~~~
+Report Bugs or propose features
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Report bugs at https://github.com/DataMedSci/pymchelper/issues
+The best way to report a bug is to login to your Github account and fill the form at https://github.com/DataMedSci/pymchelper/issues 
 
 If you are reporting a bug, please include:
 
 * Your operating system name and version.
 * Any details about your local setup that might be helpful in troubleshooting.
 * Detailed steps to reproduce the bug.
-
-Fix Bugs or Implement Features
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-Look through the GitHub issues for bugs or features.
-Anything tagged with "bug" or "feature" is open to whoever wants to implement it.
-
-Implement Features
-~~~~~~~~~~~~~~~~~~
-
-Look through the GitHub issues for features. Anything tagged with "feature"
-is open to whoever wants to implement it.
-
-Write Documentation
-~~~~~~~~~~~~~~~~~~~
-
-`pymchelper` could always use more documentation, whether as part of the
-official `pymchelper` docs, in docstrings, or even on the web in blog posts,
-articles, and such.
-
-Submit Feedback
-~~~~~~~~~~~~~~~
-
-The best way to send feedback is to file an issue at https://github.com/DataMedSci/pymchelper/issues.
 
 If you are proposing a feature:
 
@@ -56,8 +32,22 @@ If you are proposing a feature:
 * Remember that this is a volunteer-driven project, and that contributions
   are welcome :)
 
-Get Started for GIT-aware developers
-------------------------------------
+Fix Bugs or Implement Features
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Look through the GitHub issues for bugs or features.
+Anything tagged with "bug" or "feature" is open to whoever wants to implement it.
+
+Write Documentation
+~~~~~~~~~~~~~~~~~~~
+
+`pymchelper` could always use more documentation, whether as part of the
+official `pymchelper` docs, in docstrings, or even on the web in blog posts,
+articles, and such.
+
+
+Get Started for developers
+--------------------------
 
 Ready to contribute? Here's how to set up `pymchelper` for local development.
 We assume you are familiar with GIT source control system. If not you will
@@ -110,10 +100,7 @@ To have the code working, the PYTHONPATH has to be adjusted::
 
 9. Submit a pull request through the GitHub website to the master branch of ``git@github.com:DataMedSci/pymchelper.git`` repository.
 
-10. Check the status of automatic tests ran by Travis system.
-
-You can find them on the pull request webpage https://travis-ci.org/DataMedSci/pymchelper/pull_requests.
-In case some of the tests fails, fix the problem. Then commit and push your changes (steps 5-8).
+10. Check the status of automatic tests. In case some of the tests fails, fix the problem. Then commit and push your changes (steps 5-8).
 
 
 Pull Request Guidelines
@@ -122,34 +109,9 @@ Pull Request Guidelines
 Before you submit a pull request, check that it meets these guidelines:
 
 1. The pull request should include tests.
-2. If the pull request adds functionality, the docs should be updated. Put
-   your new functionality into a function with a docstring, and extend the documentation where necessary.
-3. The pull request should work for Python 2.7, 3.2, 3.3, 3.4 and 3.5. Check
-   https://travis-ci.org/DataMedSci/pymchelper/pull_requests
-   and make sure that the tests pass for all supported Python versions.
-
-
-Get Started for non-GIT developers
-----------------------------------
-
-1. Fetch the code from remote GIT repository to your local directory::
-
-    $ git clone git@github.com:DataMedSci/pymchelper.git
-
-2. Follow steps 4-6 from the instruction for GIT-aware developers. To run code locally, prefix usual calls with ``PYTHONPATH=.``::
-
-   $ PYTHONPATH=. python pymchelper/run.py --help
-    usage: run.py [-h] [-V] converter ...
-    (...)
-
-
-Make your changes and check that they comply with PEP8 code quality standards (flake8 tests) and run all unit tests with pytest::
-
-    $ flake8 pymchelper tests
-    $ pytest tests/
-
-3. Compress your working directory and send it to us by email (see :doc:`authors <authors>`), describing your changes.
-
+2. If the pull request adds functionality, the docs should be updated. 
+   Put your new functionality into a function with a docstring, and extend the documentation where necessary.
+3. Make sure that all tests triggered by the Pull Requests are passing.
 
 Tips
 ----

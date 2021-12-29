@@ -5,10 +5,11 @@ Credits
 Development
 -----------
 
-* Leszek Grzanka - IFJ-PAN, Poland <leszek.grzanka@ifj.edu.pl>
-* Niels Bassler - Stockholm University, Sweden
+* Leszek Grzanka - IFJ-PAN, Krakow, Poland <leszek.grzanka@ifj.edu.pl>
+* Niels Bassler - Aarhus University, Aarhus, Denmark
 
 Contributors
 ------------
 
-None yet. Why not be the first?
+Github maintains list of all  `contributors <https://github.com/DataMedSci/pymchelper/graphs/contributors>`_
+Would you like to join it ?
