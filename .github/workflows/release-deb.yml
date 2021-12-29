@@ -24,29 +24,20 @@ jobs:
         with:
           fetch-depth: 0 # Number of commits to fetch. 0 indicates all history for all branches and tags.
 
-      - name: Build Docker image
-        uses: docker/build-push-action@v2.7.0
-        with:
-          context: .
-          push: false
-          tags: pymchelper
+      - name: Build Docker image with pyinstaller and pymchelper inside
+        run: docker build --tag pymchelper .
 
       - name: Generate single-file executables for mcscripter
-        run: |
-          docker run -v `pwd`/dist:/app/dist pymchelper:latest pyinstaller --add-data 'pymchelper/VERSION:pymchelper' --onefile --name mcscripter pymchelper/utils/mcscripter.py
+        run: docker run --volume `pwd`/dist:/app/dist pymchelper:latest pyinstaller --add-data 'pymchelper/VERSION:pymchelper' --onefile --name mcscripter pymchelper/utils/mcscripter.py
 
       - name: Generate single-file executables for pld2sobp
-        run: |
-          docker run -v `pwd`/dist:/app/dist pymchelper:latest pyinstaller --add-data 'pymchelper/VERSION:pymchelper' --onefile --name pld2sobp pymchelper/utils/pld2sobp.py
+        run: docker run --volume `pwd`/dist:/app/dist pymchelper:latest pyinstaller --add-data 'pymchelper/VERSION:pymchelper' --onefile --name pld2sobp pymchelper/utils/pld2sobp.py
 
       - name: Generate single-file executables for runmc
-        run: |
-          docker run -v `pwd`/dist:/app/dist pymchelper:latest pyinstaller runmc.spec
+        run: docker run --volume `pwd`/dist:/app/dist pymchelper:latest pyinstaller runmc.spec
 
       - name: Generate single-file executables for convertmc
-        run: |
-          docker run -v `pwd`/dist:/app/dist pymchelper:latest pyinstaller convertmc.spec
-
+        run: docker run --volume `pwd`/dist:/app/dist pymchelper:latest pyinstaller convertmc.spec
 
       - name: Test single-file executables
         run: |
@@ -97,10 +88,15 @@ jobs:
     steps:
       - name: Checkout repository with full history
         uses: actions/checkout@v2
-
+      
+      - uses: actions/download-artifact@v2
+        with:
+          name: executables
+          path: ./dist
+          
       - name: Generate deb packages
         working-directory: debian_packages
-        run: ./generate_deb_packages.sh
+        run: ./generate_deb_packages.sh convertmc runmc pld2sobp mcscripter
 
       - name: Archive deb package as artifacts
         uses: actions/upload-artifact@v2
