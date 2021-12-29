@@ -8,7 +8,6 @@ Developer documentation
    
    contributing.rst
    apidoc/modules.rst
-   technical.rst
    authors.rst
 
    

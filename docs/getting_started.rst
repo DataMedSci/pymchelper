@@ -58,7 +58,6 @@ Among these features are:
 * calculating standard error when averaging many files
 * writing PNG images (1 and 2D plots)
 * writing tabulated text files
-* writing gnuplot scripts
 
 
 Quick Installation Guide
