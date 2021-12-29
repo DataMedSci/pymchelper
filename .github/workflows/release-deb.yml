@@ -1,4 +1,4 @@
-name: Release machinery
+name: Release - executable artifacts and deb package
 
 on:
   push:

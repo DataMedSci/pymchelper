@@ -1,4 +1,4 @@
-name: Release machinery
+name: Release - pip package
 
 on:
   push:
