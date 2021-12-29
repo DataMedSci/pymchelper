@@ -19,13 +19,13 @@ COPY requirements.txt .
 COPY setup.py .
 COPY README.md .
 COPY pymchelper pymchelper
-COPY .git .git
 
 # disable pip cache to save some space
 ENV PIP_NO_CACHE_DIR=1
 RUN pip install --only-binary scipy,pillow -r requirements.txt
 
 # generate static VERSION file
+COPY .git .git
 RUN ls -alh .git
 RUN python3 setup.py --help
 
@@ -36,3 +36,4 @@ RUN mkdir dist
 COPY debian_packages/single_file_executables/my_pyinstaller_utils.py .
 COPY debian_packages/single_file_executables/convertmc.spec .
 COPY debian_packages/single_file_executables/runmc.spec .
+#COPY debian_packages/single_file_executables/matplotlibrc .
