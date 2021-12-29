@@ -130,7 +130,7 @@ jobs:
         
     - name: Make wheel package
       run: |         
-        pip install wheel
+        pip install wheel twine
         
         # first call to version method would generate VERSION  file
         PYTHONPATH=. python pymchelper/run.py --version
