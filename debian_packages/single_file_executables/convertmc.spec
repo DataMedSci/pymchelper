@@ -16,8 +16,15 @@ a = Analysis([os.path.join('pymchelper', 'run.py')],
              noarchive=False)
 
 # remove unwanted large files
-a.binaries = TOC([item for item in a.binaries if not item[0].startswith('mpl-data')])
-a.datas = TOC([item for item in a.datas if not item[0].startswith('mpl-data')])
+def is_wanted_file(item):
+    '''Return True if the item is related to the file we want to include'''
+    if 'mpl-data/matplotlibrc' in item[1]:
+        return True
+    if item[0].startswith('mpl-data'):
+        return False
+    return True
+a.binaries = TOC([item for item in a.binaries if is_wanted_file(item)])
+a.datas = TOC([item for item in a.datas if is_wanted_file(item)])
 
 # debugging printouts
 print_header("BINARIES")
