@@ -12,7 +12,6 @@ FROM ghcr.io/grzanka/centos6pyinstaller:main
 #
 # docker run  -v `pwd`/dist:/test/ ubuntu:16.04 /test/mcscripter --version
 
-
 # pymchelper package and deps installation
 # files and directories below are needed to install pymchelper in editable mode
 WORKDIR /app
@@ -34,5 +33,6 @@ RUN python3 setup.py --help
 RUN mkdir dist
 
 # copy pyinstaller specification files
-COPY convertmc.spec .
-COPY runmc.spec .
+COPY debian_packages/single_file_executables/my_pyinstaller_utils.py .
+COPY debian_packages/single_file_executables/convertmc.spec .
+COPY debian_packages/single_file_executables/runmc.spec .
