@@ -6,7 +6,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
-    <title>Technical documentation &#8212; pymchelper 1.10.11 documentation</title>
+    <title>Technical documentation &#8212; pymchelper 1.11.0 documentation</title>
     
   <link href="_static/css/theme.css" rel="stylesheet">
   <link href="_static/css/index.ff1ffe594081f20da1ef19478df9384b.css" rel="stylesheet">
@@ -341,13 +341,15 @@
 <section id="release-management">
 <h2>Release management<a class="headerlink" href="#release-management" title="Permalink to this headline">¶</a></h2>
 <p>New releases are created using Github <a class="reference external" href="https://docs.github.com/en/repositories/releasing-projects-on-github/about-releases">release feature</a>.
-First a release branch is created (e.g. <cite>release/v1.10.10</cite>). Then a new release is added together with appropriate tag.
+First a release branch is created (e.g. <cite>release/v1.10.10</cite>). Then Github Actions are triggered which check if pip and deb packages are created correctly.
+In case some problems appear, necessary fixes are being made on release branch (or sub-branches).
+When all problems are solved, release branch is being merged into <em>master</em> branch. Then a new release is added together with appropriate tag being added to a <em>master</em> branch.
 Github actions will automatically trigger making and uploading of pip and deb packages,
 as well as <a class="reference external" href="https://github.com/DataMedSci/pymchelper/releases/latest">relase assets</a>.</p>
 </section>
 <section id="preparing-pip-package">
 <h2>Preparing pip package<a class="headerlink" href="#preparing-pip-package" title="Permalink to this headline">¶</a></h2>
-<p>Follow these steps:</p>
+<p>Follow these steps to produce binary wheel package:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pip</span> <span class="n">install</span> <span class="o">-</span><span class="n">r</span> <span class="n">requirements</span><span class="o">.</span><span class="n">txt</span>
 <span class="n">pip</span> <span class="n">install</span> <span class="n">wheel</span> <span class="n">twine</span>
 <span class="n">python</span> <span class="o">-</span><span class="n">m</span> <span class="n">pymchelper</span><span class="o">.</span><span class="n">run</span> <span class="o">--</span><span class="n">version</span>
@@ -355,6 +357,7 @@ as well as <a class="reference external" href="https://github.com/DataMedSci/pym
 <span class="n">twine</span> <span class="n">check</span> <span class="n">dist</span><span class="o">/*.</span><span class="n">whl</span>
 </pre></div>
 </div>
+<p>Wheel packages are automatically uploaded by github actions to <a class="reference external" href="https://pypi.org/project/pymchelper/">PyPI server</a></p>
 </section>
 <section id="preparing-deb-package">
 <h2>Preparing deb package<a class="headerlink" href="#preparing-deb-package" title="Permalink to this headline">¶</a></h2>
@@ -376,6 +379,7 @@ docker run  -v `pwd`/dist:/test/ ubuntu:12.04 /test/convertmc --version
 <span class="o">./</span><span class="n">generate_deb_packages</span><span class="o">.</span><span class="n">sh</span> <span class="n">convertmc</span> <span class="n">runmc</span> <span class="n">pld2sobp</span> <span class="n">mcscripter</span>
 </pre></div>
 </div>
+<p>Deb packages are automatically uploaded to <a class="reference external" href="https://github.com/DataMedSci/deb_package_repository">APT repository</a>  hosted on Github Pages.</p>
 </section>
 </section>
 
