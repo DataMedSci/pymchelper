@@ -1,18 +1,32 @@
+import glob
 import os
-
-from my_pyinstaller_utils import *
+import shutil
 
 import matplotlib
 
+# helper tools to print list of binary and data files sorted by their size in bytes
+from my_pyinstaller_utils import *
+
 # to test run dist/convertmc image tests/res/shieldhit/generated/single/cyl/en_xy_al.bdo
+
+# extract two libraries from Pillow (PIL fork) library, which is used by matplotlib to generate PNG files
+# these files may be present in the user filesystem (i.e. via `libpng16-16` package on Debian) resulting in a version conflict
+# we will copy these files to the main directory of our executable bundle, so they will take precence over system files
+
+# extract these libraries from Pillow storage
+for filename in glob.glob('/opt/python39/lib/python3.9/site-packages/Pillow.libs/*-*.so.*'):
+    if 'libpng16' in filename:
+        shutil.copy(filename, 'libpng16.so')
+    if 'libz' in filename:
+        shutil.copy(filename, 'libz.so.1')
 
 a = Analysis([os.path.join('pymchelper', 'run.py')],
              pathex=['.'],
              binaries=[],
              datas=[ # pair of strings: location in system now, the name of the folder to contain the files at run-time.
                  (os.path.join('pymchelper','VERSION'), 'pymchelper'),
-                 ('/opt/python39/lib/python3.9/site-packages/Pillow.libs/libpng16-1d32fd47.so.16.37.0', '.'),
-                 ('/opt/python39/lib/python3.9/site-packages/Pillow.libs/libz-b8b1b7c1.so.1.2.11', '.'),
+                 ('libpng16.so', '.'),  # libraries needed by Pillow
+                 ('libz.so.1', '.'),
                  (matplotlib.matplotlib_fname(), 'matplotlib/mpl-data')  # add matplotlibrc file
                  ],
              hiddenimports=[],
@@ -36,18 +50,18 @@ a.datas = TOC([item for item in a.datas if is_wanted_file(item)])
 
 # debugging printouts
 print_header("BINARIES")
-print_tuple_size(a.binaries, max_items=-1)
+print_tuple_size(a.binaries, max_items=20)
 
 # debugging printouts
 print_header("DATAS")
-print_tuple_size(a.datas, max_items=-1)
+print_tuple_size(a.datas, max_items=20)
 
 
 pyz = PYZ(a.pure, a.zipped_data, cipher=None)
 
 # debugging printouts
 print_header("PYZ")
-print_tuple_size(pyz.toc, max_items=-1)
+print_tuple_size(pyz.toc, max_items=20)
 
 
 exe = EXE(pyz,
@@ -68,4 +82,4 @@ exe = EXE(pyz,
 
 # debugging printouts
 print_header("EXE")
-print_tuple_size(exe.toc, max_items=-1)
+print_tuple_size(exe.toc, max_items=20)
