@@ -4,11 +4,15 @@ from my_pyinstaller_utils import *
 
 import matplotlib
 
+# to test run dist/convertmc image tests/res/shieldhit/generated/single/cyl/en_xy_al.bdo
+
 a = Analysis([os.path.join('pymchelper', 'run.py')],
              pathex=['.'],
              binaries=[],
              datas=[ # pair of strings: location in system now, the name of the folder to contain the files at run-time.
                  (os.path.join('pymchelper','VERSION'), 'pymchelper'),
+                 ('/opt/python39/lib/python3.9/site-packages/Pillow.libs/libpng16-1d32fd47.so.16.37.0', '.'),
+                 ('/opt/python39/lib/python3.9/site-packages/Pillow.libs/libz-b8b1b7c1.so.1.2.11', '.'),
                  (matplotlib.matplotlib_fname(), 'matplotlib/mpl-data')  # add matplotlibrc file
                  ],
              hiddenimports=[],
