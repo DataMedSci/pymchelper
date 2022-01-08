@@ -50,15 +50,14 @@ jobs:
         run: pyinstaller --add-data 'VERSION;pymchelper' --onefile --name runmc pymchelper\utils\runmc.py
 
       - name: Generate single-file executables for convertmc
-        run: pyinstaller --add-data 'VERSION;pymchelper' --onefile --name convertmc pymchelper\run.py
+        run: pyinstaller --add-data 'VERSION;pymchelper' --exclude-module scipy --onefile --name convertmc pymchelper\run.py
 
-      # - name: Test single-file executables
-      #   run: |
-      #     ls -alh ./dist/
-      #     ./dist/mcscripter --version
-      #     ./dist/pld2sobp --version
-      #     ./dist/runmc --version
-      #     ./dist/convertmc --version
+      - name: Test single-file executables
+        run: |
+          dist\mcscripter.exe --version
+          dist\pld2sobp.exe --version
+          dist\runmc.exe --version
+          dist\convertmc --version
 
       - name: Archive executables as artifacts
         uses: actions/upload-artifact@v2
