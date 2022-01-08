@@ -38,7 +38,7 @@ jobs:
         run: pip install -r requirements.txt
 
       - name: Generate single-file executables for mcscripter
-        run: pyinstaller --add-data 'pymchelper\VERSION:pymchelper' --onefile --name mcscripter pymchelper\utils\mcscripter.py
+        run: pyinstaller --add-data 'pymchelper\VERSION;pymchelper' --onefile --name mcscripter pymchelper\utils\mcscripter.py
 
       # - name: Generate single-file executables for pld2sobp
       #   run: pyinstaller --add-data 'pymchelper\VERSION:pymchelper' --onefile --name pld2sobp pymchelper/utils/pld2sobp.py
