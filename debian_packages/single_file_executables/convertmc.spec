@@ -7,8 +7,6 @@ import matplotlib
 # helper tools to print list of binary and data files sorted by their size in bytes
 from my_pyinstaller_utils import *
 
-# to test run dist/convertmc image tests/res/shieldhit/generated/single/cyl/en_xy_al.bdo
-
 # extract two libraries from Pillow (PIL fork) library, which is used by matplotlib to generate PNG files
 # these files may be present in the user filesystem (i.e. via `libpng16-16` package on Debian) resulting in a version conflict
 # we will copy these files to the main directory of our executable bundle, so they will take precence over system files

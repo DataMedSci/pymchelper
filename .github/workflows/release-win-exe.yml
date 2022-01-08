@@ -1,0 +1,92 @@
+name: Release - executable artifacts for Windows
+
+on:
+  push:
+    branches: [ 'release/*']
+    tags: ['v*']
+  pull_request:
+    branches: [ 'release/*']
+  release:
+    types: [published]
+
+jobs:
+
+  # generation of single-file executables
+  build-executables:
+    runs-on: windows-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout repository with full history
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0 # Number of commits to fetch. 0 indicates all history for all branches and tags.
+
+      - name: Set up Python
+        uses: actions/setup-python@v2.3.1
+        with:
+          python-version: 3.9
+
+      - name: Generate VERSION file
+        run: python3 setup.py --help
+
+      - name: Install pyinstaller
+        run: pip install pyinstaller         
+
+      - name: Prepare requierements
+        run: pip install -r requirements.txt
+
+      - name: Prepare version file
+        run: cp pymchelper\VERSION .
+
+      - name: Generate single-file executables for mcscripter
+        run: pyinstaller --add-data 'VERSION;pymchelper' --onefile --name mcscripter pymchelper\utils\mcscripter.py
+
+      - name: Generate single-file executables for pld2sobp
+        run: pyinstaller --add-data 'VERSION;pymchelper' --onefile --name pld2sobp pymchelper\utils\pld2sobp.py
+
+      - name: Generate single-file executables for runmc
+        run: pyinstaller --add-data 'VERSION;pymchelper' --onefile --name runmc pymchelper\utils\runmc.py
+
+      - name: Generate single-file executables for convertmc
+        run: pyinstaller --add-data 'VERSION;pymchelper' --exclude-module scipy --onefile --name convertmc pymchelper\run.py
+
+      - name: Test single-file executables
+        run: |
+          dist\mcscripter.exe --version
+          dist\pld2sobp.exe --version
+          dist\runmc.exe --version
+          dist\convertmc --version
+
+      - name: Archive executables as artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: executables
+          path: ./dist
+
+  # upload of single-file executables to release assets
+  upload-executables:
+    runs-on: windows-latest
+    needs: [build-executables]
+
+    steps:
+      - name: Checkout repository with full history
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0 # Number of commits to fetch. 0 indicates all history for all branches and tags.
+
+      - uses: actions/download-artifact@v2
+        with:
+          name: executables
+          path: ./dist
+
+      - name: Add artifact with util files to the release
+        uses: ncipollo/release-action@v1.9.0
+        if: startsWith(github.ref, 'refs/tags/v')
+        with:
+          allowUpdates:  true
+          # An optional set of paths representing artifacts to upload to the release. This may be a single path or a comma delimited list of paths (or globs)
+          artifacts: './dist/*'
+          token:  ${{ secrets.GITHUB_TOKEN }}
+
