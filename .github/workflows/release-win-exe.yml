@@ -2,10 +2,10 @@ name: Release - executable artifacts for Windows
 
 on:
   push:
-    branches: [ 'release/*' , 'master']
+    branches: [ 'release/*']
     tags: ['v*']
   pull_request:
-    branches: [ 'release/*', 'master' ]
+    branches: [ 'release/*']
   release:
     types: [published]
 
@@ -67,7 +67,7 @@ jobs:
 
   # upload of single-file executables to release assets
   upload-executables:
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
     needs: [build-executables]
 
     steps:
@@ -81,12 +81,12 @@ jobs:
           name: executables
           path: ./dist
 
-      # - name: Add artifact with util files to the release
-      #   uses: ncipollo/release-action@v1.9.0
-      #   if: startsWith(github.ref, 'refs/tags/v')
-      #   with:
-      #     allowUpdates:  true
-      #     # An optional set of paths representing artifacts to upload to the release. This may be a single path or a comma delimited list of paths (or globs)
-      #     artifacts: './dist/*'
-      #     token:  ${{ secrets.GITHUB_TOKEN }}
+      - name: Add artifact with util files to the release
+        uses: ncipollo/release-action@v1.9.0
+        if: startsWith(github.ref, 'refs/tags/v')
+        with:
+          allowUpdates:  true
+          # An optional set of paths representing artifacts to upload to the release. This may be a single path or a comma delimited list of paths (or globs)
+          artifacts: './dist/*'
+          token:  ${{ secrets.GITHUB_TOKEN }}
 
