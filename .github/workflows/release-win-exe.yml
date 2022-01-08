@@ -34,23 +34,23 @@ jobs:
       - name: Install pyinstaller
         run: pip install pyinstaller         
 
-      - name: Prepare
+      - name: Prepare requierements
         run: pip install -r requirements.txt
 
-      - name: Prepare 2
+      - name: Prepare version file
         run: cp pymchelper\VERSION .
 
       - name: Generate single-file executables for mcscripter
         run: pyinstaller --add-data 'VERSION;pymchelper' --onefile --name mcscripter pymchelper\utils\mcscripter.py
 
-      # - name: Generate single-file executables for pld2sobp
-      #   run: pyinstaller --add-data 'pymchelper\VERSION:pymchelper' --onefile --name pld2sobp pymchelper/utils/pld2sobp.py
+      - name: Generate single-file executables for pld2sobp
+        run: pyinstaller --add-data 'VERSION:pymchelper' --onefile --name pld2sobp pymchelper\utils\pld2sobp.py
 
       - name: Generate single-file executables for runmc
-        run: pyinstaller --onefile --add-data 'pymchelper\VERSION:pymchelper' --name runmc pymchelper\utils\runmc.py
+        run: pyinstaller --add-data 'VERSION:pymchelper' --onefile --name runmc pymchelper\utils\runmc.py
 
       - name: Generate single-file executables for convertmc
-        run: pyinstaller --onefile --add-data 'pymchelper\VERSION:pymchelper' --name convertmc pymchelper\run.py
+        run: pyinstaller --add-data 'VERSION:pymchelper' --onefile --name convertmc pymchelper\run.py
 
       # - name: Test single-file executables
       #   run: |
