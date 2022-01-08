@@ -76,11 +76,6 @@ install_requires = [
     "numpy>=1.21 ; python_version == '3.10'",
     "numpy>=1.20 ; python_version == '3.9'",
     "numpy>=1.18 ; python_version == '3.8'",
-    "numpy>=1.15 ; python_version == '3.7'",
-    "numpy>=1.12,<1.20 ; python_version == '3.6'",
-    "numpy>=1.11,<1.19 ; python_version == '3.5'",
-    "numpy>=1.11,<1.16 ; python_version == '3.4' or python_version == '2.7'",
-    "enum34 ; python_version == '3.4' or python_version == '2.7'"
 ]
 
 setuptools.setup(
@@ -117,11 +112,6 @@ setuptools.setup(
 
         # Specify the Python versions you support here. In particular, ensure
         # that you indicate whether you support Python 2, Python 3 or both.
-        'Programming Language :: Python :: 2.7',
-        'Programming Language :: Python :: 3.4',
-        'Programming Language :: Python :: 3.5',
-        'Programming Language :: Python :: 3.6',
-        'Programming Language :: Python :: 3.7',
         'Programming Language :: Python :: 3.8',
         'Programming Language :: Python :: 3.9',
         'Programming Language :: Python :: 3.10',
@@ -137,5 +127,5 @@ setuptools.setup(
     package_data={'pymchelper': ['flair/db/*', 'VERSION']},
     install_requires=install_requires,
     extras_require=EXTRAS_REQUIRE,
-    python_requires='>=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*',
+    python_requires='>=3.8',
 )
