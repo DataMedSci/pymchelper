@@ -33,7 +33,9 @@ jobs:
 
 
       - name: Install pyinstaller
-        run: pip install pyinstaller
+        run: | 
+          pip install pyinstaller
+          pyinstaller --onefile --name convertmc .\pymchelper\utils\runmc.py
 
       - name: Prepare
         run: cp debian_packages/single_file_executables/my_pyinstaller_utils.py .
