@@ -35,6 +35,9 @@ jobs:
       - name: Install pyinstaller
         run: pip install pyinstaller
 
+      - name: Prepare
+        run: cp debian_packages/single_file_executables/my_pyinstaller_utils.py .
+
       # - name: Generate single-file executables for mcscripter
       #   run: pyinstaller --add-data 'pymchelper\VERSION:pymchelper' --onefile --name mcscripter pymchelper/utils/mcscripter.py
 
@@ -42,7 +45,9 @@ jobs:
       #   run: pyinstaller --add-data 'pymchelper\VERSION:pymchelper' --onefile --name pld2sobp pymchelper/utils/pld2sobp.py
 
       - name: Generate single-file executables for runmc
-        run: pyinstaller runmc.spec
+        run: | 
+          cp debian_packages/single_file_executables/runmc.spec .
+          pyinstaller runmc.spec
 
       # - name: Generate single-file executables for convertmc
       #   run: pyinstaller convertmc.spec
