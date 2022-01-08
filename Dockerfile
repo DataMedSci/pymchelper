@@ -22,7 +22,7 @@ COPY pymchelper pymchelper
 
 # disable pip cache to save some space
 ENV PIP_NO_CACHE_DIR=1
-RUN pip install --only-binary scipy,pillow -r requirements.txt
+RUN pip install --only-binary scipy,pillow,numpy -r requirements.txt
 
 # generate static VERSION file
 COPY .git .git
