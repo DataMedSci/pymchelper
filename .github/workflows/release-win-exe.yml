@@ -23,6 +23,15 @@ jobs:
         with:
           fetch-depth: 0 # Number of commits to fetch. 0 indicates all history for all branches and tags.
 
+      - name: Set up Python
+        uses: actions/setup-python@v2.3.1
+        with:
+          python-version: 3.9
+
+      - name: Generate VERSION file
+        run: python3 setup.py --help
+
+
       - name: Install pyinstaller
         run: pip install pyinstaller
 
@@ -35,16 +44,16 @@ jobs:
       - name: Generate single-file executables for runmc
         run: pyinstaller runmc.spec
 
-      - name: Generate single-file executables for convertmc
-        run: pyinstaller convertmc.spec
+      # - name: Generate single-file executables for convertmc
+      #   run: pyinstaller convertmc.spec
 
-      - name: Test single-file executables
-        run: |
-          ls -alh ./dist/
-          ./dist/mcscripter --version
-          ./dist/pld2sobp --version
-          ./dist/runmc --version
-          ./dist/convertmc --version
+      # - name: Test single-file executables
+      #   run: |
+      #     ls -alh ./dist/
+      #     ./dist/mcscripter --version
+      #     ./dist/pld2sobp --version
+      #     ./dist/runmc --version
+      #     ./dist/convertmc --version
 
       - name: Archive executables as artifacts
         uses: actions/upload-artifact@v2
