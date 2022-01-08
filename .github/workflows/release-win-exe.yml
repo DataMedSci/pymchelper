@@ -31,14 +31,11 @@ jobs:
       - name: Generate VERSION file
         run: python3 setup.py --help
 
-
       - name: Install pyinstaller
-        run: | 
-          pip install pyinstaller
-         
+        run: pip install pyinstaller         
 
-      # - name: Prepare
-      #   run: cp debian_packages/single_file_executables/my_pyinstaller_utils.py .
+      - name: Prepare
+        run: pip install -r requirements.txt
 
       # - name: Generate single-file executables for mcscripter
       #   run: pyinstaller --add-data 'pymchelper\VERSION:pymchelper' --onefile --name mcscripter pymchelper/utils/mcscripter.py
