@@ -1,11 +1,7 @@
+import importlib
+import importlib.util
 import os
-import sys
 
-# Python2 lacks a FileNotFoundError exception, we use then IOError
-try:
-    FileNotFoundError
-except NameError:
-    FileNotFoundError = IOError
 
 __version__ = 'unknown'
 
@@ -19,14 +15,8 @@ __version__ = 'unknown'
 
 # get location of __init__.py file (the one you see now) in the filesystem
 module_name = 'pymchelper'
-if sys.version_info < (3, 0):  # Python 2.7
-    import imp
-    init_location = os.path.join(imp.find_module(module_name)[1], module_name)
-else:  # Python 3.x
-    import importlib
-    import importlib.util
-    spec = importlib.util.find_spec(module_name)
-    init_location = spec.origin
+spec = importlib.util.find_spec(module_name)
+init_location = spec.origin
 
 # VERSION should sit next to __init__.py in the directory structure
 version_file = os.path.join(os.path.dirname(init_location), 'VERSION')
