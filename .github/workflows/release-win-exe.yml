@@ -2,10 +2,10 @@ name: Release - executable artifacts for Windows
 
 on:
   push:
-    branches: [ 'release/*' ]
+    branches: [ 'release/*' , 'master']
     tags: ['v*']
   pull_request:
-    branches: [ 'release/*' ]
+    branches: [ 'release/*', 'master' ]
   release:
     types: [published]
 
@@ -16,7 +16,6 @@ jobs:
     runs-on: windows-latest
     permissions:
       contents: read
-      packages: write
 
     steps:
       - name: Checkout repository with full history
@@ -27,17 +26,17 @@ jobs:
       - name: Install pyinstaller
         run: pip install pyinstaller
 
-      - name: Generate single-file executables for mcscripter
-        run: pyinstaller --add-data 'pymchelper/VERSION:pymchelper' --onefile --name mcscripter pymchelper/utils/mcscripter.py
+      # - name: Generate single-file executables for mcscripter
+      #   run: pyinstaller --add-data 'pymchelper\VERSION:pymchelper' --onefile --name mcscripter pymchelper/utils/mcscripter.py
 
-      - name: Generate single-file executables for pld2sobp
-        run: pyinstaller --add-data 'pymchelper/VERSION:pymchelper' --onefile --name pld2sobp pymchelper/utils/pld2sobp.py
+      # - name: Generate single-file executables for pld2sobp
+      #   run: pyinstaller --add-data 'pymchelper\VERSION:pymchelper' --onefile --name pld2sobp pymchelper/utils/pld2sobp.py
 
       - name: Generate single-file executables for runmc
-        run: pymchelper:latest pyinstaller runmc.spec
+        run: pyinstaller runmc.spec
 
       - name: Generate single-file executables for convertmc
-        run: pymchelper:latest pyinstaller convertmc.spec
+        run: pyinstaller convertmc.spec
 
       - name: Test single-file executables
         run: |
@@ -69,12 +68,12 @@ jobs:
           name: executables
           path: ./dist
 
-      - name: Add artifact with util files to the release
-        uses: ncipollo/release-action@v1.9.0
-        if: startsWith(github.ref, 'refs/tags/v')
-        with:
-          allowUpdates:  true
-          # An optional set of paths representing artifacts to upload to the release. This may be a single path or a comma delimited list of paths (or globs)
-          artifacts: './dist/*'
-          token:  ${{ secrets.GITHUB_TOKEN }}
+      # - name: Add artifact with util files to the release
+      #   uses: ncipollo/release-action@v1.9.0
+      #   if: startsWith(github.ref, 'refs/tags/v')
+      #   with:
+      #     allowUpdates:  true
+      #     # An optional set of paths representing artifacts to upload to the release. This may be a single path or a comma delimited list of paths (or globs)
+      #     artifacts: './dist/*'
+      #     token:  ${{ secrets.GITHUB_TOKEN }}
 
