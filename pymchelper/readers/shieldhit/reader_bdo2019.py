@@ -167,7 +167,15 @@ class SHReaderBDO2019(SHReader):
                 if not page.name:
                     page.name = str(page.dettyp)
 
-            estimator.file_format = 'bdo2019'
+            # apply basic normalization for pages with normalisation tag
+            for page in estimator.pages:
+                page_normalisation = getattr(page, 'page_normalized', None)
+                # id 2: X = (sum_j x_j) / (sum_j I_j)          NORMCOUNT, ...
+                if page_normalisation == 2:
+                    page.data_raw /= np.float64(estimator.number_of_primaries)
+                    page.error_raw /= np.float64(estimator.number_of_primaries)
 
-            logger.debug("Done reading bdo file.")
-            return True
+        estimator.file_format = 'bdo2019'
+
+        logger.debug("Done reading bdo file.")
+        return True
