@@ -14,10 +14,9 @@ logger = logging.getLogger(__name__)
 
 
 class SHReaderBDO2019(SHReader):
-    """
-    Experimental binary format reader version >= 0.7
-    """
-    def read_data(self, estimator):
+    """Experimental binary format reader version >= 0.7"""
+    
+    def read_data(self, estimator, nscale=1):
         logger.debug("Reading: " + self.filename)
 
         with open(self.filename, "rb") as f:
