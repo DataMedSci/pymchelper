@@ -169,7 +169,8 @@ class SHReaderBDO2019(SHReader):
             # apply basic normalization for pages with normalisation tag
             for page in estimator.pages:
                 page_normalisation = getattr(page, 'page_normalized', None)
-                # id 2: X = (sum_j x_j) / (sum_j I_j)          NORMCOUNT, ...
+                # see pymchelper/readers/shieldhit/binary_spec.py for details on the normalisation tags
+                # normalize the detectors such as dose or fluence (tagged as SH_POSTPROC_NORM or 2)
                 if page_normalisation == 2:
                     page.data_raw /= np.float64(estimator.number_of_primaries)
                     page.error_raw /= np.float64(estimator.number_of_primaries)
