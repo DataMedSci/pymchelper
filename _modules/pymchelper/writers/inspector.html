@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>pymchelper.writers.inspector &#8212; pymchelper 1.11.4 documentation</title>
+    <title>pymchelper.writers.inspector &#8212; pymchelper 1.12.0 documentation</title>
     
   <link href="../../../_static/css/theme.css" rel="stylesheet">
   <link href="../../../_static/css/index.ff1ffe594081f20da1ef19478df9384b.css" rel="stylesheet">
@@ -173,7 +173,8 @@
                 <span class="k">if</span> <span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">{</span><span class="s1">&#39;data&#39;</span><span class="p">,</span> <span class="s1">&#39;data_raw&#39;</span><span class="p">,</span> <span class="s1">&#39;error&#39;</span><span class="p">,</span> <span class="s1">&#39;error_raw&#39;</span><span class="p">}:</span>
                     <span class="n">line</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="se">\t</span><span class="si">{:24s}</span><span class="s2">: &#39;</span><span class="si">{:s}</span><span class="s2">&#39;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">name</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">value</span><span class="p">))</span>
                     <span class="nb">print</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Data min: </span><span class="si">{:g}</span><span class="s2">, max: </span><span class="si">{:g}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">page</span><span class="o">.</span><span class="n">data_raw</span><span class="o">.</span><span class="n">min</span><span class="p">(),</span> <span class="n">page</span><span class="o">.</span><span class="n">data_raw</span><span class="o">.</span><span class="n">max</span><span class="p">()))</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Data min: </span><span class="si">{:g}</span><span class="s2">, max: </span><span class="si">{:g}</span><span class="s2">, mean: </span><span class="si">{:g}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                <span class="n">page</span><span class="o">.</span><span class="n">data_raw</span><span class="o">.</span><span class="n">min</span><span class="p">(),</span> <span class="n">page</span><span class="o">.</span><span class="n">data_raw</span><span class="o">.</span><span class="n">max</span><span class="p">(),</span> <span class="n">page</span><span class="o">.</span><span class="n">data_raw</span><span class="o">.</span><span class="n">mean</span><span class="p">()))</span>
             <span class="nb">print</span><span class="p">(</span><span class="mi">75</span> <span class="o">*</span> <span class="s2">&quot;-&quot;</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">options</span><span class="o">.</span><span class="n">details</span><span class="p">:</span>

@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>pymchelper.readers.shieldhit.reader_bdo2019 &#8212; pymchelper 1.11.4 documentation</title>
+    <title>pymchelper.readers.shieldhit.reader_bdo2019 &#8212; pymchelper 1.12.0 documentation</title>
     
   <link href="../../../../_static/css/theme.css" rel="stylesheet">
   <link href="../../../../_static/css/index.ff1ffe594081f20da1ef19478df9384b.css" rel="stylesheet">
@@ -159,10 +159,9 @@
 
 
 <div class="viewcode-block" id="SHReaderBDO2019"><a class="viewcode-back" href="../../../../apidoc/pymchelper.readers.shieldhit.reader_bdo2019.html#pymchelper.readers.shieldhit.reader_bdo2019.SHReaderBDO2019">[docs]</a><span class="k">class</span> <span class="nc">SHReaderBDO2019</span><span class="p">(</span><span class="n">SHReader</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Experimental binary format reader version &gt;= 0.7</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-<div class="viewcode-block" id="SHReaderBDO2019.read_data"><a class="viewcode-back" href="../../../../apidoc/pymchelper.readers.shieldhit.reader_bdo2019.html#pymchelper.readers.shieldhit.reader_bdo2019.SHReaderBDO2019.read_data">[docs]</a>    <span class="k">def</span> <span class="nf">read_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">estimator</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Experimental binary format reader version &gt;= 0.7&quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="SHReaderBDO2019.read_data"><a class="viewcode-back" href="../../../../apidoc/pymchelper.readers.shieldhit.reader_bdo2019.html#pymchelper.readers.shieldhit.reader_bdo2019.SHReaderBDO2019.read_data">[docs]</a>    <span class="k">def</span> <span class="nf">read_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">estimator</span><span class="p">,</span> <span class="n">nscale</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
         <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Reading: &quot;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">filename</span><span class="p">)</span>
 
         <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">filename</span><span class="p">,</span> <span class="s2">&quot;rb&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
@@ -312,10 +311,19 @@
                 <span class="k">if</span> <span class="ow">not</span> <span class="n">page</span><span class="o">.</span><span class="n">name</span><span class="p">:</span>
                     <span class="n">page</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">page</span><span class="o">.</span><span class="n">dettyp</span><span class="p">)</span>
 
-            <span class="n">estimator</span><span class="o">.</span><span class="n">file_format</span> <span class="o">=</span> <span class="s1">&#39;bdo2019&#39;</span>
+            <span class="c1"># apply basic normalization for pages with normalisation tag</span>
+            <span class="k">for</span> <span class="n">page</span> <span class="ow">in</span> <span class="n">estimator</span><span class="o">.</span><span class="n">pages</span><span class="p">:</span>
+                <span class="n">page_normalisation</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">page</span><span class="p">,</span> <span class="s1">&#39;page_normalized&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+                <span class="c1"># see pymchelper/readers/shieldhit/binary_spec.py for details on the normalisation tags</span>
+                <span class="c1"># normalize the detectors such as dose or fluence (tagged as SH_POSTPROC_NORM or 2)</span>
+                <span class="k">if</span> <span class="n">page_normalisation</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+                    <span class="n">page</span><span class="o">.</span><span class="n">data_raw</span> <span class="o">/=</span> <span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">(</span><span class="n">estimator</span><span class="o">.</span><span class="n">number_of_primaries</span><span class="p">)</span>
+                    <span class="n">page</span><span class="o">.</span><span class="n">error_raw</span> <span class="o">/=</span> <span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">(</span><span class="n">estimator</span><span class="o">.</span><span class="n">number_of_primaries</span><span class="p">)</span>
 
-            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Done reading bdo file.&quot;</span><span class="p">)</span>
-            <span class="k">return</span> <span class="kc">True</span></div></div>
+        <span class="n">estimator</span><span class="o">.</span><span class="n">file_format</span> <span class="o">=</span> <span class="s1">&#39;bdo2019&#39;</span>
+
+        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Done reading bdo file.&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="kc">True</span></div></div>
 </pre></div>
 
               </div>
