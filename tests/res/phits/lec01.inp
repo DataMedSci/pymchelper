@@ -1,0 +1,59 @@
+[ T i t l e ]
+minimized input file for lecture
+
+[ P a r a m e t e r s ]
+ icntl    =           0     # (D=0) 3:ECH 5:NOR 6:SRC 7,8:GSH 11:DSH 12:DUMP
+ maxcas   =          50     # (D=10) number of particles per one batch
+ maxbch   =           2     # (D=10) number of batches
+ file(1)  = /home/ubuntu/workspace/phits/phits        # (D=c:/phits) PHITS install folder name
+ file(6)  = phits.out       # (D=phits.out) general output file name
+ 
+[ S o u r c e ]
+   s-type =   1             # mono-energetic axial source
+     proj =  proton         # kind of incident particle         
+      dir =   1.0           # z-direction of beam [cosine]
+       r0 =   0.            # radius [cm]
+       z0 =   0.            # minimum position of z-axis [cm]
+       z1 =   0.            # maximum position of z-axis [cm]
+       e0 =   150.          # energy of beam [MeV/u]
+
+[ M a t e r i a l ]
+mat[1]    H 2  O 1
+
+[ S u r f a c e ]
+  10  so      10.
+
+[ C e l l ]
+ 100     1 -1.0  -10
+ 101    -1        10
+
+[ T - T r a c k ]
+     mesh =  xyz            # mesh type is xyz scoring mesh
+   x-type =    2            # x-mesh is linear given by xmin, xmax and nx
+       nx =  200            # number of x-mesh points
+     xmin =  -20.           # minimum value of x-mesh points
+     xmax =   20.           # maximum value of x-mesh points
+   y-type =    1            # y-mesh is given by the below data
+       ny =    1            # number of y-mesh points
+           -5.0  5.0
+   z-type =    2            # z-mesh is linear given by zmin, zmax and nz
+       nz =  200            # number of z-mesh points
+     zmin =  -20.           # minimum value of z-mesh points
+     zmax =   20.           # maximum value of z-mesh points
+   t-type =    2            # t-mesh is linear given by tmin, tmax and nt
+       nt =    1            # number of t-mesh points
+     tmin =   0.0           # minimum value of t-mesh points
+     tmax =   1.0           # maximum value of t-mesh points
+     part =  all      
+   e-type =    1            # e-mesh is given by the below data
+       ne =    1            # number of e-mesh points
+            0.0  1000.0
+     unit =    1            # unit is [1/cm^2/source]
+     axis =   xz            # axis of output
+     file = track_xz.out  # file name of output for the above axis
+    title = Track Detection using [T-track] tally
+    gshow =    3            # 0: no 1:bnd, 2:bnd+mat, 3:bnd+reg 4:bnd+lat
+   epsout =    1            # (D=0) generate eps file by ANGEL
+
+[ E n d ]
+
