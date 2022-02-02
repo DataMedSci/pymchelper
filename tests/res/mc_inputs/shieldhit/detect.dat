@@ -1,21 +1,10 @@
-Geometry Cyl             # 1-dimensional cylinder scoring geometry along z
-    Name CylZ_Mesh
-    R  0.0  10.0    1
-    Z  0.0  20.0    400  # 0.5 mm resolution
-
-Geometry Mesh            # 2-dimensional Cartesian scoring geometry in the YZ plane
-    Name YZ_Mesh
-    X -0.5  0.5    1
-    Y -2.0  2.0    80  # 0.5 mm resolution
+Geometry Mesh
+    Name Z_Mesh
+    X -5.0  5.0    1
+    Y -5.0  5.0    1
     Z  0.0  20.0   400  # 0.5 mm resolution
 
-
 Output
-    Filename cylz.bdo
-    Geo CylZ_Mesh
-    Quantity DoseGy
-
-Output
-    Filename yzmsh.bdo
-    Geo YZ_Mesh
-    Quantity DoseGy
+    Filename dose.bdo
+    Geo Z_Mesh
+    Quantity Dose

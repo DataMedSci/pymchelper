@@ -1,0 +1,38 @@
+TITLE
+proton beam simulation
+* default physics for hadron therapy
+DEFAULTS                                                              HADROTHE
+* beam characteristics
+BEAM           -0.15       0.0       0.0       0.0       0.0       0.0PROTON
+* beam source position
+BEAMPOS          0.0       0.0       0.0       0.0       0.0
+* geometry description starts here
+GEOBEGIN                                                              COMBNAME
+    0    0          
+* black body box
+RPP blkbody    -7.0 7.0 -7.0 7.0 -2.0 22.0
+* vacuum box
+RPP vacuum     -6.0 6.0 -6.0 6.0 -1.0 21.0
+* water phantom
+RPP target     -5.0 5.0 -5.0 5.0 0.0 20.0
+END
+* outer black body region
+Z_BBODY      5 +blkbody -vacuum
+* inner vacuum region
+Z_VACUUM     5 +vacuum -target
+* target region
+Z_TARGET     5 +target
+END
+* geometry description ends here
+GEOEND
+ASSIGNMA    BLCKHOLE   Z_BBODY
+ASSIGNMA      VACUUM  Z_VACUUM
+ASSIGNMA       WATER  Z_TARGET
+* scoring dose
+USRBIN          10.0      DOSE       -21       5.0       5.0      20.0dose
+USRBIN          -5.0      -5.0       0.0         1         1       100 &
+* random number generator settings
+RANDOMIZ         1.0         1
+* number of particles to simulate
+START         100000
+STOP
