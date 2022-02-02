@@ -1,0 +1,13 @@
+SHIELD_HIT12A
+ - `shieldhit` binary in /home/ubuntu/usr/shieldhit/
+
+ PHITS
+ - `phits326_lin.exe` (and `phits326_lin_openmp.exe`) binary in /home/ubuntu/usr/phits/bin
+ - every input file needs to adjust phits installation dir to `/home/ubuntu/usr/phits`
+
+ FLUKA:
+ - `rfluka` binary in `/home/ubuntu/usr/fluka/bin`
+
+ TOPAS:
+  - `topas` binary in `/home/ubuntu/usr/topas/bin`
+  - export TOPAS_G4_DATA_DIR=/home/ubuntu/usr/topas/g4data

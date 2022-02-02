@@ -15,7 +15,8 @@ class MCEnvironment:
     (i.e. checking if it ends with `rfluka`) we can find corresponding code type
     """
     executable_filename = None
-
+    
+    @staticmethod
     def validate_cmdline_options(cmdline_opts: str) -> bool:
         return True
 
@@ -32,6 +33,7 @@ class SH12AEnvironment(MCEnvironment):
     SHIELD-HIT12A Environment
     """
 
+    @staticmethod
     def validate_cmdline_options(cmdline_opts: str) -> bool:
         # transform option list from plain string to a list of values for easier manipulation
         options_list = cmdline_opts.split()
@@ -107,7 +109,7 @@ class SimulationSettings:
         # if extra options are provided, perform options validation
         # in case the options are not supported by MC engine, validation method will throw an exception
         if self.cmdline_opts:
-            self._mc_environment.validate_cmdline_opt(self.cmdline_opts)
+            self._mc_environment.validate_cmdline_options(self.cmdline_opts)
 
     def set_rng_seed(self, rng_seed):
         """

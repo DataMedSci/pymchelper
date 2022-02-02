@@ -2,3 +2,4 @@
 pytest
 flake8
 sphinx
+python-dotenv
