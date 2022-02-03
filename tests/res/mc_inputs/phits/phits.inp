@@ -1,0 +1,58 @@
+[ T i t l e ]
+minimized input file for lecture
+
+[ P a r a m e t e r s ]
+ icntl    =           0     # (D=0) 3:ECH 5:NOR 6:SRC 7,8:GSH 11:DSH 12:DUMP
+ maxcas   =          500     # (D=10) number of particles per one batch
+ maxbch   =          20     # (D=10) number of batches
+ e-mode   =           2     # (D=0) 0: Normal, 1: Event generator mode
+ nedisp   =           1     # (D=0) 0: no, 1: with e straggling, 10: ATIMA
+ nspred   =           2     # (D=0) 0:no, 1:original, 2:Lynch(Moliere), 10:ATIMA
+ negs     =           1     # (D=-1) =-1:original, =0:No, =1:EGS
+ epstfl   =           1     # [EGS](D=0) 0:no, 1:consider density effect based on ICRU90
+ file(1)  = /home/ubuntu/usr/phits        # (D=c:/phits) PHITS install folder name
+ 
+[ S o u r c e ]
+   s-type =   1             # mono-energetic axial source
+     proj =  proton         # kind of incident particle         
+      dir =   1.0           # z-direction of beam [cosine]
+       r0 =   0.            # radius [cm]
+       z0 =   0.            # minimum position of z-axis [cm]
+       z1 =   0.            # maximum position of z-axis [cm]
+       e0 =   150.          # energy of beam [MeV/u]
+
+[ M a t e r i a l ]
+mat[1]    H 2  O 1
+mt1   lwtr.20t
+dedxfile = water_liquid_icru90.txt
+
+[ S u r f a c e ]
+  1  RPP -5. 5. -5. 5. 0. 20.
+
+[ C e l l ]
+ 10     1 -1.0  -1
+ 11    -1        1
+
+[ T-Deposit ]
+     mesh =  xyz            # mesh type is xyz scoring mesh
+   x-type =    2            # x-mesh is linear given by xmin, xmax and nx
+       nx =    1            # number of x-mesh points
+     xmin =   -5.           # minimum value of x-mesh points
+     xmax =    5.           # maximum value of x-mesh points
+   y-type =    1            # y-mesh is given by the below data
+       ny =    1            # number of y-mesh points
+           -5.0  5.0
+   z-type =    2            # z-mesh is linear given by zmin, zmax and nz
+       nz =  400            # number of z-mesh points
+     zmin =    0.           # minimum value of z-mesh points
+     zmax =   20.           # maximum value of z-mesh points
+     part =  all
+   output =  dose
+     unit =    0            # unit is [Gy/source]
+     axis =    z            # axis of output
+     file = dose.out  # file name of output for the above axis
+   epsout =    2            # (D=0) generate eps file by ANGEL
+   angel  =   ylin
+
+[ E n d ]
+
