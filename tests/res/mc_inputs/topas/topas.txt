@@ -1,0 +1,42 @@
+# GENERAL
+i:Ts/ShowHistoryCountAtInterval = 100
+i:Ts/NumberOfThreads = 0
+b:Ts/ShowCPUTime = "True"
+i:Ts/Seed = 1
+
+# GEOMETRY
+
+s:Ge/World/Type     = "TsBox"
+s:Ge/World/Material = "Vacuum"
+d:Ge/World/HLX = 6 cm
+d:Ge/World/HLY = 6 cm
+d:Ge/World/HLZ = 11 cm
+d:Ge/World/TransZ =  Ge/World/HLZ cm
+
+s:Ge/Phantom/Type     = "TsBox"
+s:Ge/Phantom/Parent = "World"
+s:Ge/Phantom/Material = "G4_WATER"
+d:Ge/Phantom/HLX = 5 cm
+d:Ge/Phantom/HLY = 5 cm
+d:Ge/Phantom/HLZ = 10 cm
+d:Ge/Phantom/TransZ =  -1 cm
+i:Ge/Phantom/ZBins    = 400
+
+# PARTICLE SOURCE
+s:Ge/BeamPosition/Parent="World"
+d:Ge/BeamPosition/TransZ = -11 cm
+d:Ge/BeamPosition/RotX=0. deg
+
+s:So/Demo/Type = "Beam"
+s:So/Demo/BeamParticle = "proton"
+s:So/Demo/Component = "BeamPosition"
+d:So/Demo/BeamEnergy = 150.0 MeV
+u:So/Demo/BeamEnergySpread = 0.0
+s:So/Demo/BeamPositionDistribution = "None"
+s:So/Demo/BeamAngularDistribution = "None"
+i:So/Demo/NumberOfHistoriesInRun = Ts/ShowHistoryCountAtInterval * 10
+
+s:Sc/Dose/Quantity                  = "DoseToMedium"
+s:Sc/Dose/Component                 = "Phantom"
+sv:Sc/Dose/Report = 2 "Mean" "Standard_Deviation"
+s:Sc/Dose/IfOutputFileAlreadyExists = "Overwrite"
