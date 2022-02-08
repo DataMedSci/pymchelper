@@ -11,7 +11,7 @@ from shutil import copyfile
 import sys
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Dict, List, TypeVar, Union
+from typing import Dict, Generator, List, TypeVar, Union
 
 logger = logging.getLogger(__name__)
 
@@ -21,6 +21,7 @@ PathLike = TypeVar("PathLike", str, bytes, os.PathLike)
 
 @dataclass
 class Config:
+    """description needed"""
     # keys and values for contant assignments
     const_dict: Dict[str, Union[str, List[str]]] = field(default_factory=dict)
     # keys and values for table assignments
@@ -78,6 +79,7 @@ class McFile:
     General MC single file object.
     This will be used for the template files as well as the generated output files.
     """
+    
     path: PathLike = None  # full path to this file (may be relative)
     symlink: bool = False  # marker if file is a symlink
     lines: List[str] = field(default_factory=list)
@@ -95,15 +97,17 @@ class McFile:
             self.lines = f.readlines()
 
     def __post_init__(self):
-        '''Automatically read file contents upon object creation'''
+        """Automatically read file contents upon object creation"""
         self.read()
 
 
 @dataclass
 class Template:
+    """description needed"""
     files: List[McFile] = field(default_factory=list)
 
-    def prepare(self, cfg: Config) -> Dict:
+    @staticmethod
+    def prepare(cfg: Config) -> Generator:
         # create a new dict, with all keys, but single unique values only:
         # this is the "current unique dictionary"
         # it represent a single line in config file
@@ -137,7 +141,7 @@ class Template:
                     loop_value += step
 
                     # set the relative energy spread:
-                    if "E_" == loop_key and "DE_FACTOR" in current_dict:
+                    if loop_key == 'E_' and "DE_FACTOR" in current_dict:
                         _de = loop_value * float(current_dict["DE_FACTOR"])
                         # HARDCODED format for DE_
                         current_dict['DE_'] = f"{_de:.3f}"
@@ -188,7 +192,6 @@ class Template:
                         copyfile(src=tf.path, dst=output_file_path)
 
 
-
 def read_template(cfg: Config) -> Template:
     tpl = Template()
 
@@ -211,17 +214,17 @@ def read_template(cfg: Config) -> Template:
 
 def lreplace(text: str, old: str, new: str) -> str:
     """
-        Left adjusted replacement of string f with string r, in string s.
+    Left adjusted replacement of string f with string r, in string s.
 
-        This function is implemented in order to fill in data in FORTRAN77 fields,
-        which are tied to certain positions on the line, i.e. subsequent values
-        may not be shifted.
+    This function is implemented in order to fill in data in FORTRAN77 fields,
+    which are tied to certain positions on the line, i.e. subsequent values
+    may not be shifted.
 
-        Finds string f in string s and replaces it with string r, but left adjusted, retaining line length.
-        If length of r is shorter than length of f, remaining chars will be space padded.
-        If length of r is larger than length of f, then characters will be overwritten.
-        A copy of s with the replacement is returned.
-        """
+    Finds string f in string s and replaces it with string r, but left adjusted, retaining line length.
+    If length of r is shorter than length of f, remaining chars will be space padded.
+    If length of r is larger than length of f, then characters will be overwritten.
+    A copy of s with the replacement is returned.
+    """
     result = old
     if old in text:
         idx = text.find(old)

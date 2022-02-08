@@ -1,6 +1,4 @@
-"""
-Tests for mcscripter
-"""
+"""Tests for mcscripter"""
 import logging
 from pathlib import Path
 
@@ -31,6 +29,7 @@ def test_call_cmd_no_option():
 
 
 def test_parsing_config(config_path: Path):
+    """description needed"""
     config = pymchelper.utils.mcscripter.read_config(path=config_path)
     assert config is not None
     assert config.const_dict
@@ -44,6 +43,7 @@ def test_parsing_config(config_path: Path):
 
 
 def test_reading_template(config_path: Path):
+    """description needed"""
     config = pymchelper.utils.mcscripter.read_config(path=config_path)
     assert config is not None
     template = pymchelper.utils.mcscripter.read_template(cfg=config)
@@ -55,6 +55,7 @@ def test_reading_template(config_path: Path):
 
 
 def test_writing_template(config_path: Path, tmp_path: Path):
+    """description needed"""
     config = pymchelper.utils.mcscripter.read_config(path=config_path)
     assert config
     template = pymchelper.utils.mcscripter.read_template(cfg=config)
@@ -70,4 +71,5 @@ def test_writing_template(config_path: Path, tmp_path: Path):
     assert Path(tmp_path, 'wdir', '1H', '0246.000', 'beam.dat').exists()
 
 def test_execution(config_path: Path):
+    """description needed"""
     pymchelper.utils.mcscripter.main([str(config_path)])
