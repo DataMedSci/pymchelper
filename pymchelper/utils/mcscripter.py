@@ -1,16 +1,15 @@
 """
-Tool for creating SHIELD-HIT12A MC input files using user-specified tables and ranges.
+Tool for creating MC input files using user-specified tables and ranges.
 
 2019 - Niels Bassler
 """
 
-from collections import defaultdict
-from dataclasses import dataclass, field
+import argparse
+import logging
 import os
 import sys
-import errno
-import logging
-import argparse
+from dataclasses import dataclass, field
+from pathlib import Path
 from typing import Dict, List, TypeVar, Union
 
 logger = logging.getLogger(__name__)
@@ -20,15 +19,16 @@ PathLike = TypeVar("PathLike", str, bytes, os.PathLike)
 
 
 @dataclass
-class Config():
+class Config:
     # keys and values for contant assignments
     const_dict: Dict[str, Union[str, List[str]]] = field(default_factory=dict)
     # keys and values for table assignments
     table_dict: Dict[str, List[str]] = field(default_factory=dict)
+    path: PathLike = None  # full path to this file (may be relative)
 
 
 def read_config(path: PathLike) -> Config:
-    cfg = Config()
+    cfg = Config(path=path)
 
     keys: List[str] = []
     _first_line_in_table = True
@@ -77,238 +77,151 @@ class McFile:
     General MC single file object.
     This will be used for the template files as well as the generated output files.
     """
-    fname: str = ""  # filename
-    #    path = ""   # full path to this file (may be relative)
-    #    lines = []  # list of lines inside this file
+    path: PathLike = None  # full path to this file (may be relative)
     symlink: bool = False  # marker if file is a symlink
-    templ_dir: str = ""  # template directory
+    lines: List[str] = field(default_factory=list)
+
+    @property
+    def fname(self):
+        return Path(self.path).name
+
+    def write(self):
+        with open(self.path, 'w') as f:
+            f.writelines(self.lines)
+
+    def read(self):
+        with open(self.path, 'r') as f:
+            self.lines = f.readlines()
+
+    def __post_init__(self):
+        '''Automatically read file contents upon object creation'''
+        self.read()
 
 
 @dataclass
 class Template:
     files: List[McFile] = field(default_factory=list)
 
+    def prepare(self, cfg: Config) -> Dict:
+        # create a new dict, with all keys, but single unique values only:
+        # this is the "current unique dictionary"
+        # it represent a single line in config file
+        # or a one of lines generated from loop variables
+        current_dict = cfg.const_dict.copy()
+        logger.info(current_dict)
+
+        # loop_keys are special keys which cover a numerical range in discrete steps.
+        # here we will identify them, and for each loop_key, there will be a range setup.
+        # loop_keys are identified by the "_MIN" suffix:
+        loop_keys = []
+        for key in cfg.table_dict.keys():
+            if "_MIN" in key:
+                loop_keys.append(key.strip("_MIN") + "_")
+
+        # loop over every items corresponding to every line in table section of the config directory
+        for item in zip(*cfg.table_dict.values()):
+            current_line_dict = dict(zip(cfg.table_dict.keys(), item))
+
+            current_dict.update(current_line_dict)
+
+            # now prepare the ranges for every loop_key
+            for loop_key in loop_keys:
+                start = float(current_line_dict[loop_key + "MIN"])
+                stop = float(current_line_dict[loop_key + "MAX"])
+                step = float(current_line_dict[loop_key + "STEP"])
+                loop_value = start
+                while loop_value <= stop:
+                    # append values calculated for the loop
+                    current_dict[loop_key] = loop_value
+                    loop_value += step
+
+                    # set the relative energy spread:
+                    if "E_" == loop_key and "DE_FACTOR" in current_dict:
+                        _de = loop_value * float(current_dict["DE_FACTOR"])
+                        # HARDCODED format for DE_
+                        current_dict['DE_'] = f"{_de:.3f}"
+
+                    yield current_dict
+
+    def write(self, working_directory: Union[PathLike, None], cfg: Config):
+        for u_dict in self.prepare(cfg=cfg):
+            logger.info(u_dict)
+            _wd = u_dict["WDIR"]
+
+            # check if any keys are in WDIR subsitutions
+            for key in u_dict.keys():
+                token = "${" + key + "}"
+                if token in _wd:
+
+                    _s = u_dict[key]
+                    if isinstance(_s, float):
+                        _s = f"{u_dict[key]:08.3f}"  # HARDCODED float format for directory string
+                    _wd = _wd.replace(token, _s)
+            work_dir = _wd
+
+            for tf in self.files:  # tf = template filename
+                output_file_path = Path(working_directory, work_dir, tf.fname)
+                output_file_path.parent.mkdir(parents=True, exist_ok=True)
+                if not tf.symlink:
+                    output_file_path.touch()
+                    of = McFile(
+                        path=output_file_path)  # of = output file object
+                    for line in tf.lines:
+                        for key in u_dict.keys():
+                            token = "${" + key + "}"
+                            while token in line:
+                                _s = u_dict[key]
+                                if isinstance(_s, float):
+                                    _s = "{u_dict[key]:.3f}"  # HARDCODED float format for loop_keys
+                                line = lreplace(line, token, _s)
+                        of.lines.append(line)
+                    # end loop over t.files
+                    of.write()
+                else:
+                    output_file_path.symlink_to(target=tf.path.resolve())
+
 
 def read_template(cfg: Config) -> Template:
     tpl = Template()
 
     for filename in cfg.const_dict["FILES"]:
-        mcfile = McFile()
-        mcfile.fname = filename
+        path = Path(cfg.const_dict['TDIR'], filename)
+        if not Path(cfg.const_dict['TDIR']).is_absolute():
+            path = Path(cfg.path.parent, cfg.const_dict['TDIR'], filename)
+        mcfile = McFile(path=path)
         tpl.files.append(mcfile)
 
     for filename in cfg.const_dict["SYMLINKS"]:
-        mcfile = McFile()
-        mcfile.fname = filename
-        mcfile.symlink = True
+        path = Path(cfg.const_dict['TDIR'], filename)
+        if not Path(cfg.const_dict['TDIR']).is_absolute():
+            path = Path(cfg.path.parent, cfg.const_dict['TDIR'], filename)
+        mcfile = McFile(path=path, symlink=True)
         tpl.files.append(mcfile)
 
     return tpl
 
 
-#             tf.path = os.path.join(cfg.const_dict["TDIR"], fname)
-#             tf.templ_dir = cfg.const_dict["TDIR"]
+def lreplace(text: str, old: str, new: str) -> str:
+    """
+        Left adjusted replacement of string f with string r, in string s.
 
-#             with open(tf.path) as _f:
-#                 tf.lines = _f.readlines()
+        This function is implemented in order to fill in data in FORTRAN77 fields,
+        which are tied to certain positions on the line, i.e. subsequent values
+        may not be shifted.
 
-# class McFile():
-#     """
-#     General MC single file object.
-#     This will be used for the template files as well as the generated output files.
-#     """
-
-#     def __init__(self):
-#         self.fname = ""  # filename
-#         self.path = ""   # full path to this file (may be relative)
-#         self.lines = []  # list of lines inside this file
-#         self.symlink = False  # marker if file is a symlink
-#         self.templ_dir = ""  # template directory
-
-#     def write(self):
-#         """Write self to disk, create symlink if that is the case."""
-#         # check if target directory exists, create it, if not.
-#         try:
-#             os.makedirs(os.path.dirname(self.path))
-#         except OSError as e:  # when python 2.7 is dropped this can be replaced with FileExistsError: pass
-#             if e.errno == errno.EEXIST:
-#                 pass  # silently accept existing directories
-#             else:
-#                 logger.error('Directory not created.')
-#                 raise
-
-#         if self.symlink:
-#             link_file = os.path.join(self.templ_dir, self.fname)
-#             link_target = os.path.join(self.path)
-#             link_name = os.path.relpath(link_file, os.path.dirname(link_target))
-
-#             try:
-#                 os.symlink(link_name, link_target)
-#             except AttributeError as e:  # python 2.7 on Windows cannot create symlinks
-#                 logger.error('Symlink not created.')
-#                 print("Cannot create a link to the file, please check if you are using Linux or Python 3.")
-#                 raise e
-#             except OSError as e:  # when python 2.7 is dropped this can be replaced with FileExistsError: pass
-#                 if e.errno == errno.EEXIST:
-#                     pass  # silently accept existing symlinks
-#                 else:
-#                     logger.error('Symlink not created.')
-#                     raise
-#         else:
-#             with open(self.path, 'w') as _f:
-#                 logger.info("Writing {}".format(self.path))
-#                 _f.writelines(self.lines)
-
-# class Template():
-#     """Read all files and symlinks specified in the config file, and place them in a list of McFile objects."""
-
-#     def __init__(self, cfg):
-#         self.files = []
-#         self.read(cfg)
-
-#     def read(self, cfg):
-#         """Reads all template files, and creates a list of McFile objects in self.files."""
-#         fname_list = cfg.const_dict["FILES"] + cfg.const_dict["SYMLINKS"]
-
-#         for fname in fname_list:
-#             tf = McFile()
-#             tf.fname = fname
-#             tf.path = os.path.join(cfg.const_dict["TDIR"], fname)
-#             tf.templ_dir = cfg.const_dict["TDIR"]
-
-#             with open(tf.path) as _f:
-#                 tf.lines = _f.readlines()
-
-#             if fname in cfg.const_dict["SYMLINKS"]:
-#                 tf.symlink = True
-#             else:
-#                 tf.symlink = False
-#             self.files.append(tf)
-
-# class Generator():
-#     """This generates and writes the output files based on the loaded template files and the config file."""
-
-#     def __init__(self, templ, cfg):
-#         """
-#         Logic attached to the various keys is in here.
-#         templ is a Template object and cfg is a Config object.
-#         """
-#         # create a new dict, with all keys, but single unique values only:
-#         # this is the "current unique dictionary"
-#         u_dict = cfg.const_dict.copy()
-
-#         # loop_keys are special keys which cover a numerical range in discrete steps.
-#         # here we will identify them, and for each loop_key, there will be a range setup.
-#         # loop_keys are identified by the "_MIN" suffix:
-#         loop_keys = []
-#         for key in cfg.table_dict.keys():
-#             if "_MIN" in key:
-#                 loop_keys.append(key.strip("_MIN") + "_")
-
-#         # reuse any key from table to calculate the length of the table
-#         # this means that the table must be homogenous, i.e. every key must have the same amount of values.
-#         _vals = cfg.table_dict[key]
-
-#         for i, val in enumerate(_vals):
-#             for key in cfg.table_dict.keys():
-#                 u_dict[key] = cfg.table_dict[key][i]  # only copy the ith value
-
-#             # now prepare the ranges for every loop_key
-#             for loop_key in loop_keys:
-#                 _lmin = float(cfg.table_dict[loop_key + "MIN"][i])
-#                 _lmax = float(cfg.table_dict[loop_key + "MAX"][i])
-#                 _lst = float(cfg.table_dict[loop_key + "STEP"][i])
-#                 loop_vals = range(_lmin, _lmax, _lst)
-#                 for loop_val in loop_vals:
-#                     u_dict[loop_key] = loop_val
-
-#                     # set the relative energy spread:
-#                     if "E_" in u_dict and "DE_FACTOR" in u_dict:
-#                         _de = float(u_dict["E_"]) * float(u_dict["DE_FACTOR"])
-#                         u_dict["DE_"] = "{:.3f}".format(_de)  # HARDCODED float format for DE_
-
-#             # at this point, the dict is fully set.
-#             self.write(templ, u_dict)
-
-#     @staticmethod
-#     def get_keys(s):  # This is currently not used, but kept for future use.
-#         """Return list of ${} keys in string"""
-#         r = []
-
-#         if "${" in s:
-#             _i = [i for i, d in enumerate(s) if d == "{"]
-#             _ii = [i for i, d in enumerate(s) if d == "}"]
-
-#             for i in zip(_i, _ii):
-#                 r.append(s[i[0] + 1:i[1]])
-#         return r
-
-#     @staticmethod
-#     def lreplace(s, f, r):
-#         """
-#         Left adjusted replacement of string f with string r, in string s.
-
-#         This function is implemented in order to fill in data in FORTRAN77 fields,
-#         which are tied to certain positions on the line, i.e. subsequent values
-#         may not be shifted.
-
-#         Finds string f in string s and replaces it with string r, but left adjusted, retaining line length.
-#         If length of r is shorter than length of f, remaining chars will be space padded.
-#         If length of r is larger than length of f, then characters will be overwritten.
-#         A copy of s with the replacement is returned.
-#         """
-#         if f in s:
-#             _idx = s.find(f)
-#             if len(r) < len(f):
-#                 _r = r + " " * (len(f) - len(r))
-#             else:
-#                 _r = r
-#             text = s[:_idx] + _r + s[_idx + len(_r):]
-#             return text
-
-#     def write(self, t, u_dict):
-#         """
-#         Write a copy of the template, using the substitutions as specifed in
-#         the unique dictionary u_dict.
-
-#         "Unique", means that any _MIN _MAX _STEP type variables have been set.
-#         """
-#         _wd = u_dict["WDIR"]
-
-#         # check if any keys are in WDIR subsitutions
-#         for key in u_dict.keys():
-#             token = "${" + key + "}"
-#             if token in _wd:
-
-#                 _s = u_dict[key]
-#                 if isinstance(_s, float):
-#                     _s = "{:08.3f}".format(u_dict[key])  # HARDCODED float format for directory string
-#                 _wd = _wd.replace(token, _s)
-#         work_dir = _wd
-
-#         for tf in t.files:  # tf = template filename
-#             of = McFile()  # of = output file object
-#             of.fname = tf.fname
-#             of.path = os.path.join(work_dir, tf.fname)
-#             of.templ_dir = tf.templ_dir
-
-#             # symlinks should not be parsed for tokens.
-#             if tf.symlink:
-#                 of.symlink = True
-#             else:
-#                 of.symlink = False
-
-#                 for line in tf.lines:
-#                     for key in u_dict.keys():
-#                         token = "${" + key + "}"
-#                         while token in line:
-#                             _s = u_dict[key]
-#                             if isinstance(_s, float):
-#                                 _s = "{:.3f}".format(u_dict[key])  # HARDCODED float format for loop_keys
-#                             line = self.lreplace(line, token, _s)
-#                     of.lines.append(line)
-#             # end loop over t.files
-#             of.write()
+        Finds string f in string s and replaces it with string r, but left adjusted, retaining line length.
+        If length of r is shorter than length of f, remaining chars will be space padded.
+        If length of r is larger than length of f, then characters will be overwritten.
+        A copy of s with the replacement is returned.
+        """
+    result = old
+    if old in text:
+        idx = text.find(old)
+        replacement = new
+        if len(new) < len(old):
+            replacement += " " * (len(old) - len(new))
+        result = text[:idx] + replacement + text[idx + len(replacement):]
+    return result
 
 
 def main(args=None):
@@ -341,10 +254,10 @@ def main(args=None):
     else:
         logging.basicConfig()
 
-    # cfg = Config(args.fconf.name)
-    # t = Template(cfg)
+    cfg = read_config(path=Path(args.fconf.name))
+    t = read_template(cfg=cfg)
 
-    # Generator(t, cfg)
+    t.write(working_directory=Path('.'), cfg=cfg)
 
 
 if __name__ == '__main__':
