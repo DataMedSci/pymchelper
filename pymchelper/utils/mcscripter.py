@@ -21,7 +21,8 @@ PathLike = TypeVar("PathLike", str, bytes, os.PathLike)
 
 @dataclass
 class Config:
-    """description needed"""
+    """Description needed."""
+
     # keys and values for contant assignments
     const_dict: Dict[str, Union[str, List[str]]] = field(default_factory=dict)
     # keys and values for table assignments
@@ -79,7 +80,7 @@ class McFile:
     General MC single file object.
     This will be used for the template files as well as the generated output files.
     """
-    
+
     path: PathLike = None  # full path to this file (may be relative)
     symlink: bool = False  # marker if file is a symlink
     lines: List[str] = field(default_factory=list)
@@ -103,11 +104,13 @@ class McFile:
 
 @dataclass
 class Template:
-    """description needed"""
+    """Description needed."""
+
     files: List[McFile] = field(default_factory=list)
 
     @staticmethod
     def prepare(cfg: Config) -> Generator:
+        """Description needed."""
         # create a new dict, with all keys, but single unique values only:
         # this is the "current unique dictionary"
         # it represent a single line in config file
@@ -149,6 +152,7 @@ class Template:
                     yield current_dict
 
     def write(self, working_directory: Union[PathLike, None], cfg: Config):
+        """Description needed."""
         for u_dict in self.prepare(cfg=cfg):
             logger.info(u_dict)
             _wd = u_dict["WDIR"]
@@ -193,6 +197,7 @@ class Template:
 
 
 def read_template(cfg: Config) -> Template:
+    """Description needed."""
     tpl = Template()
 
     for filename in cfg.const_dict["FILES"]:
