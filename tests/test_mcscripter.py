@@ -40,7 +40,19 @@ def test_parsing_config(config_path):
     assert config.const_dict['TDIR'] == 'template/.'
     assert config.const_dict['FILES'] == ['beam.dat', 'detect.dat']
     assert config.table_dict
-    assert config.table_dict['NAME'] == ['1H', '4He', '7Li', '12C', '16O', '20Ne']
+    assert config.table_dict['NAME'] == [
+        '1H', '4He', '7Li', '12C', '16O', '20Ne'
+    ]
+
+
+def test_reading_template(config_path):
+    config = pymchelper.utils.mcscripter.read_config(path=config_path)
+    assert config is not None
+    template = pymchelper.utils.mcscripter.read_template(cfg=config)
+    assert template
+    assert template.files
+    assert template.files[0] == pymchelper.utils.mcscripter.McFile(
+        fname='beam.dat')
 
 
 def test_execution(config_path):
@@ -70,6 +82,3 @@ def test_execution(config_path):
 #             self.assertEqual(sys.version_info[0], 2)
 #             logger.info("Removing directory {:s}".format(out_dir))
 #             shutil.rmtree(out_dir)
-
-# if __name__ == '__main__':
-#     unittest.main()

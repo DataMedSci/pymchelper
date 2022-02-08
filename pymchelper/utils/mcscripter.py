@@ -60,8 +60,7 @@ def read_config(path: PathLike) -> Config:
     # replace string with comma-separated filenames with list of filenames
     if "FILES" in cfg.const_dict:
         cfg.const_dict["FILES"] = [
-            filename.strip()
-            for filename in cfg.const_dict["FILES"].split(",")
+            filename.strip() for filename in cfg.const_dict["FILES"].split(",")
         ]
     if "SYMLINKS" in cfg.const_dict:
         cfg.const_dict["SYMLINKS"] = [
@@ -71,6 +70,47 @@ def read_config(path: PathLike) -> Config:
 
     return cfg
 
+
+@dataclass
+class McFile:
+    """
+    General MC single file object.
+    This will be used for the template files as well as the generated output files.
+    """
+    fname: str = ""  # filename
+    #    path = ""   # full path to this file (may be relative)
+    #    lines = []  # list of lines inside this file
+    symlink: bool = False  # marker if file is a symlink
+    templ_dir: str = ""  # template directory
+
+
+@dataclass
+class Template:
+    files: List[McFile] = field(default_factory=list)
+
+
+def read_template(cfg: Config) -> Template:
+    tpl = Template()
+
+    for filename in cfg.const_dict["FILES"]:
+        mcfile = McFile()
+        mcfile.fname = filename
+        tpl.files.append(mcfile)
+
+    for filename in cfg.const_dict["SYMLINKS"]:
+        mcfile = McFile()
+        mcfile.fname = filename
+        mcfile.symlink = True
+        tpl.files.append(mcfile)
+
+    return tpl
+
+
+#             tf.path = os.path.join(cfg.const_dict["TDIR"], fname)
+#             tf.templ_dir = cfg.const_dict["TDIR"]
+
+#             with open(tf.path) as _f:
+#                 tf.lines = _f.readlines()
 
 # class McFile():
 #     """
