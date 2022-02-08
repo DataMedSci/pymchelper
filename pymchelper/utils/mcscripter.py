@@ -7,6 +7,7 @@ Tool for creating MC input files using user-specified tables and ranges.
 import argparse
 import logging
 import os
+from shutil import copyfile
 import sys
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -164,8 +165,8 @@ class Template:
                 output_file_path.parent.mkdir(parents=True, exist_ok=True)
                 if not tf.symlink:
                     output_file_path.touch()
-                    of = McFile(
-                        path=output_file_path)  # of = output file object
+                    # of = output file object
+                    of = McFile(path=output_file_path)
                     for line in tf.lines:
                         for key in u_dict.keys():
                             token = "${" + key + "}"
@@ -178,7 +179,14 @@ class Template:
                     # end loop over t.files
                     of.write()
                 else:
-                    output_file_path.symlink_to(target=tf.path.resolve())
+                    try:
+                        output_file_path.symlink_to(target=tf.path.resolve())
+                    except OSError:
+                        # try copying file in case creation of symbolic links fails
+                        # this may be the case i.e. for Windows users without developer mode
+                        # or without administrative rights
+                        copyfile(src=tf.path, dst=output_file_path)
+
 
 
 def read_template(cfg: Config) -> Template:
