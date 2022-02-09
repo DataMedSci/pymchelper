@@ -37,6 +37,7 @@ class Config:
 
 
 def read_config(path: PathLike, quiet: bool = True) -> Config:
+    """Description needed"""
     cfg = Config(path=Path(str(path)))
 
     keys: List[str] = []
