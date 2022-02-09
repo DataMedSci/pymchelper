@@ -25,14 +25,19 @@ class Config:
     """Description needed."""
 
     # keys and values for contant assignments
-    const_dict: Dict[str, Union[str, List[str]]] = field(default_factory=dict)
+    const_dict: Dict[str, str] = field(default_factory=dict)
     # keys and values for table assignments
     table_dict: Dict[str, List[str]] = field(default_factory=dict)
-    path: PathLike = None  # full path to this file (may be relative)
+    path: Path = field(
+        default_factory=Path)  # full path to this file (may be relative)
+
+    # special const dict fields:
+    files: List[str] = field(default_factory=list)
+    symlinks: List[str] = field(default_factory=list)
 
 
 def read_config(path: PathLike, quiet: bool = True) -> Config:
-    cfg = Config(path=path)
+    cfg = Config(path=Path(str(path)))
 
     keys: List[str] = []
     _first_line_in_table = True
@@ -45,8 +50,8 @@ def read_config(path: PathLike, quiet: bool = True) -> Config:
 
             # constant assigments
             if "=" in line:
-                _v = line.split("=")
-                cfg.const_dict[_v[0].strip()] = _v[1].strip()
+                lhs_and_rhs = line.split("=")
+                cfg.const_dict[lhs_and_rhs[0].strip()] = lhs_and_rhs[1].strip()
                 continue
             # check if we are starting a table
             if len(line.split()) > 0:
@@ -63,17 +68,17 @@ def read_config(path: PathLike, quiet: bool = True) -> Config:
 
     # replace string with comma-separated filenames with list of filenames
     if "FILES" in cfg.const_dict:
-        cfg.const_dict["FILES"] = [
+        cfg.files = [
             filename.strip() for filename in cfg.const_dict["FILES"].split(",")
         ]
     if "SYMLINKS" in cfg.const_dict:
-        cfg.const_dict["SYMLINKS"] = [
+        cfg.symlinks = [
             filename.strip()
             for filename in cfg.const_dict["SYMLINKS"].split(",")
         ]
     logger.debug(f"Config: {cfg}")
     if not quiet:
-        print(f"Read config: {path}")
+        print(f"Read config: {path!s}")
         print(f"\t Template dir relative directory: {cfg.const_dict['TDIR']}")
     return cfg
 
@@ -85,7 +90,7 @@ class McFile:
     This will be used for the template files as well as the generated output files.
     """
 
-    path: PathLike = None  # full path to this file (may be relative)
+    path: Path = field(default_factory=Path)  # full path to this file (may be relative)
     symlink: bool = False  # marker if file is a symlink
     lines: List[str] = field(default_factory=list)
 
@@ -164,7 +169,7 @@ class Template:
               quiet: bool = True):
         """Description needed."""
         if not quiet:
-            print(f"Saving generated workspace to {working_directory}")
+            print(f"Saving generated workspace to {working_directory!s}")
         for u_dict in self.prepare(cfg=cfg):
             logger.debug(u_dict)
             _wd = u_dict["WDIR"]
@@ -184,7 +189,7 @@ class Template:
                     f"Directory WDIR is not set in config file {cfg}, cannot proceed"
                 )
 
-            current_working_dir = Path(working_directory, work_dir)
+            current_working_dir = Path(str(working_directory), work_dir)
             if current_working_dir.exists():
                 if not quiet:
                     print(
@@ -228,14 +233,14 @@ def read_template(cfg: Config) -> Template:
     """Description needed."""
     tpl = Template()
 
-    for filename in cfg.const_dict["FILES"]:
+    for filename in cfg.files:
         path = Path(cfg.const_dict['TDIR'], filename)
         if not Path(cfg.const_dict['TDIR']).is_absolute():
             path = Path(cfg.path.parent, cfg.const_dict['TDIR'], filename)
         mcfile = McFile(path=path)
         tpl.files.append(mcfile)
 
-    for filename in cfg.const_dict["SYMLINKS"]:
+    for filename in cfg.symlinks:
         path = Path(cfg.const_dict['TDIR'], filename)
         if not Path(cfg.const_dict['TDIR']).is_absolute():
             path = Path(cfg.path.parent, cfg.const_dict['TDIR'], filename)
