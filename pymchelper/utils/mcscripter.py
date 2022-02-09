@@ -90,7 +90,8 @@ class McFile:
     This will be used for the template files as well as the generated output files.
     """
 
-    path: Path = field(default_factory=Path)  # full path to this file (may be relative)
+    path: Path = field(
+        default_factory=Path)  # full path to this file (may be relative)
     symlink: bool = False  # marker if file is a symlink
     lines: List[str] = field(default_factory=list)
 
@@ -124,8 +125,8 @@ class Template:
         # this is the "current unique dictionary"
         # it represent a single line in config file
         # or a one of lines generated from loop variables
-        current_dict : Dict[str, Union[str, float]] = dict(cfg.const_dict)
-        
+        current_dict: Dict[str, Union[str, float]] = dict(cfg.const_dict)
+
         # loop_keys are special keys which cover a numerical range in discrete steps.
         # here we will identify them, and for each loop_key, there will be a range setup.
         # loop_keys are identified by the "_MIN" suffix:
@@ -133,6 +134,10 @@ class Template:
         for key in cfg.table_dict.keys():
             if "_MIN" in key:
                 loop_keys.append(key.strip("_MIN") + "_")
+
+        if not cfg.table_dict:
+            logger.debug(f"Serving {current_dict}")
+            yield current_dict
 
         # loop over every items corresponding to every line in table section of the config directory
         for item in zip(*cfg.table_dict.values()):

@@ -13,6 +13,7 @@ class Configs(enum.Enum):
     """Collection of test cases for mcscripter."""
     simple = Path('simple', 'simple.cfg')
     full = Path('full', 'config.cfg')
+    simple_no_user_tables = Path('simple', 'no_user_tables.cfg')
 
     def __init__(self, cfg_path: Path):
         self.cfg_path = cfg_path
@@ -63,8 +64,9 @@ def test_parsing_config(config_path: Path):
     assert 'TDIR' in config.const_dict
     assert config.const_dict['TDIR'] == 'template'
     assert 'beam.dat' in config.const_dict['FILES']
-    assert config.table_dict
-    assert '1H' in config.table_dict['NAME']
+    if config_path != Configs.simple_no_user_tables.relpath:
+        assert config.table_dict
+        assert '1H' in config.table_dict['NAME']
 
 
 @pytest.mark.parametrize("config_path", Configs.list(), ids=Configs.names())
