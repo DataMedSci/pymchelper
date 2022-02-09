@@ -3,6 +3,7 @@ import logging
 import os
 from pathlib import Path
 import enum
+from typing import List
 import pymchelper.utils.mcscripter
 import pytest
 
@@ -11,6 +12,7 @@ logger = logging.getLogger(__name__)
 
 class Configs(enum.Enum):
     """Collection of test cases for mcscripter."""
+
     simple = Path('simple', 'simple.cfg')
     full = Path('full', 'config.cfg')
     simple_no_user_tables = Path('simple', 'no_user_tables.cfg')
@@ -19,15 +21,18 @@ class Configs(enum.Enum):
         self.cfg_path = cfg_path
 
     @classmethod
-    def list(cls):
+    def list(cls) -> List[Path]:
+        """List of long paths to config files for each test"""
         return list(map(lambda c: c.relpath, cls))
 
     @classmethod
     def names(cls):
+        """List of short names for each test"""
         return list(map(lambda c: str(c.value), cls))
 
     @property
     def relpath(self) -> Path:
+        """Relative path to the config file"""
         return Path("tests", "res", "shieldhit", "mcscripter", self.cfg_path)
 
 
@@ -43,7 +48,7 @@ def test_call_cmd_option(option_name: str):
     with pytest.raises(SystemExit) as e:
         logger.info("Catching {:s}".format(str(e)))
         pymchelper.utils.mcscripter.main(['--' + option_name])
-        assert e.code == 0
+        assert e.value == 0
 
 
 def test_call_cmd_no_option():
@@ -51,7 +56,7 @@ def test_call_cmd_no_option():
     with pytest.raises(SystemExit) as e:
         logger.info("Catching {:s}".format(str(e)))
         pymchelper.utils.mcscripter.main([])
-        assert e.code == 2
+        assert e.value == 2
 
 
 @pytest.mark.parametrize("config_path", Configs.list(), ids=Configs.names())
@@ -104,7 +109,6 @@ def test_writing_template(config_path: Path, tmp_path: Path):
 def test_execution(config_path: Path, monkeypatch: pytest.MonkeyPatch,
                    tmp_path: Path):
     """Description needed."""
-
     logger.debug(f"current working directory {os.getcwd()}")
     full_path_to_config = config_path.resolve()
 

@@ -97,13 +97,16 @@ class McFile:
 
     @property
     def fname(self):
+        """Description needed"""
         return Path(self.path).name
 
     def write(self):
+        """Description needed"""
         with open(self.path, 'w') as f:
             f.writelines(self.lines)
 
     def read(self):
+        """Description needed"""
         with open(self.path, 'r') as f:
             self.lines = f.readlines()
 
