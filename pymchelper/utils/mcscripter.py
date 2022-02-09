@@ -124,8 +124,8 @@ class Template:
         # this is the "current unique dictionary"
         # it represent a single line in config file
         # or a one of lines generated from loop variables
-        current_dict = cfg.const_dict.copy()
-
+        current_dict : Dict[str, Union[str, float]] = dict(cfg.const_dict)
+        
         # loop_keys are special keys which cover a numerical range in discrete steps.
         # here we will identify them, and for each loop_key, there will be a range setup.
         # loop_keys are identified by the "_MIN" suffix:
