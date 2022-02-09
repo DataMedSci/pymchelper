@@ -8,6 +8,7 @@ import argparse
 import logging
 import os
 from shutil import copyfile
+import shutil
 import sys
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -30,7 +31,7 @@ class Config:
     path: PathLike = None  # full path to this file (may be relative)
 
 
-def read_config(path: PathLike) -> Config:
+def read_config(path: PathLike, quiet : bool = True) -> Config:
     cfg = Config(path=path)
 
     keys: List[str] = []
@@ -70,7 +71,10 @@ def read_config(path: PathLike) -> Config:
             filename.strip()
             for filename in cfg.const_dict["SYMLINKS"].split(",")
         ]
-
+    logger.debug(f"Config: {cfg}")
+    if not quiet:
+        print(f"Read config: {path}")
+        print(f"\t Template dir relative directory: {cfg.const_dict['TDIR']}")
     return cfg
 
 
@@ -116,7 +120,6 @@ class Template:
         # it represent a single line in config file
         # or a one of lines generated from loop variables
         current_dict = cfg.const_dict.copy()
-        logger.info(current_dict)
 
         # loop_keys are special keys which cover a numerical range in discrete steps.
         # here we will identify them, and for each loop_key, there will be a range setup.
@@ -129,8 +132,11 @@ class Template:
         # loop over every items corresponding to every line in table section of the config directory
         for item in zip(*cfg.table_dict.values()):
             current_line_dict = dict(zip(cfg.table_dict.keys(), item))
-
             current_dict.update(current_line_dict)
+
+            if not loop_keys:
+                logger.debug(f"Serving {current_dict}")
+                yield current_dict
 
             # now prepare the ranges for every loop_key
             for loop_key in loop_keys:
@@ -148,13 +154,20 @@ class Template:
                         _de = loop_value * float(current_dict["DE_FACTOR"])
                         # HARDCODED format for DE_
                         current_dict['DE_'] = f"{_de:.3f}"
-
+                        
+                    logger.debug(f"Serving {current_dict}")
                     yield current_dict
 
-    def write(self, working_directory: Union[PathLike, None], cfg: Config):
+    def write(self, working_directory: PathLike, cfg: Config, quiet : bool = True):
         """Description needed."""
+        if not quiet:
+            print(f"Saving generated workspace to {working_directory}")
+        # if working_directory
+        if Path(working_directory).exists():
+            print(f"Workspace directore exists, cleaning ... {working_directory}")
+            #shutil.rmtree(working_directory)
         for u_dict in self.prepare(cfg=cfg):
-            logger.info(u_dict)
+            logger.debug(u_dict)
             _wd = u_dict["WDIR"]
 
             # check if any keys are in WDIR subsitutions
@@ -188,6 +201,7 @@ class Template:
                     of.write()
                 else:
                     try:
+                        logger.debug(f'Creating link {output_file_path} -> {tf.path.resolve()}')
                         output_file_path.symlink_to(target=tf.path.resolve())
                     except OSError:
                         # try copying file in case creation of symbolic links fails
@@ -247,33 +261,41 @@ def main(args=None):
 
     import pymchelper
     parser = argparse.ArgumentParser()
-    parser.add_argument('fconf',
+    parser.add_argument('config_path',
                         metavar="config.txt",
-                        type=argparse.FileType('r'),
-                        help="path to config file.",
-                        default=sys.stdin)
-    parser.add_argument('-v',
-                        '--verbosity',
-                        action='count',
-                        help="increase output verbosity",
-                        default=0)
+                        type=Path,
+                        default=Path('.').absolute() / "config.txt",
+                        help="config file.")
+    parser.add_argument('-w', '--workspace',
+                        type=Path,
+                        default=Path('.').absolute(),
+                        help="workspace directory.")
     parser.add_argument('-V',
                         '--version',
                         action='version',
                         version=pymchelper.__version__)
-    args = parser.parse_args(args)
+    group = parser.add_mutually_exclusive_group()
+    group.add_argument('-q',
+                        '--quiet',
+                        action="store_true",
+                        help="quiet mode")
+    group.add_argument('-v',
+                        '--verbosity',
+                        action='count',
+                        help="increase output verbosity",
+                        default=0)
+    parsed_args = parser.parse_args(args)
 
-    if args.verbosity == 1:
+    if parsed_args.verbosity == 1:
         logging.basicConfig(level=logging.INFO)
-    elif args.verbosity > 1:
+    elif parsed_args.verbosity > 1:
         logging.basicConfig(level=logging.DEBUG)
     else:
         logging.basicConfig()
 
-    cfg = read_config(path=Path(args.fconf.name))
-    t = read_template(cfg=cfg)
-
-    t.write(working_directory=Path('.'), cfg=cfg)
+    cfg = read_config(path=parsed_args.config_path, quiet=parsed_args.quiet)
+    t = read_template(cfg=cfg)        
+    t.write(working_directory=parsed_args.workspace, cfg=cfg, quiet=parsed_args.quiet)
 
 
 if __name__ == '__main__':
