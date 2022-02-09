@@ -162,10 +162,6 @@ class Template:
         """Description needed."""
         if not quiet:
             print(f"Saving generated workspace to {working_directory}")
-        # if working_directory
-        if Path(working_directory).exists():
-            print(f"Workspace directore exists, cleaning ... {working_directory}")
-            #shutil.rmtree(working_directory)
         for u_dict in self.prepare(cfg=cfg):
             logger.debug(u_dict)
             _wd = u_dict["WDIR"]
@@ -180,9 +176,18 @@ class Template:
                         _s = f"{u_dict[key]:08.3f}"  # HARDCODED float format for directory string
                     _wd = _wd.replace(token, _s)
             work_dir = _wd
+            if not work_dir:
+                print(f"Directory WDIR is not set in config file {cfg}, cannot proceed")
+
+            current_working_dir = Path(working_directory, work_dir)
+            if current_working_dir.exists():
+                if not quiet:
+                    print(f"Workspace {current_working_dir} directory exists, cleaning ...")
+                shutil.rmtree(current_working_dir)
+                current_working_dir.mkdir(parents=True)
 
             for tf in self.files:  # tf = template filename
-                output_file_path = Path(working_directory, work_dir, tf.fname)
+                output_file_path = Path(current_working_dir, tf.fname)
                 output_file_path.parent.mkdir(parents=True, exist_ok=True)
                 if not tf.symlink:
                     output_file_path.touch()
