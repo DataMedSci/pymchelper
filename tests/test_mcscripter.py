@@ -10,9 +10,11 @@ logger = logging.getLogger(__name__)
 
 
 class Configs(enum.Enum):
+    """Collection of test cases for mcscripter."""
     simple = Path('simple', 'simple.cfg')
     full = Path('full', 'config.cfg')
-    def __init__(self, cfg_path : Path):
+
+    def __init__(self, cfg_path: Path):
         self.cfg_path = cfg_path
 
     @classmethod
@@ -25,12 +27,13 @@ class Configs(enum.Enum):
 
     @property
     def relpath(self) -> Path:
-        return str(Path("tests", "res", "shieldhit", "mcscripter", self.cfg_path))
+        return Path("tests", "res", "shieldhit", "mcscripter", self.cfg_path)
+
 
 @pytest.fixture(scope='module')
-def config_path() -> Path:
-    """Description needed."""
-    return Path("tests", "res", "shieldhit", "mcscripter", "full", "config.cfg")
+def default_config_path() -> Path:
+    """Path to the default configuration used for testing."""
+    return Configs.full.relpath
 
 
 @pytest.mark.parametrize("option_name", ["version", "help"])
@@ -50,6 +53,7 @@ def test_call_cmd_no_option():
         assert e.code == 2
 
 
+@pytest.mark.parametrize("config_path", Configs.list(), ids=Configs.names())
 def test_parsing_config(config_path: Path):
     """Description needed."""
     logger.warning(f"CWD {os.getcwd()}")
@@ -58,13 +62,12 @@ def test_parsing_config(config_path: Path):
     assert config.const_dict
     assert 'TDIR' in config.const_dict
     assert config.const_dict['TDIR'] == 'template'
-    assert config.const_dict['FILES'] == ['beam.dat', 'detect.dat']
+    assert 'beam.dat' in config.const_dict['FILES']
     assert config.table_dict
-    assert config.table_dict['NAME'] == [
-        '1H', '4He', '7Li', '12C', '16O', '20Ne'
-    ]
+    assert '1H' in config.table_dict['NAME']
 
 
+@pytest.mark.parametrize("config_path", Configs.list(), ids=Configs.names())
 def test_reading_template(config_path: Path):
     """Description needed."""
     config = pymchelper.utils.mcscripter.read_config(path=config_path)
@@ -74,33 +77,31 @@ def test_reading_template(config_path: Path):
     assert template.files
     assert template.files[0].fname == 'beam.dat'
     assert template.files[0].symlink is False
-    assert len(template.files[0].lines) == 10
+    if config_path == Configs.full.relpath:
+        assert len(template.files[0].lines) == 10
 
 
+@pytest.mark.parametrize("config_path", Configs.list(), ids=Configs.names())
 def test_writing_template(config_path: Path, tmp_path: Path):
     """Description needed."""
     config = pymchelper.utils.mcscripter.read_config(path=config_path)
     assert config
     template = pymchelper.utils.mcscripter.read_template(cfg=config)
     assert template
-
-    for current_dict in template.prepare(cfg=config):
-        assert current_dict['E_'] >= 65.8
-        assert current_dict['BSIGMA'] == '0.4'
-    
     template.write(tmp_path, config)
     assert tmp_path.exists()
     assert Path(tmp_path, 'wdir', '1H').exists()
-    assert Path(tmp_path, 'wdir', '1H', '0246.000', 'beam.dat').exists()
+    if config_path == Configs.full.relpath:
+        for current_dict in template.prepare(cfg=config):
+            assert current_dict['E_'] >= 65.8
+            assert current_dict['BSIGMA'] == '0.4'
+        assert Path(tmp_path, 'wdir', '1H', '0246.000', 'beam.dat').exists()
+
 
 @pytest.mark.parametrize("config_path", Configs.list(), ids=Configs.names())
-def test_execution(config_path: Path, monkeypatch: pytest.MonkeyPatch, tmp_path: Path):
+def test_execution(config_path: Path, monkeypatch: pytest.MonkeyPatch,
+                   tmp_path: Path):
     """Description needed."""
-
-    # print(Configs.simple.relpath)
-    # print(Configs._member_names_)
-    # print(Configs.list())
-    config_path = Path(config_path)
 
     logger.debug(f"current working directory {os.getcwd()}")
     full_path_to_config = config_path.resolve()
@@ -110,4 +111,5 @@ def test_execution(config_path: Path, monkeypatch: pytest.MonkeyPatch, tmp_path:
     pymchelper.utils.mcscripter.main([str(full_path_to_config)])
     logger.debug(f"current working directory {os.getcwd()}")
     assert Path('wdir', '1H').exists()
-#    assert Path('wdir', '1H', '0246.000', 'beam.dat').exists()
+    if config_path == Configs.full.relpath:
+        assert Path(tmp_path, 'wdir', '1H', '0246.000', 'beam.dat').exists()

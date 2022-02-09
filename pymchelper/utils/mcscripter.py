@@ -7,11 +7,11 @@ Tool for creating MC input files using user-specified tables and ranges.
 import argparse
 import logging
 import os
-from shutil import copyfile
 import shutil
 import sys
 from dataclasses import dataclass, field
 from pathlib import Path
+from shutil import copyfile
 from typing import Dict, Generator, List, TypeVar, Union
 
 logger = logging.getLogger(__name__)
@@ -31,7 +31,7 @@ class Config:
     path: PathLike = None  # full path to this file (may be relative)
 
 
-def read_config(path: PathLike, quiet : bool = True) -> Config:
+def read_config(path: PathLike, quiet: bool = True) -> Config:
     cfg = Config(path=path)
 
     keys: List[str] = []
@@ -154,11 +154,14 @@ class Template:
                         _de = loop_value * float(current_dict["DE_FACTOR"])
                         # HARDCODED format for DE_
                         current_dict['DE_'] = f"{_de:.3f}"
-                        
+
                     logger.debug(f"Serving {current_dict}")
                     yield current_dict
 
-    def write(self, working_directory: PathLike, cfg: Config, quiet : bool = True):
+    def write(self,
+              working_directory: PathLike,
+              cfg: Config,
+              quiet: bool = True):
         """Description needed."""
         if not quiet:
             print(f"Saving generated workspace to {working_directory}")
@@ -177,12 +180,16 @@ class Template:
                     _wd = _wd.replace(token, _s)
             work_dir = _wd
             if not work_dir:
-                print(f"Directory WDIR is not set in config file {cfg}, cannot proceed")
+                print(
+                    f"Directory WDIR is not set in config file {cfg}, cannot proceed"
+                )
 
             current_working_dir = Path(working_directory, work_dir)
             if current_working_dir.exists():
                 if not quiet:
-                    print(f"Workspace {current_working_dir} directory exists, cleaning ...")
+                    print(
+                        f"Workspace {current_working_dir} directory exists, cleaning ..."
+                    )
                 shutil.rmtree(current_working_dir)
                 current_working_dir.mkdir(parents=True)
 
@@ -206,7 +213,9 @@ class Template:
                     of.write()
                 else:
                     try:
-                        logger.debug(f'Creating link {output_file_path} -> {tf.path.resolve()}')
+                        logger.debug(
+                            f'Creating link {output_file_path} -> {tf.path.resolve()}'
+                        )
                         output_file_path.symlink_to(target=tf.path.resolve())
                     except OSError:
                         # try copying file in case creation of symbolic links fails
@@ -271,7 +280,8 @@ def main(args=None):
                         type=Path,
                         default=Path('.').absolute() / "config.txt",
                         help="config file.")
-    parser.add_argument('-w', '--workspace',
+    parser.add_argument('-w',
+                        '--workspace',
                         type=Path,
                         default=Path('.').absolute(),
                         help="workspace directory.")
@@ -280,15 +290,12 @@ def main(args=None):
                         action='version',
                         version=pymchelper.__version__)
     group = parser.add_mutually_exclusive_group()
-    group.add_argument('-q',
-                        '--quiet',
-                        action="store_true",
-                        help="quiet mode")
+    group.add_argument('-q', '--quiet', action="store_true", help="quiet mode")
     group.add_argument('-v',
-                        '--verbosity',
-                        action='count',
-                        help="increase output verbosity",
-                        default=0)
+                       '--verbosity',
+                       action='count',
+                       help="increase output verbosity",
+                       default=0)
     parsed_args = parser.parse_args(args)
 
     if parsed_args.verbosity == 1:
@@ -299,8 +306,10 @@ def main(args=None):
         logging.basicConfig()
 
     cfg = read_config(path=parsed_args.config_path, quiet=parsed_args.quiet)
-    t = read_template(cfg=cfg)        
-    t.write(working_directory=parsed_args.workspace, cfg=cfg, quiet=parsed_args.quiet)
+    t = read_template(cfg=cfg)
+    t.write(working_directory=parsed_args.workspace,
+            cfg=cfg,
+            quiet=parsed_args.quiet)
 
 
 if __name__ == '__main__':
