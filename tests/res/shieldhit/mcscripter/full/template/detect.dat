@@ -1,0 +1,9 @@
+Geometry Cyl
+    Name CylMesh
+    R  0.0  40.0    800
+    Z  0.0  50.0    500  # 1 mm resolution
+
+Output
+    Filename dose.bdo
+    Geo CylMesh
+    Quantity DoseGy

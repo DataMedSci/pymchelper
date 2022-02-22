@@ -1,78 +1,121 @@
-"""
-Tests for mcscripter
-"""
+"""Tests for mcscripter"""
 import logging
 import os
-import shutil
-import tempfile
-import unittest
-
-import pytest
-
+from pathlib import Path
+import enum
+from typing import List
 import pymchelper.utils.mcscripter
+import pytest
 
 logger = logging.getLogger(__name__)
 
 
-class TestMcScripter(unittest.TestCase):
-    def setUp(self):
-        # save location of current working directory
-        self.local_wdir = os.getcwd()
+class Configs(enum.Enum):
+    """Collection of test cases for mcscripter."""
 
-    def tearDown(self):
-        # it may happen that mcscripter has changed local working directory to something else
-        # therefore we set it back to original value
-        os.chdir(self.local_wdir)
+    simple = Path('simple', 'simple.cfg')
+    full = Path('full', 'config.cfg')
+    simple_no_user_tables = Path('simple', 'no_user_tables.cfg')
 
-    @pytest.mark.smoke
-    def test_help(self):
-        """ Print usage and exit normally.
-        """
-        try:
-            pymchelper.utils.mcscripter.main(["--help"])
-        except SystemExit as e:
-            self.assertEqual(e.code, 0)
+    def __init__(self, cfg_path: Path):
+        self.cfg_path = cfg_path
 
-    @pytest.mark.smoke
-    def test_version(self):
-        """ Print usage and exit normally.
-        """
-        try:
-            pymchelper.utils.mcscripter.main(["--version"])
-        except SystemExit as e:
-            self.assertEqual(e.code, 0)
+    @classmethod
+    def list(cls) -> List[Path]:
+        """List of long paths to config files for each test"""
+        return list(map(lambda c: c.relpath, cls))
 
-    def test_noarg(self):
-        """ Call without args will cause it to fail.
-        """
-        try:
-            pymchelper.utils.mcscripter.main([])
-        except SystemExit as e:
-            self.assertEqual(e.code, 2)
+    @classmethod
+    def names(cls):
+        """List of short names for each test"""
+        return list(map(lambda c: str(c.value), cls))
 
-    @pytest.mark.skip(reason="no way of currently testing this")
-    def test_simple(self):
-        """ Simple conversion including diagnostic output.
-        """
-        import sys
-        inp_dir = os.path.join("tests", "res", "shieldhit", "mcscripter")
-        inp_cfg = os.path.join(inp_dir, "test.cfg")
-        out_dir = tempfile.mkdtemp()  # make temp working dir for output files
-        try:
-            pymchelper.utils.mcscripter.main([inp_cfg])
-            self.assertTrue(os.path.isdir(out_dir))
-            self.assertTrue(os.path.isdir(os.path.join(out_dir, "12C")))
-            self.assertTrue(os.path.isdir(os.path.join(out_dir, "12C", "0333.100")))
-            self.assertTrue(os.path.isfile(os.path.join(out_dir, "12C", "0333.100", "beam.dat")))
-            self.assertTrue(os.path.islink(os.path.join(out_dir, "12C", "0333.100", "Water.txt")))
-            logger.info("Removing directory {:s}".format(out_dir))
-            shutil.rmtree(out_dir)
-        except AttributeError:  # on Windows with Python os.symlink is not enabled
-            self.assertEqual(os.name, 'nt')
-            self.assertEqual(sys.version_info[0], 2)
-            logger.info("Removing directory {:s}".format(out_dir))
-            shutil.rmtree(out_dir)
+    @property
+    def relpath(self) -> Path:
+        """Relative path to the config file"""
+        return Path("tests", "res", "shieldhit", "mcscripter", self.cfg_path)
 
 
-if __name__ == '__main__':
-    unittest.main()
+@pytest.fixture(scope='module')
+def default_config_path() -> Path:
+    """Path to the default configuration used for testing."""
+    return Configs.full.relpath
+
+
+@pytest.mark.parametrize("option_name", ["version", "help"])
+def test_call_cmd_option(option_name: str):
+    """Description needed."""
+    with pytest.raises(SystemExit) as e:
+        logger.info("Catching {:s}".format(str(e)))
+        pymchelper.utils.mcscripter.main(['--' + option_name])
+        assert e.value == 0
+
+
+def test_call_cmd_no_option():
+    """Description needed."""
+    with pytest.raises(SystemExit) as e:
+        logger.info("Catching {:s}".format(str(e)))
+        pymchelper.utils.mcscripter.main([])
+        assert e.value == 2
+
+
+@pytest.mark.parametrize("config_path", Configs.list(), ids=Configs.names())
+def test_parsing_config(config_path: Path):
+    """Description needed."""
+    logger.warning(f"CWD {os.getcwd()}")
+    config = pymchelper.utils.mcscripter.read_config(path=config_path)
+    assert config is not None
+    assert config.const_dict
+    assert 'TDIR' in config.const_dict
+    assert config.const_dict['TDIR'] == 'template'
+    assert 'beam.dat' in config.const_dict['FILES']
+    if config_path != Configs.simple_no_user_tables.relpath:
+        assert config.table_dict
+        assert '1H' in config.table_dict['NAME']
+
+
+@pytest.mark.parametrize("config_path", Configs.list(), ids=Configs.names())
+def test_reading_template(config_path: Path):
+    """Description needed."""
+    config = pymchelper.utils.mcscripter.read_config(path=config_path)
+    assert config is not None
+    template = pymchelper.utils.mcscripter.read_template(cfg=config)
+    assert template
+    assert template.files
+    assert template.files[0].fname == 'beam.dat'
+    assert template.files[0].symlink is False
+    if config_path == Configs.full.relpath:
+        assert len(template.files[0].lines) == 10
+
+
+@pytest.mark.parametrize("config_path", Configs.list(), ids=Configs.names())
+def test_writing_template(config_path: Path, tmp_path: Path):
+    """Description needed."""
+    config = pymchelper.utils.mcscripter.read_config(path=config_path)
+    assert config
+    template = pymchelper.utils.mcscripter.read_template(cfg=config)
+    assert template
+    template.write(tmp_path, config)
+    assert tmp_path.exists()
+    assert Path(tmp_path, 'wdir', '1H').exists()
+    if config_path == Configs.full.relpath:
+        for current_dict in template.prepare(cfg=config):
+            assert current_dict['E_'] >= 65.8
+            assert current_dict['BSIGMA'] == '0.4'
+        assert Path(tmp_path, 'wdir', '1H', '0246.000', 'beam.dat').exists()
+
+
+@pytest.mark.parametrize("config_path", Configs.list(), ids=Configs.names())
+def test_execution(config_path: Path, monkeypatch: pytest.MonkeyPatch,
+                   tmp_path: Path):
+    """Description needed."""
+    logger.debug(f"current working directory {os.getcwd()}")
+    full_path_to_config = config_path.resolve()
+
+    # temporary change working directory
+    monkeypatch.chdir(tmp_path)
+    pymchelper.utils.mcscripter.main([str(full_path_to_config)])
+    logger.debug(f"current working directory {os.getcwd()}")
+    assert Path('wdir', '1H').exists()
+    if config_path == Configs.full.relpath:
+        assert Path(tmp_path, 'wdir', '1H', '0246.000', 'beam.dat').exists()
