@@ -1,7 +1,0 @@
-pymchelper.writers.sparse module
-================================
-
-.. automodule:: pymchelper.writers.sparse
-   :members:
-   :undoc-members:
-   :show-inheritance:

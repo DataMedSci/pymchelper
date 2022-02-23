@@ -1,7 +1,0 @@
-pymchelper.readers.fluka module
-===============================
-
-.. automodule:: pymchelper.readers.fluka
-   :members:
-   :undoc-members:
-   :show-inheritance:

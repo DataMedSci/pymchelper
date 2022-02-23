@@ -1,7 +1,0 @@
-pymchelper.shieldhit.detector.geometry module
-=============================================
-
-.. automodule:: pymchelper.shieldhit.detector.geometry
-   :members:
-   :undoc-members:
-   :show-inheritance:

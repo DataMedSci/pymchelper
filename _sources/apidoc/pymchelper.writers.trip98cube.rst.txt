@@ -1,7 +1,0 @@
-pymchelper.writers.trip98cube module
-====================================
-
-.. automodule:: pymchelper.writers.trip98cube
-   :members:
-   :undoc-members:
-   :show-inheritance:

@@ -1,7 +1,0 @@
-pymchelper.readers.shieldhit.binary\_spec module
-================================================
-
-.. automodule:: pymchelper.readers.shieldhit.binary_spec
-   :members:
-   :undoc-members:
-   :show-inheritance:

@@ -1,7 +1,0 @@
-pymchelper.writers.inspector module
-===================================
-
-.. automodule:: pymchelper.writers.inspector
-   :members:
-   :undoc-members:
-   :show-inheritance:

@@ -1,7 +1,0 @@
-pymchelper.utils.runmc module
-=============================
-
-.. automodule:: pymchelper.utils.runmc
-   :members:
-   :undoc-members:
-   :show-inheritance:

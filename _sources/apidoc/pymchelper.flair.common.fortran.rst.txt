@@ -1,7 +1,0 @@
-pymchelper.flair.common.fortran module
-======================================
-
-.. automodule:: pymchelper.flair.common.fortran
-   :members:
-   :undoc-members:
-   :show-inheritance:

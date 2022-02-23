@@ -1,7 +1,0 @@
-pymchelper.shieldhit.particle module
-====================================
-
-.. automodule:: pymchelper.shieldhit.particle
-   :members:
-   :undoc-members:
-   :show-inheritance:

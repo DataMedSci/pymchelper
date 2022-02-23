@@ -1,7 +1,0 @@
-pymchelper.executor.options module
-==================================
-
-.. automodule:: pymchelper.executor.options
-   :members:
-   :undoc-members:
-   :show-inheritance:

@@ -1,7 +1,0 @@
-pymchelper.readers.shieldhit.reader\_bin2010 module
-===================================================
-
-.. automodule:: pymchelper.readers.shieldhit.reader_bin2010
-   :members:
-   :undoc-members:
-   :show-inheritance:

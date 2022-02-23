@@ -1,7 +1,0 @@
-pymchelper.writers.hdf module
-=============================
-
-.. automodule:: pymchelper.writers.hdf
-   :members:
-   :undoc-members:
-   :show-inheritance:

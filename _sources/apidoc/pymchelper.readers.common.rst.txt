@@ -1,7 +1,0 @@
-pymchelper.readers.common module
-================================
-
-.. automodule:: pymchelper.readers.common
-   :members:
-   :undoc-members:
-   :show-inheritance:

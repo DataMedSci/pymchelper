@@ -1,7 +1,0 @@
-pymchelper.writers.plots module
-===============================
-
-.. automodule:: pymchelper.writers.plots
-   :members:
-   :undoc-members:
-   :show-inheritance:

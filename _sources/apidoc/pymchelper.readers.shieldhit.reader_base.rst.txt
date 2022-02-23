@@ -1,7 +1,0 @@
-pymchelper.readers.shieldhit.reader\_base module
-================================================
-
-.. automodule:: pymchelper.readers.shieldhit.reader_base
-   :members:
-   :undoc-members:
-   :show-inheritance:

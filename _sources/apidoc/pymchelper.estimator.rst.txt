@@ -1,7 +1,0 @@
-pymchelper.estimator module
-===========================
-
-.. automodule:: pymchelper.estimator
-   :members:
-   :undoc-members:
-   :show-inheritance:

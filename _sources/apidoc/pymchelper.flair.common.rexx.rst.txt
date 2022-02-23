@@ -1,7 +1,0 @@
-pymchelper.flair.common.rexx module
-===================================
-
-.. automodule:: pymchelper.flair.common.rexx
-   :members:
-   :undoc-members:
-   :show-inheritance:

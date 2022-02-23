@@ -1,7 +1,0 @@
-pymchelper.flair.common.csg module
-==================================
-
-.. automodule:: pymchelper.flair.common.csg
-   :members:
-   :undoc-members:
-   :show-inheritance:
