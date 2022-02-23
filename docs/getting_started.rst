@@ -44,7 +44,6 @@ In order to get such plots instead of text files, replace first argument with :b
 Two new PNG files will be created which can be directly opened, for example
 
 .. figure:: 21.txt.png
-    :scale: 80 %
     :alt: sample file 21.txt.png generated with image converter
 
 If you are SHIELD-HIT12A user, same effect can be achieved by processing :bash:`*.bdo` binary files. 

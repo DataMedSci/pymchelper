@@ -3,14 +3,7 @@ from enum import IntEnum
 import logging
 
 import numpy as np
-# try to set legacy printing options if working with numpy 1.14 or newer
-# on older numpy versions this shouldn't have effect
 from pymchelper.axis import MeshAxis, AxisId
-
-try:
-    np.set_printoptions(legacy="1.13")
-except TypeError as e:  # noqa: F841
-    pass
 
 logger = logging.getLogger(__name__)
 
@@ -34,10 +27,10 @@ class Estimator(object):
     Estimator holds also up to 3 binning axis (``x``, ``y`` and ``z`` fields).
     Scored quantity can be assigned a ``name`` (i.e. dose) and ``unit`` (i.e. Gy).
     Several other fields are also used:
-      - nstat: number of simulated histories
-      - counter: number of files read to construct detector object
-      - corename: common core part of input files defining a name of detector
-      - error_type: none, stderr or stddev - error type
+    - nstat: number of simulated histories
+    - counter: number of files read to construct detector object
+    - corename: common core part of input files defining a name of detector
+    - error_type: none, stderr or stddev - error type
 
     Estimator data can be either read from the file (see ``fromfile`` method in ``input_output`` module
     or constructed directly:

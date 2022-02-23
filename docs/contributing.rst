@@ -50,42 +50,31 @@ Get Started for developers
 --------------------------
 
 Ready to contribute? Here's how to set up `pymchelper` for local development.
-We assume you are familiar with GIT source control system. If not you will
-other instruction at the end of this page.
+We assume you are familiar with GIT source control system. 
 
 1. Fork the ``pymchelper`` repo on GitHub.
 2. Clone your fork locally::
 
     $ git clone git@github.com:your_name_here/pymchelper.git
 
-3. If you are not familiar with GIT, proceed to step 5, otherwise create a branch for local development::
+3. Create a branch for local development::
 
     $ cd pymchelper
     $ git checkout -b feature/issue_number-name_of_your_bugfix_or_feature
 
-4. Now you can make your changes locally.
+4. Create a dedicated virtual enviroment in `venv` directory for installation of python packages:
 
-As the software is prepared to be shipped as pip package, some modifications
-of PYTHONPATH variables are needed to run the code. Let us assume you are now in the same directory as ``setup.py`` file.
-
-
-The standard way to execute Python scripts WILL NOT WORK. What users see as convertmc program, is basically pymchelper/run.py script::
-
-   $ python pymchelper/run.py --help
-
-To have the code working, the PYTHONPATH has to be adjusted::
-
-   $ PYTHONPATH=. python pymchelper/run.py --help
-    usage: run.py [-h] [-V] converter ...
-    (...)
-    
+    $ python -m venv venv
+    $ source ./venv/bin/activate.sh
+    $ pip install -r requirements.txt    
 
 5. Make local changes to fix the bug or to implement a feature.
 
 6. When you're done making changes, check that your changes comply with PEP8 code quality standards (flake8 tests) and run unit tests with pytest::
 
+    $ pip install -r tests/requirements-test.txt
     $ flake8 pymchelper tests
-    $ pytest tests
+    $ python -m pytest tests/
 
    To get flake8 and pytest, just pip install them.
 
@@ -94,7 +83,7 @@ To have the code working, the PYTHONPATH has to be adjusted::
     $ git add .
     $ git commit -m "Your detailed description of your changes."
 
-8. Repeat points 4-6 until the work is done. Now its time to push the changes to remote repository::
+8. Repeat points 5-6 until the work is done. Now its time to push the changes to remote repository::
 
     $ git push origin feature/issue_number-name_of_your_bugfix_or_feature
 
