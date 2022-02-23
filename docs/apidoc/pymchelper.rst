@@ -20,6 +20,9 @@ Submodules
 
 .. toctree::
 
-   pymchelper.detector
+   pymchelper.axis
+   pymchelper.estimator
+   pymchelper.input_output
+   pymchelper.page
    pymchelper.run
 
