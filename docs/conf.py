@@ -23,7 +23,6 @@ Add `-a` to generate all siles
 
 import os
 import pkg_resources
-import subprocess
 import sys
 
 # If extensions (or modules to document with autodoc) are in another directory,
@@ -65,7 +64,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = 'pymchelper'
-copyright = '2021, Leszek Grzanka'
+copyright = '2022, Leszek Grzanka'
 author = 'Leszek Grzanka'
 
 # The version info for the project you're documenting, acts as replacement for
@@ -134,7 +133,7 @@ html_theme = "pydata_sphinx_theme"
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
-html_static_path = ['_static']
+# html_static_path = ['_static']
 
 # Add any extra paths that contain custom files (such as robots.txt or
 # .htaccess) here, relative to this directory. These files are copied
@@ -144,7 +143,7 @@ html_static_path = ['_static']
 # If not None, a 'Last updated on:' timestamp is inserted at every page
 # bottom, using the given strftime format.
 # The empty string is equivalent to '%b %d, %Y'.
-html_last_updated_fmt = ''
+# html_last_updated_fmt = ''
 
 # If true, SmartyPants will be used to convert quotes and dashes to
 # typographically correct entities.
@@ -192,24 +191,3 @@ htmlhelp_basename = 'pymchelperdoc'
 
 # Example configuration for intersphinx: refer to the Python standard library.
 intersphinx_mapping = {'https://docs.python.org/': None}
-
-
-# def run_apidoc(_):
-#     """
-#     Automate building apidoc when building with readthedocs
-#     https://github.com/rtfd/readthedocs.org/issues/1139
-#     """
-#     module = 'pymchelper'
-#     cur_dir = os.path.abspath(os.path.dirname(__file__))
-#     output_path = os.path.join(cur_dir, 'apidoc')
-#     module_path = os.path.join(cur_dir, '..', module)
-#     cmd_path = 'sphinx-apidoc'
-#     if hasattr(sys, 'real_prefix'):  # Check to see if we are in a virtualenv
-#         # If we are, assemble the path manually
-#         cmd_path = os.path.abspath(os.path.join(sys.prefix, 'bin', 'sphinx-apidoc'))
-#     # sphinx-apidoc switches are described here: http://www.sphinx-doc.org/en/stable/man/sphinx-apidoc.html
-#     subprocess.check_call([cmd_path, '--module-first', '--separate', '-o', output_path, module_path])
-
-
-# def setup(app):
-#     app.connect('builder-inited', run_apidoc)
