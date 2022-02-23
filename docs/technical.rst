@@ -48,3 +48,15 @@ Generate debian packages for all binaries::
     ./generate_deb_packages.sh convertmc runmc pld2sobp mcscripter
     
 Deb packages are automatically uploaded to `APT repository <https://github.com/DataMedSci/deb_package_repository>`_  hosted on Github Pages.
+
+Preparing sphinx documentation
+------------------------------
+
+Sphinx documentation written reStructuredText format is stored in `docs` folder. 
+It is being translated to the HTML format by Sphinx tool and automatically deployed to the Github Pages instance by Github Actions.
+For details see `.github/workflows/release-pip.yml` file, in particular `docs` job.
+To generate documentation locally use these commands::
+
+    pip install docs/requirements.txt
+    sphinx-build -j auto docs docs/_build
+
