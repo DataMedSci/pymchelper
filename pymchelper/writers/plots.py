@@ -14,7 +14,7 @@ class PlotAxis(IntEnum):
 
 
 class PlotDataWriter:
-    """gnuplot data writer"""
+    """plot data writer"""
 
     def __init__(self, filename, options):
         self.filename = filename
@@ -84,92 +84,6 @@ class PlotDataWriter:
 
             # save space-delimited text file
             np.savetxt(filename, data_columns, fmt=fmt, delimiter=' ')
-        return 0
-
-
-class GnuplotDataWriter:
-    """TODO"""
-
-    def __init__(self, filename, options):
-        self.data_filename = filename
-        self.script_filename = filename
-        self.plot_filename = filename
-
-        if not self.plot_filename.endswith(".png"):
-            self.plot_filename += ".png"
-        if not self.script_filename.endswith(".plot"):
-            self.script_filename += ".plot"
-        if not self.data_filename.endswith(".dat"):
-            self.data_filename += ".dat"
-
-        dirname = os.path.split(self.script_filename)[0]
-        self.awk_script_filename = os.path.join(dirname, "addblanks.awk")
-
-    _awk_2d_script_content = """/^[[:blank:]]*#/ {next} # ignore comments (lines starting with #)
-NF < 3 {next} # ignore lines which don't have at least 3 columns
-$2 != prev {printf \"\\n\"; prev=$2} # print blank line
-{print} # print the line
-    """
-
-    _header = """set term png
-set output \"{plot_filename}\"
-set title \"{title}\"
-set xlabel \"{xlabel}\"
-set ylabel \"{ylabel}\"
-"""
-
-    _error_plot_command = "'./{data_filename}' u 1:(max($2-$3,0.0)):($2+$3) w filledcurves " \
-                          "fs transparent solid 0.2 lc 3 title '1-sigma confidence', "
-
-    _plotting_command = {
-        1: """max(x,y) = (x > y) ? x : y
-plot {error_plot} './{data_filename}' u 1:2 w l lt 1 lw 2 lc -1 title 'mean value'
-        """,
-        2: """set view map
-splot \"<awk -f addblanks.awk '{data_filename}'\" u 1:2:3 with pm3d
-"""
-    }
-
-    def write(self, estimator):
-        """TODO"""
-        if len(estimator.pages) > 1:
-            print("Conversion of data with multiple pages not supported yet")
-            return False
-
-        # skip plotting 0-D and 3-D data
-        if estimator.dimension not in {1, 2}:
-            return False
-
-        page = estimator.pages[0]
-
-        # set labels
-        plot_x_axis = page.plot_axis(0)
-        xlabel = ImageWriter._make_label(plot_x_axis.unit, plot_x_axis.name)
-        if estimator.dimension == 1:
-            ylabel = ImageWriter._make_label(page.unit, page.name)
-        elif estimator.dimension == 2:
-            plot_y_axis = page.plot_axis(1)
-            ylabel = ImageWriter._make_label(plot_y_axis.unit, plot_y_axis.name)
-
-            # for 2-D plots write additional awk script to convert data
-            # as described in gnuplot faq: http://www.gnuplot.info/faq/faq.html#x1-320003.9
-            with open(self.awk_script_filename, 'w') as script_file:
-                logger.info("Writing: " + self.awk_script_filename)
-                script_file.write(self._awk_2d_script_content)
-
-        # save gnuplot script
-        with open(self.script_filename, 'w') as script_file:
-            logger.info("Writing: " + self.script_filename)
-            script_file.write(self._header.format(plot_filename=self.plot_filename, xlabel=xlabel, ylabel=ylabel,
-                                                  title=page.name))
-            plt_cmd = self._plotting_command[page.dimension]
-
-            # add error plot if error data present
-            err_cmd = ""
-            if np.any(page.error):
-                err_cmd = self._error_plot_command.format(data_filename=self.data_filename)
-
-            script_file.write(plt_cmd.format(data_filename=self.data_filename, error_plot=err_cmd))
         return 0
 
 

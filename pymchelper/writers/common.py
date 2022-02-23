@@ -2,7 +2,7 @@ from enum import IntEnum
 
 from pymchelper.writers.excel import ExcelWriter
 from pymchelper.writers.inspector import Inspector
-from pymchelper.writers.plots import GnuplotDataWriter, PlotDataWriter, ImageWriter
+from pymchelper.writers.plots import PlotDataWriter, ImageWriter
 from pymchelper.writers.shieldhit import TxtWriter
 from pymchelper.writers.sparse import SparseWriter
 from pymchelper.writers.trip98cube import TRiP98CubeWriter
@@ -16,7 +16,6 @@ class Converters(IntEnum):
     """
     txt = 0
     plotdata = 1
-    gnuplot = 2
     image = 3
     tripcube = 4
     tripddd = 5
@@ -29,7 +28,6 @@ class Converters(IntEnum):
     def _converter_mapping(cls, item):
         return {
             cls.txt: TxtWriter,
-            cls.gnuplot: GnuplotDataWriter,
             cls.plotdata: PlotDataWriter,
             cls.image: ImageWriter,
             cls.tripcube: TRiP98CubeWriter,
