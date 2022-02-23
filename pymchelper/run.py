@@ -74,11 +74,8 @@ def main(args=None):
     parser_hdf = subparsers.add_parser(Converters.hdf.name, help='converts to HDF file')
     add_default_options(parser_hdf)
 
-    parser_plotdata = subparsers.add_parser(Converters.plotdata.name, help='converts to gnuplot data')
+    parser_plotdata = subparsers.add_parser(Converters.plotdata.name, help='converts to plot data')
     add_default_options(parser_plotdata)
-
-    parser_gnuplot = subparsers.add_parser(Converters.gnuplot.name, help='converts to gnuplot script')
-    add_default_options(parser_gnuplot)
 
     parser_inspect = subparsers.add_parser(Converters.inspect.name, help='prints metadata')
     add_default_options(parser_inspect)

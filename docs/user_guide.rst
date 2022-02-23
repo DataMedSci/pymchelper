@@ -19,7 +19,6 @@ Detailed documentation about available converters:
    txt_converter.rst
    excel_converter.rst
    image_converter.rst
-   gnuplot_converter.rst
    sparse_converter.rst
    inspect_converter.rst
 
@@ -28,8 +27,7 @@ Common options
 --------------
 
 **convertmc** command line program needs several options to work. 
-The first one, obligatory is converter name. User might choose among: ``txt``, ``excel``, ``image``, ``gnuplot``,
-``plotdata`` and ``sparse``.
+The first one, obligatory is converter name. User might choose among: ``txt``, ``excel``, ``image``, ``plotdata`` and ``sparse``.
 
 All converters accepts following options:
 
@@ -104,8 +102,8 @@ In order to perform averaging converter needs to get at least two files per scor
 during averaging will also calculate standard deviation, which can be presented to the user in various forms:
  
  - additional column of numbers when saving data into text files (i.e. using ``txt`` converter)
- - error band on the normal plot for 1-D scoring grid (when using ``image`` and ``gnuplot`` converters)
- - additional heatmap error plot  for 2-D scoring grid (when using ``image`` and ``gnuplot`` converters)
+ - error band on the normal plot for 1-D scoring grid (when using ``image``converter)
+ - additional heatmap error plot  for 2-D scoring grid (when using ``image``converter)
 
 When working in single-file mode calculation of the startand deviation is not possible and user will 
 not get such information. In this case output text files will have one column less and no error band is displayed
