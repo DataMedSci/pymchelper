@@ -19,7 +19,7 @@ jobs:
 
     steps:
       - name: Checkout repository with full history
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           fetch-depth: 0 # Number of commits to fetch. 0 indicates all history for all branches and tags.
 
@@ -72,7 +72,7 @@ jobs:
 
     steps:
       - name: Checkout repository with full history
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           fetch-depth: 0 # Number of commits to fetch. 0 indicates all history for all branches and tags.
 

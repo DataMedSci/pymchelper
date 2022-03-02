@@ -17,7 +17,7 @@ jobs:
        !contains(github.event.head_commit.message, '[skip ci]')
     runs-on: ubuntu-latest        
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
 
     - name: Set up Python
       uses: actions/setup-python@v2.3.2
@@ -53,7 +53,7 @@ jobs:
     runs-on: ${{ matrix.platform }}
     needs: [smoke_test]
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
 
     - name: Set up Python
       uses: actions/setup-python@v2.3.2
