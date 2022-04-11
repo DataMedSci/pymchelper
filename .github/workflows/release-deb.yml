@@ -50,7 +50,7 @@ jobs:
           docker run  -v `pwd`/dist:/test/ debian:stable /test/convertmc --version
 
       - name: Archive executables as artifacts
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: executables
           path: ./dist
@@ -99,7 +99,7 @@ jobs:
         run: ./generate_deb_packages.sh convertmc runmc pld2sobp mcscripter
 
       - name: Archive deb package as artifacts
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: deb
           path: 'debian_packages/*.deb'
@@ -154,7 +154,7 @@ jobs:
         run: ./add_packages_to_repo.sh
 
       - name: Archive directory with repository as artifact
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: repo
           path: 'debian_packages/public'
