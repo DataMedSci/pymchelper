@@ -60,7 +60,7 @@ jobs:
           dist\convertmc --version
 
       - name: Archive executables as artifacts
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: executables
           path: ./dist
