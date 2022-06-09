@@ -24,7 +24,7 @@ jobs:
           fetch-depth: 0 # Number of commits to fetch. 0 indicates all history for all branches and tags.
 
       - name: Set up Python
-        uses: actions/setup-python@v3
+        uses: actions/setup-python@v4
         with:
           python-version: 3.9
 
