@@ -62,7 +62,7 @@ class Spot():
 
 class Plan():
     """
-    Plan from a given CSV file
+    Plan from a given dicom file
     """
     def __init__(self, fn):
         """
