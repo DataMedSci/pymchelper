@@ -132,9 +132,12 @@ class Plan():
         pass
 
 
-def main(args=sys.argv[1:]):
-    """ Main function for makesobp.py
+def main(args=None):
+    """ Main function of the dicom2sobp script.
     """
+    if args is None:
+        args = sys.argv[1:]
+
     # parse arguments
     parser = argparse.ArgumentParser()
     parser.add_argument("plan", help="input treatmentplan")  # , type=argparse.FileType('r'))
@@ -205,7 +208,7 @@ def main(args=sys.argv[1:]):
 
         fout.write(s)
 
-    print("Number of primaries: {:.3e}".format(pn))
+    logger.info("Number of primaries: {:.3e}".format(pn))
 
 
 if __name__ == '__main__':
