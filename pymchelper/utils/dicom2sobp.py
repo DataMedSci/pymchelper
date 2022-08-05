@@ -147,8 +147,6 @@ def main(args=sys.argv[1:]):
 
     parsed_args = parser.parse_args(args)
 
-
-
     if parsed_args.verbosity == 1:
         logging.basicConfig(level=logging.INFO)
     elif parsed_args.verbosity > 1:
