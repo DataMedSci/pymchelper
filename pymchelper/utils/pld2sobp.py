@@ -33,6 +33,7 @@ class Layer(object):
     """
     Class for handling Layers.
     """
+
     def __init__(self, spotsize, energy, meterset, elsum, repaints, elements):
         self.spotsize = float(spotsize)
         self.energy = float(energy)
