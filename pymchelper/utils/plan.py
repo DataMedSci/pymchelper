@@ -80,6 +80,7 @@ class Field(object):
     def __init__(self):
         self.nlayers = 0   # number of layers found
         self.layers = []
+        self.dose = 0.0
         self.cmu = 0.0  # cummulative meterset or monitor units for entire field
         self.csetweight = 0.0  # IBA specific
         self.gantry = 0
@@ -98,6 +99,7 @@ class Plan(object):
         self.patient_initals = ""  # Initials of patient
         self.patient_firstname = ""  # Last name of patient
         self.plan_label = ""  #
+        self.plan_date = ""  #
         self.nfields = 0
         self.fields = []
 
@@ -105,6 +107,7 @@ class Plan(object):
         """
         Load file, autodiscovery by suffix.
         """
+        print("jjj")
         ext = os.path.splitext(file.name)[-1].lower()
         if ext == ".pld":
             self.load_PLD_IBA(file)
@@ -196,18 +199,46 @@ class Plan(object):
         """
         ds = dicom.dcmread(file_dcm.name)
         # Total number of energy layers used to produce SOBP
-        dcm_fields = ds['IonBeamSequence']
-        self.nfields = len(dcm_fields)
+        print("jere")
 
-    def load_RASTER_GSI(self, file_rst):
-        """
-        """
-        pass
+        self.patient_iD = ds['PatientID'].value
+        self.patient_name = ds['PatientName'].value
+        self.patient_initals = ""
+        self.patient_firstname = ""
+        self.plan_label = ds['RTPlanLabel'].value
+        self.plan_date = ds['RTPlanDate'].value
+        self.beam_name = ""
 
-    def inspect(self):
-        """
-        """
-        pass
+        self.nfields = int(ds['FractionGroupSequence'][0]['NumberOfBeams'].value)
+        logger.debug("Found %i fields", self.nfields)
+
+        dcm_fgs = ds['FractionGroupSequence'][0]['ReferencedBeamSequence']  # fields for given group number
+        print(dcm_fgs)
+
+        for i, dcm_field in enumerate(dcm_fgs):
+            field = Field()
+            self.fields.append(field)
+            field.dose = float(dcm_field['BeamDose'].value)
+            field.cmu = float(dcm_field['BeamMeterset'].value)
+            field.csetweight = 1.0
+            field.nlayers = int(ds['IonBeamSequence'][i]['NumberOfControlPoints'].value)
+            dcm_ibs = ds['IonBeamSequence'][i]['IonControlPointSequence']  # layers for given field number
+            logger.debug("Found %i layers in field number %i", field.nlayers, i)
+
+            # for i, layer in enumerate(layers):
+            # energy = float(layer['IonControlPointSequence'][0]['NominalBeamEnergy'].value)  # Nomnial energy in MeV
+            # npos = int(layer['IonControlPointSequence'][0]['NumberOfScanSpotPositions'].value)  # number of spots
+            # _pflat = np.array(layer['IonControlPointSequence'][0]['ScanSpotPositionMap'].value)  # spot coords in mm
+
+        def load_RASTER_GSI(self, file_rst):
+            """
+            """
+            pass
+
+        def inspect(self):
+            """
+            """
+            pass
 
 
 def main(args=None):
@@ -225,17 +256,20 @@ def main(args=None):
     parser.add_argument('fout', nargs='?', metavar="output_file.dat", type=argparse.FileType('w'),
                         help="path to the SHIELD-HIT12A/FLUKA output file, or print to stdout if not given.",
                         default=sys.stdout)
-    parser.add_argument('-f', '--flip', action='store_true', help="flip XY axis", dest="flip", default=False)
+    parser.add_argument('-f', '--flip', action='store_true',
+                        help="flip XY axis", dest="flip", default=False)
     parser.add_argument('-d', '--diag', action='store_true', help="prints additional diagnostics",
                         dest="diag", default=False)
     parser.add_argument('-s', '--scale', type=float, dest='scale',
                         help="number of particles*dE/dx per MU.", default=-1.0)
-    parser.add_argument('-v', '--verbosity', action='count', help="increase output verbosity", default=0)
+    parser.add_argument('-v', '--verbosity', action='count',
+                        help="increase output verbosity", default=0)
     parser.add_argument('-V', '--version', action='version', version=pymchelper.__version__)
     args = parser.parse_args(args)
 
     if args.verbosity == 1:
         logging.basicConfig(level=logging.INFO)
+
     if args.verbosity > 1:
         logging.basicConfig(level=logging.DEBUG)
 
