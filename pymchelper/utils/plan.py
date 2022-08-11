@@ -40,6 +40,53 @@ def dedx_air(energy):
     return exp(y)
 
 
+class BeamModel():
+    """
+    Beam model from a given CSV file
+    """
+
+    def __init__(self, fn, nominal=True):
+        """
+        Loads a beam model given as a CSV file.
+        Interpolation lookup can be done as a function of nominal energy (default, nominal=True),
+        or as a function of actual energy (nominal=False).
+        Input columns for beam model:
+            1) nominal energy [MeV]
+            2) measured energy [MeV]
+            3) energy spread 1 sigma [% of measured energy]
+            4) primary protons per MU [1e6/MU]
+            5) 1 sigma spot size x [cm]
+            6) 1 sigma spot size y [cm]
+            7) 1 sigma divergence x [rad]
+            8) 1 sigma divergence y [rad]
+            9) cov (x, x') [mm]
+            10) cov (y, y') [mm]
+
+        """
+        data = np.genfromtxt(fn, delimiter=",", skip_header=1)
+
+        # resolve by nominal energy
+        if nominal:
+            energy = data[:, 0]
+        else:
+            energy = data[:, 1]
+
+        k = 'cubic'
+
+        self.f_en = interp1d(energy, 	  data[:, 0],    kind=k)       # nominal energy [MeV]
+        self.f_e = interp1d(energy, 	  data[:, 1],    kind=k)       # measured energy [MeV]
+        # energy spread 1 sigma [% of measured energy]
+        self.f_espread = interp1d(energy,      data[:, 2],    kind=k)
+        self.f_ppmu = interp1d(energy, 	  data[:, 3],    kind=k)       # 1e6 protons per MU  [1e6/MU]
+        self.f_sx = interp1d(energy, 	  data[:, 4],    kind=k)       # 1 sigma x [cm]
+        self.f_sy = interp1d(energy, 	  data[:, 5],    kind=k)       # 1 sigma y [cm]
+        self.f_divx = interp1d(energy, 	  data[:, 6],    kind=k)       # div x [rad]
+        self.f_divy = interp1d(energy, 	  data[:, 7],    kind=k)       # div y [rad]
+        self.f_covx = interp1d(energy, 	  data[:, 8],    kind=k)       # cov (x, x') [mm]
+        self.f_covy = interp1d(energy, 	  data[:, 9],    kind=k)       # cov (y, y') [mm]
+        self.data = data
+
+
 class Layer(object):
     """
     A single energy layer in a plan
@@ -66,7 +113,7 @@ class Layer(object):
         self.cmu = cmu                # cummulative monitor units for this layer
         self.repaint = repaint        # TODO: check me
         self.nspots = nspots          # number of spots found in this layer
-        if not spots:
+        if spots is None:
             self.spots = np.zeros((nspots, 4))
         else:
             self.spots = spots            # list of spot positions in cm, as [[x, y, mu, n], ...]
@@ -92,7 +139,7 @@ class Plan(object):
     Class for handling PLD files.
     """
 
-    def __init__(self):
+    def __init__(self, bm=None):
         """ Initialize and empty plan """
         self.patient_iD = ""  # ID of patient
         self.patient_name = ""  # Last name of patient
@@ -102,6 +149,7 @@ class Plan(object):
         self.plan_date = ""  #
         self.nfields = 0
         self.fields = []
+        self.bm = bm  # optional beam model class
 
     def load(self, file):
         """
@@ -126,6 +174,7 @@ class Plan(object):
         # _scaling holds the number of particles * dE/dx / MU = some constant
         # _scaling = 8.106687e7  # Calculated Nov. 2016 from Brita's 32 Gy plan. (no dE/dx)
         _scaling = 5.1821e8  # Estimated calculation Apr. 2017 from Brita's 32 Gy plan.
+        scaling = _scaling
 
         field = Field()
         self.fields.append(field)
@@ -189,7 +238,7 @@ class Plan(object):
                         layer.spots[j] = [float(token[1].strip()),
                                           float(token[2].strip()),
                                           float(token[3].strip()),
-                                          0.0]
+                                          float(token[3].strip() * scaling)]  # *dEdx etc etc
 
                 self.fields[0].layers.append(layer)
                 logger.debug("appended layer %i with %i spots", len(self.fields[0].layers), layer.nspots)
@@ -199,7 +248,6 @@ class Plan(object):
         """
         ds = dicom.dcmread(file_dcm.name)
         # Total number of energy layers used to produce SOBP
-        print("jere")
 
         self.patient_iD = ds['PatientID'].value
         self.patient_name = ds['PatientName'].value
@@ -225,10 +273,37 @@ class Plan(object):
             dcm_ibs = ds['IonBeamSequence'][i]['IonControlPointSequence']  # layers for given field number
             logger.debug("Found %i layers in field number %i", field.nlayers, i)
 
-            # for i, layer in enumerate(layers):
-            # energy = float(layer['IonControlPointSequence'][0]['NominalBeamEnergy'].value)  # Nomnial energy in MeV
-            # npos = int(layer['IonControlPointSequence'][0]['NumberOfScanSpotPositions'].value)  # number of spots
-            # _pflat = np.array(layer['IonControlPointSequence'][0]['ScanSpotPositionMap'].value)  # spot coords in mm
+            for j, layer in enumerate(dcm_ibs):
+
+                # gantry and couch angle is stored per energy layer, strangely
+                if 'NominalBeamEnergy' in layer:
+                    energy = float(layer['NominalBeamEnergy'].value)  # Nominal energy in MeV
+                if 'NumberOfScanSpotPositions' in layer:
+                    nspots = int(layer['NumberOfScanSpotPositions'].value)  # number of spots
+                    logger.debug("Found %i spots in layer number %i at energy %f", nspots, j, energy)
+                if 'NumberOfPaintings' in layer:
+                    repaint = int(layer['NumberOfPaintings'].value)  # number of spots
+
+                if 'ScanSpotPositionMap' in layer:
+                    _pos = np.array(layer['ScanSpotPositionMap'].value).reshape(nspots, 2)  # spot coords in mm
+                    # print(layer['ScanSpotPositionMap'].value)
+                    # exit()
+                    print(_pos)
+                    # exit()
+                if 'ScanSpotMetersetWeights' in layer:
+                    _wt = np.array(layer['ScanSpotMetersetWeights'].value).reshape(nspots, 1)  # spot coords in mm
+                    print(_wt)
+                if 'ScanningSpotSize' in layer:
+                    spotsize = np.array(layer['ScanningSpotSize'].value)
+
+                spots = np.c_[_pos, _wt, _wt]
+                # print(spots)
+                # exit()
+                cmu = 10.0
+                enorm = energy
+                emeas = energy
+
+                field.layers.append(Layer(spotsize, enorm, emeas, cmu, repaint, nspots, spots))
 
         def load_RASTER_GSI(self, file_rst):
             """
@@ -256,9 +331,12 @@ def main(args=None):
     parser.add_argument('fout', nargs='?', metavar="output_file.dat", type=argparse.FileType('w'),
                         help="path to the SHIELD-HIT12A/FLUKA output file, or print to stdout if not given.",
                         default=sys.stdout)
+    parser.add_argument('-b', metavar="beam_model.csv", type=argparse.FileType('r'),
+                        help="optional input beam model", dest='fbm',
+                        default=None)
     parser.add_argument('-f', '--flip', action='store_true',
                         help="flip XY axis", dest="flip", default=False)
-    parser.add_argument('-d', '--diag', action='store_true', help="prints additional diagnostics",
+    parser.add_argument('-d', '--diag', action='store_true', help="prints diagnostics",
                         dest="diag", default=False)
     parser.add_argument('-s', '--scale', type=float, dest='scale',
                         help="number of particles*dE/dx per MU.", default=-1.0)
@@ -273,7 +351,12 @@ def main(args=None):
     if args.verbosity > 1:
         logging.basicConfig(level=logging.DEBUG)
 
-    pln = Plan()
+    if args.fbm:
+        bm = BeamModel(args.fbm.name)
+    else:
+        bm = None
+
+    pln = Plan(bm)
     pln.load(args.fin)
     args.fin.close()
 
