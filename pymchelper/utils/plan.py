@@ -14,6 +14,7 @@ import argparse
 import pydicom as dicom
 import numpy as np
 
+from dataclasses import dataclass
 from math import exp, log
 from scipy.interpolate import interp1d
 
@@ -87,16 +88,17 @@ class BeamModel():
         self.data = data
 
 
-class Layer(object):
-    """
-    A single energy layer in a plan
-    """
+@dataclass
+class Spot:
+    x: float
+    y: float
+    mu: float  # meterset weight (this is proportional to the dose in the air filled monitor IC)
+    wt: float  # actual number of particles, if possible, absolute
 
-    def __init__(self, spotsize=np.array([1.0, 1.0]),
-                 enorm=100.0, emeas=100.0, cmu=10000.0, repaint=0, nspots=1, spots=None):
-        """
-        Initialize and empty plan
 
+@dataclass
+class Layer:
+    """
         spotsize: FWHM swidth of spot in cm along x and y axis, respectively
         enorm : nominal energy in MeV
         emeas : measured energy in MeV at exit nozzle
@@ -106,32 +108,28 @@ class Layer(object):
                 x,y are isocenter plane positions in cm.
                 mu is monitor units or meterset weights for the individual spots
                 n is the estimated number of primary particles for this spot
-        """
-        self.spotsize = spotsize      # spot size in FWHM cm
-        self.energy_nominal = enorm   # nominal energy in MeV
-        self.energy_measured = emeas  # measured energy in MeV
-        self.cmu = cmu                # cummulative monitor units for this layer
-        self.repaint = repaint        # TODO: check me
-        self.nspots = nspots          # number of spots found in this layer
-        if spots is None:
-            self.spots = np.zeros((nspots, 4))
-        else:
-            self.spots = spots            # list of spot positions in cm, as [[x, y, mu, n], ...]
+    """
+
+    spotsize: np.ndarray
+    energy_nominal: float = 100.0
+    energy_measured: float = 100.0
+    cmu: float = 10000.0
+    repaint: int = 0
+    nspots: int = 1
+    spots: np.ndarray
 
 
-class Field(object):
+@dataclass
+class Field:
     """
     A single field
     """
-
-    def __init__(self):
-        self.nlayers = 0   # number of layers found
-        self.layers = []
-        self.dose = 0.0
-        self.cmu = 0.0  # cummulative meterset or monitor units for entire field
-        self.csetweight = 0.0  # IBA specific
-        self.gantry = 0
-        self.couch = 0
+    nlayers: int = 0  # number of layers in this field
+    dose: float = 0.0  # dose in [Gy]
+    cmu: float = 0.0  # cummulative MU of all layers in this field
+    _iba_csetweight: float = 0.0  # IBA specific
+    gantry: float = 0.0
+    couch: float = 0.0
 
 
 class Plan(object):
