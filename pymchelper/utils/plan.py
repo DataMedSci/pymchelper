@@ -58,13 +58,20 @@ class BeamModel():
             4) primary protons per MU [1e6/MU]
             5) 1 sigma spot size x [cm]
             6) 1 sigma spot size y [cm]
+        Optionally, 4 more columns may be given:
             7) 1 sigma divergence x [rad]
             8) 1 sigma divergence y [rad]
             9) cov (x, x') [mm]
             10) cov (y, y') [mm]
-
         """
-        data = np.genfromtxt(fn, delimiter=",", skip_header=1)
+
+        # import pandas as pd
+        # # this is solution which can handle an arbitrary amount of header lines
+        # d = pd.read_csv(path, header=None)
+        # d = d.apply(pd.to_numeric, errors='coerce') # parse to numeric and set invalid values to NaN
+        # d = d.dropna() # drop rows that contain NaN values
+
+        data = np.genfromtxt(fn, delimiter=",", invalid_raise=False)
 
         # resolve by nominal energy
         if nominal:
@@ -74,17 +81,16 @@ class BeamModel():
 
         k = 'cubic'
 
-        self.f_en = interp1d(energy, 	  data[:, 0],    kind=k)       # nominal energy [MeV]
-        self.f_e = interp1d(energy, 	  data[:, 1],    kind=k)       # measured energy [MeV]
-        # energy spread 1 sigma [% of measured energy]
-        self.f_espread = interp1d(energy,      data[:, 2],    kind=k)
-        self.f_ppmu = interp1d(energy, 	  data[:, 3],    kind=k)       # 1e6 protons per MU  [1e6/MU]
-        self.f_sx = interp1d(energy, 	  data[:, 4],    kind=k)       # 1 sigma x [cm]
-        self.f_sy = interp1d(energy, 	  data[:, 5],    kind=k)       # 1 sigma y [cm]
-        self.f_divx = interp1d(energy, 	  data[:, 6],    kind=k)       # div x [rad]
-        self.f_divy = interp1d(energy, 	  data[:, 7],    kind=k)       # div y [rad]
-        self.f_covx = interp1d(energy, 	  data[:, 8],    kind=k)       # cov (x, x') [mm]
-        self.f_covy = interp1d(energy, 	  data[:, 9],    kind=k)       # cov (y, y') [mm]
+        self.f_en = interp1d(energy, data[:, 0], kind=k)       # nominal energy [MeV]
+        self.f_e = interp1d(energy, data[:, 1], kind=k)        # measured energy [MeV]
+        self.f_espread = interp1d(energy, data[:, 2], kind=k)  # energy spread 1 sigma [% of measured energy]
+        self.f_ppmu = interp1d(energy, data[:, 3], kind=k)     # 1e6 protons per MU  [1e6/MU]
+        self.f_sx = interp1d(energy, data[:, 4], kind=k)       # 1 sigma x [cm]
+        self.f_sy = interp1d(energy, data[:, 5], kind=k)       # 1 sigma y [cm]
+        self.f_divx = interp1d(energy, data[:, 6], kind=k)     # div x [rad]
+        self.f_divy = interp1d(energy, data[:, 7], kind=k)     # div y [rad]
+        self.f_covx = interp1d(energy, data[:, 8], kind=k)     # cov (x, x') [mm]
+        self.f_covy = interp1d(energy, data[:, 9], kind=k)     # cov (y, y') [mm]
         self.data = data
 
 
@@ -132,33 +138,32 @@ class Field:
     couch: float = 0.0
 
 
+@dataclass
 class Plan(object):
     """
-    Class for handling PLD files.
+    Class for handling treatment plans.
     """
 
-    def __init__(self, bm=None):
-        """ Initialize and empty plan """
-        self.patient_iD = ""  # ID of patient
-        self.patient_name = ""  # Last name of patient
-        self.patient_initals = ""  # Initials of patient
-        self.patient_firstname = ""  # Last name of patient
-        self.plan_label = ""  #
-        self.plan_date = ""  #
-        self.nfields = 0
-        self.fields = []
-        self.bm = bm  # optional beam model class
+    patient_iD: str = ""  # ID of patient
+    patient_name: str = ""  # Last name of patient
+    patient_initals: str = ""  # Initials of patient
+    patient_firstname: str = ""  # Last name of patient
+    plan_label: str = ""  #
+    plan_date: str = ""  #
+    nfields: int = 0
+    fields: list = []
+    bm: BeamModel = None  # optional beam model class
 
     def load(self, file):
         """
         Load file, autodiscovery by suffix.
         """
-        print("jjj")
+        logger.debug("load() autodiscovery")
         ext = os.path.splitext(file.name)[-1].lower()
         if ext == ".pld":
             self.load_PLD_IBA(file)
         if ext == ".dcm":
-            self.load_DICOM_VARIAN(file)
+            self.load_DICOM_VARIAN(file)  # so far I have no other dicom files
         if ext == ".rst":
             self.load_RASTER_GSI(file)
 
