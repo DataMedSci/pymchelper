@@ -50,8 +50,7 @@ class TxtWriter:
             result = "#   DETECTOR OUTPUT GEOMAP\n"
         return result
 
-    @staticmethod
-    def _header_geometric_info(det):
+    def _header_geometric_info(self, det):
         """next block - scoring object geometrical information"""
 
         from pymchelper.writers.fortranformatter import format_d
@@ -64,7 +63,7 @@ class TxtWriter:
         elif det.geotyp in {SHGeoType.zone, SHGeoType.dzone}:
             result += f"#   ZONE START:{int(det.x.min_val):6d} ZONE END:{int(det.x.max_val):6d}\n"
         else:
-            result += "#   {self.ax} BIN:{det.x.n:6d} {self.ay} BIN:{det.y.n:6d} {self.az} BIN:{det.z.n:6d}\n"
+            result += f"#   {self.ax} BIN:{det.x.n:6d} {self.ay} BIN:{det.y.n:6d} {self.az} BIN:{det.z.n:6d}\n"
         return result
 
     @staticmethod
@@ -118,8 +117,7 @@ class TxtWriter:
                 # calculate output filename. it will include page number padded with zeros.
                 # for 10-99 pages the filename would look like: output_p01.png, ... output_p99.png
                 # for 100-999 pages the filename would look like: output_p001.png, ... output_p999.png
-                zero_padded_page_no = str(
-                    i + 1).zfill(len(str(len(estimator.pages))))
+                zero_padded_page_no = str(i + 1).zfill(len(str(len(estimator.pages))))
                 output_filename = f"{file_base_part}_p{zero_padded_page_no}{file_ext}"
                 output_path = os.path.join(dir_path, output_filename)
 
@@ -154,8 +152,8 @@ class TxtWriter:
             header += self._header_no_of_bins_and_prim(page.estimator)
 
         # dump data
-        with open(self.filename, 'w') as fout:
-            logger.info(f"Writing: {self.filename}")
+        with open(filename, 'w') as fout:
+            logger.info(f"Writing: {filename}")
             fout.write(header)
 
             det_error = page.error_raw.ravel()
