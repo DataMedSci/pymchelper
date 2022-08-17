@@ -1,13 +1,12 @@
 #!/usr/bin/env python
 
+import argparse
 import glob
 import logging
 import sys
 
-import argparse
-
 from pymchelper.estimator import ErrorEstimate
-from pymchelper.input_output import convertfrompattern, convertfromlist
+from pymchelper.input_output import convertfromlist, convertfrompattern
 from pymchelper.writers.common import Converters
 from pymchelper.writers.plots import ImageWriter, PlotAxis
 
@@ -38,8 +37,9 @@ def add_default_options(parser):
 def main(args=None):
     if args is None:
         args = sys.argv[1:]
-    import pymchelper
     import os
+
+    import pymchelper
 
     _progname = os.path.basename(sys.argv[0])
     _helptxt = 'Universal converter for FLUKA and SHIELD-HIT12A output files.'
@@ -145,8 +145,7 @@ def main(args=None):
         if parsed_args.many:
             status = convertfrompattern(parsed_args.input, output_dir,
                                         converter_name=parsed_args.command, options=parsed_args,
-                                        error=parsed_args.error, nan=parsed_args.nan,
-                                        verbose=parsed_args.verbose)
+                                        error=parsed_args.error, nan=parsed_args.nan)
         else:
             status = convertfromlist(parsed_args.input,
                                      error=parsed_args.error, nan=parsed_args.nan, outputdir=output_dir,
