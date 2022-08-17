@@ -51,6 +51,9 @@ class BeamModel():
         Loads a beam model given as a CSV file.
         Interpolation lookup can be done as a function of nominal energy (default, nominal=True),
         or as a function of actual energy (nominal=False).
+
+        Header rows will be discarded and must be prefixed with '#'.
+
         Input columns for beam model:
             1) nominal energy [MeV]
             2) measured energy [MeV]
@@ -71,7 +74,7 @@ class BeamModel():
         # d = d.apply(pd.to_numeric, errors='coerce') # parse to numeric and set invalid values to NaN
         # d = d.dropna() # drop rows that contain NaN values
 
-        data = np.genfromtxt(fn, delimiter=",", invalid_raise=False)
+        data = np.genfromtxt(fn, delimiter=",", invalid_raise=False, comments='#')
 
         # resolve by nominal energy
         if nominal:
@@ -81,25 +84,40 @@ class BeamModel():
 
         k = 'cubic'
 
-        self.f_en = interp1d(energy, data[:, 0], kind=k)       # nominal energy [MeV]
-        self.f_e = interp1d(energy, data[:, 1], kind=k)        # measured energy [MeV]
-        self.f_espread = interp1d(energy, data[:, 2], kind=k)  # energy spread 1 sigma [% of measured energy]
-        self.f_ppmu = interp1d(energy, data[:, 3], kind=k)     # 1e6 protons per MU  [1e6/MU]
-        self.f_sx = interp1d(energy, data[:, 4], kind=k)       # 1 sigma x [cm]
-        self.f_sy = interp1d(energy, data[:, 5], kind=k)       # 1 sigma y [cm]
-        self.f_divx = interp1d(energy, data[:, 6], kind=k)     # div x [rad]
-        self.f_divy = interp1d(energy, data[:, 7], kind=k)     # div y [rad]
-        self.f_covx = interp1d(energy, data[:, 8], kind=k)     # cov (x, x') [mm]
-        self.f_covy = interp1d(energy, data[:, 9], kind=k)     # cov (y, y') [mm]
+        cols = len(data[0])
+        logger.debug("Number of columns in beam model: %i", cols)
+
+        self.has_divergence = False
+
+        if cols == 6 or cols == 10:
+            self.f_en = interp1d(energy, data[:, 0], kind=k)       # nominal energy [MeV]
+            self.f_e = interp1d(energy, data[:, 1], kind=k)        # measured energy [MeV]
+            self.f_espread = interp1d(energy, data[:, 2], kind=k)  # energy spread 1 sigma [% of measured energy]
+            self.f_ppmu = interp1d(energy, data[:, 3], kind=k)     # 1e6 protons per MU  [1e6/MU]
+            self.f_sx = interp1d(energy, data[:, 4], kind=k)       # 1 sigma x [cm]
+            self.f_sy = interp1d(energy, data[:, 5], kind=k)       # 1 sigma y [cm]
+        else:
+            logger.error("invalid column count")
+
+        if cols == 10:
+            logger.debug("Beam model has divergence data")
+            self.has_divergence = True
+            self.f_divx = interp1d(energy, data[:, 6], kind=k)     # div x [rad]
+            self.f_divy = interp1d(energy, data[:, 7], kind=k)     # div y [rad]
+            self.f_covx = interp1d(energy, data[:, 8], kind=k)     # cov (x, x') [mm]
+            self.f_covy = interp1d(energy, data[:, 9], kind=k)     # cov (y, y') [mm]
+
         self.data = data
 
 
 @dataclass
 class Spot:
-    x: float
-    y: float
-    mu: float  # meterset weight (this is proportional to the dose in the air filled monitor IC)
-    wt: float  # actual number of particles, if possible, absolute
+    """
+    """
+    x: float = 0.0
+    y: float = 0.0
+    mu: float = 0.0  # meterset weight (this is proportional to the dose in the air filled monitor IC)
+    wt: float = 0.0  # actual number of particles, if possible, absolute
 
 
 @dataclass
@@ -116,13 +134,14 @@ class Layer:
                 n is the estimated number of primary particles for this spot
     """
 
-    spotsize: np.ndarray
+    spots: np.array
+    spotsize: np.ndarray([2, 1])
     energy_nominal: float = 100.0
     energy_measured: float = 100.0
     cmu: float = 10000.0
     repaint: int = 0
     nspots: int = 1
-    spots: np.ndarray
+    # spots: List[Spot]  # not sure if this will be needed
 
 
 @dataclass
@@ -139,11 +158,12 @@ class Field:
 
 
 @dataclass
-class Plan(object):
+class Plan:
     """
     Class for handling treatment plans.
     """
 
+    fields: list = None
     patient_iD: str = ""  # ID of patient
     patient_name: str = ""  # Last name of patient
     patient_initals: str = ""  # Initials of patient
@@ -151,172 +171,186 @@ class Plan(object):
     plan_label: str = ""  #
     plan_date: str = ""  #
     nfields: int = 0
-    fields: list = []
     bm: BeamModel = None  # optional beam model class
 
-    def load(self, file):
+    def inspect(self):
         """
-        Load file, autodiscovery by suffix.
         """
-        logger.debug("load() autodiscovery")
-        ext = os.path.splitext(file.name)[-1].lower()
-        if ext == ".pld":
-            self.load_PLD_IBA(file)
-        if ext == ".dcm":
-            self.load_DICOM_VARIAN(file)  # so far I have no other dicom files
-        if ext == ".rst":
-            self.load_RASTER_GSI(file)
+        pass
 
-    def load_PLD_IBA(self, file_pld):
-        """
-        file_pld : a file pointer to a .pld file, opened for reading
 
-        Here we assume there is only a single field in every .pld file
-        """
+def load(file, beam_model=None):
+    """
+    Load file, autodiscovery by suffix.
+    """
+    logger.debug("load() autodiscovery")
+    ext = os.path.splitext(file.name)[-1].lower()
 
-        # _scaling holds the number of particles * dE/dx / MU = some constant
-        # _scaling = 8.106687e7  # Calculated Nov. 2016 from Brita's 32 Gy plan. (no dE/dx)
-        _scaling = 5.1821e8  # Estimated calculation Apr. 2017 from Brita's 32 Gy plan.
-        scaling = _scaling
+    if ext == ".pld":
+        p = load_PLD_IBA(file, beam_model)
+    if ext == ".dcm":
+        p = load_DICOM_VARIAN(file, beam_model)  # so far I have no other dicom files
+    if ext == ".rst":
+        p = load_RASTER_GSI(file, beam_model)
+    return p
 
+
+def load_PLD_IBA(file_pld, beam_model=None):
+    """
+    file_pld : a file pointer to a .pld file, opened for reading
+
+    Here we assume there is only a single field in every .pld file
+    """
+
+    # _scaling holds the number of particles * dE/dx / MU = some constant
+    # _scaling = 8.106687e7  # Calculated Nov. 2016 from Brita's 32 Gy plan. (no dE/dx)
+    _scaling = 5.1821e8  # Estimated calculation Apr. 2017 from Brita's 32 Gy plan.
+    scaling = _scaling
+
+    p = Plan()
+    p.bm = beam_model
+
+    field = Field()
+    p.fields = [field]
+    p.nfields = 1
+
+    pldlines = file_pld.readlines()
+    pldlen = len(pldlines)
+    logger.info("Read {} lines of data.".format(pldlen))
+
+    field.layers = []
+    field.nlayers = 0
+
+    # First line in PLD file contains both plan and field data
+    tokens = pldlines[0].split(",")
+    # _ = tokens[0].strip()
+    p.patient_iD = tokens[1].strip()
+    p.patient_name = tokens[2].strip()
+    p.patient_initals = tokens[3].strip()
+    p.patient_firstname = tokens[4].strip()
+    p.plan_label = tokens[5].strip()
+    p.beam_name = tokens[6].strip()
+    field.cmu = float(tokens[7].strip())
+    field.csetweight = float(tokens[8].strip())
+    field.nlayers = int(tokens[9].strip())  # number of layers
+
+    for i in range(1, pldlen):  # loop over all lines starting from the second one
+        line = pldlines[i]
+        if "Layer" in line:  # each new layers starts with the "Layer" keyword
+            # the "Layer" header is formated as
+            # "Layer, "
+            header = line
+            tokens = header.split(",")
+            # extract the subsequent lines with elements
+            el_first = i + 1
+            el_last = el_first + int(tokens[4])
+
+            elements = pldlines[el_first:el_last]  # each line starting with "Element" string is a spot.
+
+            # tokens[0] just holds the "Layer" keyword
+            spotsize = float(tokens[1].strip()) * s2fwhm * 0.1  # convert mm sigma to cm FWHM
+            energy_nominal = float(tokens[2].strip())
+            cmu = float(tokens[3].strip())
+            nspots = int(tokens[4].strip())
+            logger.debug(tokens)
+
+            # read number of repaints only if 5th column is present, otherwise set to 0
+            nrepaint = 0  # TODO: suspect repaints = 1 means all dose will be delivered once.
+            if len(tokens) > 5:
+                nrepaint = tokens[5].strip()
+
+            spots = np.array([])
+
+            layer = Layer(spots, [spotsize, spotsize], energy_nominal, energy_nominal, cmu, nrepaint, nspots)
+
+            for j, element in enumerate(elements):
+                token = element.split(",")
+                # the .pld file has every spot position repeated, but MUs are only in
+                # every second line, for reasons unknown.
+                if token[3] != "0.0":
+                    np.append([float(token[1].strip()),
+                              float(token[2].strip()),
+                              float(token[3].strip()),
+                              float(token[3].strip()) * scaling],  # *dEdx etc etc
+                              layer.spots
+                              )
+
+            p.fields[0].layers.append(layer)
+            logger.debug("appended layer %i with %i spots", len(p.fields[0].layers), layer.nspots)
+    return p
+
+
+def load_DICOM_VARIAN(file_dcm, beam_model=None):
+    """
+    """
+
+    ds = dicom.dcmread(file_dcm.name)
+    # Total number of energy layers used to produce SOBP
+
+    p = Plan()
+    p.patient_iD = ds['PatientID'].value
+    p.patient_name = ds['PatientName'].value
+    p.patient_initals = ""
+    p.patient_firstname = ""
+    p.plan_label = ds['RTPlanLabel'].value
+    p.plan_date = ds['RTPlanDate'].value
+    p.beam_name = ""
+
+    p.nfields = int(ds['FractionGroupSequence'][0]['NumberOfBeams'].value)
+    logger.debug("Found %i fields", p.nfields)
+
+    dcm_fgs = ds['FractionGroupSequence'][0]['ReferencedBeamSequence']  # fields for given group number
+    print(dcm_fgs)
+
+    for i, dcm_field in enumerate(dcm_fgs):
         field = Field()
-        self.fields.append(field)
-        self.nfields = 1
+        p.fields.append(field)
+        field.dose = float(dcm_field['BeamDose'].value)
+        field.cmu = float(dcm_field['BeamMeterset'].value)
+        field.csetweight = 1.0
+        field.nlayers = int(ds['IonBeamSequence'][i]['NumberOfControlPoints'].value)
+        dcm_ibs = ds['IonBeamSequence'][i]['IonControlPointSequence']  # layers for given field number
+        logger.debug("Found %i layers in field number %i", field.nlayers, i)
 
-        pldlines = file_pld.readlines()
-        pldlen = len(pldlines)
-        logger.info("Read {} lines of data.".format(pldlen))
+        for j, layer in enumerate(dcm_ibs):
 
-        field.layers = []
-        field.nlayers = 0
+            # gantry and couch angle is stored per energy layer, strangely
+            if 'NominalBeamEnergy' in layer:
+                energy = float(layer['NominalBeamEnergy'].value)  # Nominal energy in MeV
+            if 'NumberOfScanSpotPositions' in layer:
+                nspots = int(layer['NumberOfScanSpotPositions'].value)  # number of spots
+                logger.debug("Found %i spots in layer number %i at energy %f", nspots, j, energy)
+            if 'NumberOfPaintings' in layer:
+                repaint = int(layer['NumberOfPaintings'].value)  # number of spots
 
-        # First line in PLD file contains both plan and field data
-        tokens = pldlines[0].split(",")
-        # _ = tokens[0].strip()
-        self.patient_iD = tokens[1].strip()
-        self.patient_name = tokens[2].strip()
-        self.patient_initals = tokens[3].strip()
-        self.patient_firstname = tokens[4].strip()
-        self.plan_label = tokens[5].strip()
-        self.beam_name = tokens[6].strip()
-        field.cmu = float(tokens[7].strip())
-        field.csetweight = float(tokens[8].strip())
-        field.nlayers = int(tokens[9].strip())  # number of layers
-
-        for i in range(1, pldlen):  # loop over all lines starting from the second one
-            line = pldlines[i]
-            if "Layer" in line:  # each new layers starts with the "Layer" keyword
-                # the "Layer" header is formated as
-                # "Layer, "
-                header = line
-                tokens = header.split(",")
-                # extract the subsequent lines with elements
-                el_first = i + 1
-                el_last = el_first + int(tokens[4])
-
-                elements = pldlines[el_first:el_last]  # each line starting with "Element" string is a spot.
-
-                # tokens[0] just holds the "Layer" keyword
-                spotsize = float(tokens[1].strip()) * s2fwhm * 0.1  # convert mm sigma to cm FWHM
-                energy_nominal = float(tokens[2].strip())
-                cmu = float(tokens[3].strip())
-                nspots = int(tokens[4].strip())
-
-                # read number of repaints only if 5th column is present, otherwise set to 0
-                nrepaint = 0  # TODO: suspect repaints = 1 means all dose will be delivered once.
-                if len(tokens) > 5:
-                    nrepaint = tokens[5].strip()
-
-                layer = Layer([spotsize, spotsize], energy_nominal, energy_nominal, cmu, nrepaint, nspots)
-
-                print(dir(layer))
-                print(layer.spots)
+            if 'ScanSpotPositionMap' in layer:
+                _pos = np.array(layer['ScanSpotPositionMap'].value).reshape(nspots, 2)  # spot coords in mm
+                # print(layer['ScanSpotPositionMap'].value)
                 # exit()
-
-                for j, element in enumerate(elements):
-                    token = element.split(",")
-                    # the .pld file has every spot position repeated, but MUs are only in
-                    # every second line, for reasons unknown.
-                    if token[3] != "0.0":
-                        layer.spots[j] = [float(token[1].strip()),
-                                          float(token[2].strip()),
-                                          float(token[3].strip()),
-                                          float(token[3].strip() * scaling)]  # *dEdx etc etc
-
-                self.fields[0].layers.append(layer)
-                logger.debug("appended layer %i with %i spots", len(self.fields[0].layers), layer.nspots)
-
-    def load_DICOM_VARIAN(self, file_dcm):
-        """
-        """
-        ds = dicom.dcmread(file_dcm.name)
-        # Total number of energy layers used to produce SOBP
-
-        self.patient_iD = ds['PatientID'].value
-        self.patient_name = ds['PatientName'].value
-        self.patient_initals = ""
-        self.patient_firstname = ""
-        self.plan_label = ds['RTPlanLabel'].value
-        self.plan_date = ds['RTPlanDate'].value
-        self.beam_name = ""
-
-        self.nfields = int(ds['FractionGroupSequence'][0]['NumberOfBeams'].value)
-        logger.debug("Found %i fields", self.nfields)
-
-        dcm_fgs = ds['FractionGroupSequence'][0]['ReferencedBeamSequence']  # fields for given group number
-        print(dcm_fgs)
-
-        for i, dcm_field in enumerate(dcm_fgs):
-            field = Field()
-            self.fields.append(field)
-            field.dose = float(dcm_field['BeamDose'].value)
-            field.cmu = float(dcm_field['BeamMeterset'].value)
-            field.csetweight = 1.0
-            field.nlayers = int(ds['IonBeamSequence'][i]['NumberOfControlPoints'].value)
-            dcm_ibs = ds['IonBeamSequence'][i]['IonControlPointSequence']  # layers for given field number
-            logger.debug("Found %i layers in field number %i", field.nlayers, i)
-
-            for j, layer in enumerate(dcm_ibs):
-
-                # gantry and couch angle is stored per energy layer, strangely
-                if 'NominalBeamEnergy' in layer:
-                    energy = float(layer['NominalBeamEnergy'].value)  # Nominal energy in MeV
-                if 'NumberOfScanSpotPositions' in layer:
-                    nspots = int(layer['NumberOfScanSpotPositions'].value)  # number of spots
-                    logger.debug("Found %i spots in layer number %i at energy %f", nspots, j, energy)
-                if 'NumberOfPaintings' in layer:
-                    repaint = int(layer['NumberOfPaintings'].value)  # number of spots
-
-                if 'ScanSpotPositionMap' in layer:
-                    _pos = np.array(layer['ScanSpotPositionMap'].value).reshape(nspots, 2)  # spot coords in mm
-                    # print(layer['ScanSpotPositionMap'].value)
-                    # exit()
-                    print(_pos)
-                    # exit()
-                if 'ScanSpotMetersetWeights' in layer:
-                    _wt = np.array(layer['ScanSpotMetersetWeights'].value).reshape(nspots, 1)  # spot coords in mm
-                    print(_wt)
-                if 'ScanningSpotSize' in layer:
-                    spotsize = np.array(layer['ScanningSpotSize'].value)
-
-                spots = np.c_[_pos, _wt, _wt]
-                # print(spots)
+                print(_pos)
                 # exit()
-                cmu = 10.0
-                enorm = energy
-                emeas = energy
+            if 'ScanSpotMetersetWeights' in layer:
+                _wt = np.array(layer['ScanSpotMetersetWeights'].value).reshape(nspots, 1)  # spot coords in mm
+                print(_wt)
+            if 'ScanningSpotSize' in layer:
+                spotsize = np.array(layer['ScanningSpotSize'].value)
 
-                field.layers.append(Layer(spotsize, enorm, emeas, cmu, repaint, nspots, spots))
+            spots = np.c_[_pos, _wt, _wt]
+            # print(spots)
+            # exit()
+            cmu = 10.0
+            enorm = energy
+            emeas = energy
 
-        def load_RASTER_GSI(self, file_rst):
-            """
-            """
-            pass
+            field.layers.append(Layer(spotsize, enorm, emeas, cmu, repaint, nspots, spots))
+    return p
 
-        def inspect(self):
-            """
-            """
-            pass
+
+def load_RASTER_GSI(file_rst, beam_model=None):
+    """
+    """
+    p = Plan()
+    return p
 
 
 def main(args=None):
@@ -359,9 +393,11 @@ def main(args=None):
     else:
         bm = None
 
-    pln = Plan(bm)
-    pln.load(args.fin)
+    dir(bm)
+    # exit()
+    pln = load(args.fin, bm)
     args.fin.close()
+    print(pln)
 
 
 if __name__ == '__main__':

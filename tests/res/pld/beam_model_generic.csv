@@ -1,6 +1,6 @@
-"Dummy beam model for testing purposes. THESE ARE NOT ACTUAL VALUES, DO NOT USE CLINICALLY.",,,,,
-"E nominal","E real","E real spread","Mprotons per MU","Sigma x ","Sigma y"
-[MeV],[MeV],[%],"[1e6 protons/MU]",[mm],[mm]
+#"Dummy beam model for testing purposes. THESE ARE NOT ACTUAL VALUES, DO NOT USE CLINICALLY.",,,,,
+#"E nominal","E real","E real spread","Mprotons per MU","Sigma x ","Sigma y"
+#[MeV],[MeV],[%],"[1e6 protons/MU]",[mm],[mm]
 70,71,1.5,2,4.8,5
 80,81,1.4333333333333333,2.166666666666667,4.7,4.9
 90,91,1.3666666666666667,2.333333333333333,4.6,4.8
