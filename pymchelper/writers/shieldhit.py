@@ -50,7 +50,7 @@ class TxtWriter:
             result = "#   DETECTOR OUTPUT GEOMAP\n"
         return result
 
-    @staticmethod(f)
+    @staticmethod
     def _header_geometric_info(det):
         """next block - scoring object geometrical information"""
 
