@@ -130,14 +130,13 @@ def fromfilelist(input_file_list, error=ErrorEstimate.stderr, nan: bool = True):
     return result
 
 
-def frompattern(pattern, error=ErrorEstimate.stderr, nan=True, verbose=0):
+def frompattern(pattern, error=ErrorEstimate.stderr, nan=True):
     """
     Reads all files matching pattern, e.g.: 'foobar_*.bdo', and returns a list of averaged estimators.
 
     :param pattern: pattern to be matched for reading.
     :param error: error estimation, see class ErrorEstimate class in pymchelper.estimator
     :param nan: if True, NaN (not a number) are excluded when averaing data.
-    :param verbose: optional verbosity level.
     :return: a list of estimators, or an empty list if no files were found.
     """
 
@@ -182,8 +181,7 @@ def convertfrompattern(pattern,
                        converter_name,
                        options,
                        error=ErrorEstimate.stderr,
-                       nan: bool = True,
-                       verbose: int = 0):
+                       nan: bool = True):
     """
 
     :param pattern:
@@ -192,7 +190,6 @@ def convertfrompattern(pattern,
     :param options:
     :param error: error estimation, see class ErrorEstimate class in pymchelper.estimator
     :param nan: if True, NaN (not a number) are excluded when averaging data.
-    :param verbose:
     :return:
     """
     list_of_matching_files = glob(pattern)
@@ -216,7 +213,7 @@ def tofile(estimator, filename, converter_name, options):
     """
     writer_cls = Converters.fromname(converter_name)
     writer = writer_cls(filename, options)
-    logger.debug("File corename : {:s}".format(filename))
+    logger.debug(f"File corename : {filename}")
     status = writer.write(estimator)
     return status
 

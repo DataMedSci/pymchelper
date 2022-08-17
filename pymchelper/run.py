@@ -43,7 +43,7 @@ def main(args=None):
 
     _progname = os.path.basename(sys.argv[0])
     _helptxt = 'Universal converter for FLUKA and SHIELD-HIT12A output files.'
-    _epitxt = '''Type '{:s} <converter> --help' for help on a specific converter.'''.format(_progname)
+    _epitxt = f"Type '{_progname} <converter> --help' for help on a specific converter."
 
     parser = argparse.ArgumentParser(description=_helptxt, epilog=_epitxt)
 
@@ -123,7 +123,7 @@ def main(args=None):
         # TODO add filename discovery
         files = sorted(glob.glob(parsed_args.input))
         if not files:
-            logger.error('File does not exist: ' + parsed_args.input)
+            logger.error(f'File {parsed_args.input} does not exist: ')
 
         # check if output should be interpreted as a filename
         if not parsed_args.many and len(files) == 1:
@@ -135,7 +135,7 @@ def main(args=None):
             output_dir = parsed_args.output
             # check if output directory exists
             if output_dir and not os.path.exists(output_dir):
-                logger.warning("Directory {:s} does not exist, creating.".format(output_dir))
+                logger.warning(f"Directory {output_dir} does not exist, creating.")
                 os.makedirs(output_dir)
         else:
             output_dir = '.'
