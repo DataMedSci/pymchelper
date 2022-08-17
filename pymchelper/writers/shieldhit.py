@@ -21,8 +21,8 @@ class SHBinaryWriter:
 class TxtWriter:
     @staticmethod
     def _axis_name(geo_type, axis_no):
-        cyl = ['R', 'PHI', 'Z']
-        msh = ['X', 'Y', 'Z']
+        cyl = ('R', 'PHI', 'Z')
+        msh = ('X', 'Y', 'Z')
         if geo_type in (SHGeoType.cyl, SHGeoType.dcyl):
             return cyl[axis_no]
         return msh[axis_no]
@@ -57,19 +57,13 @@ class TxtWriter:
         result = ""
         if det.geotyp in {SHGeoType.plane, SHGeoType.dplane}:
             result += "#   PLANE point(X,Y,Z)         :"
-            result += "{:s}".format(format_d(10, 3, det.sx))
-            result += "{:s}".format(format_d(10, 3, det.sy))
-            result += "{:s}\n".format(format_d(10, 3, det.sz))
+            result += f"{format_d(10, 3, det.sx)}{format_d(10, 3, det.sy)}{format_d(10, 3, det.sz)}\n"
             result += "#   PLANE normal vect(Vx,Vy,Vz):"
-            result += "{:s}".format(format_d(10, 3, det.nx))
-            result += "{:s}".format(format_d(10, 3, det.ny))
-            result += "{:s}\n".format(format_d(10, 3, det.nz))
+            result += f"{format_d(10, 3, det.nx)}{format_d(10, 3, det.ny)}{format_d(10, 3, det.nz)}\n"
         elif det.geotyp in {SHGeoType.zone, SHGeoType.dzone}:
-            result += "#   ZONE START:{:6d} ZONE END:{:6d}\n".format(int(det.x.min_val), int(det.x.max_val))
+            result += f"#   ZONE START:{int(det.x.min_val):6d} ZONE END:{int(det.x.max_val):6d}\n"
         else:
-            result += "#   {:s} BIN:{:6d} {:s} BIN:{:6d} {:s} BIN:{:6d}\n".format(self.ax, det.x.n,
-                                                                                  self.ay, det.y.n,
-                                                                                  self.az, det.z.n)
+            result += "#   {self.ax} BIN:{det.x.n:6d} {self.ay} BIN:{det.y.n:6d} {self.az} BIN:{det.z.n:6d}\n"
         return result
 
     @staticmethod
@@ -77,12 +71,12 @@ class TxtWriter:
         """scored value and optionally particle type"""
         result = ""
         if geotyp != SHGeoType.geomap and particle:
-            result += "#   JPART:{:6d} DETECTOR TYPE: {:s}\n".format(particle, str(dettyp).ljust(10))
+            result += f"#   JPART:{particle:6d} DETECTOR TYPE: {str(dettyp).ljust(10)}\n"
         else:
             det_type_name = str(dettyp)
             if dettyp in (SHDetType.zone, SHDetType.medium,):
                 det_type_name += "#"
-            result += "#                DETECTOR TYPE: {:s}\n".format(str(det_type_name).ljust(10))
+            result += f"#                DETECTOR TYPE: {str(det_type_name).ljust(10)}\n"
         return result
 
     def _header_no_of_bins_and_prim(self, estimator):
@@ -91,15 +85,21 @@ class TxtWriter:
         header = ""
         # number of bins in each dimensions
         if estimator.geotyp not in (SHGeoType.plane, SHGeoType.dplane, SHGeoType.zone, SHGeoType.dzone):
-            header += "#   {:s} START:{:s}".format(self.ax, format_d(10, 3, estimator.x.min_val))
-            header += " {:s} START:{:s}".format(self.ay, format_d(10, 3, estimator.y.min_val))
-            header += " {:s} START:{:s}\n".format(self.az, format_d(10, 3, estimator.z.min_val))
-            header += "#   {:s} END  :{:s}".format(self.ax, format_d(10, 3, estimator.x.max_val))
-            header += " {:s} END  :{:s}".format(self.ay, format_d(10, 3, estimator.y.max_val))
-            header += " {:s} END  :{:s}\n".format(self.az, format_d(10, 3, estimator.z.max_val))
+            header += "#   {:s} START:{:s}".format(
+                self.ax, format_d(10, 3, estimator.x.min_val))
+            header += " {:s} START:{:s}".format(self.ay,
+                                                format_d(10, 3, estimator.y.min_val))
+            header += " {:s} START:{:s}\n".format(
+                self.az, format_d(10, 3, estimator.z.min_val))
+            header += "#   {:s} END  :{:s}".format(
+                self.ax, format_d(10, 3, estimator.x.max_val))
+            header += " {:s} END  :{:s}".format(self.ay,
+                                                format_d(10, 3, estimator.y.max_val))
+            header += " {:s} END  :{:s}\n".format(
+                self.az, format_d(10, 3, estimator.z.max_val))
 
         # number of primaries
-        header += "#   PRIMARIES:" + format_d(10, 3, estimator.number_of_primaries) + "\n"
+        header += f"#   PRIMARIES:{format_d(10, 3, estimator.number_of_primaries)}\n"
 
         return header
 
@@ -114,7 +114,8 @@ class TxtWriter:
             if not os.path.exists(dir_path):
                 logger.info(f"Creating {dir_path}")
                 os.makedirs(dir_path)
-            file_base_part, file_ext = os.path.splitext(os.path.basename(self.filename))
+            file_base_part, file_ext = os.path.splitext(
+                os.path.basename(self.filename))
 
             # loop over all pages and save an image for each of them
             for i, page in enumerate(estimator.pages):
@@ -122,19 +123,20 @@ class TxtWriter:
                 # calculate output filename. it will include page number padded with zeros.
                 # for 10-99 pages the filename would look like: output_p01.png, ... output_p99.png
                 # for 100-999 pages the filename would look like: output_p001.png, ... output_p999.png
-                zero_padded_page_no = str(i + 1).zfill(len(str(len(estimator.pages))))
-                output_filename = "{}_p{}{}".format(file_base_part, zero_padded_page_no, file_ext)
+                zero_padded_page_no = str(
+                    i + 1).zfill(len(str(len(estimator.pages))))
+                output_filename = f"{file_base_part}_p{zero_padded_page_no}{file_ext}"
                 output_path = os.path.join(dir_path, output_filename)
 
                 # save the output file
-                logger.info("Writing {}".format(output_path))
+                logger.info(f"Writing {output_path}")
                 self.write_single_page(page, output_path)
 
         return 0
 
     def write_single_page(self, page, filename):
         """TODO"""
-        logger.info("Writing: " + filename)
+        logger.info(f"Writing: {filename}")
 
         from pymchelper.writers.fortranformatter import format_e
 
@@ -151,13 +153,14 @@ class TxtWriter:
 
             header += self._header_geometric_info(page.estimator)
 
-            header += self._header_scored_value(page.estimator.geotyp, page.dettyp, getattr(page.estimator, 'particle', None))
+            header += self._header_scored_value(
+                page.estimator.geotyp, page.dettyp, getattr(page.estimator, 'particle', None))
 
             header += self._header_no_of_bins_and_prim(page.estimator)
 
         # dump data
         with open(self.filename, 'w') as fout:
-            logger.info("Writing: " + self.filename)
+            logger.info(f"Writing: {self.filename}")
             fout.write(header)
 
             det_error = page.error_raw.ravel()
@@ -167,15 +170,16 @@ class TxtWriter:
             ymesh = page.axis(1)
             zmesh = page.axis(2)
 
-            logger.debug('xmesh {}'.format(xmesh))
-            logger.debug('ymesh {}'.format(ymesh))
-            logger.debug('zmesh {}'.format(zmesh))
+            logger.debug(f'xmesh {xmesh}')
+            logger.debug(f'ymesh {ymesh}')
+            logger.debug(f'zmesh {zmesh}')
 
-            zlist, ylist, xlist = np.meshgrid(zmesh.data, ymesh.data, xmesh.data, indexing='ij')
+            zlist, ylist, xlist = np.meshgrid(
+                zmesh.data, ymesh.data, xmesh.data, indexing='ij')
 
-            logger.debug('xlist {}'.format(xlist))
-            logger.debug('ylist {}'.format(ylist))
-            logger.debug('zlist {}'.format(zlist))
+            logger.debug(f'xlist {xlist}')
+            logger.debug(f'ylist {ylist}')
+            logger.debug(f'zlist {zlist}')
 
             for x, y, z, v, e in zip(xlist.ravel(), ylist.ravel(), zlist.ravel(), page.data.ravel(), det_error):
                 if page.estimator.geotyp in {SHGeoType.zone, SHGeoType.dzone}:
