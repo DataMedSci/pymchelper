@@ -25,8 +25,7 @@ class TxtWriter:
         msh = ['X', 'Y', 'Z']
         if geo_type in (SHGeoType.cyl, SHGeoType.dcyl):
             return cyl[axis_no]
-        else:
-            return msh[axis_no]
+        return msh[axis_no]
 
     def __init__(self, filename, options):
         if filename.endswith(".txt"):
