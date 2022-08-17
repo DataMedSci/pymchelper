@@ -1,0 +1,5 @@
+{
+    "python.formatting.provider": "yapf",
+    "restructuredtext.confPath": "${workspaceFolder}/docs",
+    "esbonio.sphinx.confDir": "${workspaceFolder}/docs"
+}

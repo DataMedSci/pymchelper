@@ -1,14 +1,13 @@
-Geometry Cyl             # 1-dimensional cylinder scoring geometry along z
+XGeometry Cyl             # 1-dimensional cylinder scoring geometry along z
     Name CylZ_Mesh
     R  0.0  10.0    1
     Z  0.0  20.0    400  # 0.5 mm resolution
 
-Geometry Mesh            # 2-dimensional Cartesian scoring geometry in the YZ plane
+XGeometry Mesh            # 2-dimensional Cartesian scoring geometry in the YZ plane
     Name YZ_Mesh
     X -0.5  0.5    1
-    Y -2.0  2.0    80  # 0.5 mm resolution
-    Z  0.0  20.0   400  # 0.5 mm resolution
-
+    Y -2.0  2.0    1000  # 0.5 mm resolution
+    Z  0.0  20.0   1000  # 0.5 mm resolution
 
 Output
     Filename cylz.bdo

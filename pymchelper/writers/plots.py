@@ -30,7 +30,7 @@ class PlotDataWriter:
             # split output path into directory, basename and extension
             dir_path = os.path.dirname(self.filename)
             if not os.path.exists(dir_path):
-                logger.info("Creating {}".format(dir_path))
+                logger.info(f"Creating {dir_path}")
                 os.makedirs(dir_path)
             file_base_part, file_ext = os.path.splitext(os.path.basename(self.filename))
 
