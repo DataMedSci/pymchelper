@@ -50,7 +50,8 @@ class TxtWriter:
             result = "#   DETECTOR OUTPUT GEOMAP\n"
         return result
 
-    def _header_geometric_info(self, det):
+    @staticmethod(f)
+    def _header_geometric_info(det):
         """next block - scoring object geometrical information"""
 
         from pymchelper.writers.fortranformatter import format_d
@@ -85,18 +86,12 @@ class TxtWriter:
         header = ""
         # number of bins in each dimensions
         if estimator.geotyp not in (SHGeoType.plane, SHGeoType.dplane, SHGeoType.zone, SHGeoType.dzone):
-            header += "#   {:s} START:{:s}".format(
-                self.ax, format_d(10, 3, estimator.x.min_val))
-            header += " {:s} START:{:s}".format(self.ay,
-                                                format_d(10, 3, estimator.y.min_val))
-            header += " {:s} START:{:s}\n".format(
-                self.az, format_d(10, 3, estimator.z.min_val))
-            header += "#   {:s} END  :{:s}".format(
-                self.ax, format_d(10, 3, estimator.x.max_val))
-            header += " {:s} END  :{:s}".format(self.ay,
-                                                format_d(10, 3, estimator.y.max_val))
-            header += " {:s} END  :{:s}\n".format(
-                self.az, format_d(10, 3, estimator.z.max_val))
+            header += f"#   {self.ax} START:{format_d(10, 3, estimator.x.min_val)}"
+            header += f" {self.ay} START:{format_d(10, 3, estimator.y.min_val)}"
+            header += f" {self.az} START:{format_d(10, 3, estimator.z.min_val)}\n"
+            header += f"#   {self.ax} END  :{format_d(10, 3, estimator.x.max_val)}"
+            header += f" {self.ay} END  :{format_d(10, 3, estimator.y.max_val)}"
+            header += f" {self.az} END  :{format_d(10, 3, estimator.z.max_val)}\n"
 
         # number of primaries
         header += f"#   PRIMARIES:{format_d(10, 3, estimator.number_of_primaries)}\n"
