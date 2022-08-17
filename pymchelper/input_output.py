@@ -1,12 +1,12 @@
-from collections import defaultdict
-from glob import glob
 import logging
 import os
+from collections import defaultdict
+from glob import glob
 
 import numpy as np
 
-from pymchelper.estimator import Estimator, average_with_nan, ErrorEstimate
-from pymchelper.readers.fluka import FlukaReaderFactory, FlukaReader
+from pymchelper.estimator import ErrorEstimate, Estimator, average_with_nan
+from pymchelper.readers.fluka import FlukaReader, FlukaReaderFactory
 from pymchelper.readers.shieldhit.general import SHReaderFactory
 from pymchelper.readers.shieldhit.reader_base import SHReader
 from pymchelper.writers.common import Converters
@@ -57,7 +57,7 @@ def fromfile(filename):
     return estimator
 
 
-def fromfilelist(input_file_list, error=ErrorEstimate.stderr, nan=True):
+def fromfilelist(input_file_list, error=ErrorEstimate.stderr, nan: bool = True):
     """
     Reads all files from a given list, and returns a list of averaged estimators.
 
@@ -97,14 +97,16 @@ def fromfilelist(input_file_list, error=ErrorEstimate.stderr, nan=True):
             # presented in Donald Knuth's Art of Computer Programming, Vol 2, page 232, 3rd edition.
             # Can be found here: http://www.johndcook.com/blog/standard_deviation/
             # and https://en.wikipedia.org/wiki/Algorithms_for_calculating_variance#Online_algorithm
-            delta = [current_page.data_raw - result_page.data_raw for current_page, result_page
-                     in zip(current_estimator.pages, result.pages)]               # delta = x - mean
+            delta = [
+                current_page.data_raw - result_page.data_raw
+                for current_page, result_page in zip(current_estimator.pages, result.pages)
+            ]  # delta = x - mean
             for page, delta_item in zip(result.pages, delta):
                 page.data_raw += delta_item / np.float64(n)
 
             if error != ErrorEstimate.none:
                 for page, delta_item, current_page in zip(result.pages, delta, current_estimator.pages):
-                    page.error_raw += delta_item * (current_page.data_raw - page.data_raw)   # M2 += delta * (x - mean)
+                    page.error_raw += delta_item * (current_page.data_raw - page.data_raw)  # M2 += delta * (x - mean)
 
         # unbiased sample variance is stored in `__M2 / (n - 1)`
         # unbiased sample standard deviation in classical algorithm is calculated as (sqrt(1/(n-1)sum(x-<x>)**2)
@@ -128,15 +130,13 @@ def fromfilelist(input_file_list, error=ErrorEstimate.stderr, nan=True):
     return result
 
 
-def frompattern(pattern, error=ErrorEstimate.stderr, nan=True, jobs=-1, verbose=0):
+def frompattern(pattern, error=ErrorEstimate.stderr, nan=True):
     """
     Reads all files matching pattern, e.g.: 'foobar_*.bdo', and returns a list of averaged estimators.
 
     :param pattern: pattern to be matched for reading.
     :param error: error estimation, see class ErrorEstimate class in pymchelper.estimator
     :param nan: if True, NaN (not a number) are excluded when averaing data.
-    :param jobs: optional number of threads for parallel processing
-    :param verbose: optional verbosity level.
     :return: a list of estimators, or an empty list if no files were found.
     """
 
@@ -147,23 +147,7 @@ def frompattern(pattern, error=ErrorEstimate.stderr, nan=True, jobs=-1, verbose=
 
     core_names_dict = group_input_files(list_of_matching_files)
 
-    # parallel execution of output file generation, using all CPU cores
-    # see http://pythonhosted.org/joblib
-    try:
-        from joblib import Parallel, delayed
-        logger.info("Parallel processing on {:d} jobs (-1 means all)".format(jobs))
-        # options.verbose count the number of `-v` switches provided by user
-        # joblib Parallel class expects the verbosity as a larger number (i.e. multiple of 10)
-        worker = Parallel(n_jobs=jobs, verbose=verbose * 10)
-        result = worker(
-            delayed(fromfilelist)(filelist, error, nan)
-            for core_name, filelist in core_names_dict.items()
-        )
-    except (ImportError, SyntaxError):
-        # single-cpu implementation, in case joblib library fails (i.e. Python 3.2)
-        logger.info("Single CPU processing")
-        result = [fromfilelist(filelist, error, nan)
-                  for core_name, filelist in core_names_dict.items()]
+    result = [fromfilelist(filelist, error, nan) for _, filelist in core_names_dict.items()]
     return result
 
 
@@ -192,8 +176,12 @@ def convertfromlist(filelist, error, nan, outputdir, converter_name, options, ou
     return status
 
 
-def convertfrompattern(pattern, outputdir, converter_name, options,
-                       error=ErrorEstimate.stderr, nan=True, jobs=-1, verbose=0):
+def convertfrompattern(pattern,
+                       outputdir,
+                       converter_name,
+                       options,
+                       error=ErrorEstimate.stderr,
+                       nan: bool = True):
     """
 
     :param pattern:
@@ -201,35 +189,17 @@ def convertfrompattern(pattern, outputdir, converter_name, options,
     :param converter_name:
     :param options:
     :param error: error estimation, see class ErrorEstimate class in pymchelper.estimator
-    :param nan: if True, NaN (not a number) are excluded when averaing data.
-    :param jobs:
-    :param verbose:
+    :param nan: if True, NaN (not a number) are excluded when averaging data.
     :return:
     """
     list_of_matching_files = glob(pattern)
 
     core_names_dict = group_input_files(list_of_matching_files)
 
-    # parallel execution of output file generation, using all CPU cores
-    # see http://pythonhosted.org/joblib
-    try:
-        from joblib import Parallel, delayed
-        logger.info("Parallel processing on {:d} jobs (-1 means all)".format(jobs))
-        # options.verbose count the number of `-v` switches provided by user
-        # joblib Parallel class expects the verbosity as a larger number (i.e. multiple of 10)
-        worker = Parallel(n_jobs=jobs, verbose=verbose * 10)
-        status = worker(
-            delayed(convertfromlist)(filelist, error, nan, outputdir, converter_name, options)
-            for core_name, filelist in core_names_dict.items()
-        )
-        return max(status)
-    except (ImportError, SyntaxError):
-        # single-cpu implementation, in case joblib library fails (i.e. Python 3.2)
-        logger.info("Single CPU processing")
-        status = []
-        for core_name, filelist in core_names_dict.items():
-            status.append(convertfromlist(filelist, error, nan, outputdir, converter_name, options))
-        return max(status)
+    status = []
+    for _, filelist in core_names_dict.items():
+        status.append(convertfromlist(filelist, error, nan, outputdir, converter_name, options))
+    return max(status)
 
 
 def tofile(estimator, filename, converter_name, options):
@@ -243,7 +213,7 @@ def tofile(estimator, filename, converter_name, options):
     """
     writer_cls = Converters.fromname(converter_name)
     writer = writer_cls(filename, options)
-    logger.debug("File corename : {:s}".format(filename))
+    logger.debug(f"File corename : {filename}")
     status = writer.write(estimator)
     return status
 
