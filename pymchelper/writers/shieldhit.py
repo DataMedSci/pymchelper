@@ -108,8 +108,7 @@ class TxtWriter:
             if not os.path.exists(dir_path):
                 logger.info(f"Creating {dir_path}")
                 os.makedirs(dir_path)
-            file_base_part, file_ext = os.path.splitext(
-                os.path.basename(self.filename))
+            file_base_part, file_ext = os.path.splitext(os.path.basename(self.filename))
 
             # loop over all pages and save an image for each of them
             for i, page in enumerate(estimator.pages):
@@ -152,7 +151,7 @@ class TxtWriter:
             header += self._header_no_of_bins_and_prim(page.estimator)
 
         # dump data
-        with open(filename, 'w') as fout:
+        with open(filename, 'w') as fout:  # skipcq: PTC-W6004
             logger.info(f"Writing: {filename}")
             fout.write(header)
 
@@ -167,8 +166,7 @@ class TxtWriter:
             logger.debug(f'ymesh {ymesh}')
             logger.debug(f'zmesh {zmesh}')
 
-            zlist, ylist, xlist = np.meshgrid(
-                zmesh.data, ymesh.data, xmesh.data, indexing='ij')
+            zlist, ylist, xlist = np.meshgrid(zmesh.data, ymesh.data, xmesh.data, indexing='ij')
 
             logger.debug(f'xlist {xlist}')
             logger.debug(f'ylist {ylist}')
