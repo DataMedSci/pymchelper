@@ -154,9 +154,10 @@ class Field:
     nlayers: int = 0  # number of layers in this field
     dose: float = 0.0  # dose in [Gy]
     cmu: float = 0.0  # cummulative MU of all layers in this field
-    _iba_csetweight: float = 0.0  # IBA specific
+    _pld_csetweight: float = 0.0  # IBA specific
     gantry: float = 0.0
     couch: float = 0.0
+    scaling: float = 1.0  # scaling applied to all particle numbers
 
 
 @dataclass
@@ -180,27 +181,30 @@ class Plan:
     plan_date: str = ""  #
     nfields: int = 0
     bm: BeamModel = None  # optional beam model class
-
-    def __str__(self):
-        """# TODO: make fields printable."""
-        pass
+    flip_xy: False  # flag whether x and y has been flipped
 
 
-def load(file, beam_model=None):
+def load_beammodel(fn):
+    """Returns a beam model object"""
+    bm = BeamModel(fn)
+    return bm
+
+
+def load(file, beam_model=None, scaling=1.0, flip_xy=False):
     """Load file, autodiscovery by suffix."""
     logger.debug("load() autodiscovery")
     ext = os.path.splitext(file.name)[-1].lower()  # extract suffix, incl. dot separator
 
     if ext == ".pld":
-        p = load_PLD_IBA(file, beam_model)
+        p = load_PLD_IBA(file, beam_model, scaling, flip_xy)
     if ext == ".dcm":
-        p = load_DICOM_VARIAN(file, beam_model)  # so far I have no other dicom files
+        p = load_DICOM_VARIAN(file, beam_model, scaling, flip_xy)  # so far I have no other dicom files
     if ext == ".rst":
-        p = load_RASTER_GSI(file, beam_model)
+        p = load_RASTER_GSI(file, beam_model, scaling, flip_xy)
     return p
 
 
-def load_PLD_IBA(file_pld, beam_model=None):
+def load_PLD_IBA(file_pld, beam_model=None, scaling=1.0, flip_xy=False):
     """
     file_pld : a file pointer to a .pld file, opened for reading.
 
@@ -208,8 +212,7 @@ def load_PLD_IBA(file_pld, beam_model=None):
     """
     # _scaling holds the number of particles * dE/dx / MU = some constant
     # _scaling = 8.106687e7  # Calculated Nov. 2016 from Brita's 32 Gy plan. (no dE/dx)
-    _scaling = 5.1821e8  # Estimated calculation Apr. 2017 from Brita's 32 Gy plan.
-    scaling = _scaling
+    ppmu = 5.1821e8  # protons per MU, Estimated calculation Apr. 2017 from Brita's 32 Gy plan.
 
     p = Plan()
     p.bm = beam_model
@@ -234,8 +237,8 @@ def load_PLD_IBA(file_pld, beam_model=None):
     p.patient_firstname = tokens[4].strip()
     p.plan_label = tokens[5].strip()
     p.beam_name = tokens[6].strip()
-    field.cmu = float(tokens[7].strip())
-    field.csetweight = float(tokens[8].strip())
+    field.cmu = float(tokens[7].strip())   # total amount of MUs in this field
+    field._pld_csetweight = float(tokens[8].strip())
     field.nlayers = int(tokens[9].strip())  # number of layers
 
     for i in range(1, pldlen):  # loop over all lines starting from the second one
@@ -267,24 +270,35 @@ def load_PLD_IBA(file_pld, beam_model=None):
 
             layer = Layer(spots, [spotsize, spotsize], energy_nominal, energy_nominal, cmu, nrepaint, nspots)
 
-            for j, element in enumerate(elements):
+            particles_sum = 0
+            for j, element in enumerate(elements):  # loop over each spot in this layer
                 token = element.split(",")
                 # the .pld file has every spot position repeated, but MUs are only in
                 # every second line, for reasons unknown.
-                if token[3] != "0.0":
-                    np.append([float(token[1].strip()),
-                               float(token[2].strip()),
-                               float(token[3].strip()),
-                               float(token[3].strip()) * scaling],  # *dEdx etc etc
-                              layer.spots
-                              )
+                _x = float(token[0].strip())
+                _y = float(token[1].strip())
+                _wt = float(token[2].strip())
+                if _wt != "0.0":
+                    _mu = float(token[3].strip())
+                    weight = ppmu * _mu * field.cmu / field._pld_csetweight
+                    # Need to convert to weight by fluence, rather than weight by dose
+                    # for building the SOBP. Monitor Units (MU) = "meterset", are per dose
+                    # in the monitoring Ionization chamber, which returns some signal
+                    # proportional to dose to air. D = phi * S => MU = phi * S(air)
+                    phi_weight = weight / dedx_air(layer.energy)
+
+                    # add number of paricles in this spot
+                    particles_spot = scaling * phi_weight
+                    particles_sum += particles_spot
+
+                np.append([_x, _y, _wt, particles_spot], layer.spots)
 
             p.fields[0].layers.append(layer)
             logger.debug("appended layer %i with %i spots", len(p.fields[0].layers), layer.nspots)
     return p
 
 
-def load_DICOM_VARIAN(file_dcm, beam_model=None):
+def load_DICOM_VARIAN(file_dcm, beam_model=None, scaling=1.0, flip_xy=False):
     """Load varian type dicom plans."""
     ds = dicom.dcmread(file_dcm.name)
     # Total number of energy layers used to produce SOBP
@@ -340,7 +354,7 @@ def load_DICOM_VARIAN(file_dcm, beam_model=None):
     return p
 
 
-def load_RASTER_GSI(file_rst, beam_model=None):
+def load_RASTER_GSI(file_rst, beam_model=None, scaling=1.0, flip_xy=False):
     """TODO: this is implemented in pytrip. Import it?."""
     p = Plan()
     return p
@@ -368,7 +382,7 @@ def main(args=None):
     parser.add_argument('-d', '--diag', action='store_true', help="prints diagnostics",
                         dest="diag", default=False)
     parser.add_argument('-s', '--scale', type=float, dest='scale',
-                        help="number of particles*dE/dx per MU.", default=-1.0)
+                        help="number of particles*dE/dx per MU.", default=1.0)
     parser.add_argument('-v', '--verbosity', action='count',
                         help="increase output verbosity", default=0)
     parser.add_argument('-V', '--version', action='version', version=pymchelper.__version__)
@@ -385,9 +399,7 @@ def main(args=None):
     else:
         bm = None
 
-    dir(bm)
-    # exit()
-    pln = load(args.fin, bm)
+    pln = load(args.fin, bm, args.scale, args.flip)
     args.fin.close()
     print(pln)
 
