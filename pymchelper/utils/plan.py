@@ -1,5 +1,5 @@
 """
-Module for reading DICOM and PLD files
+Module for reading DICOM and PLD files.
 
 One plan may contain one or more fields.
 One field may contain one or more layers.
@@ -27,6 +27,7 @@ s2fwhm = 2.0 * np.sqrt(2.0 * np.log(2.0))  # 1 FWHM = 2.355 * sigma
 def dedx_air(energy):
     """
     Calculate the mass stopping power of protons in air following ICRU 49.
+
     Valid from 1 to 500 MeV only.
 
     :params energy: Proton energy in MeV
@@ -42,13 +43,12 @@ def dedx_air(energy):
 
 
 class BeamModel():
-    """
-    Beam model from a given CSV file
-    """
+    """Beam model from a given CSV file."""
 
     def __init__(self, fn, nominal=True):
         """
-        Loads a beam model given as a CSV file.
+        Load a beam model given as a CSV file.
+
         Interpolation lookup can be done as a function of nominal energy (default, nominal=True),
         or as a function of actual energy (nominal=False).
 
@@ -66,14 +66,9 @@ class BeamModel():
             8) 1 sigma divergence y [rad]
             9) cov (x, x') [mm]
             10) cov (y, y') [mm]
+
+        TODO: get rid of scipy dependency
         """
-
-        # import pandas as pd
-        # # this is solution which can handle an arbitrary amount of header lines
-        # d = pd.read_csv(path, header=None)
-        # d = d.apply(pd.to_numeric, errors='coerce') # parse to numeric and set invalid values to NaN
-        # d = d.dropna() # drop rows that contain NaN values
-
         data = np.genfromtxt(fn, delimiter=",", invalid_raise=False, comments='#')
 
         # resolve by nominal energy
@@ -112,8 +107,9 @@ class BeamModel():
 
 @dataclass
 class Spot:
-    """
-    """
+    # TODO: not sure this is needed at all
+    """TODO."""
+
     x: float = 0.0
     y: float = 0.0
     mu: float = 0.0  # meterset weight (this is proportional to the dose in the air filled monitor IC)
@@ -123,15 +119,18 @@ class Spot:
 @dataclass
 class Layer:
     """
-        spotsize: FWHM swidth of spot in cm along x and y axis, respectively
-        enorm : nominal energy in MeV
-        emeas : measured energy in MeV at exit nozzle
-        cmu : cummulative monitor units for this layers
-        repaint: number of repainting, 0 for no repaints TODO: check what is convention here.
-        spots : np.array([[x_i, y_i, mu_i, n], [...], ...) for i spots.
-                x,y are isocenter plane positions in cm.
-                mu is monitor units or meterset weights for the individual spots
-                n is the estimated number of primary particles for this spot
+    Handle layers in a plan.
+
+    spots : np.array([[x_i, y_i, mu_i, n], [...], ...) for i spots.
+            x,y are isocenter plane positions in cm.
+            mu is monitor units or meterset weights for the individual spots
+            n is the estimated number of primary particles for this spot
+    spotsize: FWHM swidth of spot in cm along x and y axis, respectively
+    enorm : nominal energy in MeV
+    emeas : measured energy in MeV at exit nozzle
+    cmu : cummulative monitor units for this layers
+    repaint : number of repainting, 0 for no repaints TODO: check what is convention here.
+    nspots : number of spots in total
     """
 
     spots: np.array
@@ -147,8 +146,11 @@ class Layer:
 @dataclass
 class Field:
     """
-    A single field
+    A single field.
+
+    # TODO: gantry/field may be on layer level
     """
+
     nlayers: int = 0  # number of layers in this field
     dose: float = 0.0  # dose in [Gy]
     cmu: float = 0.0  # cummulative MU of all layers in this field
@@ -161,6 +163,12 @@ class Field:
 class Plan:
     """
     Class for handling treatment plans.
+
+    One plan may consist of one or more fields.
+    One field may conatain one of more layers.
+
+    Beam model is optional, but needed for exact modeling of the beam.
+    If no beam model is given, MUs are translated to particle numbers using approximate stopping power for air (dEdx).
     """
 
     fields: list = None
@@ -173,18 +181,15 @@ class Plan:
     nfields: int = 0
     bm: BeamModel = None  # optional beam model class
 
-    def inspect(self):
-        """
-        """
+    def __str__(self):
+        """# TODO: make fields printable."""
         pass
 
 
 def load(file, beam_model=None):
-    """
-    Load file, autodiscovery by suffix.
-    """
+    """Load file, autodiscovery by suffix."""
     logger.debug("load() autodiscovery")
-    ext = os.path.splitext(file.name)[-1].lower()
+    ext = os.path.splitext(file.name)[-1].lower()  # extract suffix, incl. dot separator
 
     if ext == ".pld":
         p = load_PLD_IBA(file, beam_model)
@@ -197,11 +202,10 @@ def load(file, beam_model=None):
 
 def load_PLD_IBA(file_pld, beam_model=None):
     """
-    file_pld : a file pointer to a .pld file, opened for reading
+    file_pld : a file pointer to a .pld file, opened for reading.
 
-    Here we assume there is only a single field in every .pld file
+    Here we assume there is only a single field in every .pld file.
     """
-
     # _scaling holds the number of particles * dE/dx / MU = some constant
     # _scaling = 8.106687e7  # Calculated Nov. 2016 from Brita's 32 Gy plan. (no dE/dx)
     _scaling = 5.1821e8  # Estimated calculation Apr. 2017 from Brita's 32 Gy plan.
@@ -269,9 +273,9 @@ def load_PLD_IBA(file_pld, beam_model=None):
                 # every second line, for reasons unknown.
                 if token[3] != "0.0":
                     np.append([float(token[1].strip()),
-                              float(token[2].strip()),
-                              float(token[3].strip()),
-                              float(token[3].strip()) * scaling],  # *dEdx etc etc
+                               float(token[2].strip()),
+                               float(token[3].strip()),
+                               float(token[3].strip()) * scaling],  # *dEdx etc etc
                               layer.spots
                               )
 
@@ -281,9 +285,7 @@ def load_PLD_IBA(file_pld, beam_model=None):
 
 
 def load_DICOM_VARIAN(file_dcm, beam_model=None):
-    """
-    """
-
+    """Load varian type dicom plans."""
     ds = dicom.dcmread(file_dcm.name)
     # Total number of energy layers used to produce SOBP
 
@@ -322,22 +324,14 @@ def load_DICOM_VARIAN(file_dcm, beam_model=None):
                 logger.debug("Found %i spots in layer number %i at energy %f", nspots, j, energy)
             if 'NumberOfPaintings' in layer:
                 repaint = int(layer['NumberOfPaintings'].value)  # number of spots
-
             if 'ScanSpotPositionMap' in layer:
                 _pos = np.array(layer['ScanSpotPositionMap'].value).reshape(nspots, 2)  # spot coords in mm
-                # print(layer['ScanSpotPositionMap'].value)
-                # exit()
-                print(_pos)
-                # exit()
             if 'ScanSpotMetersetWeights' in layer:
                 _wt = np.array(layer['ScanSpotMetersetWeights'].value).reshape(nspots, 1)  # spot coords in mm
-                print(_wt)
             if 'ScanningSpotSize' in layer:
                 spotsize = np.array(layer['ScanningSpotSize'].value)
 
             spots = np.c_[_pos, _wt, _wt]
-            # print(spots)
-            # exit()
             cmu = 10.0
             enorm = energy
             emeas = energy
@@ -347,15 +341,13 @@ def load_DICOM_VARIAN(file_dcm, beam_model=None):
 
 
 def load_RASTER_GSI(file_rst, beam_model=None):
-    """
-    """
+    """TODO: this is implemented in pytrip. Import it?."""
     p = Plan()
     return p
 
 
 def main(args=None):
-    """ Main function of the pld2sobp script.
-    """
+    """TODO: move this to makesobp script."""
     if args is None:
         args = sys.argv[1:]
 
