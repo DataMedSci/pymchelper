@@ -106,7 +106,7 @@ class TxtWriter:
             # split output path into directory, basename and extension
             dir_path = os.path.dirname(self.filename)
             if not os.path.exists(dir_path):
-                logger.info(f"Creating {dir_path}")
+                logger.info("Creating: %s", dir_path)
                 os.makedirs(dir_path)
             file_base_part, file_ext = os.path.splitext(os.path.basename(self.filename))
 
@@ -121,14 +121,14 @@ class TxtWriter:
                 output_path = os.path.join(dir_path, output_filename)
 
                 # save the output file
-                logger.info(f"Writing {output_path}")
+                logger.info("Writing: %s", output_path)
                 self.write_single_page(page, output_path)
 
         return 0
 
     def write_single_page(self, page, filename):
         """TODO"""
-        logger.info(f"Writing: {filename}")
+        logger.info("Writing: %s", filename)
 
         from pymchelper.writers.fortranformatter import format_e
 
@@ -152,7 +152,7 @@ class TxtWriter:
 
         # dump data
         with open(filename, 'w') as fout:  # skipcq: PTC-W6004
-            logger.info(f"Writing: {filename}")
+            logger.info("Writing: %s", filename)
             fout.write(header)
 
             det_error = page.error_raw.ravel()
