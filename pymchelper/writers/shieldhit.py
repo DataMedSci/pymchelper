@@ -1,4 +1,5 @@
 import logging
+import os
 
 import numpy as np
 
@@ -20,12 +21,11 @@ class SHBinaryWriter:
 class TxtWriter:
     @staticmethod
     def _axis_name(geo_type, axis_no):
-        cyl = ['R', 'PHI', 'Z']
-        msh = ['X', 'Y', 'Z']
+        cyl = ('R', 'PHI', 'Z')
+        msh = ('X', 'Y', 'Z')
         if geo_type in (SHGeoType.cyl, SHGeoType.dcyl):
             return cyl[axis_no]
-        else:
-            return msh[axis_no]
+        return msh[axis_no]
 
     def __init__(self, filename, options):
         if filename.endswith(".txt"):
@@ -57,19 +57,13 @@ class TxtWriter:
         result = ""
         if det.geotyp in {SHGeoType.plane, SHGeoType.dplane}:
             result += "#   PLANE point(X,Y,Z)         :"
-            result += "{:s}".format(format_d(10, 3, det.sx))
-            result += "{:s}".format(format_d(10, 3, det.sy))
-            result += "{:s}\n".format(format_d(10, 3, det.sz))
+            result += f"{format_d(10, 3, det.sx)}{format_d(10, 3, det.sy)}{format_d(10, 3, det.sz)}\n"
             result += "#   PLANE normal vect(Vx,Vy,Vz):"
-            result += "{:s}".format(format_d(10, 3, det.nx))
-            result += "{:s}".format(format_d(10, 3, det.ny))
-            result += "{:s}\n".format(format_d(10, 3, det.nz))
+            result += f"{format_d(10, 3, det.nx)}{format_d(10, 3, det.ny)}{format_d(10, 3, det.nz)}\n"
         elif det.geotyp in {SHGeoType.zone, SHGeoType.dzone}:
-            result += "#   ZONE START:{:6d} ZONE END:{:6d}\n".format(int(det.x.min_val), int(det.x.max_val))
+            result += f"#   ZONE START:{int(det.x.min_val):6d} ZONE END:{int(det.x.max_val):6d}\n"
         else:
-            result += "#   {:s} BIN:{:6d} {:s} BIN:{:6d} {:s} BIN:{:6d}\n".format(self.ax, det.x.n,
-                                                                                  self.ay, det.y.n,
-                                                                                  self.az, det.z.n)
+            result += f"#   {self.ax} BIN:{det.x.n:6d} {self.ay} BIN:{det.y.n:6d} {self.az} BIN:{det.z.n:6d}\n"
         return result
 
     @staticmethod
@@ -77,12 +71,12 @@ class TxtWriter:
         """scored value and optionally particle type"""
         result = ""
         if geotyp != SHGeoType.geomap and particle:
-            result += "#   JPART:{:6d} DETECTOR TYPE: {:s}\n".format(particle, str(dettyp).ljust(10))
+            result += f"#   JPART:{particle:6d} DETECTOR TYPE: {str(dettyp).ljust(10)}\n"
         else:
             det_type_name = str(dettyp)
             if dettyp in (SHDetType.zone, SHDetType.medium,):
                 det_type_name += "#"
-            result += "#                DETECTOR TYPE: {:s}\n".format(str(det_type_name).ljust(10))
+            result += f"#                DETECTOR TYPE: {str(det_type_name).ljust(10)}\n"
         return result
 
     def _header_no_of_bins_and_prim(self, estimator):
@@ -91,47 +85,74 @@ class TxtWriter:
         header = ""
         # number of bins in each dimensions
         if estimator.geotyp not in (SHGeoType.plane, SHGeoType.dplane, SHGeoType.zone, SHGeoType.dzone):
-            header += "#   {:s} START:{:s}".format(self.ax, format_d(10, 3, estimator.x.min_val))
-            header += " {:s} START:{:s}".format(self.ay, format_d(10, 3, estimator.y.min_val))
-            header += " {:s} START:{:s}\n".format(self.az, format_d(10, 3, estimator.z.min_val))
-            header += "#   {:s} END  :{:s}".format(self.ax, format_d(10, 3, estimator.x.max_val))
-            header += " {:s} END  :{:s}".format(self.ay, format_d(10, 3, estimator.y.max_val))
-            header += " {:s} END  :{:s}\n".format(self.az, format_d(10, 3, estimator.z.max_val))
+            header += f"#   {self.ax} START:{format_d(10, 3, estimator.x.min_val)}"
+            header += f" {self.ay} START:{format_d(10, 3, estimator.y.min_val)}"
+            header += f" {self.az} START:{format_d(10, 3, estimator.z.min_val)}\n"
+            header += f"#   {self.ax} END  :{format_d(10, 3, estimator.x.max_val)}"
+            header += f" {self.ay} END  :{format_d(10, 3, estimator.y.max_val)}"
+            header += f" {self.az} END  :{format_d(10, 3, estimator.z.max_val)}\n"
 
         # number of primaries
-        header += "#   PRIMARIES:" + format_d(10, 3, estimator.number_of_primaries) + "\n"
+        header += f"#   PRIMARIES:{format_d(10, 3, estimator.number_of_primaries)}\n"
 
         return header
 
     def write(self, estimator):
-        if len(estimator.pages) > 1:
-            print("Conversion of data with multiple pages not supported yet")
-            return False
+        """TODO"""
+        # save to single page to a file without number (i.e. output.dat)
+        if len(estimator.pages) == 1:
+            self.write_single_page(estimator.pages[0], self.filename)
+        else:
+            # split output path into directory, basename and extension
+            dir_path = os.path.dirname(self.filename)
+            if not os.path.exists(dir_path):
+                logger.info(f"Creating {dir_path}")
+                os.makedirs(dir_path)
+            file_base_part, file_ext = os.path.splitext(os.path.basename(self.filename))
+
+            # loop over all pages and save an image for each of them
+            for i, page in enumerate(estimator.pages):
+
+                # calculate output filename. it will include page number padded with zeros.
+                # for 10-99 pages the filename would look like: output_p01.png, ... output_p99.png
+                # for 100-999 pages the filename would look like: output_p001.png, ... output_p999.png
+                zero_padded_page_no = str(i + 1).zfill(len(str(len(estimator.pages))))
+                output_filename = f"{file_base_part}_p{zero_padded_page_no}{file_ext}"
+                output_path = os.path.join(dir_path, output_filename)
+
+                # save the output file
+                logger.info(f"Writing {output_path}")
+                self.write_single_page(page, output_path)
+
+        return 0
+
+    def write_single_page(self, page, filename):
+        """TODO"""
+        logger.info(f"Writing: {filename}")
 
         from pymchelper.writers.fortranformatter import format_e
 
-        page = estimator.pages[0]
-
-        self.ax = self._axis_name(estimator.geotyp, 0)
-        self.ay = self._axis_name(estimator.geotyp, 1)
-        self.az = self._axis_name(estimator.geotyp, 2)
+        self.ax = self._axis_name(page.estimator.geotyp, 0)
+        self.ay = self._axis_name(page.estimator.geotyp, 1)
+        self.az = self._axis_name(page.estimator.geotyp, 2)
 
         # original bdo2txt is not saving header data for some of cylindrical scorers, hence we do the same
-        if estimator.geotyp in (SHGeoType.cyl, SHGeoType.dcyl,) and \
+        if page.estimator.geotyp in (SHGeoType.cyl, SHGeoType.dcyl,) and \
                 page.dettyp in (SHDetType.fluence, SHDetType.avg_energy, SHDetType.avg_beta, SHDetType.energy):
             header = ""
         else:
-            header = self._header_first_line(estimator)
+            header = self._header_first_line(page.estimator)
 
-            header += self._header_geometric_info(estimator)
+            header += self._header_geometric_info(page.estimator)
 
-            header += self._header_scored_value(estimator.geotyp, page.dettyp, getattr(estimator, 'particle', None))
+            header += self._header_scored_value(
+                page.estimator.geotyp, page.dettyp, getattr(page.estimator, 'particle', None))
 
-            header += self._header_no_of_bins_and_prim(estimator)
+            header += self._header_no_of_bins_and_prim(page.estimator)
 
         # dump data
-        with open(self.filename, 'w') as fout:
-            logger.info("Writing: " + self.filename)
+        with open(filename, 'w') as fout:  # skipcq: PTC-W6004
+            logger.info(f"Writing: {filename}")
             fout.write(header)
 
             det_error = page.error_raw.ravel()
@@ -141,25 +162,25 @@ class TxtWriter:
             ymesh = page.axis(1)
             zmesh = page.axis(2)
 
-            logger.debug('xmesh {}'.format(xmesh))
-            logger.debug('ymesh {}'.format(ymesh))
-            logger.debug('zmesh {}'.format(zmesh))
+            logger.debug(f'xmesh {xmesh}')
+            logger.debug(f'ymesh {ymesh}')
+            logger.debug(f'zmesh {zmesh}')
 
             zlist, ylist, xlist = np.meshgrid(zmesh.data, ymesh.data, xmesh.data, indexing='ij')
 
-            logger.debug('xlist {}'.format(xlist))
-            logger.debug('ylist {}'.format(ylist))
-            logger.debug('zlist {}'.format(zlist))
+            logger.debug(f'xlist {xlist}')
+            logger.debug(f'ylist {ylist}')
+            logger.debug(f'zlist {zlist}')
 
             for x, y, z, v, e in zip(xlist.ravel(), ylist.ravel(), zlist.ravel(), page.data.ravel(), det_error):
-                if estimator.geotyp in {SHGeoType.zone, SHGeoType.dzone}:
+                if page.estimator.geotyp in {SHGeoType.zone, SHGeoType.dzone}:
                     x = 0.0
                 # dirty hack to be compliant with old bdo2txt and files generated in old (<0.6) BDO format
                 # this hack will be removed at some point together with bdo-style converter
-                elif not hasattr(estimator, "mc_code_version") and estimator.geotyp == SHGeoType.plane:
-                    x = (estimator.sx + estimator.nx) / 2.0
-                    y = (estimator.sy + estimator.ny) / 2.0
-                    z = (estimator.sz + estimator.nz) / 2.0
+                elif not hasattr(page.estimator, "mc_code_version") and page.estimator.geotyp == SHGeoType.plane:
+                    x = (page.estimator.sx + page.estimator.nx) / 2.0
+                    y = (page.estimator.sy + page.estimator.ny) / 2.0
+                    z = (page.estimator.sz + page.estimator.nz) / 2.0
                 else:
                     x = float('nan') if np.isnan(x) else x
                 y = float('nan') if np.isnan(y) else y
