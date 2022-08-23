@@ -162,15 +162,15 @@ class TxtWriter:
             ymesh = page.axis(1)
             zmesh = page.axis(2)
 
-            logger.debug(f'xmesh {xmesh}')
-            logger.debug(f'ymesh {ymesh}')
-            logger.debug(f'zmesh {zmesh}')
+            logger.debug('xmesh %s', str(xmesh))
+            logger.debug('ymesh %s', str(ymesh))
+            logger.debug('zmesh %s', str(zmesh))
 
             zlist, ylist, xlist = np.meshgrid(zmesh.data, ymesh.data, xmesh.data, indexing='ij')
 
-            logger.debug(f'xlist {xlist}')
-            logger.debug(f'ylist {ylist}')
-            logger.debug(f'zlist {zlist}')
+            logger.debug('xlist %s', str(xlist))
+            logger.debug('ylist %s', str(ylist))
+            logger.debug('zlist %s', str(zlist))
 
             for x, y, z, v, e in zip(xlist.ravel(), ylist.ravel(), zlist.ravel(), page.data.ravel(), det_error):
                 if page.estimator.geotyp in {SHGeoType.zone, SHGeoType.dzone}:
