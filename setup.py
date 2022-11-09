@@ -42,7 +42,7 @@ EXTRAS_REQUIRE = {
     'hdf': ['h5py'],
     'pytrip': [
         'scipy',
-        "pytrip98>=3.6.1 ; python_version == '3.10'",
+        "pytrip98>=3.6.1 ; python_version >= '3.10'",
         "pytrip98 ; python_version >= '3.5' and python_version < '3.10'"]
 }
 
@@ -57,6 +57,8 @@ EXTRAS_REQUIRE['full'].append(["hipsterplot", "bashplotlib"])  # these are neede
 # |---------------------------------------------------|
 # | numpy version | python versions |    OS support   |
 # |---------------------------------------------------|
+# |      1.23     |    3.8 - 3.11   | linux, mac, win |
+# |      1.22     |    3.8 - 3.10   | linux, mac, win |
 # |      1.21     |    3.7 - 3.10   | linux, mac, win |
 # |      1.20     |    3.7 - 3.9    | linux, mac, win |
 # |      1.19     |    3.6 - 3.8    | linux, mac, win |
@@ -73,6 +75,7 @@ EXTRAS_REQUIRE['full'].append(["hipsterplot", "bashplotlib"])  # these are neede
 # |---------------------------------------------------|
 # see https://www.python.org/dev/peps/pep-0508/ for language specification
 install_requires = [
+    "numpy>=1.23 ; python_version == '3.11'",
     "numpy>=1.21 ; python_version == '3.10'",
     "numpy>=1.20 ; python_version == '3.9'",
     "numpy>=1.18 ; python_version == '3.8'",
@@ -115,6 +118,7 @@ setuptools.setup(
         'Programming Language :: Python :: 3.8',
         'Programming Language :: Python :: 3.9',
         'Programming Language :: Python :: 3.10',
+        'Programming Language :: Python :: 3.11',
     ],
     entry_points={
         'console_scripts': [
