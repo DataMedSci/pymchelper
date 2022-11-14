@@ -95,9 +95,6 @@ setuptools.setup(
     long_description_content_type='text/markdown',
     classifiers=[
         # How mature is this project? Common values are
-        #   3 - Alpha
-        #   4 - Beta
-        #   5 - Production/Stable
         'Development Status :: 5 - Production/Stable',
 
         # Indicate who your project is intended for
