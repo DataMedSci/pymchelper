@@ -1,2 +1,2 @@
-pydata-sphinx-theme==0.11.0
+pydata-sphinx-theme==0.12.0
 -e .[full]
