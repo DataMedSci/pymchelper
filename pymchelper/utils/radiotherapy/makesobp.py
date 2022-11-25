@@ -14,8 +14,6 @@ import sys
 import logging
 import argparse
 
-import plan as pp
-
 logger = logging.getLogger(__name__)
 
 
@@ -67,6 +65,7 @@ def main(args=None):
         args = sys.argv[1:]
 
     import pymchelper
+    import pymchelper.utils.radiotherapy.plan as plan
 
     parser = argparse.ArgumentParser()
     parser.add_argument('fin', metavar="input_file.pld", type=argparse.FileType('r'),
@@ -96,7 +95,7 @@ def main(args=None):
         logging.basicConfig(level=logging.DEBUG)
 
     if args.fbm:
-        bm = pp.load_beammodel(args.fbm.name)
+        bm = plan.load_beammodel(args.fbm.name)
     else:
         bm = None
 

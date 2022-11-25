@@ -120,9 +120,9 @@ setuptools.setup(
         'console_scripts': [
             'convertmc=pymchelper.run:main',
             'runmc=pymchelper.utils.runmc:main',
-            'pld2sobp=pymchelper.utils.pld2sobp:main',
-            'dicom2sobp=pymchelper.utils.dicom2sobp:main',
             'mcscripter=pymchelper.utils.mcscripter:main',
+            'pld2sobp=pymchelper.utils.radiotherapy.pld2sobp:main',
+            'dicom2sobp=pymchelper.utils.radiotherapy.plan:main',
         ],
     },
     package_data={'pymchelper': ['flair/db/*', 'VERSION']},

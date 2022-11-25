@@ -6,6 +6,7 @@ One field may contain one or more layers.
 One layer may contain one or more spots.
 """
 
+from typing import Optional
 import pymchelper
 import os
 import sys
@@ -139,10 +140,10 @@ class Layer:
     spotsize: np.array = field(default_factory=np.array)
     energy_nominal: float = 100.0
     energy_measured: float = 100.0
-    cmu: float = 10000.0
+    cum_mu: float = 10000.0
     repaint: int = 0
-    nspots: int = 1
-    ppmu: float = 1.0
+    n_spots: int = 1
+    mu_to_part_coef: float = 1.0
 
 
 @dataclass
@@ -156,7 +157,7 @@ class Field:
     layers: list = field(default_factory=list)  # https://stackoverflow.com/questions/53632152/
     nlayers: int = 0  # number of layers in this field
     dose: float = 0.0  # dose in [Gy]
-    cmu: float = 0.0  # cummulative MU of all layers in this field
+    cum_mu: float = 0.0  # cummulative MU of all layers in this field
     _pld_csetweight: float = 0.0  # IBA specific
     gantry: float = 0.0
     couch: float = 0.0
@@ -176,14 +177,14 @@ class Plan:
     """
 
     fields: list = field(default_factory=list)  # https://stackoverflow.com/questions/53632152/
-    patient_iD: str = ""  # ID of patient
+    patient_id: str = ""  # ID of patient
     patient_name: str = ""  # Last name of patient
     patient_initals: str = ""  # Initials of patient
     patient_firstname: str = ""  # Last name of patient
     plan_label: str = ""  #
     plan_date: str = ""  #
-    nfields: int = 0
-    bm: BeamModel = None  # optional beam model class
+    n_fields: int = 0
+    beam_model: Optional[BeamModel] = None  # optional beam model class
     flip_xy: bool = False  # flag whether x and y has been flipped
 
     # factor holds the number of particles * dE/dx / MU = some constant
@@ -194,15 +195,15 @@ class Plan:
     def apply_beammodel(self):
         """Adjust plan to beam model."""
 
-        if self.bm:
+        if self.beam_model:
             for myfield in self.fields:
                 for layer in myfield.layers:
                     # calculate number of particles
-                    layer.ppmu = self.bm.f_ppmu(layer.energy_nominal)
-                    layer.energy_measured = self.bm.f_e(layer.energy_nominal)
+                    layer.ppmu = self.beam_model.f_ppmu(layer.energy_nominal)
+                    layer.energy_measured = self.beam_model.f_e(layer.energy_nominal)
                     layer.spots[:, 3] = layer.spots[:, 2] * layer.ppmu * myfield.scaling
-                    layer.spotsize = np.array([self.bm.f_sx(layer.energy_nominal),
-                                               self.bm.f_sy(layer.energy_nominal)
+                    layer.spotsize = np.array([self.beam_model.f_sx(layer.energy_nominal),
+                                               self.beam_model.f_sy(layer.energy_nominal)
                                                ])
         else:
             for myfield in self.fields:
@@ -223,19 +224,22 @@ def load(file, beam_model=None, scaling=1.0, flip_xy=False):
 
     if ext == ".pld":
         p = load_PLD_IBA(file, scaling, flip_xy)
-    if ext == ".dcm":
+    elif ext == ".dcm":
         p = load_DICOM_VARIAN(file, scaling, flip_xy)  # so far I have no other dicom files
-    if ext == ".rst":
+    elif ext == ".rst":
         p = load_RASTER_GSI(file, scaling, flip_xy)
+    else:
+        raise ValueError("File type not supported.")
+        return
 
     # apply beam model if available
     if beam_model:
-        p.bm = beam_model
+        p.beam_model = beam_model
     else:
         logger.debug("BeamModel is unavailable in Plan.")
 
     p.apply_beammodel()
-    sys.exit()
+    #sys.exit()
 
     return p
 
@@ -248,15 +252,15 @@ def load_PLD_IBA(file_pld, scaling=1.0, flip_xy=False):
     """
     eps = 1.0e-10
 
-    p = Plan()
+    current_plan = Plan()
 
     myfield = Field()  # avoid collision with dataclasses.field
-    p.fields = [myfield]
-    p.nfields = 1
+    current_plan.fields = [myfield]
+    current_plan.n_fields = 1
 
     # p.factor holds the number of particles * dE/dx / MU = some constant
     # p.factor = 8.106687e7  # Calculated Nov. 2016 from Brita's 32 Gy plan. (no dE/dx)
-    p.factor = 5.1821e8  # protons per (MU/dEdx), Estimated calculation Apr. 2017 from Brita's 32 Gy plan.
+    current_plan.factor = 5.1821e8  # protons per (MU/dEdx), Estimated calculation Apr. 2017 from Brita's 32 Gy plan.
 
     pldlines = file_pld.readlines()
     pldlen = len(pldlines)
@@ -267,12 +271,12 @@ def load_PLD_IBA(file_pld, scaling=1.0, flip_xy=False):
 
     # First line in PLD file contains both plan and field data
     tokens = pldlines[0].split(",")
-    p.patient_iD = tokens[1].strip()
-    p.patient_name = tokens[2].strip()
-    p.patient_initals = tokens[3].strip()
-    p.patient_firstname = tokens[4].strip()
-    p.plan_label = tokens[5].strip()
-    p.beam_name = tokens[6].strip()
+    current_plan.patient_id = tokens[1].strip()
+    current_plan.patient_name = tokens[2].strip()
+    current_plan.patient_initals = tokens[3].strip()
+    current_plan.patient_firstname = tokens[4].strip()
+    current_plan.plan_label = tokens[5].strip()
+    current_plan.beam_name = tokens[6].strip()
     field.cmu = float(tokens[7].strip())   # total amount of MUs in this field
     field._pld_csetweight = float(tokens[8].strip())
     field.nlayers = int(tokens[9].strip())  # number of layers
@@ -331,10 +335,10 @@ def load_PLD_IBA(file_pld, scaling=1.0, flip_xy=False):
                     nspots -= 1
 
             layer.spots = layer.spots.reshape(nspots, 4)
-            p.fields[0].layers.append(layer)
+            current_plan.fields[0].layers.append(layer)
 
-            logger.debug("appended layer %i with %i spots", len(p.fields[0].layers), layer.nspots)
-    return p
+            logger.debug("appended layer %i with %i spots", len(current_plan.fields[0].layers), layer.n_spots)
+    return current_plan
 
 
 def load_DICOM_VARIAN(file_dcm, scaling=1.0, flip_xy=False):
@@ -343,7 +347,7 @@ def load_DICOM_VARIAN(file_dcm, scaling=1.0, flip_xy=False):
     # Total number of energy layers used to produce SOBP
 
     p = Plan()
-    p.patient_iD = ds['PatientID'].value
+    p.patient_id = ds['PatientID'].value
     p.patient_name = ds['PatientName'].value
     p.patient_initals = ""
     p.patient_firstname = ""
@@ -354,8 +358,8 @@ def load_DICOM_VARIAN(file_dcm, scaling=1.0, flip_xy=False):
     # protons per (MU/dEdx), Estimated calculation Nov. 2022 from DCPT beam model
     p.factor = 17247566.1
 
-    p.nfields = int(ds['FractionGroupSequence'][0]['NumberOfBeams'].value)
-    logger.debug("Found %i fields", p.nfields)
+    p.n_fields = int(ds['FractionGroupSequence'][0]['NumberOfBeams'].value)
+    logger.debug("Found %i fields", p.n_fields)
 
     dcm_fgs = ds['FractionGroupSequence'][0]['ReferencedBeamSequence']  # fields for given group number
     # print(dcm_fgs)
@@ -364,7 +368,7 @@ def load_DICOM_VARIAN(file_dcm, scaling=1.0, flip_xy=False):
         myfield = Field()
         p.fields.append(myfield)
         myfield.dose = float(dcm_field['BeamDose'].value)
-        myfield.cmu = float(dcm_field['BeamMeterset'].value)
+        myfield.cum_mu = float(dcm_field['BeamMeterset'].value)
         myfield.csetweight = 1.0
         myfield.nlayers = int(ds['IonBeamSequence'][i]['NumberOfControlPoints'].value)
         dcm_ibs = ds['IonBeamSequence'][i]['IonControlPointSequence']  # layers for given field number
