@@ -14,7 +14,7 @@ import argparse
 import pydicom as dicom
 import numpy as np
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from math import exp, log
 from scipy.interpolate import interp1d
 
@@ -151,6 +151,7 @@ class Field:
     # TODO: gantry/field may be on layer level
     """
 
+    layers: list = field(default_factory=list)  # https://stackoverflow.com/questions/53632152/
     nlayers: int = 0  # number of layers in this field
     dose: float = 0.0  # dose in [Gy]
     cmu: float = 0.0  # cummulative MU of all layers in this field
@@ -172,7 +173,7 @@ class Plan:
     If no beam model is given, MUs are translated to particle numbers using approximate stopping power for air (dEdx).
     """
 
-    fields: list = None
+    fields: list = field(default_factory=list)  # https://stackoverflow.com/questions/53632152/
     patient_iD: str = ""  # ID of patient
     patient_name: str = ""  # Last name of patient
     patient_initals: str = ""  # Initials of patient
@@ -181,7 +182,7 @@ class Plan:
     plan_date: str = ""  #
     nfields: int = 0
     bm: BeamModel = None  # optional beam model class
-    flip_xy: False  # flag whether x and y has been flipped
+    flip_xy: bool = False  # flag whether x and y has been flipped
 
 
 def load_beammodel(fn):
@@ -217,8 +218,8 @@ def load_PLD_IBA(file_pld, beam_model=None, scaling=1.0, flip_xy=False):
     p = Plan()
     p.bm = beam_model
 
-    field = Field()
-    p.fields = [field]
+    myfield = Field()  # avoid collision with dataclasses.field
+    p.fields = [myfield]
     p.nfields = 1
 
     pldlines = file_pld.readlines()
@@ -319,14 +320,14 @@ def load_DICOM_VARIAN(file_dcm, beam_model=None, scaling=1.0, flip_xy=False):
     print(dcm_fgs)
 
     for i, dcm_field in enumerate(dcm_fgs):
-        field = Field()
-        p.fields.append(field)
-        field.dose = float(dcm_field['BeamDose'].value)
-        field.cmu = float(dcm_field['BeamMeterset'].value)
-        field.csetweight = 1.0
-        field.nlayers = int(ds['IonBeamSequence'][i]['NumberOfControlPoints'].value)
+        myfield = Field()
+        p.fields.append(myfield)
+        myfield.dose = float(dcm_field['BeamDose'].value)
+        myfield.cmu = float(dcm_field['BeamMeterset'].value)
+        myfield.csetweight = 1.0
+        myfield.nlayers = int(ds['IonBeamSequence'][i]['NumberOfControlPoints'].value)
         dcm_ibs = ds['IonBeamSequence'][i]['IonControlPointSequence']  # layers for given field number
-        logger.debug("Found %i layers in field number %i", field.nlayers, i)
+        logger.debug("Found %i layers in field number %i", myfield.nlayers, i)
 
         for j, layer in enumerate(dcm_ibs):
 
@@ -350,7 +351,7 @@ def load_DICOM_VARIAN(file_dcm, beam_model=None, scaling=1.0, flip_xy=False):
             enorm = energy
             emeas = energy
 
-            field.layers.append(Layer(spotsize, enorm, emeas, cmu, repaint, nspots, spots))
+            myfield.layers.append(Layer(spotsize, enorm, emeas, cmu, repaint, nspots, spots))
     return p
 
 
