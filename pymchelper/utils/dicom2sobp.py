@@ -12,9 +12,7 @@ s2fwhm = 2.0 * np.sqrt(2.0 * np.log(2.0))  # 1 FWHM = 2.355 * sigma
 
 
 class BeamModel():
-    """
-    Beam model from a given CSV file
-    """
+    """Beam model from a given CSV file"""
 
     def __init__(self, fn, nominal=True):
         """
@@ -62,9 +60,7 @@ class Spot():
 
 
 class Plan():
-    """
-    Plan from a given dicom file
-    """
+    """Plan from a given dicom file"""
 
     def __init__(self, fn):
         """
@@ -85,7 +81,7 @@ class Plan():
             position = np.array(ds['IonBeamSequence'][0]['IonControlPointSequence'][i]['ScanSpotPositionMap'].value)
             data = position.reshape(NoPosition, 2)
 
-            if (LayerEnergy != NominalEnergy):
+            if LayerEnergy != NominalEnergy:
                 LayerEnergy = NominalEnergy
                 LayerNumber = LayerNumber + 1
 
@@ -100,7 +96,7 @@ class Plan():
             weight = np.array(ds['IonBeamSequence'][0]['IonControlPointSequence'][i]['ScanSpotMetersetWeights'].value)
             data = np.insert(data, 2, weight*Dose, axis=1)
 
-            if (i == 0):
+            if i == 0:
                 CompleteData = data
             else:
                 CompleteData = np.concatenate((CompleteData, data))
@@ -124,17 +120,16 @@ class Plan():
     def makesobp(self, bm):
         """
         """
-        pass
+        raise NotImplementedError()
 
     def writesobp(self, fn):
         """
         """
-        pass
+        raise NotImplementedError()
 
 
 def main(args=None):
-    """ Main function of the dicom2sobp script.
-    """
+    """Main function of the dicom2sobp script."""
     if args is None:
         args = sys.argv[1:]
 

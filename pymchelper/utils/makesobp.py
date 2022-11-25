@@ -36,7 +36,6 @@ def write_sobp(pp, fout, ncols=6):  # TODO, input filename instead, since severa
         DIVx,y:
         COVx,y:d
     """
-
     if ncols == 5:
         outstr = "{:-10.6f} {:-10.2f} {:-10.2f} {:-10.2f} {:-16.6E}\n"
     if ncols == 6:
@@ -63,8 +62,7 @@ def write_sobp(pp, fout, ncols=6):  # TODO, input filename instead, since severa
 
 
 def main(args=None):
-    """ Main function of the pld2sobp script.
-    """
+    """Main function of the pld2sobp script."""
     if args is None:
         args = sys.argv[1:]
 

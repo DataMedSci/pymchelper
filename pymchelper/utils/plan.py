@@ -85,7 +85,7 @@ class BeamModel():
 
         self.has_divergence = False
 
-        if cols == 6 or cols == 10:
+        if cols in (6, 10):
             self.f_en = interp1d(energy, data[:, 0], kind=k)       # nominal energy [MeV]
             self.f_e = interp1d(energy, data[:, 1], kind=k)        # measured energy [MeV]
             self.f_espread = interp1d(energy, data[:, 2], kind=k)  # energy spread 1 sigma [% of measured energy]
@@ -192,9 +192,7 @@ class Plan:
     factor: float = 1.0  # vendor specific factor needed for translating MUs to particles
 
     def apply_beammodel(self):
-        """
-        Adjust plan to beam model.
-        """
+        """Adjust plan to beam model."""
 
         if self.bm:
             for myfield in self.fields:
@@ -248,7 +246,6 @@ def load_PLD_IBA(file_pld, scaling=1.0, flip_xy=False):
 
     Here we assume there is only a single field in every .pld file.
     """
-
     eps = 1.0e-10
 
     p = Plan()
@@ -270,7 +267,6 @@ def load_PLD_IBA(file_pld, scaling=1.0, flip_xy=False):
 
     # First line in PLD file contains both plan and field data
     tokens = pldlines[0].split(",")
-    # _ = tokens[0].strip()
     p.patient_iD = tokens[1].strip()
     p.patient_name = tokens[2].strip()
     p.patient_initals = tokens[3].strip()
@@ -328,10 +324,8 @@ def load_PLD_IBA(file_pld, scaling=1.0, flip_xy=False):
 
                 # PLD files have the spots listed tiwce, once with no MUs. These are removed here.
                 if _mu > 0.0:
-                    # _mu_rate = float(token[4].strip())  # "Meterset rate" (not used)
 
                     layer.spots = np.append([layer.spots], [_x, _y, _mu, _mu])
-                    # print([_x, _y, _mu, _mu])
                 else:
                     # this was an empty spot, decrement spot count, and do not add it.
                     nspots -= 1
