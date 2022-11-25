@@ -6,6 +6,7 @@ One field may contain one or more layers.
 One layer may contain one or more spots.
 """
 
+import pymchelper
 import os
 import sys
 import logging
@@ -57,8 +58,8 @@ class BeamModel():
         Input columns for beam model:
             1) nominal energy [MeV]
             2) measured energy [MeV]
-            3) energy spread 1 sigma [% of measured energy]
-            4) primary protons per MU [1e6/MU]
+            3) energy spread 1 sigma [MeV]
+            4) primary protons per MU [protons/MU]
             5) 1 sigma spot size x [cm]
             6) 1 sigma spot size y [cm]
         Optionally, 4 more columns may be given:
@@ -131,16 +132,17 @@ class Layer:
     cmu : cummulative monitor units for this layers
     repaint : number of repainting, 0 for no repaints TODO: check what is convention here.
     nspots : number of spots in total
+    ppmu : conversion coefficient from MU to number of particles (depends on energy)
     """
 
-    spots: np.array
-    spotsize: np.ndarray([2, 1])
+    spots: np.array = field(default_factory=np.array)
+    spotsize: np.array = field(default_factory=np.array)
     energy_nominal: float = 100.0
     energy_measured: float = 100.0
     cmu: float = 10000.0
     repaint: int = 0
     nspots: int = 1
-    # spots: List[Spot]  # not sure if this will be needed
+    ppmu: float = 1.0
 
 
 @dataclass
@@ -184,11 +186,36 @@ class Plan:
     bm: BeamModel = None  # optional beam model class
     flip_xy: bool = False  # flag whether x and y has been flipped
 
+    # factor holds the number of particles * dE/dx / MU = some constant
+    # MU definitions is arbitrary and my vary from vendor to vendor
+    # This will only be used if no beam model is available, and is based on estimates
+    factor: float = 1.0  # vendor specific factor needed for translating MUs to particles
 
-def load_beammodel(fn):
-    """Returns a beam model object"""
-    bm = BeamModel(fn)
-    return bm
+    def apply_beammodel(self):
+        """
+        Adjust plan to beam model.
+        """
+
+        if self.bm:
+            for myfield in self.fields:
+                for layer in myfield.layers:
+                    # calculate number of particles
+                    layer.ppmu = self.bm.f_ppmu(layer.energy_nominal)
+                    layer.energy_measured = self.bm.f_e(layer.energy_nominal)
+                    layer.spots[:, 3] = layer.spots[:, 2] * layer.ppmu * myfield.scaling
+                    layer.spotsize = np.array([self.bm.f_sx(layer.energy_nominal),
+                                               self.bm.f_sy(layer.energy_nominal)
+                                               ])
+        else:
+            for myfield in self.fields:
+                for layer in myfield.layers:
+                    # if there is no beam model available, we will simply use air stopping power
+                    # since MU is proportional to dose in monitor chamber, which means fluence ~ D_air / dEdx(air)
+                    layer.ppmu = self.factor / dedx_air(layer.energy_measured)
+                    layer.spots[:, 3] = layer.spots[:, 2] * layer.ppmu * myfield.scaling
+                    # old IBA code something like:
+                    # weight = ppmu * _mu2 * field.cmu / field._pld_csetweight
+                    # phi_weight = weight / dedx_air(layer.energy_measured)
 
 
 def load(file, beam_model=None, scaling=1.0, flip_xy=False):
@@ -197,30 +224,42 @@ def load(file, beam_model=None, scaling=1.0, flip_xy=False):
     ext = os.path.splitext(file.name)[-1].lower()  # extract suffix, incl. dot separator
 
     if ext == ".pld":
-        p = load_PLD_IBA(file, beam_model, scaling, flip_xy)
+        p = load_PLD_IBA(file, scaling, flip_xy)
     if ext == ".dcm":
-        p = load_DICOM_VARIAN(file, beam_model, scaling, flip_xy)  # so far I have no other dicom files
+        p = load_DICOM_VARIAN(file, scaling, flip_xy)  # so far I have no other dicom files
     if ext == ".rst":
-        p = load_RASTER_GSI(file, beam_model, scaling, flip_xy)
+        p = load_RASTER_GSI(file, scaling, flip_xy)
+
+    # apply beam model if available
+    if beam_model:
+        p.bm = beam_model
+    else:
+        logger.debug("BeamModel is unavailable in Plan.")
+
+    p.apply_beammodel()
+    sys.exit()
+
     return p
 
 
-def load_PLD_IBA(file_pld, beam_model=None, scaling=1.0, flip_xy=False):
+def load_PLD_IBA(file_pld, scaling=1.0, flip_xy=False):
     """
     file_pld : a file pointer to a .pld file, opened for reading.
 
     Here we assume there is only a single field in every .pld file.
     """
-    # _scaling holds the number of particles * dE/dx / MU = some constant
-    # _scaling = 8.106687e7  # Calculated Nov. 2016 from Brita's 32 Gy plan. (no dE/dx)
-    ppmu = 5.1821e8  # protons per MU, Estimated calculation Apr. 2017 from Brita's 32 Gy plan.
+
+    eps = 1.0e-10
 
     p = Plan()
-    p.bm = beam_model
 
     myfield = Field()  # avoid collision with dataclasses.field
     p.fields = [myfield]
     p.nfields = 1
+
+    # p.factor holds the number of particles * dE/dx / MU = some constant
+    # p.factor = 8.106687e7  # Calculated Nov. 2016 from Brita's 32 Gy plan. (no dE/dx)
+    p.factor = 5.1821e8  # protons per (MU/dEdx), Estimated calculation Apr. 2017 from Brita's 32 Gy plan.
 
     pldlines = file_pld.readlines()
     pldlen = len(pldlines)
@@ -271,35 +310,40 @@ def load_PLD_IBA(file_pld, beam_model=None, scaling=1.0, flip_xy=False):
 
             layer = Layer(spots, [spotsize, spotsize], energy_nominal, energy_nominal, cmu, nrepaint, nspots)
 
-            particles_sum = 0
             for j, element in enumerate(elements):  # loop over each spot in this layer
                 token = element.split(",")
                 # the .pld file has every spot position repeated, but MUs are only in
                 # every second line, for reasons unknown.
-                _x = float(token[0].strip())
-                _y = float(token[1].strip())
-                _wt = float(token[2].strip())
-                if _wt != "0.0":
-                    _mu = float(token[3].strip())
-                    weight = ppmu * _mu * field.cmu / field._pld_csetweight
-                    # Need to convert to weight by fluence, rather than weight by dose
-                    # for building the SOBP. Monitor Units (MU) = "meterset", are per dose
-                    # in the monitoring Ionization chamber, which returns some signal
-                    # proportional to dose to air. D = phi * S => MU = phi * S(air)
-                    phi_weight = weight / dedx_air(layer.energy)
+                _x = float(token[1].strip())
+                _y = float(token[2].strip())
+                _mu = float(token[3].strip())
 
-                    # add number of paricles in this spot
-                    particles_spot = scaling * phi_weight
-                    particles_sum += particles_spot
+                # fix bad float conversions
+                if np.abs(_x) < eps:
+                    _x = 0.0
+                if np.abs(_y) < eps:
+                    _y = 0.0
+                if _mu < eps:
+                    _mu = 0.0
 
-                np.append([_x, _y, _wt, particles_spot], layer.spots)
+                # PLD files have the spots listed tiwce, once with no MUs. These are removed here.
+                if _mu > 0.0:
+                    # _mu_rate = float(token[4].strip())  # "Meterset rate" (not used)
 
+                    layer.spots = np.append([layer.spots], [_x, _y, _mu, _mu])
+                    # print([_x, _y, _mu, _mu])
+                else:
+                    # this was an empty spot, decrement spot count, and do not add it.
+                    nspots -= 1
+
+            layer.spots = layer.spots.reshape(nspots, 4)
             p.fields[0].layers.append(layer)
+
             logger.debug("appended layer %i with %i spots", len(p.fields[0].layers), layer.nspots)
     return p
 
 
-def load_DICOM_VARIAN(file_dcm, beam_model=None, scaling=1.0, flip_xy=False):
+def load_DICOM_VARIAN(file_dcm, scaling=1.0, flip_xy=False):
     """Load varian type dicom plans."""
     ds = dicom.dcmread(file_dcm.name)
     # Total number of energy layers used to produce SOBP
@@ -313,11 +357,14 @@ def load_DICOM_VARIAN(file_dcm, beam_model=None, scaling=1.0, flip_xy=False):
     p.plan_date = ds['RTPlanDate'].value
     p.beam_name = ""
 
+    # protons per (MU/dEdx), Estimated calculation Nov. 2022 from DCPT beam model
+    p.factor = 17247566.1
+
     p.nfields = int(ds['FractionGroupSequence'][0]['NumberOfBeams'].value)
     logger.debug("Found %i fields", p.nfields)
 
     dcm_fgs = ds['FractionGroupSequence'][0]['ReferencedBeamSequence']  # fields for given group number
-    print(dcm_fgs)
+    # print(dcm_fgs)
 
     for i, dcm_field in enumerate(dcm_fgs):
         myfield = Field()
@@ -328,6 +375,8 @@ def load_DICOM_VARIAN(file_dcm, beam_model=None, scaling=1.0, flip_xy=False):
         myfield.nlayers = int(ds['IonBeamSequence'][i]['NumberOfControlPoints'].value)
         dcm_ibs = ds['IonBeamSequence'][i]['IonControlPointSequence']  # layers for given field number
         logger.debug("Found %i layers in field number %i", myfield.nlayers, i)
+
+        cmu = 0.0
 
         for j, layer in enumerate(dcm_ibs):
 
@@ -342,20 +391,17 @@ def load_DICOM_VARIAN(file_dcm, beam_model=None, scaling=1.0, flip_xy=False):
             if 'ScanSpotPositionMap' in layer:
                 _pos = np.array(layer['ScanSpotPositionMap'].value).reshape(nspots, 2)  # spot coords in mm
             if 'ScanSpotMetersetWeights' in layer:
-                _wt = np.array(layer['ScanSpotMetersetWeights'].value).reshape(nspots, 1)  # spot coords in mm
+                _mu = np.array(layer['ScanSpotMetersetWeights'].value).reshape(nspots, 1)  # spot MUs
+                cmu = _mu.sum()
             if 'ScanningSpotSize' in layer:
                 spotsize = np.array(layer['ScanningSpotSize'].value)
 
-            spots = np.c_[_pos, _wt, _wt]
-            cmu = 10.0
-            enorm = energy
-            emeas = energy
-
-            myfield.layers.append(Layer(spotsize, enorm, emeas, cmu, repaint, nspots, spots))
-    return p
+                spots = np.c_[_pos, _mu, _mu]  # weight will be calculated later when beam model is applied
+                myfield.layers.append(Layer(spots, spotsize, energy, energy, cmu, repaint, nspots))
+                return p
 
 
-def load_RASTER_GSI(file_rst, beam_model=None, scaling=1.0, flip_xy=False):
+def load_RASTER_GSI(file_rst, scaling=1.0, flip_xy=False):
     """TODO: this is implemented in pytrip. Import it?."""
     p = Plan()
     return p
@@ -365,8 +411,6 @@ def main(args=None):
     """TODO: move this to makesobp script."""
     if args is None:
         args = sys.argv[1:]
-
-    import pymchelper
 
     parser = argparse.ArgumentParser()
     parser.add_argument('fin', metavar="input_file.pld", type=argparse.FileType('r'),
@@ -406,4 +450,5 @@ def main(args=None):
 
 
 if __name__ == '__main__':
+    sys.exit(main(sys.argv[1:]))
     sys.exit(main(sys.argv[1:]))
