@@ -6,6 +6,7 @@ One field may contain one or more layers.
 One layer may contain one or more spots.
 """
 
+from pathlib import Path
 from typing import Optional
 import pymchelper
 import os
@@ -488,52 +489,57 @@ def load_RASTER_GSI(file_rst, scaling=1.0, flip_xy=False):
     return p
 
 
-def main(args=None):
+def main(args=None) -> int:
     """TODO: move this to makesobp script."""
     if args is None:
         args = sys.argv[1:]
 
+    print("before args")
     parser = argparse.ArgumentParser()
-    parser.add_argument('fin', metavar="input_file.pld", type=argparse.FileType('r'),
-                        help="path to .pld input file in IBA format.",
-                        default=sys.stdin)
-    parser.add_argument('fout', nargs='?', metavar="output_file.dat", type=argparse.FileType('w'),
-                        help="path to the SHIELD-HIT12A/FLUKA output file, or print to stdout if not given.",
-                        default=sys.stdout)
-    parser.add_argument('-b', metavar="beam_model.csv", type=argparse.FileType('r'),
-                        help="optional input beam model", dest='fbm',
-                        default=None)
-    parser.add_argument('-f', '--flip', action='store_true',
-                        help="flip XY axis", dest="flip", default=False)
-    parser.add_argument('-d', '--diag', action='store_true', help="prints diagnostics",
-                        dest="diag", default=False)
-    parser.add_argument('-s', '--scale', type=float, dest='scale',
-                        help="number of particles*dE/dx per MU.", default=1.0)
+    parser.add_argument('fin', 
+        metavar="input_file.pld", 
+        type=Path,
+        help="path to .pld input file in IBA format.")
+    # parser.add_argument('fout', nargs='?', metavar="output_file.dat", type=argparse.FileType('w'),
+    #                     help="path to the SHIELD-HIT12A/FLUKA output file, or print to stdout if not given.",
+    #                     default=sys.stdout)
+    # parser.add_argument('-b', metavar="beam_model.csv", type=argparse.FileType('r'),
+    #                     help="optional input beam model", dest='fbm',
+    #                     default=None)
+    # parser.add_argument('-f', '--flip', action='store_true',
+    #                     help="flip XY axis", dest="flip", default=False)
+    # parser.add_argument('-d', '--diag', action='store_true', help="prints diagnostics",
+    #                     dest="diag", default=False)
+    # parser.add_argument('-s', '--scale', type=float, dest='scale',
+    #                     help="number of particles*dE/dx per MU.", default=1.0)
     parser.add_argument('-v', '--verbosity', action='count',
                         help="increase output verbosity", default=0)
-    parser.add_argument('-V', '--version', action='version', version=pymchelper.__version__)
-    args = parser.parse_args(args)
+    # parser.add_argument('-V', '--version', action='version', version=pymchelper.__version__)
+    parsed_args = parser.parse_args(args)
+    print(parsed_args)
 
-    if args.verbosity == 1:
-        logging.basicConfig(level=logging.INFO)
+    # if args.verbosity == 1:
+    #     logging.basicConfig(level=logging.INFO)
 
-    if args.verbosity > 1:
-        logging.basicConfig(level=logging.DEBUG)
+    # if args.verbosity > 1:
+    #     logging.basicConfig(level=logging.DEBUG)
 
-    if args.fbm:
-        bm = BeamModel(args.fbm.name)
-    else:
-        bm = None
+    # if args.fbm:
+    #     bm = BeamModel(args.fbm.name)
+    # else:
+    #     bm = None
 
-    pln = load(args.fin, bm, args.scale, args.flip)
+    # pln = load(args.fin, bm, args.scale, args.flip)
 
-    if args.diag:
-        pln.diagnose()
+    # if args.diag:
+    #     pln.diagnose()
 
-    args.fin.close()
+    # args.fin.close()
+
+    return 0
     # print(pln)
 
 
 if __name__ == '__main__':
-    sys.exit(main(sys.argv[1:]))
+    """We do run sys exit with exit code of the main method"""
     sys.exit(main(sys.argv[1:]))
