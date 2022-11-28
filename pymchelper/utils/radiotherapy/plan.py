@@ -6,13 +6,12 @@ One field may contain one or more layers.
 One layer may contain one or more spots.
 """
 
-from pathlib import Path
+from pathlib import Path, PurePath
 from typing import Optional
-import pymchelper
-import os
 import sys
 import logging
 import argparse
+import pymchelper
 
 import pydicom as dicom
 import numpy as np
@@ -27,7 +26,7 @@ logger = logging.getLogger(__name__)
 s2fwhm = 2.0 * np.sqrt(2.0 * np.log(2.0))  # 1 FWHM = 2.355 * sigma
 
 
-def dedx_air(energy):
+def dedx_air(energy: float) -> float:
     """
     Calculate the mass stopping power of protons in air following ICRU 49.
 
@@ -299,13 +298,13 @@ class Plan:
         cols : number of columns for output format
         """
 
-    pass
+        pass
 
 
-def load(file, beam_model=None, scaling=1.0, flip_xy=False):
+def load(file: Path, beam_model=None, scaling=1.0, flip_xy=False) -> Plan:
     """Load file, autodiscovery by suffix."""
     logger.debug("load() autodiscovery")
-    ext = os.path.splitext(file.name)[-1].lower()  # extract suffix, incl. dot separator
+    ext = file.suffix.lower()  # extract suffix, incl. dot separator
 
     if ext == ".pld":
         p = load_PLD_IBA(file, scaling, flip_xy)
@@ -328,7 +327,7 @@ def load(file, beam_model=None, scaling=1.0, flip_xy=False):
     return p
 
 
-def load_PLD_IBA(file_pld, scaling=1.0, flip_xy=False):
+def load_PLD_IBA(file_pld: Path, scaling=1.0, flip_xy=False) -> Plan:
     """
     file_pld : a file pointer to a .pld file, opened for reading.
 
@@ -346,7 +345,7 @@ def load_PLD_IBA(file_pld, scaling=1.0, flip_xy=False):
     # p.factor = 8.106687e7  # Calculated Nov. 2016 from Brita's 32 Gy plan. (no dE/dx)
     current_plan.factor = 5.1821e8  # protons per (MU/dEdx), Estimated calculation Apr. 2017 from Brita's 32 Gy plan.
 
-    pldlines = file_pld.readlines()
+    pldlines = file_pld.read_text().split('\n')
     pldlen = len(pldlines)
     logger.info("Read {} lines of data.".format(pldlen))
 
@@ -425,9 +424,9 @@ def load_PLD_IBA(file_pld, scaling=1.0, flip_xy=False):
     return current_plan
 
 
-def load_DICOM_VARIAN(file_dcm, scaling=1.0, flip_xy=False):
+def load_DICOM_VARIAN(file_dcm: Path, scaling=1.0, flip_xy=False) -> Plan:
     """Load varian type dicom plans."""
-    ds = dicom.dcmread(file_dcm.name)
+    ds = dicom.dcmread(file_dcm)
     # Total number of energy layers used to produce SOBP
 
     p = Plan()
@@ -483,7 +482,7 @@ def load_DICOM_VARIAN(file_dcm, scaling=1.0, flip_xy=False):
     return p
 
 
-def load_RASTER_GSI(file_rst, scaling=1.0, flip_xy=False):
+def load_RASTER_GSI(file_rst: Path, scaling=1.0, flip_xy=False):
     """TODO: this is implemented in pytrip. Import it?."""
     p = Plan()
     return p
@@ -496,50 +495,48 @@ def main(args=None) -> int:
 
     print("before args")
     parser = argparse.ArgumentParser()
-    parser.add_argument('fin', 
-        metavar="input_file.pld", 
-        type=Path,
-        help="path to .pld input file in IBA format.")
-    # parser.add_argument('fout', nargs='?', metavar="output_file.dat", type=argparse.FileType('w'),
-    #                     help="path to the SHIELD-HIT12A/FLUKA output file, or print to stdout if not given.",
-    #                     default=sys.stdout)
-    # parser.add_argument('-b', metavar="beam_model.csv", type=argparse.FileType('r'),
-    #                     help="optional input beam model", dest='fbm',
-    #                     default=None)
-    # parser.add_argument('-f', '--flip', action='store_true',
-    #                     help="flip XY axis", dest="flip", default=False)
-    # parser.add_argument('-d', '--diag', action='store_true', help="prints diagnostics",
-    #                     dest="diag", default=False)
-    # parser.add_argument('-s', '--scale', type=float, dest='scale',
-    #                     help="number of particles*dE/dx per MU.", default=1.0)
+    parser.add_argument('fin',
+                        metavar="input_file.pld",
+                        type=Path,
+                        help="path to .pld input file in IBA format.")
+    parser.add_argument('fout', nargs='?', metavar="output_file.dat",
+                        type=Path,
+                        help="path to the SHIELD-HIT12A/FLUKA output file, or print to stdout if not given.",
+                        default=sys.stdout)
+    parser.add_argument('-b', metavar="beam_model.csv", type=argparse.FileType('r'),
+                        help="optional input beam model", dest='fbm',
+                        default=None)
+    parser.add_argument('-f', '--flip', action='store_true',
+                        help="flip XY axis", dest="flip", default=False)
+    parser.add_argument('-d', '--diag', action='store_true', help="prints diagnostics",
+                        dest="diag", default=False)
+    parser.add_argument('-s', '--scale', type=float, dest='scale',
+                        help="number of particles*dE/dx per MU.", default=1.0)
     parser.add_argument('-v', '--verbosity', action='count',
                         help="increase output verbosity", default=0)
-    # parser.add_argument('-V', '--version', action='version', version=pymchelper.__version__)
+    parser.add_argument('-V', '--version', action='version', version=pymchelper.__version__)
     parsed_args = parser.parse_args(args)
     print(parsed_args)
 
-    # if args.verbosity == 1:
-    #     logging.basicConfig(level=logging.INFO)
+    if parsed_args.verbosity == 1:
+        logging.basicConfig(level=logging.INFO)
 
-    # if args.verbosity > 1:
-    #     logging.basicConfig(level=logging.DEBUG)
+    if parsed_args.verbosity > 1:
+        logging.basicConfig(level=logging.DEBUG)
 
-    # if args.fbm:
-    #     bm = BeamModel(args.fbm.name)
-    # else:
-    #     bm = None
+    if parsed_args.fbm:
+        bm = BeamModel(args.fbm.name)
+    else:
+        bm = None
 
-    # pln = load(args.fin, bm, args.scale, args.flip)
+    pln = load(parsed_args.fin, bm, parsed_args.scale, parsed_args.flip)
 
-    # if args.diag:
-    #     pln.diagnose()
-
-    # args.fin.close()
+    if parsed_args.diag:
+        pln.diagnose()
 
     return 0
-    # print(pln)
 
 
 if __name__ == '__main__':
-    """We do run sys exit with exit code of the main method"""
+    """Run sys.exit with exit code of the main method."""
     sys.exit(main(sys.argv[1:]))
