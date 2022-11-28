@@ -10,10 +10,11 @@ import pymchelper.utils.radiotherapy.plan
 logger = logging.getLogger(__name__)
 
 
-@pytest.fixture(scope='module')
-def beam_model() -> Path:
-    return Path('tests', 'res', 'pld', 'beam_model_generic.csv')
+# @pytest.fixture(scope='module')
+# def beam_model_path() -> Path:
+#     return Path('tests', 'res', 'pld', 'beam_model_generic.csv')
 
+beam_model = Path('tests', 'res', 'pld', 'beam_model_generic.csv')
 
 input_files = [
     Path('tests', 'res', 'pld', 'test.pld'),
@@ -42,14 +43,23 @@ def test_call_cmd_option(option_name: str):
 
 
 @pytest.mark.parametrize("input_file_path", input_files)
-def test_pld(input_file_path: Path):
-    """ Test PLD plan loading with and without beam model """
+def test_plan_no_bm(input_file_path: Path):
+    """Test plan loading without beam model."""
 
     exit_code = pymchelper.utils.radiotherapy.plan.main([str(input_file_path)])
     assert exit_code == 0
 
     # expected_output_file_path = Path(output_file)
     # assert expected_output_file_path.exists()
+
+
+# @pytest.mark.parametrize("input_file_path", input_files)
+# def test_plan_bm(input_file_path: Path):
+#     """Test plan loading with beam model."""
+#     inp = f"{input_file_path} -v -b {beam_model}"
+#     print(inp)
+#     exit_code = pymchelper.utils.radiotherapy.plan.main([inp])
+#     assert exit_code == 0
 
 
 if __name__ == '__main__':

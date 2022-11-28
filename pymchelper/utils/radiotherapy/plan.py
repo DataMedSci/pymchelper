@@ -6,8 +6,6 @@ One field may contain one or more layers.
 One layer may contain one or more spots.
 """
 
-from pathlib import Path, PurePath
-from typing import Optional
 import sys
 import logging
 import argparse
@@ -15,6 +13,8 @@ import pymchelper
 
 import pydicom as dicom
 import numpy as np
+from pathlib import Path
+from typing import Optional
 
 from dataclasses import dataclass, field
 from math import exp, log
@@ -47,7 +47,7 @@ def dedx_air(energy: float) -> float:
 class BeamModel():
     """Beam model from a given CSV file."""
 
-    def __init__(self, fn, nominal=True):
+    def __init__(self, fn: Path, nominal=True):
         """
         Load a beam model given as a CSV file.
 
@@ -160,7 +160,7 @@ class Field:
     """
 
     layers: list = field(default_factory=list)  # https://stackoverflow.com/questions/53632152/
-    nlayers: int = 0  # number of layers in this field
+    n_layers: int = 0  # number of layers in this field
     dose: float = 0.0  # dose in [Gy]
     cum_mu: float = 0.0  # cumulative MU of all layers in this field
     cum_particles: float = 0.0  # cumulative number of particles
@@ -176,25 +176,29 @@ class Field:
     def diagnose(self):
         """Print overview of field."""
         energy_list = [layer.energy_nominal for layer in self.layers]
-
+        emin = min(energy_list)
+        emax = max(energy_list)
         # double loop over all layers and over all spots in a layer
         # spot_x_list = [x for layer in self.layers for x in layer.spots]
         # spot_y_list = [y for layer in self.layers for y in layer.spots]
         # spot_w_list = [w for layer in self.layers for w in layer.spots]
 
-        print("------------------------------------------------")
-        print(f"Total MUs              : {self.cum_mu:10.4f}")
-        print(f"Total particles        : {self.cum_particles:10.4e} (estimated)")
-        print("------------------------------------------------")
+        print("   " + "------------------------------------------------")
+        print("   " + f"Energy layers          : {self.n_layers:10d}")
+        print("   " + f"Total MUs              : {self.cum_mu:10.4f}")
+        print("   " + f"Total particles        : {self.cum_particles:10.4e} (estimated)")
+        print("   " + "------------------------------------------------")
         for i, layer in enumerate(self.layers):
-            print(f"Energy in layer {i:3}    : {layer.energy_nominal:10.4f} MeV")
-        print("------------------------------------------------")
-        print("Highest energy         : {:10.4f} MeV".format(max(energy_list)))
-        print("Lowest energy          : {:10.4f} MeV".format(min(energy_list)))
-        print("------------------------------------------------")
-        print("Spot X         min/max : {:10.4f} {:10.4f} mm".format(self.xmin, self.xmax))
-        print("Spot Y         min/max : {:10.4f} {:10.4f} mm".format(self.ymin, self.ymax))
+            print("   " + f"   Layer {i: 3}: {layer.energy_nominal: 10.4f} MeV "
+                  + f"   {layer.n_spots:10d} spots")
+        print("   " + "------------------------------------------------")
+        print("   " + f"Highest energy         : {emin:10.4f} MeV")
+        print("   " + f"Lowest energy          : {emax:10.4f} MeV")
+        print("   " + "------------------------------------------------")
+        print("   " + f"Spot field min/max X   : {self.xmin:+10.4f} {self.xmax:+10.4f} mm")
+        print("   " + f"Spot field min/max Y   : {self.ymin:+10.4f} {self.ymax:+10.4f} mm")
         # print("Spot meterset  min/max : {:10.4f} {:10.4f}   ".format(min(spot_w_list), max(spot_w_list)))
+        print("   " + "------------------------------------------------")
         print("")
 
 
@@ -259,6 +263,7 @@ class Plan:
             myfield.ymax = 0.0
 
             for layer in myfield.layers:
+                layer.n_spots = len(layer.spots)
                 layer.xmin = layer.spots[:, 0].min()
                 layer.xmax = layer.spots[:, 0].max()
                 layer.ymin = layer.spots[:, 1].min()
@@ -270,23 +275,28 @@ class Plan:
                 myfield.cum_mu += layer.cum_mu
 
                 if layer.xmin < myfield.xmin:
-                    layer.xmin = myfield.xmin
+                    myfield.xmin = layer.xmin
                 if layer.xmax > myfield.xmax:
-                    layer.xmax = myfield.xmax
+                    myfield.xmax = layer.xmax
 
                 if layer.ymin < myfield.ymin:
-                    layer.ymin = myfield.ymin
+                    myfield.ymin = layer.ymin
                 if layer.ymax > myfield.ymax:
-                    layer.ymax = myfield.ymax
+                    myfield.ymax = layer.ymax
 
     def diagnose(self):
         """Print overview of plan."""
         print("Diagnostics:")
-        print("------------------------------------------------")
-        print("Patient ID             : {}".format(self.patient_id))
-        print("Number of Fields       : {:2d}".format(self.n_fields))
+        print("---------------------------------------------------")
+        print(f"Patient Name           : '{self.patient_name}'       [{self.patient_initals}]")
+        print(f"Patient ID             : {self.patient_id}")
+        print(f"Plan label             : {self.plan_label}")
+        print(f"Plan date              : {self.plan_date}")
+        print(f"Number of Fields       : {self.n_fields:2d}")
+
         for i, myfield in enumerate(self.fields):
-            print("Field                  : {:02d}/{:02d}:".format(i + 1, self.n_fields))
+            print("---------------------------------------------------")
+            print("   Field                  : {:02d}/{:02d}:".format(i + 1, self.n_fields))
             myfield.diagnose()
             print("")
 
@@ -297,11 +307,10 @@ class Plan:
         fn : filename
         cols : number of columns for output format
         """
-
         pass
 
 
-def load(file: Path, beam_model=None, scaling=1.0, flip_xy=False) -> Plan:
+def load(file: Path, beam_model: BeamModel, scaling=1.0, flip_xy=False) -> Plan:
     """Load file, autodiscovery by suffix."""
     logger.debug("load() autodiscovery")
     ext = file.suffix.lower()  # extract suffix, incl. dot separator
@@ -313,7 +322,7 @@ def load(file: Path, beam_model=None, scaling=1.0, flip_xy=False) -> Plan:
     elif ext == ".rst":
         p = load_RASTER_GSI(file, scaling, flip_xy)
     else:
-        raise ValueError("File type not supported.")
+        raise ValueError(f"File type not supported. {file}")
         return
 
     # apply beam model if available
@@ -350,7 +359,7 @@ def load_PLD_IBA(file_pld: Path, scaling=1.0, flip_xy=False) -> Plan:
     logger.info("Read {} lines of data.".format(pldlen))
 
     field.layers = []
-    field.nlayers = 0
+    field.n_layers = 0
 
     # First line in PLD file contains both plan and field data
     tokens = pldlines[0].split(",")
@@ -362,7 +371,7 @@ def load_PLD_IBA(file_pld: Path, scaling=1.0, flip_xy=False) -> Plan:
     current_plan.beam_name = tokens[6].strip()
     field.cmu = float(tokens[7].strip())   # total amount of MUs in this field
     field._pld_csetweight = float(tokens[8].strip())
-    field.nlayers = int(tokens[9].strip())  # number of layers
+    field.n_layers = int(tokens[9].strip())  # number of layers
 
     for i in range(1, pldlen):  # loop over all lines starting from the second one
         line = pldlines[i]
@@ -453,9 +462,9 @@ def load_DICOM_VARIAN(file_dcm: Path, scaling=1.0, flip_xy=False) -> Plan:
         myfield.dose = float(dcm_field['BeamDose'].value)
         myfield.cum_mu = float(dcm_field['BeamMeterset'].value)
         myfield.csetweight = 1.0
-        myfield.nlayers = int(ds['IonBeamSequence'][i]['NumberOfControlPoints'].value)
+        myfield.n_layers = int(ds['IonBeamSequence'][i]['NumberOfControlPoints'].value)
         dcm_ibs = ds['IonBeamSequence'][i]['IonControlPointSequence']  # layers for given field number
-        logger.debug("Found %i layers in field number %i", myfield.nlayers, i)
+        logger.debug("Found %i layers in field number %i", myfield.n_layers, i)
 
         cmu = 0.0
 
@@ -493,7 +502,6 @@ def main(args=None) -> int:
     if args is None:
         args = sys.argv[1:]
 
-    print("before args")
     parser = argparse.ArgumentParser()
     parser.add_argument('fin',
                         metavar="input_file.pld",
@@ -503,7 +511,8 @@ def main(args=None) -> int:
                         type=Path,
                         help="path to the SHIELD-HIT12A/FLUKA output file, or print to stdout if not given.",
                         default=sys.stdout)
-    parser.add_argument('-b', metavar="beam_model.csv", type=argparse.FileType('r'),
+    parser.add_argument('-b', metavar="beam_model.csv",
+                        type=Path,
                         help="optional input beam model", dest='fbm',
                         default=None)
     parser.add_argument('-f', '--flip', action='store_true',
@@ -525,7 +534,7 @@ def main(args=None) -> int:
         logging.basicConfig(level=logging.DEBUG)
 
     if parsed_args.fbm:
-        bm = BeamModel(args.fbm.name)
+        bm = BeamModel(parsed_args.fbm)
     else:
         bm = None
 
