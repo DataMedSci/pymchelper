@@ -108,31 +108,20 @@ class BeamModel():
 
 
 @dataclass
-class Spot:
-    # TODO: not sure this is needed at all
-    """TODO."""
-
-    x: float = 0.0
-    y: float = 0.0
-    mu: float = 0.0  # meterset weight (this is proportional to the dose in the air filled monitor IC)
-    wt: float = 0.0  # actual number of particles, if possible, absolute
-
-
-@dataclass
 class Layer:
     """
     Handle layers in a plan.
 
     spots : np.array([[x_i, y_i, mu_i, n], [...], ...) for i spots.
-            x,y are isocenter plane positions in cm.
-            mu is monitor units or meterset weights for the individual spots
-            n is the estimated number of primary particles for this spot
+            x,y : are spot positions at isocenter in [mm].
+            mu  : are monitor units or meterset weights for the individual spots [MU]
+            n   : is the estimated number of primary particles for this spot
     spotsize: np.array() FWHM width of spot in along x and y axis, respectively [mm]
     enorm : nominal energy in [MeV]
     emeas : measured energy in [MeV] at exit nozzle
     cmu : cumulative monitor units for this layers [MU]
     repaint : number of repainting, 0 for no repaints TODO: check what is convention here.
-    nspots : number of spots in total
+    n_spots : number of spots in total
     mu_to_part_coef : conversion coefficient from MU to number of particles (depends on energy)
     """
 
@@ -157,8 +146,6 @@ class Layer:
 class Field:
     """
     A single field.
-
-    # TODO: gantry/field may be on layer level
     """
 
     layers: list = field(default_factory=list)  # https://stackoverflow.com/questions/53632152/
@@ -167,8 +154,8 @@ class Field:
     cum_mu: float = 0.0  # cumulative MU of all layers in this field
     cum_particles: float = 0.0  # cumulative number of particles
     _pld_csetweight: float = 0.0  # IBA specific
-    gantry: float = 0.0
-    couch: float = 0.0
+    # gantry: float = 0.0
+    # couch: float = 0.0
     scaling: float = 1.0  # scaling applied to all particle numbers
     xmin: float = 0.0
     xmax: float = 0.0
@@ -180,10 +167,6 @@ class Field:
         energy_list = [layer.energy_nominal for layer in self.layers]
         emin = min(energy_list)
         emax = max(energy_list)
-        # double loop over all layers and over all spots in a layer
-        # spot_x_list = [x for layer in self.layers for x in layer.spots]
-        # spot_y_list = [y for layer in self.layers for y in layer.spots]
-        # spot_w_list = [w for layer in self.layers for w in layer.spots]
 
         indent = "   "  # indent layer output, since this is a branch
 
@@ -201,7 +184,6 @@ class Field:
         print(indent + "------------------------------------------------")
         print(indent + f"Spot field min/max X   : {self.xmin:+10.4f} {self.xmax:+10.4f} mm")
         print(indent + f"Spot field min/max Y   : {self.ymin:+10.4f} {self.ymax:+10.4f} mm")
-        # print("Spot meterset  min/max : {:10.4f} {:10.4f}   ".format(min(spot_w_list), max(spot_w_list)))
         print(indent + "------------------------------------------------")
         print("")
 
@@ -212,10 +194,11 @@ class Plan:
     Class for handling treatment plans.
 
     One plan may consist of one or more fields.
-    One field may conatain one of more layers.
+    One field may contain one of more layers.
 
     Beam model is optional, but needed for exact modeling of the beam.
-    If no beam model is given, MUs are translated to particle numbers using approximate stopping power for air (dEdx).
+    If no beam model is given, MUs are translated to particle numbers using approximate stopping power for air (dEdx)
+    and empirical scaling factors.
     """
 
     fields: list = field(default_factory=list)  # https://stackoverflow.com/questions/53632152/
@@ -230,9 +213,9 @@ class Plan:
     flip_xy: bool = False  # flag whether x and y has been flipped
 
     # factor holds the number of particles * dE/dx / MU = some constant
-    # MU definitions is arbitrary and my vary from vendor to vendor
-    # This will only be used if no beam model is available, and is based on estimates
-    factor: float = 1.0  # vendor specific factor needed for translating MUs to particles
+    # MU definitions is arbitrary and my vary from vendor to vendor.
+    # This will only be used if no beam model is available, and is based on estimates.
+    factor: float = 1.0  # vendor specific factor needed for translating MUs to number of particles
 
     def apply_beammodel(self):
         """Adjust plan to beam model."""
@@ -267,6 +250,7 @@ class Plan:
             myfield.ymin = 0.0
             myfield.ymax = 0.0
 
+            # set layer specific values
             for layer in myfield.layers:
                 layer.n_spots = len(layer.spots)
                 layer.xmin = layer.spots[:, 0].min()
@@ -309,15 +293,17 @@ class Plan:
 
     def export(self, fn: Path, cols: int, field_nr: int):
         """
-        Export file to sobp.dat format, cols marking the number of columns.
+        Export file to sobp.dat format, 'cols' marking the number of columns.
 
         fn : filename
         cols : number of columns for output format.
                5 column format: energy[GeV] x[cm] y[cm] FWHM[cm] weight
                6 column format: energy[GeV] x[cm] y[cm] FWHMx[cm] FWHMy[cm] weight
                7 column format: energy[GeV] sigmaT0[GeV] x[cm] y[cm] FWHM[cm] weight
+        field_nr: in case of multiple field, select what field to export, use '0' to export all fields.
 
-        Divergence per spot still not supported. (TODO)
+        TODO:
+               11 columns: ENERGY, ESPREAD, X, Y, FWHMx, FWHMy, WEIGHT, DIVx, DIVy, COVx, COVy
         """
         if cols == 7:
             header = "*ENERGY(GEV) SigmaT0(GEV) X(CM)   Y(CM)    FWHMx(cm) FWHMy(cm) WEIGHT\n"
@@ -329,28 +315,33 @@ class Plan:
             raise ValueError(f"Output format with {cols} columns is not supported.")
 
         for i, myfield in enumerate(self.fields):
-            j = i + 1  # let counting start at 01 for first field.
+            j = i + 1  # j is the field number, i is the field index.
             output = header
-            # in case all fields should be written to disk, then build a new filename with _XX added to the stem
-            # of the filename
+            # in case all fields should be written to disk, build a new filename with _XX added to the stem
+            # of the filename, based on the field number (not the filed index), i.e. first file is sobp_01.dat
             if field_nr == 0:
                 fout = Path(fn.parent, (f"{fn.stem}_{j:02d}{fn.suffix}"))
             else:
-                # other wise, check if this is a field the user wanted, otherwise skip it.
+                # otherwise, check if this is a field the user wanted, if not, skip it.
                 fout = fn
                 if (j) != field_nr:
                     continue
 
             for layer in myfield.layers:
+
+                # DICOM and PLD sometimes have empty layers. This will be skipped, to not clutter the sobp.dat file.
                 if layer.is_empty:
-                    continue  # do not print empty layers
+                    continue
+
+                # Do some conversions, since sobp.dat hold different units.
                 energy = layer.energy_measured * 0.001  # convert MeV -> GeV
                 espread = layer.espread * 0.001         # convert MeV -> GeV
 
+                # Check if field-flip was requested. Then do so for FWHMxy and spot positions
                 if self.flip_xy:
-                    fwhmy, fwhmx = layer.spotsize * 0.1  # sigma (mm) -> FWHM (cm)
+                    fwhmy, fwhmx = layer.spotsize * 0.1  # mm -> cm
                 else:
-                    fwhmx, fwhmy = layer.spotsize * 0.1  # sigma (mm) -> FWHM (cm)
+                    fwhmx, fwhmy = layer.spotsize * 0.1  # mm -> cm
 
                 for spot in layer.spots:
                     if self.flip_xy:
@@ -361,6 +352,7 @@ class Plan:
                         ypos = spot[1] * 0.1  # mm -> cm
 
                     wt = spot[3]
+                    # format output file. Carefully tuned so they appear in nice columns synced to header. Maybe.
                     if cols == 7:
                         s = f"{energy:8.6f}     {espread:10.8f}  " \
                             + f"{xpos:6.2f}   {ypos:6.2f}  " \
@@ -375,22 +367,25 @@ class Plan:
                             + f"{fwhmx:6.2f}   {wt:10.4e}\n"
                     output += s
             logger.debug(f"Export field {j} {fout}, {myfield.layers[0].energy_nominal} MeV")
-            fout.write_text(output)  # still in field loop
+            fout.write_text(output)  # still in field loop, output for every field
 
 
 def load(file: Path, beam_model: BeamModel, scaling: float, flip_xy: bool) -> Plan:
     """Load file, autodiscovery by suffix."""
-    logger.debug("load() autodiscovery")
+    logger.debug(f"load() autodiscovery {file}")
     ext = file.suffix.lower()  # extract suffix, incl. dot separator
 
     if ext == ".pld":
+        logger.debug("autodiscovery: Found a IBA pld file.")
         p = load_PLD_IBA(file, scaling)
     elif ext == ".dcm":
+        logger.debug("autodiscovery: Found a DICOM file.")
         p = load_DICOM_VARIAN(file, scaling)  # so far I have no other dicom files
     elif ext == ".rst":
+        logger.debug("autodiscovery: Found a GSI raster scan file.")
         p = load_RASTER_GSI(file, scaling)
     else:
-        raise ValueError(f"File type not supported. {file}")
+        raise ValueError(f"autodiscovery: Unknown file type. {file}")
         return
 
     # apply beam model if available
@@ -407,8 +402,9 @@ def load(file: Path, beam_model: BeamModel, scaling: float, flip_xy: bool) -> Pl
 
 def load_PLD_IBA(file_pld: Path, scaling=1.0) -> Plan:
     """
-    file_pld : a file pointer to a .pld file, opened for reading.
+    Loads a IBA-style PLD-file.
 
+    file_pld : a file pointer to a .pld file, opened for reading.
     Here we assume there is only a single field in every .pld file.
     """
     eps = 1.0e-10
@@ -494,7 +490,6 @@ def load_PLD_IBA(file_pld: Path, scaling=1.0) -> Plan:
 
                 # PLD files have the spots listed tiwce, once with no MUs. These are removed here.
                 if _mu > 0.0:
-
                     layer.spots = np.append([layer.spots], [_x, _y, _mu, _mu])
                 else:
                     # this was an empty spot, decrement spot count, and do not add it.
@@ -560,7 +555,6 @@ def load_DICOM_VARIAN(file_dcm: Path, scaling=1.0) -> Plan:
             if 'ScanningSpotSize' in layer:
                 # Varian dicom holds nominal spot size in 2D, FWHMMx,y in [mm]
                 spotsize = np.array(layer['ScanningSpotSize'].value)
-
                 spots = np.c_[_pos, _mu, _mu]  # weight will be calculated later when beam model is applied
                 myfield.layers.append(Layer(spots, spotsize, energy, energy, espread, cmu, nrepaint, nspots))
     return p
@@ -573,34 +567,39 @@ def load_RASTER_GSI(file_rst: Path, scaling=1.0):
 
 
 def main(args=None) -> int:
-    """TODO: move this to makesobp script."""
+    """
+    Read a plan file (dicom, pld, rst), and convert it to a spot list, easy to read by MC codes.
+
+    The MU based spot list in dicom/pld/rst is converted to particle weighted spot list,
+    optionally based on a realistic beam model, or on simple estimations.
+    """
     if args is None:
         args = sys.argv[1:]
 
     parser = argparse.ArgumentParser()
     parser.add_argument('fin',
-                        metavar="input_file.pld",
+                        metavar="input_file",
                         type=Path,
-                        help="path to .pld input file in IBA format.")
-    parser.add_argument('fout', nargs='?', metavar="sobp.dat",
+                        help="path to input file in IBA '.pld'-format or Varian DICOM-RN.")
+    parser.add_argument('fout', nargs='?', metavar="output_file",
                         type=Path,
-                        help="path to the SHIELD-HIT12A/FLUKA output_file.dat",
+                        help="path to the SHIELD-HIT12A/FLUKA output_file. Default: 'sobp.dat'",
                         default="sobp.dat")
     parser.add_argument('-b', metavar="beam_model.csv",
                         type=Path,
-                        help="optional input beam model", dest='fbm',
+                        help="optional input beam model in commasparated CSV format", dest='fbm',
                         default=None)
     parser.add_argument('-i', '--invert', action='store_true',
                         help="invert XY axis", dest="invert", default=False)
     parser.add_argument('-f', '--field', type=int, dest='field_nr',
-                        help="In case several fields in dicom, select which to export. "
+                        help="select which field to export, for dicom files holding several fields. "
                         + "'0' will produce multiple output files with a running number.", default=1)
-    parser.add_argument('-d', '--diag', action='store_true', help="prints diagnostics, do not export data",
+    parser.add_argument('-d', '--diag', action='store_true', help="print diagnostics, but do not export data",
                         dest="diag", default=False)
     parser.add_argument('-s', '--scale', type=float, dest='scale',
-                        help="number of particles*dE/dx per MU.", default=1.0)
+                        help="number of particles*dE/dx per MU", default=1.0)
     parser.add_argument('-c', '--columns', type=int, dest='cols',
-                        help="number of columns in output file.", default=7)
+                        help="number of columns in output file. 5, 6, 7 col format supported, default is 7.", default=7)
     parser.add_argument('-v', '--verbosity', action='count',
                         help="increase output verbosity", default=0)
     parser.add_argument('-V', '--version', action='version', version=pymchelper.__version__)
