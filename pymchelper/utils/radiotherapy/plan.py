@@ -61,8 +61,8 @@ class BeamModel():
             2) measured energy [MeV]
             3) energy spread 1 sigma [MeV]
             4) primary protons per MU [protons/MU]
-            5) 1 sigma spot size x [cm]
-            6) 1 sigma spot size y [cm]
+            5) 1 sigma spot size x [mm]
+            6) 1 sigma spot size y [mm]
         Optionally, 4 more columns may be given:
             7) 1 sigma divergence x [rad]
             8) 1 sigma divergence y [rad]
@@ -127,21 +127,21 @@ class Layer:
             x,y are isocenter plane positions in cm.
             mu is monitor units or meterset weights for the individual spots
             n is the estimated number of primary particles for this spot
-    spotsize: FWHM swidth of spot in cm along x and y axis, respectively
-    enorm : nominal energy in MeV
-    emeas : measured energy in MeV at exit nozzle
-    cmu : cumulative monitor units for this layers
+    spotsize: np.array() FWHM width of spot in along x and y axis, respectively [mm]
+    enorm : nominal energy in [MeV]
+    emeas : measured energy in [MeV] at exit nozzle
+    cmu : cumulative monitor units for this layers [MU]
     repaint : number of repainting, 0 for no repaints TODO: check what is convention here.
     nspots : number of spots in total
-    ppmu : conversion coefficient from MU to number of particles (depends on energy)
+    mu_to_part_coef : conversion coefficient from MU to number of particles (depends on energy)
     """
 
     spots: np.array = field(default_factory=np.array)
     spotsize: np.array = field(default_factory=np.array)
     energy_nominal: float = 100.0
     energy_measured: float = 100.0
-    energy_spread: float = 0.0
-    cum_mu: float = 10000.0
+    espread: float = 0.0
+    cum_mu: float = 0.0
     cum_particles: float = 0.0  # cumulative number of particles
     xmin: float = 0.0
     xmax: float = 0.0
@@ -150,6 +150,7 @@ class Layer:
     repaint: int = 0
     n_spots: int = 1
     mu_to_part_coef: float = 1.0
+    is_empty: bool = True  # marker if there are no MUs in this layer
 
 
 @dataclass
@@ -184,22 +185,24 @@ class Field:
         # spot_y_list = [y for layer in self.layers for y in layer.spots]
         # spot_w_list = [w for layer in self.layers for w in layer.spots]
 
-        print("   " + "------------------------------------------------")
-        print("   " + f"Energy layers          : {self.n_layers:10d}")
-        print("   " + f"Total MUs              : {self.cum_mu:10.4f}")
-        print("   " + f"Total particles        : {self.cum_particles:10.4e} (estimated)")
-        print("   " + "------------------------------------------------")
+        indent = "   "  # indent layer output, since this is a branch
+
+        print(indent + "------------------------------------------------")
+        print(indent + f"Energy layers          : {self.n_layers:10d}")
+        print(indent + f"Total MUs              : {self.cum_mu:10.4f}")
+        print(indent + f"Total particles        : {self.cum_particles:10.4e} (estimated)")
+        print(indent + "------------------------------------------------")
         for i, layer in enumerate(self.layers):
-            print("   " + f"   Layer {i: 3}: {layer.energy_nominal: 10.4f} MeV "
+            print(indent + f"   Layer {i: 3}: {layer.energy_nominal: 10.4f} MeV "
                   + f"   {layer.n_spots:10d} spots")
-        print("   " + "------------------------------------------------")
-        print("   " + f"Highest energy         : {emin:10.4f} MeV")
-        print("   " + f"Lowest energy          : {emax:10.4f} MeV")
-        print("   " + "------------------------------------------------")
-        print("   " + f"Spot field min/max X   : {self.xmin:+10.4f} {self.xmax:+10.4f} mm")
-        print("   " + f"Spot field min/max Y   : {self.ymin:+10.4f} {self.ymax:+10.4f} mm")
+        print(indent + "------------------------------------------------")
+        print(indent + f"Highest energy         : {emin:10.4f} MeV")
+        print(indent + f"Lowest energy          : {emax:10.4f} MeV")
+        print(indent + "------------------------------------------------")
+        print(indent + f"Spot field min/max X   : {self.xmin:+10.4f} {self.xmax:+10.4f} mm")
+        print(indent + f"Spot field min/max Y   : {self.ymin:+10.4f} {self.ymax:+10.4f} mm")
         # print("Spot meterset  min/max : {:10.4f} {:10.4f}   ".format(min(spot_w_list), max(spot_w_list)))
-        print("   " + "------------------------------------------------")
+        print(indent + "------------------------------------------------")
         print("")
 
 
@@ -239,10 +242,11 @@ class Plan:
                     # calculate number of particles
                     layer.ppmu = self.beam_model.f_ppmu(layer.energy_nominal)
                     layer.energy_measured = self.beam_model.f_e(layer.energy_nominal)
+                    layer.espread = self.beam_model.f_espread(layer.energy_nominal)
                     layer.spots[:, 3] = layer.spots[:, 2] * layer.ppmu * myfield.scaling
                     layer.spotsize = np.array([self.beam_model.f_sx(layer.energy_nominal),
                                                self.beam_model.f_sy(layer.energy_nominal)
-                                               ])
+                                               ]) * s2fwhm
         else:
             for myfield in self.fields:
                 for layer in myfield.layers:
@@ -264,13 +268,14 @@ class Plan:
             myfield.ymax = 0.0
 
             for layer in myfield.layers:
-                layer.espread = self.beam_model.f_espread(layer.energy_nominal)
                 layer.n_spots = len(layer.spots)
                 layer.xmin = layer.spots[:, 0].min()
                 layer.xmax = layer.spots[:, 0].max()
                 layer.ymin = layer.spots[:, 1].min()
                 layer.ymax = layer.spots[:, 1].max()
                 layer.cum_mu = layer.spots[:, 2].sum()
+                if layer.cum_mu > 0.0:
+                    layer.is_empty = False
                 layer.cum_particles = layer.spots[:, 3].sum()
 
                 myfield.cum_particles += layer.cum_particles
@@ -302,7 +307,7 @@ class Plan:
             myfield.diagnose()
             print("")
 
-    def export(self, fn: Path, cols=5):
+    def export(self, fn: Path, cols: int, field_nr: int):
         """
         Export file to sobp.dat format, cols marking the number of columns.
 
@@ -314,39 +319,76 @@ class Plan:
 
         Divergence per spot still not supported. (TODO)
         """
-        if cols < 5 or cols > 7:
-            raise ValueError("output format not supported")
-
         if cols == 7:
-            output = "*ENERGY(GEV) SigmaT0(GEV) X(CM)   Y(CM)    FWHMx(cm) FWHMy(cm) WEIGHT\n"
+            header = "*ENERGY(GEV) SigmaT0(GEV) X(CM)   Y(CM)    FWHMx(cm) FWHMy(cm) WEIGHT\n"
+        elif cols == 6:
+            header = "*ENERGY(GEV) X(CM)   Y(CM)    FWHMx(cm) FWHMy(cm) WEIGHT\n"
+        elif cols == 5:
+            header = "*ENERGY(GEV) X(CM)   Y(CM)    FWHMx(cm) FWHMy(cm) WEIGHT\n"
+        else:
+            raise ValueError(f"Output format with {cols} columns is not supported.")
 
-        for myfield in self.fields:
+        for i, myfield in enumerate(self.fields):
+            j = i + 1  # let counting start at 01 for first field.
+            output = header
+            # in case all fields should be written to disk, then build a new filename with _XX added to the stem
+            # of the filename
+            if field_nr == 0:
+                fout = Path(fn.parent, (f"{fn.stem}_{j:02d}{fn.suffix}"))
+            else:
+                # other wise, check if this is a field the user wanted, otherwise skip it.
+                fout = fn
+                if (j) != field_nr:
+                    continue
+
             for layer in myfield.layers:
+                if layer.is_empty:
+                    continue  # do not print empty layers
                 energy = layer.energy_measured * 0.001  # convert MeV -> GeV
                 espread = layer.espread * 0.001         # convert MeV -> GeV
-                fwhmx, fwhmy = layer.spotsize * s2fwhm * 0.1  # sigma (mm) -> FWHM (cm)
+
+                if self.flip_xy:
+                    fwhmy, fwhmx = layer.spotsize * 0.1  # sigma (mm) -> FWHM (cm)
+                else:
+                    fwhmx, fwhmy = layer.spotsize * 0.1  # sigma (mm) -> FWHM (cm)
+
                 for spot in layer.spots:
-                    xpos = spot[0] * 0.1  # mm -> cm
-                    ypos = spot[1] * 0.1  # mm -> cm
+                    if self.flip_xy:
+                        xpos = spot[1] * 0.1  # mm -> cm
+                        ypos = spot[0] * 0.1  # mm -> cm
+                    else:
+                        xpos = spot[0] * 0.1  # mm -> cm
+                        ypos = spot[1] * 0.1  # mm -> cm
+
                     wt = spot[3]
-                    s = f"{energy:8.6f}     {espread:10.8f}  " \
-                        + f"{xpos:6.2f}   {ypos:6.2f}  " \
-                        + f"{fwhmx:6.2f}   {fwhmy:6.2f}     {wt:10.4e}\n"
+                    if cols == 7:
+                        s = f"{energy:8.6f}     {espread:10.8f}  " \
+                            + f"{xpos:6.2f}   {ypos:6.2f}  " \
+                            + f"{fwhmx:6.2f}   {fwhmy:6.2f}     {wt:10.4e}\n"
+                    elif cols == 6:
+                        s = f"{energy:8.6f}     " \
+                            + f"{xpos:6.2f}   {ypos:6.2f}  " \
+                            + f"{fwhmx:6.2f}   {fwhmy:6.2f}     {wt:10.4e}\n"
+                    else:
+                        s = f"{energy:8.6f}     " \
+                            + f"{xpos:6.2f}   {ypos:6.2f}  " \
+                            + f"{fwhmx:6.2f}   {wt:10.4e}\n"
                     output += s
-        fn.write_text(output)
+            logger.debug(f"Export field {j} {fout}, {myfield.layers[0].energy_nominal} MeV")
+            fout.write_text(output)  # still in field loop
 
 
-def load(file: Path, beam_model: BeamModel, scaling=1.0, flip_xy=False) -> Plan:
+def load(file: Path, beam_model: BeamModel, scaling: float, flip_xy: bool) -> Plan:
     """Load file, autodiscovery by suffix."""
     logger.debug("load() autodiscovery")
     ext = file.suffix.lower()  # extract suffix, incl. dot separator
 
     if ext == ".pld":
-        p = load_PLD_IBA(file, scaling, flip_xy)
+        p = load_PLD_IBA(file, scaling)
     elif ext == ".dcm":
-        p = load_DICOM_VARIAN(file, scaling, flip_xy)  # so far I have no other dicom files
+        p = load_DICOM_VARIAN(file, scaling)  # so far I have no other dicom files
     elif ext == ".rst":
-        p = load_RASTER_GSI(file, scaling, flip_xy)
+        p = load_RASTER_GSI(file, scaling)
     else:
         raise ValueError(f"File type not supported. {file}")
         return
@@ -358,11 +400,12 @@ def load(file: Path, beam_model: BeamModel, scaling=1.0, flip_xy=False) -> Plan:
         logger.debug("BeamModel is unavailable in Plan.")
 
     p.apply_beammodel()
+    p.flip_xy = flip_xy
 
     return p
 
 
-def load_PLD_IBA(file_pld: Path, scaling=1.0, flip_xy=False) -> Plan:
+def load_PLD_IBA(file_pld: Path, scaling=1.0) -> Plan:
     """
     file_pld : a file pointer to a .pld file, opened for reading.
 
@@ -415,7 +458,9 @@ def load_PLD_IBA(file_pld: Path, scaling=1.0, flip_xy=False) -> Plan:
             elements = pldlines[el_first:el_last]  # each line starting with "Element" string is a spot.
 
             # tokens[0] just holds the "Layer" keyword
-            spotsize = float(tokens[1].strip()) * s2fwhm * 0.1  # convert mm sigma to cm FWHM
+            # IBA PLD holds nominal spot size in 1D, 1 sigma in [mm]
+            spotsize = float(tokens[1].strip()) * s2fwhm   # convert mm sigma to mm FWHM (this is just a float)
+
             energy_nominal = float(tokens[2].strip())
             cmu = float(tokens[3].strip())
             nspots = int(tokens[4].strip())
@@ -428,7 +473,8 @@ def load_PLD_IBA(file_pld: Path, scaling=1.0, flip_xy=False) -> Plan:
 
             spots = np.array([])
 
-            layer = Layer(spots, [spotsize, spotsize], energy_nominal, energy_nominal, espread, cmu, nrepaint, nspots)
+            layer = Layer(spots, np.array([spotsize, spotsize]), energy_nominal,
+                          energy_nominal, espread, cmu, nrepaint, nspots)
 
             for j, element in enumerate(elements):  # loop over each spot in this layer
                 token = element.split(",")
@@ -461,7 +507,7 @@ def load_PLD_IBA(file_pld: Path, scaling=1.0, flip_xy=False) -> Plan:
     return current_plan
 
 
-def load_DICOM_VARIAN(file_dcm: Path, scaling=1.0, flip_xy=False) -> Plan:
+def load_DICOM_VARIAN(file_dcm: Path, scaling=1.0) -> Plan:
     """Load varian type dicom plans."""
     ds = dicom.dcmread(file_dcm)
     # Total number of energy layers used to produce SOBP
@@ -512,6 +558,7 @@ def load_DICOM_VARIAN(file_dcm: Path, scaling=1.0, flip_xy=False) -> Plan:
                 _mu = np.array(layer['ScanSpotMetersetWeights'].value).reshape(nspots, 1)  # spot MUs
                 cmu = _mu.sum()
             if 'ScanningSpotSize' in layer:
+                # Varian dicom holds nominal spot size in 2D, FWHMMx,y in [mm]
                 spotsize = np.array(layer['ScanningSpotSize'].value)
 
                 spots = np.c_[_pos, _mu, _mu]  # weight will be calculated later when beam model is applied
@@ -519,7 +566,7 @@ def load_DICOM_VARIAN(file_dcm: Path, scaling=1.0, flip_xy=False) -> Plan:
     return p
 
 
-def load_RASTER_GSI(file_rst: Path, scaling=1.0, flip_xy=False):
+def load_RASTER_GSI(file_rst: Path, scaling=1.0):
     """TODO: this is implemented in pytrip. Import it?."""
     p = Plan()
     return p
@@ -543,17 +590,21 @@ def main(args=None) -> int:
                         type=Path,
                         help="optional input beam model", dest='fbm',
                         default=None)
-    parser.add_argument('-f', '--flip', action='store_true',
-                        help="flip XY axis", dest="flip", default=False)
-    parser.add_argument('-d', '--diag', action='store_true', help="prints diagnostics",
+    parser.add_argument('-i', '--invert', action='store_true',
+                        help="invert XY axis", dest="invert", default=False)
+    parser.add_argument('-f', '--field', type=int, dest='field_nr',
+                        help="In case several fields in dicom, select which to export. "
+                        + "'0' will produce multiple output files with a running number.", default=1)
+    parser.add_argument('-d', '--diag', action='store_true', help="prints diagnostics, do not export data",
                         dest="diag", default=False)
     parser.add_argument('-s', '--scale', type=float, dest='scale',
                         help="number of particles*dE/dx per MU.", default=1.0)
+    parser.add_argument('-c', '--columns', type=int, dest='cols',
+                        help="number of columns in output file.", default=7)
     parser.add_argument('-v', '--verbosity', action='count',
                         help="increase output verbosity", default=0)
     parser.add_argument('-V', '--version', action='version', version=pymchelper.__version__)
     parsed_args = parser.parse_args(args)
-    print(parsed_args)
 
     if parsed_args.verbosity == 1:
         logging.basicConfig(level=logging.INFO)
@@ -566,12 +617,12 @@ def main(args=None) -> int:
     else:
         bm = None
 
-    pln = load(parsed_args.fin, bm, parsed_args.scale, parsed_args.flip)
+    pln = load(parsed_args.fin, bm, parsed_args.scale, parsed_args.invert)
 
     if parsed_args.diag:
         pln.diagnose()
-
-    pln.export(parsed_args.fout, cols=7)
+    else:
+        pln.export(parsed_args.fout, parsed_args.cols, parsed_args.field_nr)
 
     return 0
 
