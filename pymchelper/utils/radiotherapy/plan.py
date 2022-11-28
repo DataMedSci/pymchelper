@@ -223,10 +223,10 @@ class Plan:
             for myfield in self.fields:
                 for layer in myfield.layers:
                     # calculate number of particles
-                    layer.ppmu = self.beam_model.f_ppmu(layer.energy_nominal)
+                    layer.mu_to_part_coef = self.beam_model.f_ppmu(layer.energy_nominal)
                     layer.energy_measured = self.beam_model.f_e(layer.energy_nominal)
                     layer.espread = self.beam_model.f_espread(layer.energy_nominal)
-                    layer.spots[:, 3] = layer.spots[:, 2] * layer.ppmu * myfield.scaling
+                    layer.spots[:, 3] = layer.spots[:, 2] * layer.mu_to_part_coef * myfield.scaling
                     layer.spotsize = np.array([self.beam_model.f_sx(layer.energy_nominal),
                                                self.beam_model.f_sy(layer.energy_nominal)
                                                ]) * s2fwhm
@@ -235,10 +235,10 @@ class Plan:
                 for layer in myfield.layers:
                     # if there is no beam model available, we will simply use air stopping power
                     # since MU is proportional to dose in monitor chamber, which means fluence ~ D_air / dEdx(air)
-                    layer.ppmu = self.factor / dedx_air(layer.energy_measured)
-                    layer.spots[:, 3] = layer.spots[:, 2] * layer.ppmu * myfield.scaling
+                    layer.mu_to_part_coef = self.factor / dedx_air(layer.energy_measured)
+                    layer.spots[:, 3] = layer.spots[:, 2] * layer.mu_to_part_coef * myfield.scaling
                     # old IBA code something like:
-                    # weight = ppmu * _mu2 * field.cmu / field._pld_csetweight
+                    # weight = mu_to_part_coef * _mu2 * field.cmu / field._pld_csetweight
                     # phi_weight = weight / dedx_air(layer.energy_measured)
 
         # set cumulative sums
@@ -419,6 +419,10 @@ def load_PLD_IBA(file_pld: Path, scaling=1.0) -> Plan:
     # p.factor = 8.106687e7  # Calculated Nov. 2016 from Brita's 32 Gy plan. (no dE/dx)
     current_plan.factor = 5.1821e8  # protons per (MU/dEdx), Estimated calculation Apr. 2017 from Brita's 32 Gy plan.
 
+    # currently scaling is treated equal at plan and field level. This is for future use.
+    current_plan.scaling = scaling
+    field.scaling = scaling
+
     pldlines = file_pld.read_text().split('\n')
     pldlen = len(pldlines)
     logger.info("Read {} lines of data.".format(pldlen))
@@ -518,6 +522,7 @@ def load_DICOM_VARIAN(file_dcm: Path, scaling=1.0) -> Plan:
 
     # protons per (MU/dEdx), Estimated calculation Nov. 2022 from DCPT beam model
     p.factor = 17247566.1
+    p.scaling = scaling  # nee note in IBA reader above.
     espread = 0.0  # will be set by beam model
     p.n_fields = int(ds['FractionGroupSequence'][0]['NumberOfBeams'].value)
     logger.debug("Found %i fields", p.n_fields)
@@ -531,6 +536,7 @@ def load_DICOM_VARIAN(file_dcm: Path, scaling=1.0) -> Plan:
         myfield.dose = float(dcm_field['BeamDose'].value)
         myfield.cum_mu = float(dcm_field['BeamMeterset'].value)
         myfield.csetweight = 1.0
+        myfield.scaling = scaling  # nee note in IBA reader above.
         myfield.n_layers = int(ds['IonBeamSequence'][i]['NumberOfControlPoints'].value)
         dcm_ibs = ds['IonBeamSequence'][i]['IonControlPointSequence']  # layers for given field number
         logger.debug("Found %i layers in field number %i", myfield.n_layers, i)
