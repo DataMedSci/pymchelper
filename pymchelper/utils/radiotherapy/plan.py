@@ -130,7 +130,7 @@ class Layer:
     spotsize: FWHM swidth of spot in cm along x and y axis, respectively
     enorm : nominal energy in MeV
     emeas : measured energy in MeV at exit nozzle
-    cmu : cummulative monitor units for this layers
+    cmu : cumulative monitor units for this layers
     repaint : number of repainting, 0 for no repaints TODO: check what is convention here.
     nspots : number of spots in total
     ppmu : conversion coefficient from MU to number of particles (depends on energy)
@@ -141,6 +141,11 @@ class Layer:
     energy_nominal: float = 100.0
     energy_measured: float = 100.0
     cum_mu: float = 10000.0
+    cum_particles: float = 0.0  # cumulative number of particles
+    xmin: float = 0.0
+    xmax: float = 0.0
+    ymin: float = 0.0
+    ymax: float = 0.0
     repaint: int = 0
     n_spots: int = 1
     mu_to_part_coef: float = 1.0
@@ -157,11 +162,40 @@ class Field:
     layers: list = field(default_factory=list)  # https://stackoverflow.com/questions/53632152/
     nlayers: int = 0  # number of layers in this field
     dose: float = 0.0  # dose in [Gy]
-    cum_mu: float = 0.0  # cummulative MU of all layers in this field
+    cum_mu: float = 0.0  # cumulative MU of all layers in this field
+    cum_particles: float = 0.0  # cumulative number of particles
     _pld_csetweight: float = 0.0  # IBA specific
     gantry: float = 0.0
     couch: float = 0.0
     scaling: float = 1.0  # scaling applied to all particle numbers
+    xmin: float = 0.0
+    xmax: float = 0.0
+    ymin: float = 0.0
+    ymax: float = 0.0
+
+    def diagnose(self):
+        """Print overview of field."""
+        energy_list = [layer.energy_nominal for layer in self.layers]
+
+        # double loop over all layers and over all spots in a layer
+        # spot_x_list = [x for layer in self.layers for x in layer.spots]
+        # spot_y_list = [y for layer in self.layers for y in layer.spots]
+        # spot_w_list = [w for layer in self.layers for w in layer.spots]
+
+        print("------------------------------------------------")
+        print(f"Total MUs              : {self.cum_mu:10.4f}")
+        print(f"Total particles        : {self.cum_particles:10.4e} (estimated)")
+        print("------------------------------------------------")
+        for i, layer in enumerate(self.layers):
+            print(f"Energy in layer {i:3}    : {layer.energy_nominal:10.4f} MeV")
+        print("------------------------------------------------")
+        print("Highest energy         : {:10.4f} MeV".format(max(energy_list)))
+        print("Lowest energy          : {:10.4f} MeV".format(min(energy_list)))
+        print("------------------------------------------------")
+        print("Spot X         min/max : {:10.4f} {:10.4f} mm".format(self.xmin, self.xmax))
+        print("Spot Y         min/max : {:10.4f} {:10.4f} mm".format(self.ymin, self.ymax))
+        # print("Spot meterset  min/max : {:10.4f} {:10.4f}   ".format(min(spot_w_list), max(spot_w_list)))
+        print("")
 
 
 @dataclass
@@ -194,7 +228,6 @@ class Plan:
 
     def apply_beammodel(self):
         """Adjust plan to beam model."""
-
         if self.beam_model:
             for myfield in self.fields:
                 for layer in myfield.layers:
@@ -215,6 +248,57 @@ class Plan:
                     # old IBA code something like:
                     # weight = ppmu * _mu2 * field.cmu / field._pld_csetweight
                     # phi_weight = weight / dedx_air(layer.energy_measured)
+
+        # set cumulative sums
+        for myfield in self.fields:
+            myfield.cum_particles = 0.0
+            myfield.cum_mu = 0.0
+            myfield.xmin = 0.0
+            myfield.xmax = 0.0
+            myfield.ymin = 0.0
+            myfield.ymax = 0.0
+
+            for layer in myfield.layers:
+                layer.xmin = layer.spots[:, 0].min()
+                layer.xmax = layer.spots[:, 0].max()
+                layer.ymin = layer.spots[:, 1].min()
+                layer.ymax = layer.spots[:, 1].max()
+                layer.cum_mu = layer.spots[:, 2].sum()
+                layer.cum_particles = layer.spots[:, 3].sum()
+
+                myfield.cum_particles += layer.cum_particles
+                myfield.cum_mu += layer.cum_mu
+
+                if layer.xmin < myfield.xmin:
+                    layer.xmin = myfield.xmin
+                if layer.xmax > myfield.xmax:
+                    layer.xmax = myfield.xmax
+
+                if layer.ymin < myfield.ymin:
+                    layer.ymin = myfield.ymin
+                if layer.ymax > myfield.ymax:
+                    layer.ymax = myfield.ymax
+
+    def diagnose(self):
+        """Print overview of plan."""
+        print("Diagnostics:")
+        print("------------------------------------------------")
+        print("Patient ID             : {}".format(self.patient_id))
+        print("Number of Fields       : {:2d}".format(self.n_fields))
+        for i, myfield in enumerate(self.fields):
+            print("Field                  : {:02d}/{:02d}:".format(i + 1, self.n_fields))
+            myfield.diagnose()
+            print("")
+
+    def export(self, fn="sobp.dat", cols=5):
+        """
+        Export file to sobp.dat format, cols marking the number of columns.
+
+        fn : filename
+        cols : number of columns for output format
+        """
+
+    pass
 
 
 def load(file, beam_model=None, scaling=1.0, flip_xy=False):
@@ -239,7 +323,6 @@ def load(file, beam_model=None, scaling=1.0, flip_xy=False):
         logger.debug("BeamModel is unavailable in Plan.")
 
     p.apply_beammodel()
-    #sys.exit()
 
     return p
 
@@ -362,10 +445,10 @@ def load_DICOM_VARIAN(file_dcm, scaling=1.0, flip_xy=False):
     logger.debug("Found %i fields", p.n_fields)
 
     dcm_fgs = ds['FractionGroupSequence'][0]['ReferencedBeamSequence']  # fields for given group number
-    # print(dcm_fgs)
 
     for i, dcm_field in enumerate(dcm_fgs):
         myfield = Field()
+        logger.debug(f"Appending field number {i}...")
         p.fields.append(myfield)
         myfield.dose = float(dcm_field['BeamDose'].value)
         myfield.cum_mu = float(dcm_field['BeamMeterset'].value)
@@ -396,7 +479,7 @@ def load_DICOM_VARIAN(file_dcm, scaling=1.0, flip_xy=False):
 
                 spots = np.c_[_pos, _mu, _mu]  # weight will be calculated later when beam model is applied
                 myfield.layers.append(Layer(spots, spotsize, energy, energy, cmu, repaint, nspots))
-                return p
+    return p
 
 
 def load_RASTER_GSI(file_rst, scaling=1.0, flip_xy=False):
@@ -443,8 +526,12 @@ def main(args=None):
         bm = None
 
     pln = load(args.fin, bm, args.scale, args.flip)
+
+    if args.diag:
+        pln.diagnose()
+
     args.fin.close()
-    print(pln)
+    # print(pln)
 
 
 if __name__ == '__main__':
