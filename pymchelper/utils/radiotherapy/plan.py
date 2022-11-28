@@ -140,6 +140,7 @@ class Layer:
     spotsize: np.array = field(default_factory=np.array)
     energy_nominal: float = 100.0
     energy_measured: float = 100.0
+    energy_spread: float = 0.0
     cum_mu: float = 10000.0
     cum_particles: float = 0.0  # cumulative number of particles
     xmin: float = 0.0
@@ -263,6 +264,7 @@ class Plan:
             myfield.ymax = 0.0
 
             for layer in myfield.layers:
+                layer.espread = self.beam_model.f_espread(layer.energy_nominal)
                 layer.n_spots = len(layer.spots)
                 layer.xmin = layer.spots[:, 0].min()
                 layer.xmax = layer.spots[:, 0].max()
@@ -300,14 +302,38 @@ class Plan:
             myfield.diagnose()
             print("")
 
-    def export(self, fn="sobp.dat", cols=5):
+    def export(self, fn: Path, cols=5):
         """
         Export file to sobp.dat format, cols marking the number of columns.
 
         fn : filename
-        cols : number of columns for output format
+        cols : number of columns for output format.
+               5 column format: energy[GeV] x[cm] y[cm] FWHM[cm] weight
+               6 column format: energy[GeV] x[cm] y[cm] FWHMx[cm] FWHMy[cm] weight
+               7 column format: energy[GeV] sigmaT0[GeV] x[cm] y[cm] FWHM[cm] weight
+
+        Divergence per spot still not supported. (TODO)
         """
-        pass
+        if cols < 5 or cols > 7:
+            raise ValueError("output format not supported")
+
+        if cols == 7:
+            output = "*ENERGY(GEV) SigmaT0(GEV) X(CM)   Y(CM)    FWHMx(cm) FWHMy(cm) WEIGHT\n"
+
+        for myfield in self.fields:
+            for layer in myfield.layers:
+                energy = layer.energy_measured * 0.001  # convert MeV -> GeV
+                espread = layer.espread * 0.001         # convert MeV -> GeV
+                fwhmx, fwhmy = layer.spotsize * s2fwhm * 0.1  # sigma (mm) -> FWHM (cm)
+                for spot in layer.spots:
+                    xpos = spot[0] * 0.1  # mm -> cm
+                    ypos = spot[1] * 0.1  # mm -> cm
+                    wt = spot[3]
+                    s = f"{energy:8.6f}     {espread:10.8f}  " \
+                        + f"{xpos:6.2f}   {ypos:6.2f}  " \
+                        + f"{fwhmx:6.2f}   {fwhmy:6.2f}     {wt:10.4e}\n"
+                    output += s
+        fn.write_text(output)
 
 
 def load(file: Path, beam_model: BeamModel, scaling=1.0, flip_xy=False) -> Plan:
@@ -373,6 +399,8 @@ def load_PLD_IBA(file_pld: Path, scaling=1.0, flip_xy=False) -> Plan:
     field._pld_csetweight = float(tokens[8].strip())
     field.n_layers = int(tokens[9].strip())  # number of layers
 
+    espread = 0.0  # will be set by beam model
+
     for i in range(1, pldlen):  # loop over all lines starting from the second one
         line = pldlines[i]
         if "Layer" in line:  # each new layers starts with the "Layer" keyword
@@ -400,7 +428,7 @@ def load_PLD_IBA(file_pld: Path, scaling=1.0, flip_xy=False) -> Plan:
 
             spots = np.array([])
 
-            layer = Layer(spots, [spotsize, spotsize], energy_nominal, energy_nominal, cmu, nrepaint, nspots)
+            layer = Layer(spots, [spotsize, spotsize], energy_nominal, energy_nominal, espread, cmu, nrepaint, nspots)
 
             for j, element in enumerate(elements):  # loop over each spot in this layer
                 token = element.split(",")
@@ -449,7 +477,7 @@ def load_DICOM_VARIAN(file_dcm: Path, scaling=1.0, flip_xy=False) -> Plan:
 
     # protons per (MU/dEdx), Estimated calculation Nov. 2022 from DCPT beam model
     p.factor = 17247566.1
-
+    espread = 0.0  # will be set by beam model
     p.n_fields = int(ds['FractionGroupSequence'][0]['NumberOfBeams'].value)
     logger.debug("Found %i fields", p.n_fields)
 
@@ -477,7 +505,7 @@ def load_DICOM_VARIAN(file_dcm: Path, scaling=1.0, flip_xy=False) -> Plan:
                 nspots = int(layer['NumberOfScanSpotPositions'].value)  # number of spots
                 logger.debug("Found %i spots in layer number %i at energy %f", nspots, j, energy)
             if 'NumberOfPaintings' in layer:
-                repaint = int(layer['NumberOfPaintings'].value)  # number of spots
+                nrepaint = int(layer['NumberOfPaintings'].value)  # number of spots
             if 'ScanSpotPositionMap' in layer:
                 _pos = np.array(layer['ScanSpotPositionMap'].value).reshape(nspots, 2)  # spot coords in mm
             if 'ScanSpotMetersetWeights' in layer:
@@ -487,7 +515,7 @@ def load_DICOM_VARIAN(file_dcm: Path, scaling=1.0, flip_xy=False) -> Plan:
                 spotsize = np.array(layer['ScanningSpotSize'].value)
 
                 spots = np.c_[_pos, _mu, _mu]  # weight will be calculated later when beam model is applied
-                myfield.layers.append(Layer(spots, spotsize, energy, energy, cmu, repaint, nspots))
+                myfield.layers.append(Layer(spots, spotsize, energy, energy, espread, cmu, nrepaint, nspots))
     return p
 
 
@@ -507,10 +535,10 @@ def main(args=None) -> int:
                         metavar="input_file.pld",
                         type=Path,
                         help="path to .pld input file in IBA format.")
-    parser.add_argument('fout', nargs='?', metavar="output_file.dat",
+    parser.add_argument('fout', nargs='?', metavar="sobp.dat",
                         type=Path,
-                        help="path to the SHIELD-HIT12A/FLUKA output file, or print to stdout if not given.",
-                        default=sys.stdout)
+                        help="path to the SHIELD-HIT12A/FLUKA output_file.dat",
+                        default="sobp.dat")
     parser.add_argument('-b', metavar="beam_model.csv",
                         type=Path,
                         help="optional input beam model", dest='fbm',
@@ -542,6 +570,8 @@ def main(args=None) -> int:
 
     if parsed_args.diag:
         pln.diagnose()
+
+    pln.export(parsed_args.fout, cols=7)
 
     return 0
 
