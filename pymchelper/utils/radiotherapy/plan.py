@@ -37,8 +37,8 @@ def dedx_air(energy: float) -> float:
     """
     if energy > 500.0 or energy < 1.0:
         logger.error("Proton energy must be between 1 and 500 MeV.")
-        raise ValueError("Energy = {:.2f} out of bounds.".format(energy))
-
+        raise ValueError(f"Energy = {energy:.2f} out of bounds.")
+        return 0
     x = log(energy)
     y = 5.4041 - 0.66877 * x - 0.034441 * (x**2) - 0.0010707 * (x**3) + 0.00082584 * (x**4)
     return exp(y)
@@ -144,9 +144,7 @@ class Layer:
 
 @dataclass
 class Field:
-    """
-    A single field.
-    """
+    """A single field."""
 
     layers: list = field(default_factory=list)  # https://stackoverflow.com/questions/53632152/
     n_layers: int = 0  # number of layers in this field
@@ -210,12 +208,14 @@ class Plan:
     plan_date: str = ""  #
     n_fields: int = 0
     beam_model: Optional[BeamModel] = None  # optional beam model class
+    beam_name: str = ""
     flip_xy: bool = False  # flag whether x and y has been flipped
 
     # factor holds the number of particles * dE/dx / MU = some constant
     # MU definitions is arbitrary and my vary from vendor to vendor.
     # This will only be used if no beam model is available, and is based on estimates.
     factor: float = 1.0  # vendor specific factor needed for translating MUs to number of particles
+    scaling: float = 1.0
 
     def apply_beammodel(self):
         """Adjust plan to beam model."""
@@ -386,7 +386,7 @@ def load(file: Path, beam_model: BeamModel, scaling: float, flip_xy: bool) -> Pl
         p = load_RASTER_GSI(file, scaling)
     else:
         raise ValueError(f"autodiscovery: Unknown file type. {file}")
-        return
+        return 0
 
     # apply beam model if available
     if beam_model:
@@ -402,7 +402,7 @@ def load(file: Path, beam_model: BeamModel, scaling: float, flip_xy: bool) -> Pl
 
 def load_PLD_IBA(file_pld: Path, scaling=1.0) -> Plan:
     """
-    Loads a IBA-style PLD-file.
+    Load a IBA-style PLD-file.
 
     file_pld : a file pointer to a .pld file, opened for reading.
     Here we assume there is only a single field in every .pld file.
@@ -425,7 +425,7 @@ def load_PLD_IBA(file_pld: Path, scaling=1.0) -> Plan:
 
     pldlines = file_pld.read_text().split('\n')
     pldlen = len(pldlines)
-    logger.info("Read {} lines of data.".format(pldlen))
+    logger.info(f"Read {pldlen} lines of data.")
 
     field.layers = []
     field.n_layers = 0
@@ -518,7 +518,6 @@ def load_DICOM_VARIAN(file_dcm: Path, scaling=1.0) -> Plan:
     p.patient_firstname = ""
     p.plan_label = ds['RTPlanLabel'].value
     p.plan_date = ds['RTPlanDate'].value
-    p.beam_name = ""
 
     # protons per (MU/dEdx), Estimated calculation Nov. 2022 from DCPT beam model
     p.factor = 17247566.1
@@ -535,7 +534,7 @@ def load_DICOM_VARIAN(file_dcm: Path, scaling=1.0) -> Plan:
         p.fields.append(myfield)
         myfield.dose = float(dcm_field['BeamDose'].value)
         myfield.cum_mu = float(dcm_field['BeamMeterset'].value)
-        myfield.csetweight = 1.0
+        myfield._pld_csetweight = 1.0
         myfield.scaling = scaling  # nee note in IBA reader above.
         myfield.n_layers = int(ds['IonBeamSequence'][i]['NumberOfControlPoints'].value)
         dcm_ibs = ds['IonBeamSequence'][i]['IonControlPointSequence']  # layers for given field number
