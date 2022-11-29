@@ -19,46 +19,6 @@ logger = logging.getLogger(__name__)
 
 
 @pytest.mark.smoke
-class TestPld2Sobp(unittest.TestCase):
-
-    def test_help(self):
-        """ Print help text and exit normally.
-        """
-        try:
-            pymchelper.utils.pld2sobp.main(["--help"])
-        except SystemExit as e:
-            self.assertEqual(e.code, 0)
-
-    def test_version(self):
-        """ Print version and exit normally.
-        """
-        try:
-            pymchelper.utils.pld2sobp.main(["--version"])
-        except SystemExit as e:
-            self.assertEqual(e.code, 0)
-
-    def test_noarg(self):
-        """ Call pld2sobp without args will cause it to fail.
-        """
-        try:
-            pymchelper.utils.pld2sobp.main([])
-        except SystemExit as e:
-            self.assertEqual(e.code, 2)
-
-    def test_simple(self):
-        """ Simple conversion including diagnostic output.
-        """
-        inp_path = os.path.join("tests", "res", "pld", "test.pld")
-        out_path = os.path.join("tests", "res", "pld", "test.dat")  # TODO replace with temporary file
-        try:
-            pymchelper.utils.pld2sobp.main(["-d", inp_path, out_path])
-        except SystemExit as e:
-            self.assertEqual(e.code, 0)
-
-        self.assertTrue(os.path.isfile(out_path))
-
-
-@pytest.mark.smoke
 class TestTrip2Ddd(unittest.TestCase):
 
     def test_help(self):

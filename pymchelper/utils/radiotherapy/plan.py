@@ -38,7 +38,6 @@ def dedx_air(energy: float) -> float:
     if energy > 500.0 or energy < 1.0:
         logger.error("Proton energy must be between 1 and 500 MeV.")
         raise ValueError(f"Energy = {energy:.2f} out of bounds.")
-        return 0
     x = log(energy)
     y = 5.4041 - 0.66877 * x - 0.034441 * (x**2) - 0.0010707 * (x**3) + 0.00082584 * (x**4)
     return exp(y)
@@ -151,7 +150,7 @@ class Field:
     dose: float = 0.0  # dose in [Gy]
     cum_mu: float = 0.0  # cumulative MU of all layers in this field
     cum_particles: float = 0.0  # cumulative number of particles
-    _pld_csetweight: float = 0.0  # IBA specific
+    pld_csetweight: float = 0.0  # IBA specific
     # gantry: float = 0.0
     # couch: float = 0.0
     scaling: float = 1.0  # scaling applied to all particle numbers
@@ -238,7 +237,7 @@ class Plan:
                     layer.mu_to_part_coef = self.factor / dedx_air(layer.energy_measured)
                     layer.spots[:, 3] = layer.spots[:, 2] * layer.mu_to_part_coef * myfield.scaling
                     # old IBA code something like:
-                    # weight = mu_to_part_coef * _mu2 * field.cmu / field._pld_csetweight
+                    # weight = mu_to_part_coef * _mu2 * field.cmu / field.pld_csetweight
                     # phi_weight = weight / dedx_air(layer.energy_measured)
 
         # set cumulative sums
@@ -386,7 +385,6 @@ def load(file: Path, beam_model: BeamModel, scaling: float, flip_xy: bool) -> Pl
         p = load_RASTER_GSI(file, scaling)
     else:
         raise ValueError(f"autodiscovery: Unknown file type. {file}")
-        return 0
 
     # apply beam model if available
     if beam_model:
@@ -439,7 +437,7 @@ def load_PLD_IBA(file_pld: Path, scaling=1.0) -> Plan:
     current_plan.plan_label = tokens[5].strip()
     current_plan.beam_name = tokens[6].strip()
     field.cmu = float(tokens[7].strip())   # total amount of MUs in this field
-    field._pld_csetweight = float(tokens[8].strip())
+    field.pld_csetweight = float(tokens[8].strip())
     field.n_layers = int(tokens[9].strip())  # number of layers
 
     espread = 0.0  # will be set by beam model
@@ -476,7 +474,7 @@ def load_PLD_IBA(file_pld: Path, scaling=1.0) -> Plan:
             layer = Layer(spots, np.array([spotsize, spotsize]), energy_nominal,
                           energy_nominal, espread, cmu, nrepaint, nspots)
 
-            for j, element in enumerate(elements):  # loop over each spot in this layer
+            for element in elements:  # loop over each spot in this layer
                 token = element.split(",")
                 # the .pld file has every spot position repeated, but MUs are only in
                 # every second line, for reasons unknown.
@@ -534,7 +532,7 @@ def load_DICOM_VARIAN(file_dcm: Path, scaling=1.0) -> Plan:
         p.fields.append(myfield)
         myfield.dose = float(dcm_field['BeamDose'].value)
         myfield.cum_mu = float(dcm_field['BeamMeterset'].value)
-        myfield._pld_csetweight = 1.0
+        myfield.pld_csetweight = 1.0
         myfield.scaling = scaling  # nee note in IBA reader above.
         myfield.n_layers = int(ds['IonBeamSequence'][i]['NumberOfControlPoints'].value)
         dcm_ibs = ds['IonBeamSequence'][i]['IonControlPointSequence']  # layers for given field number
@@ -568,6 +566,7 @@ def load_DICOM_VARIAN(file_dcm: Path, scaling=1.0) -> Plan:
 def load_RASTER_GSI(file_rst: Path, scaling=1.0):
     """TODO: this is implemented in pytrip. Import it?."""
     p = Plan()
+    p.scaling = scaling  # nee note in IBA reader above.
     return p
 
 
@@ -632,5 +631,5 @@ def main(args=None) -> int:
 
 
 if __name__ == '__main__':
-    """Run sys.exit with exit code of the main method."""
+    # Run sys.exit with exit code of the main method.
     sys.exit(main(sys.argv[1:]))

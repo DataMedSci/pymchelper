@@ -44,7 +44,6 @@ def test_call_cmd_option(option_name: str):
 @pytest.mark.parametrize("input_file_path", input_files)
 def test_plan_no_bm(input_file_path: Path):
     """Test plan loading without beam model."""
-
     exit_code = pymchelper.utils.radiotherapy.plan.main([str(input_file_path)])
     assert exit_code == 0
 
