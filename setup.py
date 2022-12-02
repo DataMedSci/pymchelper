@@ -23,11 +23,9 @@ def write_version_py():
 # automatically generate VERSION file upon import or execution of this (setup.py) script
 write_version_py()
 
-
 # extract readme text from the markdown file
 with open('README.md') as readme_file:
     readme = readme_file.read()
-
 
 # extras_require will be used in two scenarios:
 #  - installation of pymchelper with all feature via pip using `pip install "pymchelper[full]"`
@@ -36,10 +34,15 @@ EXTRAS_REQUIRE = {
     'image': ['matplotlib'],
     'excel': ['xlwt'],
     'hdf': ['h5py'],
+    'dicom': [
+        "pydicom>=2.3.1 ; python_version == '3.11'", 
+        "pydicom ; python_version < '3.11'"
+    ],
     'pytrip': [
-        'scipy',
+        'scipy', 
         "pytrip98>=3.6.1 ; python_version == '3.10'",
-        "pytrip98 ; python_version >= '3.5' and python_version < '3.10'"]
+        "pytrip98 ; python_version >= '3.5' and python_version < '3.10'"
+    ]
 }
 
 # inspired by https://github.com/pyimgui/pyimgui/blob/master/setup.py
