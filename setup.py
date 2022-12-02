@@ -1,11 +1,12 @@
 from itertools import chain
 import os
+from pathlib import Path
 import setuptools
 
 from pymchelper.version import git_version
 
 
-def write_version_py(filename=os.path.join('pymchelper', 'VERSION')):
+def write_version_py():
     """
     Generate a file with a version number obtained from git (i.e. name of last tag + additional info)
     It uses a dedicated function called `git_version` which sits in the `version` module.
@@ -15,13 +16,9 @@ def write_version_py(filename=os.path.join('pymchelper', 'VERSION')):
     cnt = """%(version)s
 """
 
-    # we avoid `with` construct to be backward compatible with python 2.x
     GIT_REVISION = git_version()
-    a = open(filename, 'w')
-    try:
-        a.write(cnt % {'version': GIT_REVISION})
-    finally:
-        a.close()
+    with open(Path('pymchelper', 'VERSION'), 'w') as f:
+        f.write(cnt % {'version': GIT_REVISION})
 
 
 # automatically generate VERSION file upon import or execution of this (setup.py) script
@@ -50,7 +47,7 @@ EXTRAS_REQUIRE = {
 # construct special 'full' extra that adds requirements for all built-in
 # backend integrations and additional extra features.
 EXTRAS_REQUIRE['full'] = list(set(chain(*EXTRAS_REQUIRE.values())))
-EXTRAS_REQUIRE['full'].append(["hipsterplot", "bashplotlib"])  # these are needed by verbose inspect tool
+EXTRAS_REQUIRE['full'].extend(["hipsterplot", "bashplotlib"])  # these are needed by verbose inspect tool
 
 # here is table with corresponding numpy versions, and supported python and OS versions
 # it is based on inspection of https://pypi.org/project/numpy/
