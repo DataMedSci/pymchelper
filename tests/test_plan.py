@@ -1,8 +1,6 @@
 import logging
-import shutil
 from typing import Union
 import pytest
-import unittest
 
 from pathlib import Path
 
@@ -43,7 +41,6 @@ def test_call_cmd_option(option_name: str):
 def test_generate_plan(input_file_path: Path, beam_model_path: Union[Path, None], monkeypatch: pytest.MonkeyPatch,
                        tmp_path: Path, capsys: pytest.CaptureFixture):
     """Test plan loading with and without beam model."""
-
     expected_output_file_path = Path(output_file)
 
     # prepare command line arguments, we do it here as we need to have absolute paths
@@ -81,13 +78,11 @@ def test_generate_plan(input_file_path: Path, beam_model_path: Union[Path, None]
 def test_debug_mode(input_file_path: Path, beam_model_path: Union[Path, None], monkeypatch: pytest.MonkeyPatch,
                     tmp_path: Path, capsys: pytest.CaptureFixture):
     """Test plan loading with and without beam model."""
-
     expected_output_file_path = Path(output_file)
 
     # prepare command line arguments, we do it here as we need to have absolute paths
     # later on we will change the current directory to tmp_path and won't be able to resolve them
-    cmd_line_args = [str(input_file_path.resolve())]
-    cmd_line_args.append('-d')
+    cmd_line_args = [str(input_file_path.resolve()), '-d']
     if beam_model_path is not None:
         cmd_line_args.append('-b')
         cmd_line_args.append(str(beam_model_path.resolve()))
