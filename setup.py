@@ -35,11 +35,11 @@ EXTRAS_REQUIRE = {
     'excel': ['xlwt'],
     'hdf': ['h5py'],
     'dicom': [
-        "pydicom>=2.3.1 ; python_version == '3.11'", 
+        "pydicom>=2.3.1 ; python_version == '3.11'",
         "pydicom ; python_version < '3.11'"
     ],
     'pytrip': [
-        'scipy', 
+        'scipy',
         "pytrip98>=3.6.1 ; python_version == '3.10'",
         "pytrip98 ; python_version >= '3.5' and python_version < '3.10'"
     ]
