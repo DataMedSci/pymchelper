@@ -284,7 +284,7 @@ class Plan:
 
         for i, myfield in enumerate(self.fields):
             print("---------------------------------------------------")
-            print("   Field                  : {:02d}/{:02d}:".format(i + 1, self.n_fields))
+            print(f"   Field                  : {i + 1:02d}/{self.n_fields:02d}:")
             myfield.diagnose()
             print("")
 
@@ -363,13 +363,13 @@ class Plan:
                             + f"{xpos:6.2f}   {ypos:6.2f}  " \
                             + f"{fwhmx:6.2f}   {wt:10.4e}\n"
                     output += s
-            logger.debug(f"Export field {j} {fout}, {myfield.layers[0].energy_nominal} MeV")
+            logger.debug("Export field %d %s, %g MeV", j, fout, myfield.layers[0].energy_nominal)
             fout.write_text(output)  # still in field loop, output for every field
 
 
 def load(file: Path, beam_model: BeamModel, scaling: float, flip_xy: bool) -> Plan:
     """Load file, autodiscovery by suffix."""
-    logger.debug(f"load() autodiscovery {file}")
+    logger.debug("load() autodiscovery %s", file)
     ext = file.suffix.lower()  # extract suffix, incl. dot separator
 
     if ext == ".pld":
@@ -421,7 +421,7 @@ def load_PLD_IBA(file_pld: Path, scaling=1.0) -> Plan:
 
     pldlines = file_pld.read_text().split('\n')
     pldlen = len(pldlines)
-    logger.info(f"Read {pldlen} lines of data.")
+    logger.info("Read %d lines of data.", pldlen)
 
     field.layers = []
     field.n_layers = 0
@@ -532,7 +532,7 @@ def load_DICOM_VARIAN(file_dcm: Path, scaling=1.0) -> Plan:
 
     for i, dcm_field in enumerate(dcm_fgs):
         myfield = Field()
-        logger.debug(f"Appending field number {i}...")
+        logger.debug("Appending field number %d...", i)
         p.fields.append(myfield)
         myfield.dose = float(dcm_field['BeamDose'].value)
         myfield.cum_mu = float(dcm_field['BeamMeterset'].value)
