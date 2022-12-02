@@ -34,7 +34,7 @@ Follow these steps to generate single-file executables for Linux using pyinstall
     docker build --tag pymchelper .
     docker run --volume `pwd`/dist:/app/dist pymchelper:latest pyinstaller convertmc.spec
     docker run --volume `pwd`/dist:/app/dist pymchelper:latest pyinstaller runmc.spec
-    docker run --volume `pwd`/dist:/app/dist pymchelper:latest pyinstaller --add-data 'pymchelper/VERSION:pymchelper' --onefile --name pld2sobp pymchelper/utils/pld2sobp.py
+    docker run --volume `pwd`/dist:/app/dist pymchelper:latest pyinstaller --add-data 'pymchelper/VERSION:pymchelper' --onefile --name plan2sobp pymchelper/utils/radiotherapy/plan.py
     docker run --volume `pwd`/dist:/app/dist pymchelper:latest pyinstaller --add-data 'pymchelper/VERSION:pymchelper' --onefile --name mcscripter pymchelper/utils/mcscripter.py
 
 Run some tests::
@@ -45,7 +45,7 @@ Run some tests::
 Generate debian packages for all binaries::
 
     cd debian_packages
-    ./generate_deb_packages.sh convertmc runmc pld2sobp mcscripter
+    ./generate_deb_packages.sh convertmc runmc plan2sobp mcscripter
     
 Deb packages are automatically uploaded to `APT repository <https://github.com/DataMedSci/deb_package_repository>`_  hosted on Github Pages.
 

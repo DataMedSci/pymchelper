@@ -11,7 +11,7 @@ import unittest
 import numpy as np
 import pytest
 
-import pymchelper.utils.pld2sobp
+import pymchelper
 from pymchelper import run
 from pymchelper.input_output import fromfile
 
