@@ -24,7 +24,7 @@ output_file = "sobp.dat"
 def test_call_cmd_no_option():
     """Test calling pymchelper with no options."""
     with pytest.raises(SystemExit) as e:
-        logger.info("Catching: ", e)
+        logger.info("Catching: %s", e)
         pymchelper.utils.radiotherapy.plan.main([])
         assert e.value == 2
 
@@ -33,7 +33,7 @@ def test_call_cmd_no_option():
 def test_call_cmd_option(option_name: str):
     """Test calling pymchelper with no options."""
     with pytest.raises(SystemExit) as e:
-        logger.info("Catching: ", e)
+        logger.info("Catching: %s", e)
         pymchelper.utils.radiotherapy.plan.main([])
         assert e.value == 0
 

@@ -20,7 +20,6 @@ from dataclasses import dataclass, field
 from math import exp, log
 from scipy.interpolate import interp1d
 
-
 logger = logging.getLogger(__name__)
 
 s2fwhm = 2.0 * np.sqrt(2.0 * np.log(2.0))  # 1 FWHM = 2.355 * sigma
@@ -86,22 +85,22 @@ class BeamModel():
         self.has_divergence = False
 
         if cols in (6, 10):
-            self.f_en = interp1d(energy, data[:, 0], kind=k)       # nominal energy [MeV]
-            self.f_e = interp1d(energy, data[:, 1], kind=k)        # measured energy [MeV]
+            self.f_en = interp1d(energy, data[:, 0], kind=k)  # nominal energy [MeV]
+            self.f_e = interp1d(energy, data[:, 1], kind=k)  # measured energy [MeV]
             self.f_espread = interp1d(energy, data[:, 2], kind=k)  # energy spread 1 sigma [% of measured energy]
-            self.f_ppmu = interp1d(energy, data[:, 3], kind=k)     # 1e6 protons per MU  [1e6/MU]
-            self.f_sx = interp1d(energy, data[:, 4], kind=k)       # 1 sigma x [cm]
-            self.f_sy = interp1d(energy, data[:, 5], kind=k)       # 1 sigma y [cm]
+            self.f_ppmu = interp1d(energy, data[:, 3], kind=k)  # 1e6 protons per MU  [1e6/MU]
+            self.f_sx = interp1d(energy, data[:, 4], kind=k)  # 1 sigma x [cm]
+            self.f_sy = interp1d(energy, data[:, 5], kind=k)  # 1 sigma y [cm]
         else:
             logger.error("invalid column count")
 
         if cols == 10:
             logger.debug("Beam model has divergence data")
             self.has_divergence = True
-            self.f_divx = interp1d(energy, data[:, 6], kind=k)     # div x [rad]
-            self.f_divy = interp1d(energy, data[:, 7], kind=k)     # div y [rad]
-            self.f_covx = interp1d(energy, data[:, 8], kind=k)     # cov (x, x') [mm]
-            self.f_covy = interp1d(energy, data[:, 9], kind=k)     # cov (y, y') [mm]
+            self.f_divx = interp1d(energy, data[:, 6], kind=k)  # div x [rad]
+            self.f_divy = interp1d(energy, data[:, 7], kind=k)  # div y [rad]
+            self.f_covx = interp1d(energy, data[:, 8], kind=k)  # cov (x, x') [mm]
+            self.f_covy = interp1d(energy, data[:, 9], kind=k)  # cov (y, y') [mm]
 
         self.data = data
 
@@ -118,7 +117,7 @@ class Layer:
     spotsize: np.array() FWHM width of spot in along x and y axis, respectively [mm]
     enorm : nominal energy in [MeV]
     emeas : measured energy in [MeV] at exit nozzle
-    cmu : cumulative monitor units for this layers [MU]
+    cum_mu : cumulative monitor units for this layers [MU]
     repaint : number of repainting, 0 for no repaints TODO: check what is convention here.
     n_spots : number of spots in total
     mu_to_part_coef : conversion coefficient from MU to number of particles (depends on energy)
@@ -173,8 +172,7 @@ class Field:
         print(indent + f"Total particles        : {self.cum_particles:10.4e} (estimated)")
         print(indent + "------------------------------------------------")
         for i, layer in enumerate(self.layers):
-            print(indent + f"   Layer {i: 3}: {layer.energy_nominal: 10.4f} MeV "
-                  + f"   {layer.n_spots:10d} spots")
+            print(indent + f"   Layer {i: 3}: {layer.energy_nominal: 10.4f} MeV " + f"   {layer.n_spots:10d} spots")
         print(indent + "------------------------------------------------")
         print(indent + f"Highest energy         : {emin:10.4f} MeV")
         print(indent + f"Lowest energy          : {emax:10.4f} MeV")
@@ -226,9 +224,9 @@ class Plan:
                     layer.energy_measured = self.beam_model.f_e(layer.energy_nominal)
                     layer.espread = self.beam_model.f_espread(layer.energy_nominal)
                     layer.spots[:, 3] = layer.spots[:, 2] * layer.mu_to_part_coef * myfield.scaling
-                    layer.spotsize = np.array([self.beam_model.f_sx(layer.energy_nominal),
-                                               self.beam_model.f_sy(layer.energy_nominal)
-                                               ]) * s2fwhm
+                    layer.spotsize = np.array(
+                        [self.beam_model.f_sx(layer.energy_nominal),
+                         self.beam_model.f_sy(layer.energy_nominal)]) * s2fwhm
         else:
             for myfield in self.fields:
                 for layer in myfield.layers:
@@ -334,7 +332,7 @@ class Plan:
 
                 # Do some conversions, since sobp.dat hold different units.
                 energy = layer.energy_measured * 0.001  # convert MeV -> GeV
-                espread = layer.espread * 0.001         # convert MeV -> GeV
+                espread = layer.espread * 0.001  # convert MeV -> GeV
 
                 # Check if field-flip was requested. Then do so for FWHMxy and spot positions
                 if self.flip_xy:
@@ -436,7 +434,7 @@ def load_PLD_IBA(file_pld: Path, scaling=1.0) -> Plan:
     current_plan.patient_firstname = tokens[4].strip()
     current_plan.plan_label = tokens[5].strip()
     current_plan.beam_name = tokens[6].strip()
-    field.cmu = float(tokens[7].strip())   # total amount of MUs in this field
+    field.cmu = float(tokens[7].strip())  # total amount of MUs in this field
     field.pld_csetweight = float(tokens[8].strip())
     field.n_layers = int(tokens[9].strip())  # number of layers
 
@@ -457,7 +455,7 @@ def load_PLD_IBA(file_pld: Path, scaling=1.0) -> Plan:
 
             # tokens[0] just holds the "Layer" keyword
             # IBA PLD holds nominal spot size in 1D, 1 sigma in [mm]
-            spotsize = float(tokens[1].strip()) * s2fwhm   # convert mm sigma to mm FWHM (this is just a float)
+            spotsize = float(tokens[1].strip()) * s2fwhm  # convert mm sigma to mm FWHM (this is just a float)
 
             energy_nominal = float(tokens[2].strip())
             cmu = float(tokens[3].strip())
@@ -465,14 +463,20 @@ def load_PLD_IBA(file_pld: Path, scaling=1.0) -> Plan:
             logger.debug(tokens)
 
             # read number of repaints only if 5th column is present, otherwise set to 0
-            nrepaint = 0  # TODO: suspect repaints = 1 means all dose will be delivered once.
+            nrepaint = 0  # we suspect repaints = 1 means all dose will be delivered once.
             if len(tokens) > 5:
-                nrepaint = tokens[5].strip()
+                nrepaint = int(tokens[5].strip())
 
             spots = np.array([])
 
-            layer = Layer(spots, np.array([spotsize, spotsize]), energy_nominal,
-                          energy_nominal, espread, cmu, nrepaint, nspots)
+            layer = Layer(spots=spots,
+                          spotsize=np.array([spotsize, spotsize]),
+                          energy_nominal=energy_nominal,
+                          energy_measured=energy_nominal,
+                          espread=espread,
+                          cum_mu=cmu,
+                          n_spots=nspots,
+                          repaint=nrepaint)
 
             for element in elements:  # loop over each spot in this layer
                 token = element.split(",")
@@ -564,7 +568,9 @@ def load_DICOM_VARIAN(file_dcm: Path, scaling=1.0) -> Plan:
 
 
 def load_RASTER_GSI(file_rst: Path, scaling=1.0):
-    """TODO: this is implemented in pytrip. Import it?."""
+    """this is implemented in pytrip, maybe we could import it?."""
+    logging.warning("GSI raster file reader not implemented yet.")
+    logging.info("Opening file %s", file_rst)
     p = Plan()
     p.scaling = scaling  # nee note in IBA reader above.
     return p
@@ -585,27 +591,40 @@ def main(args=None) -> int:
                         metavar="input_file",
                         type=Path,
                         help="path to input file in IBA '.pld'-format or Varian DICOM-RN.")
-    parser.add_argument('fout', nargs='?', metavar="output_file",
+    parser.add_argument('fout',
+                        nargs='?',
+                        metavar="output_file",
                         type=Path,
                         help="path to the SHIELD-HIT12A/FLUKA output_file. Default: 'sobp.dat'",
                         default="sobp.dat")
-    parser.add_argument('-b', metavar="beam_model.csv",
+    parser.add_argument('-b',
+                        metavar="beam_model.csv",
                         type=Path,
-                        help="optional input beam model in commasparated CSV format", dest='fbm',
+                        help="optional input beam model in commasparated CSV format",
+                        dest='fbm',
                         default=None)
-    parser.add_argument('-i', '--invert', action='store_true',
-                        help="invert XY axis", dest="invert", default=False)
-    parser.add_argument('-f', '--field', type=int, dest='field_nr',
-                        help="select which field to export, for dicom files holding several fields. "
-                        + "'0' will produce multiple output files with a running number.", default=1)
-    parser.add_argument('-d', '--diag', action='store_true', help="print diagnostics, but do not export data",
-                        dest="diag", default=False)
-    parser.add_argument('-s', '--scale', type=float, dest='scale',
-                        help="number of particles*dE/dx per MU", default=1.0)
-    parser.add_argument('-c', '--columns', type=int, dest='cols',
-                        help="number of columns in output file. 5, 6, 7 col format supported, default is 7.", default=7)
-    parser.add_argument('-v', '--verbosity', action='count',
-                        help="increase output verbosity", default=0)
+    parser.add_argument('-i', '--invert', action='store_true', help="invert XY axis", dest="invert", default=False)
+    parser.add_argument('-f',
+                        '--field',
+                        type=int,
+                        dest='field_nr',
+                        help="select which field to export, for dicom files holding several fields. " +
+                        "'0' will produce multiple output files with a running number.",
+                        default=1)
+    parser.add_argument('-d',
+                        '--diag',
+                        action='store_true',
+                        help="print diagnostics, but do not export data",
+                        dest="diag",
+                        default=False)
+    parser.add_argument('-s', '--scale', type=float, dest='scale', help="number of particles*dE/dx per MU", default=1.0)
+    parser.add_argument('-c',
+                        '--columns',
+                        type=int,
+                        dest='cols',
+                        help="number of columns in output file. 5, 6, 7 col format supported, default is 7.",
+                        default=7)
+    parser.add_argument('-v', '--verbosity', action='count', help="increase output verbosity", default=0)
     parser.add_argument('-V', '--version', action='version', version=pymchelper.__version__)
     parsed_args = parser.parse_args(args)
 
