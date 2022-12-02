@@ -75,12 +75,6 @@ def test_generate_plan(input_file_path: Path, beam_model_path: Union[Path, None]
     # check if file is not empty
     assert expected_output_file_path.stat().st_size > 0
 
-    # go back to original working directory
-    monkeypatch.chdir(Path.cwd())
-
-    # remove tmp_path directory and all its contents
-    shutil.rmtree(tmp_path)
-
 
 @pytest.mark.parametrize("input_file_path", input_files.values(), ids=input_files.keys())
 @pytest.mark.parametrize("beam_model_path", [beam_model_path, None], ids=[beam_model_path.stem, "no_beam_model"])
@@ -119,9 +113,3 @@ def test_debug_mode(input_file_path: Path, beam_model_path: Union[Path, None], m
 
     # check if output file exists
     assert not expected_output_file_path.exists()
-
-    # go back to original working directory
-    monkeypatch.chdir(Path.cwd())
-
-    # remove tmp_path directory and all its contents
-    shutil.rmtree(tmp_path)
