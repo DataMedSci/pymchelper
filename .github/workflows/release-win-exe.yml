@@ -43,8 +43,8 @@ jobs:
       - name: Generate single-file executables for mcscripter
         run: pyinstaller --add-data 'VERSION;pymchelper' --onefile --name mcscripter pymchelper\utils\mcscripter.py
 
-      - name: Generate single-file executables for pld2sobp
-        run: pyinstaller --add-data 'VERSION;pymchelper' --onefile --name pld2sobp pymchelper\utils\pld2sobp.py
+      - name: Generate single-file executables for plan2sobp
+        run: pyinstaller --add-data 'VERSION;pymchelper' --onefile --name plan2sobp pymchelper\utils\radiotherapy\plan.py
 
       - name: Generate single-file executables for runmc
         run: pyinstaller --add-data 'VERSION;pymchelper' --onefile --name runmc pymchelper\utils\runmc.py
@@ -55,7 +55,7 @@ jobs:
       - name: Test single-file executables
         run: |
           dist\mcscripter.exe --version
-          dist\pld2sobp.exe --version
+          dist\plan2sobp.exe --version
           dist\runmc.exe --version
           dist\convertmc --version
 

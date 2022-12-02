@@ -30,8 +30,8 @@ jobs:
       - name: Generate single-file executables for mcscripter
         run: docker run --volume `pwd`/dist:/app/dist pymchelper:latest pyinstaller --add-data 'pymchelper/VERSION:pymchelper' --onefile --name mcscripter pymchelper/utils/mcscripter.py
 
-      - name: Generate single-file executables for pld2sobp
-        run: docker run --volume `pwd`/dist:/app/dist pymchelper:latest pyinstaller --add-data 'pymchelper/VERSION:pymchelper' --onefile --name pld2sobp pymchelper/utils/pld2sobp.py
+      - name: Generate single-file executables for plan2sobp
+        run: docker run --volume `pwd`/dist:/app/dist pymchelper:latest pyinstaller --add-data 'pymchelper/VERSION:pymchelper' --onefile --name plan2sobp pymchelper/utils/radiotherapy/plan.py
 
       - name: Generate single-file executables for runmc
         run: docker run --volume `pwd`/dist:/app/dist pymchelper:latest pyinstaller runmc.spec
@@ -43,7 +43,7 @@ jobs:
         run: |
           ls -alh ./dist/
           ./dist/mcscripter --version
-          ./dist/pld2sobp --version
+          ./dist/plan2sobp --version
           ./dist/runmc --version
           ./dist/convertmc --version
           docker run  -v `pwd`/dist:/test/ ubuntu:12.04 /test/convertmc --version
@@ -96,7 +96,7 @@ jobs:
 
       - name: Generate deb packages
         working-directory: debian_packages
-        run: ./generate_deb_packages.sh convertmc runmc pld2sobp mcscripter
+        run: ./generate_deb_packages.sh convertmc runmc plan2sobp mcscripter
 
       - name: Archive deb package as artifacts
         uses: actions/upload-artifact@v3
