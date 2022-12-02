@@ -1,5 +1,4 @@
 from itertools import chain
-import os
 from pathlib import Path
 import setuptools
 
