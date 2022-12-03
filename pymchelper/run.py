@@ -76,6 +76,12 @@ def main(args=None):
     parser_plotdata = subparsers.add_parser(Converters.plotdata.name, help='converts to plot data')
     add_default_options(parser_plotdata)
 
+    parser_dicom = subparsers.add_parser(Converters.dicom.name, help='converts to DICOM file')
+    add_default_options(parser_dicom)
+    parser_dicom.add_argument('-d', '--details',
+                              help='print detailed information about data attribute',
+                              action="store_true")
+
     parser_inspect = subparsers.add_parser(Converters.inspect.name, help='prints metadata')
     add_default_options(parser_inspect)
     parser_inspect.add_argument('-d', '--details',

@@ -8,7 +8,7 @@ from pymchelper.writers.sparse import SparseWriter
 from pymchelper.writers.trip98cube import TRiP98CubeWriter
 from pymchelper.writers.trip98ddd import TRiP98DDDWriter
 from pymchelper.writers.hdf import HdfWriter
-
+from pymchelper.writers.dicom import DicomWriter
 
 class Converters(IntEnum):
     """
@@ -23,6 +23,7 @@ class Converters(IntEnum):
     sparse = 7
     inspect = 8
     hdf = 9
+    dicom = 10
 
     @classmethod
     def _converter_mapping(cls, item):
@@ -35,13 +36,14 @@ class Converters(IntEnum):
             cls.excel: ExcelWriter,
             cls.sparse: SparseWriter,
             cls.inspect: Inspector,
-            cls.hdf: HdfWriter
+            cls.hdf: HdfWriter,
+            cls.dicom: DicomWriter
         }.get(item)
 
     @classmethod
-    def fromname(cls, name):
+    def fromname(cls, name : str):
         return cls._converter_mapping(Converters[name])
 
     @classmethod
-    def fromnumber(cls, number):
+    def fromnumber(cls, number : int):
         return cls._converter_mapping[Converters(number)]
