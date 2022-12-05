@@ -3,6 +3,7 @@
 import argparse
 import glob
 import logging
+from pathlib import Path
 import sys
 
 from pymchelper.estimator import ErrorEstimate
@@ -78,9 +79,9 @@ def main(args=None):
 
     parser_dicom = subparsers.add_parser(Converters.dicom.name, help='converts to DICOM file')
     add_default_options(parser_dicom)
-    parser_dicom.add_argument('-d', '--details',
-                              help='print detailed information about data attribute',
-                              action="store_true")
+    parser_dicom.add_argument('-d', '--dicom',
+                              help='path to the reference DICOM file',
+                              type=Path)
 
     parser_inspect = subparsers.add_parser(Converters.inspect.name, help='prints metadata')
     add_default_options(parser_inspect)
