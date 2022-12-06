@@ -288,7 +288,7 @@ class Plan:
             myfield.diagnose()
             print("")
 
-    def export(self, fn: Path, cols: int, field_nr: int):
+    def export(self, fn: Path, cols: int, field_nr: int, nominal: bool):
         """
         Export file to sobp.dat format, 'cols' marking the number of columns.
 
@@ -298,6 +298,7 @@ class Plan:
                6 column format: energy[GeV] x[cm] y[cm] FWHMx[cm] FWHMy[cm] weight
                7 column format: energy[GeV] sigmaT0[GeV] x[cm] y[cm] FWHM[cm] weight
         field_nr: in case of multiple field, select what field to export, use '0' to export all fields.
+        nominal : flag whether norminal energy should be exported or not
 
         TODO:
                11 columns: ENERGY, ESPREAD, X, Y, FWHMx, FWHMy, WEIGHT, DIVx, DIVy, COVx, COVy
@@ -331,7 +332,10 @@ class Plan:
                     continue
 
                 # Do some conversions, since sobp.dat hold different units.
-                energy = layer.energy_measured * 0.001  # convert MeV -> GeV
+                if nominal:
+                    energy = layer.energy_nominal * 0.001  # convert MeV -> GeV
+                else:
+                    energy = layer.energy_measured * 0.001  # convert MeV -> GeV
                 espread = layer.espread * 0.001  # convert MeV -> GeV
 
                 # Check if field-flip was requested. Then do so for FWHMxy and spot positions
@@ -608,14 +612,20 @@ def main(args=None) -> int:
                         '--field',
                         type=int,
                         dest='field_nr',
-                        help="select which field to export, for dicom files holding several fields. " +
-                        "'0' will produce multiple output files with a running number.",
+                        help="select which field to export, for dicom files holding several fields. "
+                        + "'0' will produce multiple output files with a running number.",
                         default=1)
     parser.add_argument('-d',
                         '--diag',
                         action='store_true',
                         help="print diagnostics, but do not export data",
                         dest="diag",
+                        default=False)
+    parser.add_argument('-n',
+                        '--nominal',
+                        action='store_true',
+                        help="save nominal energies instead of beam model energies",
+                        dest="nominal",
                         default=False)
     parser.add_argument('-s', '--scale', type=float, dest='scale', help="number of particles*dE/dx per MU", default=1.0)
     parser.add_argument('-c',
@@ -644,7 +654,7 @@ def main(args=None) -> int:
     if parsed_args.diag:
         pln.diagnose()
     else:
-        pln.export(parsed_args.fout, parsed_args.cols, parsed_args.field_nr)
+        pln.export(parsed_args.fout, parsed_args.cols, parsed_args.field_nr, parsed_args.nominal)
 
     return 0
 
