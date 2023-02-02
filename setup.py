@@ -1,11 +1,11 @@
 from itertools import chain
-import os
+from pathlib import Path
 import setuptools
 
 from pymchelper.version import git_version
 
 
-def write_version_py(filename=os.path.join('pymchelper', 'VERSION')):
+def write_version_py():
     """
     Generate a file with a version number obtained from git (i.e. name of last tag + additional info)
     It uses a dedicated function called `git_version` which sits in the `version` module.
@@ -15,23 +15,17 @@ def write_version_py(filename=os.path.join('pymchelper', 'VERSION')):
     cnt = """%(version)s
 """
 
-    # we avoid `with` construct to be backward compatible with python 2.x
     GIT_REVISION = git_version()
-    a = open(filename, 'w')
-    try:
-        a.write(cnt % {'version': GIT_REVISION})
-    finally:
-        a.close()
+    with open(Path('pymchelper', 'VERSION'), 'w') as f:
+        f.write(cnt % {'version': GIT_REVISION})
 
 
 # automatically generate VERSION file upon import or execution of this (setup.py) script
 write_version_py()
 
-
 # extract readme text from the markdown file
 with open('README.md') as readme_file:
     readme = readme_file.read()
-
 
 # extras_require will be used in two scenarios:
 #  - installation of pymchelper with all feature via pip using `pip install "pymchelper[full]"`
@@ -40,18 +34,23 @@ EXTRAS_REQUIRE = {
     'image': ['matplotlib'],
     'excel': ['xlwt'],
     'hdf': ['h5py'],
+    'dicom': [
+        "pydicom>=2.3.1 ; python_version == '3.11'",
+        "pydicom ; python_version < '3.11'"
+    ],
     'pytrip': [
         'scipy',
         "pytrip98>=3.8.0 ; python_version >= '3.11'",
         "pytrip98>=3.6.1 ; python_version >= '3.10' and python_version < '3.11'",
-        "pytrip98 ; python_version >= '3.5' and python_version < '3.10'"]
+        "pytrip98 ; python_version >= '3.5' and python_version < '3.10'"
+    ]
 }
 
 # inspired by https://github.com/pyimgui/pyimgui/blob/master/setup.py
 # construct special 'full' extra that adds requirements for all built-in
 # backend integrations and additional extra features.
 EXTRAS_REQUIRE['full'] = list(set(chain(*EXTRAS_REQUIRE.values())))
-EXTRAS_REQUIRE['full'].append(["hipsterplot", "bashplotlib"])  # these are needed by verbose inspect tool
+EXTRAS_REQUIRE['full'].extend(["hipsterplot", "bashplotlib"])  # these are needed by verbose inspect tool
 
 # here is table with corresponding numpy versions, and supported python and OS versions
 # it is based on inspection of https://pypi.org/project/numpy/
@@ -122,8 +121,8 @@ setuptools.setup(
         'console_scripts': [
             'convertmc=pymchelper.run:main',
             'runmc=pymchelper.utils.runmc:main',
-            'pld2sobp=pymchelper.utils.pld2sobp:main',
             'mcscripter=pymchelper.utils.mcscripter:main',
+            'plan2sobp=pymchelper.utils.radiotherapy.plan:main',
         ],
     },
     package_data={'pymchelper': ['flair/db/*', 'VERSION']},
