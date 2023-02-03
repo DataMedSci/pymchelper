@@ -6,7 +6,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
 
-    <title>Inspect data &#8212; pymchelper 2.2.1 documentation</title>
+    <title>Inspect data &#8212; pymchelper 2.2.3 documentation</title>
   
   
   
@@ -34,9 +34,6 @@
 <link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=796348d33e8b1d947c94">
 
     <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
-    <script src="_static/jquery.js"></script>
-    <script src="_static/underscore.js"></script>
-    <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
     <script src="_static/doctools.js"></script>
     <script src="_static/sphinx_highlight.js"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = 'inspect_converter';</script>
@@ -98,8 +95,9 @@
   
 
   
+    <img src="_static/logo-light.png" class="logo__image only-light" alt="Logo image">
+    <img src="_static/logo-dark.png" class="logo__image only-dark" alt="Logo image">
   
-    <p class="title logo__title">pymchelper 2.2.1 documentation</p>
   
 </a>
     
@@ -320,37 +318,37 @@ but prints on the screen metadata of the input binary file.</p>
 <section id="an-example-usage">
 <h2>An example usage<a class="headerlink" href="#an-example-usage" title="Permalink to this heading">#</a></h2>
 <p>As usual we can apply standard command:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>convertmc inspect ex_dose.bdo
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>convertmc<span class="w"> </span>inspect<span class="w"> </span>ex_dose.bdo
 </pre></div>
 </div>
 <p>We should expect to see following output on the screen:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>INFO:pymchelper.readers.shieldhit:Reading: ex_dose.bdo
-dettyp                  : <span class="s1">&#39;DOSE&#39;</span>
-filedate                : <span class="s1">&#39;Fri, 06 Oct 2017 23:05:49 +0200&#39;</span>
-geotyp                  : <span class="s1">&#39;CYL&#39;</span>
-host                    : <span class="s1">&#39;nz61-6&#39;</span>
-mc_code_version         : <span class="s1">&#39;0.6.0-dev&#39;</span>
-nstat                   : <span class="s1">&#39;10000&#39;</span>
-nx                      : <span class="s1">&#39;1&#39;</span>
-ny                      : <span class="s1">&#39;1&#39;</span>
-nz                      : <span class="s1">&#39;1000&#39;</span>
-pages                   : <span class="s1">&#39;1&#39;</span>
-particle                : <span class="s1">&#39;-1&#39;</span>
-particle_a              : <span class="s1">&#39;-1&#39;</span>
-particle_z              : <span class="s1">&#39;-1&#39;</span>
-title                   : <span class="s1">&#39;Dose&#39;</span>
-tripdose                : <span class="s1">&#39;0.0&#39;</span>
-tripntot                : <span class="s1">&#39;-1&#39;</span>
-units                   : <span class="s1">&#39;[&#39;</span>cm<span class="s1">&#39;, &#39;</span>radians<span class="s1">&#39;, &#39;</span>cm<span class="s1">&#39;, &#39;</span><span class="o">(</span>nil<span class="o">)</span><span class="s1">&#39;, &#39;</span> MeV/g/primary<span class="s1">&#39;, &#39;</span>Dose<span class="s1">&#39;, &#39;</span>Radius <span class="o">(</span>R<span class="o">)</span><span class="s1">&#39;, &#39;</span>Angle <span class="o">(</span>PHI<span class="o">)</span><span class="s1">&#39;, &#39;</span>Position <span class="o">(</span>Z<span class="o">)</span><span class="s1">&#39;, &#39;&#39;, &#39;&#39;]&#39;</span>
-xmax                    : <span class="s1">&#39;10.0&#39;</span>
-xmin                    : <span class="s1">&#39;0.0&#39;</span>
-ymax                    : <span class="s1">&#39;6.28318530718&#39;</span>
-ymin                    : <span class="s1">&#39;0.0&#39;</span>
-zmax                    : <span class="s1">&#39;30.0&#39;</span>
-zmin                    : <span class="s1">&#39;0.0&#39;</span>
-zone_start              : <span class="s1">&#39;-1&#39;</span>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>INFO:pymchelper.readers.shieldhit:Reading:<span class="w"> </span>ex_dose.bdo
+dettyp<span class="w">                  </span>:<span class="w"> </span><span class="s1">&#39;DOSE&#39;</span>
+filedate<span class="w">                </span>:<span class="w"> </span><span class="s1">&#39;Fri, 06 Oct 2017 23:05:49 +0200&#39;</span>
+geotyp<span class="w">                  </span>:<span class="w"> </span><span class="s1">&#39;CYL&#39;</span>
+host<span class="w">                    </span>:<span class="w"> </span><span class="s1">&#39;nz61-6&#39;</span>
+mc_code_version<span class="w">         </span>:<span class="w"> </span><span class="s1">&#39;0.6.0-dev&#39;</span>
+nstat<span class="w">                   </span>:<span class="w"> </span><span class="s1">&#39;10000&#39;</span>
+nx<span class="w">                      </span>:<span class="w"> </span><span class="s1">&#39;1&#39;</span>
+ny<span class="w">                      </span>:<span class="w"> </span><span class="s1">&#39;1&#39;</span>
+nz<span class="w">                      </span>:<span class="w"> </span><span class="s1">&#39;1000&#39;</span>
+pages<span class="w">                   </span>:<span class="w"> </span><span class="s1">&#39;1&#39;</span>
+particle<span class="w">                </span>:<span class="w"> </span><span class="s1">&#39;-1&#39;</span>
+particle_a<span class="w">              </span>:<span class="w"> </span><span class="s1">&#39;-1&#39;</span>
+particle_z<span class="w">              </span>:<span class="w"> </span><span class="s1">&#39;-1&#39;</span>
+title<span class="w">                   </span>:<span class="w"> </span><span class="s1">&#39;Dose&#39;</span>
+tripdose<span class="w">                </span>:<span class="w"> </span><span class="s1">&#39;0.0&#39;</span>
+tripntot<span class="w">                </span>:<span class="w"> </span><span class="s1">&#39;-1&#39;</span>
+units<span class="w">                   </span>:<span class="w"> </span><span class="s1">&#39;[&#39;</span>cm<span class="s1">&#39;, &#39;</span>radians<span class="s1">&#39;, &#39;</span>cm<span class="s1">&#39;, &#39;</span><span class="o">(</span>nil<span class="o">)</span><span class="s1">&#39;, &#39;</span><span class="w"> </span>MeV/g/primary<span class="s1">&#39;, &#39;</span>Dose<span class="s1">&#39;, &#39;</span>Radius<span class="w"> </span><span class="o">(</span>R<span class="o">)</span><span class="s1">&#39;, &#39;</span>Angle<span class="w"> </span><span class="o">(</span>PHI<span class="o">)</span><span class="s1">&#39;, &#39;</span>Position<span class="w"> </span><span class="o">(</span>Z<span class="o">)</span><span class="s1">&#39;, &#39;&#39;, &#39;&#39;]&#39;</span>
+xmax<span class="w">                    </span>:<span class="w"> </span><span class="s1">&#39;10.0&#39;</span>
+xmin<span class="w">                    </span>:<span class="w"> </span><span class="s1">&#39;0.0&#39;</span>
+ymax<span class="w">                    </span>:<span class="w"> </span><span class="s1">&#39;6.28318530718&#39;</span>
+ymin<span class="w">                    </span>:<span class="w"> </span><span class="s1">&#39;0.0&#39;</span>
+zmax<span class="w">                    </span>:<span class="w"> </span><span class="s1">&#39;30.0&#39;</span>
+zmin<span class="w">                    </span>:<span class="w"> </span><span class="s1">&#39;0.0&#39;</span>
+zone_start<span class="w">              </span>:<span class="w"> </span><span class="s1">&#39;-1&#39;</span>
 ***************************************************************************
-Data min: <span class="m">3</span>.04792e-05, max: <span class="m">0</span>.0715219
+Data<span class="w"> </span>min:<span class="w"> </span><span class="m">3</span>.04792e-05,<span class="w"> </span>max:<span class="w"> </span><span class="m">0</span>.0715219
 </pre></div>
 </div>
 </section>
@@ -358,89 +356,89 @@ Data min: <span class="m">3</span>.04792e-05, max: <span class="m">0</span>.0715
 <h2>Advanced usage<a class="headerlink" href="#advanced-usage" title="Permalink to this heading">#</a></h2>
 <dl>
 <dt>Very simple ASCII-art plots can be also printed on the screen, assuming that two libraries: bashplotlib and hipsterplot</dt><dd><p>will be installed first:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip install bashplotlib hipsterplot
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip<span class="w"> </span>install<span class="w"> </span>bashplotlib<span class="w"> </span>hipsterplot
 </pre></div>
 </div>
 </dd>
 </dl>
 <p>To activate plotting additional option has to be used:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>convertmc inspect ex_dose.bdo --details
-INFO:pymchelper.readers.shieldhit:Reading: ex_dose.bdo
-dettyp                  : <span class="s1">&#39;DOSE&#39;</span>
-filedate                : <span class="s1">&#39;Fri, 06 Oct 2017 23:05:49 +0200&#39;</span>
-geotyp                  : <span class="s1">&#39;CYL&#39;</span>
-host                    : <span class="s1">&#39;nz61-6&#39;</span>
-mc_code_version         : <span class="s1">&#39;0.6.0-dev&#39;</span>
-nstat                   : <span class="s1">&#39;10000&#39;</span>
-nx                      : <span class="s1">&#39;1&#39;</span>
-ny                      : <span class="s1">&#39;1&#39;</span>
-nz                      : <span class="s1">&#39;1000&#39;</span>
-pages                   : <span class="s1">&#39;1&#39;</span>
-particle                : <span class="s1">&#39;-1&#39;</span>
-particle_a              : <span class="s1">&#39;-1&#39;</span>
-particle_z              : <span class="s1">&#39;-1&#39;</span>
-title                   : <span class="s1">&#39;Dose&#39;</span>
-tripdose                : <span class="s1">&#39;0.0&#39;</span>
-tripntot                : <span class="s1">&#39;-1&#39;</span>
-units                   : <span class="s1">&#39;[&#39;</span>cm<span class="s1">&#39;, &#39;</span>radians<span class="s1">&#39;, &#39;</span>cm<span class="s1">&#39;, &#39;</span><span class="o">(</span>nil<span class="o">)</span><span class="s1">&#39;, &#39;</span> MeV/g/primary<span class="s1">&#39;, &#39;</span>Dose<span class="s1">&#39;, &#39;</span>Radius <span class="o">(</span>R<span class="o">)</span><span class="s1">&#39;, &#39;</span>Angle <span class="o">(</span>PHI<span class="o">)</span><span class="s1">&#39;, &#39;</span>Position <span class="o">(</span>Z<span class="o">)</span><span class="s1">&#39;, &#39;&#39;, &#39;&#39;]&#39;</span>
-xmax                    : <span class="s1">&#39;10.0&#39;</span>
-xmin                    : <span class="s1">&#39;0.0&#39;</span>
-ymax                    : <span class="s1">&#39;6.28318530718&#39;</span>
-ymin                    : <span class="s1">&#39;0.0&#39;</span>
-zmax                    : <span class="s1">&#39;30.0&#39;</span>
-zmin                    : <span class="s1">&#39;0.0&#39;</span>
-zone_start              : <span class="s1">&#39;-1&#39;</span>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>convertmc<span class="w"> </span>inspect<span class="w"> </span>ex_dose.bdo<span class="w"> </span>--details
+INFO:pymchelper.readers.shieldhit:Reading:<span class="w"> </span>ex_dose.bdo
+dettyp<span class="w">                  </span>:<span class="w"> </span><span class="s1">&#39;DOSE&#39;</span>
+filedate<span class="w">                </span>:<span class="w"> </span><span class="s1">&#39;Fri, 06 Oct 2017 23:05:49 +0200&#39;</span>
+geotyp<span class="w">                  </span>:<span class="w"> </span><span class="s1">&#39;CYL&#39;</span>
+host<span class="w">                    </span>:<span class="w"> </span><span class="s1">&#39;nz61-6&#39;</span>
+mc_code_version<span class="w">         </span>:<span class="w"> </span><span class="s1">&#39;0.6.0-dev&#39;</span>
+nstat<span class="w">                   </span>:<span class="w"> </span><span class="s1">&#39;10000&#39;</span>
+nx<span class="w">                      </span>:<span class="w"> </span><span class="s1">&#39;1&#39;</span>
+ny<span class="w">                      </span>:<span class="w"> </span><span class="s1">&#39;1&#39;</span>
+nz<span class="w">                      </span>:<span class="w"> </span><span class="s1">&#39;1000&#39;</span>
+pages<span class="w">                   </span>:<span class="w"> </span><span class="s1">&#39;1&#39;</span>
+particle<span class="w">                </span>:<span class="w"> </span><span class="s1">&#39;-1&#39;</span>
+particle_a<span class="w">              </span>:<span class="w"> </span><span class="s1">&#39;-1&#39;</span>
+particle_z<span class="w">              </span>:<span class="w"> </span><span class="s1">&#39;-1&#39;</span>
+title<span class="w">                   </span>:<span class="w"> </span><span class="s1">&#39;Dose&#39;</span>
+tripdose<span class="w">                </span>:<span class="w"> </span><span class="s1">&#39;0.0&#39;</span>
+tripntot<span class="w">                </span>:<span class="w"> </span><span class="s1">&#39;-1&#39;</span>
+units<span class="w">                   </span>:<span class="w"> </span><span class="s1">&#39;[&#39;</span>cm<span class="s1">&#39;, &#39;</span>radians<span class="s1">&#39;, &#39;</span>cm<span class="s1">&#39;, &#39;</span><span class="o">(</span>nil<span class="o">)</span><span class="s1">&#39;, &#39;</span><span class="w"> </span>MeV/g/primary<span class="s1">&#39;, &#39;</span>Dose<span class="s1">&#39;, &#39;</span>Radius<span class="w"> </span><span class="o">(</span>R<span class="o">)</span><span class="s1">&#39;, &#39;</span>Angle<span class="w"> </span><span class="o">(</span>PHI<span class="o">)</span><span class="s1">&#39;, &#39;</span>Position<span class="w"> </span><span class="o">(</span>Z<span class="o">)</span><span class="s1">&#39;, &#39;&#39;, &#39;&#39;]&#39;</span>
+xmax<span class="w">                    </span>:<span class="w"> </span><span class="s1">&#39;10.0&#39;</span>
+xmin<span class="w">                    </span>:<span class="w"> </span><span class="s1">&#39;0.0&#39;</span>
+ymax<span class="w">                    </span>:<span class="w"> </span><span class="s1">&#39;6.28318530718&#39;</span>
+ymin<span class="w">                    </span>:<span class="w"> </span><span class="s1">&#39;0.0&#39;</span>
+zmax<span class="w">                    </span>:<span class="w"> </span><span class="s1">&#39;30.0&#39;</span>
+zmin<span class="w">                    </span>:<span class="w"> </span><span class="s1">&#39;0.0&#39;</span>
+zone_start<span class="w">              </span>:<span class="w"> </span><span class="s1">&#39;-1&#39;</span>
 ***************************************************************************
-Data min: <span class="m">3</span>.04792e-05, max: <span class="m">0</span>.0715219
+Data<span class="w"> </span>min:<span class="w"> </span><span class="m">3</span>.04792e-05,<span class="w"> </span>max:<span class="w"> </span><span class="m">0</span>.0715219
 ***************************************************************************
-Data scatter plot
-    <span class="m">0</span>.0691                                                            <span class="c1">#:</span>
-    <span class="m">0</span>.0644                                                            <span class="p">|</span>.
-    <span class="m">0</span>.0596                                                           :.<span class="p">|</span>
-    <span class="m">0</span>.0548                                                           <span class="c1"># .</span>
-    <span class="m">0</span>.0501                                                           <span class="c1"># .</span>
-    <span class="m">0</span>.0453                                                          <span class="c1">#: .</span>
-    <span class="m">0</span>.0405                                                         <span class="c1">##  :</span>
-    <span class="m">0</span>.0358                                                        <span class="c1">##</span>
-    <span class="m">0</span>.0310                                                    .###.    :
-    <span class="m">0</span>.0262                                            . <span class="c1">#######        .</span>
-    <span class="m">0</span>.0215                       <span class="c1">#:.####################|               :</span>
-    <span class="m">0</span>.0167 <span class="c1">######################### .                                  .</span>
-    <span class="m">0</span>.0119                                                              <span class="p">|</span>
-    <span class="m">0</span>.0072                                                              :
-    <span class="m">0</span>.0024                                                              <span class="c1">#########</span>
+Data<span class="w"> </span>scatter<span class="w"> </span>plot
+<span class="w">    </span><span class="m">0</span>.0691<span class="w">                                                            </span><span class="c1">#:</span>
+<span class="w">    </span><span class="m">0</span>.0644<span class="w">                                                            </span><span class="p">|</span>.
+<span class="w">    </span><span class="m">0</span>.0596<span class="w">                                                           </span>:.<span class="p">|</span>
+<span class="w">    </span><span class="m">0</span>.0548<span class="w">                                                           </span><span class="c1"># .</span>
+<span class="w">    </span><span class="m">0</span>.0501<span class="w">                                                           </span><span class="c1"># .</span>
+<span class="w">    </span><span class="m">0</span>.0453<span class="w">                                                          </span><span class="c1">#: .</span>
+<span class="w">    </span><span class="m">0</span>.0405<span class="w">                                                         </span><span class="c1">##  :</span>
+<span class="w">    </span><span class="m">0</span>.0358<span class="w">                                                        </span><span class="c1">##</span>
+<span class="w">    </span><span class="m">0</span>.0310<span class="w">                                                    </span>.###.<span class="w">    </span>:
+<span class="w">    </span><span class="m">0</span>.0262<span class="w">                                            </span>.<span class="w"> </span><span class="c1">#######        .</span>
+<span class="w">    </span><span class="m">0</span>.0215<span class="w">                       </span><span class="c1">#:.####################|               :</span>
+<span class="w">    </span><span class="m">0</span>.0167<span class="w"> </span><span class="c1">######################### .                                  .</span>
+<span class="w">    </span><span class="m">0</span>.0119<span class="w">                                                              </span><span class="p">|</span>
+<span class="w">    </span><span class="m">0</span>.0072<span class="w">                                                              </span>:
+<span class="w">    </span><span class="m">0</span>.0024<span class="w">                                                              </span><span class="c1">#########</span>
 ***************************************************************************
-Data histogram
+Data<span class="w"> </span>histogram
 
- <span class="m">106</span><span class="p">|</span>  o
- <span class="m">100</span><span class="p">|</span>  o                  o
-  <span class="m">95</span><span class="p">|</span>  o                o o
-  <span class="m">89</span><span class="p">|</span>  o                ooo
-  <span class="m">84</span><span class="p">|</span>  o                ooo
-  <span class="m">78</span><span class="p">|</span>  o                ooo
-  <span class="m">73</span><span class="p">|</span>  o               ooooo
-  <span class="m">67</span><span class="p">|</span>  o              oooooo
-  <span class="m">62</span><span class="p">|</span>  o              oooooo
-  <span class="m">56</span><span class="p">|</span>  o              oooooo
-  <span class="m">50</span><span class="p">|</span>  o              oooooo
-  <span class="m">45</span><span class="p">|</span>  o             ooooooo
-  <span class="m">39</span><span class="p">|</span>  o             ooooooo o
-  <span class="m">34</span><span class="p">|</span>  o             ooooooooo
-  <span class="m">28</span><span class="p">|</span>  o             oooooooooo
-  <span class="m">23</span><span class="p">|</span>  o             oooooooooo o
-  <span class="m">17</span><span class="p">|</span>  o             oooooooooooo oo
-  <span class="m">12</span><span class="p">|</span>  o             ooooooooooooooo
-   <span class="m">6</span><span class="p">|</span>  o             ooooooooooooooooo o o    o
-   <span class="m">1</span><span class="p">|</span> ooooooo o o   ooooooooooooooooooooooooo oooooooooooooo ooo oooooooooo o
-     -----------------------------------------------------------------------
+<span class="w"> </span><span class="m">106</span><span class="p">|</span><span class="w">  </span>o
+<span class="w"> </span><span class="m">100</span><span class="p">|</span><span class="w">  </span>o<span class="w">                  </span>o
+<span class="w">  </span><span class="m">95</span><span class="p">|</span><span class="w">  </span>o<span class="w">                </span>o<span class="w"> </span>o
+<span class="w">  </span><span class="m">89</span><span class="p">|</span><span class="w">  </span>o<span class="w">                </span>ooo
+<span class="w">  </span><span class="m">84</span><span class="p">|</span><span class="w">  </span>o<span class="w">                </span>ooo
+<span class="w">  </span><span class="m">78</span><span class="p">|</span><span class="w">  </span>o<span class="w">                </span>ooo
+<span class="w">  </span><span class="m">73</span><span class="p">|</span><span class="w">  </span>o<span class="w">               </span>ooooo
+<span class="w">  </span><span class="m">67</span><span class="p">|</span><span class="w">  </span>o<span class="w">              </span>oooooo
+<span class="w">  </span><span class="m">62</span><span class="p">|</span><span class="w">  </span>o<span class="w">              </span>oooooo
+<span class="w">  </span><span class="m">56</span><span class="p">|</span><span class="w">  </span>o<span class="w">              </span>oooooo
+<span class="w">  </span><span class="m">50</span><span class="p">|</span><span class="w">  </span>o<span class="w">              </span>oooooo
+<span class="w">  </span><span class="m">45</span><span class="p">|</span><span class="w">  </span>o<span class="w">             </span>ooooooo
+<span class="w">  </span><span class="m">39</span><span class="p">|</span><span class="w">  </span>o<span class="w">             </span>ooooooo<span class="w"> </span>o
+<span class="w">  </span><span class="m">34</span><span class="p">|</span><span class="w">  </span>o<span class="w">             </span>ooooooooo
+<span class="w">  </span><span class="m">28</span><span class="p">|</span><span class="w">  </span>o<span class="w">             </span>oooooooooo
+<span class="w">  </span><span class="m">23</span><span class="p">|</span><span class="w">  </span>o<span class="w">             </span>oooooooooo<span class="w"> </span>o
+<span class="w">  </span><span class="m">17</span><span class="p">|</span><span class="w">  </span>o<span class="w">             </span>oooooooooooo<span class="w"> </span>oo
+<span class="w">  </span><span class="m">12</span><span class="p">|</span><span class="w">  </span>o<span class="w">             </span>ooooooooooooooo
+<span class="w">   </span><span class="m">6</span><span class="p">|</span><span class="w">  </span>o<span class="w">             </span>ooooooooooooooooo<span class="w"> </span>o<span class="w"> </span>o<span class="w">    </span>o
+<span class="w">   </span><span class="m">1</span><span class="p">|</span><span class="w"> </span>ooooooo<span class="w"> </span>o<span class="w"> </span>o<span class="w">   </span>ooooooooooooooooooooooooo<span class="w"> </span>oooooooooooooo<span class="w"> </span>ooo<span class="w"> </span>oooooooooo<span class="w"> </span>o
+<span class="w">     </span>-----------------------------------------------------------------------
 
 ------------------------------------
-<span class="p">|</span>             Summary              <span class="p">|</span>
+<span class="p">|</span><span class="w">             </span>Summary<span class="w">              </span><span class="p">|</span>
 ------------------------------------
-<span class="p">|</span>        observations: <span class="m">1000</span>        <span class="p">|</span>
-<span class="p">|</span>       min value: <span class="m">0</span>.000030        <span class="p">|</span>
-<span class="p">|</span>         mean : <span class="m">0</span>.020207          <span class="p">|</span>
-<span class="p">|</span>       max value: <span class="m">0</span>.071522        <span class="p">|</span>
+<span class="p">|</span><span class="w">        </span>observations:<span class="w"> </span><span class="m">1000</span><span class="w">        </span><span class="p">|</span>
+<span class="p">|</span><span class="w">       </span>min<span class="w"> </span>value:<span class="w"> </span><span class="m">0</span>.000030<span class="w">        </span><span class="p">|</span>
+<span class="p">|</span><span class="w">         </span>mean<span class="w"> </span>:<span class="w"> </span><span class="m">0</span>.020207<span class="w">          </span><span class="p">|</span>
+<span class="p">|</span><span class="w">       </span>max<span class="w"> </span>value:<span class="w"> </span><span class="m">0</span>.071522<span class="w">        </span><span class="p">|</span>
 ------------------------------------
 </pre></div>
 </div>
@@ -564,7 +562,7 @@ Data histogram
   <div class="footer-item">
     
 <p class="sphinx-version">
-Created using <a href="http://sphinx-doc.org/">Sphinx</a> 5.3.0.<br>
+Created using <a href="http://sphinx-doc.org/">Sphinx</a> 6.1.3.<br>
 </p>
 
   </div>

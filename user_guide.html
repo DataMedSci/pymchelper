@@ -6,7 +6,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
 
-    <title>User’s Guide &#8212; pymchelper 2.2.1 documentation</title>
+    <title>User’s Guide &#8212; pymchelper 2.2.3 documentation</title>
   
   
   
@@ -34,9 +34,6 @@
 <link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=796348d33e8b1d947c94">
 
     <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
-    <script src="_static/jquery.js"></script>
-    <script src="_static/underscore.js"></script>
-    <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
     <script src="_static/doctools.js"></script>
     <script src="_static/sphinx_highlight.js"></script>
     <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
@@ -99,8 +96,9 @@
   
 
   
+    <img src="_static/logo-light.png" class="logo__image only-light" alt="Logo image">
+    <img src="_static/logo-dark.png" class="logo__image only-dark" alt="Logo image">
   
-    <p class="title logo__title">pymchelper 2.2.1 documentation</p>
   
 </a>
     
@@ -340,7 +338,7 @@ The first one, obligatory is converter name. User might choose among: <code clas
 <p>It is obligatory to specify location of the entities to convert. It can be a single file or a wildcard expression
 (like <code class="code highlight bash docutils literal highlight-bash">*.bdo</code>) specifying group of files.</p>
 <p>To convert a single binary file <code class="code highlight bash docutils literal highlight-bash">proton0001_fort.21</code> generated with Fluka to a text file you can use following command:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>convertmc txt proton0001_fort.21
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>convertmc<span class="w"> </span>txt<span class="w"> </span>proton0001_fort.21
 </pre></div>
 </div>
 <p>Converter will automatically figure out output filename <code class="code highlight bash docutils literal highlight-bash">proton0001_fort.txt</code></p>
@@ -348,7 +346,7 @@ The first one, obligatory is converter name. User might choose among: <code clas
 Let us assume we have input files <code class="code highlight bash docutils literal highlight-bash">proton0001_fort.21</code>, <code class="code highlight bash docutils literal highlight-bash">proton0002_fort.21</code> and <code class="code highlight bash docutils literal highlight-bash">proton0003_fort.21</code> corresponding
 to different runs but storing the output of the same scorer. To read data from these 3 files, average on-the-fly
 and save output to single file, type:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>convertmc txt <span class="s2">&quot;proton0001_fort.*&quot;</span>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>convertmc<span class="w"> </span>txt<span class="w"> </span><span class="s2">&quot;proton0001_fort.*&quot;</span>
 </pre></div>
 </div>
 <p>Again, a single file <code class="code highlight bash docutils literal highlight-bash">proton0001_fort.txt</code> will be generated, containing averaged data from 3 binary input files.</p>
@@ -357,7 +355,7 @@ and save output to single file, type:</p>
 By adding <code class="code highlight bash docutils literal highlight-bash">---many</code> flag we ask converter to scan group of files, discover sub-groups belonging to same converter
 and perform averaging in each of sub-groups. Finally some number of output files will be generated (one output file
 for one scorer). An example:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>convertmc txt --many <span class="s2">&quot;proton0001_fort.*&quot;</span>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>convertmc<span class="w"> </span>txt<span class="w"> </span>--many<span class="w"> </span><span class="s2">&quot;proton0001_fort.*&quot;</span>
 </pre></div>
 </div>
 </section>
@@ -365,14 +363,14 @@ for one scorer). An example:</p>
 <h3>Output files<a class="headerlink" href="#output-files" title="Permalink to this heading">#</a></h3>
 <dl>
 <dt>When working in single-file conversion mode or when merging group of files into a single file</dt><dd><p>it is possible to provide a name of output file as a third argument:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>convertmc txt proton0001_fort.21 dose.txt
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>convertmc<span class="w"> </span>txt<span class="w"> </span>proton0001_fort.21<span class="w"> </span>dose.txt
 </pre></div>
 </div>
 </dd>
 </dl>
 <p>When using <code class="code highlight bash docutils literal highlight-bash">--many</code> option <strong>convertmc</strong> will generate many files. In this case user might provide an
 existing directory as a third parameter. All output files will be generated there:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>convertmc txt --many <span class="s2">&quot;*_fort.*&quot;</span> /path/to/output/dir/
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>convertmc<span class="w"> </span>txt<span class="w"> </span>--many<span class="w"> </span><span class="s2">&quot;*_fort.*&quot;</span><span class="w"> </span>/path/to/output/dir/
 </pre></div>
 </div>
 </section>
@@ -385,11 +383,11 @@ of total particles in the experiment is necessary (not to be confused with numbe
 User can specify this number via option called <code class="code highlight bash docutils literal highlight-bash">--nscale</code>. <strong>convertmc</strong> will then report dose
 (and some other quantities) in natural units and per user-provided particle number (not per single primary).
 Let us assume that <code class="code highlight bash docutils literal highlight-bash">proton0001_fort.21</code> file was obtained by simulation of 10000 protons.</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>convertmc txt proton0001_fort.21 dose_per_prim.txt
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>convertmc<span class="w"> </span>txt<span class="w"> </span>proton0001_fort.21<span class="w"> </span>dose_per_prim.txt
 </pre></div>
 </div>
 <p>will save a file <code class="code highlight bash docutils literal highlight-bash">dose_per_prim.txt</code> with dose-per-primary and MeV/g/prim units. While:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>convertmc txt proton0001_fort.21 dose.txt --nscale 1e8
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>convertmc<span class="w"> </span>txt<span class="w"> </span>proton0001_fort.21<span class="w"> </span>dose.txt<span class="w"> </span>--nscale<span class="w"> </span>1e8
 </pre></div>
 </div>
 <p>will save a file <code class="code highlight bash docutils literal highlight-bash">dose.txt</code> with rescaled dose of <span class="math notranslate nohighlight">\(10^8\)</span> protons in Gy units</p>
@@ -430,18 +428,18 @@ then average will be calculated only on regular numbers.</p>
 <section id="obtaining-help">
 <h3>Obtaining help<a class="headerlink" href="#obtaining-help" title="Permalink to this heading">#</a></h3>
 <p>To get a general help instructed printed on a screen type:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>convertmc --help
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>convertmc<span class="w"> </span>--help
 </pre></div>
 </div>
-<p>or simply <code class="code highlight bash docutils literal highlight-bash">convertmc -h</code></p>
+<p>or simply <code class="code highlight bash docutils literal highlight-bash">convertmc<span class="w"> </span>-h</code></p>
 <p>Each of the converter comes with dedicated help page which can be printed using i.e.:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>convertmc txt --help
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>convertmc<span class="w"> </span>txt<span class="w"> </span>--help
 </pre></div>
 </div>
 </section>
 <section id="program-version">
 <h3>Program version<a class="headerlink" href="#program-version" title="Permalink to this heading">#</a></h3>
-<p>To get program version type <code class="code highlight bash docutils literal highlight-bash">convertmc --version</code> or <code class="code highlight bash docutils literal highlight-bash">convertmc -V</code></p>
+<p>To get program version type <code class="code highlight bash docutils literal highlight-bash">convertmc<span class="w"> </span>--version</code> or <code class="code highlight bash docutils literal highlight-bash">convertmc<span class="w"> </span>-V</code></p>
 </section>
 <section id="more-verbose-output">
 <h3>More verbose output<a class="headerlink" href="#more-verbose-output" title="Permalink to this heading">#</a></h3>
@@ -654,7 +652,7 @@ See an example:</p>
   <div class="footer-item">
     
 <p class="sphinx-version">
-Created using <a href="http://sphinx-doc.org/">Sphinx</a> 5.3.0.<br>
+Created using <a href="http://sphinx-doc.org/">Sphinx</a> 6.1.3.<br>
 </p>
 
   </div>
