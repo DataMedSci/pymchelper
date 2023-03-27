@@ -1,5 +1,7 @@
 from enum import IntEnum
 import logging
+import os
+from typing import TypeVar
 
 import numpy as np
 
@@ -12,23 +14,25 @@ from pymchelper.readers.shieldhit.binary_spec import SHBDOTagID
 
 logger = logging.getLogger(__name__)
 
+# path-like type hint which supports both strings and Path objects
+PathLike = TypeVar("PathLike", str, bytes, os.PathLike)
 
-def file_has_sh_magic_number(filename):
+def file_has_sh_magic_number(file_path : PathLike) -> bool:
     """
     BDO binary files, introduced in 2016 (BDO2016 and BDO2019 formats) starts with 6 magic bytes xSH12A
-    :param filename: Binary file filename
+    :param file_path: Binary file filename
     :return: True if binary file starts with SH magic number
     """
     sh_bdo_magic_number = b'xSH12A'
     has_bdo_magic_number = False
-    with open(filename, "rb") as f:
+    with open(file_path, "rb") as f:
         d1 = np.dtype([('magic', 'S6')])  # TODO add a check if file has less than 6 bytes or is empty
         x = np.fromfile(f, dtype=d1, count=1)
         if x:
             # compare first 6 bytes with reference string
             has_bdo_magic_number = (sh_bdo_magic_number == x['magic'][0])
 
-    logger.debug("File {:s} has magic number: {:s}".format(filename, str(has_bdo_magic_number)))
+    logger.debug(f"File {file_path} has magic number: {has_bdo_magic_number}")
     return has_bdo_magic_number
 
 
