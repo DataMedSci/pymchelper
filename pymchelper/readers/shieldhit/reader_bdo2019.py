@@ -103,18 +103,18 @@ class SHReaderBDO2019(SHReader):
                 if SHBDOTagID.detector_type == token_id:
                     # here new page is added to the estimator structure
                     estimator.add_page(Page())
-                    logger.debug("Setting page.dettyp = {} ({})".format(SHDetType(payload), SHDetType(payload).name))
+                    logger.debug("Setting page.dettyp = %s (%s)", SHDetType(payload), SHDetType(payload).name)
                     estimator.pages[-1].dettyp = SHDetType(payload)
 
                 # page(detector) data is the last thing related to page that is saved in binary file
                 # at this point all other page related tags should already be processed
                 if SHBDOTagID.data_block == token_id:
-                    logger.debug("Setting page data = {}".format(np.asarray(payload)))
+                    logger.debug("Setting page data = %s", np.asarray(payload))
                     estimator.pages[-1].data_raw = np.asarray(payload)
 
                 # read tokens based on tag <-> name mapping for detector
                 if token_id in detector_name_from_bdotag:
-                    logger.debug("Setting detector.%s = %s",detector_name_from_bdotag[token_id], payload)
+                    logger.debug("Setting detector.%s = %s", detector_name_from_bdotag[token_id], payload)
                     setattr(estimator, detector_name_from_bdotag[token_id], payload)
 
                 # read tokens based on tag <-> name mapping for pages
