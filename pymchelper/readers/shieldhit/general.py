@@ -37,7 +37,7 @@ def file_has_sh_magic_number(file_path: PathLike) -> bool:
             # compare first 6 bytes with reference string
             has_bdo_magic_number = (sh_bdo_magic_number == x['magic'][0])
 
-    logger.debug(f"File {file_path} has magic number: {has_bdo_magic_number}")
+    logger.debug("File %s has magic number: %s", file_path, has_bdo_magic_number)
     return has_bdo_magic_number
 
 
@@ -55,7 +55,7 @@ def extract_sh_ver(file_path: PathLike) -> str:
         d1 = np.dtype([('magic', 'S6'), ('end', 'S2'),
                        ('vstr', 'S16')])  # TODO add a check if file has less than 6 bytes or is empty
         x = np.fromfile(f, dtype=d1, count=1)
-        logger.debug("File {:s}, raw version info {:s}".format(file_path, str(x['vstr'][0])))
+        logger.debug("File %s, raw version info %s", file_path, str(x['vstr'][0]))
         try:
             ver = x['vstr'][0].decode('ASCII')
         except UnicodeDecodeError:

@@ -17,7 +17,7 @@ class SHReaderBDO2019(SHReader):
     """Experimental binary format reader version >= 0.7"""
 
     def read_data(self, estimator, nscale=1):
-        logger.debug(f"Reading: {self.filename}")
+        logger.debug("Reading: %s", self.filename)
 
         with open(self.filename, "rb") as f:
             d1 = np.dtype([('magic', 'S6'), ('end', 'S2'), ('vstr', 'S16')])
@@ -114,12 +114,12 @@ class SHReaderBDO2019(SHReader):
 
                 # read tokens based on tag <-> name mapping for detector
                 if token_id in detector_name_from_bdotag:
-                    logger.debug("Setting detector.{} = {}".format(detector_name_from_bdotag[token_id], payload))
+                    logger.debug("Setting detector.%s = %s",detector_name_from_bdotag[token_id], payload)
                     setattr(estimator, detector_name_from_bdotag[token_id], payload)
 
                 # read tokens based on tag <-> name mapping for pages
                 if token_id in page_tags_to_save:
-                    logger.debug("Setting page.{} = {}".format(SHBDOTagID(token_id).name, payload))
+                    logger.debug("Setting page.%s = %s", SHBDOTagID(token_id).name, payload)
                     setattr(estimator.pages[-1], SHBDOTagID(token_id).name, payload)
 
             # Loop over the file is over here

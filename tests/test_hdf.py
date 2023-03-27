@@ -1,11 +1,8 @@
 """Tests for HDF converter"""
 import logging
-import os
 from pathlib import Path
-import enum
 from typing import List
 from pymchelper.input_output import fromfile
-import pymchelper.utils.mcscripter
 import pytest
 
 logger = logging.getLogger(__name__)
@@ -39,7 +36,7 @@ def test_hdf_generation(manypage_bdo_path: Path, tmp_path: Path, monkeypatch: py
     # temporary change working directory
     monkeypatch.chdir(tmp_path)
     from pymchelper.run import main
-    logger.info(f"Parsing {manypage_bdo_path} to HDF")
+    logger.debug("Parsing %s to HDF", manypage_bdo_path)
     main(['hdf', str(manypage_bdo_path)])
 
     expected_hdf_path = tmp_path / "ex_yzmsh.h5"
