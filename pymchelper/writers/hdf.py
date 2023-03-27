@@ -11,6 +11,7 @@ class HdfWriter:
     One HDF file can handle many single- or multi-dimensional tables.
 
     """
+
     def __init__(self, filename, options):
         self.filename = filename
         if not self.filename.endswith(".h5"):
@@ -28,7 +29,7 @@ class HdfWriter:
             raise e
 
         with h5py.File(self.filename, 'w') as hdf_file:
-            
+
             for page_number, page in enumerate(estimator.pages):
 
                 dataset_name = "data"

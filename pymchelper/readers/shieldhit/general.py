@@ -25,6 +25,10 @@ def file_has_sh_magic_number(file_path : PathLike) -> bool:
     """
     sh_bdo_magic_number = b'xSH12A'
     has_bdo_magic_number = False
+    if not str(file_path).endswith(".bdo"):
+        return False
+    if os.path.getsize(file_path) < 6:
+        return False        
     with open(file_path, "rb") as f:
         d1 = np.dtype([('magic', 'S6')])  # TODO add a check if file has less than 6 bytes or is empty
         x = np.fromfile(f, dtype=d1, count=1)
@@ -36,26 +40,28 @@ def file_has_sh_magic_number(file_path : PathLike) -> bool:
     return has_bdo_magic_number
 
 
-def extract_sh_ver(filename):
+def extract_sh_ver(file_path : PathLike) -> str:
     """
     BDO binary files, introduced in 2016 (BDO2016 and BDO2019 formats) contain information about SH VER
     :param filename: Binary file filename
     :return: SH12 version (as a string, i.e. 0.7) or None if version information was not found in the file
     """
 
-    ver = None
-    with open(filename, "rb") as f:
+    ver = ''
+    if not str(file_path).endswith(".bdo"):
+        return ver
+    with open(file_path, "rb") as f:
         d1 = np.dtype([('magic', 'S6'),
                        ('end', 'S2'),
                        ('vstr', 'S16')])  # TODO add a check if file has less than 6 bytes or is empty
         x = np.fromfile(f, dtype=d1, count=1)
-        logger.debug("File {:s}, raw version info {:s}".format(filename, str(x['vstr'][0])))
+        logger.debug("File {:s}, raw version info {:s}".format(file_path, str(x['vstr'][0])))
         try:
             ver = x['vstr'][0].decode('ASCII')
         except UnicodeDecodeError:
-            ver = None
+            ver = ''
 
-    logger.debug("File {:s}, SH12A version: {:s}".format(filename, str(ver)))
+    logger.debug("File {:s}, SH12A version: {:s}".format(file_path, str(ver)))
     return ver
 
 
@@ -70,14 +76,16 @@ class SHFileFormatId(IntEnum):
     csv = 4       # comma separated file format
 
 
-def read_token(filename, token_id):
+def read_token(file_path : PathLike, token_id):
     """
     TODO
     :param filename:
     :param token_id:
     :return:
     """
-    with open(filename, "rb") as f:
+    if not str(file_path).endswith(".bdo"):
+        return None
+    with open(file_path, "rb") as f:
 
         # skip ASCII header
         d1 = np.dtype([('magic', 'S6'), ('endiannes', 'S2'), ('vstr', 'S16')])
