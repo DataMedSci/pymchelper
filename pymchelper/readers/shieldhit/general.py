@@ -61,7 +61,7 @@ def extract_sh_ver(file_path: PathLike) -> str:
         except UnicodeDecodeError:
             ver = ''
 
-    logger.debug("File {:s}, SH12A version: {:s}".format(file_path, str(ver)))
+    logger.debug("File {:s}, SH12A version: {:s}".format(file_path, ver))
     return ver
 
 
