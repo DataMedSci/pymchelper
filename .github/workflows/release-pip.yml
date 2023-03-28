@@ -90,6 +90,7 @@ jobs:
     permissions:
       id-token: write
       pages: write
+      contents: read
     steps:
     - name: Checkout
       uses: actions/checkout@v3
