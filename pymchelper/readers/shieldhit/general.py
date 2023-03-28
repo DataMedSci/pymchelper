@@ -1,5 +1,7 @@
 from enum import IntEnum
 import logging
+import os
+from typing import TypeVar
 
 import numpy as np
 
@@ -12,46 +14,54 @@ from pymchelper.readers.shieldhit.binary_spec import SHBDOTagID
 
 logger = logging.getLogger(__name__)
 
+# path-like type hint which supports both strings and Path objects
+PathLike = TypeVar("PathLike", str, bytes, os.PathLike)
 
-def file_has_sh_magic_number(filename):
+
+def file_has_sh_magic_number(file_path: PathLike) -> bool:
     """
     BDO binary files, introduced in 2016 (BDO2016 and BDO2019 formats) starts with 6 magic bytes xSH12A
-    :param filename: Binary file filename
+    :param file_path: Binary file filename
     :return: True if binary file starts with SH magic number
     """
     sh_bdo_magic_number = b'xSH12A'
     has_bdo_magic_number = False
-    with open(filename, "rb") as f:
+    if not str(file_path).endswith(".bdo"):
+        return False
+    if os.path.getsize(file_path) < 6:
+        return False
+    with open(file_path, "rb") as f:
         d1 = np.dtype([('magic', 'S6')])  # TODO add a check if file has less than 6 bytes or is empty
         x = np.fromfile(f, dtype=d1, count=1)
         if x:
             # compare first 6 bytes with reference string
             has_bdo_magic_number = (sh_bdo_magic_number == x['magic'][0])
 
-    logger.debug("File {:s} has magic number: {:s}".format(filename, str(has_bdo_magic_number)))
+    logger.debug("File %s has magic number: %s", file_path, has_bdo_magic_number)
     return has_bdo_magic_number
 
 
-def extract_sh_ver(filename):
+def extract_sh_ver(file_path: PathLike) -> str:
     """
     BDO binary files, introduced in 2016 (BDO2016 and BDO2019 formats) contain information about SH VER
     :param filename: Binary file filename
     :return: SH12 version (as a string, i.e. 0.7) or None if version information was not found in the file
     """
 
-    ver = None
-    with open(filename, "rb") as f:
-        d1 = np.dtype([('magic', 'S6'),
-                       ('end', 'S2'),
+    ver = ''
+    if not str(file_path).endswith(".bdo"):
+        return ver
+    with open(file_path, "rb") as f:
+        d1 = np.dtype([('magic', 'S6'), ('end', 'S2'),
                        ('vstr', 'S16')])  # TODO add a check if file has less than 6 bytes or is empty
         x = np.fromfile(f, dtype=d1, count=1)
-        logger.debug("File {:s}, raw version info {:s}".format(filename, str(x['vstr'][0])))
+        logger.debug("File %s, raw version info %s", file_path, str(x['vstr'][0]))
         try:
             ver = x['vstr'][0].decode('ASCII')
         except UnicodeDecodeError:
-            ver = None
+            ver = ''
 
-    logger.debug("File {:s}, SH12A version: {:s}".format(filename, str(ver)))
+    logger.debug("File {:s}, SH12A version: {:s}".format(file_path, ver))
     return ver
 
 
@@ -59,21 +69,23 @@ class SHFileFormatId(IntEnum):
     """
     SHIELD-HIT12A file format ids, as described in sh_file_format.h file
     """
-    bin2010 = 0   # Old binary format from 2010, the first version David wrote back then
-    bdo2016 = 1   # year 2016 .bdo file format, now with proper tags, used from SH 0.6.0
-    bdo2019 = 2   # year 2019 .bdo style, introduced June 2019
-    ascii = 3     # raw text format
-    csv = 4       # comma separated file format
+    bin2010 = 0  # Old binary format from 2010, the first version David wrote back then
+    bdo2016 = 1  # year 2016 .bdo file format, now with proper tags, used from SH 0.6.0
+    bdo2019 = 2  # year 2019 .bdo style, introduced June 2019
+    ascii = 3  # raw text format
+    csv = 4  # comma separated file format
 
 
-def read_token(filename, token_id):
+def read_token(file_path: PathLike, token_id):
     """
     TODO
     :param filename:
     :param token_id:
     :return:
     """
-    with open(filename, "rb") as f:
+    if not str(file_path).endswith(".bdo"):
+        return None
+    with open(file_path, "rb") as f:
 
         # skip ASCII header
         d1 = np.dtype([('magic', 'S6'), ('endiannes', 'S2'), ('vstr', 'S16')])
@@ -88,12 +100,7 @@ def read_token(filename, token_id):
             if pl_id == token_id:
 
                 logger.debug("Read token {:s} (0x{:02x}) value {} type {:s} length {:d}".format(
-                    SHBDOTagID(pl_id).name,
-                    pl_id,
-                    _pl,
-                    _pl_type.decode('ASCII'),
-                    _pl_len
-                ))
+                    SHBDOTagID(pl_id).name, pl_id, _pl, _pl_type.decode('ASCII'), _pl_len))
 
                 pl = [None] * _pl_len
 
@@ -112,6 +119,7 @@ def read_token(filename, token_id):
 
 
 class SHReaderFactory(ReaderFactory):
+
     def get_reader(self):
         """
         Inspect binary file and return appropriate reader object

@@ -1,0 +1,24 @@
+# Features:
+# 1) tabs and spaces are permitted
+# 2) !, # for comments. * is also possible, but please avoid using it, it may be deprecated soon.
+# 3) integer and float representation allowed
+# 4) All commands are case insensitive. Filenames are case sensitive.
+
+Geometry Cyl             # 1-dimensional cylinder scoring geometry along z
+    Name MyCyl
+    R  0.0  10.0    1
+    Z  0.0  40.0    400
+
+Geometry Mesh            # 2-dimensional Cartesian scoring geometry in the YZ plane
+    Name MyMesh_YZ
+    X -5.0  5.0    1
+    Y -5.0  5.0    100
+    Z  0.0  30.0   300
+
+
+Output
+    Filename ex_yzmsh.bdo  # this will output as default binary .bdo format
+    Geo MyMesh_YZ
+    Quantity Dose
+    Quantity TLET
+    Quantity Zone       # plot the zone map, useful for viewing the geometry and debugging it.
