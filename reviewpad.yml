@@ -15,7 +15,7 @@ labels:
     description: Pull request is medium
     color: "#2986cc"
   large:
-    description: Pull request is largemetrics-on-merge: true
+    description: Pull request is large
     color: "#c90076"
 
 # Define the list of workflows to be run by Reviewpad.
