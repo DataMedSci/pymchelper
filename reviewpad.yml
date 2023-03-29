@@ -3,6 +3,8 @@
 # You can use it as a starting point and customize it to your needs.
 # For more details see https://docs.reviewpad.com/guides/syntax.
 
+metrics-on-merge: true 
+
 # Define the list of labels to be used by Reviewpad.
 # For more details see https://docs.reviewpad.com/guides/syntax#label.
 labels:
@@ -13,7 +15,7 @@ labels:
     description: Pull request is medium
     color: "#2986cc"
   large:
-    description: Pull request is large
+    description: Pull request is largemetrics-on-merge: true
     color: "#c90076"
 
 # Define the list of workflows to be run by Reviewpad.
@@ -30,16 +32,6 @@ workflows:
         extra-actions:
           - $summarize()
 
-  # This workflow assigns the most relevant reviewer to pull requests.
-  # This helps guarantee that most pull requests are reviewed by at least one person.
-  - name: reviewer-assignment
-    description: Assign the most relevant reviewer to pull requests
-    always-run: true
-    if:
-      # Automatically assign reviewer when the pull request is ready for review;
-      - rule: $isDraft() == false
-        extra-actions:
-          - $assignCodeAuthorReviewers()
 
   # This workflow praises contributors on their pull request contributions.
   # This helps contributors feel appreciated.
