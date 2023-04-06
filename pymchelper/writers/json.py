@@ -8,22 +8,25 @@ from pymchelper.page import Page
 
 logger = logging.getLogger(__name__)
 
+
 class JsonWriter:
     """
     Supports writing JSON format.
+    JSON format is a format accepted by yaptide project.
     """
 
     def __init__(self, filename, options):
         self.filename = filename
+        self.options = options
         if not self.filename.endswith(".json"):
             self.filename += ".json"
 
     def write(self, estimator: Estimator):
+        """Writes estimator object to json file"""
         if len(estimator.pages) == 0:
             print("No pages in the output file, conversion to JSON skipped.")
             return False
 
-        
         est_dict = {
             "metadata": {},
             "pages": []
