@@ -1,8 +1,9 @@
 import logging
 import json
 
-from pymchelper.estimator import Estimator
 from pymchelper.axis import MeshAxis
+from pymchelper.estimator import Estimator
+from pymchelper.page import Page
 
 
 logger = logging.getLogger(__name__)
@@ -39,6 +40,7 @@ class JsonWriter:
             # page_dict contains:
             # "dimensions" indicating it is 1 dim page
             # "data" which has unit, name and list of data values
+            page: Page
             page_dict = {
                 "metadata": {},
                 "dimensions": page.dimension,
@@ -64,23 +66,32 @@ class JsonWriter:
             # currently output is returned only when dimension == 1 due to
             # problems in efficient testing of other dimensions
 
-            if page.dimension in {1, 2}:
-                axis: MeshAxis = page.plot_axis(0)
-                page_dict["first_axis"] = {
+            ################ Old code start ################
+            # if page.dimension in {1, 2}:
+            #     axis: MeshAxis = page.plot_axis(0)
+            #     page_dict["first_axis"] = {
+            #         "unit": str(axis.unit),
+            #         "name": str(axis.name),
+            #         "values": axis.data.tolist(),
+            #     }
+            # if page.dimension == 2:
+            #     axis: MeshAxis = page.plot_axis(1)
+            #     page_dict["second_axis"] = {
+            #         "unit": str(axis.unit),
+            #         "name": str(axis.name),
+            #         "values": axis.data.tolist(),
+            #     }
+            # if page.dimension > 2:
+            #     # Add info about the location of the file containging to many dimensions
+            #     raise ValueError(f"Invalid number of pages {page.dimension}")
+            ################  Old code end  ################
+            for i in range(page.dimension):
+                axis: MeshAxis = page.plot_axis(i)
+                page_dict[f"{i+1}_axis"] = {
                     "unit": str(axis.unit),
                     "name": str(axis.name),
                     "values": axis.data.tolist(),
                 }
-            if page.dimension == 2:
-                axis: MeshAxis = page.plot_axis(1)
-                page_dict["second_axis"] = {
-                    "unit": str(axis.unit),
-                    "name": str(axis.name),
-                    "values": axis.data.tolist(),
-                }
-            if page.dimension > 2:
-                # Add info about the location of the file containging to many dimensions
-                raise ValueError(f"Invalid number of pages {page.dimension}")
 
             est_dict["pages"].append(page_dict)
 
