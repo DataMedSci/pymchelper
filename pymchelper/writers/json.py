@@ -31,6 +31,8 @@ class JsonWriter:
             "metadata": {},
             "pages": []
         }
+        exclude = {"data_raw", "error_raw", "estimator", "diff_axis1", "diff_axis2"}
+        exclude |= set(estimator.__dict__.keys())
 
         # read metadata from estimator object
         for name, value in estimator.__dict__.items():
@@ -56,8 +58,6 @@ class JsonWriter:
             # read metadata from page object
             for name, value in page.__dict__.items():
                 # skip non-metadata fields and fields already read from estimator object
-                exclude = {"data_raw", "error_raw", "estimator", "diff_axis1", "diff_axis2"}
-                exclude |= set(estimator.__dict__.keys())
                 if name not in exclude:
                     # remove \" to properly generate JSON
                     page_dict["metadata"][name] = str(value).replace("\"", "")
