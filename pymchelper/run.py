@@ -73,6 +73,9 @@ def main(args=None):
     parser_hdf = subparsers.add_parser(Converters.hdf.name, help='converts to HDF file')
     add_default_options(parser_hdf)
 
+    parser_json = subparsers.add_parser(Converters.json.name, help='converts to JSON file')
+    add_default_options(parser_json)
+
     parser_plotdata = subparsers.add_parser(Converters.plotdata.name, help='converts to plot data')
     add_default_options(parser_plotdata)
 
