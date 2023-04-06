@@ -66,28 +66,7 @@ class JsonWriter:
                 page_dict["data"]["values"] = [page.data_raw.tolist()]
             else:
                 page_dict["data"]["values"] = page.data_raw.tolist()
-            # currently output is returned only when dimension == 1 due to
-            # problems in efficient testing of other dimensions
 
-            ################ Old code start ################
-            # if page.dimension in {1, 2}:
-            #     axis: MeshAxis = page.plot_axis(0)
-            #     page_dict["first_axis"] = {
-            #         "unit": str(axis.unit),
-            #         "name": str(axis.name),
-            #         "values": axis.data.tolist(),
-            #     }
-            # if page.dimension == 2:
-            #     axis: MeshAxis = page.plot_axis(1)
-            #     page_dict["second_axis"] = {
-            #         "unit": str(axis.unit),
-            #         "name": str(axis.name),
-            #         "values": axis.data.tolist(),
-            #     }
-            # if page.dimension > 2:
-            #     # Add info about the location of the file containging to many dimensions
-            #     raise ValueError(f"Invalid number of pages {page.dimension}")
-            ################  Old code end  ################
             for i in range(page.dimension):
                 axis: MeshAxis = page.plot_axis(i)
                 page_dict[f"{i+1}_axis"] = {

@@ -1,10 +1,9 @@
 """Tests for JSON converter"""
 import logging
 from pathlib import Path
-from typing import List
-from pymchelper.input_output import fromfile
 import pytest
 
+from pymchelper.input_output import fromfile
 from pymchelper.axis import MeshAxis
 from pymchelper.estimator import Estimator
 from pymchelper.page import Page
