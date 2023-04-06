@@ -73,6 +73,9 @@ def main(args=None):
     parser_hdf = subparsers.add_parser(Converters.hdf.name, help='converts to HDF file')
     add_default_options(parser_hdf)
 
+    parser_json = subparsers.add_parser(Converters.json.name, help='converts to JSON file')
+    add_default_options(parser_json)
+
     parser_plotdata = subparsers.add_parser(Converters.plotdata.name, help='converts to plot data')
     add_default_options(parser_plotdata)
 
@@ -123,7 +126,7 @@ def main(args=None):
         # TODO add filename discovery
         files = sorted(glob.glob(parsed_args.input))
         if not files:
-            logger.error(f'File {parsed_args.input} does not exist: ')
+            logger.error('File %s does not exist: ', parsed_args.input)
 
         # check if output should be interpreted as a filename
         if not parsed_args.many and len(files) == 1:
@@ -135,7 +138,7 @@ def main(args=None):
             output_dir = parsed_args.output
             # check if output directory exists
             if output_dir and not os.path.exists(output_dir):
-                logger.warning(f"Directory {output_dir} does not exist, creating.")
+                logger.warning("Directory %s does not exist, creating.", output_dir)
                 os.makedirs(output_dir)
         else:
             output_dir = '.'
