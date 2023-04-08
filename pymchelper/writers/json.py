@@ -69,7 +69,7 @@ class JsonWriter:
 
             for i in range(page.dimension):
                 axis: MeshAxis = page.plot_axis(i)
-                page_dict[f"{i+1}_axis"] = {
+                page_dict[f"axis_dim{i+1}"] = {
                     "unit": str(axis.unit),
                     "name": str(axis.name),
                     "values": axis.data.tolist(),
