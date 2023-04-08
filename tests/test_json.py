@@ -67,6 +67,6 @@ def test_json_generation(manypage_bdo_path: Path, tmp_path: Path, monkeypatch: p
 
             for i in range(page.dimension):
                 axis: MeshAxis = page.plot_axis(i)
-                assert str(axis.unit) == page_dict[f"{i+1}_axis"]["unit"]
-                assert str(axis.name) == page_dict[f"{i+1}_axis"]["name"]
-                assert len(axis.data.tolist()) == len(page_dict[f"{i+1}_axis"]["values"])
+                assert str(axis.unit) == page_dict[f"axis_dim{i+1}"]["unit"]
+                assert str(axis.name) == page_dict[f"axis_dim{i+1}"]["name"]
+                assert len(axis.data.tolist()) == len(page_dict[f"axis_dim{i+1}"]["values"])
