@@ -32,6 +32,17 @@ workflows:
         extra-actions:
           - $summarize()
 
+  # Summarize an issue.
+  # This helps the author determine whether an external party has a proper understanding of the issue.
+  # And the assignee to have a short description of the issue before reading the full description.
+  - name: summarize-issue
+    always-run: true
+    on:
+      - issue
+    if:
+      - rule: $state() == "open"
+        extra-actions:
+          - $summarize()
 
   # This workflow praises contributors on their pull request contributions.
   # This helps contributors feel appreciated.
