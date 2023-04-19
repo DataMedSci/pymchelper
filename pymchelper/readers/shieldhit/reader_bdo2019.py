@@ -176,6 +176,9 @@ class SHReaderBDO2019(SHReader):
                     page.error_raw /= np.float64(estimator.number_of_primaries)
 
         estimator.file_format = 'bdo2019'
+        estimator.total_number_of_primaries = estimator.number_of_primaries
+        estimator.total_run_time = estimator.run_time
+        estimator.total_run_time_sim = estimator.run_time_sim
 
         logger.debug("Done reading bdo file.")
         return True

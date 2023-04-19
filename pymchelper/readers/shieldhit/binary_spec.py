@@ -208,6 +208,8 @@ detector_name_from_bdotag = {
     SHBDOTagID.user: 'user',
     SHBDOTagID.host: 'host',
     SHBDOTagID.rt_nstat: 'number_of_primaries',
+    SHBDOTagID.rt_time: 'run_time',
+    SHBDOTagID.rt_timesim: 'run_time_sim',
     SHBDOTagID.number_of_pages: 'page_count',
     SHBDOTagID.geo_unit_ids: 'geo_unit_ids',
     SHBDOTagID.geo_units: 'geo_units',

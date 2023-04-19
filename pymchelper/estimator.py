@@ -62,6 +62,11 @@ class Estimator(object):
         self.z = self.x
 
         self.number_of_primaries = 0  # number of histories simulated
+        self.run_time = 0  # runtime in seconds
+        self.run_time_sim = 0  # run time in seconds excluding initialization header
+        self.total_number_of_primaries = 0  # number of histories simulated
+        self.total_run_time = 0  # runtime in seconds
+        self.total_run_time_sim = 0  # run time in seconds excluding initialization header
         self.file_counter = 0  # number of files read
         self.file_corename = ""  # common core for paths of contributing files
         self.file_format = ""  # binary file format of the input files
@@ -131,9 +136,17 @@ def average_with_nan(estimator_list, error_estimate=ErrorEstimate.stderr):
     # TODO add compatibility check
     if not estimator_list:
         return None
+
     result = copy.deepcopy(estimator_list[0])
+
+    for n, estimator in enumerate(estimator_list, start=2):
+        result.total_number_of_primaries += estimator.number_of_primaries
+        result.total_run_time += estimator.run_time
+        result.total_run_time_sim += estimator.run_time_sim
+
     for page_no, page in enumerate(result.pages):
         page.data_raw = np.nanmean([estimator.pages[page_no].data_raw for estimator in estimator_list], axis=0)
+
     result.file_counter = len(estimator_list)
     if result.file_counter > 1 and error_estimate != ErrorEstimate.none:
         # s = stddev = sqrt(1/(n-1)sum(x-<x>)**2)
