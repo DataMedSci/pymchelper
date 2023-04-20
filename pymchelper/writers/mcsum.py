@@ -10,12 +10,12 @@ class MCSumWriter:
         logger.debug("Initialising Inspector writer")
         self.options = options
 
-    def write(self, estimator):
+    @staticmethod
+    def write(estimator):
         """Print all keys and values from estimator structure
 
         they include also a metadata read from binary output file
         """
-
         s = estimator.total_run_time
         if s < 60:
             ts = time.strftime('%S seconds', time.gmtime(s))

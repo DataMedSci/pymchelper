@@ -104,9 +104,9 @@ class Estimator(object):
         """
         if axis_id == AxisId.x:
             return self.x
-        elif axis_id == AxisId.y:
+        if axis_id == AxisId.y:
             return self.y
-        elif axis_id == AxisId.z:
+        if axis_id == AxisId.z:
             return self.z
         return None
 
