@@ -174,8 +174,8 @@ class Field:
         for i, layer in enumerate(self.layers):
             print(indent + f"   Layer {i: 3}: {layer.energy_nominal: 10.4f} MeV " + f"   {layer.n_spots:10d} spots")
         print(indent + "------------------------------------------------")
-        print(indent + f"Highest energy         : {emin:10.4f} MeV")
-        print(indent + f"Lowest energy          : {emax:10.4f} MeV")
+        print(indent + f"Lowest energy          : {emin:10.4f} MeV")
+        print(indent + f"Highest energy         : {emax:10.4f} MeV")
         print(indent + "------------------------------------------------")
         print(indent + f"Spot field min/max X   : {self.xmin:+10.4f} {self.xmax:+10.4f} mm")
         print(indent + f"Spot field min/max Y   : {self.ymin:+10.4f} {self.ymax:+10.4f} mm")
