@@ -1,6 +1,11 @@
 #!/usr/bin/env python3
 
-"""This script generates a bash script that generates mock fluka output files from files existing in selected directory."""
+"""
+This script collects all fluka output files in the current directory and generates a bash script named rfluka.
+
+Generated bash script will contain all fluka output files as base64 encoded strings.
+Running generated script will create all fluka output files in the current directory.
+"""
 
 import base64
 import glob
