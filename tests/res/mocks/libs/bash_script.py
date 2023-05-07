@@ -6,7 +6,7 @@ __FILE_NAME_AND_CONTENT_TEMPLATE = """
 FILE_NAME_{index}="{file_name}"
 FILE_NAME_CONTENT_{index}="{file_content}"
 sleep 1
-printf '%s' "$FILE_NAME_CONTENT_{index}" | base64 -d -i > $FILE_NAME_{index}
+printf '%s' "$FILE_NAME_CONTENT_{index}" | base64 -d > $FILE_NAME_{index}
 echo "Generated $FILE_NAME_{index}"
 """
 
