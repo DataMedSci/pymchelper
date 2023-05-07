@@ -33,7 +33,7 @@ def test_fluka_mock(tmp_path: Path):
 
 def check_fluka_file(file: Path):
     # creating empty Detector object and filling it with data read from Fluka file
-    fluka_data = fromfile(file)
+    fluka_data = fromfile(str(file.resolve()))
 
     # printing some output on the screen
     logger.info("Fluka bins in X: {:d}, Y: {:d}, Z: {:d}".format(fluka_data.x.n, fluka_data.y.n, fluka_data.z.n))
