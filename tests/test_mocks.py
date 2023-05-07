@@ -37,7 +37,7 @@ def check_fluka_file(file: Path):
 
     # printing some output on the screen
     logger.info("Fluka bins in X: {:d}, Y: {:d}, Z: {:d}".format(fluka_data.x.n, fluka_data.y.n, fluka_data.z.n))
-    logger.info("First bin of fluka data", fluka_data.pages[0].data[0, 0, 0, 0, 0])
+    logger.info("First bin of fluka data %s", fluka_data.pages[0].data[0, 0, 0, 0, 0])
 
 
 def append_path_to_environ(env: dict, path: Path) -> dict:
