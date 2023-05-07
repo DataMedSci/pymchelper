@@ -8,9 +8,8 @@ Running generated script will create all shieldhit output files in the current d
 """
 
 import base64
-import glob
 import os
-import sys
+from pathlib import Path
 
 __FILE_NAME_AND_CONTENT_TEMPLATE = """
 FILE_NAME_{index}="{file_name}"
@@ -32,15 +31,16 @@ def to_bash_lines(index: int, file_name: str, file_content: bytes) -> str:
 
 def run():
     """Runs the script."""
-    cwd = os.curdir
-    fluka_files = glob.glob(os.path.join(cwd, "*.bdo"))
-    if not fluka_files:
+
+    shieldhit_files = Path.cwd().glob("*.bdo")
+    if not shieldhit_files:
         print("No shieldhit files found in current directory.")
-        sys.exit()
+        return
+
     with open(__OUTPUT_SCRIPT_NAME, "w") as f:
         f.write("#!/bin/bash\n")
 
-        for index, file in enumerate(sorted(fluka_files)):
+        for index, file in enumerate(sorted(shieldhit_files)):
             with open(file, 'rb') as fluka_file:
                 file_name = os.path.basename(file)
                 file_content = fluka_file.read()
