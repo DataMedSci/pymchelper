@@ -8,9 +8,9 @@ Running generated script will create all fluka output files in the current direc
 """
 
 import base64
-import glob
 import os
 import sys
+from pathlib import Path
 
 __FILE_NAME_AND_CONTENT_TEMPLATE = """
 FILE_NAME_{index}="{file_name}"
@@ -32,8 +32,7 @@ def to_bash_lines(index: int, file_name: str, file_content: bytes) -> str:
 
 def run():
     """Runs the script."""
-    cwd = os.curdir
-    fluka_files = glob.glob(os.path.join(cwd, "*_fort.*"))
+    fluka_files = list(Path.cwd().glob("*_fort.*"))
     if not fluka_files:
         print("No fluka files found in current directory.")
         sys.exit()
