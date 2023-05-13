@@ -10,7 +10,7 @@ printf '%s' "$OUTPUT_FILE_CONTENT_{index}" | base64 -d > $OUTPUT_FILE_NAME_{inde
 """
 
 
-def to_bash_lines(index: int, file_name: str, file_content: bytes) -> str:
+def encode_single_file(index: int, file_name: str, file_content: bytes) -> str:
     """Converts file name and content to bash lines."""
     base64_encoded_content = base64.standard_b64encode(file_content).decode("utf-8")
     return __FILE_NAME_AND_CONTENT_TEMPLATE.format(index=index, file_name=file_name,
@@ -26,5 +26,5 @@ def create_script(script_name: str, files_to_save: List[Path]):
             with open(file, 'rb') as f:
                 file_name = file.name
                 file_content = f.read()
-                script.write(to_bash_lines(index, file_name, file_content))
+                script.write(encode_single_file(index, file_name, file_content))
     sp.chmod(0o744)
