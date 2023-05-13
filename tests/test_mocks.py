@@ -22,7 +22,7 @@ def test_fluka_mock(tmp_path: Path):
     assert rfluka.exists(), "rfluka script does not exist"
 
     expected_files = ["cherenkov001_fort.55", "cherenkov002_fort.55", "cherenkov003_fort.55", "cherenkov004_fort.55"]
-    env = append_path_to_environ(os.environ, PATH)
+    env = append_path_to_environ(os.environ.copy(), PATH)
     call("rfluka", cwd=tmp_path, env=env)
 
     for f in expected_files:
