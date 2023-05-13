@@ -9,7 +9,7 @@ Running generated script will create all fluka output files in the current direc
 
 from pathlib import Path
 
-from tests.res.mocks.libs.bash_script import create_script
+from tests.res.mocks.libs.bash_script import generate_mock
 
 
 def run():
@@ -19,7 +19,7 @@ def run():
         print("No fluka files found in current directory.")
         return
 
-    create_script("rfluka", fluka_files)
+    generate_mock("rfluka", fluka_files)
 
 
 if __name__ == "__main__":

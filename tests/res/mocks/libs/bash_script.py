@@ -9,6 +9,18 @@ sleep 1
 printf '%s' "$OUTPUT_FILE_CONTENT_{index}" | base64 -d > $OUTPUT_FILE_NAME_{index}
 """
 
+__STDOUT_TEMPLATE = """
+STDOUT_FILE_CONTENT="{stdout}"
+sleep 1
+printf '%s' "$STDOUT_FILE_CONTENT" | base64 -d >&1
+"""
+
+__STDERR_TEMPLATE = """
+STDERR_FILE_CONTENT="{stderr}"
+sleep 1
+printf '%s' "$STDERR_FILE_CONTENT" | base64 -d >&2
+"""
+
 
 def encode_single_file(index: int, file_name: str, file_content: bytes) -> str:
     """Converts file name and content to bash lines."""
@@ -17,7 +29,7 @@ def encode_single_file(index: int, file_name: str, file_content: bytes) -> str:
                                                    file_content=base64_encoded_content)
 
 
-def create_script(script_name: str, files_to_save: List[Path]):
+def generate_mock(script_name: str, files_to_save: List[Path], stdout: Path = None, stderr: Path = None):
     """Creates a bash script with given name and files to save."""
     sp = Path(script_name)
     with open(sp, "w") as script:
@@ -27,4 +39,17 @@ def create_script(script_name: str, files_to_save: List[Path]):
                 file_name = file.name
                 file_content = f.read()
                 script.write(encode_single_file(index, file_name, file_content))
+        __append_std_out_and_std_err(script, stdout, stderr)
     sp.chmod(0o744)
+
+def __append_std_out_and_std_err(script, stdout, stderr):
+    if stdout:
+        with open(stdout, 'rb') as f:
+            stdout_content = f.read()
+            stdout_content = base64.standard_b64encode(stdout_content).decode("utf-8")
+            script.write(__STDOUT_TEMPLATE.format(stdout=stdout_content))
+    if stderr:
+        with open(stderr, 'rb') as f:
+            stderr_content = f.read()
+            stderr_content = base64.standard_b64encode(stderr_content).decode("utf-8")
+            script.write(__STDERR_TEMPLATE.format(stderr=stderr_content))
