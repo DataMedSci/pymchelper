@@ -1,6 +1,6 @@
 import base64
 from pathlib import Path
-from typing import List
+from typing import List, Optional
 
 __FILE_NAME_AND_CONTENT_TEMPLATE = """
 OUTPUT_FILE_NAME_{index}="{file_name}"
@@ -29,10 +29,9 @@ def encode_single_file(index: int, file_name: str, file_content: bytes) -> str:
                                                    file_content=base64_encoded_content)
 
 
-def generate_mock(script_name: str, files_to_save: List[Path], stdout: Path = None, stderr: Path = None):
+def generate_mock(output_path: Path, files_to_save: List[Path], stdout: Optional[Path] = None, stderr: Optional[Path] = None):
     """Creates a bash script with given name and files to save."""
-    sp = Path(script_name)
-    with open(sp, "w") as script:
+    with open(output_path, "w") as script:
         script.write("#!/bin/bash\n")
         for index, file in enumerate(sorted(files_to_save)):
             with open(file, 'rb') as f:
@@ -40,7 +39,7 @@ def generate_mock(script_name: str, files_to_save: List[Path], stdout: Path = No
                 file_content = f.read()
                 script.write(encode_single_file(index, file_name, file_content))
         __append_std_out_and_std_err(script, stdout, stderr)
-    sp.chmod(0o744)
+    output_path.chmod(0o744)
 
 def __append_std_out_and_std_err(script, stdout, stderr):
     if stdout:
