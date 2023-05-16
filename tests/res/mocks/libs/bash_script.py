@@ -32,7 +32,7 @@ def encode_single_file(index: int, file_name: str, file_content: bytes) -> str:
 def generate_mock(output_path: Path, files_to_save: List[Path], stdout: Optional[Path] = None,
                   stderr: Optional[Path] = None):
     """Creates a bash script with given name and files to save."""
-    with open(output_path, "w") as script:
+    with open(output_path, "w") as script:  # skipcq: PTC-W6004
         script.write("#!/bin/bash\n")
         for index, file in enumerate(sorted(files_to_save)):
             with open(file, 'rb') as f:
