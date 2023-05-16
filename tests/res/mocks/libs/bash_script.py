@@ -29,7 +29,8 @@ def encode_single_file(index: int, file_name: str, file_content: bytes) -> str:
                                                    file_content=base64_encoded_content)
 
 
-def generate_mock(output_path: Path, files_to_save: List[Path], stdout: Optional[Path] = None, stderr: Optional[Path] = None):
+def generate_mock(output_path: Path, files_to_save: List[Path], stdout: Optional[Path] = None,
+                  stderr: Optional[Path] = None):
     """Creates a bash script with given name and files to save."""
     with open(output_path, "w") as script:
         script.write("#!/bin/bash\n")
@@ -41,7 +42,9 @@ def generate_mock(output_path: Path, files_to_save: List[Path], stdout: Optional
         __append_std_out_and_std_err(script, stdout, stderr)
     output_path.chmod(0o744)
 
+
 def __append_std_out_and_std_err(script, stdout, stderr):
+    """Appends stdout and stderr to the script."""
     if stdout:
         with open(stdout, 'rb') as f:
             stdout_content = f.read()

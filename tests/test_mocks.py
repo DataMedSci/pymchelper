@@ -18,7 +18,7 @@ __MOCKS_PATH = Path(__file__).parent / "res" / "mocks"
 logger = logging.getLogger(__name__)
 
 
-__EXPECTED_FLUKA_OUT = {
+__EXPECTED_FLUKA_RESULTS = {
     "minimal001_fort.21": {
         "shape": [4, 1, 4],
         "4x4": [
@@ -33,7 +33,7 @@ __EXPECTED_FLUKA_OUT = {
         "4x4": [
             [0.00047575, 0., 0., 0.],
             [0., 0.00188021, 0.00166488, 0.],
-            [0., 0.0010242, 0.00105254, 0. ],
+            [0., 0.0010242, 0.00105254, 0.],
             [0., 0., 0., 0.]
         ]
     }
@@ -41,7 +41,7 @@ __EXPECTED_FLUKA_OUT = {
 
 
 @pytest.mark.skipif(os.name == 'nt', reason="Windows not supported")
-@pytest.mark.parametrize('output_file', __EXPECTED_FLUKA_OUT.keys())
+@pytest.mark.parametrize('output_file', __EXPECTED_FLUKA_RESULTS.keys())
 def test_fluka_mock(tmp_path: Path, output_file: str):
     """Test fluka mock script"""
     rfluka = __MOCKS_PATH / "fluka_minimal" / "rfluka"
@@ -58,9 +58,10 @@ def test_fluka_mock(tmp_path: Path, output_file: str):
 
 
 def __verify_fluka_file(fluka_data: Estimator , filename: str):
-    assert (__EXPECTED_FLUKA_OUT[filename]["shape"] == [fluka_data.x.n, fluka_data.y.n, fluka_data.z.n])
+    """Compares content of generated fluka file with expected values"""
+    assert (__EXPECTED_FLUKA_RESULTS[filename]["shape"] == [fluka_data.x.n, fluka_data.y.n, fluka_data.z.n])
 
-    expected = list(np.around(np.array(__EXPECTED_FLUKA_OUT[filename]["4x4"]).flatten(), 4))
+    expected = list(np.around(np.array(__EXPECTED_FLUKA_RESULTS[filename]["4x4"]).flatten(), 4))
     result = list(np.around(np.array(fluka_data.pages[0].data).flatten(), 4))
     assert expected == result, "Fluka data does not match expected values"
 

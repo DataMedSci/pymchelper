@@ -6,7 +6,6 @@ Then, it creates bash srcipt that will mimics rfluka for selected input file.
 """
 
 import argparse
-import os
 from pathlib import Path
 import shutil
 import subprocess
@@ -39,22 +38,22 @@ def main(args=None) -> None:
     if not input_path.exists():
         print("Input file does not exist.")
         return
-    
-    output_path =  Path("rfluka")
+
+    output_path = Path("rfluka")
     if parsed_args.output:
         output_path = Path(parsed_args.output).resolve()
 
     with tempfile.TemporaryDirectory() as tmp_dir:
         shutil.copy(input_path, tmp_dir)
-        dir = Path(tmp_dir)
-        out = dir / "std.out"
-        err = dir / "std.err"
+        tmp_path = Path(tmp_dir)
+        out = tmp_path / "std.out"
+        err = tmp_path / "std.err"
         with (open(out, "wb") as stdout,
-            open(err, "wb") as stderr):
+              open(err, "wb") as stderr):
             args = [str(fluka_path), input_path.name, "-N0", "-M1"]
-            subprocess.run(args, cwd=dir, stderr=stderr, stdout=stdout)
+            subprocess.check_call(args, cwd=tmp_path, stderr=stderr, stdout=stdout)
 
-            fluka_files = list(dir.glob("*_fort.*"))
+            fluka_files = list(tmp_path.glob("*_fort.*"))
             if not fluka_files:
                 print("No fluka files found in temporary directory.")
 
