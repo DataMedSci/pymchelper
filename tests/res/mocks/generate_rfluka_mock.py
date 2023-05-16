@@ -48,8 +48,7 @@ def main(args=None) -> None:
         tmp_path = Path(tmp_dir)
         out = tmp_path / "std.out"
         err = tmp_path / "std.err"
-        with (open(out, "wb") as stdout,
-              open(err, "wb") as stderr):
+        with open(out, "wb") as stdout, open(err, "wb") as stderr:
             args = [str(fluka_path), input_path.name, "-N0", "-M1"]
             subprocess.check_call(args, cwd=tmp_path, stderr=stderr, stdout=stdout)
 
