@@ -1,0 +1,40 @@
+TITLE
+* Minimal fluka file with 20 particles, two results, 4x4 bins
+* Set the defaults for precision simulations
+DEFAULTS                                                              HADROTHE
+* Define the beam characteristics
+BEAM           -0.06       0.0       0.0      -2.0      -2.0          PROTON
+* Define the beam position
+BEAMPOS          0.0       0.0     -100.       0.0       0.0
+GEOBEGIN                                                              COMBNAME
+    0    0          
+* Black body
+SPH blkbody    0.0 0.0 0.0 100000.0
+* Void sphere
+SPH air        0.0 0.0 0.0 10000.0
+* Cylindrical target
+RCC target     0.0 0.0 0.0 0.0 0.0 10.0 5.0
+END
+* Black hole
+BLKBODY      5 +blkbody -air
+* Void around
+AIR          5 +air -target
+* Target
+TARGET       5 +target
+END
+GEOEND
+* ..+....1....+....2....+....3....+....4....+....5....+....6....+....7..
+ASSIGNMA    BLCKHOLE   BLKBODY
+ASSIGNMA         AIR       AIR
+ASSIGNMA       WATER    TARGET
+* 4
+USRBIN           10.    ENERGY      -21.        5.       0.1        5.dose_xz
+USRBIN           -5.      -0.1       0.0        4.        1.        4. &
+* 5
+USRBIN           10.    ENERGY      -22.        5.        5.       2.9dose_xy
+USRBIN           -5.       -5.       2.8        4.        4.        1. &
+* Set the random number seed
+RANDOMIZ         1.0        1.
+* Set the number of primary histories to be simulated in the run
+START             20
+STOP
