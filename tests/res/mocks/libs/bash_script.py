@@ -1,3 +1,5 @@
+"""Module for generating bash scripts with files to save."""
+
 import base64
 from pathlib import Path
 from typing import List, Optional
@@ -23,7 +25,7 @@ printf '%s' "$STDERR_FILE_CONTENT" | base64 -d >&2
 
 
 def encode_single_file(file_number: int, file_name: str, file_content: bytes) -> str:
-    """Encodes single file to bash script"""
+    """Encode single file to bash script."""
     base64_encoded_content = base64.standard_b64encode(file_content).decode("utf-8")
     return __FILE_NAME_AND_CONTENT_TEMPLATE.format(index=file_number, file_name=file_name,
                                                    file_content=base64_encoded_content)
@@ -31,7 +33,7 @@ def encode_single_file(file_number: int, file_name: str, file_content: bytes) ->
 
 def generate_mock(output_path: Path, files_to_save: List[Path], stdout: Optional[Path] = None,
                   stderr: Optional[Path] = None):
-    """Creates a bash script with given name and files to save."""
+    """Create a bash script with given name and files to save."""
     with open(output_path, "w") as script:  # skipcq: PTC-W6004
         script.write("#!/bin/bash\n")
         for index, file in enumerate(sorted(files_to_save)):
