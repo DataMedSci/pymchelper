@@ -25,7 +25,7 @@ def fluka_mock() -> Generator[Path, None, None]:
 @pytest.fixture(scope='module')
 def expected_results() -> dict:
     """Return expected result"""
-    return {
+    yield {
         "minimal001_fort.21": {
             "shape": [4, 1, 4],
             "4x4": [
