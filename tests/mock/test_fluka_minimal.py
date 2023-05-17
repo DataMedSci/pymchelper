@@ -18,7 +18,7 @@ logger = logging.getLogger(__name__)
 @pytest.fixture(scope='module')
 def fluka_mock() -> Path:
     """Return path to mock script"""
-    return Path(__file__).parent.parent / "res" / "mocks" / "fluka_minimal" / "rfluka"
+    yield Path(__file__).parent.parent / "res" / "mocks" / "fluka_minimal" / "rfluka"
 
 
 @pytest.fixture(scope='module')
