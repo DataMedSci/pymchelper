@@ -64,7 +64,7 @@ def test_fluka_mock(tmp_path: Path, output_file: str, expected_results: dict, fl
 
 def __verify_fluka_file(actual_result: Estimator, expected_result: dict):
     """Compares content of generated fluka file with expected values"""
-    assert (expected_result["shape"] == [actual_result.x.n, actual_result.y.n, actual_result.z.n])
+    assert expected_result["shape"] == [actual_result.x.n, actual_result.y.n, actual_result.z.n]
 
     expected = list(np.around(np.array(expected_result["4x4"]).flatten(), 4))
     result = list(np.around(np.array(actual_result.pages[0].data).flatten(), 4))

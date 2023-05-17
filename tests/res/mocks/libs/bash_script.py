@@ -1,6 +1,6 @@
 import base64
 from pathlib import Path
-from typing import List, Optional, TextIO
+from typing import List, Optional
 
 __FILE_NAME_AND_CONTENT_TEMPLATE = """
 OUTPUT_FILE_NAME_{index}="{file_name}"
