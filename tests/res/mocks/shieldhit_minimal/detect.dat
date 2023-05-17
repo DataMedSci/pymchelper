@@ -1,0 +1,14 @@
+Geometry Cyl
+    Name ScoringCylinder
+        R 0.0 10.0 4
+        Z 0.0 30.0 4
+
+Output
+    Filename mesh.bdo
+    Geo ScoringCylinder
+    Quantity Dose
+
+Output
+    Filename fluence.bdo
+    Geo ScoringCylinder
+    Quantity FLUENCE
