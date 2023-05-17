@@ -59,7 +59,7 @@ def main(args=None) -> None:
         with open(out, "wb") as stdout, open(err, "wb") as stderr:
             shieldhit_args = [str(shieldhit_path), "-n", "1", str(tmp_dir)]
             subprocess.check_call(shieldhit_args, cwd=tmp_path, stderr=stderr, stdout=stdout)
-        
+
             result_files = list(tmp_path.glob("*.bdo"))
             if not result_files:
                 print("No generated files found in temporary directory.")
