@@ -24,7 +24,7 @@ __EXPECTED_FLUKA_RESULTS = {
         "4x4": [
             [0., 0., 0., 0.],
             [0., 0.00146468, 0.00169978, 0.],
-            [0.00090805, 0., 0.,0.],
+            [0.00090805, 0., 0., 0.],
             [0, 0., 0., 0.]
         ]
     },
@@ -57,7 +57,7 @@ def test_fluka_mock(tmp_path: Path, output_file: str):
     __verify_fluka_file(fluka_data, output_file)
 
 
-def __verify_fluka_file(fluka_data: Estimator , filename: str):
+def __verify_fluka_file(fluka_data: Estimator, filename: str):
     """Compares content of generated fluka file with expected values"""
     assert (__EXPECTED_FLUKA_RESULTS[filename]["shape"] == [fluka_data.x.n, fluka_data.y.n, fluka_data.z.n])
 
