@@ -43,12 +43,12 @@ def generate_mock(output_path: Path, files_to_save: List[Path], stdout: Optional
         if stdout:
             with open(stdout, 'rb') as f:
                 stdout_content = f.read()
-                stdout_content = base64.standard_b64encode(stdout_content).decode("utf-8")
-                script.write(__STDOUT_TEMPLATE.format(stdout=stdout_content))
+                base64_encoded_content = base64.standard_b64encode(stdout_content).decode("utf-8")
+                script.write(__STDOUT_TEMPLATE.format(stdout=base64_encoded_content))
         if stderr:
             with open(stderr, 'rb') as f:
                 stderr_content = f.read()
-                stderr_content = base64.standard_b64encode(stderr_content).decode("utf-8")
-                script.write(__STDERR_TEMPLATE.format(stderr=stderr_content))
+                base64_encoded_content = base64.standard_b64encode(stderr_content).decode("utf-8")
+                script.write(__STDERR_TEMPLATE.format(stderr=base64_encoded_content))
 
     output_path.chmod(0o744)
