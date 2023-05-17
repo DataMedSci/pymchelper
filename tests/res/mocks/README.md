@@ -10,3 +10,12 @@ To generate the **rfluka** mock, run the following command:
 ```bash
 python3 ./generate_rfluka_mock.py "$FLUKA_EXECUTABLE_PATH/rfluka" ./fluka_minimal/minimal.inp ./fluka_minimal/rfluka
 ```
+
+
+### Generating shieldhit mock
+
+To generate the **shieldhit** mock, run the following command:
+
+```bash
+python3 ./generate_shieldhit_mock.py "$SHIELDHIT_EXECUTABLE_PATH/shieldhit" ./shieldhit_minimal ./shieldhit_minimal/shieldhit
+```
