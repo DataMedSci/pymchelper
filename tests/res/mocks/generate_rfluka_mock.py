@@ -49,8 +49,8 @@ def main(args=None) -> None:
         out = tmp_path / "std.out"
         err = tmp_path / "std.err"
         with open(out, "wb") as stdout, open(err, "wb") as stderr:
-            args = [str(fluka_path), input_path.name, "-N0", "-M1"]
-            subprocess.check_call(args, cwd=tmp_path, stderr=stderr, stdout=stdout)
+            fluka_args = [str(fluka_path), input_path.name, "-N0", "-M1"]
+            subprocess.check_call(fluka_args, cwd=tmp_path, stderr=stderr, stdout=stdout)
 
             fluka_files = list(tmp_path.glob("*_fort.*"))
             if not fluka_files:

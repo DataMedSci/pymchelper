@@ -1,6 +1,6 @@
 import base64
 from pathlib import Path
-from typing import List, Optional
+from typing import List, Optional, TextIO
 
 __FILE_NAME_AND_CONTENT_TEMPLATE = """
 OUTPUT_FILE_NAME_{index}="{file_name}"
@@ -39,19 +39,16 @@ def generate_mock(output_path: Path, files_to_save: List[Path], stdout: Optional
                 file_name = file.name
                 file_content = f.read()
                 script.write(encode_single_file(index, file_name, file_content))
-        __append_std_out_and_std_err(script, stdout, stderr)
+
+        if stdout:
+            with open(stdout, 'rb') as f:
+                stdout_content = f.read()
+                stdout_content = base64.standard_b64encode(stdout_content).decode("utf-8")
+                script.write(__STDOUT_TEMPLATE.format(stdout=stdout_content))
+        if stderr:
+            with open(stderr, 'rb') as f:
+                stderr_content = f.read()
+                stderr_content = base64.standard_b64encode(stderr_content).decode("utf-8")
+                script.write(__STDERR_TEMPLATE.format(stderr=stderr_content))
+
     output_path.chmod(0o744)
-
-
-def __append_std_out_and_std_err(script, stdout, stderr):
-    """Appends stdout and stderr to the script."""
-    if stdout:
-        with open(stdout, 'rb') as f:
-            stdout_content = f.read()
-            stdout_content = base64.standard_b64encode(stdout_content).decode("utf-8")
-            script.write(__STDOUT_TEMPLATE.format(stdout=stdout_content))
-    if stderr:
-        with open(stderr, 'rb') as f:
-            stderr_content = f.read()
-            stderr_content = base64.standard_b64encode(stderr_content).decode("utf-8")
-            script.write(__STDERR_TEMPLATE.format(stderr=stderr_content))
