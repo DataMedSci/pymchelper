@@ -1,9 +1,10 @@
-"""Test mock scripts"""
+"""Test fluka mock"""
 
 import logging
 import os
 from pathlib import Path
 from subprocess import call
+from typing import Generator
 import numpy as np
 
 import pytest
@@ -16,7 +17,7 @@ logger = logging.getLogger(__name__)
 
 
 @pytest.fixture(scope='module')
-def fluka_mock() -> Path:
+def fluka_mock() -> Generator[Path, None, None]:
     """Return path to mock script"""
     yield Path(__file__).parent.parent / "res" / "mocks" / "fluka_minimal" / "rfluka"
 
@@ -53,7 +54,7 @@ def test_fluka_mock(tmp_path: Path, output_file: str, expected_results: dict, fl
     assert fluka_mock.exists(), "rfluka script does not exist"
 
     env = append_path_to_environ(fluka_mock.parent)
-    call("rfluka", cwd=tmp_path, env=env)
+    call("rfluka", cwd=tmp_path, env=env)  # skipcq: BAN-B607
     output_files = [f.name for f in list(tmp_path.glob("*"))]
 
     assert output_file in output_files, f"File {output_file} was not created"

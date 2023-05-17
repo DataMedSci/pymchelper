@@ -22,10 +22,10 @@ printf '%s' "$STDERR_FILE_CONTENT" | base64 -d >&2
 """
 
 
-def encode_single_file(index: int, file_name: str, file_content: bytes) -> str:
-    """Converts file name and content to bash lines."""
+def encode_single_file(file_number: int, file_name: str, file_content: bytes) -> str:
+    """Encodes single file to bash script"""
     base64_encoded_content = base64.standard_b64encode(file_content).decode("utf-8")
-    return __FILE_NAME_AND_CONTENT_TEMPLATE.format(index=index, file_name=file_name,
+    return __FILE_NAME_AND_CONTENT_TEMPLATE.format(index=file_number, file_name=file_name,
                                                    file_content=base64_encoded_content)
 
 
