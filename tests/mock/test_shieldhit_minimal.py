@@ -47,7 +47,6 @@ def expected_results() -> Generator[dict, None, None]:
     }
 
 
-
 @pytest.mark.skipif(os.name == 'nt', reason="Windows not supported")
 @pytest.mark.parametrize('output_file', ["mesh.bdo", "fluence.bdo"])
 def test_shieldhit_mock(tmp_path: Path, output_file: str, expected_results: dict, shieldhit_mock: Path):
