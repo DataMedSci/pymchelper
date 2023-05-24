@@ -72,5 +72,4 @@ s:Sc/FluenceBPprotonsXY2/Component                 = "PhantomScoringCoarseXY2"
 sv:Sc/FluenceBPprotonsXY2/Report = 2 "Mean" "Standard_Deviation"
 s:Sc/FluenceBPprotonsXY2/IfOutputFileAlreadyExists = "Overwrite"
 s:Sc/FluenceBPprotonsXY2/OutputFile = "fluence_bp_protons_xy2.csv"
-
 sv:Sc/FluenceBPprotonsXY2/OnlyIncludeIfIncidentParticlesNamed = 1 "proton"
