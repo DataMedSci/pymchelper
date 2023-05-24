@@ -1,0 +1,15 @@
+Geometry Mesh
+    Name YZ_Mesh
+    X  -0.5  0.5  1
+    Y  -2.0  2.0  4
+    Z  -2.0  2.0  4
+
+Output
+    Filename mesh.bdo
+    Geo YZ_Mesh
+    Quantity Dose
+
+Output
+    Filename fluence.bdo
+    Geo YZ_Mesh
+    Quantity FLUENCE
