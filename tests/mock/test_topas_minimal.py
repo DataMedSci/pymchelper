@@ -62,7 +62,6 @@ def test_topas_mock(tmp_path: Path, output_file: str, expected_results: dict, to
 
 def __verify_topas_file(actual_result: np.ndarray, expected_result: np.ndarray):
     """Compares content of generated topas file with expected values"""
-
     expected = list(np.around(np.array(expected_result["4x4"]).flatten(), 4))
     result = list(np.around(actual_result.flatten(), 4))
     assert expected == result, "Topas data does not match expected values"
