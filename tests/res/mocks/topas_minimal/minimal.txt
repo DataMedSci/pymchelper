@@ -52,12 +52,6 @@ d:So/Demo/BeamPositionCutoffY = 2. cm # Y extent of position (if Flat or Gaussia
 s:So/Demo/BeamAngularDistribution = "None"
 i:So/Demo/NumberOfHistoriesInRun = Ts/ShowHistoryCountAtInterval * 10
 
-# Parisi Beam model
-#d:So/Demo/BeamEnergy = 58.4 MeV
-#u:So/Demo/BeamEnergySpread = 1.018
-#d:So/Demo/OnlyIncludeParticlesWithInitialKEBelow = 58.55 MeV
-
-
 s:Sc/FluenceBPprotonsXY/Quantity                  = "Fluence"
 s:Sc/FluenceBPprotonsXY/WeightBy                  = "Track"
 s:Sc/FluenceBPprotonsXY/Component                 = "PhantomScoringCoarseXY"

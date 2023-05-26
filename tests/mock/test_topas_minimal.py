@@ -52,7 +52,7 @@ def test_topas_mock(tmp_path: Path, output_file: str, expected_results: dict, to
 
     env = append_path_to_environ(topas_mock.parent)
     call("topas", cwd=tmp_path, env=env)  # skipcq: BAN-B607
-    output_files = [f.name for f in list(tmp_path.glob("*"))]
+    output_files = [f.name for f in list(tmp_path.glob("*.csv"))]
 
     assert output_file in output_files, f"File {output_file} was not created"
     topas_data = from_csv(tmp_path / output_file)
