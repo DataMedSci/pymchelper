@@ -80,12 +80,12 @@ def append_path_to_environ(path: Path) -> dict:
 def from_csv(path: Path) -> np.ndarray:
     """Reads csv file and returns numpy array"""
     lines = np.genfromtxt(path, delimiter=',')
-    x = lines[:, 0].astype(int).max() + 1
-    y = lines[:, 1].astype(int).max() + 1
-    z = lines[:, 2].astype(int).max() + 1
-    data = np.delete(lines, [0, 1, 2, 4], axis=1)
+    # get number of bins in each dimension, bins are numbered from 0
+    xbins, ybins, zbins = lines[-1, [0, 1, 2]].astype(int) + 1
+    # get scores
+    scores = lines[:, 3]
 
-    return data.reshape((x, y, z))
+    return scores.reshape((xbins, ybins, zbins))
 
 
 if __name__ == "__main__":
