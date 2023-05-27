@@ -19,3 +19,12 @@ To generate the **shieldhit** mock, run the following command:
 ```bash
 python3 ./generate_shieldhit_mock.py "$SHIELDHIT_EXECUTABLE_PATH/shieldhit" ./shieldhit_minimal ./shieldhit_minimal/shieldhit
 ```
+
+
+### Generating topas mock
+
+To generate the **topas** mock, run the following command:
+
+```bash
+python3 ./generate_topas_mock.py "$TOPAS_EXECUTABLE_PATH/topas" ./topas_minimal/minimal.txt ./topas_minimal/topas
+```
