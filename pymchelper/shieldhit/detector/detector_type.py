@@ -83,6 +83,8 @@ class SHDetType(IntEnum):
     dq_eff = 61  # Dose-averaged Q_eff
     tq_eff = 62  # Track-averaged Q_eff
 
+    mcpl = 63  # MC particle list, aka. phase space list 
+
     let_bdo2016 = 120  # for differential scoring
     angle_bdo2016 = 121  # for differential scoring
     dose_gy_bdo2016 = 205
