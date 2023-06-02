@@ -81,6 +81,10 @@ def main(args=None):
 
     parser_inspect = subparsers.add_parser(Converters.inspect.name, help='prints metadata')
     add_default_options(parser_inspect)
+
+    parser_mcsum = subparsers.add_parser(Converters.mcsum.name, help='MC summary table after Sechopoulos et al (2018)')
+    add_default_options(parser_mcsum)
+
     parser_inspect.add_argument('-d', '--details',
                                 help='print detailed information about data attribute',
                                 action="store_true")

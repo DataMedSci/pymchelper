@@ -92,6 +92,9 @@ def fromfilelist(input_file_list, error=ErrorEstimate.stderr, nan: bool = True):
         # loop over all files with n running from 2
         for n, filename in enumerate(input_file_list[1:], start=2):
             current_estimator = fromfile(filename)  # x
+            result.total_number_of_primaries += current_estimator.number_of_primaries
+            result.total_run_time += current_estimator.run_time
+            result.total_run_time_sim += current_estimator.run_time_sim
 
             # Running variance algorithm based on algorithm by B. P. Welford,
             # presented in Donald Knuth's Art of Computer Programming, Vol 2, page 232, 3rd edition.
