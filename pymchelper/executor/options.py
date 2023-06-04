@@ -32,6 +32,11 @@ class SH12AEnvironmentWindows(MCEnvironment):
     """
     executable_filename = 'shieldhit.exe'
 
+class TopasEnvironment(MCEnvironment):
+    """
+    TOPAS Environment
+    """
+    executable_filename = 'topas'
 
 class SimulationSettings:
     """
@@ -43,13 +48,20 @@ class SimulationSettings:
     (i.e. whether this is SHIELD-HIT12A input or FLUKA input)
     """
 
-    def __init__(self, input_path, simulator_exec_path=None, cmdline_opts=None):
+    def __init__(self, input_path, simulator_type = 'shieldhit', simulator_exec_path=None, cmdline_opts=None):
         # input file or directory
         self.input_path = input_path
 
-        # discover the type of MC engine based on the type of input files/directories
-        # `self._mc_environment` is set to one of the `MCEnvironment` subclasses
-        self._mc_environment = self._discover_mc_engine(input_path)
+        # set `self._mc_environment` to the proper `MCEnvironment` subclass
+        # shieldhit is default
+        if simulator_type=='shieldhit':
+            if sys.platform == 'win32':
+                self._mc_environment = SH12AEnvironmentWindows
+            self._mc_environment = SH12AEnvironmentLinux
+        elif simulator_type=='fluka':
+            self._mc_environment = FlukaEnvironment
+        elif simulator_type=='topas':
+            self._mc_environment = TopasEnvironment
 
         # set `self.executable_path` to the value provided by user, or if it is missing
         # perform automatic discovery of the *location* of MC engine executable file by scanning PATH env. variable
@@ -120,31 +132,6 @@ class SimulationSettings:
         if options_set & unsupported:
             # TODO replace exception with warning and ignore such options  # skipcq: PYL-W0511
             raise SyntaxError("Unsupported option encountered: {:s}".format(",".join(options_set & unsupported)))
-
-    @staticmethod
-    def _discover_mc_engine(input_path):
-        """
-        Analyse the input path and based on its type set proper MC engine
-        In case of failure return None
-        """
-
-        # raise exception if invalid path is provided
-        if not os.path.exists(input_path):
-            raise Exception("Input path {:s} doesn't exists".format(input_path))
-
-        # Fluka input files are provided as the single file
-        # TODO cross-check if the `*.inp` extension is needed  # skipcq: PYL-W0511
-        if os.path.isfile(input_path):
-            return FlukaEnvironment
-        # SHIELD-HIT12A input is in the form of directory with multiple files
-        # TODO add a check if the directory contains (beam.dat, mat.dat, geo.dat and detect.dat)  # skipcq: PYL-W0511
-        if os.path.isdir(input_path):
-            # in case pymchelper runs on Windows choose a SHIELD-HIT12A environment which is Windows specific
-            # (executable file being `shieldhit.exe` instead of `shieldhit`)
-            if sys.platform == 'win32':
-                return SH12AEnvironmentWindows
-            return SH12AEnvironmentLinux
-        return None
 
     @staticmethod
     def _discover_mc_exec_location(exec_filename):

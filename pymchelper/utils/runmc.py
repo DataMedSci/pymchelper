@@ -50,6 +50,7 @@ def main(args=None):
     import pymchelper
 
     parser = argparse.ArgumentParser()
+    parser.add_argument('-t', '--type', help='Simulator type: shieldhit, topas or fluka (default: shieldhit)', type=str, default='shieldhit')
     parser.add_argument('-e', '--executable', help='path to MC executable '
                                                    '(automatically detected if not provided)',
                         type=str, default=None)
@@ -102,6 +103,7 @@ def main(args=None):
     #   - location of MC simulator executable file (i.e. `shieldhit` or `rfluka`)
     #   - simulation options for the MC engine provided via -m switch (i.e. --time or -v)
     settings = SimulationSettings(input_path=parsed_args.input,
+                                  simulator_type=parsed_args.type,
                                   simulator_exec_path=parsed_args.executable,
                                   cmdline_opts=parsed_simulation_opts)
 
