@@ -7,7 +7,7 @@ import argparse
 import timeit
 
 from pymchelper.executor.options import SimulationSettings
-from pymchelper.executor.runner import OutputDataType, Runner
+from pymchelper.executor.runner import OutputDataType, SimulatorType, Runner
 from pymchelper.writers.plots import PlotDataWriter, ImageWriter
 
 
@@ -50,7 +50,7 @@ def main(args=None):
     import pymchelper
 
     parser = argparse.ArgumentParser()
-    parser.add_argument('-t', '--type', help='Simulator type: shieldhit, topas or fluka (default: shieldhit)', type=str, default='shieldhit')
+    parser.add_argument('-s', '--simulator', help='Simulator type: shieldhit, topas or fluka (default: shieldhit)', type=str, default='shieldhit')
     parser.add_argument('-e', '--executable', help='path to MC executable '
                                                    '(automatically detected if not provided)',
                         type=str, default=None)

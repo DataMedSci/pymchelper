@@ -16,6 +16,7 @@ logger = logging.getLogger(__name__)
 
 @pytest.mark.smoke
 @pytest.mark.skipif(sys.platform == "darwin", reason="we don't have SHIELD-HIT12A demo binary for MacOSX")
+@pytest.mark.skipif(sys.platform == "win32", reason="simulator mocks don't work on Windows")
 class TestRunner(unittest.TestCase):
     """
     Test if runner runs mock simulators
