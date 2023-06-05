@@ -110,7 +110,8 @@ def main(args=None):
     # create runner object based on MC options and dedicated parallel jobs number
     # note that runner object is only created here, no simulation is started at this point
     # and no directories are being created
-    runner_obj = Runner(jobs=parsed_args.jobs,
+    runner_obj = Runner(settings=settings,
+                        jobs=parsed_args.jobs,
                         keep_workspace_after_run=parsed_args.keep,
                         output_directory=parsed_args.outdir)
 
@@ -119,7 +120,7 @@ def main(args=None):
     # in case of successful execution this would return list of temporary workspaces directories
     # containing partial results from simultaneous parallel executions
     start_time = timeit.default_timer()
-    runner_obj.run(settings=settings)
+    runner_obj.run()
     elapsed = timeit.default_timer() - start_time
     print("MC simulation took {:.3f} seconds".format(elapsed))
 

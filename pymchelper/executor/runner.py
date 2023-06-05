@@ -24,7 +24,8 @@ class Runner:
     Main class responsible for configuring and starting multiple parallel MC simulation processes
     It can be used to access combined averaged results of the simulation.
     """
-    def __init__(self, jobs=None, keep_workspace_after_run=False, output_directory='.'):
+    def __init__(self, settings, jobs=None, keep_workspace_after_run=False, output_directory='.'):
+        self.settings = settings
 
         # create pool of processes, waiting to be started by run method
         # if jobs is not specified, os.cpu_count() would be used
@@ -45,7 +46,7 @@ class Runner:
         self.workspace_manager = WorkspaceManager(output_directory=output_directory,
                                                   keep_workspace_after_run=keep_workspace_after_run)
 
-    def run(self, settings):
+    def run(self):
         """
         Execute parallel simulation processes, creating workspace (and working directories) in the `output_directory`
         In case of successful execution return True, otherwise return False
@@ -57,14 +58,14 @@ class Runner:
         rng_seeds = range(1, self.jobs + 1)
 
         # create working directories
-        self.workspace_manager.create_working_directories(simulation_input_path=settings.input_path,
+        self.workspace_manager.create_working_directories(simulation_input_path=self.settings.input_path,
                                                           rng_seeds=rng_seeds)
 
         # rng seeds injection to settings for each SingleSimulationExecutor call
         # TODO consider better way of doing it  # skipcq: PYL-W0511
         settings_list = []
         for rng_seed in rng_seeds:
-            current_settings = deepcopy(settings)  # do not modify original arguments
+            current_settings = deepcopy(self.settings)  # do not modify original arguments
             current_settings.set_rng_seed(rng_seed)
             settings_list.append(current_settings)
 

@@ -168,10 +168,10 @@ def run_sh12a(input_dict):
 
     # create runner object, needed to start simulation
     # we set jobs to `None`, so pymchelper will automatically detect how many parallel workers to run
-    runner = Runner(jobs=None, keep_workspace_after_run=False, output_directory=temp_directory_path)
+    runner = Runner(settings=settings, jobs=None, keep_workspace_after_run=False, output_directory=temp_directory_path)
 
     # here simulation is started
-    runner.run(settings=settings)
+    runner.run()
 
     # read all the simulation output files
     data = runner.get_data()
