@@ -8,6 +8,7 @@ from multiprocessing import Pool
 
 from enum import IntEnum
 
+from pymchelper.simulator_type import SimulatorType
 from pymchelper.input_output import frompattern
 
 
@@ -18,14 +19,6 @@ class OutputDataType(IntEnum):
     plot = 1
     txt = 2
     
-class SimulatorType(IntEnum):
-    """
-    Type of the MC simulator: SHIELD-HIT12A, TOPAS or FLUKA
-    """
-    shieldhit = 1
-    topas = 2
-    fluka = 3
-
 
 class Runner:
     """
@@ -107,12 +100,15 @@ class Runner:
 
         # TODO line below is specific to SHIELD-HIT12A, should be generalised  # skipcq: PYL-W0511
         # scans output directory for MC simulation output files
-        output_files_pattern = os.path.join(self.workspace_manager.output_dir_absolute_path, "run_*", "*.bdo")
+        if self.settings.simulator_type == SimulatorType.shieldhit:
+            output_files_pattern = os.path.join(self.workspace_manager.output_dir_absolute_path, "run_*", "*.bdo")
+        elif self.settings.simulator_type == SimulatorType.topas:
+            output_files_pattern = os.path.join(self.workspace_manager.output_dir_absolute_path, "run_*", "*.csv")
         logging.debug("Files to merge {:s}".format(output_files_pattern))
 
         estimators_dict = {}
         # convert output files to list of estimator objects
-        estimators_list = frompattern(output_files_pattern)
+        estimators_list = frompattern(output_files_pattern, self.settings.simulator_type)
         for estimator in estimators_list:
             logging.debug("Appending estimator for {:s}".format(estimator.file_corename))
             estimators_dict[estimator.file_corename] = estimator

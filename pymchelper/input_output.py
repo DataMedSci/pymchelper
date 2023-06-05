@@ -6,6 +6,7 @@ from glob import glob
 import numpy as np
 
 from pymchelper.estimator import ErrorEstimate, Estimator, average_with_nan
+from pymchelper.simulator_type import SimulatorType
 from pymchelper.readers.fluka import FlukaReader, FlukaReaderFactory
 from pymchelper.readers.shieldhit.general import SHReaderFactory
 from pymchelper.readers.shieldhit.reader_base import SHReader
@@ -130,13 +131,13 @@ def fromfilelist(input_file_list, error=ErrorEstimate.stderr, nan: bool = True):
     return result
 
 
-def frompattern(pattern, error=ErrorEstimate.stderr, nan=True):
+def frompattern(pattern, sim_type, error=ErrorEstimate.stderr, nan=True):
     """
     Reads all files matching pattern, e.g.: 'foobar_*.bdo', and returns a list of averaged estimators.
 
     :param pattern: pattern to be matched for reading.
     :param error: error estimation, see class ErrorEstimate class in pymchelper.estimator
-    :param nan: if True, NaN (not a number) are excluded when averaing data.
+    :param nan: if True, NaN (not a number) are excluded when averaging data.
     :return: a list of estimators, or an empty list if no files were found.
     """
 
@@ -147,7 +148,11 @@ def frompattern(pattern, error=ErrorEstimate.stderr, nan=True):
 
     core_names_dict = group_input_files(list_of_matching_files)
 
-    result = [fromfilelist(filelist, error, nan) for _, filelist in core_names_dict.items()]
+    if sim_type == SimulatorType.shieldhit:
+        result = [fromfilelist(filelist, error, nan) for _, filelist in core_names_dict.items()]
+    elif sim_type == SimulatorType.topas:
+        #todo
+        result = []
     return result
 
 
@@ -156,7 +161,7 @@ def convertfromlist(filelist, error, nan, outputdir, converter_name, options, ou
 
     :param filelist:
     :param error: error estimation, see class ErrorEstimate class in pymchelper.estimator
-    :param nan: if True, NaN (not a number) are excluded when averaing data.
+    :param nan: if True, NaN (not a number) are excluded when averaging data.
     :param outputdir:
     :param converter_name:
     :param options:

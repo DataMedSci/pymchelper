@@ -9,7 +9,7 @@ from pathlib import Path
 import pytest
 
 from pymchelper.executor.options import SimulationSettings
-from pymchelper.executor.runner import Runner
+from pymchelper.executor.runner import Runner, SimulatorType
 
 logger = logging.getLogger(__name__)
 
@@ -37,7 +37,7 @@ class TestRunner(unittest.TestCase):
         dirpath = tempfile.mkdtemp()
 
         settings = SimulationSettings(input_path=self.sh_exec_path,
-                                      simulator_type='shieldhit',
+                                      simulator_type=SimulatorType.shieldhit,
                                       simulator_exec_path=self.sh_exec_path,
                                       cmdline_opts='-s')
         settings.set_no_of_primaries(10)
@@ -64,7 +64,7 @@ class TestRunner(unittest.TestCase):
         dirpath = tempfile.mkdtemp()
 
         settings = SimulationSettings(input_path=self.topas_input_path,
-                                        simulator_type='topas',
+                                        simulator_type=SimulatorType.topas,
                                         simulator_exec_path=self.topas_exec_path)
         print(settings)
 

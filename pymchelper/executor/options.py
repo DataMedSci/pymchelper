@@ -49,6 +49,9 @@ class SimulationSettings:
     """
 
     def __init__(self, input_path, simulator_type = 'shieldhit', simulator_exec_path=None, cmdline_opts=None):
+        #simulator type (shieldhit, topas or fluka)
+        self.simulator_type = simulator_type
+        
         # input file or directory
         self.input_path = input_path
 
