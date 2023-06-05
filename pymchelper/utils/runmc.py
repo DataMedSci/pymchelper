@@ -50,7 +50,8 @@ def main(args=None):
     import pymchelper
 
     parser = argparse.ArgumentParser()
-    parser.add_argument('-s', '--simulator', help='Simulator type: shieldhit, topas or fluka (default: shieldhit)', type=str, default='shieldhit')
+    parser.add_argument('-s', '--simulator', help='Simulator type: shieldhit, topas or fluka (default: shieldhit)',
+                        type=str, choices=[s.name for s in SimulatorType], default=SimulatorType.shieldhit.name)
     parser.add_argument('-e', '--executable', help='path to MC executable '
                                                    '(automatically detected if not provided)',
                         type=str, default=None)
