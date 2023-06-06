@@ -207,6 +207,8 @@ class Plan:
     beam_model: Optional[BeamModel] = None  # optional beam model class
     beam_name: str = ""
     flip_xy: bool = False  # flag whether x and y has been flipped
+    flip_x: bool = False
+    flip_y: bool = False
 
     # factor holds the number of particles * dE/dx / MU = some constant
     # MU definitions is arbitrary and my vary from vendor to vendor.
@@ -345,6 +347,12 @@ class Plan:
                     fwhmx, fwhmy = layer.spotsize * 0.1  # mm -> cm
 
                 for spot in layer.spots:
+                    if self.flip_x:
+                        spot[0] *= -1
+
+                    if self.flip_y:
+                        spot[1] *= -1
+
                     if self.flip_xy:
                         xpos = spot[1] * 0.1  # mm -> cm
                         ypos = spot[0] * 0.1  # mm -> cm
@@ -371,7 +379,7 @@ class Plan:
             fout.write_text(output)  # still in field loop, output for every field
 
 
-def load(file: Path, beam_model: BeamModel, scaling: float, flip_xy: bool) -> Plan:
+def load(file: Path, beam_model: BeamModel, scaling: float, flip_xy: bool, flip_x: bool, flip_y: bool) -> Plan:
     """Load file, autodiscovery by suffix."""
     logger.debug("load() autodiscovery %s", file)
     ext = file.suffix.lower()  # extract suffix, incl. dot separator
@@ -396,6 +404,8 @@ def load(file: Path, beam_model: BeamModel, scaling: float, flip_xy: bool) -> Pl
 
     p.apply_beammodel()
     p.flip_xy = flip_xy
+    p.flip_x = flip_x
+    p.flip_y = flip_y
 
     return p
 
@@ -607,7 +617,20 @@ def main(args=None) -> int:
                         help="optional input beam model in commasparated CSV format",
                         dest='fbm',
                         default=None)
-    parser.add_argument('-i', '--invert', action='store_true', help="invert XY axis", dest="invert", default=False)
+    parser.add_argument('-i', '--flip',
+                        action='store_true',
+                        help="flip XY axis of input (x -> y and y -> x)",
+                        dest="flip_xy", default=False)
+    parser.add_argument('-x', '--xflip',
+                        action='store_true',
+                        help="flip x axis of input (x -> -x)",
+                        dest="flip_x",
+                        default=False)
+    parser.add_argument('-y', '--yflip',
+                        action='store_true',
+                        help="flip y axis of input (y -> -y)",
+                        dest="flip_y",
+                        default=False)
     parser.add_argument('-f',
                         '--field',
                         type=int,
@@ -618,7 +641,7 @@ def main(args=None) -> int:
     parser.add_argument('-d',
                         '--diag',
                         action='store_true',
-                        help="print diagnostics, but do not export data",
+                        help="print diagnostics of input dicom file, but do not export data",
                         dest="diag",
                         default=False)
     parser.add_argument('-n',
@@ -649,7 +672,10 @@ def main(args=None) -> int:
     else:
         bm = None
 
-    pln = load(parsed_args.fin, bm, parsed_args.scale, parsed_args.invert)
+    pln = load(parsed_args.fin, bm, parsed_args.scale,
+               parsed_args.flip_xy,
+               parsed_args.flip_x,
+               parsed_args.flip_y)
 
     if parsed_args.diag:
         pln.diagnose()
