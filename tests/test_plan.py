@@ -36,7 +36,7 @@ def test_call_cmd_option(option_name: str):
         assert e.value == 0
 
 
-@pytest.mark.parametrize("option_name", ["flip", "xflip", "yflip"])
+@pytest.mark.parametrize("option_name", ["", "flip", "xflip", "yflip"])
 @pytest.mark.parametrize("input_file_path", input_files.values(), ids=input_files.keys())
 @pytest.mark.parametrize("beam_model_path", [beam_model_path, None], ids=[beam_model_path.stem, "no_beam_model"])
 def test_generate_plan(input_file_path: Path, beam_model_path: Union[Path, None],
@@ -53,7 +53,8 @@ def test_generate_plan(input_file_path: Path, beam_model_path: Union[Path, None]
         cmd_line_args.append('-b')
         cmd_line_args.append(str(beam_model_path.resolve()))
 
-    if option_name is not None:
+    # add option if provided as non-empty string
+    if option_name:
         cmd_line_args.append(f'--{option_name}')
 
     # temporary change working directory to newly created temporary directory
