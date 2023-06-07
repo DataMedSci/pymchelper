@@ -157,8 +157,21 @@ def get_topas_estimators(output_files_path):
     Get Topas estimators from provided directory
     #TODO: create a list of estimators based on output files in the directory
     """
-    print(os.listdir(output_files_path))
-    return [Estimator()]
+    estimators_list = []
+    
+    for filename in os.listdir(output_files_path):
+        if filename.endswith(".csv"):
+            estimator = Estimator()
+            file_path = os.path.join(output_files_path, filename)
+            lines = np.genfromtxt(file_path, delimiter=',')
+            xbins, ybins, zbins = lines[-1, [0, 1, 2]].astype(int) + 1
+            scores = lines[:, 3]
+
+            print(scores.reshape((xbins, ybins, zbins)))
+            estimator.file_corename = filename[:-4]
+            estimators_list.append(estimator)
+            
+    return estimators_list
 
 def convertfromlist(filelist, error, nan, outputdir, converter_name, options, outputfile=None):
     """

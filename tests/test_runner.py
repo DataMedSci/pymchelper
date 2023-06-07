@@ -76,6 +76,9 @@ def test_topas(topas_path):
     data = r.get_data()
     print(data)
     assert data is not None
+    assert 'fluence_bp_protons_xy' in data
+    assert 'fluence_bp_protons_xy2' in data
+    
     shutil.rmtree(dirpath)
 
     # logger.info(data)
