@@ -1,9 +1,7 @@
 import logging
-import os
 import shutil
 import sys
 import tempfile
-import unittest
 from pathlib import Path
 
 import pytest

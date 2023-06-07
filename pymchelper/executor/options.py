@@ -32,11 +32,12 @@ class SH12AEnvironmentWindows(MCEnvironment):
     """
     executable_filename = 'shieldhit.exe'
 
+
 class TopasEnvironment(MCEnvironment):
-    """
-    TOPAS Environment
-    """
+    """TOPAS Environment"""
+    
     executable_filename = 'topas'
+
 
 class SimulationSettings:
     """
@@ -49,9 +50,9 @@ class SimulationSettings:
     """
 
     def __init__(self, input_path, simulator_type = 'shieldhit', simulator_exec_path=None, cmdline_opts=None):
-        #simulator type (shieldhit, topas or fluka)
+        # simulator type (shieldhit, topas or fluka)
         self.simulator_type = simulator_type
-        
+
         # input file or directory
         self.input_path = input_path
 
@@ -61,9 +62,9 @@ class SimulationSettings:
             if sys.platform == 'win32':
                 self._mc_environment = SH12AEnvironmentWindows
             self._mc_environment = SH12AEnvironmentLinux
-        elif simulator_type=='fluka':
+        elif simulator_type == 'fluka':
             self._mc_environment = FlukaEnvironment
-        elif simulator_type=='topas':
+        elif simulator_type == 'topas':
             self._mc_environment = TopasEnvironment
 
         # set `self.executable_path` to the value provided by user, or if it is missing

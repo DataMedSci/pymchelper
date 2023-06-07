@@ -18,7 +18,7 @@ class OutputDataType(IntEnum):
     """
     plot = 1
     txt = 2
-    
+
 
 class Runner:
     """
