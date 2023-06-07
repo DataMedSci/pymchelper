@@ -131,7 +131,7 @@ def fromfilelist(input_file_list, error=ErrorEstimate.stderr, nan: bool = True):
     return result
 
 
-def frompattern(pattern, sim_type, error=ErrorEstimate.stderr, nan=True):
+def frompattern(pattern, error=ErrorEstimate.stderr, nan=True):
     """
     Reads all files matching pattern, e.g.: 'foobar_*.bdo', and returns a list of averaged estimators.
 
@@ -148,13 +148,17 @@ def frompattern(pattern, sim_type, error=ErrorEstimate.stderr, nan=True):
 
     core_names_dict = group_input_files(list_of_matching_files)
 
-    if sim_type == SimulatorType.shieldhit:
-        result = [fromfilelist(filelist, error, nan) for _, filelist in core_names_dict.items()]
-    elif sim_type == SimulatorType.topas:
-        #todo
-        result = []
+    result = [fromfilelist(filelist, error, nan) for _, filelist in core_names_dict.items()]
+
     return result
 
+def get_topas_estimators(output_files_path):
+    """
+    Get Topas estimators from provided directory
+    #TODO: create a list of estimators based on output files in the directory
+    """
+    print(os.listdir(output_files_path))
+    return [Estimator()]
 
 def convertfromlist(filelist, error, nan, outputdir, converter_name, options, outputfile=None):
     """
