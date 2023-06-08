@@ -1,6 +1,7 @@
 from copy import deepcopy
 import logging
 import os
+import re
 import shutil
 import subprocess
 import timeit
@@ -62,9 +63,25 @@ class Runner:
         elif self.settings.simulator_type == SimulatorType.topas:
             # for topas we don't need to create multiple working directories and a pool of workers
             # as we can use embedded parallelisation in topas
-            # we can just set one rng seed, so one working directory and one worker will be created
+            # for that we need to modify the input file and set the number of threads to the number of jobs
+            # we set one rng seed, so one working directory and one worker will be created
             
-            #TODO: set the number of parallel jobs in topas input file
+            modified_input_path = str(self.settings.input_path).replace(".txt", "_modified.txt")
+            
+            with open(self.settings.input_path, 'r') as f:
+                config = f.read()
+                if "i:Ts/NumberOfThreads" in config:
+                    pattern = r"i:Ts/NumberOfThreads\s*=\s*\d+"
+                    replacement = f"i:Ts/NumberOfThreads = {self.jobs}"
+                    config = re.sub(pattern, replacement, config)
+                else:
+                    config = f"i:Ts/NumberOfThreads = {self.jobs}\n" + config
+
+            with open(modified_input_path, "w") as file:
+                file.write(config)
+            
+            self.settings.input_path = modified_input_path
+                
             rng_seeds = [1]
             
         # create working directories
@@ -108,7 +125,6 @@ class Runner:
         """
         start_time = timeit.default_timer()
 
-        # TODO line below is specific to SHIELD-HIT12A, should be generalised  # skipcq: PYL-W0511
         # scans output directory for MC simulation output files
         estimators_dict = {}
         estimators_list = []

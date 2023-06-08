@@ -72,7 +72,13 @@ def test_topas(topas_path):
     
     isRunOk = r.run()
     assert isRunOk
-
+    
+    #ensure that correct number of threads is set in the input file
+    with open(r.settings.input_path, "r") as input_file:
+        contents = input_file.read()
+        assert "i:Ts/NumberOfThreads = 0" not in contents
+        assert "i:Ts/NumberOfThreads = 2" in contents
+        
     data = r.get_data()
     print(data)
     assert data is not None
