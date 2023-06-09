@@ -59,3 +59,15 @@ def test_bdo_properly_read(manypage_bdo_path: Path):
 
     assert np.allclose(txt_data, all_pages.T)
 
+def test_mcpl_generation(manypage_bdo_path: Path, tmp_path: Path, monkeypatch: pytest.MonkeyPatch):
+    """Check if MCPL file can be generated from BDO."""
+    # temporary change working directory
+    monkeypatch.chdir(tmp_path)
+    from pymchelper.run import main
+    logger.debug("Parsing %s to MCPL", manypage_bdo_path)
+    main(['mcpl', str(manypage_bdo_path)])
+
+    expected_mcpl_path = tmp_path / manypage_bdo_path.with_suffix(".mcpl").name
+    assert expected_mcpl_path.exists()
+    assert expected_mcpl_path.is_file()
+    assert expected_mcpl_path.stat().st_size > 0
