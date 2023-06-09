@@ -1,12 +1,11 @@
 """Tests for MCPL converter"""
 import logging
 from pathlib import Path
-from typing import List
-
 import numpy as np
 from pymchelper.estimator import ErrorEstimate
 from pymchelper.input_output import fromfile
 import pytest
+import mcpl
 
 logger = logging.getLogger(__name__)
 
@@ -75,3 +74,6 @@ def test_mcpl_generation(manypage_bdo_path: Path, tmp_path: Path, monkeypatch: p
         assert expected_mcpl_path.exists()
         assert expected_mcpl_path.is_file()
         assert expected_mcpl_path.stat().st_size > 0
+
+        mcpl_file = mcpl.MCPLFile(expected_mcpl_path)
+        assert mcpl_file is not None
