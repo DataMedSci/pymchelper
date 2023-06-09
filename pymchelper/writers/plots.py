@@ -26,7 +26,6 @@ class PlotDataWriter:
 
     def write(self, estimator: Estimator):
         """Write the estimator data to a file."""
-
         # create output directory if it does not exist
         self.output_path.parent.mkdir(parents=True, exist_ok=True)
 

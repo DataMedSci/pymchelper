@@ -40,6 +40,7 @@ def test_bdo_reading(manypage_bdo_path: Path):
 
 
 def test_bdo_properly_read(manypage_bdo_path: Path):
+    """Check if the data is properly read."""
     estimator_data = fromfile(manypage_bdo_path)
     mcpl_as_text_path = manypage_bdo_path.with_suffix(".txt")
     assert mcpl_as_text_path.exists()
