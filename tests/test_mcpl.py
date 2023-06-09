@@ -2,6 +2,8 @@
 import logging
 from pathlib import Path
 from typing import List
+
+import numpy as np
 from pymchelper.estimator import ErrorEstimate
 from pymchelper.input_output import fromfile
 import pytest
@@ -37,48 +39,22 @@ def test_bdo_reading(manypage_bdo_path: Path):
     assert estimator_data.pages[0].data.shape == (8, 10)
 
 
-# def test_hdf_generation(manypage_bdo_path: Path, tmp_path: Path, monkeypatch: pytest.MonkeyPatch):
-#     """Check if HDF file can be generated from BDO."""
-#     # temporary change working directory
-#     monkeypatch.chdir(tmp_path)
-#     from pymchelper.run import main
-#     logger.debug("Parsing %s to HDF", manypage_bdo_path)
-#     main(['hdf', str(manypage_bdo_path)])
+def test_bdo_properly_read(manypage_bdo_path: Path):
+    estimator_data = fromfile(manypage_bdo_path)
+    mcpl_as_text_path = manypage_bdo_path.with_suffix(".txt")
+    assert mcpl_as_text_path.exists()
+    assert mcpl_as_text_path.is_file()
+    assert mcpl_as_text_path.stat().st_size > 0
+    
+    txt_data = np.loadtxt(mcpl_as_text_path)
+    assert txt_data is not None
+    assert txt_data.shape == (45, 8)
 
-#     expected_hdf_path = tmp_path / "ex_yzmsh.h5"
-#     assert expected_hdf_path.exists()
+    list_of_arrays = [page.data for page in estimator_data.pages]
+    # concatenate all pages into one numpy array
+    all_pages = np.concatenate(list_of_arrays, axis=1)
+    assert all_pages is not None
+    assert all_pages.shape == (8, 45)
 
-#     import h5py
+    assert np.allclose(txt_data, all_pages.T)
 
-#     # check if HDF file can be read
-#     with h5py.File(expected_hdf_path, 'r') as hf:
-
-#         estimator_data = fromfile(manypage_bdo_path)
-
-#         assert hf is not None
-#         assert hf.attrs is not None
-#         for page_no, page in enumerate(estimator_data.pages):
-#             assert hf[f"data_{page_no}"] is not None
-#             assert hf[f"data_{page_no}"].attrs is not None
-#             assert hf[f"data_{page_no}"].attrs["name"] == page.name
-#             assert hf[f"data_{page_no}"].attrs["unit"] == page.unit
-#             assert hf[f"data_{page_no}"].attrs["nstat"] == estimator_data.number_of_primaries
-#             assert hf[f"data_{page_no}"].attrs["counter"] == estimator_data.file_counter
-#             assert hf[f"data_{page_no}"].attrs["xaxis_n"] == estimator_data.x.n
-#             assert hf[f"data_{page_no}"].attrs["xaxis_min"] == estimator_data.x.min_val
-#             assert hf[f"data_{page_no}"].attrs["xaxis_max"] == estimator_data.x.max_val
-#             assert hf[f"data_{page_no}"].attrs["yaxis_n"] == estimator_data.y.n
-#             assert hf[f"data_{page_no}"].attrs["yaxis_min"] == estimator_data.y.min_val
-#             assert hf[f"data_{page_no}"].attrs["yaxis_max"] == estimator_data.y.max_val
-#             assert hf[f"data_{page_no}"].attrs["zaxis_n"] == estimator_data.z.n
-#             assert hf[f"data_{page_no}"].attrs["zaxis_min"] == estimator_data.z.min_val
-#             assert hf[f"data_{page_no}"].attrs["zaxis_max"] == estimator_data.z.max_val
-#             assert hf[f"data_{page_no}"].attrs["xaxis_name"] == estimator_data.x.name
-#             assert hf[f"data_{page_no}"].attrs["yaxis_name"] == estimator_data.y.name
-#             assert hf[f"data_{page_no}"].attrs["zaxis_name"] == estimator_data.z.name
-#             assert hf[f"data_{page_no}"].attrs["xaxis_unit"] == estimator_data.x.unit
-#             assert hf[f"data_{page_no}"].attrs["yaxis_unit"] == estimator_data.y.unit
-#             assert hf[f"data_{page_no}"].attrs["zaxis_unit"] == estimator_data.z.unit
-#             # check if data is the same
-#             assert hf[f"data_{page_no}"].shape == page.data.shape
-#             assert hf[f"data_{page_no}"][:] == pytest.approx(page.data)

@@ -108,7 +108,7 @@ class Page:
         For more details see ``data`` property.
         :return:
         """
-        if self.estimator:            
+        if self.estimator:
             return self._reshape(data_1d=self.error_raw,
                                  shape=(self.estimator.x.n, self.estimator.y.n, self.estimator.z.n,
                                         self.diff_axis1.n, self.diff_axis2.n))

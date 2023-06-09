@@ -21,7 +21,7 @@ class PlotAxis(IntEnum):
 class PlotDataWriter:
     """plot data writer"""
 
-    def __init__(self, output_path: str, options):
+    def __init__(self, output_path: str, _):
         self.output_path = Path(output_path).with_suffix(".dat")
 
     def write(self, estimator: Estimator):
@@ -41,7 +41,8 @@ class PlotDataWriter:
                 # for 10-99 pages the filename would look like: output_p01.png, ... output_p99.png
                 # for 100-999 pages the filename would look like: output_p001.png, ... output_p999.png
                 zero_padded_page_no = str(i + 1).zfill(len(str(len(estimator.pages))))
-                page_output_path = self.output_path.parent / f"{self.output_path.stem}_p{zero_padded_page_no}{self.output_path.suffix}"
+                page_output_path = self.output_path.parent
+                page_output_path /= f"{self.output_path.stem}_p{zero_padded_page_no}{self.output_path.suffix}"
 
                 # save the output file
                 logger.info("Writing %s", page_output_path)
