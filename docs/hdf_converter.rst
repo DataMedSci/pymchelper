@@ -29,7 +29,7 @@ Data can be extracted from HDF file with following Python code:
 
 .. code-block:: python
 
-   import numpy as np
+   import h5py
 
    # reading data and attributes from HDF file
     with h5py.File('dose.h5', 'r') as hf:

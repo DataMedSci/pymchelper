@@ -2,6 +2,7 @@
 import logging
 from pathlib import Path
 from typing import List
+from pymchelper.estimator import ErrorEstimate
 from pymchelper.input_output import fromfile
 import pytest
 
@@ -27,8 +28,13 @@ def test_bdo_reading(manypage_bdo_path: Path):
     estimator_data = fromfile(manypage_bdo_path)
     assert estimator_data is not None
     assert estimator_data.pages is not None
+    assert estimator_data.dim == 0
+    assert estimator_data.error_type == ErrorEstimate.none
+    for i in range(3):
+        assert estimator_data.axis(i).n == 1
     assert len(estimator_data.pages) == 3
     assert estimator_data.pages[0].data is not None
+    assert estimator_data.pages[0].data.shape == (8, 10)
 
 
 # def test_hdf_generation(manypage_bdo_path: Path, tmp_path: Path, monkeypatch: pytest.MonkeyPatch):
