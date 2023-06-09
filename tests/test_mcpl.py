@@ -46,7 +46,7 @@ def test_bdo_properly_read(manypage_bdo_path: Path):
     assert mcpl_as_text_path.exists()
     assert mcpl_as_text_path.is_file()
     assert mcpl_as_text_path.stat().st_size > 0
-    
+
     txt_data = np.loadtxt(mcpl_as_text_path)
     assert txt_data is not None
     assert txt_data.shape == (45, 8)
@@ -59,6 +59,7 @@ def test_bdo_properly_read(manypage_bdo_path: Path):
 
     assert np.allclose(txt_data, all_pages.T)
 
+
 def test_mcpl_generation(manypage_bdo_path: Path, tmp_path: Path, monkeypatch: pytest.MonkeyPatch):
     """Check if MCPL file can be generated from BDO."""
     # temporary change working directory
@@ -67,7 +68,10 @@ def test_mcpl_generation(manypage_bdo_path: Path, tmp_path: Path, monkeypatch: p
     logger.debug("Parsing %s to MCPL", manypage_bdo_path)
     main(['mcpl', str(manypage_bdo_path)])
 
-    expected_mcpl_path = tmp_path / manypage_bdo_path.with_suffix(".mcpl").name
-    assert expected_mcpl_path.exists()
-    assert expected_mcpl_path.is_file()
-    assert expected_mcpl_path.stat().st_size > 0
+    estimator_data = fromfile(manypage_bdo_path)
+
+    for i, page in enumerate(estimator_data.pages):
+        expected_mcpl_path = tmp_path / f'NB_mcpl_p{i+1}.mcpl'
+        assert expected_mcpl_path.exists()
+        assert expected_mcpl_path.is_file()
+        assert expected_mcpl_path.stat().st_size > 0

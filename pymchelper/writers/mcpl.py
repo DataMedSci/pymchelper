@@ -18,5 +18,6 @@ class MCPLWriter(Writer):
         logger.info("Writing page to: %s", str(output_path))
 
         # special case for MCPL data
-        if page.dettyp == SHDetType.mcpl:            
+        if page.dettyp == SHDetType.mcpl:
+            output_path.write_bytes(page.data_raw)
             return
