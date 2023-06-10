@@ -50,15 +50,35 @@ class MCPLWriter(Writer):
             # see https://mctools.github.io/mcpl/mcpl.pdf#nameddest=section.3
             for row in page.data.T:
                 pdg, x, y, z, ux, uy, uz, E = row
-                bytes_to_write += struct.pack("<d", x) # x
-                bytes_to_write += struct.pack("<d", y) # y
-                bytes_to_write += struct.pack("<d", z) # z
-                bytes_to_write += struct.pack("<d", ux) # ux
-                bytes_to_write += struct.pack("<d", uy) # uy
-                bytes_to_write += struct.pack("<d", E) # uz
-                bytes_to_write += struct.pack("<d", 0) # time
-                bytes_to_write += struct.pack("<I", int(pdg)) # E
-                print(f"pdg: {pdg}, x: {x}, y: {y}, z: {z}, ux: {ux}, uy: {uy}, uz: {uz}, E: {E}")
+
+                # adaptive projection packing
+                fp1 : float = float('nan')
+                fp2 : float = float('nan')
+                sign : int = 1
+                if ux*ux > uy*uy and ux*ux > uz*uz:
+                    if ux < 0:
+                        sign = -1
+                    fp1 = 1/uz
+                    fp2 = uy
+                if uy*uy > ux*ux and uy*uy > uz*uz:
+                    if uy < 0:
+                        sign = -1
+                    fp1 = ux
+                    fp2 = 1/uz
+                if uz*uz >= ux*ux and uz*uz >= uy*uy:
+                    if uz < 0:
+                        sign = -1
+                    fp1 = ux
+                    fp2 = uy
+
+                bytes_to_write += struct.pack("<f", x) # x
+                bytes_to_write += struct.pack("<f", y) # y
+                bytes_to_write += struct.pack("<f", z) # z
+                bytes_to_write += struct.pack("<f", fp1) # FP1 (mostly ux)
+                bytes_to_write += struct.pack("<f", fp2) # FP2 (mostly uy)
+                bytes_to_write += struct.pack("<f", sign*E) # uz
+                bytes_to_write += struct.pack("<f", 0) # time
+                bytes_to_write += struct.pack("<I", int(pdg)) # pdg
 
             output_path.write_bytes(bytes_to_write)
             return

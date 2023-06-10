@@ -77,3 +77,8 @@ def test_mcpl_generation(manypage_bdo_path: Path, tmp_path: Path, monkeypatch: p
 
         mcpl_file = mcpl.MCPLFile(expected_mcpl_path)
         assert mcpl_file is not None
+        assert mcpl_file.nparticles == page.data.shape[1]
+        for p in mcpl_file.particles:
+            assert p.weight == 1.0
+            assert p.pdgcode == 2112
+            assert p.position[2] == 4.0
