@@ -11,7 +11,7 @@ class Writer:
     def __init__(self, output_path: str):
         self.output_path = Path(output_path)
 
-    def write(self, estimator: Estimator):
+    def write(self, estimator: Estimator) -> int:
         """Write the estimator data to a file."""
         # create output directory if it does not exist
         self.output_path.parent.mkdir(parents=True, exist_ok=True)
@@ -33,6 +33,7 @@ class Writer:
                 # save the output file
                 logger.info("Writing %s", page_output_path)
                 self.write_single_page(page=page, output_path=page_output_path)
+        return 1
 
     @abstractmethod
     def write_single_page(self, page, output_path: Path):

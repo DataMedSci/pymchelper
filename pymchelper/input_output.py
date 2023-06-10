@@ -44,7 +44,7 @@ def guess_corename(filename):
     return corename
 
 
-def fromfile(filename):
+def fromfile(filename: str):
     """Read estimator data from a binary file ```filename```"""
 
     reader = guess_reader(filename)
