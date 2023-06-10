@@ -7,6 +7,7 @@ logger = logging.getLogger(__name__)
 
 
 class Writer:
+    """Base class for all writers."""
 
     def __init__(self, output_path: str):
         self.output_path = Path(output_path)
@@ -38,4 +39,4 @@ class Writer:
     @abstractmethod
     def write_single_page(self, page, output_path: Path):
         """Write a single page to a file."""
-        pass
+        raise NotImplementedError
