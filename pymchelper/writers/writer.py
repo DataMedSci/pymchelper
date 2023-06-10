@@ -1,3 +1,4 @@
+from abc import abstractmethod
 import logging
 from pathlib import Path
 from pymchelper.estimator import Estimator
@@ -7,7 +8,7 @@ logger = logging.getLogger(__name__)
 
 class Writer:
 
-    def __init__(self, output_path: str, _):
+    def __init__(self, output_path: str):
         self.output_path = Path(output_path)
 
     def write(self, estimator: Estimator):
@@ -33,5 +34,7 @@ class Writer:
                 logger.info("Writing %s", page_output_path)
                 self.write_single_page(page=page, output_path=page_output_path)
 
-    def write_single_page(self, _):
-        return NotImplemented
+    @abstractmethod
+    def write_single_page(self, page, output_path: Path):
+        """Write a single page to a file."""
+        pass

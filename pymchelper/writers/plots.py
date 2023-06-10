@@ -4,7 +4,6 @@ from enum import IntEnum
 from pathlib import Path
 
 import numpy as np
-from pymchelper.estimator import Estimator
 from pymchelper.page import Page
 
 from pymchelper.shieldhit.detector.detector_type import SHDetType
@@ -23,7 +22,8 @@ class PlotDataWriter(Writer):
     """plot data writer"""
 
     def __init__(self, output_path: str, _):
-        self.output_path = Path(output_path).with_suffix(".dat")
+        super().__init__(output_path)
+        self.output_path = self.output_path.with_suffix(".dat")
 
     def write_single_page(self, page: Page, output_path: Path):
         """TODO"""
