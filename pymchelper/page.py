@@ -1,6 +1,7 @@
 import numpy as np
 
 from pymchelper.axis import MeshAxis, AxisId
+from pymchelper.shieldhit.detector.detector_type import SHDetType
 
 
 class Page:
@@ -11,8 +12,8 @@ class Page:
         self.data_raw = np.array([float("NaN")])  # linear data storage
         self.error_raw = np.array([float("NaN")])  # linear data storage
 
-        self.name = ""
-        self.unit = ""
+        self.name : str = ""
+        self.unit : str = ""
 
         self.dettyp = None  # Dose, Fluence, LET etc...
 
@@ -45,7 +46,7 @@ class Page:
         return None
 
     @property
-    def dimension(self):
+    def dimension(self) -> int:
         """
         Let's take again detector d with YZ scoring.
         >>> from pymchelper.estimator import Estimator
@@ -66,7 +67,7 @@ class Page:
         if self.estimator:
             return 2 - (self.diff_axis1.n, self.diff_axis2.n).count(1) + self.estimator.dimension
         else:
-            return None
+            return 0
 
     @property
     def data(self):
@@ -91,10 +92,13 @@ class Page:
         :return: reshaped view of ``data_raw``
         """
         if self.estimator:
+            # phase space data needs to be reshaped to a 2D array
+            if self.dettyp == SHDetType.mcpl:
+                return self._reshape(data_1d=self.data_raw, shape=(8, -1))
             return self._reshape(data_1d=self.data_raw,
                                  shape=(self.estimator.x.n, self.estimator.y.n, self.estimator.z.n,
                                         self.diff_axis1.n, self.diff_axis2.n))
-        return None
+        return self.data_raw
 
     @property
     def error(self):
@@ -108,19 +112,19 @@ class Page:
             return self._reshape(data_1d=self.error_raw,
                                  shape=(self.estimator.x.n, self.estimator.y.n, self.estimator.z.n,
                                         self.diff_axis1.n, self.diff_axis2.n))
-        return None
+        return self.error_raw
 
-    def _reshape(self, data_1d, shape):
+    def _reshape(self, data_1d, shape : tuple):
         # TODO check also  tests/res/shieldhit/single/ex_yzmsh.bdo as it is saved in bin2010 format
         if self.estimator:
             order = 'C'
-            if self.estimator.file_format in ('bdo2016', 'bdo2019', 'fluka_binary'):
+            if self.estimator.file_format in {'bdo2016', 'bdo2019', 'fluka_binary'}:
                 order = 'F'
             return data_1d.reshape(shape, order=order)
         else:
-            return None
+            return data_1d
 
-    def plot_axis(self, id):
+    def plot_axis(self, id : int):
         """
         Calculate new order of detector axis, axis with data (n>1) comes first
         Axes with constant value goes last.

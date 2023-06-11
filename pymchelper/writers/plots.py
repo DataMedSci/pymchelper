@@ -1,8 +1,13 @@
 import logging
 import os
 from enum import IntEnum
+from pathlib import Path
 
 import numpy as np
+from pymchelper.page import Page
+
+from pymchelper.shieldhit.detector.detector_type import SHDetType
+from pymchelper.writers.writer import Writer
 
 logger = logging.getLogger(__name__)
 
@@ -13,54 +18,29 @@ class PlotAxis(IntEnum):
     z = 3
 
 
-class PlotDataWriter:
+class PlotDataWriter(Writer):
     """plot data writer"""
 
-    def __init__(self, filename, options):
-        self.filename = filename
-        if not self.filename.endswith(".dat"):
-            self.filename += ".dat"
+    def __init__(self, output_path: str, _):
+        super().__init__(output_path)
+        self.output_path = self.output_path.with_suffix(".dat")
 
-    def write(self, estimator):
+    def write_single_page(self, page: Page, output_path: Path):
         """TODO"""
-        # save to single page to a file without number (i.e. output.dat)
-        if len(estimator.pages) == 1:
-            self.write_single_page(estimator.pages[0], self.filename)
-        else:
-            # split output path into directory, basename and extension
-            dir_path = os.path.dirname(self.filename)
-            if not os.path.exists(dir_path):
-                logger.info("Creating {}".format(dir_path))
-                os.makedirs(dir_path)
-            file_base_part, file_ext = os.path.splitext(os.path.basename(self.filename))
+        logger.info("Writing page to: %s", str(output_path))
 
-            # loop over all pages and save an image for each of them
-            for i, page in enumerate(estimator.pages):
-
-                # calculate output filename. it will include page number padded with zeros.
-                # for 10-99 pages the filename would look like: output_p01.png, ... output_p99.png
-                # for 100-999 pages the filename would look like: output_p001.png, ... output_p999.png
-                zero_padded_page_no = str(i + 1).zfill(len(str(len(estimator.pages))))
-                output_filename = "{}_p{}{}".format(file_base_part, zero_padded_page_no, file_ext)
-                output_path = os.path.join(dir_path, output_filename)
-
-                # save the output file
-                logger.info("Writing {}".format(output_path))
-                self.write_single_page(page, output_path)
-
-        return 0
-
-    def write_single_page(self, page, filename):
-        """TODO"""
-        logger.info("Writing: " + filename)
+        # special case for MCPL data
+        if page.dettyp == SHDetType.mcpl:
+            np.savetxt(output_path, page.data.T, fmt="%g", delimiter=' ')
+            return
 
         # special case for 0-dim data
         if page.dimension == 0:
             # save two numbers to the file
             if not np.all(np.isnan(page.error_raw)) and np.any(page.error_raw):
-                np.savetxt(self.filename, [[page.data_raw, page.error_raw]], fmt="%g %g", delimiter=' ')
+                np.savetxt(self.output_path, [[page.data_raw, page.error_raw]], fmt="%g %g", delimiter=' ')
             else:  # save one number to the file
-                np.savetxt(self.filename, [page.data_raw], fmt="%g", delimiter=' ')
+                np.savetxt(self.output_path, [page.data_raw], fmt="%g", delimiter=' ')
         else:
             axis_numbers = list(range(page.dimension))
 
@@ -68,8 +48,9 @@ class PlotDataWriter:
             axis_data_columns_1d = [page.plot_axis(i).data for i in axis_numbers]
 
             # now we calculate running index for each axis
-            axis_data_columns_long = [np.meshgrid(*axis_data_columns_1d, indexing='ij')[i].ravel()
-                                      for i in axis_numbers]
+            axis_data_columns_long = [
+                np.meshgrid(*axis_data_columns_1d, indexing='ij')[i].ravel() for i in axis_numbers
+            ]
 
             fmt = "%g" + " %g" * page.dimension
             data_to_save = axis_data_columns_long + [page.data_raw]
@@ -83,8 +64,8 @@ class PlotDataWriter:
             data_columns = np.transpose(data_to_save)
 
             # save space-delimited text file
-            np.savetxt(filename, data_columns, fmt=fmt, delimiter=' ')
-        return 0
+            np.savetxt(output_path, data_columns, fmt=fmt, delimiter=' ')
+        return
 
 
 class ImageWriter:
@@ -144,10 +125,12 @@ class ImageWriter:
 
             # add optional error area
             if np.any(page.error):
-                ax.fill_between(plot_x_axis.data,
-                                (data_raw - error_raw).clip(0.0),
+                ax.fill_between(plot_x_axis.data, (data_raw - error_raw).clip(0.0),
                                 (data_raw + error_raw).clip(0.0, 1.05 * data_raw.max()),
-                                alpha=0.2, edgecolor='#CC4F1B', facecolor='#FF9848', antialiased=True)
+                                alpha=0.2,
+                                edgecolor='#CC4F1B',
+                                facecolor='#FF9848',
+                                antialiased=True)
             ax.set_ylabel(self._make_label(page.unit, page.name))
             ax.grid(True, alpha=0.3)
             ax.plot(plot_x_axis.data, data_raw)

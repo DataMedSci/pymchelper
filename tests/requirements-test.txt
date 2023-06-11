@@ -1,5 +1,5 @@
 # micro-language and markers are described here: https://www.python.org/dev/peps/pep-0496/
-pytest
-flake8
-sphinx
-mypy
+pytest==7.2.0
+flake8==6.0.0
+sphinx==5.3.0
+mcpl==1.6.2
