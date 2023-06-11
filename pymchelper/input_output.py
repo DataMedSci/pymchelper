@@ -2,6 +2,7 @@ import logging
 import os
 from collections import defaultdict
 from glob import glob
+import re
 
 import numpy as np
 
@@ -157,8 +158,22 @@ def get_topas_estimators(output_files_path):
     Get Topas estimators from provided directory
     #TODO: create a list of estimators based on output files in the directory
     """
-    estimators_list = []
     
+    #find the input file to extract the number of histories from it
+    for filename in os.listdir(output_files_path):
+        if filename.endswith(".txt"):
+            input_file_path = os.path.join(output_files_path, filename)
+            with open(input_file_path) as input_file:
+                pattern = r'NumberOfHistoriesInRun\s*=\s*(\d+)'
+                for line in input_file.readlines():
+                    match = re.search(pattern, line)
+                    if match:
+                        number_str = re.search(r'\d+', match.group())
+                        if number_str:
+                            num_histories = int(number_str.group())
+    
+    #generate estimator object for each output file
+    estimators_list = []  
     for filename in os.listdir(output_files_path):
         if filename.endswith(".csv"):
             estimator = Estimator()
@@ -169,6 +184,8 @@ def get_topas_estimators(output_files_path):
 
             print(scores.reshape((xbins, ybins, zbins)))
             estimator.file_corename = filename[:-4]
+            estimator.number_of_primaries = num_histories
+            estimator.file_format = "csv"
             estimators_list.append(estimator)
             
     return estimators_list
