@@ -5,6 +5,7 @@ from glob import glob
 import re
 
 import numpy as np
+from pymchelper.axis import MeshAxis
 
 from pymchelper.estimator import ErrorEstimate, Estimator, average_with_nan
 from pymchelper.simulator_type import SimulatorType
@@ -165,27 +166,48 @@ def get_topas_estimators(output_files_path):
             input_file_path = os.path.join(output_files_path, filename)
             with open(input_file_path) as input_file:
                 pattern = r'NumberOfHistoriesInRun\s*=\s*(\d+)'
+                num_histories = 0
                 for line in input_file.readlines():
                     match = re.search(pattern, line)
                     if match:
                         number_str = re.search(r'\d+', match.group())
                         if number_str:
                             num_histories = int(number_str.group())
+                            break
     
     #generate estimator object for each output file
     estimators_list = []  
     for filename in os.listdir(output_files_path):
         if filename.endswith(".csv"):
+            output_file_path = os.path.join(output_files_path, filename)
+            with open(output_file_path) as output_file:
+                bins_data = {}
+                output_lines  = output_file.readlines()
+                for dimension in ['X', 'Y', 'Z']:
+                    pattern = f"# {dimension} in (\\d+) bin[s ] of ([\\d.]+) (\\w+)"
+                    for line in output_lines:
+                        match = re.search(pattern, line)
+                        if match:
+                            bins_data[dimension] = {'num': int(match.group(1)), 'size': float(match.group(2)), 'unit': match.group(3)}
+                            break
+            
             estimator = Estimator()
             file_path = os.path.join(output_files_path, filename)
             lines = np.genfromtxt(file_path, delimiter=',')
             xbins, ybins, zbins = lines[-1, [0, 1, 2]].astype(int) + 1
             scores = lines[:, 3]
 
-            print(scores.reshape((xbins, ybins, zbins)))
+            #print(scores.reshape((xbins, ybins, zbins)))
+            #print(scores)
             estimator.file_corename = filename[:-4]
             estimator.number_of_primaries = num_histories
             estimator.file_format = "csv"
+            estimator.x = MeshAxis(n=bins_data['X']['num'], min_val=0.0, max_val=bins_data['X']['size']*bins_data['X']['num'],
+                                   name="X", unit=bins_data['X']['unit'], binning=MeshAxis.BinningType.linear)
+            estimator.y = MeshAxis(n=bins_data['Y']['num'], min_val=0.0, max_val=bins_data['Y']['size']*bins_data['Y']['num'],
+                                    name="Y", unit=bins_data['Y']['unit'], binning=MeshAxis.BinningType.linear)
+            estimator.z = MeshAxis(n=bins_data['Z']['num'], min_val=0.0, max_val=bins_data['Z']['size']*bins_data['Z']['num'],
+                                    name="Z", unit=bins_data['Z']['unit'], binning=MeshAxis.BinningType.linear)
             estimators_list.append(estimator)
             
     return estimators_list
