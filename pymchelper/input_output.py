@@ -13,6 +13,7 @@ from pymchelper.readers.fluka import FlukaReader, FlukaReaderFactory
 from pymchelper.readers.shieldhit.general import SHReaderFactory
 from pymchelper.readers.shieldhit.reader_base import SHReader
 from pymchelper.writers.common import Converters
+from pymchelper.page import Page
 
 logger = logging.getLogger(__name__)
 
@@ -167,13 +168,12 @@ def get_topas_estimators(output_files_path):
             with open(input_file_path) as input_file:
                 pattern = r'NumberOfHistoriesInRun\s*=\s*(\d+)'
                 num_histories = 0
-                for line in input_file.readlines():
-                    match = re.search(pattern, line)
-                    if match:
-                        number_str = re.search(r'\d+', match.group())
-                        if number_str:
-                            num_histories = int(number_str.group())
-                            break
+                input_data = input_file.read()
+                match = re.search(pattern, input_data)
+                if match:
+                    number_str = re.search(r'\d+', match.group())
+                    if number_str:
+                        num_histories = int(number_str.group())
     
     #generate estimator object for each output file
     estimators_list = []  
@@ -182,23 +182,19 @@ def get_topas_estimators(output_files_path):
             output_file_path = os.path.join(output_files_path, filename)
             with open(output_file_path) as output_file:
                 bins_data = {}
-                output_lines  = output_file.readlines()
+                output_data  = output_file.read()
                 for dimension in ['X', 'Y', 'Z']:
                     pattern = f"# {dimension} in (\\d+) bin[s ] of ([\\d.]+) (\\w+)"
-                    for line in output_lines:
-                        match = re.search(pattern, line)
-                        if match:
-                            bins_data[dimension] = {'num': int(match.group(1)), 'size': float(match.group(2)), 'unit': match.group(3)}
-                            break
+                    match = re.search(pattern, output_data)
+                    if match:
+                        bins_data[dimension] = {'num': int(match.group(1)), 'size': float(match.group(2)), 'unit': match.group(3)}
             
             estimator = Estimator()
             file_path = os.path.join(output_files_path, filename)
             lines = np.genfromtxt(file_path, delimiter=',')
-            xbins, ybins, zbins = lines[-1, [0, 1, 2]].astype(int) + 1
             scores = lines[:, 3]
 
-            #print(scores.reshape((xbins, ybins, zbins)))
-            #print(scores)
+            scores_reshaped = scores.reshape((bins_data['X']['num'], bins_data['Y']['num'], bins_data['Z']['num']))
             estimator.file_corename = filename[:-4]
             estimator.number_of_primaries = num_histories
             estimator.file_format = "csv"
@@ -208,6 +204,17 @@ def get_topas_estimators(output_files_path):
                                     name="Y", unit=bins_data['Y']['unit'], binning=MeshAxis.BinningType.linear)
             estimator.z = MeshAxis(n=bins_data['Z']['num'], min_val=0.0, max_val=bins_data['Z']['size']*bins_data['Z']['num'],
                                     name="Z", unit=bins_data['Z']['unit'], binning=MeshAxis.BinningType.linear)
+            
+            page = Page(estimator=estimator)
+            #TODO
+            page.title = ""
+            page.name = ""
+            page.unit = ""
+
+            page.data_raw = scores_reshaped
+            page.error_raw = np.empty_like(page.data_raw)
+
+            estimator.add_page(page)
             estimators_list.append(estimator)
             
     return estimators_list
