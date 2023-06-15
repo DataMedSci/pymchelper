@@ -8,6 +8,7 @@ import numpy as np
 from pymchelper.axis import MeshAxis
 
 from pymchelper.estimator import ErrorEstimate, Estimator, average_with_nan
+from pymchelper.readers.topas import TopasReaderFactory
 from pymchelper.simulator_type import SimulatorType
 from pymchelper.readers.fluka import FlukaReader, FlukaReaderFactory
 from pymchelper.readers.shieldhit.general import SHReaderFactory
@@ -25,6 +26,7 @@ def guess_reader(filename):
     :param filename:
     :return: Instantiated reader object
     """
+    reader = None
     fluka_reader = FlukaReaderFactory(filename).get_reader()
     if fluka_reader:
         reader = fluka_reader(filename)
@@ -32,6 +34,10 @@ def guess_reader(filename):
         sh_reader = SHReaderFactory(filename).get_reader()
         if sh_reader:
             reader = sh_reader(filename)
+        else:
+            topas_reader = TopasReaderFactory(filename).get_reader()
+            if topas_reader:
+                reader = topas_reader(filename)
     return reader
 
 
@@ -158,65 +164,18 @@ def frompattern(pattern, error=ErrorEstimate.stderr, nan=True):
 def get_topas_estimators(output_files_path):
     """
     Get Topas estimators from provided directory
-    #TODO: create a list of estimators based on output files in the directory
     """
     
-    #find the input file to extract the number of histories from it
+    estimators_list = []
     for filename in os.listdir(output_files_path):
-        if filename.endswith(".txt"):
-            input_file_path = os.path.join(output_files_path, filename)
-            with open(input_file_path) as input_file:
-                pattern = r'NumberOfHistoriesInRun\s*=\s*(\d+)'
-                num_histories = 0
-                input_data = input_file.read()
-                match = re.search(pattern, input_data)
-                if match:
-                    number_str = re.search(r'\d+', match.group())
-                    if number_str:
-                        num_histories = int(number_str.group())
-    
-    #generate estimator object for each output file
-    estimators_list = []  
-    for filename in os.listdir(output_files_path):
-        if filename.endswith(".csv"):
-            output_file_path = os.path.join(output_files_path, filename)
-            with open(output_file_path) as output_file:
-                bins_data = {}
-                output_data  = output_file.read()
-                for dimension in ['X', 'Y', 'Z']:
-                    pattern = f"# {dimension} in (\\d+) bin[s ] of ([\\d.]+) (\\w+)"
-                    match = re.search(pattern, output_data)
-                    if match:
-                        bins_data[dimension] = {'num': int(match.group(1)), 'size': float(match.group(2)), 'unit': match.group(3)}
-            
+        output_file_path = os.path.join(output_files_path, filename)
+        topas_reader = TopasReaderFactory(output_file_path).get_reader()
+        if topas_reader:
+            reader = topas_reader(output_file_path)
             estimator = Estimator()
-            file_path = os.path.join(output_files_path, filename)
-            lines = np.genfromtxt(file_path, delimiter=',')
-            scores = lines[:, 3]
-
-            scores_reshaped = scores.reshape((bins_data['X']['num'], bins_data['Y']['num'], bins_data['Z']['num']))
-            estimator.file_corename = filename[:-4]
-            estimator.number_of_primaries = num_histories
-            estimator.file_format = "csv"
-            estimator.x = MeshAxis(n=bins_data['X']['num'], min_val=0.0, max_val=bins_data['X']['size']*bins_data['X']['num'],
-                                   name="X", unit=bins_data['X']['unit'], binning=MeshAxis.BinningType.linear)
-            estimator.y = MeshAxis(n=bins_data['Y']['num'], min_val=0.0, max_val=bins_data['Y']['size']*bins_data['Y']['num'],
-                                    name="Y", unit=bins_data['Y']['unit'], binning=MeshAxis.BinningType.linear)
-            estimator.z = MeshAxis(n=bins_data['Z']['num'], min_val=0.0, max_val=bins_data['Z']['size']*bins_data['Z']['num'],
-                                    name="Z", unit=bins_data['Z']['unit'], binning=MeshAxis.BinningType.linear)
-            
-            page = Page(estimator=estimator)
-            #TODO
-            page.title = ""
-            page.name = ""
-            page.unit = ""
-
-            page.data_raw = scores_reshaped
-            page.error_raw = np.empty_like(page.data_raw)
-
-            estimator.add_page(page)
+            reader.read(estimator)
             estimators_list.append(estimator)
-            
+    
     return estimators_list
 
 def convertfromlist(filelist, error, nan, outputdir, converter_name, options, outputfile=None):

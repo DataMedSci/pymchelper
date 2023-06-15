@@ -62,7 +62,7 @@ class Runner:
 
         elif self.settings.simulator_type == SimulatorType.topas:
             # for topas we don't need to create multiple working directories and a pool of workers
-            # as we can use embedded parallelisation in topas
+            # as we can use embedded parallelization in topas
             # for that we need to modify the input file and set the number of threads to the number of jobs
             # we set one rng seed, so one working directory and one worker will be created
             
