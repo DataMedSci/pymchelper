@@ -39,9 +39,9 @@ class SHReaderBDO2019(SHReader):
 
                 # decode all strings (currently there will never be more than one per token)
                 if 'S' in token_type.decode('ASCII'):
-                    for i, _j in enumerate(raw_payload):
+                    for i, payload_entry in enumerate(raw_payload):
                         # raw payload may contain non-ASCII characters (i.e. filedate on non-English Windows OS)
-                        payload[i] = raw_payload[i].decode('ASCII', 'replace').strip()
+                        payload[i] = payload_entry.decode('ASCII', 'replace').strip()
                 else:
                     payload = raw_payload
 
@@ -133,9 +133,9 @@ class SHReaderBDO2019(SHReader):
                                                unit=page.page_diff_units.split(";")[0],
                                                binning=MeshAxis.BinningType.linear)
                 except AttributeError:
-                    logger.info("Lack of data for first level differential scoring")
+                    logger.debug("Lack of data for first level differential scoring")
                 except IndexError:
-                    logger.info("Lack of units for first level differential scoring")
+                    logger.debug("Lack of units for first level differential scoring")
 
                 try:
                     page.diff_axis2 = MeshAxis(n=page.page_diff_size[1],
@@ -145,9 +145,14 @@ class SHReaderBDO2019(SHReader):
                                                unit=page.page_diff_units.split(";")[1],
                                                binning=MeshAxis.BinningType.linear)
                 except AttributeError:
-                    logger.info("Lack of data for second level differential scoring")
+                    logger.debug("Lack of data for second level differential scoring")
                 except IndexError:
-                    logger.info("Lack of units for second level differential scoring")
+                    logger.debug("Lack of units for second level differential scoring")
+
+            # Special treatment for MCPL detector
+            for page in estimator.pages:
+                if page.dettyp == SHDetType.mcpl:
+                    estimator.dim = 0
 
             # Fix names of the axis objects for different mesh type,
             # units are directly extracted from BDO tags in 2019 format

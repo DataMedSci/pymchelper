@@ -36,10 +36,13 @@ def test_call_cmd_option(option_name: str):
         assert e.value == 0
 
 
+@pytest.mark.parametrize("option_name", ["", "flip", "xflip", "yflip"])
 @pytest.mark.parametrize("input_file_path", input_files.values(), ids=input_files.keys())
 @pytest.mark.parametrize("beam_model_path", [beam_model_path, None], ids=[beam_model_path.stem, "no_beam_model"])
-def test_generate_plan(input_file_path: Path, beam_model_path: Union[Path, None], monkeypatch: pytest.MonkeyPatch,
-                       tmp_path: Path, capsys: pytest.CaptureFixture):
+def test_generate_plan(input_file_path: Path, beam_model_path: Union[Path, None],
+                       monkeypatch: pytest.MonkeyPatch,
+                       tmp_path: Path, capsys: pytest.CaptureFixture,
+                       option_name: str):
     """Test plan loading with and without beam model."""
     expected_output_file_path = Path(output_file)
 
@@ -49,6 +52,10 @@ def test_generate_plan(input_file_path: Path, beam_model_path: Union[Path, None]
     if beam_model_path is not None:
         cmd_line_args.append('-b')
         cmd_line_args.append(str(beam_model_path.resolve()))
+
+    # add option if provided as non-empty string
+    if option_name:
+        cmd_line_args.append(f'--{option_name}')
 
     # temporary change working directory to newly created temporary directory
     # this ensures that we run the test where the output file was not generated yet

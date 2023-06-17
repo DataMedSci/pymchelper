@@ -18,7 +18,7 @@ class ErrorEstimate(IntEnum):
     stddev = 2
 
 
-class Estimator(object):
+class Estimator:
     """
     Estimator data including scoring mesh description.
 
@@ -38,13 +38,13 @@ class Estimator(object):
     >>> d = Estimator()
     >>> d.x = MeshAxis(n=2, min_val=0.0, max_val=10.0, name="X", unit="cm", binning=MeshAxis.BinningType.linear)
     >>> d.x.data
-    array([ 2.5,  7.5])
+    array([2.5, 7.5])
     >>> d.y = MeshAxis(n=3, min_val=0.0, max_val=150.0, name="Y", unit="cm", binning=MeshAxis.BinningType.linear)
     >>> d.y.data
     array([  25.,   75.,  125.])
     >>> d.z = MeshAxis(n=1, min_val=0.0, max_val=1.0, name="Z", unit="cm", binning=MeshAxis.BinningType.linear)
     >>> d.z.data
-    array([ 0.5])
+    array([0.5])
     """
 
     def __init__(self):
@@ -106,7 +106,7 @@ class Estimator(object):
         return None
 
     @property
-    def dimension(self):
+    def dimension(self) -> int:
         """
         Let's take again detector d with YZ scoring.
         >>> e = Estimator()

@@ -9,6 +9,7 @@ from pymchelper.writers.trip98cube import TRiP98CubeWriter
 from pymchelper.writers.trip98ddd import TRiP98DDDWriter
 from pymchelper.writers.hdf import HdfWriter
 from pymchelper.writers.json import JsonWriter
+from pymchelper.writers.mcpl import MCPLWriter
 
 
 class Converters(IntEnum):
@@ -25,6 +26,7 @@ class Converters(IntEnum):
     inspect = 8
     hdf = 9
     json = 10
+    mcpl = 11
 
     @classmethod
     def _converter_mapping(cls, item):
@@ -38,7 +40,8 @@ class Converters(IntEnum):
             cls.sparse: SparseWriter,
             cls.inspect: Inspector,
             cls.hdf: HdfWriter,
-            cls.json: JsonWriter
+            cls.json: JsonWriter,
+            cls.mcpl: MCPLWriter,
         }.get(item)
 
     @classmethod
