@@ -2,6 +2,8 @@ import logging
 import os
 import sys
 
+from pymchelper.simulator_type import SimulatorType
+
 
 class MCEnvironment:
     """
@@ -49,7 +51,7 @@ class SimulationSettings:
     (i.e. whether this is SHIELD-HIT12A input or FLUKA input)
     """
 
-    def __init__(self, input_path, simulator_type = 'shieldhit', simulator_exec_path=None, cmdline_opts=None):
+    def __init__(self, input_path, simulator_type = SimulatorType.shieldhit, simulator_exec_path=None, cmdline_opts=None):
         # simulator type (shieldhit, topas or fluka)
         self.simulator_type = simulator_type
 
@@ -58,13 +60,14 @@ class SimulationSettings:
 
         # set `self._mc_environment` to the proper `MCEnvironment` subclass
         # shieldhit is default
-        if simulator_type=='shieldhit':
+        if simulator_type==SimulatorType.shieldhit:
             if sys.platform == 'win32':
                 self._mc_environment = SH12AEnvironmentWindows
-            self._mc_environment = SH12AEnvironmentLinux
-        elif simulator_type == 'fluka':
+            else:
+                self._mc_environment = SH12AEnvironmentLinux
+        elif simulator_type == SimulatorType.fluka:
             self._mc_environment = FlukaEnvironment
-        elif simulator_type == 'topas':
+        elif simulator_type == SimulatorType.topas:
             self._mc_environment = TopasEnvironment
 
         # set `self.executable_path` to the value provided by user, or if it is missing
