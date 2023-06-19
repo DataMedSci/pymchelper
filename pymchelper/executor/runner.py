@@ -142,6 +142,11 @@ class Runner:
             output_files_path = str(Path(self.workspace_manager.output_dir_absolute_path) / "run_1")
             estimators_list = get_topas_estimators(output_files_path)
 
+        elif self.settings.simulator_type == SimulatorType.fluka:
+            output_files_pattern = os.path.join(self.workspace_manager.output_dir_absolute_path, "run_*", "*_fort.*")
+            logging.debug("Files to merge {:s}".format(output_files_pattern))
+            estimators_list = frompattern(output_files_pattern)
+
         for estimator in estimators_list:
             logging.debug("Appending estimator for {:s}".format(estimator.file_corename))
             estimators_dict[estimator.file_corename] = estimator
