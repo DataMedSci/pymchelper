@@ -23,6 +23,11 @@ def test_read():
     assert estimator.y.n == 4
     assert estimator.z.n == 1
     
+    assert estimator.pages[0].name == "FluenceBPprotonsXY"
+    assert estimator.pages[0].title == "FluenceBPprotonsXY"
+    assert estimator.pages[0].dettyp == "Fluence"
+    assert estimator.pages[0].unit == "/mm2"
+    
     assert estimator.pages[0].data.shape == (4, 4, 1, 1, 1)
     
     expected_data = [0.00177, 0., 0., 0.00088,
