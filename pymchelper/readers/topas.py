@@ -50,6 +50,20 @@ class TopasReader(Reader):
                 if match:
                     unit = match.group(1)
                 return scorer, unit
+            
+    def get_differential_axis(self, output_data):
+        if "# Binned by" in output_data:
+            pattern = f"# Binned by (.+?) in (\\d+) bin[s ] of (\\d+) (\\w+) from ([\\d.]+) (\\w+) to ([\\d.]+) (\\w+)"
+            match = re.search(pattern, output_data)
+            if match:
+                binned_by = match.group(1)
+                num_bins = int(match.group(2))
+                unit = match.group(4)
+                min_val = float(match.group(5))
+                max_val = float(match.group(7))
+                
+                return MeshAxis(n=num_bins, min_val=min_val, max_val=max_val, name=binned_by, unit=unit, binning=MeshAxis.BinningType.linear)
+        return None
 
     def read_data(self, estimator):
         """
@@ -86,9 +100,18 @@ class TopasReader(Reader):
                 if self.get_bins(curr_dimensions, bins_data, output_data):
                     actual_dimensions = curr_dimensions
                     break
-        
-            lines = np.genfromtxt(self.filename, delimiter=',')
-            scores = lines[:, 3]
+            
+            page = Page(estimator=estimator)
+            
+            differential_axis = self.get_differential_axis(output_data)
+            if differential_axis:
+                page.diff_axis1 = differential_axis
+                lines = np.genfromtxt(self.filename, delimiter=',')
+                scores = lines.flatten()
+            
+            else:
+                lines = np.genfromtxt(self.filename, delimiter=',')
+                scores = lines[:, 3]
 
             estimator.file_corename = os.path.basename(self.filename)[:-4]
             estimator.number_of_primaries = num_histories
@@ -99,8 +122,6 @@ class TopasReader(Reader):
                                     name=actual_dimensions[1], unit=bins_data[actual_dimensions[1]]['unit'], binning=MeshAxis.BinningType.linear)
             estimator.z = MeshAxis(n=bins_data[actual_dimensions[2]]['num'], min_val=0.0, max_val=bins_data[actual_dimensions[2]]['size']*bins_data[actual_dimensions[2]]['num'],
                                     name=actual_dimensions[2], unit=bins_data[actual_dimensions[2]]['unit'], binning=MeshAxis.BinningType.linear)
-            
-            page = Page(estimator=estimator)
             
             page.title = self.get_scorer_name(output_data)
             page.name = page.title

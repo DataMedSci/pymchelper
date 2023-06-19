@@ -54,3 +54,21 @@ def test_cylindrical_coordinates():
     assert estimator.z.name == "Z"
     
     assert estimator.pages[0].dettyp == "SurfaceTrackCount"
+    
+def test_differential_axis():
+    file_path = os.path.join("tests", "res", "topas", "binning_by_energy", "fluence_bp_protons_xy.csv")
+    
+    reader = TopasReaderFactory(file_path).get_reader()
+    assert reader is not None
+    
+    reader = reader(file_path)
+    estimator = Estimator()
+    reader.read_data(estimator)
+    
+    assert estimator.pages[0].dimension == 3
+    assert estimator.pages[0].diff_axis1.name == "incident track energy"
+    assert estimator.pages[0].diff_axis1.unit == "MeV"
+    assert estimator.pages[0].diff_axis1.n == 10
+    assert estimator.pages[0].diff_axis1.min_val == 0
+    assert estimator.pages[0].diff_axis1.max_val == 100
+    
