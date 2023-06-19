@@ -13,10 +13,12 @@ logger = logging.getLogger(__name__)
 
 @pytest.fixture
 def shieldhit_path():
+    """Return SHIELD-HIT12A executable path"""
     return Path("tests") / "res" / "mocks" / "shieldhit_minimal" / "shieldhit"
    
 @pytest.fixture
 def topas_path():
+    """Return topas executable and input file paths"""
     topas_exec_path = Path("tests") / "res" / "mocks" / "topas_minimal" / "topas"
     topas_input_path = Path("tests") / "res" / "mocks" / "topas_minimal" / "minimal.txt"
 
@@ -56,9 +58,7 @@ def test_shieldhit(shieldhit_path):
 @pytest.mark.skipif(sys.platform == "darwin", reason="we don't have SHIELD-HIT12A demo binary for MacOSX")
 @pytest.mark.skipif(sys.platform == "win32", reason="simulator mocks don't work on Windows")
 def test_topas(topas_path):
-    """
-    TODO
-    """
+    """TODO"""
     topas_exec_path, topas_input_path = topas_path
     
     dirpath = tempfile.mkdtemp()

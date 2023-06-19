@@ -55,7 +55,7 @@ class Runner:
         """
         start_time = timeit.default_timer()
 
-        if self.settings.simulator_type == SimulatorType.shieldhit or self.settings.simulator_type == SimulatorType.fluka:
+        if self.settings.simulator_type in [SimulatorType.shieldhit, SimulatorType.fluka]:
             # SHIELD-HIT12A and Fluka require RNG seeds to be integers greater or equal to 1
             # each of the workers needs to have its own different RNG seed
             rng_seeds = range(1, self.jobs + 1)
@@ -65,9 +65,9 @@ class Runner:
             # as we can use embedded parallelization in topas
             # for that we need to modify the input file and set the number of threads to the number of jobs
             # we set one rng seed, so one working directory and one worker will be created
-            
+
             modified_input_path = str(self.settings.input_path).replace(".txt", "_modified.txt")
-            
+
             with open(self.settings.input_path, 'r') as f:
                 config = f.read()
                 if "i:Ts/NumberOfThreads" in config:
@@ -79,14 +79,14 @@ class Runner:
 
             with open(modified_input_path, "w") as file:
                 file.write(config)
-            
+
             self.settings.input_path = modified_input_path
-                
+ 
             rng_seeds = [1]
-            
+   
         # create working directories
         self.workspace_manager.create_working_directories(simulation_input_path=self.settings.input_path,
-                                                        rng_seeds=rng_seeds)
+                                                          rng_seeds=rng_seeds)
 
         # rng seeds injection to settings for each SingleSimulationExecutor call
         # TODO consider better way of doing it  # skipcq: PYL-W0511
@@ -112,7 +112,7 @@ class Runner:
 
         elapsed = timeit.default_timer() - start_time
         logging.info("run elapsed time {:.3f} seconds".format(elapsed))
-              
+     
         return True
 
     def get_data(self):
@@ -128,7 +128,7 @@ class Runner:
         # scans output directory for MC simulation output files
         estimators_dict = {}
         estimators_list = []
-        
+
         if self.settings.simulator_type == SimulatorType.shieldhit:
             output_files_pattern = os.path.join(self.workspace_manager.output_dir_absolute_path, "run_*", "*.bdo")
             logging.debug("Files to merge {:s}".format(output_files_pattern))
@@ -138,7 +138,7 @@ class Runner:
         elif self.settings.simulator_type == SimulatorType.topas:
             output_files_path = os.path.join(self.workspace_manager.output_dir_absolute_path, "run_1")
             estimators_list = get_topas_estimators(output_files_path)
-        
+
         for estimator in estimators_list:
             logging.debug("Appending estimator for {:s}".format(estimator.file_corename))
             estimators_dict[estimator.file_corename] = estimator

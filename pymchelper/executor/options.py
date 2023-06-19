@@ -37,7 +37,7 @@ class SH12AEnvironmentWindows(MCEnvironment):
 
 class TopasEnvironment(MCEnvironment):
     """TOPAS Environment"""
-    
+
     executable_filename = 'topas'
 
 
@@ -51,7 +51,7 @@ class SimulationSettings:
     (i.e. whether this is SHIELD-HIT12A input or FLUKA input)
     """
 
-    def __init__(self, input_path, simulator_type = SimulatorType.shieldhit, simulator_exec_path=None, cmdline_opts=None):
+    def __init__(self, input_path, simulator_type=SimulatorType.shieldhit, simulator_exec_path=None, cmdline_opts=None):
         # simulator type (shieldhit, topas or fluka)
         self.simulator_type = simulator_type
 
@@ -60,7 +60,7 @@ class SimulationSettings:
 
         # set `self._mc_environment` to the proper `MCEnvironment` subclass
         # shieldhit is default
-        if simulator_type==SimulatorType.shieldhit:
+        if simulator_type == SimulatorType.shieldhit:
             if sys.platform == 'win32':
                 self._mc_environment = SH12AEnvironmentWindows
             else:

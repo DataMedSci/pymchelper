@@ -2,19 +2,15 @@ import logging
 import os
 from collections import defaultdict
 from glob import glob
-import re
 
 import numpy as np
-from pymchelper.axis import MeshAxis
 
 from pymchelper.estimator import ErrorEstimate, Estimator, average_with_nan
 from pymchelper.readers.topas import TopasReaderFactory
-from pymchelper.simulator_type import SimulatorType
 from pymchelper.readers.fluka import FlukaReader, FlukaReaderFactory
 from pymchelper.readers.shieldhit.general import SHReaderFactory
 from pymchelper.readers.shieldhit.reader_base import SHReader
 from pymchelper.writers.common import Converters
-from pymchelper.page import Page
 
 logger = logging.getLogger(__name__)
 
@@ -162,10 +158,8 @@ def frompattern(pattern, error=ErrorEstimate.stderr, nan=True):
     return result
 
 def get_topas_estimators(output_files_path):
-    """
-    Get Topas estimators from provided directory
-    """
-    
+    """Get Topas estimators from provided directory"""
+
     estimators_list = []
     for filename in os.listdir(output_files_path):
         output_file_path = os.path.join(output_files_path, filename)
@@ -175,12 +169,11 @@ def get_topas_estimators(output_files_path):
             estimator = Estimator()
             reader.read(estimator)
             estimators_list.append(estimator)
-    
+
     return estimators_list
 
 def convertfromlist(filelist, error, nan, outputdir, converter_name, options, outputfile=None):
     """
-
     :param filelist:
     :param error: error estimation, see class ErrorEstimate class in pymchelper.estimator
     :param nan: if True, NaN (not a number) are excluded when averaging data.
