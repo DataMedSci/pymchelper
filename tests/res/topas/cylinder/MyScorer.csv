@@ -1,0 +1,14 @@
+# TOPAS Version: 3.9
+# Parameter File: FoilToCylinder.txt
+# Results for scorer: MyScorer
+# Filtered by: OnlyIncludeParticlesOfGeneration = "secondary"
+# Filtered by: OnlyIncludeParticlesGoing = "Out"
+# Scored on surface: Cylinder/OuterCurvedSurface
+# R in 2 bins of 2.5 cm
+# Phi in 2 bins of 50 deg
+# Z in 1 bin  of 100 cm
+# SurfaceTrackCount : Sum   
+0, 0, 0, 0
+0, 1, 0, 0
+1, 0, 0, 0
+1, 1, 0, 0
