@@ -1,14 +1,18 @@
+from ast import Tuple
 import logging
 import sys
 from pathlib import Path
-from typing import Generator
+from typing import Dict, Generator, Tuple
+import numpy as np
 
 import numpy as np
 import pytest
+from pymchelper.estimator import Estimator
 
 from pymchelper.input_output import fromfile
 from pymchelper.executor.options import SimulationSettings
 from pymchelper.executor.runner import Runner
+from pymchelper.simulator_type import SimulatorType
 
 @pytest.fixture
 def topas_mock_path() -> Generator[Path, None, None]:
@@ -188,4 +192,77 @@ def test_topas(topas_mock_path: Path, topas_input_path: Path, tmp_path: Path):
     assert data is not None
     assert 'fluence_bp_protons_xy' in data
     assert 'fluence_bp_protons_xy2' in data
-    
+
+
+@pytest.fixture
+def fluka_expected_results() -> Generator[Dict[str, dict], None, None]:
+    """Return expected result"""
+    yield {
+        "21": {
+            "shape": [4, 1, 4],
+            "4x4": [
+                [0., 0., 0., 0.],
+                [0., 0.00146468, 0.00169978, 0.],
+                [0.00090805, 0., 0., 0.],
+                [0, 0., 0., 0.]
+            ]
+        },
+        "22": {
+            "shape": [4, 4, 1],
+            "4x4": [
+                [0.00047575, 0., 0., 0.],
+                [0., 0.00188021, 0.00166488, 0.],
+                [0., 0.0010242, 0.00105254, 0.],
+                [0., 0., 0., 0.]
+            ]
+        }
+    }
+
+
+@pytest.fixture
+def fluka_path() -> Generator[Tuple[Path, Path], None, None]:
+    executable = Path("tests") / "res" / "mocks" / "fluka_minimal" / "rfluka"
+    input_file = Path("tests") / "res" / "mocks" / "fluka_minimal" / "minimal.inp"
+
+    yield executable, input_file
+
+
+@pytest.mark.smoke
+@pytest.mark.skipif(sys.platform == "darwin", reason="we don't have SHIELD-HIT12A demo binary for MacOSX")
+@pytest.mark.skipif(sys.platform == "win32", reason="simulator mocks don't work on Windows")
+def test_fluka(fluka_path: Tuple[Path, Path], tmp_path: Path, fluka_expected_results: Dict[str, dict]):
+    """
+    Test fluka generator with previously generated rfluka mock
+    """
+    fluka_exec_path, fluka_input_path = fluka_path
+
+    settings = SimulationSettings(input_path=fluka_input_path,
+                                  simulator_type=SimulatorType.fluka,
+                                  simulator_exec_path=fluka_exec_path)
+    print(settings)
+
+    r = Runner(settings=settings, jobs=2, output_directory=str(tmp_path))
+
+    isRunOk = r.run()
+    assert isRunOk
+
+    data = r.get_data()
+    print(data, len(data))
+    assert data is not None
+    assert '21' in data
+    assert '22' in data
+    assert 'fluka_binary' == data['21'].file_format
+    assert 'fluka_binary' == data['21'].file_format
+
+    __verify_fluka_file(data["21"], fluka_expected_results["21"])
+    __verify_fluka_file(data["22"], fluka_expected_results["22"])
+
+
+def __verify_fluka_file(actual_result: Estimator, expected_result: dict) -> None:
+    """Compares content of generated fluka file with expected values"""
+    assert b'* Minimal fluka file with 20 particles, two results, 4x4 bins' == actual_result.title
+    assert expected_result["shape"] == [actual_result.x.n, actual_result.y.n, actual_result.z.n]
+
+    expected = list(np.around(np.array(expected_result["4x4"]).flatten(), 4))
+    result = list(np.around(np.array(actual_result.pages[0].data).flatten(), 4))
+    assert expected == result, "Fluka data does not match expected values"
