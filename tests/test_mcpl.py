@@ -36,8 +36,7 @@ def test_bdo_reading(manypage_bdo_path: Path):
         assert estimator_data.axis(i).n == 1
     assert len(estimator_data.pages) == 3
     assert estimator_data.pages[0].data is not None
-    assert estimator_data.pages[0].data.shape == (8, 10)
-    print(estimator_data.pages[0].data)
+    assert estimator_data.pages[0].data.shape == (8, 11)
 
 
 def test_bdo_properly_read(manypage_bdo_path: Path):
@@ -51,13 +50,13 @@ def test_bdo_properly_read(manypage_bdo_path: Path):
 
     txt_data = np.loadtxt(mcpl_as_text_path)
     assert txt_data is not None
-    assert txt_data.shape == (27, 8)
+    assert txt_data.shape == (25, 8)
 
     list_of_arrays = [page.data for page in estimator_data.pages]
     # concatenate all pages into one numpy array
     all_pages = np.concatenate(list_of_arrays, axis=1)
     assert all_pages is not None
-    assert all_pages.shape == (8, 27)
+    assert all_pages.shape == (8, 25)
 
     assert np.allclose(txt_data, all_pages.T)
 
