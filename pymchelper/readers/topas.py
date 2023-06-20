@@ -46,8 +46,8 @@ class TopasReader(Reader):
             name = match.group(1)
         return name
 
-    def get_scorer_and_unit(self, output_data):  # skipcq: PYL-R0201
-        """Get scoring quantity and unit from the output file"""
+    def get_scorer_unit_results(self, output_data):  # skipcq: PYL-R0201
+        """Get scoring quantity, unit and the scoring values (sum/mean/etc.) from the output file"""
         scorers = ['DoseToMedium', 'DoseToWater', 'DoseToMaterial', 'TrackLengthEstimator',
                    'AmbientDoseEquivalent', 'EnergyDeposit', 'Fluence', 'EnergyFluence',
                    'StepCount', 'OpticalPhotonCount', 'OriginCount', 'Charge', 'EffectiveCharge',
@@ -55,12 +55,15 @@ class TopasReader(Reader):
         for scorer in scorers:
             if scorer in output_data:
                 unit = ""
-                pattern = f"# {scorer} \\( (.*?) \\)"
+                pattern = f"# {scorer}\\s(\\( .*? \\))?\\s*: (.*)"
                 match = re.search(pattern, output_data)
                 if match:
-                    unit = match.group(1)
-                return scorer, unit
-        return "", ""
+                    unit = ""
+                    if match.group(1):
+                        unit = match.group(1)[2:-2]
+                    results = match.group(2).split()
+                    return scorer, unit, results
+        return "", "", []
 
     def get_differential_axis(self, output_data):  # skipcq: PYL-R0201
         """Check if the output file contains differential axis and get it from file if it does"""
@@ -113,18 +116,6 @@ class TopasReader(Reader):
                     actual_dimensions = curr_dimensions
                     break
 
-            page = Page(estimator=estimator)
-
-            differential_axis = self.get_differential_axis(output_data)
-            if differential_axis:
-                page.diff_axis1 = differential_axis
-                lines = np.genfromtxt(self.filename, delimiter=',')
-                scores = lines.flatten()
-
-            else:
-                lines = np.genfromtxt(self.filename, delimiter=',')
-                scores = lines[:, 3]
-
             estimator.file_corename = os.path.basename(self.filename)[:-4]
             estimator.number_of_primaries = num_histories
             estimator.file_format = "csv"
@@ -144,14 +135,36 @@ class TopasReader(Reader):
                                    name=actual_dimensions[2], unit=bins_data[actual_dimensions[2]]['unit'],
                                    binning=MeshAxis.BinningType.linear)
 
-            page.title = self.get_scorer_name(output_data)
-            page.name = page.title
-            page.dettyp, page.unit = self.get_scorer_and_unit(output_data)
+            differential_axis = self.get_differential_axis(output_data)
 
-            page.data_raw = scores
-            page.error_raw = np.empty_like(page.data_raw)
+            # in one output csv file there can be multiple results for one scorer
+            # (e.g. sum and mean for fluence)
+            scorer, unit, results = self.get_scorer_unit_results(output_data)
+            num_results = len(results)
+            for column, result in enumerate(results):
+                page = Page(estimator=estimator)
+                if differential_axis:
+                    page.diff_axis1 = differential_axis
+                    # when there is a differential axis, each line in csv contains scores
+                    # in alternating order. For example, for sum and mean it looks like this:
+                    # sum(underflow) mean(underflow) sum(bin1) mean(bin1) sum(bin2) mean(bin2) ...
+                    lines = np.genfromtxt(self.filename, delimiter=',')
+                    scores = lines[:, column::num_results].flatten()
 
-            estimator.add_page(page)
+                else:
+                    # when there is no differential axis, each line in csv file looks like this:
+                    # x y z result1 result2 result3 ...
+                    lines = np.genfromtxt(self.filename, delimiter=',')
+                    scores = lines[:, column+3]
+
+                page.title = self.get_scorer_name(output_data)
+                page.name = page.title
+                page.dettyp, page.unit = scorer+result, unit
+
+                page.data_raw = scores
+                page.error_raw = np.empty_like(page.data_raw)
+
+                estimator.add_page(page)
             return True
 
     @property

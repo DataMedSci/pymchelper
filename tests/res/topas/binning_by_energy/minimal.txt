@@ -52,13 +52,16 @@ d:So/Demo/BeamPositionCutoffY = 2. cm # Y extent of position (if Flat or Gaussia
 s:So/Demo/BeamAngularDistribution = "None"
 i:So/Demo/NumberOfHistoriesInRun = 20
 
-s:Sc/FluenceBPprotonsXY/Quantity                  = "Fluence"
+s:Sc/FluenceBPprotonsXY/Quantity                  = "DoseToMedium"
 s:Sc/FluenceBPprotonsXY/WeightBy                  = "Track"
 s:Sc/FluenceBPprotonsXY/Component                 = "PhantomScoringCoarseXY"
 sv:Sc/FluenceBPprotonsXY/Report = 2 "Mean" "Standard_Deviation"
 s:Sc/FluenceBPprotonsXY/IfOutputFileAlreadyExists = "Overwrite"
 s:Sc/FluenceBPprotonsXY/OutputFile = "fluence_bp_protons_xy"
 sv:Sc/FluenceBPprotonsXY/OnlyIncludeIfIncidentParticlesNamed = 1 "proton"
+i:Sc/FluenceBPprotonsXY/EBins = 10
+d:Sc/FluenceBPprotonsXY/EBinMin = 0. MeV
+d:Sc/FluenceBPprotonsXY/EBinMax = 100. MeV
 
 s:Sc/FluenceBPprotonsXY2/Quantity                  = "Fluence"
 s:Sc/FluenceBPprotonsXY2/WeightBy                  = "Track"
