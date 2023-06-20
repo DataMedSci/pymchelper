@@ -7,7 +7,7 @@ import unittest
 
 import pytest
 
-from pymchelper.executor.options import SimulationSettings
+from pymchelper.executor.settings import SimulationSettings
 from pymchelper.executor.runner import Runner
 
 logger = logging.getLogger(__name__)

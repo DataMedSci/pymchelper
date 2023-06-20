@@ -67,7 +67,7 @@ import numpy as np
 from scipy.optimize import brentq
 
 # import necessary objects from pymchelper library needed to run SHIELD-HIT12A simulation
-from pymchelper.executor.options import SimulationSettings
+from pymchelper.executor.settings import SimulationSettings
 from pymchelper.executor.runner import Runner
 
 input_cfg_templ = {}

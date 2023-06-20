@@ -6,7 +6,7 @@ import sys
 import argparse
 import timeit
 
-from pymchelper.executor.options import SimulationSettings
+from pymchelper.executor.settings import SimulationSettings
 from pymchelper.executor.runner import OutputDataType, Runner
 from pymchelper.writers.plots import PlotDataWriter, ImageWriter
 
