@@ -1,3 +1,4 @@
+from copy import deepcopy
 import logging
 import os
 import sys
@@ -163,3 +164,12 @@ class SimulationSettings:
     def cmdline_opts(self) -> Optional[str]:
         """Return command line options for the MC engine."""
         return self.options.cmdline_opts
+
+    def __deepcopy__(self, memo):
+        """Deep copy of the object."""
+        cls = self.__class__
+        result = cls.__new__(cls)
+        memo[id(self)] = result
+        for k, v in self.__dict__.items():
+            setattr(result, k, deepcopy(v, memo))
+        return result
