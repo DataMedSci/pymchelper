@@ -81,9 +81,9 @@ class Runner:
                 file.write(config)
 
             self.settings.input_path = modified_input_path
- 
+
             rng_seeds = [1]
-   
+
         # create working directories
         self.workspace_manager.create_working_directories(simulation_input_path=self.settings.input_path,
                                                           rng_seeds=rng_seeds)
@@ -112,7 +112,7 @@ class Runner:
 
         elapsed = timeit.default_timer() - start_time
         logging.info("run elapsed time {:.3f} seconds".format(elapsed))
-     
+
         return True
 
     def get_data(self):

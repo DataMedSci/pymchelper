@@ -157,9 +157,9 @@ def frompattern(pattern, error=ErrorEstimate.stderr, nan=True):
 
     return result
 
+
 def get_topas_estimators(output_files_path):
     """Get Topas estimators from provided directory"""
-
     estimators_list = []
     for filename in os.listdir(output_files_path):
         output_file_path = os.path.join(output_files_path, filename)
@@ -171,6 +171,7 @@ def get_topas_estimators(output_files_path):
             estimators_list.append(estimator)
 
     return estimators_list
+
 
 def convertfromlist(filelist, error, nan, outputdir, converter_name, options, outputfile=None):
     """

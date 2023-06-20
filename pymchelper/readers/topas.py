@@ -9,30 +9,35 @@ from pymchelper.readers.common import Reader, ReaderFactory
 
 class TopasReaderFactory(ReaderFactory):
     """Factory for TopasReader"""
+
     def get_reader(self):
         """Return TopasReader if the file extension is .csv"""
         if self.filename.endswith('.csv'):
             return TopasReader
         return None
 
+
 class TopasReader(Reader):
     """Reader for Topas output files"""
+
     def __init__(self, filename):
         super(TopasReader, self).__init__(filename)
         self.directory = os.path.dirname(filename)
 
-    def get_bins(self, dimensions, bins_data, output_data): #skipcq: PYL-R0201
+    def get_bins(self, dimensions, bins_data, output_data):  # skipcq: PYL-R0201
         """Get number of bins, bin size and unit for each dimension"""
         for dimension in dimensions:
             pattern = f"# {dimension} in (\\d+) bin[s ] of ([\\d.]+) (\\w+)"
             match = re.search(pattern, output_data)
             if match:
-                bins_data[dimension] = {'num': int(match.group(1)), 'size': float(match.group(2)), 'unit': match.group(3)}
+                bins_data[dimension] = {'num': int(match.group(1)),
+                                        'size': float(match.group(2)),
+                                        'unit': match.group(3)}
             else:
                 return False
         return True
 
-    def get_scorer_name(self, output_data): #skipcq: PYL-R0201
+    def get_scorer_name(self, output_data):  # skipcq: PYL-R0201
         """Get scorer name from the output file"""
         name = ""
         pattern = r"# Results for scorer: (\w+)"
@@ -41,7 +46,7 @@ class TopasReader(Reader):
             name = match.group(1)
         return name
 
-    def get_scorer_and_unit(self, output_data): #skipcq: PYL-R0201
+    def get_scorer_and_unit(self, output_data):  # skipcq: PYL-R0201
         """Get scoring quantity and unit from the output file"""
         scorers = ['DoseToMedium', 'DoseToWater', 'DoseToMaterial', 'TrackLengthEstimator',
                    'AmbientDoseEquivalent', 'EnergyDeposit', 'Fluence', 'EnergyFluence',
@@ -57,7 +62,7 @@ class TopasReader(Reader):
                 return scorer, unit
         return "", ""
 
-    def get_differential_axis(self, output_data): #skipcq: PYL-R0201
+    def get_differential_axis(self, output_data):  # skipcq: PYL-R0201
         """Check if the output file contains differential axis and get it from file if it does"""
         if "# Binned by" in output_data:
             pattern = r"# Binned by (.+?) in (\d+) bin[s ] of (\d+) (\w+) from ([\d.]+) (\w+) to ([\d.]+) (\w+)"
@@ -68,8 +73,9 @@ class TopasReader(Reader):
                 unit = match.group(4)
                 min_val = float(match.group(5))
                 max_val = float(match.group(7))
-                
-                return MeshAxis(n=num_bins, min_val=min_val, max_val=max_val, name=binned_by, unit=unit, binning=MeshAxis.BinningType.linear)
+
+                return MeshAxis(n=num_bins, min_val=min_val, max_val=max_val,
+                                name=binned_by, unit=unit, binning=MeshAxis.BinningType.linear)
         return None
 
     def read_data(self, estimator):
@@ -78,7 +84,7 @@ class TopasReader(Reader):
         Topas reader assumes that the input file is in the same directory as the output file
         to extract the number of histories from it - otherwise the number of histories is set to 0.
         """
-        #find the input file to extract the number of histories from it
+        # find the input file to extract the number of histories from it
         num_histories = 0
         for input_file in os.listdir(self.directory):
             if input_file.endswith(".txt"):
@@ -93,7 +99,7 @@ class TopasReader(Reader):
                         if number_str:
                             num_histories = int(number_str.group())
 
-        #generate estimator object for each output file
+        # generate estimator object for each output file
         with open(self.filename) as output_file:
             output_data = output_file.read()
 
@@ -122,12 +128,18 @@ class TopasReader(Reader):
             estimator.file_corename = os.path.basename(self.filename)[:-4]
             estimator.number_of_primaries = num_histories
             estimator.file_format = "csv"
-            estimator.x = MeshAxis(n=bins_data[actual_dimensions[0]]['num'], min_val=0.0, max_val=bins_data[actual_dimensions[0]]['size']*bins_data[actual_dimensions[0]]['num'],
-                                   name=actual_dimensions[0], unit=bins_data[actual_dimensions[0]]['unit'], binning=MeshAxis.BinningType.linear)
-            estimator.y = MeshAxis(n=bins_data[actual_dimensions[1]]['num'], min_val=0.0, max_val=bins_data[actual_dimensions[1]]['size']*bins_data[actual_dimensions[1]]['num'],
-                                   name=actual_dimensions[1], unit=bins_data[actual_dimensions[1]]['unit'], binning=MeshAxis.BinningType.linear)
-            estimator.z = MeshAxis(n=bins_data[actual_dimensions[2]]['num'], min_val=0.0, max_val=bins_data[actual_dimensions[2]]['size']*bins_data[actual_dimensions[2]]['num'],
-                                   name=actual_dimensions[2], unit=bins_data[actual_dimensions[2]]['unit'], binning=MeshAxis.BinningType.linear)
+            estimator.x = MeshAxis(n=bins_data[actual_dimensions[0]]['num'],
+                                   min_val=0.0, max_val=bins_data[actual_dimensions[0]]['size']*bins_data[actual_dimensions[0]]['num'],
+                                   name=actual_dimensions[0], unit=bins_data[actual_dimensions[0]]['unit'],
+                                   binning=MeshAxis.BinningType.linear)
+            estimator.y = MeshAxis(n=bins_data[actual_dimensions[1]]['num'],
+                                   min_val=0.0, max_val=bins_data[actual_dimensions[1]]['size']*bins_data[actual_dimensions[1]]['num'],
+                                   name=actual_dimensions[1], unit=bins_data[actual_dimensions[1]]['unit'],
+                                   binning=MeshAxis.BinningType.linear)
+            estimator.z = MeshAxis(n=bins_data[actual_dimensions[2]]['num'],
+                                   min_val=0.0, max_val=bins_data[actual_dimensions[2]]['size']*bins_data[actual_dimensions[2]]['num'],
+                                   name=actual_dimensions[2], unit=bins_data[actual_dimensions[2]]['unit'],
+                                   binning=MeshAxis.BinningType.linear)
 
             page.title = self.get_scorer_name(output_data)
             page.name = page.title
