@@ -143,3 +143,23 @@ class SimulationSettings:
         path = os.path.abspath(str(options.simulator_exec_path)) if options.simulator_exec_path else ''
         result = "{executable_path:s} {cmdline_opts:s}".format(executable_path=path, cmdline_opts=options.cmdline_opts)
         return result
+
+    @property
+    def input_path(self) -> PathLike:
+        """Return path to the MC input file or directory."""
+        return self.options.input_path
+
+    @property
+    def simulator_type(self) -> Optional[SimulatorType]:
+        """Return type of the MC engine."""
+        return self.options.simulator_type
+
+    @property
+    def executable_path(self) -> Optional[PathLike]:
+        """Return path to the MC engine executable."""
+        return self.options.simulator_exec_path
+
+    @property
+    def cmdline_opts(self) -> Optional[str]:
+        """Return command line options for the MC engine."""
+        return self.options.cmdline_opts
