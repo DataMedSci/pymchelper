@@ -1,5 +1,6 @@
 """Options for simulation."""
 
+from copy import deepcopy
 from dataclasses import dataclass
 from typing import Optional
 
@@ -22,12 +23,3 @@ class SimulationOptions:
     simulator_type: Optional[SimulatorType] = None
     simulator_exec_path: Optional[PathLike] = None
     cmdline_opts: Optional[str] = None
-
-    def __dict__(self):
-        """Return dictionary representation of the object."""
-        return {
-            'input_path': self.input_path,
-            'simulator_type': self.simulator_type,
-            'simulator_exec_path': self.simulator_exec_path,
-            'cmdline_opts': self.cmdline_opts
-        }
