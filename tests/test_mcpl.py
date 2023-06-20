@@ -1,6 +1,7 @@
 """Tests for MCPL converter"""
 import logging
 from pathlib import Path
+from typing import Generator
 import numpy as np
 from pymchelper.estimator import ErrorEstimate
 from pymchelper.input_output import fromfile
@@ -11,7 +12,7 @@ logger = logging.getLogger(__name__)
 
 
 @pytest.fixture(scope='module')
-def manypage_bdo_path() -> Path:
+def manypage_bdo_path() -> Generator[Path, None, None]:
     """Location of this script according to pathlib"""
     main_dir = Path(__file__).resolve().parent
     yield main_dir / "res" / "shieldhit" / "phasespace" / "NB_mcpl.bdo"
@@ -26,7 +27,7 @@ def test_output_basic_properties(manypage_bdo_path: Path):
 
 def test_bdo_reading(manypage_bdo_path: Path):
     """Check parsing of the multipage BDO."""
-    estimator_data = fromfile(manypage_bdo_path)
+    estimator_data = fromfile(str(manypage_bdo_path))
     assert estimator_data is not None
     assert estimator_data.pages is not None
     assert estimator_data.dim == 0
@@ -36,11 +37,13 @@ def test_bdo_reading(manypage_bdo_path: Path):
     assert len(estimator_data.pages) == 3
     assert estimator_data.pages[0].data is not None
     assert estimator_data.pages[0].data.shape == (8, 10)
+    print(estimator_data.pages[0].data)
 
 
 def test_bdo_properly_read(manypage_bdo_path: Path):
     """Check if the data is properly read."""
-    estimator_data = fromfile(manypage_bdo_path)
+    estimator_data = fromfile(str(manypage_bdo_path))
+    assert estimator_data is not None
     mcpl_as_text_path = manypage_bdo_path.with_suffix(".txt")
     assert mcpl_as_text_path.exists()
     assert mcpl_as_text_path.is_file()
@@ -48,13 +51,13 @@ def test_bdo_properly_read(manypage_bdo_path: Path):
 
     txt_data = np.loadtxt(mcpl_as_text_path)
     assert txt_data is not None
-    assert txt_data.shape == (45, 8)
+    assert txt_data.shape == (27, 8)
 
     list_of_arrays = [page.data for page in estimator_data.pages]
     # concatenate all pages into one numpy array
     all_pages = np.concatenate(list_of_arrays, axis=1)
     assert all_pages is not None
-    assert all_pages.shape == (8, 45)
+    assert all_pages.shape == (8, 27)
 
     assert np.allclose(txt_data, all_pages.T)
 
@@ -67,7 +70,9 @@ def test_mcpl_generation(manypage_bdo_path: Path, tmp_path: Path, monkeypatch: p
     logger.debug("Parsing %s to MCPL", manypage_bdo_path)
     main(['mcpl', str(manypage_bdo_path)])
 
-    estimator_data = fromfile(manypage_bdo_path)
+    estimator_data = fromfile(str(manypage_bdo_path))
+
+    assert estimator_data is not None
 
     for i, page in enumerate(estimator_data.pages):
         expected_mcpl_path = tmp_path / f'NB_mcpl_p{i+1}.mcpl'
@@ -80,5 +85,5 @@ def test_mcpl_generation(manypage_bdo_path: Path, tmp_path: Path, monkeypatch: p
         assert mcpl_file.nparticles == page.data.shape[1]
         for p in mcpl_file.particles:
             assert p.weight == 1.0
-            assert p.pdgcode == 2112
+            assert p.pdgcode == 2212  # protons
             assert p.position[2] == 4.0
