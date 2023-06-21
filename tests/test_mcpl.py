@@ -114,5 +114,5 @@ def test_concatenation_of_bdo_files(phasespace_bdo_files_path: Generator[Path, N
     logging.info("Checking if concatenation of BDO files works for %s", list_of_input_files)
     assert len(list_of_input_files) == 3
 
-    estimator_data = fromfilelist(list_of_input_files)
+    estimator_data = fromfilelist(list_of_input_files, nan=False)
     assert estimator_data is not None
