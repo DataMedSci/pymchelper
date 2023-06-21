@@ -4,7 +4,7 @@ from pathlib import Path
 from typing import Generator
 import numpy as np
 from pymchelper.estimator import ErrorEstimate
-from pymchelper.input_output import fromfile
+from pymchelper.input_output import fromfile, fromfilelist
 import pytest
 import mcpl
 
@@ -58,8 +58,8 @@ def test_bdo_reading(phasespace_bdo_file_path: Path):
 
 
 def test_bdo_properly_read(phasespace_bdo_file_path: Path):
-    logging.info("Checking if data is properly read for %s", phasespace_bdo_file_path)
     """Check if the data is properly read."""
+    logging.info("Checking if data is properly read for %s", phasespace_bdo_file_path)
     estimator_data = fromfile(str(phasespace_bdo_file_path))
     assert estimator_data is not None
     mcpl_as_text_path = phasespace_bdo_file_path.with_suffix(".txt")
@@ -109,7 +109,10 @@ def test_mcpl_generation(phasespace_bdo_file_path: Path, tmp_path: Path, monkeyp
 
 
 def test_concatenation_of_bdo_files(phasespace_bdo_files_path: Generator[Path, None, None]):
-
+    """Check if concatenation of BDO files works."""
     list_of_input_files = list(phasespace_bdo_files_path)
     logging.info("Checking if concatenation of BDO files works for %s", list_of_input_files)
     assert len(list_of_input_files) == 3
+
+    estimator_data = fromfilelist(list_of_input_files)
+    assert estimator_data is not None
