@@ -110,7 +110,7 @@ def test_mcpl_generation(phasespace_bdo_file_path: Path, tmp_path: Path, monkeyp
 
 def test_concatenation_of_bdo_files(phasespace_bdo_files_path: Generator[Path, None, None]):
     """Check if concatenation of BDO files works."""
-    list_of_input_files = list(phasespace_bdo_files_path)
+    list_of_input_files = list(str(path) for path in phasespace_bdo_files_path)
     logging.info("Checking if concatenation of BDO files works for %s", list_of_input_files)
     assert len(list_of_input_files) == 3
 
