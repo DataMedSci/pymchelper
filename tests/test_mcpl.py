@@ -11,22 +11,38 @@ import mcpl
 logger = logging.getLogger(__name__)
 
 
-@pytest.fixture(scope='module')
+@pytest.fixture(scope='function')
 def phasespace_bdo_file_path() -> Generator[Path, None, None]:
     """Location of this script according to pathlib"""
     main_dir = Path(__file__).resolve().parent
     yield main_dir / "res" / "shieldhit" / "phasespace" / "NB_mcpl.bdo"
 
 
-def test_output_basic_properties(phasespace_bdo_file_path: Path):
+@pytest.fixture(scope='function')
+def phasespace_bdo_files_path() -> Generator[Path, None, None]:
+    """Location of this script according to pathlib"""
+    main_dir = Path(__file__).resolve().parent
+    return (main_dir / "res" / "shieldhit" / "phasespace").glob("NB_mcpl_000*.bdo")
+
+
+def test_output_basic_properties(phasespace_bdo_file_path: Path, phasespace_bdo_files_path: Generator[Path, None,
+                                                                                                      None]):
     """Check if test file exists."""
+    logging.info("Testing if %s is regular file", phasespace_bdo_file_path)
     assert phasespace_bdo_file_path.exists()
     assert phasespace_bdo_file_path.is_file()
     assert phasespace_bdo_file_path.stat().st_size > 0
 
+    for file in phasespace_bdo_files_path:
+        logging.info("Testing if %s is regular file", file)
+        assert file.exists()
+        assert file.is_file()
+        assert file.stat().st_size > 0
+
 
 def test_bdo_reading(phasespace_bdo_file_path: Path):
     """Check parsing of the multipage BDO."""
+    logging.info("Checking if parsing works for %s", phasespace_bdo_file_path)
     estimator_data = fromfile(str(phasespace_bdo_file_path))
     assert estimator_data is not None
     assert estimator_data.pages is not None
@@ -42,6 +58,7 @@ def test_bdo_reading(phasespace_bdo_file_path: Path):
 
 
 def test_bdo_properly_read(phasespace_bdo_file_path: Path):
+    logging.info("Checking if data is properly read for %s", phasespace_bdo_file_path)
     """Check if the data is properly read."""
     estimator_data = fromfile(str(phasespace_bdo_file_path))
     assert estimator_data is not None
@@ -65,10 +82,11 @@ def test_bdo_properly_read(phasespace_bdo_file_path: Path):
 
 def test_mcpl_generation(phasespace_bdo_file_path: Path, tmp_path: Path, monkeypatch: pytest.MonkeyPatch):
     """Check if MCPL file can be generated from BDO."""
+    logging.info("Checking if MCPL file can be generated from BDO %s", phasespace_bdo_file_path)
     # temporary change working directory
-    monkeypatch.chdir(tmp_path)
     from pymchelper.run import main
-    logger.debug("Parsing %s to MCPL", phasespace_bdo_file_path)
+    logging.info("Changing working directory to %s", tmp_path)
+    monkeypatch.chdir(tmp_path)
     main(['mcpl', str(phasespace_bdo_file_path)])
 
     estimator_data = fromfile(str(phasespace_bdo_file_path))
@@ -88,3 +106,10 @@ def test_mcpl_generation(phasespace_bdo_file_path: Path, tmp_path: Path, monkeyp
             assert p.weight == 1.0
             assert p.pdgcode == 2212  # protons
             assert p.position[2] == 4.0
+
+
+def test_concatenation_of_bdo_files(phasespace_bdo_files_path: Generator[Path, None, None]):
+
+    list_of_input_files = list(phasespace_bdo_files_path)
+    logging.info("Checking if concatenation of BDO files works for %s", list_of_input_files)
+    assert len(list_of_input_files) == 3
