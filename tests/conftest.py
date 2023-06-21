@@ -108,7 +108,7 @@ def shieldhit_binary_path(shieldhit_installation_dir: Path,
 
 
 @pytest.fixture(scope='session')
-def shieldhit_demo_binary_installed(shieldhit_installation_dir: Path, shieldhit_binary_filename: Path):
+def shieldhit_demo_binary_installed(shieldhit_installation_dir: Path, shieldhit_binary_path: Path):
     """Checks if SHIELD-HIT12A binary is installed and installs it if necessary"""
     logging.info("SHIELDHIT binary path %s", shieldhit_binary_path)
 

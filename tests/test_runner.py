@@ -1,9 +1,7 @@
 import logging
-import os
-import shutil
 import sys
-import tempfile
-import unittest
+from pathlib import Path
+from typing import Generator
 
 import pytest
 
@@ -13,28 +11,11 @@ from pymchelper.executor.runner import Runner
 logger = logging.getLogger(__name__)
 
 
-@pytest.mark.smoke
-@pytest.mark.skipif(sys.platform == "darwin", reason="we don't have SHIELD-HIT12A demo binary for MacOSX")
-class TestSHRunner(unittest.TestCase):
-    """
-    TODO
-    """
-
-    def setUp(self):
-        """
-        TODO
-        """
-        self.exec_path = os.path.join("tests", "res", "shieldhit", "executable", "shieldhit")
-        if sys.platform == 'win32':
-            self.exec_path += '.exe'
-        print(self.exec_path)
-
-    def test_simple(self):
-        """
-        TODO
-        """
-        input_cfg = {
-            'beam.dat': """RNDSEED      	89736501     ! Random seed
+@pytest.fixture(scope="module")
+def example_input_cfg() -> Generator[dict, None, None]:
+    input_cfg = {
+        'beam.dat':
+        """RNDSEED      	89736501     ! Random seed
 JPART0       	2           ! Incident particle type
 TMAX0           150.0   0.0  ! Incident energy; (MeV/nucl)
 NSTAT           1000    -1 ! NSTAT, Step of saving
@@ -42,11 +23,13 @@ STRAGG          2            ! Straggling: 0-Off 1-Gauss, 2-Vavilov
 MSCAT           2            ! Mult. scatt 0-Off 1-Gauss, 2-Moliere
 NUCRE           0            ! Nucl.Reac. switcher: 1-ON, 0-OFF
         """,
-            'mat.dat': """MEDIUM 1
+        'mat.dat':
+        """MEDIUM 1
 ICRU 276
 END
         """,
-            'detect.dat': """
+        'detect.dat':
+        """
         Geometry Cyl
             Name MyCyl
             R  0.0  10.0    1
@@ -56,7 +39,8 @@ END
             Geo MyCyl
             Quantity Dose
         """,
-            'geo.dat': """*---><---><--------><------------------------------------------------>
+        'geo.dat':
+        """*---><---><--------><------------------------------------------------>
     0    0           protons, H2O 30 cm cylinder, r=10
 *---><---><--------><--------><--------><--------><--------><-------->
   RCC    1       0.0       0.0       0.0       0.0       0.0      30.0
@@ -71,26 +55,32 @@ END
   003          +3     -2
   END
     1    2    3
-    1 1000    0"""}
+    1 1000    0"""
+    }
+    yield input_cfg
 
-        dirpath = tempfile.mkdtemp()
 
-        for config_file in input_cfg:
-            file_path = os.path.join(dirpath, config_file)
-            with open(file_path, 'w') as output_file:
-                output_file.write(input_cfg[config_file])
+@pytest.mark.smoke
+@pytest.mark.skipif(sys.platform == "darwin", reason="we don't have SHIELD-HIT12A demo binary for MacOSX")
+def test_runner(example_input_cfg: dict, tmp_path: Path, monkeypatch: pytest.MonkeyPatch, shieldhit_binary_path: Path,
+                shieldhit_demo_binary_installed):
+    """Test if single BDO file is converted to Excel file"""
+    logging.info("Changing working directory to %s", tmp_path)
+    monkeypatch.chdir(tmp_path)
 
-        settings = SimulationSettings(input_path=dirpath,
-                                      simulator_exec_path=self.exec_path,
-                                      cmdline_opts='-s')
-        settings.set_no_of_primaries(10)
+    for config_file, file_content in example_input_cfg.items():
+        file_path = tmp_path / config_file
+        file_path.write_text(file_content)
+        assert file_path.exists()
+        assert file_path.is_file()
+        assert file_path.stat().st_size > 0
 
-        r = Runner(jobs=2, output_directory=dirpath)
-        isRunOk = r.run(settings=settings)
-        self.assertTrue(isRunOk)
+    settings = SimulationSettings(input_path=tmp_path, simulator_exec_path=shieldhit_binary_path, cmdline_opts='-s')
+    settings.set_no_of_primaries(10)
 
-        data = r.get_data()
-        self.assertIsNotNone(data)
-        shutil.rmtree(dirpath)
+    r = Runner(jobs=2, output_directory=str(tmp_path))
+    isRunOk = r.run(settings=settings)
+    assert isRunOk
 
-        # logger.info(data)
+    data = r.get_data()
+    assert data is not None
