@@ -102,7 +102,7 @@ def fromfilelist(input_file_list, error=ErrorEstimate.stderr, nan: bool = True) 
             concat = False
             for current_page, result_page in zip(current_estimator.pages, result.pages):
                 # got a page with "concatenate normalisation"
-                if getattr(current_page, 'page_normalized') == 4:
+                if getattr(current_page, 'page_normalized', 2) == 4:
                     logger.info("Concatenating page %s", current_page.name)
                     # Assuming current_page.data_raw and page.data_raw are existing NumPy arrays
                     result_page.data_raw = np.concatenate((result_page.data_raw, current_page.data_raw))
