@@ -10,9 +10,9 @@ import zipfile
 import pytest
 import requests
 
-shieldhit_demo_version = '1.0.1'
-linux_shieldhit_demo_url = f'https://shieldhit.org/download/DEMO/shield_hit12a_x86_64_demo_gfortran_v{shieldhit_demo_version}.tar.gz'
-windows_shieldhit_demo_url = f'https://shieldhit.org/download/DEMO/shield_hit12a_win64_demo_v{shieldhit_demo_version}.zip'
+sh12a_ver = '1.0.1'
+linux_sh12a_demo_url = f'https://shieldhit.org/download/DEMO/shield_hit12a_x86_64_demo_gfortran_v{sh12a_ver}.tar.gz'
+windows_sh12a_demo_url = f'https://shieldhit.org/download/DEMO/shield_hit12a_win64_demo_v{sh12a_ver}.zip'
 
 
 def extract_shieldhit_from_tar_gz(archive_path: Path, unpacking_dir: Path, member_name: str, installation_dir: Path):
@@ -26,7 +26,7 @@ def extract_shieldhit_from_tar_gz(archive_path: Path, unpacking_dir: Path, membe
                 # move to installation path
                 local_file = Path(unpacking_dir) / member.name
                 logging.info("Moving %s to %s", local_file, installation_dir)
-                local_file.rename(installation_dir / member_name)
+                shutil.move(local_file, installation_dir / member_name)
 
 
 def extract_shieldhit_from_zip(archive_path: Path, unpacking_dir: Path, member_name: str, installation_dir: Path):
@@ -49,10 +49,10 @@ def extract_shieldhit_from_zip(archive_path: Path, unpacking_dir: Path, member_n
 
 def download_shieldhit_demo_version(installation_dir):
     """Download shieldhit demo version from shieldhit.org"""
-    demo_version_url = linux_shieldhit_demo_url
+    demo_version_url = linux_sh12a_demo_url
     # check if working on Windows
     if platform.system() == 'Windows':
-        demo_version_url = windows_shieldhit_demo_url
+        demo_version_url = windows_sh12a_demo_url
 
     # create temporary directory and download
     with tempfile.TemporaryDirectory() as tmpdir_name:
@@ -99,6 +99,7 @@ def shieldhit_binary_filename() -> Generator[Path, None, None]:
 @pytest.fixture(scope='session')
 def shieldhit_binary_path(shieldhit_installation_dir: Path,
                           shieldhit_binary_filename: Path) -> Generator[Path, None, None]:
+    """Returns the path to the SHIELD-HIT12A binary"""
     yield shieldhit_installation_dir / shieldhit_binary_filename
 
 

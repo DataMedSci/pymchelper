@@ -5,12 +5,11 @@ from pymchelper.flair import Input
 
 import pytest
 
-from pymchelper import run
-
 logger = logging.getLogger(__name__)
 
 
 def test_generate_shieldhit_input(tmp_path: Path, monkeypatch: pytest.MonkeyPatch):
+    """Test if shieldhit input is generated correctly"""
     logging.info("Changing working directory to %s", tmp_path)
     monkeypatch.chdir(tmp_path)
     generate_detect_shieldhit.main()
@@ -24,6 +23,7 @@ def test_generate_shieldhit_input(tmp_path: Path, monkeypatch: pytest.MonkeyPatc
 
 
 def test_generate_fluka_input(tmp_path: Path, monkeypatch: pytest.MonkeyPatch):
+    """Test if fluka input is generated correctly"""
     logging.info("Changing working directory to %s", tmp_path)
     monkeypatch.chdir(tmp_path)
     generate_fluka_input.main()

@@ -30,12 +30,14 @@ def is_png_file(file_path: Path) -> bool:
 
 @pytest.fixture(scope='module')
 def shieldhit_single_result_directory() -> Generator[Path, None, None]:
+    """Return path to directory with single SHIELD-HIT12A result files"""
     main_dir = Path(__file__).resolve().parent
     yield main_dir / "res" / "shieldhit" / "single"
 
 
 @pytest.fixture(scope='function')
 def shieldhit_single_result_files(shieldhit_single_result_directory) -> Generator[Path, None, None]:
+    """Return SHIELD-HIT12A result files as glob generator"""
     return shieldhit_single_result_directory.glob("*.bdo")
 
 
