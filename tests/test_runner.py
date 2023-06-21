@@ -8,11 +8,10 @@ import pytest
 from pymchelper.executor.options import SimulationSettings
 from pymchelper.executor.runner import Runner
 
-logger = logging.getLogger(__name__)
-
 
 @pytest.fixture(scope="module")
 def example_input_cfg() -> Generator[dict, None, None]:
+    """Return example input configuration for SHIELD-HIT12A"""
     input_cfg = {
         'beam.dat':
         """RNDSEED      	89736501     ! Random seed
