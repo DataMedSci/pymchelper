@@ -1,8 +1,5 @@
-import imghdr
 import logging
-import os
 from pathlib import Path
-from typing import Generator
 from examples import generate_detect_shieldhit, generate_fluka_input
 from pymchelper.flair import Input
 
@@ -38,20 +35,20 @@ def test_generate_fluka_input(tmp_path: Path, monkeypatch: pytest.MonkeyPatch):
     # check if only one file is created in current directory
     assert len(list(tmp_path.glob('*'))) == 1
 
-    input = Input.Input()
-    input.read(str(expected_file))
+    fluka_input = Input.Input()
+    fluka_input.read(str(expected_file))
 
     logger.info("checking presence of RANDOMIZ card")
-    assert "RANDOMIZ" in input.cards
+    assert "RANDOMIZ" in fluka_input.cards
 
     logger.info("checking if there is only one RANDOMIZ card ")
-    assert len(input.cards["RANDOMIZ"]) == 1
+    assert len(fluka_input.cards["RANDOMIZ"]) == 1
 
     logger.info("checking if RNG setting is correct ")
-    assert input.cards["RANDOMIZ"][0].whats()[2] == 137
+    assert fluka_input.cards["RANDOMIZ"][0].whats()[2] == 137
 
     logger.info("checking presence of USRBIN cards")
-    assert "USRBIN" in input.cards
+    assert "USRBIN" in fluka_input.cards
 
     logger.info("checking if there are 8 USRBIN cards")
-    assert len(input.cards["USRBIN"]) == 8
+    assert len(fluka_input.cards["USRBIN"]) == 8

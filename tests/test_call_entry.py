@@ -1,4 +1,3 @@
-import imghdr
 import logging
 import os
 from pathlib import Path
@@ -9,6 +8,24 @@ import pytest
 from pymchelper import run
 
 logger = logging.getLogger(__name__)
+
+
+def is_file_with_magic_bytes(file_path: Path, magic_bytes: bytes) -> bool:
+    """Check if file has given type by checking its magic bytes"""
+    with open(file_path, 'rb') as f:
+        file_header = f.read(len(magic_bytes))
+
+    return file_header == magic_bytes
+
+
+def is_excel_file(file_path: Path) -> bool:
+    """Check if file is Excel file by checking its magic bytes"""
+    return is_file_with_magic_bytes(file_path, b'\xD0\xCF\x11\xE0\xA1\xB1\x1A\xE1')
+
+
+def is_png_file(file_path: Path) -> bool:
+    """Check if file is PNG file by checking its magic bytes"""
+    return is_file_with_magic_bytes(file_path, b'\x89\x50\x4E\x47\x0D\x0A\x1A\x0A')
 
 
 @pytest.fixture(scope='module')
@@ -44,17 +61,7 @@ def test_convert_single_to_image(shieldhit_single_result_files: Generator[Path, 
     assert len(list(expected_files)) == len(list(shieldhit_single_result_files))
     # check if all the files are proper PNG files
     for expected_file_path in expected_files:
-        assert imghdr.what(expected_file_path) == 'png'
-
-
-def is_excel_file(file_path):
-    """Check if file is an Excel file by checking its magic bytes"""
-    xls_magic_bytes = b'\xD0\xCF\x11\xE0\xA1\xB1\x1A\xE1'  # Magic bytes for XLS format
-
-    with open(file_path, 'rb') as f:
-        file_header = f.read(len(xls_magic_bytes))
-
-    return file_header == xls_magic_bytes
+        assert is_png_file(expected_file_path)
 
 
 def test_convert_single_to_excel(shieldhit_single_result_directory: Path, tmp_path: Path,

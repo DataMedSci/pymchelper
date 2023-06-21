@@ -1,5 +1,4 @@
 import logging
-import os
 import platform
 import shutil
 import tarfile
@@ -55,11 +54,7 @@ def download_shieldhit_demo_version(installation_dir):
     if platform.system() == 'Windows':
         demo_version_url = windows_shieldhit_demo_url
 
-    # main_dir = Path(__file__).resolve().parent
-    # installation_path = main_dir / 'res' / 'shieldhit' / 'executable'
-
     # create temporary directory and download
-    # Create a temporary file to store the downloaded binary data
     with tempfile.TemporaryDirectory() as tmpdir_name:
         logging.info("Downloading from %s to %s", demo_version_url, tmpdir_name)
         headers = {'User-Agent': 'Mozilla/5.0 (Windows NT x.y; rv:10.0) Gecko/20100101 Firefox/10.0'}
