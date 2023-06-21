@@ -109,4 +109,6 @@ def shieldhit_demo_binary_installed(shieldhit_installation_dir: Path, shieldhit_
     logging.info("SHIELDHIT binary path %s", shieldhit_binary_path)
 
     if not shieldhit_binary_path.exists():
+        logging.info("SHIELDHIT binary not found, downloading and installing")
+        shieldhit_installation_dir.mkdir(parents=True, exist_ok=True)
         download_shieldhit_demo_version(shieldhit_installation_dir)
