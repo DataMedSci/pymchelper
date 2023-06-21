@@ -4,10 +4,9 @@ from pathlib import Path
 from typing import Generator
 
 import numpy as np
-from pymchelper.input_output import fromfile
-
 import pytest
 
+from pymchelper.input_output import fromfile
 from pymchelper.executor.options import SimulationSettings
 from pymchelper.executor.runner import Runner
 
