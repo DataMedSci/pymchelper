@@ -59,7 +59,7 @@ def fromfile(filename: str) -> Optional[Estimator]:
     return estimator
 
 
-def fromfilelist(input_file_list, error=ErrorEstimate.stderr, nan: bool = True) -> Optional[Estimator]:
+def fromfilelist(input_file_list, error: ErrorEstimate = ErrorEstimate.stderr, nan: bool = True) -> Optional[Estimator]:
     """
     Reads all files from a given list, and returns a list of averaged estimators.
 
@@ -99,31 +99,22 @@ def fromfilelist(input_file_list, error=ErrorEstimate.stderr, nan: bool = True) 
                 logger.warning("File %s could not be read", filename)
                 return None
 
-            concat = False
             for current_page, result_page in zip(current_estimator.pages, result.pages):
                 # got a page with "concatenate normalisation"
                 if getattr(current_page, 'page_normalized', 2) == 4:
                     logger.info("Concatenating page %s", current_page.name)
-                    # Assuming current_page.data_raw and page.data_raw are existing NumPy arrays
                     result_page.data_raw = np.concatenate((result_page.data_raw, current_page.data_raw))
-                    concat = True
-
-            if not concat:
-                # Running variance algorithm based on algorithm by B. P. Welford,
-                # presented in Donald Knuth's Art of Computer Programming, Vol 2, page 232, 3rd edition.
-                # Can be found here: http://www.johndcook.com/blog/standard_deviation/
-                # and https://en.wikipedia.org/wiki/Algorithms_for_calculating_variance#Online_algorithm
-                delta = [
-                    current_page.data_raw - result_page.data_raw
-                    for current_page, result_page in zip(current_estimator.pages, result.pages)
-                ]  # delta = x - mean
-                for page, delta_item in zip(result.pages, delta):
-                    page.data_raw += delta_item / np.float64(n)
-
-                if error != ErrorEstimate.none:
-                    for page, delta_item, current_page in zip(result.pages, delta, current_estimator.pages):
-                        page.error_raw += delta_item * (current_page.data_raw - page.data_raw
-                                                        )  # M2 += delta * (x - mean)
+                else:
+                    logger.info("Averaging page %s", current_page.name)
+                    # Running variance algorithm based on algorithm by B. P. Welford,
+                    # presented in Donald Knuth's Art of Computer Programming, Vol 2, page 232, 3rd edition.
+                    # Can be found here: http://www.johndcook.com/blog/standard_deviation/
+                    # and https://en.wikipedia.org/wiki/Algorithms_for_calculating_variance#Online_algorithm
+                    delta = current_page.data_raw - result_page.data_raw  # delta = x - mean
+                    result_page.data_raw += delta / np.float64(n)
+                    if error != ErrorEstimate.none:
+                        # M2 += delta * (x - mean)
+                        result_page.error_raw += delta * (current_page.data_raw - result_page.data_raw)
 
         # unbiased sample variance is stored in `__M2 / (n - 1)`
         # unbiased sample standard deviation in classical algorithm is calculated as (sqrt(1/(n-1)sum(x-<x>)**2)
@@ -147,7 +138,7 @@ def fromfilelist(input_file_list, error=ErrorEstimate.stderr, nan: bool = True) 
     return result
 
 
-def frompattern(pattern, error=ErrorEstimate.stderr, nan=True):
+def frompattern(pattern: str, error: ErrorEstimate = ErrorEstimate.stderr, nan: bool = True):
     """
     Reads all files matching pattern, e.g.: 'foobar_*.bdo', and returns a list of averaged estimators.
 

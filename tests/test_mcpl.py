@@ -116,3 +116,24 @@ def test_concatenation_of_bdo_files(phasespace_bdo_files_path: Generator[Path, N
 
     estimator_data = fromfilelist(list_of_input_files, nan=False)
     assert estimator_data is not None
+    assert len(estimator_data.pages) == 3
+    assert estimator_data.pages[0].data.shape == (8, 38)
+    assert estimator_data.pages[1].data.shape == (8, 30)
+    assert estimator_data.pages[2].data.shape == (8, 15)
+
+    file_data = {}
+    for file in list_of_input_files:
+        file_data[file] = fromfile(file)
+        assert file_data[file] is not None
+        assert len(file_data[file].pages) == 3
+        assert file_data[file].pages[0].data.shape[0] == 8
+
+    for data in file_data.values():
+        assert data.pages[0].data.shape[1] < 38
+        assert data.pages[1].data.shape[1] < 30
+        assert data.pages[2].data.shape[1] < 15
+    assert sum([data.pages[0].data.shape[1] for data in file_data.values()]) == 38
+    assert sum([data.pages[1].data.shape[1] for data in file_data.values()]) == 30
+    assert sum([data.pages[2].data.shape[1] for data in file_data.values()]) == 15
+    concatenated_page = np.concatenate([data.pages[0].data_raw for data in file_data.values()])
+    assert np.isclose(concatenated_page, estimator_data.pages[0].data_raw).all()
