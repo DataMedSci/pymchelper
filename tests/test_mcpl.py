@@ -12,38 +12,40 @@ logger = logging.getLogger(__name__)
 
 
 @pytest.fixture(scope='module')
-def manypage_bdo_path() -> Generator[Path, None, None]:
+def phasespace_bdo_file_path() -> Generator[Path, None, None]:
     """Location of this script according to pathlib"""
     main_dir = Path(__file__).resolve().parent
     yield main_dir / "res" / "shieldhit" / "phasespace" / "NB_mcpl.bdo"
 
 
-def test_output_basic_properties(manypage_bdo_path: Path):
+def test_output_basic_properties(phasespace_bdo_file_path: Path):
     """Check if test file exists."""
-    assert manypage_bdo_path.exists()
-    assert manypage_bdo_path.is_file()
-    assert manypage_bdo_path.stat().st_size > 0
+    assert phasespace_bdo_file_path.exists()
+    assert phasespace_bdo_file_path.is_file()
+    assert phasespace_bdo_file_path.stat().st_size > 0
 
 
-def test_bdo_reading(manypage_bdo_path: Path):
+def test_bdo_reading(phasespace_bdo_file_path: Path):
     """Check parsing of the multipage BDO."""
-    estimator_data = fromfile(str(manypage_bdo_path))
+    estimator_data = fromfile(str(phasespace_bdo_file_path))
     assert estimator_data is not None
     assert estimator_data.pages is not None
-    assert estimator_data.dim == 0
+    assert estimator_data.dimension == 0
     assert estimator_data.error_type == ErrorEstimate.none
     for i in range(3):
-        assert estimator_data.axis(i).n == 1
+        axis_data = estimator_data.axis(i)
+        assert axis_data is not None
+        assert axis_data.n == 1
     assert len(estimator_data.pages) == 3
     assert estimator_data.pages[0].data is not None
     assert estimator_data.pages[0].data.shape == (8, 11)
 
 
-def test_bdo_properly_read(manypage_bdo_path: Path):
+def test_bdo_properly_read(phasespace_bdo_file_path: Path):
     """Check if the data is properly read."""
-    estimator_data = fromfile(str(manypage_bdo_path))
+    estimator_data = fromfile(str(phasespace_bdo_file_path))
     assert estimator_data is not None
-    mcpl_as_text_path = manypage_bdo_path.with_suffix(".txt")
+    mcpl_as_text_path = phasespace_bdo_file_path.with_suffix(".txt")
     assert mcpl_as_text_path.exists()
     assert mcpl_as_text_path.is_file()
     assert mcpl_as_text_path.stat().st_size > 0
@@ -61,15 +63,15 @@ def test_bdo_properly_read(manypage_bdo_path: Path):
     assert np.allclose(txt_data, all_pages.T)
 
 
-def test_mcpl_generation(manypage_bdo_path: Path, tmp_path: Path, monkeypatch: pytest.MonkeyPatch):
+def test_mcpl_generation(phasespace_bdo_file_path: Path, tmp_path: Path, monkeypatch: pytest.MonkeyPatch):
     """Check if MCPL file can be generated from BDO."""
     # temporary change working directory
     monkeypatch.chdir(tmp_path)
     from pymchelper.run import main
-    logger.debug("Parsing %s to MCPL", manypage_bdo_path)
-    main(['mcpl', str(manypage_bdo_path)])
+    logger.debug("Parsing %s to MCPL", phasespace_bdo_file_path)
+    main(['mcpl', str(phasespace_bdo_file_path)])
 
-    estimator_data = fromfile(str(manypage_bdo_path))
+    estimator_data = fromfile(str(phasespace_bdo_file_path))
 
     assert estimator_data is not None
 
