@@ -132,8 +132,8 @@ def test_concatenation_of_bdo_files(phasespace_bdo_files_path: Generator[Path, N
         assert data.pages[0].data.shape[1] < 38
         assert data.pages[1].data.shape[1] < 30
         assert data.pages[2].data.shape[1] < 15
-    assert sum([data.pages[0].data.shape[1] for data in file_data.values()]) == 38
-    assert sum([data.pages[1].data.shape[1] for data in file_data.values()]) == 30
-    assert sum([data.pages[2].data.shape[1] for data in file_data.values()]) == 15
+    assert sum(data.pages[0].data.shape[1] for data in file_data.values()) == 38
+    assert sum(data.pages[1].data.shape[1] for data in file_data.values()) == 30
+    assert sum(data.pages[2].data.shape[1] for data in file_data.values()) == 15
     concatenated_page = np.concatenate([data.pages[0].data_raw for data in file_data.values()])
     assert np.isclose(concatenated_page, estimator_data.pages[0].data_raw).all()

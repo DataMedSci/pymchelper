@@ -113,7 +113,7 @@ def fromfilelist(input_file_list, error: ErrorEstimate = ErrorEstimate.stderr, n
                     delta = current_page.data_raw - result_page.data_raw  # delta = x - mean
                     result_page.data_raw += delta / np.float64(n)
                     if error != ErrorEstimate.none:
-                        # M2 += delta * (x - mean)
+                        # the line below is equivalent to M2 += delta * (x - mean)
                         result_page.error_raw += delta * (current_page.data_raw - result_page.data_raw)
 
         # unbiased sample variance is stored in `__M2 / (n - 1)`
