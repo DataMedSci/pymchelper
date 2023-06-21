@@ -5,3 +5,4 @@ sphinx==7.0.1
 mcpl==1.6.2
 pre-commit==3.3.3
 yapf==0.40.1
+requests==2.31.0
