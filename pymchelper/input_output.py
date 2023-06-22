@@ -2,6 +2,8 @@ import logging
 import os
 from collections import defaultdict
 from glob import glob
+from pathlib import Path
+from typing import List
 
 import numpy as np
 
@@ -158,14 +160,13 @@ def frompattern(pattern, error=ErrorEstimate.stderr, nan=True):
     return result
 
 
-def get_topas_estimators(output_files_path):
+def get_topas_estimators(output_files_path: str)->List[Estimator]:
     """Get Topas estimators from provided directory"""
     estimators_list = []
-    for filename in os.listdir(output_files_path):
-        output_file_path = os.path.join(output_files_path, filename)
-        topas_reader = TopasReaderFactory(output_file_path).get_reader()
+    for result_file_path in Path(output_files_path).iterdir():
+        topas_reader = TopasReaderFactory(result_file_path).get_reader()
         if topas_reader:
-            reader = topas_reader(output_file_path)
+            reader = topas_reader(result_file_path)
             estimator = Estimator()
             reader.read(estimator)
             estimators_list.append(estimator)
