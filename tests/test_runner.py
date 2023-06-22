@@ -1,7 +1,6 @@
 import logging
 import shutil
 import sys
-import tempfile
 from pathlib import Path
 from typing import Generator, Tuple
 
@@ -15,13 +14,13 @@ logger = logging.getLogger(__name__)
 @pytest.fixture
 def shieldhit_path() -> Generator[Path, None, None]:
     """Return SHIELD-HIT12A executable path"""
-    yield str(Path("tests") / "res" / "mocks" / "shieldhit_minimal" / "shieldhit")
+    yield Path("tests") / "res" / "mocks" / "shieldhit_minimal" / "shieldhit"
    
 @pytest.fixture
 def topas_path() -> Generator[Tuple[Path, Path], None, None]:
     """Return topas executable and input file paths"""
-    topas_exec_path = str(Path("tests") / "res" / "mocks" / "topas_minimal" / "topas")
-    topas_input_path = str(Path("tests") / "res" / "mocks" / "topas_minimal" / "minimal.txt")
+    topas_exec_path = Path("tests") / "res" / "mocks" / "topas_minimal" / "topas"
+    topas_input_path = Path("tests") / "res" / "mocks" / "topas_minimal" / "minimal.txt"
 
     return topas_exec_path, topas_input_path
 
@@ -31,9 +30,9 @@ def topas_path() -> Generator[Tuple[Path, Path], None, None]:
 @pytest.mark.skipif(sys.platform == "win32", reason="simulator mocks don't work on Windows")
 def test_shieldhit(shieldhit_path: Path, tmp_path: Path):
     """TODO"""
-    settings = SimulationSettings(input_path=shieldhit_path,
+    settings = SimulationSettings(input_path=str(shieldhit_path),
                                     simulator_type=SimulatorType.shieldhit,
-                                    simulator_exec_path=shieldhit_path,
+                                    simulator_exec_path=str(shieldhit_path),
                                     cmdline_opts='-s')
     settings.set_no_of_primaries(10)
     logger.info(settings)
@@ -56,9 +55,9 @@ def test_topas(topas_path: Path, tmp_path: Path):
     """TODO"""
     topas_exec_path, topas_input_path = topas_path
 
-    settings = SimulationSettings(input_path=topas_input_path,
+    settings = SimulationSettings(input_path=str(topas_input_path),
                                     simulator_type=SimulatorType.topas,
-                                    simulator_exec_path=topas_exec_path)
+                                    simulator_exec_path=str(topas_exec_path))
     logger.info(settings)
 
     r = Runner(settings=settings, jobs=2, output_directory=tmp_path)

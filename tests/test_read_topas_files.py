@@ -8,22 +8,24 @@ import pytest
 
 @pytest.fixture(scope="module")
 def topas_minimal_output_path() -> Generator[Path, None, None]:
+    """Return path to Topas minimal output file"""
     main_dir = Path(__file__).resolve().parent
     yield main_dir / "res" / "topas" / "minimal" / "fluence_bp_protons_xy.csv"
 
 @pytest.fixture(scope="module")
 def topas_cylinder_output_path() -> Generator[Path, None, None]:
+    """Return path to Topas output file with cylindrical coordinates"""
     main_dir = Path(__file__).resolve().parent
     yield main_dir / "res" / "topas" / "cylinder" / "MyScorer.csv"
 
 @pytest.fixture(scope="module")
 def topas_binning_by_energy_output_path() -> Generator[Path, None, None]:
+    """Return path to Topas output file with binning by energy"""
     main_dir = Path(__file__).resolve().parent
     yield main_dir / "res" / "topas" / "binning_by_energy" / "fluence_bp_protons_xy.csv"
 
 def test_read(topas_minimal_output_path: Path):
     """Test if Topas output file is read correctly"""
-
     reader = TopasReaderFactory(str(topas_minimal_output_path)).get_reader()
     assert reader is not None
     
