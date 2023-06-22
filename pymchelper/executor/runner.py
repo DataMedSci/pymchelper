@@ -1,6 +1,7 @@
 from copy import deepcopy
 import logging
 import os
+from pathlib import Path
 import re
 import shutil
 import subprocess
@@ -130,13 +131,13 @@ class Runner:
         estimators_list = []
 
         if self.settings.simulator_type == SimulatorType.shieldhit:
-            output_files_pattern = os.path.join(self.workspace_manager.output_dir_absolute_path, "run_*", "*.bdo")
-            logging.debug("Files to merge {:s}".format(output_files_pattern))
+            output_files_pattern = Path(self.workspace_manager.output_dir_absolute_path) / "run_*" / "*.bdo"
+            logging.debug("Files to merge %s", output_files_pattern)
             # convert output files to list of estimator objects
             estimators_list = frompattern(output_files_pattern)
 
         elif self.settings.simulator_type == SimulatorType.topas:
-            output_files_path = os.path.join(self.workspace_manager.output_dir_absolute_path, "run_1")
+            output_files_path = Path(self.workspace_manager.output_dir_absolute_path) / "run_1"
             estimators_list = get_topas_estimators(output_files_path)
 
         for estimator in estimators_list:
