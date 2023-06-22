@@ -51,9 +51,9 @@ class SimulationSettings:
     (i.e. whether this is SHIELD-HIT12A input or FLUKA input)
     """
 
-    def __init__(self, input_path, simulator_type=SimulatorType.shieldhit, simulator_exec_path=None, cmdline_opts=None):
+    def __init__(self, input_path: str, simulator_type: SimulatorType=SimulatorType.shieldhit, simulator_exec_path: str=None, cmdline_opts: str=None):
         # simulator type (shieldhit, topas or fluka)
-        self.simulator_type = simulator_type
+        self.simulator_type: SimulatorType = simulator_type
 
         # input file or directory
         self.input_path = input_path
