@@ -160,7 +160,7 @@ def frompattern(pattern, error=ErrorEstimate.stderr, nan=True):
     return result
 
 
-def get_topas_estimators(output_files_path: str)->List[Estimator]:
+def get_topas_estimators(output_files_path: str) -> List[Estimator]:
     """Get Topas estimators from provided directory"""
     estimators_list = []
     for result_file_path in Path(output_files_path).iterdir():
