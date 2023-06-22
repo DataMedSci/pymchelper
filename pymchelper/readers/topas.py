@@ -1,4 +1,3 @@
-#import os
 from pathlib import Path
 import re
 from typing import List, Tuple
@@ -29,6 +28,7 @@ class TopasReader(Reader):
 
     @staticmethod
     def get_parameter_filename(results_data: str) -> str:
+        """Get parameter filename from the output file"""
         parameter_filename = ""
         pattern = r"# Parameter File: (.*)"
         match = re.search(pattern, results_data)
@@ -37,7 +37,7 @@ class TopasReader(Reader):
         return parameter_filename
 
     @staticmethod
-    def get_bins(dimensions: List[str], results_data: str) -> dict:
+    def get_bins(dimensions: List[str], results_data: str) -> dict|None:
         """
         Return dict containing number of bins, bin size and unit for each dimension
         or None if output file does not contain this information for provided dimensions
@@ -85,7 +85,7 @@ class TopasReader(Reader):
         return "", "", []
 
     @staticmethod
-    def get_differential_axis(results_data: str) -> MeshAxis:
+    def get_differential_axis(results_data: str) -> MeshAxis|None:
         """Check if the output file contains differential axis and get it from file if it does"""
         if "# Binned by" in results_data:
             pattern = r"# Binned by (.+?) in (\d+) bin[s ] of (\d+) (\w+) from ([\d.]+) (\w+) to ([\d.]+) (\w+)"
@@ -112,7 +112,7 @@ class TopasReader(Reader):
 
             num_histories = 0
             input_filename = TopasReader.get_parameter_filename(results_data)
-            input_file_path = Path(self.directory)/ input_filename
+            input_file_path = Path(self.directory) / input_filename
             if input_file_path.exists():
                 with open(input_file_path, 'r') as input_file:
                     pattern = r'NumberOfHistoriesInRun\s*=\s*(\d+)'
@@ -132,7 +132,7 @@ class TopasReader(Reader):
                 if bins_data is not None:
                     actual_dimensions = curr_dimensions
                     break
-            
+
             if bins_data is None:
                 return False
 
