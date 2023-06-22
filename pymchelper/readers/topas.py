@@ -37,7 +37,7 @@ class TopasReader(Reader):
         return parameter_filename
 
     @staticmethod
-    def get_bins(dimensions: List[str], results_data: str) -> dict|None:
+    def get_bins(dimensions: List[str], results_data: str) -> dict | None:
         """
         Return dict containing number of bins, bin size and unit for each dimension
         or None if output file does not contain this information for provided dimensions
@@ -85,7 +85,7 @@ class TopasReader(Reader):
         return "", "", []
 
     @staticmethod
-    def get_differential_axis(results_data: str) -> MeshAxis|None:
+    def get_differential_axis(results_data: str) -> MeshAxis | None:
         """Check if the output file contains differential axis and get it from file if it does"""
         if "# Binned by" in results_data:
             pattern = r"# Binned by (.+?) in (\d+) bin[s ] of (\d+) (\w+) from ([\d.]+) (\w+) to ([\d.]+) (\w+)"
