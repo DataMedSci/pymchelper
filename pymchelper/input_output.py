@@ -164,7 +164,7 @@ def get_topas_estimators(output_files_path: str)->List[Estimator]:
     """Get Topas estimators from provided directory"""
     estimators_list = []
     for result_file_path in Path(output_files_path).iterdir():
-        topas_reader = TopasReaderFactory(result_file_path).get_reader()
+        topas_reader = TopasReaderFactory(str(result_file_path)).get_reader()
         if topas_reader:
             reader = topas_reader(result_file_path)
             estimator = Estimator()

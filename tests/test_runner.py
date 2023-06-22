@@ -3,6 +3,7 @@ import shutil
 import sys
 import tempfile
 from pathlib import Path
+from typing import Generator, Tuple
 
 import pytest
 
@@ -12,15 +13,15 @@ from pymchelper.executor.runner import Runner, SimulatorType
 logger = logging.getLogger(__name__)
 
 @pytest.fixture
-def shieldhit_path():
+def shieldhit_path() -> Generator[Path, None, None]:
     """Return SHIELD-HIT12A executable path"""
-    return Path("tests") / "res" / "mocks" / "shieldhit_minimal" / "shieldhit"
+    yield str(Path("tests") / "res" / "mocks" / "shieldhit_minimal" / "shieldhit")
    
 @pytest.fixture
-def topas_path():
+def topas_path() -> Generator[Tuple[Path, Path], None, None]:
     """Return topas executable and input file paths"""
-    topas_exec_path = Path("tests") / "res" / "mocks" / "topas_minimal" / "topas"
-    topas_input_path = Path("tests") / "res" / "mocks" / "topas_minimal" / "minimal.txt"
+    topas_exec_path = str(Path("tests") / "res" / "mocks" / "topas_minimal" / "topas")
+    topas_input_path = str(Path("tests") / "res" / "mocks" / "topas_minimal" / "minimal.txt")
 
     return topas_exec_path, topas_input_path
 
