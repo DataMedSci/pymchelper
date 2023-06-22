@@ -1,6 +1,7 @@
 #import os
 from pathlib import Path
 import re
+from typing import List, Tuple
 
 import numpy as np
 from pymchelper.axis import MeshAxis
@@ -36,7 +37,7 @@ class TopasReader(Reader):
         return parameter_filename
 
     @staticmethod
-    def get_bins(dimensions: list[str], results_data: str) -> dict:
+    def get_bins(dimensions: List[str], results_data: str) -> dict:
         """
         Return dict containing number of bins, bin size and unit for each dimension
         or None if output file does not contain this information for provided dimensions
@@ -64,7 +65,7 @@ class TopasReader(Reader):
         return name
 
     @staticmethod
-    def get_scorer_unit_results(results_data: str) -> tuple[str, str, list]:
+    def get_scorer_unit_results(results_data: str) -> Tuple[str, str, List]:
         """Get scoring quantity, unit and the scoring values (sum/mean/etc.) from the output file"""
         scorers = ['DoseToMedium', 'DoseToWater', 'DoseToMaterial', 'TrackLengthEstimator',
                    'AmbientDoseEquivalent', 'EnergyDeposit', 'Fluence', 'EnergyFluence',
