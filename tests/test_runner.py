@@ -29,47 +29,39 @@ def topas_path() -> Generator[Tuple[Path, Path], None, None]:
 @pytest.mark.smoke
 @pytest.mark.skipif(sys.platform == "darwin", reason="we don't have SHIELD-HIT12A demo binary for MacOSX")
 @pytest.mark.skipif(sys.platform == "win32", reason="simulator mocks don't work on Windows")
-def test_shieldhit(shieldhit_path):
-    """
-    TODO
-    """
-    dirpath = tempfile.mkdtemp()
-
+def test_shieldhit(shieldhit_path: Path, tmp_path: Path):
+    """TODO"""
     settings = SimulationSettings(input_path=shieldhit_path,
                                     simulator_type=SimulatorType.shieldhit,
                                     simulator_exec_path=shieldhit_path,
                                     cmdline_opts='-s')
     settings.set_no_of_primaries(10)
-    print(settings)
+    logger.info(settings)
 
-    r = Runner(settings=settings, jobs=2, output_directory=dirpath)
+    r = Runner(settings=settings, jobs=2, output_directory=tmp_path)
     isRunOk = r.run()
     assert isRunOk
 
     data = r.get_data()
-    print(data)
+    logger.info(data)
     assert data is not None
     assert 'fluence' in data
     assert 'mesh' in data
-    shutil.rmtree(dirpath)
-
-    # logger.info(data)
+    shutil.rmtree(tmp_path)
 
 @pytest.mark.smoke
 @pytest.mark.skipif(sys.platform == "darwin", reason="we don't have SHIELD-HIT12A demo binary for MacOSX")
 @pytest.mark.skipif(sys.platform == "win32", reason="simulator mocks don't work on Windows")
-def test_topas(topas_path):
+def test_topas(topas_path: Path, tmp_path: Path):
     """TODO"""
     topas_exec_path, topas_input_path = topas_path
-    
-    dirpath = tempfile.mkdtemp()
 
     settings = SimulationSettings(input_path=topas_input_path,
                                     simulator_type=SimulatorType.topas,
                                     simulator_exec_path=topas_exec_path)
-    print(settings)
+    logger.info(settings)
 
-    r = Runner(settings=settings, jobs=2, output_directory=dirpath)
+    r = Runner(settings=settings, jobs=2, output_directory=tmp_path)
     
     isRunOk = r.run()
     assert isRunOk
@@ -81,11 +73,9 @@ def test_topas(topas_path):
         assert "i:Ts/NumberOfThreads = 2" in contents
         
     data = r.get_data()
-    print(data)
+    logger.info(data)
     assert data is not None
     assert 'fluence_bp_protons_xy' in data
     assert 'fluence_bp_protons_xy2' in data
     
-    shutil.rmtree(dirpath)
-
-    # logger.info(data)
+    shutil.rmtree(tmp_path)
