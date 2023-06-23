@@ -1,6 +1,7 @@
 import copy
 from enum import IntEnum
 import logging
+from typing import Optional
 
 import numpy as np
 from pymchelper.axis import MeshAxis, AxisId
@@ -81,7 +82,7 @@ class Estimator:
         new_page.estimator = self
         self.pages += (new_page,)
 
-    def axis(self, axis_id):
+    def axis(self, axis_id : int) -> Optional[MeshAxis]:
         """
         Mesh axis selector method based on integer id's.
 

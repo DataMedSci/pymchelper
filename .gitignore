@@ -292,3 +292,4 @@ wdir/*
 sobp*.dat
 
 tests/res/shieldhit/generated/detect_*.dat
+tests/res/shieldhit/executable/**
