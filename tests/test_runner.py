@@ -95,14 +95,13 @@ def test_shieldhit(example_input_cfg: dict, tmp_path: Path, monkeypatch: pytest.
     settings = SimulationSettings(input_path=tmp_path, simulator_exec_path=shieldhit_binary_path, cmdline_opts='-s')
     settings.set_no_of_primaries(10)
 
-    r = Runner(jobs=2, output_directory=str(tmp_path))
-    isRunOk = r.run(settings=settings)
+    r = Runner(jobs=2, settings=settings, output_directory=str(tmp_path))
+    isRunOk = r.run()
     assert isRunOk
 
     data = r.get_data()
     assert data is not None
-    assert 'fluence' in data
-    assert 'mesh' in data
+    assert 'data_' in data
 
 
 @pytest.mark.smoke
@@ -125,8 +124,8 @@ def test_merging(example_input_cfg: dict, tmp_path: Path, monkeypatch: pytest.Mo
                                   cmdline_opts='--silent')
     settings.set_no_of_primaries(500)
 
-    r = Runner(jobs=3, output_directory=str(tmp_path), keep_workspace_after_run=True)
-    isRunOk = r.run(settings=settings)
+    r = Runner(jobs=3, settings=settings, output_directory=str(tmp_path), keep_workspace_after_run=True)
+    isRunOk = r.run()
     assert isRunOk
 
     data = r.get_data()
@@ -172,7 +171,7 @@ def test_topas(topas_path: Path, tmp_path: Path):
     settings = SimulationSettings(input_path=str(topas_input_path),
                                     simulator_type=SimulatorType.topas,
                                     simulator_exec_path=str(topas_exec_path))
-    logger.info(settings)
+    logging.info(settings)
 
     r = Runner(settings=settings, jobs=2, output_directory=tmp_path)
     
@@ -186,7 +185,7 @@ def test_topas(topas_path: Path, tmp_path: Path):
         assert "i:Ts/NumberOfThreads = 2" in contents
         
     data = r.get_data()
-    logger.info(data)
+    logging.info(data)
     assert data is not None
     assert 'fluence_bp_protons_xy' in data
     assert 'fluence_bp_protons_xy2' in data
