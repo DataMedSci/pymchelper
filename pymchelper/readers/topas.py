@@ -157,34 +157,61 @@ class TopasReader(Reader):
 
             differential_axis = TopasReader.get_differential_axis(results_data)
 
-            # in one output csv file there can be multiple results for one scorer
-            # (e.g. sum and mean for fluence)
+            # In one output csv file there can be multiple results for one scorer
+            # (e.g. mean and standard deviation for fluence).
+            # We look for mean and standard deviation and ignore the rest.
+            # Then we put them in raw_data and raw_error respectively.
             scorer, unit, results = TopasReader.get_scorer_unit_results(results_data)
             num_results = len(results)
+            page = Page(estimator=estimator)
+            set_data = False
+            set_error = False
             for column, result in enumerate(results):
-                page = Page(estimator=estimator)
+                if result not in ['Mean', 'Standard_Deviation']:
+                    continue
                 if differential_axis:
                     page.diff_axis1 = differential_axis
-                    # when there is a differential axis, each line in csv contains scores
+                    # When there is a differential axis, each line in csv contains scores
                     # in alternating order. For example, for sum and mean it looks like this:
                     # sum(underflow) mean(underflow) sum(bin1) mean(bin1) sum(bin2) mean(bin2) ...
+                    # Binning by time has one additional bin at the end : overflow.
+                    # Binning by energy has two additional bins at the end:
+                    # overflow and for case of no incident track.
+                    # Both have one additional bin at the beginning: underflow.
+                    # We ignore these additional bins.
+                    if differential_axis.name == 'time':
+                        additional_bins = 1
+                    elif differential_axis.name == 'incident track energy':
+                        additional_bins = 2
+                    else:
+                        return False
                     lines = np.genfromtxt(self.filename, delimiter=',')
-                    scores = lines[:, column::num_results].flatten()
+                    last_bin_index = len(lines[0]) - num_results*additional_bins
+                    scores = lines[:, column+num_results:last_bin_index:num_results].flatten()
 
                 else:
-                    # when there is no differential axis, each line in csv file looks like this:
+                    # When there is no differential axis, each line in csv file looks like this:
                     # x y z result1 result2 result3 ...
                     lines = np.genfromtxt(self.filename, delimiter=',')
                     scores = lines[:, column+3]
 
                 page.title = TopasReader.get_scorer_name(results_data)
                 page.name = page.title
-                page.dettyp, page.unit = scorer+result, unit
+                page.dettyp, page.unit = scorer, unit
 
-                page.data_raw = scores
+                if result == 'Mean':
+                    page.data_raw = scores
+                    set_data = True
+                elif result == 'Standard_Deviation':
+                    page.error_raw = scores
+                    set_error = True
+            
+            # If we didn't find mean results for the scorer, we return False
+            if not set_data:
+                return False
+            if not set_error:
                 page.error_raw = np.empty_like(page.data_raw)
-
-                estimator.add_page(page)
+            estimator.add_page(page)
             return True
 
     @property

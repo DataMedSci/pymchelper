@@ -7,7 +7,7 @@
 # R in 2 bins of 2.5 cm
 # Phi in 2 bins of 50 deg
 # Z in 1 bin  of 100 cm
-# SurfaceTrackCount : Sum   
+# SurfaceTrackCount : Mean   
 0, 0, 0, 0
 0, 1, 0, 0
 1, 0, 0, 0
