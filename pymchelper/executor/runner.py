@@ -9,6 +9,7 @@ import timeit
 from multiprocessing import Pool
 
 from enum import IntEnum
+from pymchelper.executor.options import SimulationSettings
 
 from pymchelper.simulator_type import SimulatorType
 from pymchelper.input_output import frompattern, get_topas_estimators
@@ -27,7 +28,7 @@ class Runner:
     Main class responsible for configuring and starting multiple parallel MC simulation processes
     It can be used to access combined averaged results of the simulation.
     """
-    def __init__(self, settings, jobs=None, keep_workspace_after_run=False, output_directory='.'):
+    def __init__(self, settings: SimulationSettings, jobs: int=None, keep_workspace_after_run: bool=False, output_directory: str='.'):
         self.settings = settings
 
         # create pool of processes, waiting to be started by run method

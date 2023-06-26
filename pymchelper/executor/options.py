@@ -1,6 +1,8 @@
 import logging
 import os
+from pathlib import Path
 import sys
+from typing import Optional
 
 from pymchelper.simulator_type import SimulatorType
 
@@ -19,6 +21,7 @@ class FlukaEnvironment(MCEnvironment):
     FLUKA Environment
     """
     executable_filename = 'rfluka'
+    simulator_type = SimulatorType.fluka
 
 
 class SH12AEnvironmentLinux(MCEnvironment):
@@ -26,6 +29,7 @@ class SH12AEnvironmentLinux(MCEnvironment):
     SHIELD-HIT12A Environment for Linux
     """
     executable_filename = 'shieldhit'
+    simulator_type = SimulatorType.shieldhit
 
 
 class SH12AEnvironmentWindows(MCEnvironment):
@@ -33,12 +37,14 @@ class SH12AEnvironmentWindows(MCEnvironment):
     SHIELD-HIT12A Environment for Windows
     """
     executable_filename = 'shieldhit.exe'
+    simulator_type = SimulatorType.shieldhit
 
 
 class TopasEnvironment(MCEnvironment):
     """TOPAS Environment"""
 
     executable_filename = 'topas'
+    simulator_type = SimulatorType.topas
 
 
 class SimulationSettings:
@@ -48,29 +54,35 @@ class SimulationSettings:
       - additional options provided by the user
       - location of the input files or directories
     Moreover this class performs automatic discovery of the MC input
-    (i.e. whether this is SHIELD-HIT12A input or FLUKA input)
+    (i.e. whether this is SHIELD-HIT12A, Fluka or TOPAS input)
     """
 
-    def __init__(self, input_path: str, simulator_type: SimulatorType=SimulatorType.shieldhit,
+    def __init__(self, input_path: str, simulator_type: Optional[SimulatorType]=None,
                  simulator_exec_path: str=None, cmdline_opts: str=None):
-        # simulator type (shieldhit, topas or fluka)
-        self.simulator_type: SimulatorType = simulator_type
-
-        # input file or directory
+        # Input file or directory
         self.input_path = input_path
 
-        # set `self._mc_environment` to the proper `MCEnvironment` subclass
-        # shieldhit is default
-        if simulator_type == SimulatorType.shieldhit:
-            if sys.platform == 'win32':
-                self._mc_environment = SH12AEnvironmentWindows
-            else:
-                self._mc_environment = SH12AEnvironmentLinux
-        elif simulator_type == SimulatorType.fluka:
-            self._mc_environment = FlukaEnvironment
-        elif simulator_type == SimulatorType.topas:
-            self._mc_environment = TopasEnvironment
+        # Set `self._mc_environment` to the proper `MCEnvironment` subclass
+        # If `simulator_type` is provided by user, then we use it to set proper `MCEnvironment` subclass
+        # Otherwise, we try to guess based on provided input path
+        if simulator_type:
+            if simulator_type == SimulatorType.shieldhit:
+                if sys.platform == 'win32':
+                    self._mc_environment = SH12AEnvironmentWindows
+                else:
+                    self._mc_environment = SH12AEnvironmentLinux
+            elif simulator_type == SimulatorType.fluka:
+                self._mc_environment = FlukaEnvironment
+            elif simulator_type == SimulatorType.topas:
+                self._mc_environment = TopasEnvironment
+        else:
+            self._mc_environment = self._discover_mc_engine(input_path)
 
+        if not self._mc_environment:
+            raise Exception("Unable to determine MC engine type for {:s}".format(input_path))
+
+        self.simulator_type = self._mc_environment.simulator_type
+        
         # set `self.executable_path` to the value provided by user, or if it is missing
         # perform automatic discovery of the *location* of MC engine executable file by scanning PATH env. variable
         self.executable_path = simulator_exec_path
@@ -140,6 +152,36 @@ class SimulationSettings:
         if options_set & unsupported:
             # TODO replace exception with warning and ignore such options  # skipcq: PYL-W0511
             raise SyntaxError("Unsupported option encountered: {:s}".format(",".join(options_set & unsupported)))
+
+    @staticmethod
+    def _discover_mc_engine(input_path: str):
+        """
+        Analyse the input path and based on its type set proper MC engine
+        In case of failure return None
+        """
+        input_path = Path(input_path)
+        # raise exception if invalid path is provided
+        if not input_path.exists():
+            raise Exception("Input path {:s} doesn't exists".format(input_path))
+
+        # Fluka and TOPAS input files are provided as the single file
+        # We return proper MC engine based on the file extension
+        if input_path.is_file():
+            if input_path.endswith('.inp'):
+                return FlukaEnvironment
+            elif input_path.endswith('.txt'):
+                return TopasEnvironment
+        # SHIELD-HIT12A input is in the form of directory with multiple files
+        elif input_path.is_dir():
+            # We check if directory contains the required SHIELDHIT-12A input files
+            if all(input_path.joinpath(file).exists() for file in ['beam.dat', 'mat.dat', 'geo.dat', 'detect.dat']):
+                # in case pymchelper runs on Windows choose a SHIELDHIT-12A environment which is Windows specific
+                # (executable file being `shieldhit.exe` instead of `shieldhit`)
+                if sys.platform == 'win32':
+                    return SH12AEnvironmentWindows
+                else:
+                    return SH12AEnvironmentLinux
+        return None
 
     @staticmethod
     def _discover_mc_exec_location(exec_filename):

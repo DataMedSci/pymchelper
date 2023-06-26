@@ -51,8 +51,9 @@ def main(args=None):
     import pymchelper
 
     parser = argparse.ArgumentParser()
-    parser.add_argument('-s', '--simulator', help='Simulator type: shieldhit, topas or fluka (default: shieldhit)',
-                        type=str, choices=[s.name for s in SimulatorType], default=SimulatorType.shieldhit)
+    parser.add_argument('-s', '--simulator', help='Simulator type: shieldhit, topas or fluka '
+                                                  '(automatically detected if not provided))',
+                        type=str, choices=[s.name for s in SimulatorType], default=None)
     parser.add_argument('-e', '--executable', help='path to MC executable '
                                                    '(automatically detected if not provided)',
                         type=str, default=None)
