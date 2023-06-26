@@ -99,38 +99,5 @@ class MCPLWriter(Writer):
 
             data_bytes = data_bytes.tobytes()
 
-            # for i, row in enumerate(page.data.T):
-
-            #     pdg, x, y, z, ux, uy, uz, E = row
-
-            #     # adaptive projection packing
-            #     fp1: float = float('nan')
-            #     fp2: float = float('nan')
-            #     sign: int = 1
-            #     if ux * ux > uy * uy and ux * ux > uz * uz:
-            #         if ux < 0:
-            #             sign = -1
-            #         fp1 = 1 / uz
-            #         fp2 = uy
-            #     if uy * uy > ux * ux and uy * uy > uz * uz:
-            #         if uy < 0:
-            #             sign = -1
-            #         fp1 = ux
-            #         fp2 = 1 / uz
-            #     if uz * uz >= ux * ux and uz * uz >= uy * uy:
-            #         if uz < 0:
-            #             sign = -1
-            #         fp1 = ux
-            #         fp2 = uy
-
-            #     bytes_to_write += struct.pack("<f", x)  # x
-            #     bytes_to_write += struct.pack("<f", y)  # y
-            #     bytes_to_write += struct.pack("<f", z)  # z
-            #     bytes_to_write += struct.pack("<f", fp1)  # FP1 (mostly ux)
-            #     bytes_to_write += struct.pack("<f", fp2)  # FP2 (mostly uy)
-            #     bytes_to_write += struct.pack("<f", sign * E)  # uz
-            #     bytes_to_write += struct.pack("<f", 0)  # time
-            #     bytes_to_write += struct.pack("<I", int(pdg))  # pdg
-
             output_path.write_bytes(header_bytes + data_bytes)
             return
