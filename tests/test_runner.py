@@ -168,9 +168,8 @@ def test_merging(example_input_cfg: dict, tmp_path: Path, monkeypatch: pytest.Mo
 @pytest.mark.skipif(sys.platform == "darwin", reason="we don't have SHIELD-HIT12A demo binary for MacOSX")
 @pytest.mark.skipif(sys.platform == "win32", reason="simulator mocks don't work on Windows")
 def test_topas(topas_mock_path: Path, topas_input_path: Path, tmp_path: Path):
-    """TODO"""
+    """Test if runner can run topas mock and read the output"""
     settings = SimulationSettings(input_path=str(topas_input_path),
-                                    simulator_type=SimulatorType.topas,
                                     simulator_exec_path=str(topas_mock_path))
     logging.info(settings)
 

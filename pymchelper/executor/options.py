@@ -154,12 +154,12 @@ class SimulationSettings:
             raise SyntaxError("Unsupported option encountered: {:s}".format(",".join(options_set & unsupported)))
 
     @staticmethod
-    def _discover_mc_engine(input_path: str):
+    def _discover_mc_engine(input_path_str: str):
         """
         Analyse the input path and based on its type set proper MC engine
         In case of failure return None
         """
-        input_path = Path(input_path)
+        input_path = Path(input_path_str)
         # raise exception if invalid path is provided
         if not input_path.exists():
             raise Exception("Input path {:s} doesn't exists".format(input_path))
@@ -167,9 +167,9 @@ class SimulationSettings:
         # Fluka and TOPAS input files are provided as the single file
         # We return proper MC engine based on the file extension
         if input_path.is_file():
-            if input_path.endswith('.inp'):
+            if input_path_str.endswith('.inp'):
                 return FlukaEnvironment
-            if input_path.endswith('.txt'):
+            if input_path_str.endswith('.txt'):
                 return TopasEnvironment
         # SHIELD-HIT12A input is in the form of directory with multiple files
         elif input_path.is_dir():
