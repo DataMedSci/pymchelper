@@ -123,37 +123,40 @@ class TopasReader(Reader):
                         if number_str:
                             num_histories = int(number_str.group())
 
+            estimator.file_corename = Path(self.filename).name[:-4]
+            estimator.number_of_primaries = num_histories
+            estimator.file_format = "csv"
+
             dimensions = [['X', 'Y', 'Z'],
                           ['R', 'Phi', 'Z'],
-                          ['Rho', 'Phi', 'Theta']]
+                          ['R', 'Phi', 'Theta']]
 
             for curr_dimensions in dimensions:
                 bins_data = TopasReader.get_bins(curr_dimensions, results_data)
                 if bins_data is not None:
                     actual_dimensions = curr_dimensions
+                    x_max = bins_data[actual_dimensions[0]]['size']*bins_data[actual_dimensions[0]]['num']
+                    estimator.x = MeshAxis(n=bins_data[actual_dimensions[0]]['num'],
+                                        min_val=0.0, max_val=x_max,
+                                        name=actual_dimensions[0], unit=bins_data[actual_dimensions[0]]['unit'],
+                                        binning=MeshAxis.BinningType.linear)
+                    y_max = bins_data[actual_dimensions[1]]['size']*bins_data[actual_dimensions[1]]['num']
+                    estimator.y = MeshAxis(n=bins_data[actual_dimensions[1]]['num'],
+                                        min_val=0.0, max_val=y_max,
+                                        name=actual_dimensions[1], unit=bins_data[actual_dimensions[1]]['unit'],
+                                        binning=MeshAxis.BinningType.linear)
+                    z_max = bins_data[actual_dimensions[2]]['size']*bins_data[actual_dimensions[2]]['num']
+                    estimator.z = MeshAxis(n=bins_data[actual_dimensions[2]]['num'],
+                                        min_val=0.0, max_val=z_max,
+                                        name=actual_dimensions[2], unit=bins_data[actual_dimensions[2]]['unit'],
+                                        binning=MeshAxis.BinningType.linear)
+                    no_bins = False
                     break
 
             if bins_data is None:
-                return False
-
-            estimator.file_corename = Path(self.filename).name[:-4]
-            estimator.number_of_primaries = num_histories
-            estimator.file_format = "csv"
-            x_max = bins_data[actual_dimensions[0]]['size']*bins_data[actual_dimensions[0]]['num']
-            estimator.x = MeshAxis(n=bins_data[actual_dimensions[0]]['num'],
-                                   min_val=0.0, max_val=x_max,
-                                   name=actual_dimensions[0], unit=bins_data[actual_dimensions[0]]['unit'],
-                                   binning=MeshAxis.BinningType.linear)
-            y_max = bins_data[actual_dimensions[1]]['size']*bins_data[actual_dimensions[1]]['num']
-            estimator.y = MeshAxis(n=bins_data[actual_dimensions[1]]['num'],
-                                   min_val=0.0, max_val=y_max,
-                                   name=actual_dimensions[1], unit=bins_data[actual_dimensions[1]]['unit'],
-                                   binning=MeshAxis.BinningType.linear)
-            z_max = bins_data[actual_dimensions[2]]['size']*bins_data[actual_dimensions[2]]['num']
-            estimator.z = MeshAxis(n=bins_data[actual_dimensions[2]]['num'],
-                                   min_val=0.0, max_val=z_max,
-                                   name=actual_dimensions[2], unit=bins_data[actual_dimensions[2]]['unit'],
-                                   binning=MeshAxis.BinningType.linear)
+                # We assume that the geometry is not divided into bins
+                # (or in other words there is one bin with one score)
+                no_bins = True
 
             differential_axis = TopasReader.get_differential_axis(results_data)
 
@@ -192,8 +195,18 @@ class TopasReader(Reader):
                 else:
                     # When there is no differential axis, each line in csv file looks like this:
                     # x y z result1 result2 result3 ...
-                    lines = np.genfromtxt(self.filename, delimiter=',')
-                    scores = lines[:, column+3]
+                    # where x, y, z are coordinates of the bin - we ignore them.
+                    # Unless there are no bins - then there is one line with scores
+                    # result1 result2 ...
+                    if no_bins:
+                        data = np.genfromtxt(self.filename, delimiter=',')
+                        if data.shape == ():
+                            scores = np.array([data])
+                        else:
+                            scores = np.array([data[column]])
+                    else:
+                        lines = np.genfromtxt(self.filename, delimiter=',')
+                        scores = lines[:, column+3]
 
                 page.title = TopasReader.get_scorer_name(results_data)
                 page.name = page.title

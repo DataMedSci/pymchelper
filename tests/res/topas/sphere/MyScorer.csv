@@ -1,0 +1,16 @@
+# TOPAS Version: 3.9
+# Parameter File: sphere.txt
+# Results for scorer: MyScorer
+# Filtered by: OnlyIncludeParticlesOfGeneration = "secondary"
+# Filtered by: OnlyIncludeParticlesGoing = "Out"
+# Scored on surface: Cylinder/OuterCurvedSurface
+# R in 2 bins of 2.5 cm
+# Phi in 2 bins of 50 deg
+# Theta in 1 bin  of 180 deg
+# SurfaceTrackCount : Mean   
+# Binned by time in 10 bins of 10 ns from 0 ns to 100 ns
+# First bin is underflow, last bin is overflow.
+0, 0, 0.1, 0, 0, 0, 0, 0, 0, 0, 0, 0
+0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+0, 0, 0.1, 0, 0, 0, 0, 0, 0, 0, 0, 0
+0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0

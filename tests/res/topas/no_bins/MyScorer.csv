@@ -1,0 +1,8 @@
+# TOPAS Version: 3.9
+# Parameter File: sphere.txt
+# Results for scorer: MyScorer
+# Filtered by: OnlyIncludeParticlesOfGeneration = "secondary"
+# Filtered by: OnlyIncludeParticlesGoing = "Out"
+# Scored on surface: Cylinder/OuterCurvedSurface
+# SurfaceTrackCount : Mean   
+0.1

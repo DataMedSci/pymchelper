@@ -6,23 +6,35 @@ from pymchelper.readers.topas import TopasReaderFactory
 
 import pytest
 
-@pytest.fixture(scope="module")
-def topas_minimal_output_path() -> Generator[Path, None, None]:
+@pytest.fixture()
+def main_dir() -> Generator[Path, None, None]:
+    """Return path to main directory"""
+    yield Path(__file__).resolve().parent
+
+@pytest.fixture()
+def topas_minimal_output_path(main_dir) -> Generator[Path, None, None]:
     """Return path to Topas minimal output file"""
-    main_dir = Path(__file__).resolve().parent
     yield main_dir / "res" / "topas" / "minimal" / "fluence_bp_protons_xy.csv"
 
-@pytest.fixture(scope="module")
-def topas_cylinder_output_path() -> Generator[Path, None, None]:
+@pytest.fixture()
+def topas_cylinder_output_path(main_dir) -> Generator[Path, None, None]:
     """Return path to Topas output file with cylindrical coordinates"""
-    main_dir = Path(__file__).resolve().parent
     yield main_dir / "res" / "topas" / "cylinder" / "MyScorer.csv"
 
-@pytest.fixture(scope="module")
-def topas_binning_by_energy_output_path() -> Generator[Path, None, None]:
+@pytest.fixture()
+def topas_binning_by_energy_output_path(main_dir) -> Generator[Path, None, None]:
     """Return path to Topas output file with binning by energy"""
-    main_dir = Path(__file__).resolve().parent
     yield main_dir / "res" / "topas" / "binning_by_energy" / "fluence_bp_protons_xy.csv"
+
+@pytest.fixture()
+def topas_sphere_binned_by_time_path(main_dir) -> Generator[Path, None, None]:
+    """Return path to Topas output file with binning by energy"""
+    yield main_dir / "res" / "topas" / "sphere" / "MyScorer.csv"
+
+@pytest.fixture()
+def topas_no_bins_path(main_dir) -> Generator[Path, None, None]:
+    """Return path to Topas output file without any bins"""
+    yield main_dir / "res" / "topas" / "no_bins" / "MyScorer.csv"
 
 def test_read(topas_minimal_output_path: Path):
     """Test if Topas output file is read correctly"""
@@ -101,3 +113,45 @@ def test_differential_axis(topas_binning_by_energy_output_path: Path):
     assert np.allclose(estimator.pages[0].data_raw[0:6], expected_data_mean, atol=1e-5)
     assert len(estimator.pages[0].error_raw) == 160
     assert np.allclose(estimator.pages[0].error_raw[0:6], expected_data_std, atol=1e-5)
+
+
+def test_sphere_bin_by_time(topas_sphere_binned_by_time_path: Path):
+    """Test reading of spherical coordinates and binning by time"""
+    reader = TopasReaderFactory(str(topas_sphere_binned_by_time_path)).get_reader()
+    assert reader is not None
+
+    reader = reader(str(topas_sphere_binned_by_time_path))
+    estimator = Estimator()
+    reader.read_data(estimator)
+
+    assert estimator.x.name == "R"
+    assert estimator.y.name == "Phi"
+    assert estimator.z.name == "Theta"
+
+    assert estimator.pages[0].dimension == 3
+    assert estimator.pages[0].diff_axis1.name == "time"
+    assert estimator.pages[0].diff_axis1.unit == "ns"
+    assert estimator.pages[0].diff_axis1.n == 10
+    assert estimator.pages[0].diff_axis1.min_val == 0
+    assert estimator.pages[0].diff_axis1.max_val == 100
+
+    expected_data_mean = [ 0.0, 0.1, 0.0, 0.0]
+    assert estimator.pages[0].dettyp == "SurfaceTrackCount"
+    assert len(estimator.pages[0].data_raw) == 40
+    assert np.allclose(estimator.pages[0].data_raw[0:4], expected_data_mean, atol=1e-5)
+    
+def test_no_bins(topas_no_bins_path: Path):
+    """Test reading of Topas output file without any bins"""
+    reader = TopasReaderFactory(str(topas_no_bins_path)).get_reader()
+    assert reader is not None
+
+    reader = reader(str(topas_no_bins_path))
+    estimator = Estimator()
+    reader.read_data(estimator)
+
+    assert estimator.pages[0].dimension == 0
+
+    expected_data_mean = [0.1]
+    assert estimator.pages[0].dettyp == "SurfaceTrackCount"
+    assert len(estimator.pages[0].data_raw) == 1
+    assert np.allclose(estimator.pages[0].data_raw, expected_data_mean, atol=1e-5)
