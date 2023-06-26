@@ -205,7 +205,7 @@ class TopasReader(Reader):
                 elif result == 'Standard_Deviation':
                     page.error_raw = scores
                     set_error = True
-            
+
             # If we didn't find mean results for the scorer, we return False
             if not set_data:
                 return False
