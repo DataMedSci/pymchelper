@@ -27,34 +27,34 @@ class MCPLWriter(Writer):
         if page.dettyp == SHDetType.mcpl:
 
             # first part of the header
-            bytes_to_write = "MCPL".encode('ascii')  # magic number
-            bytes_to_write += "003".encode('ascii')  # version
-            bytes_to_write += "L".encode('ascii')  # little endian
-            bytes_to_write += struct.pack("<Q", page.data.shape[1])  # number of particles
-            bytes_to_write += struct.pack("<I", 0)  # number of custom comments
-            bytes_to_write += struct.pack("<I", 0)  # number of custom binary blobs
-            bytes_to_write += struct.pack("<I", 0)  # user flags disabled
-            bytes_to_write += struct.pack("<I", 0)  # polarisation disabled
-            bytes_to_write += struct.pack("<I", 1)  # single precision for floats
-            bytes_to_write += struct.pack("<i", 0)  # all particles have PDG code
-            bytes_to_write += struct.pack("<I", 4)  # data length
-            bytes_to_write += struct.pack("<I", 1)  # universal weight
+            header_bytes = "MCPL".encode('ascii')  # magic number
+            header_bytes += "003".encode('ascii')  # version
+            header_bytes += "L".encode('ascii')  # little endian
+            header_bytes += struct.pack("<Q", page.data.shape[1])  # number of particles
+            header_bytes += struct.pack("<I", 0)  # number of custom comments
+            header_bytes += struct.pack("<I", 0)  # number of custom binary blobs
+            header_bytes += struct.pack("<I", 0)  # user flags disabled
+            header_bytes += struct.pack("<I", 0)  # polarisation disabled
+            header_bytes += struct.pack("<I", 1)  # single precision for floats
+            header_bytes += struct.pack("<i", 0)  # all particles have PDG code
+            header_bytes += struct.pack("<I", 4)  # data length
+            header_bytes += struct.pack("<I", 1)  # universal weight
 
             # second part of the header
-            bytes_to_write += struct.pack("<d", 1)  # universal weight value
+            header_bytes += struct.pack("<d", 1)  # universal weight value
 
             # data arrays
             source_name = f"pymchelper {pymchelper.__version__}"
-            bytes_to_write += struct.pack("<I", len(source_name))  # length of the source name
-            bytes_to_write += source_name.encode('ascii')  # source name
+            header_bytes += struct.pack("<I", len(source_name))  # length of the source name
+            header_bytes += source_name.encode('ascii')  # source name
 
             # particle data
             # iterate over rows in the data array page.data
             # need to fix the structure according to MCPL format
             # see https://mctools.github.io/mcpl/mcpl.pdf#nameddest=section.3
 
-            print(page.data.shape)
             pdg = page.data[0]
+
             x = page.data[1]
             y = page.data[2]
             z = page.data[3]
@@ -66,9 +66,9 @@ class MCPLWriter(Writer):
             fp2 = np.empty_like(uy)
             sign = np.ones_like(x, dtype=int)
 
-            condition_1 = np.logical_and(np.logical_and(ux * ux > uy * uy, ux * ux > uz * uz), ux < 0)
-            condition_2 = np.logical_and(np.logical_and(uy * uy > ux * ux, uy * uy > uz * uz), uy < 0)
-            condition_3 = np.logical_and(np.logical_and(uz * uz >= ux * ux, uz * uz >= uy * uy), uz < 0)
+            condition_1 = np.logical_and(ux * ux > uy * uy, ux * ux > uz * uz)
+            condition_2 = np.logical_and(uy * uy > ux * ux, uy * uy > uz * uz)
+            condition_3 = np.logical_and(uz * uz >= ux * ux, uz * uz >= uy * uy)
 
             sign[ux < 0] = -1
             fp1[condition_1] = 1 / uz[condition_1]
@@ -82,17 +82,22 @@ class MCPLWriter(Writer):
             fp1[condition_3] = ux[condition_3]
             fp2[condition_3] = uy[condition_3]
 
-            bytes_to_write = np.empty(page.data.shape, dtype=np.float32)
-            bytes_to_write[0] = x
-            bytes_to_write[1] = y
-            bytes_to_write[2] = z
-            bytes_to_write[3] = fp1
-            bytes_to_write[4] = fp2
-            bytes_to_write[5] = sign * E
-            bytes_to_write[6] = 0
-            bytes_to_write[7] = pdg.astype(np.uint32)
+            # Create a structured array with named fields
+            dt = np.dtype([('x', np.float32), ('y', np.float32), ('z', np.float32), ('fp1', np.float32),
+                           ('fp2', np.float32), ('uz', np.float32), ('time', np.float32), ('pdg', np.uint32)])
+            data_bytes = np.empty(page.data.shape[1], dtype=dt)
 
-            bytes_to_write = bytes_to_write.tobytes()
+            # Assign values to the fields
+            data_bytes['x'] = x
+            data_bytes['y'] = y
+            data_bytes['z'] = z
+            data_bytes['fp1'] = fp1
+            data_bytes['fp2'] = fp2
+            data_bytes['uz'] = sign * E
+            data_bytes['time'] = 0
+            data_bytes['pdg'] = pdg
+
+            data_bytes = data_bytes.tobytes()
 
             # for i, row in enumerate(page.data.T):
 
@@ -127,5 +132,5 @@ class MCPLWriter(Writer):
             #     bytes_to_write += struct.pack("<f", 0)  # time
             #     bytes_to_write += struct.pack("<I", int(pdg))  # pdg
 
-            output_path.write_bytes(bytes_to_write)
+            output_path.write_bytes(header_bytes + data_bytes)
             return
