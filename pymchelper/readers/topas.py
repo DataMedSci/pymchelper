@@ -137,19 +137,19 @@ class TopasReader(Reader):
                     actual_dimensions = curr_dimensions
                     x_max = bins_data[actual_dimensions[0]]['size']*bins_data[actual_dimensions[0]]['num']
                     estimator.x = MeshAxis(n=bins_data[actual_dimensions[0]]['num'],
-                                        min_val=0.0, max_val=x_max,
-                                        name=actual_dimensions[0], unit=bins_data[actual_dimensions[0]]['unit'],
-                                        binning=MeshAxis.BinningType.linear)
+                                           min_val=0.0, max_val=x_max,
+                                           name=actual_dimensions[0], unit=bins_data[actual_dimensions[0]]['unit'],
+                                           binning=MeshAxis.BinningType.linear)
                     y_max = bins_data[actual_dimensions[1]]['size']*bins_data[actual_dimensions[1]]['num']
                     estimator.y = MeshAxis(n=bins_data[actual_dimensions[1]]['num'],
-                                        min_val=0.0, max_val=y_max,
-                                        name=actual_dimensions[1], unit=bins_data[actual_dimensions[1]]['unit'],
-                                        binning=MeshAxis.BinningType.linear)
+                                           min_val=0.0, max_val=y_max,
+                                           name=actual_dimensions[1], unit=bins_data[actual_dimensions[1]]['unit'],
+                                           binning=MeshAxis.BinningType.linear)
                     z_max = bins_data[actual_dimensions[2]]['size']*bins_data[actual_dimensions[2]]['num']
                     estimator.z = MeshAxis(n=bins_data[actual_dimensions[2]]['num'],
-                                        min_val=0.0, max_val=z_max,
-                                        name=actual_dimensions[2], unit=bins_data[actual_dimensions[2]]['unit'],
-                                        binning=MeshAxis.BinningType.linear)
+                                           min_val=0.0, max_val=z_max,
+                                           name=actual_dimensions[2], unit=bins_data[actual_dimensions[2]]['unit'],
+                                           binning=MeshAxis.BinningType.linear)
                     no_bins = False
                     break
 
