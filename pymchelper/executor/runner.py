@@ -28,7 +28,8 @@ class Runner:
     Main class responsible for configuring and starting multiple parallel MC simulation processes
     It can be used to access combined averaged results of the simulation.
     """
-    def __init__(self, settings: SimulationSettings, jobs: int=None, keep_workspace_after_run: bool=False, output_directory: str='.'):
+    def __init__(self, settings: SimulationSettings, jobs: int=None,
+                 keep_workspace_after_run: bool=False, output_directory: str='.'):
         self.settings = settings
 
         # create pool of processes, waiting to be started by run method

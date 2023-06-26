@@ -79,10 +79,10 @@ class SimulationSettings:
             self._mc_environment = self._discover_mc_engine(input_path)
 
         if not self._mc_environment:
-            raise Exception("Unable to determine MC engine type for {:s}".format(input_path))
+            raise Exception(f"Unable to determine MC engine type for {input_path}")
 
         self.simulator_type = self._mc_environment.simulator_type
-        
+
         # set `self.executable_path` to the value provided by user, or if it is missing
         # perform automatic discovery of the *location* of MC engine executable file by scanning PATH env. variable
         self.executable_path = simulator_exec_path
@@ -169,7 +169,7 @@ class SimulationSettings:
         if input_path.is_file():
             if input_path.endswith('.inp'):
                 return FlukaEnvironment
-            elif input_path.endswith('.txt'):
+            if input_path.endswith('.txt'):
                 return TopasEnvironment
         # SHIELD-HIT12A input is in the form of directory with multiple files
         elif input_path.is_dir():
@@ -179,8 +179,7 @@ class SimulationSettings:
                 # (executable file being `shieldhit.exe` instead of `shieldhit`)
                 if sys.platform == 'win32':
                     return SH12AEnvironmentWindows
-                else:
-                    return SH12AEnvironmentLinux
+                return SH12AEnvironmentLinux
         return None
 
     @staticmethod
