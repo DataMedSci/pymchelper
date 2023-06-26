@@ -11,14 +11,15 @@ from pymchelper.input_output import fromfile
 from pymchelper.executor.options import SimulationSettings
 from pymchelper.executor.runner import Runner, SimulatorType
 
-
 @pytest.fixture
-def topas_path() -> Generator[Tuple[Path, Path], None, None]:
-    """Return topas executable and input file paths"""
-    topas_exec_path = Path("tests") / "res" / "mocks" / "topas_minimal" / "topas"
-    topas_input_path = Path("tests") / "res" / "mocks" / "topas_minimal" / "minimal.txt"
-
-    return topas_exec_path, topas_input_path
+def topas_mock_path() -> Generator[Path, None, None]:
+    main_dir = Path(__file__).resolve().parent
+    yield main_dir / 'res' / 'mocks' / 'topas_minimal' / 'topas'
+    
+@pytest.fixture
+def topas_input_path() -> Generator[Path, None, None]:
+    main_dir = Path(__file__).resolve().parent
+    yield main_dir / 'res' / 'mocks' / 'topas_minimal' / 'minimal.txt'
 
 @pytest.fixture(scope="module")
 def example_input_cfg() -> Generator[dict, None, None]:
@@ -164,13 +165,11 @@ def test_merging(example_input_cfg: dict, tmp_path: Path, monkeypatch: pytest.Mo
 @pytest.mark.smoke
 @pytest.mark.skipif(sys.platform == "darwin", reason="we don't have SHIELD-HIT12A demo binary for MacOSX")
 @pytest.mark.skipif(sys.platform == "win32", reason="simulator mocks don't work on Windows")
-def test_topas(topas_path: Path, tmp_path: Path):
+def test_topas(topas_mock_path: Path, topas_input_path: Path, tmp_path: Path):
     """TODO"""
-    topas_exec_path, topas_input_path = topas_path
-
     settings = SimulationSettings(input_path=str(topas_input_path),
                                     simulator_type=SimulatorType.topas,
-                                    simulator_exec_path=str(topas_exec_path))
+                                    simulator_exec_path=str(topas_mock_path))
     logging.info(settings)
 
     r = Runner(settings=settings, jobs=2, output_directory=tmp_path)
