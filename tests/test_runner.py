@@ -9,7 +9,7 @@ import pytest
 
 from pymchelper.input_output import fromfile
 from pymchelper.executor.options import SimulationSettings
-from pymchelper.executor.runner import Runner, SimulatorType
+from pymchelper.executor.runner import Runner
 
 @pytest.fixture
 def topas_mock_path() -> Generator[Path, None, None]:
