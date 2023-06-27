@@ -2,7 +2,7 @@ import logging
 import shutil
 import sys
 from pathlib import Path
-from typing import Generator, Tuple
+from typing import Generator
 
 import numpy as np
 import pytest
