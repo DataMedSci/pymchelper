@@ -37,7 +37,7 @@ class MCPLWriter(Writer):
             header_bytes += struct.pack("<I", 0)  # polarisation disabled
             header_bytes += struct.pack("<I", 1)  # single precision for floats
             header_bytes += struct.pack("<i", 0)  # all particles have PDG code
-            header_bytes += struct.pack("<I", 4)  # data length
+            header_bytes += struct.pack("<I", 32)  # data length
             header_bytes += struct.pack("<I", 1)  # universal weight
 
             # second part of the header
@@ -49,53 +49,51 @@ class MCPLWriter(Writer):
             header_bytes += source_name.encode('ascii')  # source name
 
             # particle data
-            # iterate over rows in the data array page.data
             # need to fix the structure according to MCPL format
             # see https://mctools.github.io/mcpl/mcpl.pdf#nameddest=section.3
+            # we use numpy to speed up the process for large arrays
 
-            pdg = page.data[0]
-
-            x = page.data[1]
-            y = page.data[2]
-            z = page.data[3]
-            ux = page.data[4]
-            uy = page.data[5]
-            uz = page.data[6]
-            E = page.data[7]
-            fp1 = np.empty_like(ux)
-            fp2 = np.empty_like(uy)
-            sign = np.ones_like(x, dtype=int)
-
-            condition_1 = np.logical_and(ux * ux > uy * uy, ux * ux > uz * uz)
-            condition_2 = np.logical_and(uy * uy > ux * ux, uy * uy > uz * uz)
-            condition_3 = np.logical_and(uz * uz >= ux * ux, uz * uz >= uy * uy)
-
-            sign[ux < 0] = -1
-            fp1[condition_1] = 1 / uz[condition_1]
-            fp2[condition_1] = uy[condition_1]
-
-            sign[uy < 0] = -1
-            fp1[condition_2] = ux[condition_2]
-            fp2[condition_2] = 1 / uz[condition_2]
-
-            sign[uz < 0] = -1
-            fp1[condition_3] = ux[condition_3]
-            fp2[condition_3] = uy[condition_3]
-
-            # Create a structured array with named fields
+            # Create a structured array with named fields, as some of the fields have different types
             dt = np.dtype([('x', np.float32), ('y', np.float32), ('z', np.float32), ('fp1', np.float32),
                            ('fp2', np.float32), ('uz', np.float32), ('time', np.float32), ('pdg', np.uint32)])
             data_bytes = np.empty(page.data.shape[1], dtype=dt)
 
             # Assign values to the fields
-            data_bytes['x'] = x
-            data_bytes['y'] = y
-            data_bytes['z'] = z
-            data_bytes['fp1'] = fp1
-            data_bytes['fp2'] = fp2
-            data_bytes['uz'] = sign * E
+            data_bytes['x'] = page.data[1]
+            data_bytes['y'] = page.data[2]
+            data_bytes['z'] = page.data[3]
+            data_bytes['fp1'] = page.data[4]  # ux by default
+            data_bytes['fp2'] = page.data[5]  # uy by default
             data_bytes['time'] = 0
-            data_bytes['pdg'] = pdg
+            data_bytes['pdg'] = page.data[0]
+
+            ux2 = page.data[4]**2
+            uy2 = page.data[5]**2
+            uz2 = page.data[6]**2
+            sign = np.ones_like(page.data[6], dtype=int)
+
+            # find the maximum component of the direction vector
+            # condition below defines the case where the maximum component is ux
+            condition_1 = np.logical_and(ux2 >= uy2, ux2 > uz2)
+            # condition below defines the case where the maximum component is uy
+            condition_2 = np.logical_and(uy2 > ux2, uy2 > uz2)
+            # by exclusion, the remaining case is where the maximum component is uz
+
+            # fill the arrays according to the maximum component
+            # lets start with the case where the maximum component is uz
+            sign[page.data[6] < 0] = -1
+
+            # fill the arrays according to the maximum component ux
+            sign[page.data[4] < 0] = -1  # negative sign of ux
+            data_bytes['fp1'][condition_1] = 1 / page.data[6][condition_1]  # 1/uz
+            data_bytes['fp2'][condition_1] = page.data[5][condition_1]  # uy
+
+            # fill the arrays according to the maximum component uy
+            sign[page.data[5] < 0] = -1  # sign of uy
+            data_bytes['fp1'][condition_2] = page.data[4][condition_2]  # ux
+            data_bytes['fp2'][condition_2] = 1 / page.data[6][condition_2]  # 1/uz
+
+            data_bytes['uz'] = sign * page.data[7]
 
             data_bytes = data_bytes.tobytes()
 
