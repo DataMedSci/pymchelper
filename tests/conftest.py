@@ -82,6 +82,7 @@ def main_dir() -> Generator[Path, None, None]:
     """Return path to main directory of this file"""
     yield Path(__file__).resolve().parent
 
+
 @pytest.fixture(scope='session')
 def shieldhit_installation_dir() -> Generator[Path, None, None]:
     """Returns the installation directory for SHIELD-HIT12A"""
