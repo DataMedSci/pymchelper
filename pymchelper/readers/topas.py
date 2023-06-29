@@ -29,6 +29,7 @@ def extract_parameter_filename(header_line: str) -> Optional[str]:
         parameter_filename = match.group(1)
     return parameter_filename
 
+
 def extract_bins_data(dimensions: List[str], header_lines: List[str]) -> Optional[dict]:
     """
     Takes as arguments a list of dimensions (e.g. ['X', 'Y', 'Z'])
@@ -50,6 +51,7 @@ def extract_bins_data(dimensions: List[str], header_lines: List[str]) -> Optiona
             return None
     return bins_data
 
+
 def extract_scorer_name(header_line: str) -> Optional[str]:
     """Get scorer name from the output file"""
     pattern = r"# Results for scorer: (\w+)"
@@ -59,12 +61,13 @@ def extract_scorer_name(header_line: str) -> Optional[str]:
         name = match.group(1)
     return name
 
+
 def extract_scorer_unit_results(header_line: str) -> Optional[Tuple[str, str, List]]:
     """Get scoring quantity, unit and the scoring values (sum/mean/etc.) from the output file"""
     scorers = ['DoseToMedium', 'DoseToWater', 'DoseToMaterial', 'TrackLengthEstimator',
-                'AmbientDoseEquivalent', 'EnergyDeposit', 'Fluence', 'EnergyFluence',
-                'StepCount', 'OpticalPhotonCount', 'OriginCount', 'Charge', 'EffectiveCharge',
-                'ProtonLET', 'SurfaceCurrent', 'SurfaceTrackCount', 'PhaseSpace']
+               'AmbientDoseEquivalent', 'EnergyDeposit', 'Fluence', 'EnergyFluence',
+               'StepCount', 'OpticalPhotonCount', 'OriginCount', 'Charge', 'EffectiveCharge',
+               'ProtonLET', 'SurfaceCurrent', 'SurfaceTrackCount', 'PhaseSpace']
     for scorer in scorers:
         if scorer in header_line:
             unit = ""
@@ -77,6 +80,7 @@ def extract_scorer_unit_results(header_line: str) -> Optional[Tuple[str, str, Li
                 results = match.group(2).split()
                 return (scorer, unit, results)
     return None
+
 
 def extract_differential_axis(header_line: str) -> Optional[MeshAxis]:
     """Check if the output file contains differential axis and get it from file if it does"""
@@ -149,19 +153,19 @@ class TopasReader(Reader):
                         actual_dimensions = curr_dimensions
                         x_max = bins_data[actual_dimensions[0]]['size']*bins_data[actual_dimensions[0]]['num']
                         estimator.x = MeshAxis(n=bins_data[actual_dimensions[0]]['num'],
-                                            min_val=0.0, max_val=x_max,
-                                            name=actual_dimensions[0], unit=bins_data[actual_dimensions[0]]['unit'],
-                                            binning=MeshAxis.BinningType.linear)
+                                               min_val=0.0, max_val=x_max,
+                                               name=actual_dimensions[0], unit=bins_data[actual_dimensions[0]]['unit'],
+                                               binning=MeshAxis.BinningType.linear)
                         y_max = bins_data[actual_dimensions[1]]['size']*bins_data[actual_dimensions[1]]['num']
                         estimator.y = MeshAxis(n=bins_data[actual_dimensions[1]]['num'],
-                                            min_val=0.0, max_val=y_max,
-                                            name=actual_dimensions[1], unit=bins_data[actual_dimensions[1]]['unit'],
-                                            binning=MeshAxis.BinningType.linear)
+                                               min_val=0.0, max_val=y_max,
+                                               name=actual_dimensions[1], unit=bins_data[actual_dimensions[1]]['unit'],
+                                               binning=MeshAxis.BinningType.linear)
                         z_max = bins_data[actual_dimensions[2]]['size']*bins_data[actual_dimensions[2]]['num']
                         estimator.z = MeshAxis(n=bins_data[actual_dimensions[2]]['num'],
-                                            min_val=0.0, max_val=z_max,
-                                            name=actual_dimensions[2], unit=bins_data[actual_dimensions[2]]['unit'],
-                                            binning=MeshAxis.BinningType.linear)
+                                               min_val=0.0, max_val=z_max,
+                                               name=actual_dimensions[2], unit=bins_data[actual_dimensions[2]]['unit'],
+                                               binning=MeshAxis.BinningType.linear)
                         no_bins = False
                         break
                 if actual_dimensions is not None:
@@ -195,7 +199,7 @@ class TopasReader(Reader):
             # We did not find scorer info in the output file
             if scorer is None:
                 return False
-    
+
             num_results = len(results)
             page = Page(estimator=estimator)
             set_data = False
