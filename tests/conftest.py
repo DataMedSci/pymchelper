@@ -77,6 +77,7 @@ def download_shieldhit_demo_version(installation_dir):
                                        member_name='shieldhit.exe',
                                        installation_dir=installation_dir)
 
+
 @pytest.fixture(scope='session')
 def main_dir() -> Generator[Path, None, None]:
     """Return path to main directory of this file"""
