@@ -7,11 +7,6 @@ from pymchelper.readers.topas import TopasReaderFactory
 import pytest
 
 @pytest.fixture()
-def main_dir() -> Generator[Path, None, None]:
-    """Return path to main directory"""
-    yield Path(__file__).resolve().parent
-
-@pytest.fixture()
 def topas_minimal_output_path(main_dir) -> Generator[Path, None, None]:
     """Return path to Topas minimal output file"""
     yield main_dir / "res" / "topas" / "minimal" / "fluence_bp_protons_xy.csv"
