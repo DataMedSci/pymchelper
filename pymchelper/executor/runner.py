@@ -64,12 +64,13 @@ class Runner:
             rng_seeds = range(1, self.jobs + 1)
 
         elif self.settings.simulator_type == SimulatorType.topas:
-            # for topas we don't need to create multiple working directories and a pool of workers
-            # as we can use embedded parallelization in topas
-            # for that we need to modify the input file and set the number of threads to the number of jobs
-            # we set one rng seed, so one working directory and one worker will be created
+            # For TOPAS we don't need to create multiple working directories and a pool of workers,
+            # as we can use embedded parallelization in TOPAS.
+            # For that we need to modify the input file and set the number of threads to the number of jobs.
+            # We set one rng seed, so one working directory and one worker will be created.
 
-            modified_input_path = str(self.settings.input_path).replace(".txt", "_modified.txt")
+            modified_input_filename = Path(self.settings.input_path).name.replace(".txt", "_modified.txt")
+            modified_input_path = Path(self.settings.input_path).parent / modified_input_filename
 
             with open(self.settings.input_path, 'r') as f:
                 config = f.read()
@@ -83,7 +84,7 @@ class Runner:
             with open(modified_input_path, "w") as file:
                 file.write(config)
 
-            self.settings.input_path = modified_input_path
+            self.settings.input_path = str(modified_input_path)
 
             rng_seeds = [1]
 
