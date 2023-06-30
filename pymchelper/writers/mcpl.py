@@ -78,18 +78,19 @@ class MCPLWriter(Writer):
             # condition below defines the case where the maximum component is uy
             condition_2 = np.logical_and(uy2 > ux2, uy2 > uz2)
             # by exclusion, the remaining case is where the maximum component is uz
+            condition_3 = np.logical_not(np.logical_or(condition_1, condition_2))
 
             # fill the arrays according to the maximum component
             # lets start with the case where the maximum component is uz
-            sign[page.data[6] < 0] = -1
+            sign[(page.data[6] < 0) & condition_3] = -1
 
             # fill the arrays according to the maximum component ux
-            sign[page.data[4] < 0] = -1  # negative sign of ux
+            sign[(page.data[4] < 0) & condition_1] = -1  # negative sign of ux
             data_bytes['fp1'][condition_1] = 1 / page.data[6][condition_1]  # 1/uz
             data_bytes['fp2'][condition_1] = page.data[5][condition_1]  # uy
 
             # fill the arrays according to the maximum component uy
-            sign[page.data[5] < 0] = -1  # sign of uy
+            sign[(page.data[5] < 0) & condition_2] = -1  # sign of uy
             data_bytes['fp1'][condition_2] = page.data[4][condition_2]  # ux
             data_bytes['fp2'][condition_2] = 1 / page.data[6][condition_2]  # 1/uz
 
