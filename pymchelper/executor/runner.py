@@ -81,8 +81,7 @@ class Runner:
                 else:
                     config = f"i:Ts/NumberOfThreads = {self.jobs}\n" + config
 
-            with open(modified_input_path, "w") as file:
-                file.write(config)
+            modified_input_path.write_text(config)
 
             self.settings.input_path = str(modified_input_path)
 
