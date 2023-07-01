@@ -190,4 +190,3 @@ def test_topas(topas_mock_path: Path, topas_input_path: Path, tmp_path: Path):
     assert 'fluence_bp_protons_xy' in data
     assert 'fluence_bp_protons_xy2' in data
     
-    shutil.rmtree(tmp_path)
