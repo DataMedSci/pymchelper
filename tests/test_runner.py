@@ -13,7 +13,7 @@ from pymchelper.executor.runner import Runner
 
 @pytest.fixture
 def topas_mock_path() -> Generator[Path, None, None]:
-    """Return path to Topas mock executable"""
+    """path to TOPAS mock executable"""
     main_dir = Path(__file__).resolve().parent
     yield main_dir / 'res' / 'mocks' / 'topas_minimal' / 'topas'
     
