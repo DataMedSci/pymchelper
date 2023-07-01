@@ -170,10 +170,10 @@ def frompattern(pattern: str, error: ErrorEstimate = ErrorEstimate.stderr, nan: 
 def get_topas_estimators(output_files_path: str) -> List[Estimator]:
     """Get Topas estimators from provided directory"""
     estimators_list = []
-    for result_file_path in Path(output_files_path).iterdir():
-        topas_reader = TopasReaderFactory(str(result_file_path)).get_reader()
+    for path in Path(output_files_path).iterdir():
+        topas_reader = TopasReaderFactory(str(path)).get_reader()
         if topas_reader:
-            reader = topas_reader(result_file_path)
+            reader = topas_reader(path)
             estimator = Estimator()
             reader.read(estimator)
             estimators_list.append(estimator)
