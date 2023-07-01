@@ -1,5 +1,4 @@
 import logging
-import shutil
 import sys
 from pathlib import Path
 from typing import Generator
