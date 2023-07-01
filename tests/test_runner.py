@@ -19,7 +19,7 @@ def topas_mock_path() -> Generator[Path, None, None]:
     
 @pytest.fixture
 def topas_input_path() -> Generator[Path, None, None]:
-    """Return path to Topas input file"""
+    """path to TOPAS input file"""
     main_dir = Path(__file__).resolve().parent
     yield main_dir / 'res' / 'mocks' / 'topas_minimal' / 'minimal.txt'
 
