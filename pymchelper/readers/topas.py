@@ -115,11 +115,10 @@ class TopasReader(Reader):
         """
         with open(self.filename, 'r') as results_file:
             results_lines = results_file.readlines()
+            header_lines = [line for line in results_lines if line.startswith("#")]
 
             num_histories = 0
-            for line in results_lines:
-                if not line.startswith("#"):
-                    break
+            for line in header_lines:
                 input_filename = extract_parameter_filename(line)
                 if input_filename is not None:
                     input_file_path = Path(self.directory) / input_filename
@@ -144,10 +143,8 @@ class TopasReader(Reader):
 
             actual_dimensions = None
             for curr_dimensions in dimensions:
-                for index, line in enumerate(results_lines):
-                    if not line.startswith("#"):
-                        break
-                    bins_data = extract_bins_data(curr_dimensions, results_lines[index:index+3])
+                for line_index in range(len(header_lines)-3):
+                    bins_data = extract_bins_data(curr_dimensions, header_lines[line_index:line_index+3])
                     if bins_data is not None:
                         actual_dimensions = curr_dimensions
                         x_max = bins_data[actual_dimensions[0]]['size']*bins_data[actual_dimensions[0]]['num']
@@ -175,9 +172,7 @@ class TopasReader(Reader):
                 # (or in other words there is one bin with one score)
                 no_bins = True
 
-            for line in results_lines:
-                if not line.startswith("#"):
-                    break
+            for line in header_lines:
                 differential_axis = extract_differential_axis(line)
                 if differential_axis is not None:
                     break
@@ -187,9 +182,7 @@ class TopasReader(Reader):
             # We look for mean and standard deviation and ignore the rest.
             # Then we put them in raw_data and raw_error respectively.
             scorer, unit, results = None, None, None
-            for line in results_lines:
-                if not line.startswith("#"):
-                    break
+            for line in header_lines:
                 res = extract_scorer_unit_results(line)
                 if res is not None:
                     scorer, unit, results = res
@@ -242,7 +235,7 @@ class TopasReader(Reader):
                         lines = np.genfromtxt(self.filename, delimiter=',')
                         scores = lines[:, column+3]
 
-                for line in results_lines:
+                for line in header_lines:
                     title = extract_scorer_name(line)
                     if title is not None:
                         page.title = title
