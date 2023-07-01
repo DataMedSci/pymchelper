@@ -293,3 +293,4 @@ sobp*.dat
 
 tests/res/shieldhit/generated/detect_*.dat
 tests/res/shieldhit/executable/**
+tests/res/mocks/topas_minimal/minimal_modified.txt

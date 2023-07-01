@@ -2,11 +2,13 @@ import logging
 import os
 from collections import defaultdict
 from glob import glob
-from typing import Optional
+from pathlib import Path
+from typing import List, Optional
 
 import numpy as np
 
 from pymchelper.estimator import ErrorEstimate, Estimator, average_with_nan
+from pymchelper.readers.topas import TopasReaderFactory
 from pymchelper.readers.fluka import FlukaReader, FlukaReaderFactory
 from pymchelper.readers.shieldhit.general import SHReaderFactory
 from pymchelper.readers.shieldhit.reader_base import SHReader
@@ -22,6 +24,7 @@ def guess_reader(filename):
     :param filename:
     :return: Instantiated reader object
     """
+    reader = None
     fluka_reader = FlukaReaderFactory(filename).get_reader()
     if fluka_reader:
         reader = fluka_reader(filename)
@@ -29,6 +32,10 @@ def guess_reader(filename):
         sh_reader = SHReaderFactory(filename).get_reader()
         if sh_reader:
             reader = sh_reader(filename)
+        else:
+            topas_reader = TopasReaderFactory(filename).get_reader()
+            if topas_reader:
+                reader = topas_reader(filename)
     return reader
 
 
@@ -144,7 +151,7 @@ def frompattern(pattern: str, error: ErrorEstimate = ErrorEstimate.stderr, nan: 
 
     :param pattern: pattern to be matched for reading.
     :param error: error estimation, see class ErrorEstimate class in pymchelper.estimator
-    :param nan: if True, NaN (not a number) are excluded when averaing data.
+    :param nan: if True, NaN (not a number) are excluded when averaging data.
     :return: a list of estimators, or an empty list if no files were found.
     """
 
@@ -156,15 +163,29 @@ def frompattern(pattern: str, error: ErrorEstimate = ErrorEstimate.stderr, nan: 
     core_names_dict = group_input_files(list_of_matching_files)
 
     result = [fromfilelist(filelist, error, nan) for _, filelist in core_names_dict.items()]
+
     return result
+
+
+def get_topas_estimators(output_files_path: str) -> List[Estimator]:
+    """Get Topas estimators from provided directory"""
+    estimators_list = []
+    for path in Path(output_files_path).iterdir():
+        topas_reader = TopasReaderFactory(str(path)).get_reader()
+        if topas_reader:
+            reader = topas_reader(path)
+            estimator = Estimator()
+            reader.read(estimator)
+            estimators_list.append(estimator)
+
+    return estimators_list
 
 
 def convertfromlist(filelist, error, nan, outputdir, converter_name, options, outputfile=None):
     """
-
     :param filelist:
     :param error: error estimation, see class ErrorEstimate class in pymchelper.estimator
-    :param nan: if True, NaN (not a number) are excluded when averaing data.
+    :param nan: if True, NaN (not a number) are excluded when averaging data.
     :param outputdir:
     :param converter_name:
     :param options:

@@ -50,7 +50,7 @@ s:So/Demo/BeamPositionCutoffShape = "Ellipse" # Rectangle or Ellipse (if Flat or
 d:So/Demo/BeamPositionCutoffX = 2. cm # X extent of position (if Flat or Gaussian)
 d:So/Demo/BeamPositionCutoffY = 2. cm # Y extent of position (if Flat or Gaussian)
 s:So/Demo/BeamAngularDistribution = "None"
-i:So/Demo/NumberOfHistoriesInRun = Ts/ShowHistoryCountAtInterval * 10
+i:So/Demo/NumberOfHistoriesInRun = 20
 
 s:Sc/FluenceBPprotonsXY/Quantity                  = "Fluence"
 s:Sc/FluenceBPprotonsXY/WeightBy                  = "Track"

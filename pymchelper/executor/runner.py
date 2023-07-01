@@ -1,14 +1,18 @@
 from copy import deepcopy
 import logging
 import os
+from pathlib import Path
+import re
 import shutil
 import subprocess
 import timeit
 from multiprocessing import Pool
 
 from enum import IntEnum
+from pymchelper.executor.options import SimulationSettings
 
-from pymchelper.input_output import frompattern
+from pymchelper.simulator_type import SimulatorType
+from pymchelper.input_output import frompattern, get_topas_estimators
 
 
 class OutputDataType(IntEnum):
@@ -24,7 +28,9 @@ class Runner:
     Main class responsible for configuring and starting multiple parallel MC simulation processes
     It can be used to access combined averaged results of the simulation.
     """
-    def __init__(self, jobs=None, keep_workspace_after_run=False, output_directory='.'):
+    def __init__(self, settings: SimulationSettings, jobs: int=None,
+                 keep_workspace_after_run: bool=False, output_directory: str='.'):
+        self.settings = settings
 
         # create pool of processes, waiting to be started by run method
         # if jobs is not specified, os.cpu_count() would be used
@@ -45,26 +51,51 @@ class Runner:
         self.workspace_manager = WorkspaceManager(output_directory=output_directory,
                                                   keep_workspace_after_run=keep_workspace_after_run)
 
-    def run(self, settings):
+    def run(self):
         """
         Execute parallel simulation processes, creating workspace (and working directories) in the `output_directory`
         In case of successful execution return True, otherwise return False
         """
         start_time = timeit.default_timer()
 
-        # SHIELD-HIT12A and Fluka require RNG seeds to be integers greater or equal to 1
-        # each of the workers needs to have its own different RNG seed
-        rng_seeds = range(1, self.jobs + 1)
+        if self.settings.simulator_type in [SimulatorType.shieldhit, SimulatorType.fluka]:
+            # SHIELD-HIT12A and Fluka require RNG seeds to be integers greater or equal to 1
+            # each of the workers needs to have its own different RNG seed
+            rng_seeds = range(1, self.jobs + 1)
+
+        elif self.settings.simulator_type == SimulatorType.topas:
+            # For TOPAS we don't need to create multiple working directories and a pool of workers,
+            # as we can use embedded parallelization in TOPAS.
+            # For that we need to modify the input file and set the number of threads to the number of jobs.
+            # We set one rng seed, so one working directory and one worker will be created.
+
+            modified_input_filename = Path(self.settings.input_path).name.replace(".txt", "_modified.txt")
+            modified_input_path = Path(self.settings.input_path).parent / modified_input_filename
+
+            with open(self.settings.input_path, 'r') as f:
+                config = f.read()
+                if "i:Ts/NumberOfThreads" in config:
+                    pattern = r"i:Ts/NumberOfThreads\s*=\s*\d+"
+                    replacement = f"i:Ts/NumberOfThreads = {self.jobs}"
+                    config = re.sub(pattern, replacement, config)
+                else:
+                    config = f"i:Ts/NumberOfThreads = {self.jobs}\n" + config
+
+            modified_input_path.write_text(config)
+
+            self.settings.input_path = str(modified_input_path)
+
+            rng_seeds = [1]
 
         # create working directories
-        self.workspace_manager.create_working_directories(simulation_input_path=settings.input_path,
+        self.workspace_manager.create_working_directories(simulation_input_path=self.settings.input_path,
                                                           rng_seeds=rng_seeds)
 
         # rng seeds injection to settings for each SingleSimulationExecutor call
         # TODO consider better way of doing it  # skipcq: PYL-W0511
         settings_list = []
         for rng_seed in rng_seeds:
-            current_settings = deepcopy(settings)  # do not modify original arguments
+            current_settings = deepcopy(self.settings)  # do not modify original arguments
             current_settings.set_rng_seed(rng_seed)
             settings_list.append(current_settings)
 
@@ -84,6 +115,7 @@ class Runner:
 
         elapsed = timeit.default_timer() - start_time
         logging.info("run elapsed time {:.3f} seconds".format(elapsed))
+
         return True
 
     def get_data(self):
@@ -96,14 +128,20 @@ class Runner:
         """
         start_time = timeit.default_timer()
 
-        # TODO line below is specific to SHIELD-HIT12A, should be generalised  # skipcq: PYL-W0511
         # scans output directory for MC simulation output files
-        output_files_pattern = os.path.join(self.workspace_manager.output_dir_absolute_path, "run_*", "*.bdo")
-        logging.debug("Files to merge {:s}".format(output_files_pattern))
-
         estimators_dict = {}
-        # convert output files to list of estimator objects
-        estimators_list = frompattern(output_files_pattern)
+        estimators_list = []
+
+        if self.settings.simulator_type == SimulatorType.shieldhit:
+            output_files_pattern = str(Path(self.workspace_manager.output_dir_absolute_path) / "run_*" / "*.bdo")
+            logging.debug("Files to merge %s", output_files_pattern)
+            # convert output files to list of estimator objects
+            estimators_list = frompattern(output_files_pattern)
+
+        elif self.settings.simulator_type == SimulatorType.topas:
+            output_files_path = str(Path(self.workspace_manager.output_dir_absolute_path) / "run_1")
+            estimators_list = get_topas_estimators(output_files_path)
+
         for estimator in estimators_list:
             logging.debug("Appending estimator for {:s}".format(estimator.file_corename))
             estimators_dict[estimator.file_corename] = estimator

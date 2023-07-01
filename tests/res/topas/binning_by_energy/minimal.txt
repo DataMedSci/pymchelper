@@ -1,0 +1,72 @@
+# GENERAL
+i:Ts/ShowHistoryCountAtInterval = 2
+i:Ts/NumberOfThreads = 0
+b:Ts/ShowCPUTime = "True"
+i:Ts/Seed = 1
+
+# GEOMETRY
+
+s:Ge/World/Type     = "TsCylinder"
+s:Ge/World/Material = "Vacuum"
+d:Ge/World/Rmax = 5 cm
+d:Ge/World/HL = 3 cm
+d:Ge/World/TransZ =  Ge/World/HL cm
+
+s:Ge/PhantomScoringCoarseXY/Type     = "TsBox"
+s:Ge/PhantomScoringCoarseXY/Parent = "World"
+d:Ge/PhantomScoringCoarseXY/HLX = 1.5 cm
+d:Ge/PhantomScoringCoarseXY/HLY = 1.5 cm
+d:Ge/PhantomScoringCoarseXY/HLZ = 8.75 mm
+d:Ge/PhantomScoringCoarseXY/TransZ = 0. mm
+i:Ge/PhantomScoringCoarseXY/ZBins    = 1
+i:Ge/PhantomScoringCoarseXY/XBins    = 4
+i:Ge/PhantomScoringCoarseXY/YBins    = 4
+b:Ge/PhantomScoringCoarseXY/IsParallel = "True"
+
+s:Ge/PhantomScoringCoarseXY2/Type     = "TsBox"
+s:Ge/PhantomScoringCoarseXY2/Parent = "World"
+d:Ge/PhantomScoringCoarseXY2/HLX = 1.5 cm
+d:Ge/PhantomScoringCoarseXY2/HLY = 1.5 cm
+d:Ge/PhantomScoringCoarseXY2/HLZ = 8.75 mm
+d:Ge/PhantomScoringCoarseXY2/TransX = 1.5 mm
+d:Ge/PhantomScoringCoarseXY2/TransY = 1.5 mm
+i:Ge/PhantomScoringCoarseXY2/ZBins    = 1
+i:Ge/PhantomScoringCoarseXY2/XBins    = 4
+i:Ge/PhantomScoringCoarseXY2/YBins    = 4
+b:Ge/PhantomScoringCoarseXY2/IsParallel = "True"
+
+# PARTICLE SOURCE
+s:Ge/BeamPosition/Parent="World"
+d:Ge/BeamPosition/TransZ = -11 cm
+d:Ge/BeamPosition/RotX=0. deg
+
+s:So/Demo/Type = "Beam"
+s:So/Demo/BeamParticle = "proton"
+s:So/Demo/Component = "BeamPosition"
+d:So/Demo/BeamEnergy = 60 MeV
+u:So/Demo/BeamEnergySpread = 1
+s:So/Demo/BeamPositionDistribution = "Flat"
+s:So/Demo/BeamPositionCutoffShape = "Ellipse" # Rectangle or Ellipse (if Flat or Gaussian)
+d:So/Demo/BeamPositionCutoffX = 2. cm # X extent of position (if Flat or Gaussian)
+d:So/Demo/BeamPositionCutoffY = 2. cm # Y extent of position (if Flat or Gaussian)
+s:So/Demo/BeamAngularDistribution = "None"
+i:So/Demo/NumberOfHistoriesInRun = 20
+
+s:Sc/FluenceBPprotonsXY/Quantity                  = "DoseToMedium"
+s:Sc/FluenceBPprotonsXY/WeightBy                  = "Track"
+s:Sc/FluenceBPprotonsXY/Component                 = "PhantomScoringCoarseXY"
+sv:Sc/FluenceBPprotonsXY/Report = 2 "Mean" "Standard_Deviation"
+s:Sc/FluenceBPprotonsXY/IfOutputFileAlreadyExists = "Overwrite"
+s:Sc/FluenceBPprotonsXY/OutputFile = "fluence_bp_protons_xy"
+sv:Sc/FluenceBPprotonsXY/OnlyIncludeIfIncidentParticlesNamed = 1 "proton"
+i:Sc/FluenceBPprotonsXY/EBins = 10
+d:Sc/FluenceBPprotonsXY/EBinMin = 0. MeV
+d:Sc/FluenceBPprotonsXY/EBinMax = 100. MeV
+
+s:Sc/FluenceBPprotonsXY2/Quantity                  = "Fluence"
+s:Sc/FluenceBPprotonsXY2/WeightBy                  = "Track"
+s:Sc/FluenceBPprotonsXY2/Component                 = "PhantomScoringCoarseXY2"
+sv:Sc/FluenceBPprotonsXY2/Report = 2 "Mean" "Standard_Deviation"
+s:Sc/FluenceBPprotonsXY2/IfOutputFileAlreadyExists = "Overwrite"
+s:Sc/FluenceBPprotonsXY2/OutputFile = "fluence_bp_protons_xy2"
+sv:Sc/FluenceBPprotonsXY2/OnlyIncludeIfIncidentParticlesNamed = 1 "proton"

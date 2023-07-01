@@ -10,6 +10,17 @@ from pymchelper.input_output import fromfile
 from pymchelper.executor.options import SimulationSettings
 from pymchelper.executor.runner import Runner
 
+@pytest.fixture
+def topas_mock_path() -> Generator[Path, None, None]:
+    """path to TOPAS mock executable"""
+    main_dir = Path(__file__).resolve().parent
+    yield main_dir / 'res' / 'mocks' / 'topas_minimal' / 'topas'
+    
+@pytest.fixture
+def topas_input_path() -> Generator[Path, None, None]:
+    """path to TOPAS input file"""
+    main_dir = Path(__file__).resolve().parent
+    yield main_dir / 'res' / 'mocks' / 'topas_minimal' / 'minimal.txt'
 
 @pytest.fixture(scope="module")
 def example_input_cfg() -> Generator[dict, None, None]:
@@ -70,7 +81,7 @@ END
 
 @pytest.mark.smoke
 @pytest.mark.skipif(sys.platform == "darwin", reason="we don't have SHIELD-HIT12A demo binary for MacOSX")
-def test_runner(example_input_cfg: dict, tmp_path: Path, monkeypatch: pytest.MonkeyPatch, shieldhit_binary_path: Path,
+def test_shieldhit(example_input_cfg: dict, tmp_path: Path, monkeypatch: pytest.MonkeyPatch, shieldhit_binary_path: Path,
                 shieldhit_demo_binary_installed):
     """Test if single BDO file is converted to Excel file"""
     logging.info("Changing working directory to %s", tmp_path)
@@ -86,12 +97,13 @@ def test_runner(example_input_cfg: dict, tmp_path: Path, monkeypatch: pytest.Mon
     settings = SimulationSettings(input_path=tmp_path, simulator_exec_path=shieldhit_binary_path, cmdline_opts='-s')
     settings.set_no_of_primaries(10)
 
-    r = Runner(jobs=2, output_directory=str(tmp_path))
-    isRunOk = r.run(settings=settings)
+    r = Runner(jobs=2, settings=settings, output_directory=str(tmp_path))
+    isRunOk = r.run()
     assert isRunOk
 
     data = r.get_data()
     assert data is not None
+    assert 'data_' in data
 
 
 @pytest.mark.smoke
@@ -114,8 +126,8 @@ def test_merging(example_input_cfg: dict, tmp_path: Path, monkeypatch: pytest.Mo
                                   cmdline_opts='--silent')
     settings.set_no_of_primaries(500)
 
-    r = Runner(jobs=3, output_directory=str(tmp_path), keep_workspace_after_run=True)
-    isRunOk = r.run(settings=settings)
+    r = Runner(jobs=3, settings=settings, output_directory=str(tmp_path), keep_workspace_after_run=True)
+    isRunOk = r.run()
     assert isRunOk
 
     data = r.get_data()
@@ -149,3 +161,31 @@ def test_merging(example_input_cfg: dict, tmp_path: Path, monkeypatch: pytest.Mo
         # demo version of SHIELD-HIT12A cannot use different random seeds for each run,
         # therefore the first bin dose should be the same for all runs
         assert first_bin_dose == data_first_bin_dose
+
+
+@pytest.mark.smoke
+@pytest.mark.skipif(sys.platform == "darwin", reason="we don't have TOPAS binary for MacOSX")
+@pytest.mark.skipif(sys.platform == "win32", reason="simulator mocks don't work on Windows")
+def test_topas(topas_mock_path: Path, topas_input_path: Path, tmp_path: Path):
+    """Test if runner can run TOPAS mock and read the output"""
+    settings = SimulationSettings(input_path=str(topas_input_path),
+                                    simulator_exec_path=str(topas_mock_path))
+    logging.info(settings)
+
+    r = Runner(settings=settings, jobs=2, output_directory=tmp_path)
+    
+    isRunOk = r.run()
+    assert isRunOk
+    
+    #ensure that correct number of threads is set in the input file
+    with open(r.settings.input_path, "r") as input_file:
+        contents = input_file.read()
+        assert "i:Ts/NumberOfThreads = 0" not in contents
+        assert "i:Ts/NumberOfThreads = 2" in contents
+        
+    data = r.get_data()
+    logging.info(data)
+    assert data is not None
+    assert 'fluence_bp_protons_xy' in data
+    assert 'fluence_bp_protons_xy2' in data
+    
