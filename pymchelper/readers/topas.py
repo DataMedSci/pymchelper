@@ -21,7 +21,6 @@ class TopasReaderFactory(ReaderFactory):
 
 def extract_parameter_filename(header_line: str) -> Optional[str]:
     """Get parameter filename from the output file"""
-    parameter_filename = ""
     pattern = r"# Parameter File: (.*)"
     match = re.search(pattern, header_line)
     parameter_filename = None
