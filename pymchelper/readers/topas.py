@@ -109,7 +109,7 @@ class TopasReader(Reader):
     def read_data(self, estimator: Estimator) -> bool:
         """
         Read the data from the file and store them in the provided estimator object.
-        Topas reader assumes that the input file is in the same directory as the output file
+        TOPAS reader assumes that the input file is in the same directory as the output file
         to extract the number of histories from it.
         If the name of the input file is not found in the output file
         or the input file is not in the same directory, the number of histories is set to 0.
