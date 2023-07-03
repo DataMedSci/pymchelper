@@ -5,10 +5,13 @@ from pathlib import Path
 import re
 import shutil
 import subprocess
+import tempfile
 import timeit
 from multiprocessing import Pool
 
 from enum import IntEnum
+from typing import List
+from pymchelper.flair import Input
 from pymchelper.executor.options import SimulationSettings
 
 from pymchelper.simulator_type import SimulatorType
@@ -91,6 +94,11 @@ class Runner:
         self.workspace_manager.create_working_directories(simulation_input_path=self.settings.input_path,
                                                           rng_seeds=rng_seeds)
 
+        if self.settings.simulator_type == SimulatorType.fluka:
+            for seed, workdir in zip(rng_seeds, self.workspace_manager.working_directories_abs_paths):
+                destination = str(Path(workdir) / Path(self.settings.input_path).name)
+                self.__update_fluka_input_file(destination, seed)
+
         # rng seeds injection to settings for each SingleSimulationExecutor call
         # TODO consider better way of doing it  # skipcq: PYL-W0511
         settings_list = []
@@ -160,6 +168,25 @@ class Runner:
         Removes all working directories (if exists)
         """
         self.workspace_manager.clean()
+
+    def __update_fluka_input_file(self, destination: str, rng_seed: int):
+        """
+        Updates the FLUKA input file with the new RNG seed.
+        """
+        configuration = Input.Input(destination)
+        cards : List[Input.Card] = configuration.cardlist
+        randomize = list([(index, card) for index, card in enumerate(cards) if str(card.tag).startswith('RANDOMIZ')])
+
+        rng_card = Input.Card("RANDOMIZ")
+        rng_card.setComment("updated random number generator settings")
+        rng_card.setWhat(2, rng_seed)
+
+        if randomize:
+            configuration.replaceCard(randomize[0][0], rng_card)
+        else:
+            configuration.addCard(rng_card)
+
+        configuration.write(destination)
 
 
 class SingleSimulationExecutor:
