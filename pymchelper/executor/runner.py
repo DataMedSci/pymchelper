@@ -104,7 +104,8 @@ class Runner:
         settings_list = []
         for rng_seed in rng_seeds:
             current_settings = deepcopy(self.settings)  # do not modify original arguments
-            current_settings.set_rng_seed(rng_seed)
+            if self.settings.simulator_type in [SimulatorType.shieldhit, SimulatorType.topas]:
+                current_settings.set_rng_seed(rng_seed)
             settings_list.append(current_settings)
 
         # create executor callable object for current run
