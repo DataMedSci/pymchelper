@@ -10,7 +10,7 @@ import timeit
 from multiprocessing import Pool
 
 from enum import IntEnum
-from typing import List
+from typing import List, Tuple
 from pymchelper.flair import Input
 from pymchelper.executor.options import SimulationSettings
 
@@ -195,7 +195,7 @@ class SingleSimulationExecutor:
     Callable class responsible for execution of the single MC simulation process.
     """
 
-    def __call__(self, settings_and_working_dir, **kwargs):
+    def __call__(self, settings_and_working_dir: Tuple[SimulationSettings, str], **kwargs):
 
         # we deliberately combine settings and list of working directories
         # in the single argument `settings_and_working_dir`
@@ -212,7 +212,11 @@ class SingleSimulationExecutor:
             # finally we obtain a list like:
             # ('/usr/local/bin/shieldhit', '--time', '00:30:50', '-v', '-N', '3', '/data/my/simulation/input')
             command_as_list = core_command_string.split()
-            command_as_list.append(working_dir_abs_path)
+            if settings.simulator_type == SimulatorType.fluka:
+                input_file_path = str(Path(working_dir_abs_path) / Path(settings.input_path).name)
+                command_as_list.append(input_file_path)
+            else:
+                command_as_list.append(working_dir_abs_path)
 
             # execute the MC simulation on a spawned process
             # TODO handle this differently, i.e. redirect it to file or save in some variable   # skipcq: PYL-W0511
