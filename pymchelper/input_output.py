@@ -101,6 +101,7 @@ def fromfilelist(input_file_list, error: ErrorEstimate = ErrorEstimate.stderr, n
         # loop over all files with n running from 2
         for n, filename in enumerate(input_file_list[1:], start=2):
             current_estimator = fromfile(filename)  # x
+            logger.info("Reading file %s (%d/%d)", filename, n, len(input_file_list))
 
             if not current_estimator:
                 logger.warning("File %s could not be read", filename)
@@ -109,10 +110,10 @@ def fromfilelist(input_file_list, error: ErrorEstimate = ErrorEstimate.stderr, n
             for current_page, result_page in zip(current_estimator.pages, result.pages):
                 # got a page with "concatenate normalisation"
                 if getattr(current_page, 'page_normalized', 2) == 4:
-                    logger.info("Concatenating page %s", current_page.name)
+                    logger.debug("Concatenating page %s", current_page.name)
                     result_page.data_raw = np.concatenate((result_page.data_raw, current_page.data_raw))
                 else:
-                    logger.info("Averaging page %s", current_page.name)
+                    logger.debug("Averaging page %s", current_page.name)
                     # Running variance algorithm based on algorithm by B. P. Welford,
                     # presented in Donald Knuth's Art of Computer Programming, Vol 2, page 232, 3rd edition.
                     # Can be found here: http://www.johndcook.com/blog/standard_deviation/

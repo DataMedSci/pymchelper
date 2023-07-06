@@ -125,6 +125,8 @@ class SHBDOTagID(IntEnum):
     #          two %s are the differential units, and the first is the data in
     #          non-differential form. */
 
+    phase_space_population = 0xDDE0  # /* number of particles in phase space */
+
     # /* Filter data attached to page */
     page_filter_name = 0xDDF0  # /* name of filter containing one or more rules */
     page_filter_rules_no = 0xDDF1  # /* number of filter rules applied */
@@ -159,9 +161,7 @@ class SHBDOTagID(IntEnum):
     error = 0xFFCE  # /* 0xFFCE-rror */
 
 
-estimator_tags_to_save = (
-
-)
+estimator_tags_to_save = ()
 
 page_tags_to_save = (
     SHBDOTagID.detector_type,
@@ -170,16 +170,13 @@ page_tags_to_save = (
     SHBDOTagID.page_scale_factor,
     SHBDOTagID.page_offset,
     SHBDOTagID.page_unit_ids,
-
     SHBDOTagID.detector_unit,
-
     SHBDOTagID.page_diff_flag,
     SHBDOTagID.page_diff_type,
     SHBDOTagID.page_diff_start,
     SHBDOTagID.page_diff_stop,
     SHBDOTagID.page_diff_size,
     SHBDOTagID.page_diff_units,
-
     SHBDOTagID.page_filter_name,
     SHBDOTagID.page_filter_rules_no,
     SHBDOTagID.page_filter_e_min,
@@ -281,28 +278,23 @@ unit_name_from_unit_id = {
     SHBDOUnitID.SH_SCORING_UNIT_PCT: "%",
     SHBDOUnitID.SH_SCORING_UNIT_PMIL: "%%",
     SHBDOUnitID.SH_SCORING_UNIT_RELATIVE: "rel.units",
-
     SHBDOUnitID.SH_SCORING_UNIT_CM: "cm",
     SHBDOUnitID.SH_SCORING_UNIT_CM2: "cm^2",
     SHBDOUnitID.SH_SCORING_UNIT_CM3: "cm^3",
     SHBDOUnitID.SH_SCORING_UNIT_PCM: "/cm",
     SHBDOUnitID.SH_SCORING_UNIT_PCM2: "/cm^2",
     SHBDOUnitID.SH_SCORING_UNIT_PCM3: "/cm^3",
-
     SHBDOUnitID.SH_SCORING_UNIT_M: "m",
     SHBDOUnitID.SH_SCORING_UNIT_M2: "m^2",
     SHBDOUnitID.SH_SCORING_UNIT_M3: "m^3",
     SHBDOUnitID.SH_SCORING_UNIT_PM: "/m",
     SHBDOUnitID.SH_SCORING_UNIT_PM2: "/m^2",
     SHBDOUnitID.SH_SCORING_UNIT_PM3: "/m^3",
-
     SHBDOUnitID.SH_SCORING_UNIT_GPCM3: "g/cm^3",
     SHBDOUnitID.SH_SCORING_UNIT_KGPM3: "kg/m^3",
-
     SHBDOUnitID.SH_SCORING_UNIT_KEVPUM: "keV/um",
     SHBDOUnitID.SH_SCORING_UNIT_MEVPCM: "MeV/cm",
     SHBDOUnitID.SH_SCORING_UNIT_MEVCM2PG: "MeV cm^2/g",
-
     SHBDOUnitID.SH_SCORING_UNIT_MEVPG: "MeV/g",
     SHBDOUnitID.SH_SCORING_UNIT_GY: "Gy",
     SHBDOUnitID.SH_SCORING_UNIT_GYRBE: "Gy(RBE)",  # /* Probably there are new ICRU rules here */
@@ -310,21 +302,16 @@ unit_name_from_unit_id = {
     SHBDOUnitID.SH_SCORING_UNIT_SV: "Sv",
     SHBDOUnitID.SH_SCORING_UNIT_DOSERAD: "Rad",
     SHBDOUnitID.SH_SCORING_UNIT_DOSEREM: "Rem",
-
     SHBDOUnitID.SH_SCORING_UNIT_DEGREES: "deg",
     SHBDOUnitID.SH_SCORING_UNIT_RADIANS: "rad",
     SHBDOUnitID.SH_SCORING_UNIT_SR: "sr",
-
     SHBDOUnitID.SH_SCORING_UNIT_COUNT: "#",
-
     SHBDOUnitID.SH_SCORING_UNIT_MEV: "MeV",
     SHBDOUnitID.SH_SCORING_UNIT_MEVPNUC: "MeV/nucleon",
     SHBDOUnitID.SH_SCORING_UNIT_MEVPAMU: "MeV/amu",
-
     SHBDOUnitID.SH_SCORING_UNIT_NUCN: "",
     SHBDOUnitID.SH_SCORING_UNIT_MEVPC2: "MeV/c^2",
     SHBDOUnitID.SH_SCORING_UNIT_U: "u",
-
     SHBDOUnitID.SH_SCORING_UNIT_MATID: "",
     SHBDOUnitID.SH_SCORING_UNIT_NZONE: "",
 }
