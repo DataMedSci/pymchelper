@@ -1,6 +1,6 @@
 # micro-language and markers are described here: https://www.python.org/dev/peps/pep-0496/
 pytest==7.4.0
-flake8==6.0.0
+flake8==6.1.0
 sphinx==7.1.1
 mcpl==1.6.2
 pre-commit==3.3.3
