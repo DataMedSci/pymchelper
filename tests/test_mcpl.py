@@ -106,6 +106,7 @@ def test_mcpl_generation(phasespace_bdo_file_path: Path, tmp_path: Path, monkeyp
             assert p.weight == 1.0
             assert p.pdgcode == 2212  # protons
             assert p.position[2] == 4.0
+            assert p.direction[2] > 0.0
 
 
 def test_concatenation_of_bdo_files(phasespace_bdo_files_path: Generator[Path, None, None]):
