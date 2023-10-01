@@ -57,6 +57,8 @@ EXTRAS_REQUIRE['full'].extend(["hipsterplot", "bashplotlib"])  # these are neede
 # |---------------------------------------------------|
 # | numpy version | python versions |    OS support   |
 # |---------------------------------------------------|
+# |      1.26     |    3.9 - 3.12   | linux, mac, win |
+# |      1.25     |    3.9 - 3.11   | linux, mac, win |
 # |      1.24     |    3.8 - 3.11   | linux, mac, win |
 # |     1.23.3    |    3.8 - 3.11   | linux, mac, win |
 # | 1.22 - 1.23.2 |    3.8 - 3.10   | linux, mac, win |
