@@ -40,6 +40,9 @@ EXTRAS_REQUIRE = {
     ],
     'pytrip': [
         'scipy',
+        "pytrip98>=3.8.0,<3.9.0 ; platform_system == 'Darwin' and python_version >= '3.11'",
+        "pytrip98>=3.6.1,<3.9.0 ; platform_system == 'Darwin' and (python_version >= '3.10' and python_version < '3.11')",  # noqa: E501
+        "pytrip98<3.9.0 ; platform_system == 'Darwin' and (python_version >= '3.5' and python_version < '3.10')",
         "pytrip98>=3.8.0 ; python_version >= '3.11'",
         "pytrip98>=3.6.1 ; python_version >= '3.10' and python_version < '3.11'",
         "pytrip98 ; python_version >= '3.5' and python_version < '3.10'"
@@ -57,6 +60,8 @@ EXTRAS_REQUIRE['full'].extend(["hipsterplot", "bashplotlib"])  # these are neede
 # |---------------------------------------------------|
 # | numpy version | python versions |    OS support   |
 # |---------------------------------------------------|
+# |      1.26     |    3.9 - 3.12   | linux, mac, win |
+# |      1.25     |    3.9 - 3.11   | linux, mac, win |
 # |      1.24     |    3.8 - 3.11   | linux, mac, win |
 # |     1.23.3    |    3.8 - 3.11   | linux, mac, win |
 # | 1.22 - 1.23.2 |    3.8 - 3.10   | linux, mac, win |
@@ -78,8 +83,8 @@ EXTRAS_REQUIRE['full'].extend(["hipsterplot", "bashplotlib"])  # these are neede
 install_requires = [
     "numpy>=1.23.3 ; python_version == '3.11'",
     "numpy>=1.21 ; python_version == '3.10'",
-    "numpy>=1.20 ; python_version == '3.9'",
-    "numpy>=1.18 ; python_version == '3.8'",
+    "numpy>=1.20,<1.26.0 ; python_version == '3.9'",
+    "numpy>=1.18,<1.26.0 ; python_version == '3.8'",
 ]
 
 setuptools.setup(
