@@ -40,6 +40,9 @@ EXTRAS_REQUIRE = {
     ],
     'pytrip': [
         'scipy',
+        "pytrip98>=3.8.0,<3.9.0 ; platform_system == 'darwin' and python_version >= '3.11'; <3.9.0",
+        "pytrip98>=3.6.1,<3.9.0 ; platform_system == 'darwin' and python_version >= '3.10' and python_version < '3.11'",
+        "pytrip98<3.9.0 ; platform_system == 'darwin' and python_version >= '3.5' and python_version < '3.10'"
         "pytrip98>=3.8.0 ; python_version >= '3.11'",
         "pytrip98>=3.6.1 ; python_version >= '3.10' and python_version < '3.11'",
         "pytrip98 ; python_version >= '3.5' and python_version < '3.10'"
