@@ -4,5 +4,5 @@ flake8==6.1.0
 sphinx==7.1.2
 mcpl==1.6.2
 pre-commit==3.4.0
-yapf==0.40.1
+yapf==0.40.2
 requests==2.31.0
