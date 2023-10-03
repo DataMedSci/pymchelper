@@ -168,11 +168,11 @@ class Runner:
         self.workspace_manager.clean()
 
     @staticmethod
-    def __update_fluka_input_file(cls, destination: str, rng_seed: int):
+    def __update_fluka_input_file(destination: str, rng_seed: int):
         """Updates the FLUKA input file with the new RNG seed."""
         configuration = Input.Input(destination)
         cards : List[Input.Card] = configuration.cardlist
-        randomize = list((index, card) for index, card in enumerate(cards) if str(card.tag).startswith('RANDOMIZ'))
+        randomize = [(index, card) for index, card in enumerate(cards) if str(card.tag).startswith('RANDOMIZ')]
 
         rng_card = Input.Card("RANDOMIZ")
         rng_card.setComment("updated random number generator settings")
