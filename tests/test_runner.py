@@ -228,7 +228,6 @@ def fluka_path() -> Generator[Tuple[Path, Path], None, None]:
 
 
 @pytest.mark.smoke
-@pytest.mark.skipif(sys.platform == "darwin", reason="we don't have SHIELD-HIT12A demo binary for MacOSX")
 @pytest.mark.skipif(sys.platform == "win32", reason="simulator mocks don't work on Windows")
 def test_fluka(fluka_path: Tuple[Path, Path], tmp_path: Path, fluka_expected_results: Dict[str, dict]):
     """
@@ -252,7 +251,7 @@ def test_fluka(fluka_path: Tuple[Path, Path], tmp_path: Path, fluka_expected_res
     assert '21' in data
     assert '22' in data
     assert 'fluka_binary' == data['21'].file_format
-    assert 'fluka_binary' == data['21'].file_format
+    assert 'fluka_binary' == data['22'].file_format
 
     __verify_fluka_file(data["21"], fluka_expected_results["21"])
     __verify_fluka_file(data["22"], fluka_expected_results["22"])
