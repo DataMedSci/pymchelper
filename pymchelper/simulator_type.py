@@ -11,7 +11,7 @@ class SimulatorType(IntEnum):
 
     @classmethod
     @property
-    def names(_cls) -> List[str]:
+    def names(cls) -> List[str]:
         """Return list of available simulators"""
         return [s.name for s in SimulatorType]
 

@@ -5,7 +5,6 @@ from pathlib import Path
 import re
 import shutil
 import subprocess
-import tempfile
 import timeit
 from multiprocessing import Pool
 
@@ -168,11 +167,12 @@ class Runner:
         """Removes all working directories (if exists)"""
         self.workspace_manager.clean()
 
-    def __update_fluka_input_file(self, destination: str, rng_seed: int):
+    @staticmethod
+    def __update_fluka_input_file(cls, destination: str, rng_seed: int):
         """Updates the FLUKA input file with the new RNG seed."""
         configuration = Input.Input(destination)
         cards : List[Input.Card] = configuration.cardlist
-        randomize = list([(index, card) for index, card in enumerate(cards) if str(card.tag).startswith('RANDOMIZ')])
+        randomize = list((index, card) for index, card in enumerate(cards) if str(card.tag).startswith('RANDOMIZ'))
 
         rng_card = Input.Card("RANDOMIZ")
         rng_card.setComment("updated random number generator settings")

@@ -222,6 +222,7 @@ def fluka_expected_results() -> Generator[Dict[str, dict], None, None]:
 
 @pytest.fixture
 def fluka_path() -> Generator[Tuple[Path, Path], None, None]:
+    """Return path to rfluka executable and input file"""
     executable = Path("tests") / "res" / "mocks" / "fluka_minimal" / "rfluka"
     input_file = Path("tests") / "res" / "mocks" / "fluka_minimal" / "minimal.inp"
 
