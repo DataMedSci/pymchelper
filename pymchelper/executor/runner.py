@@ -165,15 +165,11 @@ class Runner:
         return estimators_dict
 
     def clean(self):
-        """
-        Removes all working directories (if exists)
-        """
+        """Removes all working directories (if exists)"""
         self.workspace_manager.clean()
 
     def __update_fluka_input_file(self, destination: str, rng_seed: int):
-        """
-        Updates the FLUKA input file with the new RNG seed.
-        """
+        """Updates the FLUKA input file with the new RNG seed."""
         configuration = Input.Input(destination)
         cards : List[Input.Card] = configuration.cardlist
         randomize = list([(index, card) for index, card in enumerate(cards) if str(card.tag).startswith('RANDOMIZ')])

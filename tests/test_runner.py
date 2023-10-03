@@ -1,11 +1,9 @@
-from ast import Tuple
 import logging
 import sys
 from pathlib import Path
 from typing import Dict, Generator, Tuple
 import numpy as np
 
-import numpy as np
 import pytest
 from pymchelper.estimator import Estimator
 
@@ -14,17 +12,20 @@ from pymchelper.executor.options import SimulationSettings
 from pymchelper.executor.runner import Runner
 from pymchelper.simulator_type import SimulatorType
 
+
 @pytest.fixture
 def topas_mock_path() -> Generator[Path, None, None]:
     """path to TOPAS mock executable"""
     main_dir = Path(__file__).resolve().parent
     yield main_dir / 'res' / 'mocks' / 'topas_minimal' / 'topas'
-    
+
+
 @pytest.fixture
 def topas_input_path() -> Generator[Path, None, None]:
     """path to TOPAS input file"""
     main_dir = Path(__file__).resolve().parent
     yield main_dir / 'res' / 'mocks' / 'topas_minimal' / 'minimal.txt'
+
 
 @pytest.fixture(scope="module")
 def example_input_cfg() -> Generator[dict, None, None]:
@@ -86,7 +87,7 @@ END
 @pytest.mark.smoke
 @pytest.mark.skipif(sys.platform == "darwin", reason="we don't have SHIELD-HIT12A demo binary for MacOSX")
 def test_shieldhit(example_input_cfg: dict, tmp_path: Path, monkeypatch: pytest.MonkeyPatch, shieldhit_binary_path: Path,
-                shieldhit_demo_binary_installed):
+                   shieldhit_demo_binary_installed):
     """Test if single BDO file is converted to Excel file"""
     logging.info("Changing working directory to %s", tmp_path)
     monkeypatch.chdir(tmp_path)
@@ -173,20 +174,20 @@ def test_merging(example_input_cfg: dict, tmp_path: Path, monkeypatch: pytest.Mo
 def test_topas(topas_mock_path: Path, topas_input_path: Path, tmp_path: Path):
     """Test if runner can run TOPAS mock and read the output"""
     settings = SimulationSettings(input_path=str(topas_input_path),
-                                    simulator_exec_path=str(topas_mock_path))
+                                  simulator_exec_path=str(topas_mock_path))
     logging.info(settings)
 
     r = Runner(settings=settings, jobs=2, output_directory=tmp_path)
-    
+
     isRunOk = r.run()
     assert isRunOk
-    
-    #ensure that correct number of threads is set in the input file
+
+    # ensure that correct number of threads is set in the input file
     with open(r.settings.input_path, "r") as input_file:
         contents = input_file.read()
         assert "i:Ts/NumberOfThreads = 0" not in contents
         assert "i:Ts/NumberOfThreads = 2" in contents
-        
+
     data = r.get_data()
     logging.info(data)
     assert data is not None
@@ -230,9 +231,7 @@ def fluka_path() -> Generator[Tuple[Path, Path], None, None]:
 @pytest.mark.smoke
 @pytest.mark.skipif(sys.platform == "win32", reason="simulator mocks don't work on Windows")
 def test_fluka(fluka_path: Tuple[Path, Path], tmp_path: Path, fluka_expected_results: Dict[str, dict]):
-    """
-    Test fluka generator with previously generated rfluka mock
-    """
+    """Test fluka generator with previously generated rfluka mock"""
     fluka_exec_path, fluka_input_path = fluka_path
 
     settings = SimulationSettings(input_path=fluka_input_path,
