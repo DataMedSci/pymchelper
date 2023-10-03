@@ -176,6 +176,7 @@ class Runner:
 
         rng_card = Input.Card("RANDOMIZ")
         rng_card.setComment("updated random number generator settings")
+        rng_card.setWhat(1, 1.)
         rng_card.setWhat(2, rng_seed)
 
         if randomize:
