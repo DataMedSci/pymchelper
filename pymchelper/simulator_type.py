@@ -18,7 +18,7 @@ class SimulatorType(IntEnum):
     @staticmethod
     def from_name(name: str) -> Optional['SimulatorType']:
         """Return simulator type from its name"""
-        for s in SimulatorType:
-            if s.name == name:
-                return s
-        return None
+        try:
+            return  SimulatorType[name]
+        except KeyError:
+            return None
