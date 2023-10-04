@@ -19,6 +19,6 @@ class SimulatorType(IntEnum):
     def from_name(name: str) -> Optional['SimulatorType']:
         """Return simulator type from its name"""
         try:
-            return  SimulatorType[name]
+            return SimulatorType[name]
         except KeyError:
             return None
