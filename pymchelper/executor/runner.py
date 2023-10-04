@@ -152,7 +152,7 @@ class Runner:
 
         elif self.settings.simulator_type == SimulatorType.fluka:
             output_files_pattern = os.path.join(self.workspace_manager.output_dir_absolute_path, "run_*", "*_fort.*")
-            logging.debug("Files to merge {:s}".format(output_files_pattern))
+            logging.debug("Files to merge %s", output_files_pattern)
             estimators_list = frompattern(output_files_pattern)
 
         for estimator in estimators_list:
