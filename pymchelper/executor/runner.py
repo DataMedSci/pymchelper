@@ -9,7 +9,7 @@ import timeit
 from multiprocessing import Pool
 
 from enum import IntEnum
-from typing import List, Tuple
+from typing import Tuple
 from pymchelper.flair import Input
 from pymchelper.executor.options import SimulationSettings
 
@@ -170,21 +170,24 @@ class Runner:
     @staticmethod
     def __update_fluka_input_file(destination: str, rng_seed: int):
         """Updates the FLUKA input file with the new RNG seed."""
-        configuration = Input.Input(destination)
-        cards : List[Input.Card] = configuration.cardlist
-        randomize = [(index, card) for index, card in enumerate(cards) if str(card.tag).startswith('RANDOMIZ')]
+        with open(destination, 'r') as destination_file:
+            lines = destination_file.readlines()
+        has_randomize_card = False
+        for index, line in enumerate(lines):
+            if line.startswith('RANDOMIZ'):
+                card = Input.Card("RANDOMIZ")
+                card.setWhat(1, 1.)
+                card.setWhat(2, rng_seed)
+                lines[index] = card.toStr() + '\n'
+                has_randomize_card = True
+        if not has_randomize_card:
+            card = Input.Card("RANDOMIZ")
+            card.setWhat(1, 1.)
+            card.setWhat(2, rng_seed)
+            lines.append(card.toStr() + '\n')
 
-        rng_card = Input.Card("RANDOMIZ")
-        rng_card.setComment("updated random number generator settings")
-        rng_card.setWhat(1, 1.)
-        rng_card.setWhat(2, rng_seed)
-
-        if randomize:
-            configuration.replaceCard(randomize[0][0], rng_card)
-        else:
-            configuration.addCard(rng_card)
-
-        configuration.write(destination)
+        with open(destination, 'w') as destination_file:
+            destination_file.writelines(lines)
 
 
 class SingleSimulationExecutor:
