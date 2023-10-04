@@ -1,26 +1,31 @@
 import logging
 import sys
 from pathlib import Path
-from typing import Generator
-
+from typing import Dict, Generator, Tuple
 import numpy as np
+
 import pytest
+from pymchelper.estimator import Estimator
 
 from pymchelper.input_output import fromfile
 from pymchelper.executor.options import SimulationSettings
 from pymchelper.executor.runner import Runner
+from pymchelper.simulator_type import SimulatorType
+
 
 @pytest.fixture
 def topas_mock_path() -> Generator[Path, None, None]:
     """path to TOPAS mock executable"""
     main_dir = Path(__file__).resolve().parent
     yield main_dir / 'res' / 'mocks' / 'topas_minimal' / 'topas'
-    
+
+
 @pytest.fixture
 def topas_input_path() -> Generator[Path, None, None]:
     """path to TOPAS input file"""
     main_dir = Path(__file__).resolve().parent
     yield main_dir / 'res' / 'mocks' / 'topas_minimal' / 'minimal.txt'
+
 
 @pytest.fixture(scope="module")
 def example_input_cfg() -> Generator[dict, None, None]:
@@ -82,7 +87,7 @@ END
 @pytest.mark.smoke
 @pytest.mark.skipif(sys.platform == "darwin", reason="we don't have SHIELD-HIT12A demo binary for MacOSX")
 def test_shieldhit(example_input_cfg: dict, tmp_path: Path, monkeypatch: pytest.MonkeyPatch, shieldhit_binary_path: Path,
-                shieldhit_demo_binary_installed):
+                   shieldhit_demo_binary_installed):
     """Test if single BDO file is converted to Excel file"""
     logging.info("Changing working directory to %s", tmp_path)
     monkeypatch.chdir(tmp_path)
@@ -169,23 +174,94 @@ def test_merging(example_input_cfg: dict, tmp_path: Path, monkeypatch: pytest.Mo
 def test_topas(topas_mock_path: Path, topas_input_path: Path, tmp_path: Path):
     """Test if runner can run TOPAS mock and read the output"""
     settings = SimulationSettings(input_path=str(topas_input_path),
-                                    simulator_exec_path=str(topas_mock_path))
+                                  simulator_exec_path=str(topas_mock_path))
     logging.info(settings)
 
     r = Runner(settings=settings, jobs=2, output_directory=tmp_path)
-    
+
     isRunOk = r.run()
     assert isRunOk
-    
-    #ensure that correct number of threads is set in the input file
+
+    # ensure that correct number of threads is set in the input file
     with open(r.settings.input_path, "r") as input_file:
         contents = input_file.read()
         assert "i:Ts/NumberOfThreads = 0" not in contents
         assert "i:Ts/NumberOfThreads = 2" in contents
-        
+
     data = r.get_data()
     logging.info(data)
     assert data is not None
     assert 'fluence_bp_protons_xy' in data
     assert 'fluence_bp_protons_xy2' in data
-    
+
+
+@pytest.fixture
+def fluka_expected_results() -> Generator[Dict[str, dict], None, None]:
+    """Return expected result"""
+    yield {
+        "21": {
+            "shape": [4, 1, 4],
+            "4x4": [
+                [0., 0., 0., 0.],
+                [0., 0.00146468, 0.00169978, 0.],
+                [0.00090805, 0., 0., 0.],
+                [0, 0., 0., 0.]
+            ]
+        },
+        "22": {
+            "shape": [4, 4, 1],
+            "4x4": [
+                [0.00047575, 0., 0., 0.],
+                [0., 0.00188021, 0.00166488, 0.],
+                [0., 0.0010242, 0.00105254, 0.],
+                [0., 0., 0., 0.]
+            ]
+        }
+    }
+
+
+@pytest.fixture
+def fluka_path() -> Generator[Tuple[Path, Path], None, None]:
+    """Return path to rfluka executable and input file"""
+    executable = Path("tests") / "res" / "mocks" / "fluka_minimal" / "rfluka"
+    input_file = Path("tests") / "res" / "mocks" / "fluka_minimal" / "minimal.inp"
+
+    yield executable, input_file
+
+
+@pytest.mark.smoke
+@pytest.mark.skipif(sys.platform == "win32", reason="simulator mocks don't work on Windows")
+def test_fluka(fluka_path: Tuple[Path, Path], tmp_path: Path, fluka_expected_results: Dict[str, dict]):
+    """Test fluka generator with previously generated rfluka mock"""
+    fluka_exec_path, fluka_input_path = fluka_path
+
+    settings = SimulationSettings(input_path=fluka_input_path,
+                                  simulator_type=SimulatorType.fluka,
+                                  simulator_exec_path=fluka_exec_path)
+    print(settings)
+
+    r = Runner(settings=settings, jobs=2, output_directory=str(tmp_path))
+
+    isRunOk = r.run()
+    assert isRunOk
+
+    data = r.get_data()
+    print(data, len(data))
+    assert data is not None
+    assert '21' in data
+    assert '22' in data
+    assert 'fluka_binary' == data['21'].file_format
+    assert 'fluka_binary' == data['22'].file_format
+
+    __verify_fluka_file(data["21"], fluka_expected_results["21"])
+    __verify_fluka_file(data["22"], fluka_expected_results["22"])
+
+
+def __verify_fluka_file(actual_result: Estimator, expected_result: dict) -> None:
+    """Compares content of generated fluka file with expected values"""
+    assert b'* Minimal fluka file with 20 particles, two results, 4x4 bins' == actual_result.title
+    assert expected_result["shape"] == [actual_result.x.n, actual_result.y.n, actual_result.z.n]
+
+    expected = list(np.around(np.array(expected_result["4x4"]).flatten(), 4))
+    result = list(np.around(np.array(actual_result.pages[0].data).flatten(), 4))
+    assert expected == result, "Fluka data does not match expected values"

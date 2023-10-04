@@ -9,6 +9,8 @@ import timeit
 from multiprocessing import Pool
 
 from enum import IntEnum
+from typing import Tuple
+from pymchelper.flair import Input
 from pymchelper.executor.options import SimulationSettings
 
 from pymchelper.simulator_type import SimulatorType
@@ -91,12 +93,18 @@ class Runner:
         self.workspace_manager.create_working_directories(simulation_input_path=self.settings.input_path,
                                                           rng_seeds=rng_seeds)
 
+        if self.settings.simulator_type == SimulatorType.fluka:
+            for seed, workdir in zip(rng_seeds, self.workspace_manager.working_directories_abs_paths):
+                destination = str(Path(workdir) / Path(self.settings.input_path).name)
+                self.__update_fluka_input_file(destination, seed)
+
         # rng seeds injection to settings for each SingleSimulationExecutor call
         # TODO consider better way of doing it  # skipcq: PYL-W0511
         settings_list = []
         for rng_seed in rng_seeds:
             current_settings = deepcopy(self.settings)  # do not modify original arguments
-            current_settings.set_rng_seed(rng_seed)
+            if self.settings.simulator_type in [SimulatorType.shieldhit, SimulatorType.topas]:
+                current_settings.set_rng_seed(rng_seed)
             settings_list.append(current_settings)
 
         # create executor callable object for current run
@@ -142,6 +150,11 @@ class Runner:
             output_files_path = str(Path(self.workspace_manager.output_dir_absolute_path) / "run_1")
             estimators_list = get_topas_estimators(output_files_path)
 
+        elif self.settings.simulator_type == SimulatorType.fluka:
+            output_files_pattern = os.path.join(self.workspace_manager.output_dir_absolute_path, "run_*", "*_fort.*")
+            logging.debug("Files to merge %s", output_files_pattern)
+            estimators_list = frompattern(output_files_pattern)
+
         for estimator in estimators_list:
             logging.debug("Appending estimator for {:s}".format(estimator.file_corename))
             estimators_dict[estimator.file_corename] = estimator
@@ -151,10 +164,30 @@ class Runner:
         return estimators_dict
 
     def clean(self):
-        """
-        Removes all working directories (if exists)
-        """
+        """Removes all working directories (if exists)"""
         self.workspace_manager.clean()
+
+    @staticmethod
+    def __update_fluka_input_file(destination: str, rng_seed: int):
+        """Updates the FLUKA input file with the new RNG seed."""
+        with open(destination, 'r') as destination_file:
+            lines = destination_file.readlines()
+        has_randomize_card = False
+        for index, line in enumerate(lines):
+            if line.startswith('RANDOMIZ'):
+                card = Input.Card("RANDOMIZ")
+                card.setWhat(1, 1.)
+                card.setWhat(2, rng_seed)
+                lines[index] = card.toStr() + '\n'
+                has_randomize_card = True
+        if not has_randomize_card:
+            card = Input.Card("RANDOMIZ")
+            card.setWhat(1, 1.)
+            card.setWhat(2, rng_seed)
+            lines.append(card.toStr() + '\n')
+
+        with open(destination, 'w') as destination_file:
+            destination_file.writelines(lines)
 
 
 class SingleSimulationExecutor:
@@ -162,7 +195,7 @@ class SingleSimulationExecutor:
     Callable class responsible for execution of the single MC simulation process.
     """
 
-    def __call__(self, settings_and_working_dir, **kwargs):
+    def __call__(self, settings_and_working_dir: Tuple[SimulationSettings, str], **kwargs):
 
         # we deliberately combine settings and list of working directories
         # in the single argument `settings_and_working_dir`
@@ -179,7 +212,11 @@ class SingleSimulationExecutor:
             # finally we obtain a list like:
             # ('/usr/local/bin/shieldhit', '--time', '00:30:50', '-v', '-N', '3', '/data/my/simulation/input')
             command_as_list = core_command_string.split()
-            command_as_list.append(working_dir_abs_path)
+            if settings.simulator_type == SimulatorType.fluka:
+                input_file_path = str(Path(working_dir_abs_path) / Path(settings.input_path).name)
+                command_as_list.append(input_file_path)
+            else:
+                command_as_list.append(working_dir_abs_path)
 
             # execute the MC simulation on a spawned process
             # TODO handle this differently, i.e. redirect it to file or save in some variable   # skipcq: PYL-W0511
