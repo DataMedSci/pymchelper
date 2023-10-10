@@ -25,13 +25,26 @@ def guess_reader(filename):
     :return: Instantiated reader object
     """
     reader = None
+    logging.debug("Guessing reader for file %s", filename)
+    logging.debug("Checking FlukaReader")
     fluka_reader = FlukaReaderFactory(filename).get_reader()
+    logging.debug("Got: %s", fluka_reader)
     if fluka_reader:
+        logging.debug("Got FlukaReader")
         reader = fluka_reader(filename)
     else:
+        logging.debug("Checking SHReader")
         sh_reader = SHReaderFactory(filename).get_reader()
+        logging.debug("Got: %s", sh_reader)
         if sh_reader:
-            reader = sh_reader(filename)
+            try:
+                reader = sh_reader(filename)
+                reader.read_header(Estimator())
+            except ValueError as e:
+                logger.error("Error reading file %s: %s", filename, e)
+                topas_reader = TopasReaderFactory(filename).get_reader()
+                if topas_reader:
+                    reader = topas_reader(filename)
         else:
             topas_reader = TopasReaderFactory(filename).get_reader()
             if topas_reader:
@@ -55,7 +68,9 @@ def guess_corename(filename):
 def fromfile(filename: str) -> Optional[Estimator]:
     """Read estimator data from a binary file ```filename```"""
 
+    logger.debug("Reading file %s, guessing reader", filename)
     reader = guess_reader(filename)
+    logger.debug("Reader: %s", reader)
     if reader is None:
         raise Exception("File format not compatible", filename)
     estimator = Estimator()
@@ -85,6 +100,7 @@ def fromfilelist(input_file_list, error: ErrorEstimate = ErrorEstimate.stderr, n
             return None
     elif len(input_file_list) == 1:
         result = fromfile(input_file_list[0])
+        print("result", result.file_corename)
         if not result:
             return None
     else:
@@ -140,8 +156,9 @@ def fromfilelist(input_file_list, error: ErrorEstimate = ErrorEstimate.stderr, n
 
     result.file_counter = len(input_file_list)
     core_names_dict = group_input_files(input_file_list)
-    if len(core_names_dict) == 1:
+    if len(core_names_dict) == 1 and getattr(result, 'file_corename', None) is None:
         result.file_corename = list(core_names_dict)[0]
+        print("here result.file_corename", result.file_corename)
 
     return result
 
@@ -194,6 +211,7 @@ def convertfromlist(filelist, error, nan, outputdir, converter_name, options, ou
     :return:
     """
     estimator = fromfilelist(filelist, error, nan)
+    print(estimator.file_corename)
     if not estimator:
         return None
     if outputfile is not None:
