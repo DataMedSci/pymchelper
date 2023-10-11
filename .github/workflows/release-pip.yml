@@ -108,7 +108,7 @@ jobs:
     - name: Push changes to gh-pages branch
       # this action is being triggered on release tags (named v*)
       if: "github.event_name == 'push' && startsWith(github.event.ref, 'refs/tags/v')"
-      uses: ad-m/github-push-action@v0.6.0
+      uses: ad-m/github-push-action@v0.8.0
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
         branch: gh-pages
