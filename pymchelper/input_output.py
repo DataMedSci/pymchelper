@@ -41,7 +41,6 @@ def guess_reader(filename):
                 reader = sh_reader(filename)
                 reader.read_header(Estimator())
             except ValueError as e:
-                logger.error("Error reading file %s: %s", filename, e)
                 topas_reader = TopasReaderFactory(filename).get_reader()
                 if topas_reader:
                     reader = topas_reader(filename)
@@ -100,7 +99,6 @@ def fromfilelist(input_file_list, error: ErrorEstimate = ErrorEstimate.stderr, n
             return None
     elif len(input_file_list) == 1:
         result = fromfile(input_file_list[0])
-        print("result", result.file_corename)
         if not result:
             return None
     else:
@@ -211,7 +209,6 @@ def convertfromlist(filelist, error, nan, outputdir, converter_name, options, ou
     :return:
     """
     estimator = fromfilelist(filelist, error, nan)
-    print(estimator.file_corename)
     if not estimator:
         return None
     if outputfile is not None:
