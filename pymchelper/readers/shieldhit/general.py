@@ -137,7 +137,7 @@ class SHReaderFactory(ReaderFactory):
             # format tag specifying binary standard was introduced in SH12A v0.7.4-dev on  07.06.2019 (commit 6eddf98)
             file_format = read_token(self.filename, SHBDOTagID.format)
             if file_format:
-                logger.debug("File format: {} {:s}".format(file_format, SHFileFormatId(file_format).name))
+                logger.debug("File format: %s %s", file_format, SHFileFormatId(file_format).name)
                 if file_format == SHFileFormatId.bdo2019:
                     reader = SHReaderBDO2019
                 elif file_format == SHFileFormatId.bdo2016:
