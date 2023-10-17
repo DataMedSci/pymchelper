@@ -68,8 +68,10 @@ def test_read(topas_minimal_output_path: Path):
     assert estimator.z.name == "Z"
     assert estimator.z.n == 1
 
-    assert estimator.pages[0].name == "FluenceBPprotonsXY"
-    assert estimator.pages[0].title == "FluenceBPprotonsXY"
+    assert len(estimator.pages) == 3
+
+    assert estimator.pages[0].name == "FluenceBPprotonsXY (Mean)"
+    assert estimator.pages[0].title == "FluenceBPprotonsXY (Mean)"
     assert estimator.pages[0].dettyp == "Fluence"
     assert estimator.pages[0].unit == "/mm2"
 
@@ -83,7 +85,7 @@ def test_read(topas_minimal_output_path: Path):
         0.00505895, 0.00353209, 0., 0., 0.
     ]
     assert np.allclose(estimator.pages[0].data_raw, expected_data_mean, atol=1e-5)
-    assert np.allclose(estimator.pages[0].error_raw, expected_data_std, atol=1e-5)
+    assert np.allclose(estimator.pages[2].data_raw, expected_data_std, atol=1e-5)
 
 
 def test_cylindrical_coordinates(topas_cylinder_output_path: Path):
@@ -190,5 +192,5 @@ def test_five_columns(topas_five_columns: Path):
     reader = reader(str(topas_five_columns))
     estimator = Estimator()
     reader.read_data(estimator)
-    assert len(estimator.pages) == 1
+    assert len(estimator.pages) == 2
     assert estimator.pages[0].dimension == 1

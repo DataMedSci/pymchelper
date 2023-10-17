@@ -1,3 +1,5 @@
+from dataclasses import dataclass, field
+import logging
 from pathlib import Path
 import re
 from typing import List, Optional, Tuple
@@ -27,6 +29,27 @@ def extract_parameter_filename(header_line: str) -> Optional[str]:
     if match:
         parameter_filename = match.group(1)
     return parameter_filename
+
+
+@dataclass(frozen=True)
+class ScoringAxis:
+    name: str = ''
+    num: int = 0
+    size: float = np.nan
+    unit: str = ''
+
+
+def extract_axis_data(header_line: str) -> Optional[ScoringAxis]:
+    """Get parameter filename from the output file"""
+    pattern = r"# (\S.*) in (\d+) bin[s ] of ([\d.]+) (\w+)"
+    match = re.search(pattern, header_line)
+    axis = None
+    if match:
+        axis = ScoringAxis(name=match.group(1),
+                           num=int(match.group(2)),
+                           size=float(match.group(3)),
+                           unit=match.group(4))
+    return axis
 
 
 def extract_bins_data(dimensions: List[str], header_lines: List[str]) -> Optional[dict]:
@@ -59,7 +82,14 @@ def extract_scorer_name(header_line: str) -> Optional[str]:
     return name
 
 
-def extract_scorer_unit_results(header_line: str) -> Optional[Tuple[str, str, List]]:
+@dataclass(frozen=True)
+class ScoredQuantity:
+    name: str = ''
+    unit: str = ''
+    results: list[str] = field(default_factory=list)
+
+
+def extract_scorer_unit_results(header_line: str) -> Optional[ScoredQuantity]:
     """Get scoring quantity, unit and the scoring values (sum/mean/etc.) from the output file"""
     scorers = [
         'DoseToMedium', 'DoseToWater', 'DoseToMaterial', 'TrackLengthEstimator', 'AmbientDoseEquivalent',
@@ -76,13 +106,13 @@ def extract_scorer_unit_results(header_line: str) -> Optional[Tuple[str, str, Li
                 if match.group(1):
                     unit = match.group(1)[2:-2]
                 results = match.group(2).split()
-                return (scorer, unit, results)
+                return ScoredQuantity(name=scorer, unit=unit, results=results)
     return None
 
 
 def extract_differential_axis(header_line: str) -> Optional[MeshAxis]:
     """Check if the output file contains differential axis and get it from file if it does"""
-    if "# Binned by" in header_line:
+    if header_line.startswith("# Binned by"):
         pattern = r"# Binned by (.+?) in (\d+) bin[s ] of (\d+) (\w+) from ([\d.]+) (\w+) to ([\d.]+) (\w+)"
         match = re.search(pattern, header_line)
         if match:
@@ -120,17 +150,23 @@ class TopasReader(Reader):
         estimator.file_corename = Path(self.filename).name[:-4]
         estimator.file_format = "csv"
 
-        print(f"dupa {estimator.file_corename}")
+        logging.debug("Assuming file corename %s", estimator.file_corename)
         with open(self.filename, 'r') as results_file:
+            logging.debug("Reading file %s", self.filename)
             results_lines = results_file.readlines()
             header_lines = [line for line in results_lines if line.startswith("#")]
 
+            logging.debug("Guessing number of primaries from TOPAS input file")
             num_histories = 0
+            # Loop through header lines until we find the input file name
+            # and then read the number of histories from it
             for line in header_lines:
                 input_filename = extract_parameter_filename(line)
                 if input_filename is not None:
+                    logging.debug("Found input filename %s", input_filename)
                     input_file_path = Path(self.directory) / input_filename
                     if input_file_path.exists():
+                        logging.debug("Reading input file %s", input_file_path)
                         with open(input_file_path, 'r') as input_file:
                             pattern = r'NumberOfHistoriesInRun\s*=\s*(\d+)'
                             input_data = input_file.read()
@@ -139,52 +175,37 @@ class TopasReader(Reader):
                                 number_str = re.search(r'\d+', match.group())
                                 if number_str:
                                     num_histories = int(number_str.group())
+                    else:
+                        logging.info("Input file %s not found", input_file_path)
                     break
-
             estimator.number_of_primaries = num_histories
+            logging.debug("Number of primaries: %d", estimator.number_of_primaries)
 
-            dimensions = [['X', 'Y', 'Z'], ['R', 'Phi', 'Z'], ['R', 'Phi', 'Theta']]
+            no_bins = True
+            logging.debug("Scanning for axis specifications")
+            for line in header_lines:
+                axis_data = extract_axis_data(line)
+                if axis_data is not None:
+                    logging.debug("Found axis %s", axis_data.name)
+                    mesh_axis = MeshAxis(n=axis_data.num,
+                                         min_val=0.0,
+                                         max_val=axis_data.size * axis_data.num,
+                                         name=axis_data.name,
+                                         unit=axis_data.unit,
+                                         binning=MeshAxis.BinningType.linear)
+                    if axis_data.name in ('X', 'R'):
+                        estimator.x = mesh_axis
+                    if axis_data.name in ('Y', 'Phi'):
+                        estimator.y = mesh_axis
+                    if axis_data.name in ('Z', 'Theta'):
+                        estimator.z = mesh_axis
+                    no_bins = False
 
-            actual_dimensions = None
-            for curr_dimensions in dimensions:
-                for line_index in range(len(header_lines) - 3):
-                    bins_data = extract_bins_data(curr_dimensions, header_lines[line_index:line_index + 3])
-                    if bins_data is not None:
-                        actual_dimensions = curr_dimensions
-                        x_max = bins_data[actual_dimensions[0]]['size'] * bins_data[actual_dimensions[0]]['num']
-                        estimator.x = MeshAxis(n=bins_data[actual_dimensions[0]]['num'],
-                                               min_val=0.0,
-                                               max_val=x_max,
-                                               name=actual_dimensions[0],
-                                               unit=bins_data[actual_dimensions[0]]['unit'],
-                                               binning=MeshAxis.BinningType.linear)
-                        y_max = bins_data[actual_dimensions[1]]['size'] * bins_data[actual_dimensions[1]]['num']
-                        estimator.y = MeshAxis(n=bins_data[actual_dimensions[1]]['num'],
-                                               min_val=0.0,
-                                               max_val=y_max,
-                                               name=actual_dimensions[1],
-                                               unit=bins_data[actual_dimensions[1]]['unit'],
-                                               binning=MeshAxis.BinningType.linear)
-                        z_max = bins_data[actual_dimensions[2]]['size'] * bins_data[actual_dimensions[2]]['num']
-                        estimator.z = MeshAxis(n=bins_data[actual_dimensions[2]]['num'],
-                                               min_val=0.0,
-                                               max_val=z_max,
-                                               name=actual_dimensions[2],
-                                               unit=bins_data[actual_dimensions[2]]['unit'],
-                                               binning=MeshAxis.BinningType.linear)
-                        no_bins = False
-                        break
-                if actual_dimensions is not None:
-                    break
-
-            if bins_data is None:
-                # We assume that the geometry is not divided into bins
-                # (or in other words there is one bin with one score)
-                no_bins = True
-
+            logging.debug("Scanning for differential axis specifications")
             for line in header_lines:
                 differential_axis = extract_differential_axis(line)
                 if differential_axis is not None:
+                    logging.debug("Found differential axis %s", differential_axis.name)
                     break
 
             # In one output csv file there can be multiple results for one scorer
@@ -195,20 +216,24 @@ class TopasReader(Reader):
             for line in header_lines:
                 res = extract_scorer_unit_results(line)
                 if res is not None:
-                    scorer, unit, results = res
+                    scorer = res.name
+                    unit = res.unit
+                    results = res.results
                     break
 
             # We did not find scorer info in the output file
             if scorer is None:
                 return False
 
+            scorer_name = ''
+            for line in header_lines:
+                scorer_name = extract_scorer_name(line)
+                if scorer_name:
+                    break
+
             num_results = len(results)
-            page = Page(estimator=estimator)
-            set_data = False
-            set_error = False
             for column, result in enumerate(results):
-                if result not in ['Mean', 'Standard_Deviation']:
-                    continue
+                page = Page(estimator=estimator)
                 if differential_axis:
                     page.diff_axis1 = differential_axis
                     # When there is a differential axis, each line in csv contains scores
@@ -235,38 +260,25 @@ class TopasReader(Reader):
                     # where x, y, z are coordinates of the bin - we ignore them.
                     # Unless there are no bins - then there is one line with scores
                     # result1 result2 ...
+                    logging.debug("No differential scoring")
                     if no_bins:
+                        logging.debug("Data not binned")
                         data = np.genfromtxt(self.filename, delimiter=',')
                         if data.shape == ():
                             scores = np.array([data])
                         else:
                             scores = np.array([data[column]])
                     else:
+                        logging.debug("Binned data")
                         lines = np.genfromtxt(self.filename, delimiter=',')
                         scores = lines[:, column + 3]
 
-                for line in header_lines:
-                    title = extract_scorer_name(line)
-                    if title is not None:
-                        page.title = title
-                        page.name = title
-                        break
-
                 page.dettyp, page.unit = scorer, unit
-
-                if result == 'Mean':
-                    page.data_raw = scores
-                    set_data = True
-                elif result == 'Standard_Deviation':
-                    page.error_raw = scores
-                    set_error = True
-
-            # If we didn't find mean results for the scorer, we return False
-            if not set_data:
-                return False
-            if not set_error:
+                page.name = f"{scorer_name} ({result})"
+                page.title = page.name
+                page.data_raw = scores
                 page.error_raw = np.empty_like(page.data_raw)
-            estimator.add_page(page)
+                estimator.add_page(page)
             return True
 
     @property
