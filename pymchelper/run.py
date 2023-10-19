@@ -19,7 +19,8 @@ def add_default_options(parser):
     parser.add_argument('output', help='output filename or directory', nargs='?')
     parser.add_argument('--many', help='automatically merge data from various sources', action="store_true")
     parser.add_argument('-a', '--nan', help='ignore NaN in averaging', action="store_true")
-    parser.add_argument('-e', '--error',
+    parser.add_argument('-e',
+                        '--error',
                         help='type of error estimate to add (default: ' + ErrorEstimate.stderr.name + ')',
                         default=ErrorEstimate.stderr.name,
                         choices=[x.name for x in ErrorEstimate],
@@ -55,7 +56,8 @@ def main(args=None):
     parser_image = subparsers.add_parser(Converters.image.name, help='converts to PNG images')
     add_default_options(parser_image)
     axis_names = [x.name for x in PlotAxis]
-    parser_image.add_argument('-l', '--log',
+    parser_image.add_argument('-l',
+                              '--log',
                               help='set logscale for plot axis',
                               nargs='+',
                               choices=axis_names,
@@ -63,7 +65,7 @@ def main(args=None):
                               type=str)
     parser_image.add_argument("--colormap",
                               help='image color map, see https://matplotlib.org/stable/tutorials/colors/colormaps.html '
-                                   'for list of possible options (default: ' + ImageWriter.default_colormap + ')',
+                              'for list of possible options (default: ' + ImageWriter.default_colormap + ')',
                               default=ImageWriter.default_colormap,
                               type=str)
 
@@ -81,10 +83,10 @@ def main(args=None):
 
     parser_plotdata = subparsers.add_parser(Converters.plotdata.name, help='converts to plot data')
     add_default_options(parser_plotdata)
-
     parser_inspect = subparsers.add_parser(Converters.inspect.name, help='prints metadata')
     add_default_options(parser_inspect)
-    parser_inspect.add_argument('-d', '--details',
+    parser_inspect.add_argument('-d',
+                                '--details',
                                 help='print detailed information about data attribute',
                                 action="store_true")
 
@@ -103,9 +105,7 @@ def main(args=None):
     parser_tripddd.add_argument("--energy",
                                 help='energy of the beam [MeV/amu] (guess from data if option missing)',
                                 type=float)
-    parser_tripddd.add_argument("--projectile",
-                                help='projectile (guess from data if option missing)',
-                                type=str)
+    parser_tripddd.add_argument("--projectile", help='projectile (guess from data if option missing)', type=str)
     parser_tripddd.add_argument("--ngauss",
                                 help='number of Gaussian functions to fit (default: 0)',
                                 choices=(0, 1, 2),
@@ -149,13 +149,20 @@ def main(args=None):
         parsed_args.error = ErrorEstimate[parsed_args.error]
 
         if parsed_args.many:
-            status = convertfrompattern(parsed_args.input, output_dir,
-                                        converter_name=parsed_args.command, options=parsed_args,
-                                        error=parsed_args.error, nan=parsed_args.nan)
+            status = convertfrompattern(parsed_args.input,
+                                        output_dir,
+                                        converter_name=parsed_args.command,
+                                        options=parsed_args,
+                                        error=parsed_args.error,
+                                        nan=parsed_args.nan)
         else:
             status = convertfromlist(parsed_args.input,
-                                     error=parsed_args.error, nan=parsed_args.nan, outputdir=output_dir,
-                                     converter_name=parsed_args.command, options=parsed_args, outputfile=output_file)
+                                     error=parsed_args.error,
+                                     nan=parsed_args.nan,
+                                     outputdir=output_dir,
+                                     converter_name=parsed_args.command,
+                                     options=parsed_args,
+                                     outputfile=output_file)
 
     return status
 
