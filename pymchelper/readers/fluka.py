@@ -314,29 +314,30 @@ class UsrbinScoring:
     _he_tn_fluence_scorings = ['THEHAD-EQ', 'THNEU-EQ']
     _net_charge_scorings = ['NET-CHRG']
 
-    def get_scoring_and_unit(self, scoring_or_particle: str) -> tuple:
+    @classmethod
+    def get_scoring_and_unit(cls, scoring_or_particle: str) -> Tuple[str, str]:
         """Get scoring and unit from scoring name
 
         :param scoring: scoring name
         :return: tuple of scoring and unit
         """
-        if scoring_or_particle in self._deposition_scorings:
+        if scoring_or_particle in cls._deposition_scorings:
             return scoring_or_particle, 'MeV/g'
-        elif scoring_or_particle in self._fission_density_scorings:
+        elif scoring_or_particle in cls._fission_density_scorings:
             return scoring_or_particle, 'fissions/cm3'
-        elif scoring_or_particle in self._neutron_balance_desnity_scorings:
+        elif scoring_or_particle in cls._neutron_balance_desnity_scorings:
             return scoring_or_particle, 'neutrons/cm3'
-        elif scoring_or_particle in self._density_of_momentum_scorings:
+        elif scoring_or_particle in cls._density_of_momentum_scorings:
             return scoring_or_particle, 'MeV/cm3'
-        elif scoring_or_particle in self._activity_scorings:
+        elif scoring_or_particle in cls._activity_scorings:
             return scoring_or_particle, 'Bq/cm3'
-        elif scoring_or_particle in self._dose_equivalent_scorings:
+        elif scoring_or_particle in cls._dose_equivalent_scorings:
             return scoring_or_particle, 'Sv'
-        elif scoring_or_particle in self._fluence_weighted_bdf_scorings:
+        elif scoring_or_particle in cls._fluence_weighted_bdf_scorings:
             return scoring_or_particle, 'MeV/cm2'
-        elif scoring_or_particle in self._he_tn_fluence_scorings:
+        elif scoring_or_particle in cls._he_tn_fluence_scorings:
             return scoring_or_particle, 'He/cm2'
-        elif scoring_or_particle in self._net_charge_scorings:
+        elif scoring_or_particle in cls._net_charge_scorings:
             return scoring_or_particle, 'C/cm3'
         else:
             return scoring_or_particle, ''
