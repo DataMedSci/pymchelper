@@ -78,10 +78,14 @@ class FlukaReader(Reader):
                                        unit="cm",
                                        binning=MeshAxis.BinningType.linear)
 
+                # lets check if the detector.score is generalized particle name.
+                # if that is the case it means we are scoring Fluence for some particle filter
+                # we do a check by querying Flair DB is the particle name is known
                 particle_name_from_code = get_particle_from_db(detector.score)
                 if particle_name_from_code:
-                    page.name = particle_name_from_code.name
+                    page.name = f"FLUENCE ({particle_name_from_code.name})"
                 else:
+                    # here we have the case of genuine scorer (like dose)
                     page.name = f"scorer {detector.score}"
                 page.unit = ""
 
@@ -278,7 +282,7 @@ class FlukaReader(Reader):
 
 
 def get_particle_from_db(particle_id: int) -> Optional[Particle]:
-    """Get particle from flair database by its id"""
+    """Get particle from Flair database by its id"""
     try:
         Particle.makeLists()
         particle = Particle.get(particle_id)
