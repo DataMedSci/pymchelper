@@ -33,7 +33,8 @@ def expected_results() -> dict:
                 [0., 0.00146468, 0.00169978, 0.],
                 [0.00090805, 0., 0., 0.],
                 [0, 0., 0., 0.]
-            ]
+            ],
+            "name": "ENERGY"
         },
         "minimal001_fort.22": {
             "shape": [4, 4, 1],
@@ -42,7 +43,8 @@ def expected_results() -> dict:
                 [0., 0.00188021, 0.00166488, 0.],
                 [0., 0.0010242, 0.00105254, 0.],
                 [0., 0., 0., 0.]
-            ]
+            ],
+            "name": "ENERGY"
         }
     }
 
@@ -66,6 +68,8 @@ def test_fluka_mock(tmp_path: Path, output_file: str, expected_results: dict, fl
 def __verify_fluka_file(actual_result: Estimator, expected_result: dict):
     """Compares content of generated fluka file with expected values"""
     assert expected_result["shape"] == [actual_result.x.n, actual_result.y.n, actual_result.z.n]
+    assert len(actual_result.pages) == 1
+    assert expected_result['name'] in actual_result.pages[0].name
 
     expected = list(np.around(np.array(expected_result["4x4"]).flatten(), 4))
     result = list(np.around(np.array(actual_result.pages[0].data).flatten(), 4))
