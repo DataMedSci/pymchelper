@@ -16,6 +16,7 @@ class FlukaReaderFactory(ReaderFactory):
     """
     Class responsible for discovery of filetype.
     """
+
     def get_reader(self):
         """
         Try reading header of Fluka binary file and return a corresponding FlukaReader object
@@ -77,12 +78,11 @@ class FlukaReader(Reader):
                                        unit="cm",
                                        binning=MeshAxis.BinningType.linear)
 
-
                 particle_name_from_code = get_particle_from_db(detector.score)
                 if particle_name_from_code:
                     page.name = particle_name_from_code.name
                 else:
-                    page.name = "scorer {}".format(detector.score)
+                    page.name = f"scorer {detector.score}"
                 page.unit = ""
 
                 # unpack detector data
@@ -277,7 +277,8 @@ class FlukaReader(Reader):
         return True
 
 
-def get_particle_from_db(particle_id: str) -> Optional[Particle]:
+def get_particle_from_db(particle_id: int) -> Optional[Particle]:
+    """Get particle from flair database by its id"""
     try:
         Particle.makeLists()
         particle = Particle.get(particle_id)
