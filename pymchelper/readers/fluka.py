@@ -1,5 +1,5 @@
 import logging
-from typing import Optional
+from typing import Optional, Tuple
 
 import numpy as np
 
@@ -82,12 +82,15 @@ class FlukaReader(Reader):
                 # if that is the case it means we are scoring Fluence for some particle filter
                 # we do a check by querying Flair DB is the particle name is known
                 particle_from_code = get_particle_from_db(detector.score)
-                if particle_from_code:
-                    page.name = f"FLUENCE ({particle_from_code.name})"
+                scoring, unit = UsrbinScoring.get_scoring_and_unit(particle_from_code.name)
+                if unit:
+                    # here we have the case of genuine scorer (like dose, energy, etc.)
+                    page.name = f"{scoring}"
+                    page.unit = unit
                 else:
-                    # here we have the case of genuine scorer (like dose)
-                    page.name = f"scorer {detector.score}"
-                page.unit = ""
+                    # here we have the case of scoring for particles or some other quantity
+                    page.name = f"FLUENCE {particle_from_code.name}"
+                    page.unit = "/cm^2"
 
                 # unpack detector data
                 # TODO cross-check if reshaping is needed
@@ -311,33 +314,43 @@ class UsrbinScoring:
     _activity_scorings = ['ACTIVITY', 'ACTOMASS']
     _dose_equivalent_scorings = ['DOSE-EQ']
     _fluence_weighted_bdf_scorings = ['SI1MEVNE']
-    _he_tn_fluence_scorings = ['THEHAD-EQ', 'THNEU-EQ']
+    _he_tn_fluence_scorings = ['HEHAD-EQ', 'THNEU-EQ']
     _net_charge_scorings = ['NET-CHRG']
 
     @classmethod
     def get_scoring_and_unit(cls, scoring_or_particle: str) -> Tuple[str, str]:
         """Get scoring and unit from scoring name
 
+        Based on:
+        - (1) https://flukafiles.web.cern.ch/manual/chapters/particle_and_material_codes/particles_codes.html
+        - (2) https://flukafiles.web.cern.ch/manual/chapters/description_input/description_options/usrbin.html
         :param scoring: scoring name
         :return: tuple of scoring and unit
         """
         if scoring_or_particle in cls._deposition_scorings:
-            return scoring_or_particle, 'MeV/g'
+            if 'DOSE' in scoring_or_particle:
+                return scoring_or_particle, 'GeV/g '
+            return scoring_or_particle, 'GeV/g'
         elif scoring_or_particle in cls._fission_density_scorings:
-            return scoring_or_particle, 'fissions/cm3'
+            return scoring_or_particle, 'fissions/cm^3'
         elif scoring_or_particle in cls._neutron_balance_desnity_scorings:
-            return scoring_or_particle, 'neutrons/cm3'
+            return scoring_or_particle, 'neutrons/cm^3'
         elif scoring_or_particle in cls._density_of_momentum_scorings:
-            return scoring_or_particle, 'MeV/cm3'
+            return scoring_or_particle, 'cm^-2'
         elif scoring_or_particle in cls._activity_scorings:
-            return scoring_or_particle, 'Bq/cm3'
+            # This is not totally true, see ACTIVITY and ACTOMASS from 1st link
+            if 'ACTIVITY' == scoring_or_particle:
+                return scoring_or_particle, 'Bq/cm^3'
+            if 'ACTOMASS' == scoring_or_particle:
+                return scoring_or_particle, 'Bq/g'
+            return scoring_or_particle, ''
         elif scoring_or_particle in cls._dose_equivalent_scorings:
-            return scoring_or_particle, 'Sv'
+            return scoring_or_particle, 'pSv'
         elif scoring_or_particle in cls._fluence_weighted_bdf_scorings:
-            return scoring_or_particle, 'MeV/cm2'
+            return scoring_or_particle, 'GeV/cm^3'
         elif scoring_or_particle in cls._he_tn_fluence_scorings:
-            return scoring_or_particle, 'He/cm2'
+            return scoring_or_particle, 'cm-2'
         elif scoring_or_particle in cls._net_charge_scorings:
-            return scoring_or_particle, 'C/cm3'
+            return scoring_or_particle, 'C/cm^3'
         else:
             return scoring_or_particle, ''
