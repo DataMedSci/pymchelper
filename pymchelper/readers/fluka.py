@@ -81,9 +81,9 @@ class FlukaReader(Reader):
                 # lets check if the detector.score is generalized particle name.
                 # if that is the case it means we are scoring Fluence for some particle filter
                 # we do a check by querying Flair DB is the particle name is known
-                particle_name_from_code = get_particle_from_db(detector.score)
-                if particle_name_from_code:
-                    page.name = f"FLUENCE ({particle_name_from_code.name})"
+                particle_from_code = get_particle_from_db(detector.score)
+                if particle_from_code:
+                    page.name = f"FLUENCE ({particle_from_code.name})"
                 else:
                     # here we have the case of genuine scorer (like dose)
                     page.name = f"scorer {detector.score}"
@@ -289,3 +289,54 @@ def get_particle_from_db(particle_id: int) -> Optional[Particle]:
         return particle
     except KeyError:
         return None
+
+
+class UsrbinScoring:
+    """Scoring names for USRBIN estimator"""
+    _deposition_scorings = [
+        'ENERGY',
+        'EM-ENRGY',
+        'DOSE',
+        'UNB-ENER',
+        'UNB-EMEN',
+        'NIEL-DEP',
+        'DPA-SCO',
+        'DOSE-EM',
+        'DOSEQLET',
+        'RES-NIEL'
+    ]
+    _fission_density_scorings = ['FISSIONS', 'HE-FISS', 'LE-FISS']
+    _neutron_balance_desnity_scorings = ['NEU-BALA']
+    _density_of_momentum_scorings = ['X-MOMENT', 'Y-MOMENT', 'Z-MOMENT']
+    _activity_scorings = ['ACTIVITY', 'ACTOMASS']
+    _dose_equivalent_scorings = ['DOSE-EQ']
+    _fluence_weighted_bdf_scorings = ['SI1MEVNE']
+    _he_tn_fluence_scorings = ['THEHAD-EQ', 'THNEU-EQ']
+    _net_charge_scorings = ['NET-CHRG']
+
+    def get_scoring_and_unit(self, scoring_or_particle: str) -> tuple:
+        """Get scoring and unit from scoring name
+
+        :param scoring: scoring name
+        :return: tuple of scoring and unit
+        """
+        if scoring_or_particle in self._deposition_scorings:
+            return scoring_or_particle, 'MeV/g'
+        elif scoring_or_particle in self._fission_density_scorings:
+            return scoring_or_particle, 'fissions/cm3'
+        elif scoring_or_particle in self._neutron_balance_desnity_scorings:
+            return scoring_or_particle, 'neutrons/cm3'
+        elif scoring_or_particle in self._density_of_momentum_scorings:
+            return scoring_or_particle, 'MeV/cm3'
+        elif scoring_or_particle in self._activity_scorings:
+            return scoring_or_particle, 'Bq/cm3'
+        elif scoring_or_particle in self._dose_equivalent_scorings:
+            return scoring_or_particle, 'Sv'
+        elif scoring_or_particle in self._fluence_weighted_bdf_scorings:
+            return scoring_or_particle, 'MeV/cm2'
+        elif scoring_or_particle in self._he_tn_fluence_scorings:
+            return scoring_or_particle, 'He/cm2'
+        elif scoring_or_particle in self._net_charge_scorings:
+            return scoring_or_particle, 'C/cm3'
+        else:
+            return scoring_or_particle, ''
