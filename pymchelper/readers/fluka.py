@@ -1,8 +1,10 @@
 import logging
+from typing import Optional
 
 import numpy as np
 
 from pymchelper.axis import MeshAxis
+from pymchelper.flair.Input import Particle
 from pymchelper.page import Page
 from pymchelper.readers.common import ReaderFactory, Reader
 from pymchelper.flair.Data import Usrbin, UsrTrack, unpackArray, Usrbdx, Resnuclei, Usrxxx
@@ -75,7 +77,12 @@ class FlukaReader(Reader):
                                        unit="cm",
                                        binning=MeshAxis.BinningType.linear)
 
-                page.name = "scorer {}".format(detector.score)
+
+                particle_name_from_code = get_particle_from_db(detector.score)
+                if particle_name_from_code:
+                    page.name = particle_name_from_code.name
+                else:
+                    page.name = "scorer {}".format(detector.score)
                 page.unit = ""
 
                 # unpack detector data
@@ -268,3 +275,12 @@ class FlukaReader(Reader):
 
         estimator.file_format = 'fluka_binary'
         return True
+
+
+def get_particle_from_db(particle_id: str) -> Optional[Particle]:
+    try:
+        Particle.makeLists()
+        particle = Particle.get(particle_id)
+        return particle
+    except KeyError:
+        return None
