@@ -57,24 +57,23 @@ class FlukaReader(Reader):
             for det_no, detector in enumerate(usr_object.detector):
                 page = Page(estimator=estimator)
                 page.title = detector.name
-
                 # USRBIN doesn't support differential binning type, only spatial binning is allowed
                 estimator.x = MeshAxis(n=detector.nx,
                                        min_val=detector.xlow,
                                        max_val=detector.xhigh,
-                                       name="X",
+                                       name="Position (X)",
                                        unit="cm",
                                        binning=MeshAxis.BinningType.linear)
                 estimator.y = MeshAxis(n=detector.ny,
                                        min_val=detector.ylow,
                                        max_val=detector.yhigh,
-                                       name="Y",
+                                       name="Position (Y)",
                                        unit="cm",
                                        binning=MeshAxis.BinningType.linear)
                 estimator.z = MeshAxis(n=detector.nz,
                                        min_val=detector.zlow,
                                        max_val=detector.zhigh,
-                                       name="Z",
+                                       name="Position (Z)",
                                        unit="cm",
                                        binning=MeshAxis.BinningType.linear)
 

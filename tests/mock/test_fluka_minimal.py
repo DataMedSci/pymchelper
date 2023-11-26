@@ -8,6 +8,7 @@ from typing import Generator
 import numpy as np
 
 import pytest
+from pymchelper.axis import MeshAxis
 from pymchelper.estimator import Estimator
 
 
@@ -34,7 +35,22 @@ def expected_results() -> dict:
                 [0.00090805, 0., 0., 0.],
                 [0, 0., 0., 0.]
             ],
-            "name": "ENERGY"
+            "name": "ENERGY",
+            "axis": {
+                "x": {
+                    "name": "Position (X)",
+                    "unit": "cm",
+                },
+                "y": {
+                    "name": "Position (Y)",
+                    "unit": "cm",
+                },
+                "z": {
+                    "name": "Position (Z)",
+                    "unit": "cm",
+                },
+            }
+
         },
         "minimal001_fort.22": {
             "shape": [4, 4, 1],
@@ -44,7 +60,21 @@ def expected_results() -> dict:
                 [0., 0.0010242, 0.00105254, 0.],
                 [0., 0., 0., 0.]
             ],
-            "name": "ENERGY"
+            "name": "ENERGY",
+            "axis": {
+                "x": {
+                    "name": "Position (X)",
+                    "unit": "cm",
+                },
+                "y": {
+                    "name": "Position (Y)",
+                    "unit": "cm",
+                },
+                "z": {
+                    "name": "Position (Z)",
+                    "unit": "cm",
+                },
+            }
         }
     }
 
@@ -70,10 +100,18 @@ def __verify_fluka_file(actual_result: Estimator, expected_result: dict):
     assert expected_result["shape"] == [actual_result.x.n, actual_result.y.n, actual_result.z.n]
     assert len(actual_result.pages) == 1
     assert expected_result['name'] in actual_result.pages[0].name
+    for axis_name, value in expected_result["axis"].items():
+        verify_axis(actual_result.__getattribute__(axis_name), value)
 
     expected = list(np.around(np.array(expected_result["4x4"]).flatten(), 4))
     result = list(np.around(np.array(actual_result.pages[0].data).flatten(), 4))
     assert expected == result, "Fluka data does not match expected values"
+
+
+def verify_axis(axis: MeshAxis, expected_axis: dict):
+    """Compares axis of generated fluka file with expected values"""
+    assert axis.name == expected_axis["name"]
+    assert axis.unit == expected_axis["unit"]
 
 
 def append_path_to_environ(path: Path) -> dict:
