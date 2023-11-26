@@ -103,7 +103,7 @@ class FlukaReader(Reader):
             return None
 
     def parse_usrbdx(self, estimator):
-        """USRBDX defines a detector for a boundary crossing fluence or current estimator
+        """USRBDX defines a detector for a boundary crossing fluence or current estimator.
 
         :param estimator: an Estimator object, will be modified here and filled with data
         """
@@ -320,11 +320,12 @@ class UsrbinScoring:
 
     @classmethod
     def get_scoring_and_unit(cls, scoring_or_particle: str) -> Tuple[str, str]:
-        """Get scoring and unit from scoring name
+        """Get scoring and unit from scoring name.
 
         Based on:
         - (1) https://flukafiles.web.cern.ch/manual/chapters/particle_and_material_codes/particles_codes.html
         - (2) https://flukafiles.web.cern.ch/manual/chapters/description_input/description_options/usrbin.html
+
         :param scoring: scoring name
         :return: tuple of scoring and unit
         """
