@@ -50,7 +50,6 @@ def expected_results() -> dict:
                     "unit": "cm",
                 },
             }
-
         },
         "minimal001_fort.22": {
             "shape": [4, 4, 1],

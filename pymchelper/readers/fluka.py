@@ -1,5 +1,5 @@
 import logging
-from typing import Optional, Tuple
+from typing import Optional
 
 import numpy as np
 
@@ -80,16 +80,21 @@ class FlukaReader(Reader):
                 # lets check if the detector.score is generalized particle name.
                 # if that is the case it means we are scoring Fluence for some particle filter
                 # we do a check by querying Flair DB is the particle name is known
-                particle_from_code = get_particle_from_db(detector.score)
-                scoring, unit = UsrbinScoring.get_scoring_and_unit(particle_from_code.name)
-                if unit:
-                    # here we have the case of genuine scorer (like dose, energy, etc.)
-                    page.name = f"{scoring}"
-                    page.unit = unit
+                particle_or_scoring_from_id = get_particle_from_db(detector.score)
+                if particle_or_scoring_from_id:
+                    unit = UsrbinScoring.get_unit_for_scoring(particle_or_scoring_from_id.name)
+                    if unit:
+                        # here we have the case of genuine scorer (like dose, energy, etc.)
+                        page.name = particle_or_scoring_from_id.name
+                        page.unit = unit
+                    else:
+                        # here we have the case of scoring for particles
+                        page.name = f"FLUENCE {particle_or_scoring_from_id.name}"
+                        page.unit = "/cm^2"
                 else:
-                    # here we have the case of scoring for particles or some other quantity
-                    page.name = f"FLUENCE {particle_from_code.name}"
-                    page.unit = "/cm^2"
+                    # if not present in the database, we returns the scoring id and empty unit
+                    page.name = f"scorer {detector.score}"
+                    page.unit = ""
 
                 # unpack detector data
                 # TODO cross-check if reshaping is needed
@@ -312,8 +317,8 @@ class UsrbinScoring:
     _net_charge_scorings = ['NET-CHRG']
 
     @classmethod
-    def get_scoring_and_unit(cls, scoring_or_particle: str) -> Tuple[str, str]:
-        """Get scoring and unit from scoring name.
+    def get_unit_for_scoring(cls, scoring: str) -> str:
+        """Get unit for scoring name.
 
         Based on:
         - (1) https://flukafiles.web.cern.ch/manual/chapters/particle_and_material_codes/particles_codes.html
@@ -322,32 +327,33 @@ class UsrbinScoring:
         :param scoring: scoring name
         :return: tuple of scoring and unit
         """
-        if scoring_or_particle in cls._deposition_scorings:
-            if scoring_or_particle == 'DPA-SCO':
-                return scoring_or_particle, '/g'
-            if 'DOSE' in scoring_or_particle:
-                return scoring_or_particle, 'GeV/g '
-            return scoring_or_particle, 'GeV'
-        if scoring_or_particle in cls._fission_density_scorings:
-            return scoring_or_particle, 'fissions/cm^3'
-        if scoring_or_particle in cls._neutron_balance_desnity_scorings:
-            return scoring_or_particle, 'neutrons/cm^3'
-        if scoring_or_particle in cls._density_of_momentum_scorings:
-            return scoring_or_particle, 'cm^-2'
-        if scoring_or_particle in cls._activity_scorings:
+        if scoring in cls._deposition_scorings:
+            if scoring == 'DPA-SCO':
+                return '/g'
+            if 'DOSE' in scoring:
+                return 'GeV/g '
+            return 'GeV'
+        if scoring in cls._fission_density_scorings:
+            return 'fissions/cm^3'
+        if scoring in cls._neutron_balance_desnity_scorings:
+            return 'neutrons/cm^3'
+        if scoring in cls._density_of_momentum_scorings:
+            return 'cm^-2'
+        if scoring in cls._activity_scorings:
             # This is not totally true, see ACTIVITY and ACTOMASS from 1st link
-            if scoring_or_particle == 'ACTIVITY':
-                return scoring_or_particle, 'Bq/cm^3'
-            if scoring_or_particle == 'ACTOMASS':
-                return scoring_or_particle, 'Bq/g'
-            return scoring_or_particle, ''
-        if scoring_or_particle in cls._dose_equivalent_scorings:
-            return scoring_or_particle, 'pSv'
-        if scoring_or_particle in cls._fluence_weighted_bdf_scorings:
-            return scoring_or_particle, 'GeV/cm^3'
-        if scoring_or_particle in cls._he_tn_fluence_scorings:
-            return scoring_or_particle, 'cm-2'
-        if scoring_or_particle in cls._net_charge_scorings:
-            return scoring_or_particle, 'C/cm^3'
+            if scoring == 'ACTIVITY':
+                return 'Bq/cm^3'
+            if scoring == 'ACTOMASS':
+                return 'Bq/g'
+            return ''
+        if scoring in cls._dose_equivalent_scorings:
+            return 'pSv'
+        if scoring in cls._fluence_weighted_bdf_scorings:
+            return 'GeV/cm^3'
+        if scoring in cls._he_tn_fluence_scorings:
+            return 'cm-2'
+        if scoring in cls._net_charge_scorings:
+            return 'C/cm^3'
 
-        return scoring_or_particle, ''
+        # if unknown scoring, return empty string
+        return ''
