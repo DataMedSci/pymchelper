@@ -107,7 +107,6 @@ class FlukaReader(Reader):
 
         :param estimator: an Estimator object, will be modified here and filled with data
         """
-
         try:
             usr_object = Usrbdx(self.filename)
 
@@ -134,20 +133,22 @@ class FlukaReader(Reader):
 
                 # USRBDX doesn't support spatial (XYZ) binning type
                 # USRBDX provides double differential binning, first axis is kinetic energy (in GeV)
-                page.diff_axis1 = MeshAxis(n=detector.ne,  # number of energy intervals for scoring
-                                           min_val=detector.elow,  # minimum kinetic energy for scoring (GeV)
-                                           max_val=detector.ehigh,  # maximum kinetic energy for scoring (GeV)
-                                           name="kinetic energy",
-                                           unit="GeV",
-                                           binning=energy_binning)
+                page.diff_axis1 = MeshAxis(
+                    n=detector.ne,  # number of energy intervals for scoring
+                    min_val=detector.elow,  # minimum kinetic energy for scoring (GeV)
+                    max_val=detector.ehigh,  # maximum kinetic energy for scoring (GeV)
+                    name="kinetic energy",
+                    unit="GeV",
+                    binning=energy_binning)
 
                 # second axis is solid angle (in steradians)
-                page.diff_axis2 = MeshAxis(n=detector.na,  # number of angular bins
-                                           min_val=detector.alow,  # minimum solid angle for scoring
-                                           max_val=detector.ahigh,  # maximum solid angle for scoring
-                                           name="solid angle",
-                                           unit="sr",
-                                           binning=angle_binning)
+                page.diff_axis2 = MeshAxis(
+                    n=detector.na,  # number of angular bins
+                    min_val=detector.alow,  # minimum solid angle for scoring
+                    max_val=detector.ahigh,  # maximum solid angle for scoring
+                    name="solid angle",
+                    unit="sr",
+                    binning=angle_binning)
 
                 # detector.fluence corresponds to i2 in WHAT(1) in first card of USBDX
                 if detector.fluence == 1:
@@ -187,7 +188,7 @@ class FlukaReader(Reader):
             for det_no, detector in enumerate(usr_object.detector):
                 page = Page(estimator=estimator)
                 page.title = detector.name
-                page.volume = detector.volume   # volume of the detector in cm**3
+                page.volume = detector.volume  # volume of the detector in cm**3
 
                 # USRTRACK doesn't support spatial (XYZ) binning type
                 if detector.type == 1:
@@ -198,12 +199,13 @@ class FlukaReader(Reader):
                     return Exception("Invalid binning type")
 
                 # USRTRACK provides single differential binning, with diff axis in kinetic energy (in GeV)
-                page.diff_axis1 = MeshAxis(n=detector.ne,  # number of energy intervals for scoring
-                                           min_val=detector.elow,  # minimum kinetic energy for scoring (GeV)
-                                           max_val=detector.ehigh,  # maximum kinetic energy for scoring (GeV)
-                                           name="kinetic energy",
-                                           unit="GeV",
-                                           binning=energy_binning)
+                page.diff_axis1 = MeshAxis(
+                    n=detector.ne,  # number of energy intervals for scoring
+                    min_val=detector.elow,  # minimum kinetic energy for scoring (GeV)
+                    max_val=detector.ehigh,  # maximum kinetic energy for scoring (GeV)
+                    name="kinetic energy",
+                    unit="GeV",
+                    binning=energy_binning)
 
                 page.name = "fluence"
                 page.unit = "cm-2 GeV-1"
@@ -298,16 +300,7 @@ class UsrbinScoring:
     """Scoring names for USRBIN estimator"""
 
     _deposition_scorings = [
-        'ENERGY',
-        'EM-ENRGY',
-        'DOSE',
-        'UNB-ENER',
-        'UNB-EMEN',
-        'NIEL-DEP',
-        'DPA-SCO',
-        'DOSE-EM',
-        'DOSEQLET',
-        'RES-NIEL'
+        'ENERGY', 'EM-ENRGY', 'DOSE', 'UNB-ENER', 'UNB-EMEN', 'NIEL-DEP', 'DPA-SCO', 'DOSE-EM', 'DOSEQLET', 'RES-NIEL'
     ]
     _fission_density_scorings = ['FISSIONS', 'HE-FISS', 'LE-FISS']
     _neutron_balance_desnity_scorings = ['NEU-BALA']
