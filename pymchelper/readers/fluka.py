@@ -1,8 +1,10 @@
 import logging
+from typing import Optional
 
 import numpy as np
 
 from pymchelper.axis import MeshAxis
+from pymchelper.flair.Input import Particle
 from pymchelper.page import Page
 from pymchelper.readers.common import ReaderFactory, Reader
 from pymchelper.flair.Data import Usrbin, UsrTrack, unpackArray, Usrbdx, Resnuclei, Usrxxx
@@ -14,6 +16,7 @@ class FlukaReaderFactory(ReaderFactory):
     """
     Class responsible for discovery of filetype.
     """
+
     def get_reader(self):
         """
         Try reading header of Fluka binary file and return a corresponding FlukaReader object
@@ -54,29 +57,44 @@ class FlukaReader(Reader):
             for det_no, detector in enumerate(usr_object.detector):
                 page = Page(estimator=estimator)
                 page.title = detector.name
-
                 # USRBIN doesn't support differential binning type, only spatial binning is allowed
                 estimator.x = MeshAxis(n=detector.nx,
                                        min_val=detector.xlow,
                                        max_val=detector.xhigh,
-                                       name="X",
+                                       name="Position (X)",
                                        unit="cm",
                                        binning=MeshAxis.BinningType.linear)
                 estimator.y = MeshAxis(n=detector.ny,
                                        min_val=detector.ylow,
                                        max_val=detector.yhigh,
-                                       name="Y",
+                                       name="Position (Y)",
                                        unit="cm",
                                        binning=MeshAxis.BinningType.linear)
                 estimator.z = MeshAxis(n=detector.nz,
                                        min_val=detector.zlow,
                                        max_val=detector.zhigh,
-                                       name="Z",
+                                       name="Position (Z)",
                                        unit="cm",
                                        binning=MeshAxis.BinningType.linear)
 
-                page.name = "scorer {}".format(detector.score)
-                page.unit = ""
+                # lets check if the detector.score is generalized particle name.
+                # if that is the case it means we are scoring Fluence for some particle filter
+                # we do a check by querying Flair DB is the particle name is known
+                particle_or_scoring_from_id = get_particle_from_db(detector.score)
+                if particle_or_scoring_from_id:
+                    unit = UsrbinScoring.get_unit_for_scoring(particle_or_scoring_from_id.name)
+                    if unit:
+                        # here we have the case of genuine scorer (like dose, energy, etc.)
+                        page.name = particle_or_scoring_from_id.name
+                        page.unit = unit
+                    else:
+                        # here we have the case of scoring for particles
+                        page.name = f"FLUENCE {particle_or_scoring_from_id.name}"
+                        page.unit = "/cm^2"
+                else:
+                    # if not present in the database, we returns the scoring id and empty unit
+                    page.name = f"scorer {detector.score}"
+                    page.unit = ""
 
                 # unpack detector data
                 # TODO cross-check if reshaping is needed
@@ -90,8 +108,8 @@ class FlukaReader(Reader):
             return None
 
     def parse_usrbdx(self, estimator):
-        """
-        USRBDX defines a detector for a boundary crossing fluence or current estimator
+        """USRBDX defines a detector for a boundary crossing fluence or current estimator.
+
         :param estimator: an Estimator object, will be modified here and filled with data
         """
         try:
@@ -120,20 +138,22 @@ class FlukaReader(Reader):
 
                 # USRBDX doesn't support spatial (XYZ) binning type
                 # USRBDX provides double differential binning, first axis is kinetic energy (in GeV)
-                page.diff_axis1 = MeshAxis(n=detector.ne,  # number of energy intervals for scoring
-                                           min_val=detector.elow,  # minimum kinetic energy for scoring (GeV)
-                                           max_val=detector.ehigh,  # maximum kinetic energy for scoring (GeV)
-                                           name="kinetic energy",
-                                           unit="GeV",
-                                           binning=energy_binning)
+                page.diff_axis1 = MeshAxis(
+                    n=detector.ne,  # number of energy intervals for scoring
+                    min_val=detector.elow,  # minimum kinetic energy for scoring (GeV)
+                    max_val=detector.ehigh,  # maximum kinetic energy for scoring (GeV)
+                    name="kinetic energy",
+                    unit="GeV",
+                    binning=energy_binning)
 
                 # second axis is solid angle (in steradians)
-                page.diff_axis2 = MeshAxis(n=detector.na,  # number of angular bins
-                                           min_val=detector.alow,  # minimum solid angle for scoring
-                                           max_val=detector.ahigh,  # maximum solid angle for scoring
-                                           name="solid angle",
-                                           unit="sr",
-                                           binning=angle_binning)
+                page.diff_axis2 = MeshAxis(
+                    n=detector.na,  # number of angular bins
+                    min_val=detector.alow,  # minimum solid angle for scoring
+                    max_val=detector.ahigh,  # maximum solid angle for scoring
+                    name="solid angle",
+                    unit="sr",
+                    binning=angle_binning)
 
                 # detector.fluence corresponds to i2 in WHAT(1) in first card of USBDX
                 if detector.fluence == 1:
@@ -173,7 +193,7 @@ class FlukaReader(Reader):
             for det_no, detector in enumerate(usr_object.detector):
                 page = Page(estimator=estimator)
                 page.title = detector.name
-                page.volume = detector.volume   # volume of the detector in cm**3
+                page.volume = detector.volume  # volume of the detector in cm**3
 
                 # USRTRACK doesn't support spatial (XYZ) binning type
                 if detector.type == 1:
@@ -184,12 +204,13 @@ class FlukaReader(Reader):
                     return Exception("Invalid binning type")
 
                 # USRTRACK provides single differential binning, with diff axis in kinetic energy (in GeV)
-                page.diff_axis1 = MeshAxis(n=detector.ne,  # number of energy intervals for scoring
-                                           min_val=detector.elow,  # minimum kinetic energy for scoring (GeV)
-                                           max_val=detector.ehigh,  # maximum kinetic energy for scoring (GeV)
-                                           name="kinetic energy",
-                                           unit="GeV",
-                                           binning=energy_binning)
+                page.diff_axis1 = MeshAxis(
+                    n=detector.ne,  # number of energy intervals for scoring
+                    min_val=detector.elow,  # minimum kinetic energy for scoring (GeV)
+                    max_val=detector.ehigh,  # maximum kinetic energy for scoring (GeV)
+                    name="kinetic energy",
+                    unit="GeV",
+                    binning=energy_binning)
 
                 page.name = "fluence"
                 page.unit = "cm-2 GeV-1"
@@ -268,3 +289,71 @@ class FlukaReader(Reader):
 
         estimator.file_format = 'fluka_binary'
         return True
+
+
+def get_particle_from_db(particle_id: int) -> Optional[Particle]:
+    """Get particle from Flair database by its id"""
+    try:
+        Particle.makeLists()
+        particle = Particle.get(particle_id)
+        return particle
+    except KeyError:
+        return None
+
+
+class UsrbinScoring:
+    """Scoring names for USRBIN estimator"""
+
+    _deposition_scorings = [
+        'ENERGY', 'EM-ENRGY', 'DOSE', 'UNB-ENER', 'UNB-EMEN', 'NIEL-DEP', 'DPA-SCO', 'DOSE-EM', 'DOSEQLET', 'RES-NIEL'
+    ]
+    _fission_density_scorings = ['FISSIONS', 'HE-FISS', 'LE-FISS']
+    _neutron_balance_desnity_scorings = ['NEU-BALA']
+    _density_of_momentum_scorings = ['X-MOMENT', 'Y-MOMENT', 'Z-MOMENT']
+    _activity_scorings = ['ACTIVITY', 'ACTOMASS']
+    _dose_equivalent_scorings = ['DOSE-EQ']
+    _fluence_weighted_bdf_scorings = ['SI1MEVNE']
+    _he_tn_fluence_scorings = ['HEHAD-EQ', 'THNEU-EQ']
+    _net_charge_scorings = ['NET-CHRG']
+
+    @classmethod
+    def get_unit_for_scoring(cls, scoring: str) -> str:
+        """Get unit for scoring name.
+
+        Based on:
+        - (1) https://flukafiles.web.cern.ch/manual/chapters/particle_and_material_codes/particles_codes.html
+        - (2) https://flukafiles.web.cern.ch/manual/chapters/description_input/description_options/usrbin.html
+
+        :param scoring: scoring name
+        :return: tuple of scoring and unit
+        """
+        if scoring in cls._deposition_scorings:
+            if scoring == 'DPA-SCO':
+                return '/g'
+            if 'DOSE' in scoring:
+                return 'GeV/g '
+            return 'GeV'
+        if scoring in cls._fission_density_scorings:
+            return 'fissions/cm^3'
+        if scoring in cls._neutron_balance_desnity_scorings:
+            return 'neutrons/cm^3'
+        if scoring in cls._density_of_momentum_scorings:
+            return 'cm^-2'
+        if scoring in cls._activity_scorings:
+            # This is not totally true, see ACTIVITY and ACTOMASS from 1st link
+            if scoring == 'ACTIVITY':
+                return 'Bq/cm^3'
+            if scoring == 'ACTOMASS':
+                return 'Bq/g'
+            return ''
+        if scoring in cls._dose_equivalent_scorings:
+            return 'pSv'
+        if scoring in cls._fluence_weighted_bdf_scorings:
+            return 'GeV/cm^3'
+        if scoring in cls._he_tn_fluence_scorings:
+            return 'cm-2'
+        if scoring in cls._net_charge_scorings:
+            return 'C/cm^3'
+
+        # if unknown scoring, return empty string
+        return ''
