@@ -108,6 +108,7 @@ class FlukaReader(Reader):
         USRBDX defines a detector for a boundary crossing fluence or current estimator
         :param estimator: an Estimator object, will be modified here and filled with data
         """
+
         try:
             usr_object = Usrbdx(self.filename)
 
@@ -296,6 +297,7 @@ def get_particle_from_db(particle_id: int) -> Optional[Particle]:
 
 class UsrbinScoring:
     """Scoring names for USRBIN estimator"""
+
     _deposition_scorings = [
         'ENERGY',
         'EM-ENRGY',
@@ -328,29 +330,31 @@ class UsrbinScoring:
         :return: tuple of scoring and unit
         """
         if scoring_or_particle in cls._deposition_scorings:
+            if scoring_or_particle == 'DPA-SCO':
+                return scoring_or_particle, '/g'
             if 'DOSE' in scoring_or_particle:
                 return scoring_or_particle, 'GeV/g '
-            return scoring_or_particle, 'GeV/g'
-        elif scoring_or_particle in cls._fission_density_scorings:
+            return scoring_or_particle, 'GeV'
+        if scoring_or_particle in cls._fission_density_scorings:
             return scoring_or_particle, 'fissions/cm^3'
-        elif scoring_or_particle in cls._neutron_balance_desnity_scorings:
+        if scoring_or_particle in cls._neutron_balance_desnity_scorings:
             return scoring_or_particle, 'neutrons/cm^3'
-        elif scoring_or_particle in cls._density_of_momentum_scorings:
+        if scoring_or_particle in cls._density_of_momentum_scorings:
             return scoring_or_particle, 'cm^-2'
-        elif scoring_or_particle in cls._activity_scorings:
+        if scoring_or_particle in cls._activity_scorings:
             # This is not totally true, see ACTIVITY and ACTOMASS from 1st link
-            if 'ACTIVITY' == scoring_or_particle:
+            if scoring_or_particle == 'ACTIVITY':
                 return scoring_or_particle, 'Bq/cm^3'
-            if 'ACTOMASS' == scoring_or_particle:
+            if scoring_or_particle == 'ACTOMASS':
                 return scoring_or_particle, 'Bq/g'
             return scoring_or_particle, ''
-        elif scoring_or_particle in cls._dose_equivalent_scorings:
+        if scoring_or_particle in cls._dose_equivalent_scorings:
             return scoring_or_particle, 'pSv'
-        elif scoring_or_particle in cls._fluence_weighted_bdf_scorings:
+        if scoring_or_particle in cls._fluence_weighted_bdf_scorings:
             return scoring_or_particle, 'GeV/cm^3'
-        elif scoring_or_particle in cls._he_tn_fluence_scorings:
+        if scoring_or_particle in cls._he_tn_fluence_scorings:
             return scoring_or_particle, 'cm-2'
-        elif scoring_or_particle in cls._net_charge_scorings:
+        if scoring_or_particle in cls._net_charge_scorings:
             return scoring_or_particle, 'C/cm^3'
-        else:
-            return scoring_or_particle, ''
+
+        return scoring_or_particle, ''
