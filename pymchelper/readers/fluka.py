@@ -104,8 +104,8 @@ class FlukaReader(Reader):
             return None
 
     def parse_usrbdx(self, estimator):
-        """
-        USRBDX defines a detector for a boundary crossing fluence or current estimator
+        """USRBDX defines a detector for a boundary crossing fluence or current estimator
+
         :param estimator: an Estimator object, will be modified here and filled with data
         """
 
