@@ -362,12 +362,14 @@ class UsrbinScoring:
         # if unknown scoring, return empty string
         return ''
 
+
 @dataclass(frozen=True)
 class Axis:
     """Single axis description"""
 
     name: str
     unit: str
+
 
 @dataclass(frozen=True)
 class AxesDescription:
@@ -377,6 +379,7 @@ class AxesDescription:
     y: 'UsrbinAxes.Axis'
     z: 'UsrbinAxes.Axis'
 
+
 class UsrbinAxes:
     """Axes descriptions for USRBIN estimator"""
 
@@ -385,10 +388,11 @@ class UsrbinAxes:
     defaulf = cartesian_mesh
 
     @classmethod
-    def get_axes_description(cls, type: int) -> AxesDescription:
-        if type in (0, 10):
+    def get_axes_description(cls, binning_type: int) -> AxesDescription:
+        """Get axes descriptions for binding type"""
+        if binning_type in (0, 10):
             return cls.cartesian_mesh
-        if type in (1, 11):
+        if binning_type in (1, 11):
             return cls.cylindrical_mesh
 
         return cls.default
