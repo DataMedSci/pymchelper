@@ -375,7 +375,13 @@ class UsrbinScoring:
     def get_axes_description(binning_type: int) -> AxesDescription:
         """Get axes descriptions for binding type"""
         if binning_type in (1, 11):  # cylindrical mesh
-            return AxesDescription(AxisDescription("Radius (R)", "cm"), AxisDescription("Angle (PHI)", "rad"), AxisDescription("Position (Z)", "cm"))
+            return AxesDescription(
+                AxisDescription("Radius (R)", "cm"),
+                AxisDescription("Angle (PHI)", "rad"),
+                AxisDescription("Position (Z)", "cm"))
 
         # by default (which includes binning_type 0 and 10 we have Cartesian mesh)
-        return AxesDescription(AxisDescription("Position (X)", "cm"), AxisDescription("Position (Y)", "cm"), AxisDescription("Position (Z)", "cm"))
+        return AxesDescription(
+            AxisDescription("Position (X)", "cm"),
+            AxisDescription("Position (Y)", "cm"),
+            AxisDescription("Position (Z)", "cm"))
