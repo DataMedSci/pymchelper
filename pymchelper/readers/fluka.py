@@ -375,9 +375,9 @@ class Axis:
 class AxesDescription:
     """Axes descriptions"""
 
-    x: 'UsrbinAxes.Axis'
-    y: 'UsrbinAxes.Axis'
-    z: 'UsrbinAxes.Axis'
+    x: Axis
+    y: Axis
+    z: Axis
 
 
 class UsrbinAxes:
