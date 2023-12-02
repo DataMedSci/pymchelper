@@ -373,7 +373,7 @@ class UsrbinScoring:
 
     @staticmethod
     def get_axes_description(binning_type: int) -> AxesDescription:
-        """Get axes descriptions for binding type"""
+        """Get axes descriptions for binning type"""
         if binning_type in (1, 11):  # cylindrical mesh
             return AxesDescription(
                 AxisDescription("Radius (R)", "cm"),
