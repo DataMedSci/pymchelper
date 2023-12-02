@@ -380,7 +380,8 @@ class UsrbinScoring:
                 AxisDescription("Angle (PHI)", "rad"),
                 AxisDescription("Position (Z)", "cm"))
 
-        # by default (which includes binning_type 0 and 10 we have Cartesian mesh)
+        # As a default value for not yet implemented binning types.
+        # We use cartesian mesh.
         return AxesDescription(
             AxisDescription("Position (X)", "cm"),
             AxisDescription("Position (Y)", "cm"),

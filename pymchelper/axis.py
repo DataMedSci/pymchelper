@@ -1,6 +1,6 @@
 from collections import namedtuple
+from dataclasses import dataclass
 from enum import IntEnum
-from typing import NamedTuple
 
 import numpy as np
 
@@ -111,7 +111,8 @@ class AxisId(IntEnum):
     diff2 = 4
 
 
-class AxisDescription(NamedTuple):
+@dataclass
+class AxisDescription:
     """Single axis description"""
 
     name: str
