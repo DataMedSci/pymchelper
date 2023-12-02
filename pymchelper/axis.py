@@ -1,5 +1,6 @@
 from collections import namedtuple
 from enum import IntEnum
+from typing import NamedTuple
 
 import numpy as np
 
@@ -108,3 +109,10 @@ class AxisId(IntEnum):
     z = 2
     diff1 = 3
     diff2 = 4
+
+
+class AxisDescription(NamedTuple):
+    """Single axis description"""
+
+    name: str
+    unit: str

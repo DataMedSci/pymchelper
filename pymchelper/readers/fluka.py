@@ -4,7 +4,7 @@ from typing import Optional
 
 import numpy as np
 
-from pymchelper.axis import MeshAxis
+from pymchelper.axis import AxisDescription, MeshAxis
 from pymchelper.flair.Input import Particle
 from pymchelper.page import Page
 from pymchelper.readers.common import ReaderFactory, Reader
@@ -60,7 +60,7 @@ class FlukaReader(Reader):
                 page.title = detector.name
                 # USRBIN doesn't support differential binning type, only spatial binning is allowed
 
-                axes_description = UsrbinAxes.get_axes_description(detector.type)
+                axes_description = UsrbinScoring.get_axes_description(detector.type)
 
                 estimator.x = MeshAxis(n=detector.nx,
                                        min_val=detector.xlow,
@@ -305,8 +305,17 @@ def get_particle_from_db(particle_id: int) -> Optional[Particle]:
         return None
 
 
+@dataclass(frozen=True)
+class AxesDescription:
+    """Axes descriptions"""
+
+    x: AxisDescription
+    y: AxisDescription
+    z: AxisDescription
+
+
 class UsrbinScoring:
-    """Scoring names for USRBIN estimator"""
+    """Helper class for USRBIN scoring"""
 
     _deposition_scorings = [
         'ENERGY', 'EM-ENRGY', 'DOSE', 'UNB-ENER', 'UNB-EMEN', 'NIEL-DEP', 'DPA-SCO', 'DOSE-EM', 'DOSEQLET', 'RES-NIEL'
@@ -362,37 +371,11 @@ class UsrbinScoring:
         # if unknown scoring, return empty string
         return ''
 
-
-@dataclass(frozen=True)
-class Axis:
-    """Single axis description"""
-
-    name: str
-    unit: str
-
-
-@dataclass(frozen=True)
-class AxesDescription:
-    """Axes descriptions"""
-
-    x: Axis
-    y: Axis
-    z: Axis
-
-
-class UsrbinAxes:
-    """Axes descriptions for USRBIN estimator"""
-
-    cartesian_mesh = AxesDescription(Axis("Position (X)", "cm"), Axis("Position (Y)", "cm"), Axis("Position (Z)", "cm"))
-    cylindrical_mesh = AxesDescription(Axis("Radius (R)", "cm"), Axis("Angle (PHI)", "rad"), Axis("Position (Z)", "cm"))
-    defaulf = cartesian_mesh
-
-    @classmethod
-    def get_axes_description(cls, binning_type: int) -> AxesDescription:
+    @staticmethod
+    def get_axes_description(binning_type: int) -> AxesDescription:
         """Get axes descriptions for binding type"""
-        if binning_type in (0, 10):
-            return cls.cartesian_mesh
-        if binning_type in (1, 11):
-            return cls.cylindrical_mesh
+        if binning_type in (1, 11):  # cylindrical mesh
+            return AxesDescription(AxisDescription("Radius (R)", "cm"), AxisDescription("Angle (PHI)", "rad"), AxisDescription("Position (Z)", "cm"))
 
-        return cls.default
+        # by default (which includes binning_type 0 and 10 we have Cartesian mesh)
+        return AxesDescription(AxisDescription("Position (X)", "cm"), AxisDescription("Position (Y)", "cm"), AxisDescription("Position (Z)", "cm"))
