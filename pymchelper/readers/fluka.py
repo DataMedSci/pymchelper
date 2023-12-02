@@ -1,3 +1,4 @@
+from dataclasses import dataclass
 import logging
 from typing import Optional
 
@@ -59,23 +60,25 @@ class FlukaReader(Reader):
                 page.title = detector.name
                 # USRBIN doesn't support differential binning type, only spatial binning is allowed
 
+                axes_description = UsrbinAxes.get_axes_description(detector.type)
+
                 estimator.x = MeshAxis(n=detector.nx,
                                        min_val=detector.xlow,
                                        max_val=detector.xhigh,
-                                       name="Radius (R)" if detector.type in (1, 11) else "Position (X)",
-                                       unit="cm",
+                                       name=axes_description.x.name,
+                                       unit=axes_description.x.unit,
                                        binning=MeshAxis.BinningType.linear)
                 estimator.y = MeshAxis(n=detector.ny,
                                        min_val=detector.ylow,
                                        max_val=detector.yhigh,
-                                       name="Position (Y)",
-                                       unit="rad" if detector.type in (1, 11) else "cm",
+                                       name=axes_description.y.name,
+                                       unit=axes_description.y.unit,
                                        binning=MeshAxis.BinningType.linear)
                 estimator.z = MeshAxis(n=detector.nz,
                                        min_val=detector.zlow,
                                        max_val=detector.zhigh,
-                                       name="Position (Z)",
-                                       unit="cm",
+                                       name=axes_description.z.name,
+                                       unit=axes_description.z.unit,
                                        binning=MeshAxis.BinningType.linear)
 
                 # lets check if the detector.score is generalized particle name.
@@ -358,3 +361,34 @@ class UsrbinScoring:
 
         # if unknown scoring, return empty string
         return ''
+
+@dataclass(frozen=True)
+class Axis:
+    """Single axis description"""
+
+    name: str
+    unit: str
+
+@dataclass(frozen=True)
+class AxesDescription:
+    """Axes descriptions"""
+
+    x: 'UsrbinAxes.Axis'
+    y: 'UsrbinAxes.Axis'
+    z: 'UsrbinAxes.Axis'
+
+class UsrbinAxes:
+    """Axes descriptions for USRBIN estimator"""
+
+    cartesian_mesh = AxesDescription(Axis("Position (X)", "cm"), Axis("Position (Y)", "cm"), Axis("Position (Z)", "cm"))
+    cylindrical_mesh = AxesDescription(Axis("Radius (R)", "cm"), Axis("Angle (PHI)", "rad"), Axis("Position (Z)", "cm"))
+    defaulf = cartesian_mesh
+
+    @classmethod
+    def get_axes_description(cls, type: int) -> AxesDescription:
+        if type in (0, 10):
+            return cls.cartesian_mesh
+        if type in (1, 11):
+            return cls.cylindrical_mesh
+
+        return cls.default
