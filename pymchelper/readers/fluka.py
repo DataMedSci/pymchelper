@@ -1,9 +1,10 @@
+from dataclasses import dataclass
 import logging
 from typing import Optional
 
 import numpy as np
 
-from pymchelper.axis import MeshAxis
+from pymchelper.axis import AxisDescription, MeshAxis
 from pymchelper.flair.Input import Particle
 from pymchelper.page import Page
 from pymchelper.readers.common import ReaderFactory, Reader
@@ -58,23 +59,26 @@ class FlukaReader(Reader):
                 page = Page(estimator=estimator)
                 page.title = detector.name
                 # USRBIN doesn't support differential binning type, only spatial binning is allowed
+
+                axes_description = UsrbinScoring.get_axes_description(detector.type)
+
                 estimator.x = MeshAxis(n=detector.nx,
                                        min_val=detector.xlow,
                                        max_val=detector.xhigh,
-                                       name="Position (X)",
-                                       unit="cm",
+                                       name=axes_description.x.name,
+                                       unit=axes_description.x.unit,
                                        binning=MeshAxis.BinningType.linear)
                 estimator.y = MeshAxis(n=detector.ny,
                                        min_val=detector.ylow,
                                        max_val=detector.yhigh,
-                                       name="Position (Y)",
-                                       unit="cm",
+                                       name=axes_description.y.name,
+                                       unit=axes_description.y.unit,
                                        binning=MeshAxis.BinningType.linear)
                 estimator.z = MeshAxis(n=detector.nz,
                                        min_val=detector.zlow,
                                        max_val=detector.zhigh,
-                                       name="Position (Z)",
-                                       unit="cm",
+                                       name=axes_description.z.name,
+                                       unit=axes_description.z.unit,
                                        binning=MeshAxis.BinningType.linear)
 
                 # lets check if the detector.score is generalized particle name.
@@ -301,8 +305,17 @@ def get_particle_from_db(particle_id: int) -> Optional[Particle]:
         return None
 
 
+@dataclass(frozen=True)
+class AxesDescription:
+    """Axes descriptions"""
+
+    x: AxisDescription
+    y: AxisDescription
+    z: AxisDescription
+
+
 class UsrbinScoring:
-    """Scoring names for USRBIN estimator"""
+    """Helper class for USRBIN scoring"""
 
     _deposition_scorings = [
         'ENERGY', 'EM-ENRGY', 'DOSE', 'UNB-ENER', 'UNB-EMEN', 'NIEL-DEP', 'DPA-SCO', 'DOSE-EM', 'DOSEQLET', 'RES-NIEL'
@@ -357,3 +370,19 @@ class UsrbinScoring:
 
         # if unknown scoring, return empty string
         return ''
+
+    @staticmethod
+    def get_axes_description(binning_type: int) -> AxesDescription:
+        """Get axes descriptions for binning type"""
+        if binning_type in (1, 11):  # cylindrical mesh
+            return AxesDescription(
+                AxisDescription("Radius (R)", "cm"),
+                AxisDescription("Angle (PHI)", "rad"),
+                AxisDescription("Position (Z)", "cm"))
+
+        # As a default value for not yet implemented binning types.
+        # We use cartesian mesh.
+        return AxesDescription(
+            AxisDescription("Position (X)", "cm"),
+            AxisDescription("Position (Y)", "cm"),
+            AxisDescription("Position (Z)", "cm"))
