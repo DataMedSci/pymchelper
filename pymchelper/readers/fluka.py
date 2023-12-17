@@ -350,8 +350,8 @@ class UsrbinScoring:
                 return '/g', identity
             if 'DOSE' in scoring:
                 # Doses are expressed in GeV/g per unit primary weight.
-                # To obtain dose in Gy, we multiply it by 1.602176462E-7.
-                return 'Gy', 1.602176462E-7
+                # We are rescaling it to MeV/g
+                return 'MeV/g', 1000
             # Energy is expressed as GeV, we are rescaling it to MeV
             return 'MeV', 1000
         if scoring in cls._fission_density_scorings:
