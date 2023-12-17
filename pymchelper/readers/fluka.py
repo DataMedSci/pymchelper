@@ -85,8 +85,9 @@ class FlukaReader(Reader):
                 # if that is the case it means we are scoring Fluence for some particle filter
                 # we do a check by querying Flair DB is the particle name is known
                 particle_or_scoring_from_id = get_particle_from_db(detector.score)
+                rescaling_factor = 1.0
                 if particle_or_scoring_from_id:
-                    unit, rescaling = UsrbinScoring.get_unit_and_factor_for_scoring(particle_or_scoring_from_id.name)
+                    unit, rescaling_factor = UsrbinScoring.get_unit_and_factor_for_scoring(particle_or_scoring_from_id.name)
                     if unit:
                         # here we have the case of genuine scorer (like dose, energy, etc.)
                         page.name = particle_or_scoring_from_id.name
@@ -95,7 +96,6 @@ class FlukaReader(Reader):
                         # here we have the case of scoring for particles
                         page.name = f"FLUENCE {particle_or_scoring_from_id.name}"
                         page.unit = "/cm^2"
-                    page.data = page.data()
                 else:
                     # if not present in the database, we returns the scoring id and empty unit
                     page.name = f"scorer {detector.score}"
@@ -104,6 +104,7 @@ class FlukaReader(Reader):
                 # unpack detector data
                 # TODO cross-check if reshaping is needed
                 page.data_raw = np.array(unpackArray(usr_object.readData(det_no)))
+                page.data_raw *= rescaling_factor
                 page.error_raw = np.empty_like(page.data_raw)
 
                 estimator.add_page(page)
@@ -347,8 +348,11 @@ class UsrbinScoring:
             if scoring == 'DPA-SCO':
                 return '/g', identity
             if 'DOSE' in scoring:
-                return 'GeV/g ', identity
-            return 'GeV', identity
+                # Doses are expressed in GeV/g per unit primary weight.
+                # To obtain dose in Gy, we multiply it by 1.602176462E-7.
+                return 'Gy', 1.602176462E-7
+            # Energy is expressed as GeV, we are rescaling it to MeV
+            return 'MeV', 1000
         if scoring in cls._fission_density_scorings:
             return 'fissions/cm^3', identity
         if scoring in cls._neutron_balance_desnity_scorings:
