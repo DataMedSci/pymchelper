@@ -62,11 +62,11 @@ We assume you are familiar with GIT source control system.
     $ cd pymchelper
     $ git checkout -b feature/issue_number-name_of_your_bugfix_or_feature
 
-4. Create a dedicated virtual enviroment in `venv` directory for installation of python packages:
+4. Create a dedicated virtual enviroment in `venv` directory for installation of python packages::
 
     $ python -m venv venv
     $ source ./venv/bin/activate.sh
-    $ pip install -r requirements.txt    
+    $ pip install -r requirements.txt
 
 5. Make local changes to fix the bug or to implement a feature.
 
