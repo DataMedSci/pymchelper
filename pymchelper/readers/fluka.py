@@ -86,7 +86,7 @@ class FlukaReader(Reader):
                 # we do a check by querying Flair DB is the particle name is known
                 particle_or_scoring_from_id = get_particle_from_db(detector.score)
                 if particle_or_scoring_from_id:
-                    unit = UsrbinScoring.get_unit_for_scoring(particle_or_scoring_from_id.name)
+                    unit, rescaling = UsrbinScoring.get_unit_and_factor_for_scoring(particle_or_scoring_from_id.name)
                     if unit:
                         # here we have the case of genuine scorer (like dose, energy, etc.)
                         page.name = particle_or_scoring_from_id.name
@@ -95,6 +95,7 @@ class FlukaReader(Reader):
                         # here we have the case of scoring for particles
                         page.name = f"FLUENCE {particle_or_scoring_from_id.name}"
                         page.unit = "/cm^2"
+                    page.data = page.data()
                 else:
                     # if not present in the database, we returns the scoring id and empty unit
                     page.name = f"scorer {detector.score}"
@@ -330,7 +331,7 @@ class UsrbinScoring:
     _net_charge_scorings = ['NET-CHRG']
 
     @classmethod
-    def get_unit_for_scoring(cls, scoring: str) -> str:
+    def get_unit_and_factor_for_scoring(cls, scoring: str) -> (str, float):
         """Get unit for scoring name.
 
         Based on:
@@ -340,36 +341,38 @@ class UsrbinScoring:
         :param scoring: scoring name
         :return: tuple of scoring and unit
         """
+        identity = 1.0
+
         if scoring in cls._deposition_scorings:
             if scoring == 'DPA-SCO':
-                return '/g'
+                return '/g', identity
             if 'DOSE' in scoring:
-                return 'GeV/g '
-            return 'GeV'
+                return 'GeV/g ', identity
+            return 'GeV', identity
         if scoring in cls._fission_density_scorings:
-            return 'fissions/cm^3'
+            return 'fissions/cm^3', identity
         if scoring in cls._neutron_balance_desnity_scorings:
-            return 'neutrons/cm^3'
+            return 'neutrons/cm^3', identity
         if scoring in cls._density_of_momentum_scorings:
-            return 'cm^-2'
+            return 'cm^-2', identity
         if scoring in cls._activity_scorings:
             # This is not totally true, see ACTIVITY and ACTOMASS from 1st link
             if scoring == 'ACTIVITY':
-                return 'Bq/cm^3'
+                return 'Bq/cm^3', identity
             if scoring == 'ACTOMASS':
-                return 'Bq/g'
-            return ''
+                return 'Bq/g', identity
+            return '', identity
         if scoring in cls._dose_equivalent_scorings:
-            return 'pSv'
+            return 'pSv', identity
         if scoring in cls._fluence_weighted_bdf_scorings:
-            return 'GeV/cm^3'
+            return 'GeV/cm^3', identity
         if scoring in cls._he_tn_fluence_scorings:
-            return 'cm-2'
+            return 'cm-2', identity
         if scoring in cls._net_charge_scorings:
-            return 'C/cm^3'
+            return 'C/cm^3', identity
 
         # if unknown scoring, return empty string
-        return ''
+        return '', identity
 
     @staticmethod
     def get_axes_description(binning_type: int) -> AxesDescription:
