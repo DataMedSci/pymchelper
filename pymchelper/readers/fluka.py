@@ -87,7 +87,8 @@ class FlukaReader(Reader):
                 particle_or_scoring_from_id = get_particle_from_db(detector.score)
                 rescaling_factor = 1.0
                 if particle_or_scoring_from_id:
-                    unit, rescaling_factor = UsrbinScoring.get_unit_and_factor_for_scoring(particle_or_scoring_from_id.name)
+                    unit, rescaling_factor = UsrbinScoring.get_unit_and_factor_for_scoring(
+                        particle_or_scoring_from_id.name)
                     if unit:
                         # here we have the case of genuine scorer (like dose, energy, etc.)
                         page.name = particle_or_scoring_from_id.name
@@ -333,7 +334,7 @@ class UsrbinScoring:
 
     @classmethod
     def get_unit_and_factor_for_scoring(cls, scoring: str) -> (str, float):
-        """Get unit for scoring name.
+        """Get unit and rescaling factor for scoring
 
         Based on:
         - (1) https://flukafiles.web.cern.ch/manual/chapters/particle_and_material_codes/particles_codes.html
@@ -382,14 +383,10 @@ class UsrbinScoring:
     def get_axes_description(binning_type: int) -> AxesDescription:
         """Get axes descriptions for binning type"""
         if binning_type in (1, 11):  # cylindrical mesh
-            return AxesDescription(
-                AxisDescription("Radius (R)", "cm"),
-                AxisDescription("Angle (PHI)", "rad"),
-                AxisDescription("Position (Z)", "cm"))
+            return AxesDescription(AxisDescription("Radius (R)", "cm"), AxisDescription("Angle (PHI)", "rad"),
+                                   AxisDescription("Position (Z)", "cm"))
 
         # As a default value for not yet implemented binning types.
         # We use cartesian mesh.
-        return AxesDescription(
-            AxisDescription("Position (X)", "cm"),
-            AxisDescription("Position (Y)", "cm"),
-            AxisDescription("Position (Z)", "cm"))
+        return AxesDescription(AxisDescription("Position (X)", "cm"), AxisDescription("Position (Y)", "cm"),
+                               AxisDescription("Position (Z)", "cm"))
