@@ -53,7 +53,7 @@ def guess_corename(filename):
     return corename
 
 
-def fromfile(file_path: Path) -> Optional[Estimator]:
+def fromfile(file_path: Path, nscale: float = 1.) -> Optional[Estimator]:
     """Read estimator data from a binary file ```filename```"""
 
     reader = guess_reader(file_path)
@@ -64,11 +64,17 @@ def fromfile(file_path: Path) -> Optional[Estimator]:
     if not reader.read(estimator):  # some problems occurred during read
         logger.error("Error reading file %s", file_path)
         estimator = None
+    # rescale by user provided factor
+    for page in estimator.pages:
+        logging.info("Rescaling by %f", nscale)
+        page.data_raw *= np.float64(nscale)
+        page.error_raw *= np.float64(nscale)
     return estimator
 
 
 def fromfilelist(input_files_paths: list[Path],
                  error: ErrorEstimate = ErrorEstimate.stderr,
+                 nscale: float = 1,
                  nan: bool = True) -> Optional[Estimator]:
     """
     Reads all files from a given list, and returns a list of averaged estimators.
@@ -79,16 +85,16 @@ def fromfilelist(input_files_paths: list[Path],
     :return: list of estimators
     """
     if nan:
-        estimator_list = [fromfile(input_path) for input_path in input_files_paths]
+        estimator_list = [fromfile(input_path, nscale=nscale) for input_path in input_files_paths]
         result = average_with_nan(estimator_list, error)
         if not result:  # TODO check here !
             return None
     elif len(input_files_paths) == 1:
-        result = fromfile(input_files_paths[0])
+        result = fromfile(input_files_paths[0], nscale=nscale)
         if not result:
             return None
     else:
-        result = fromfile(input_files_paths[0])
+        result = fromfile(input_files_paths[0], nscale=nscale)
         if not result:
             return None
 
@@ -100,7 +106,7 @@ def fromfilelist(input_files_paths: list[Path],
 
         # loop over all files with n running from 2
         for n, filename in enumerate(input_files_paths[1:], start=2):
-            current_estimator = fromfile(filename)  # x
+            current_estimator = fromfile(filename, nscale=nscale)  # x
             logger.info("Reading file %s (%d/%d)", filename, n, len(input_files_paths))
 
             if not current_estimator:
@@ -146,7 +152,7 @@ def fromfilelist(input_files_paths: list[Path],
     return result
 
 
-def frompattern(pattern: str, error: ErrorEstimate = ErrorEstimate.stderr, nan: bool = True):
+def frompattern(pattern: str, error: ErrorEstimate = ErrorEstimate.stderr, nan: bool = True, nscale: float = 1.0):
     """
     Reads all files matching pattern, e.g.: 'foobar_*.bdo', and returns a list of averaged estimators.
 
@@ -163,7 +169,10 @@ def frompattern(pattern: str, error: ErrorEstimate = ErrorEstimate.stderr, nan: 
 
     core_names_dict = group_input_files(list_of_matching_files)
 
-    result = [fromfilelist(filelist, error, nan) for _, filelist in core_names_dict.items()]
+    result = [
+        fromfilelist(input_files_paths=filelist, error=error, nscale=nscale, nan=nan)
+        for _, filelist in core_names_dict.items()
+    ]
 
     return result
 
@@ -184,24 +193,17 @@ def get_topas_estimators(output_files_path: str) -> List[Estimator]:
 
 def convertfromlist(path_list: list[Path], error, nan, outputdir, converter_name, options, outputfile=None):
     """
-    :param filelist:
-    :param error: error estimation, see class ErrorEstimate class in pymchelper.estimator
-    :param nan: if True, NaN (not a number) are excluded when averaging data.
-    :param outputdir:
-    :param converter_name:
-    :param options:
-    :param outputfile:
-    :return:
+    TODO
     """
-    estimator = fromfilelist(path_list, error, nan)
+    estimator = fromfilelist(input_files_paths=path_list, error=error, nan=nan, nscale=options.nscale)
     if not estimator:
         return None
     if outputfile is not None:
         output_path = outputfile
     elif outputdir is None:
-        output_path = estimator.file_corename
+        output_path = Path(estimator.file_corename)
     else:
-        output_path = os.path.join(outputdir, estimator.file_corename)
+        output_path = outputdir / estimator.file_corename
     status = tofile(estimator, output_path, converter_name, options)
     return status
 

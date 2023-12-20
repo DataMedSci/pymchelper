@@ -25,7 +25,7 @@ def add_default_options(parser: argparse.ArgumentParser):
                         default=ErrorEstimate.stderr.name,
                         choices=[x.name for x in ErrorEstimate],
                         type=str)
-    parser.add_argument('-n', '--nscale', help='scale with number of primaries N.', default=1, type=float)
+    parser.add_argument('-n', '--nscale', help='scale with number of primaries N.', default=1., type=float)
     parser.add_argument('-v',
                         '--verbose',
                         action='count',
@@ -141,6 +141,8 @@ def main():
         output_file = parsed_args.output.name
 
     parsed_args.error = ErrorEstimate[parsed_args.error]
+
+    logging.info("nscale %g", parsed_args.nscale)
 
     if parsed_args.many:
         status = convertfrompattern(input_paths,

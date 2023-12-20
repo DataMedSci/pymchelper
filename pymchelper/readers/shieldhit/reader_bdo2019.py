@@ -17,7 +17,7 @@ logger = logging.getLogger(__name__)
 class SHReaderBDO2019(SHReader):
     """Experimental binary format reader version >= 0.7"""
 
-    def read_data(self, estimator: Estimator, nscale: int = 1):
+    def read_data(self, estimator: Estimator):
         logger.debug("Reading: %s", self.filename)
 
         with open(self.filename, "rb") as f:
@@ -171,12 +171,6 @@ class SHReaderBDO2019(SHReader):
                 if page_normalisation == 2:
                     page.data_raw /= np.float64(estimator.number_of_primaries)
                     page.error_raw /= np.float64(estimator.number_of_primaries)
-
-            # rescale by user-provided number of primaries
-            for page in estimator.pages:
-                logging.info("normalizing by factor %d", nscale)
-                page.data_raw *= nscale
-                page.error_raw *= nscale
 
         estimator.file_format = 'bdo2019'
 
