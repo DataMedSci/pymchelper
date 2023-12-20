@@ -2,6 +2,7 @@ import logging
 
 import numpy as np
 
+from pymchelper.estimator import Estimator
 from pymchelper.axis import MeshAxis
 from pymchelper.page import Page
 from pymchelper.readers.shieldhit.binary_spec import SHBDOTagID, detector_name_from_bdotag, unit_name_from_unit_id, \
@@ -16,16 +17,16 @@ logger = logging.getLogger(__name__)
 class SHReaderBDO2019(SHReader):
     """Experimental binary format reader version >= 0.7"""
 
-    def read_data(self, estimator, nscale=1):
+    def read_data(self, estimator: Estimator, nscale: int = 1):
         logger.debug("Reading: %s", self.filename)
 
         with open(self.filename, "rb") as f:
             d1 = np.dtype([('magic', 'S6'), ('end', 'S2'), ('vstr', 'S16')])
 
             _x = np.fromfile(f, dtype=d1, count=1)  # read the data into numpy
-            logger.debug("Magic : " + _x['magic'][0].decode('ASCII'))
-            logger.debug("Endiannes: " + _x['end'][0].decode('ASCII'))
-            logger.debug("VerStr: " + _x['vstr'][0].decode('ASCII'))
+            logger.debug("Magic : %s", _x['magic'][0].decode('ASCII'))
+            logger.debug("Endiannes: %s", _x['end'][0].decode('ASCII'))
+            logger.debug("VerStr: %s", _x['vstr'][0].decode('ASCII'))
 
             while f:
                 token = read_next_token(f)
@@ -50,20 +51,11 @@ class SHReaderBDO2019(SHReader):
 
                 try:
                     token_name = SHBDOTagID(token_id).name
-                    logger.debug("Read token {:s} (0x{:02x}) value {} type {:s} length {:d}".format(
-                        token_name,
-                        token_id,
-                        raw_payload,
-                        token_type.decode('ASCII'),
-                        payload_len
-                    ))
+                    logger.debug("Read token %s (0x%02x) value %s type %s length %d", token_name, token_id, raw_payload,
+                                 token_type.decode('ASCII'), payload_len)
                 except ValueError:
-                    logger.info("Found unknown token (0x{:02x}) value {} type {:s} length {:d}, skipping".format(
-                        token_id,
-                        raw_payload,
-                        token_type.decode('ASCII'),
-                        payload_len
-                    ))
+                    logger.info("Found unknown token (0x%02x) value %s type %s length %d}, skipping", token_id,
+                                raw_payload, token_type.decode('ASCII'), payload_len)
 
                 # geometry type
                 if SHBDOTagID.geometry_type == token_id:
@@ -179,6 +171,12 @@ class SHReaderBDO2019(SHReader):
                 if page_normalisation == 2:
                     page.data_raw /= np.float64(estimator.number_of_primaries)
                     page.error_raw /= np.float64(estimator.number_of_primaries)
+
+            # rescale by user-provided number of primaries
+            for page in estimator.pages:
+                logging.info("normalizing by factor %d", nscale)
+                page.data_raw *= nscale
+                page.error_raw *= nscale
 
         estimator.file_format = 'bdo2019'
 

@@ -1,5 +1,6 @@
 import logging
 import os
+from typing import Optional
 
 import numpy as np
 
@@ -27,15 +28,15 @@ class SHReader(Reader):
         return True
 
     @property
-    def corename(self):
+    def corename(self) -> Optional[str]:
         """
         TODO
         :return:
         """
         core_name = None
 
-        if self.filename.endswith(('.bdo', '.bdox')):  # TODO add more sophisticated check for file being SH12A output
-            basename = os.path.basename(self.filename)
+        if self.filename.suffix in ('.bdo', '.bdox'):  # TODO add more sophisticated check for file being SH12A output
+            basename = self.filename.name
             # we expect the basename to follow one of two conventions:
             #  - corenameABCD.bdo (where ABCD is 4-digit integer)
             #  - corename.bdo
@@ -64,8 +65,9 @@ def mesh_unit_and_name(estimator, axis):
 
     unit = _geotyp_units.get(estimator.geotyp, _default_units)[axis]
 
-    if estimator.geotyp in {SHGeoType.msh, SHGeoType.dmsh, SHGeoType.voxscore, SHGeoType.geomap,
-                            SHGeoType.plane, SHGeoType.dplane}:
+    if estimator.geotyp in {
+            SHGeoType.msh, SHGeoType.dmsh, SHGeoType.voxscore, SHGeoType.geomap, SHGeoType.plane, SHGeoType.dplane
+    }:
         name = ("Position (X)", "Position (Y)", "Position (Z)")[axis]
     elif estimator.geotyp in {SHGeoType.cyl, SHGeoType.dcyl}:
         name = ("Radius (R)", "Angle (PHI)", "Position (Z)")[axis]
@@ -161,9 +163,7 @@ def read_next_token(f):
     f is an open and readable file pointer.
     returns None if no token was found / EOF
     """
-    tag = np.dtype([('pl_id', '<u8'),
-                    ('pl_type', 'S8'),
-                    ('pl_len', '<u8')])
+    tag = np.dtype([('pl_id', '<u8'), ('pl_type', 'S8'), ('pl_len', '<u8')])
 
     x1 = np.fromfile(f, dtype=tag, count=1)  # read the data into numpy
 
@@ -174,9 +174,7 @@ def read_next_token(f):
         pl_type = x1['pl_type'][0]
         pl_len = x1['pl_len'][0]
         try:
-            pl = np.fromfile(f,
-                             dtype=pl_type,
-                             count=pl_len)  # read the data into numpy
+            pl = np.fromfile(f, dtype=pl_type, count=pl_len)  # read the data into numpy
             return pl_id, pl_type, pl_len, pl
         except TypeError:
             return None

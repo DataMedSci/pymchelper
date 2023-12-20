@@ -35,14 +35,14 @@ class FlukaReaderFactory(ReaderFactory):
 class FlukaReader(Reader):
 
     @property
-    def corename(self):
+    def corename(self) -> Optional[str]:
         """
         Fluka output filenames follow this pattern: corename_fort.XX.
         :return: corename part of output file or None in case filename doesn't follow Fluka naming pattern
         """
         core_name = None
-        if "_fort" in self.filename:
-            core_name = self.filename[-2:]
+        if "_fort" in self.filename.name:
+            core_name = self.filename.name[-2:]
         return core_name
 
     def parse_usrbin(self, estimator):
@@ -375,14 +375,10 @@ class UsrbinScoring:
     def get_axes_description(binning_type: int) -> AxesDescription:
         """Get axes descriptions for binning type"""
         if binning_type in (1, 11):  # cylindrical mesh
-            return AxesDescription(
-                AxisDescription("Radius (R)", "cm"),
-                AxisDescription("Angle (PHI)", "rad"),
-                AxisDescription("Position (Z)", "cm"))
+            return AxesDescription(AxisDescription("Radius (R)", "cm"), AxisDescription("Angle (PHI)", "rad"),
+                                   AxisDescription("Position (Z)", "cm"))
 
         # As a default value for not yet implemented binning types.
         # We use cartesian mesh.
-        return AxesDescription(
-            AxisDescription("Position (X)", "cm"),
-            AxisDescription("Position (Y)", "cm"),
-            AxisDescription("Position (Z)", "cm"))
+        return AxesDescription(AxisDescription("Position (X)", "cm"), AxisDescription("Position (Y)", "cm"),
+                               AxisDescription("Position (Z)", "cm"))

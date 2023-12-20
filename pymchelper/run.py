@@ -4,22 +4,23 @@ import argparse
 import glob
 import logging
 import sys
+from pathlib import Path
+from typing import Optional
 
 from pymchelper.estimator import ErrorEstimate
 from pymchelper.input_output import convertfromlist, convertfrompattern
 from pymchelper.writers.common import Converters
 from pymchelper.writers.plots import ImageWriter, PlotAxis
+import pymchelper.version as __version__
 
-logger = logging.getLogger(__name__)
 
-
-def add_default_options(parser):
-    import pymchelper
-    parser.add_argument('input', help='input filename, file list or pattern', type=str)
-    parser.add_argument('output', help='output filename or directory', nargs='?')
+def add_default_options(parser: argparse.ArgumentParser):
+    parser.add_argument('input', help='input filename, file list or pattern', type=Path)
+    parser.add_argument('output', help='output filename or directory', nargs='?', type=Path)
     parser.add_argument('--many', help='automatically merge data from various sources', action="store_true")
     parser.add_argument('-a', '--nan', help='ignore NaN in averaging', action="store_true")
-    parser.add_argument('-e', '--error',
+    parser.add_argument('-e',
+                        '--error',
                         help='type of error estimate to add (default: ' + ErrorEstimate.stderr.name + ')',
                         default=ErrorEstimate.stderr.name,
                         choices=[x.name for x in ErrorEstimate],
@@ -31,23 +32,16 @@ def add_default_options(parser):
                         default=0,
                         help='give more output. Option is additive, and can be used up to 3 times')
     parser.add_argument('-q', '--quiet', action='count', default=0, help='be silent')
-    parser.add_argument('-V', '--version', action='version', version=pymchelper.__version__)
+    parser.add_argument('-V', '--version', action='version', version=__version__)
 
 
-def main(args=None):
-    if args is None:
-        args = sys.argv[1:]
-    import os
-
-    import pymchelper
-
-    _progname = os.path.basename(sys.argv[0])
+def create_arg_parser(progname: str) -> argparse.ArgumentParser:
     _helptxt = 'Universal converter for FLUKA and SHIELD-HIT12A output files.'
-    _epitxt = f"Type '{_progname} <converter> --help' for help on a specific converter."
+    _epitxt = f"Type '{progname} <converter> --help' for help on a specific converter."
 
     parser = argparse.ArgumentParser(description=_helptxt, epilog=_epitxt)
 
-    subparsers = parser.add_subparsers(dest='command', metavar='converter')
+    subparsers = parser.add_subparsers(dest='command', metavar='converter', required=True)
 
     parser_txt = subparsers.add_parser(Converters.txt.name, help='converts to plain txt file')
     add_default_options(parser_txt)
@@ -55,7 +49,8 @@ def main(args=None):
     parser_image = subparsers.add_parser(Converters.image.name, help='converts to PNG images')
     add_default_options(parser_image)
     axis_names = [x.name for x in PlotAxis]
-    parser_image.add_argument('-l', '--log',
+    parser_image.add_argument('-l',
+                              '--log',
                               help='set logscale for plot axis',
                               nargs='+',
                               choices=axis_names,
@@ -63,7 +58,7 @@ def main(args=None):
                               type=str)
     parser_image.add_argument("--colormap",
                               help='image color map, see https://matplotlib.org/stable/tutorials/colors/colormaps.html '
-                                   'for list of possible options (default: ' + ImageWriter.default_colormap + ')',
+                              'for list of possible options (default: ' + ImageWriter.default_colormap + ')',
                               default=ImageWriter.default_colormap,
                               type=str)
 
@@ -84,7 +79,8 @@ def main(args=None):
 
     parser_inspect = subparsers.add_parser(Converters.inspect.name, help='prints metadata')
     add_default_options(parser_inspect)
-    parser_inspect.add_argument('-d', '--details',
+    parser_inspect.add_argument('-d',
+                                '--details',
                                 help='print detailed information about data attribute',
                                 action="store_true")
 
@@ -103,18 +99,22 @@ def main(args=None):
     parser_tripddd.add_argument("--energy",
                                 help='energy of the beam [MeV/amu] (guess from data if option missing)',
                                 type=float)
-    parser_tripddd.add_argument("--projectile",
-                                help='projectile (guess from data if option missing)',
-                                type=str)
+    parser_tripddd.add_argument("--projectile", help='projectile (guess from data if option missing)', type=str)
     parser_tripddd.add_argument("--ngauss",
                                 help='number of Gaussian functions to fit (default: 0)',
                                 choices=(0, 1, 2),
                                 default=0,
                                 type=int)
 
-    parser.add_argument('-V', '--version', action='version', version=pymchelper.__version__)
+    parser.add_argument('-V', '--version', action='version', version=__version__)
+    return parser
 
-    parsed_args = parser.parse_args(args)
+
+def main():
+    prog_name = Path(sys.argv[0]).name
+    parser = create_arg_parser(progname=prog_name)
+
+    parsed_args = parser.parse_args()
 
     verbose_flag = getattr(parsed_args, 'verbose', 0)
     if verbose_flag == 1:
@@ -125,40 +125,41 @@ def main(args=None):
         logging.basicConfig()
 
     status = 0
-    if parsed_args.command is not None:
-        # TODO add filename discovery
-        files = sorted(glob.glob(parsed_args.input))
-        if not files:
-            logger.error('File %s does not exist: ', parsed_args.input)
 
-        # check if output should be interpreted as a filename
-        if not parsed_args.many and len(files) == 1:
-            output_file = parsed_args.output
-        else:
-            output_file = None
+    input_paths: list[Path] = [parsed_args.input]
+    if '*' in str(parsed_args.input):
+        input_paths = list(Path('.').glob(str(parsed_args.input)))
 
-        if parsed_args.output is not None and output_file is None:
-            output_dir = parsed_args.output
-            # check if output directory exists
-            if output_dir and not os.path.exists(output_dir):
-                logger.warning("Directory %s does not exist, creating.", output_dir)
-                os.makedirs(output_dir)
-        else:
-            output_dir = '.'
+    output_dir = Path('.')
+    if parsed_args.output and parsed_args.output.is_dir():
+        output_dir = parsed_args.output
+    if parsed_args.output and parsed_args.output.is_file():
+        output_dir = parsed_args.output.parent
 
-        parsed_args.error = ErrorEstimate[parsed_args.error]
+    output_file: Optional[Path] = None
+    if parsed_args.output and parsed_args.output.is_file():
+        output_file = parsed_args.output.name
 
-        if parsed_args.many:
-            status = convertfrompattern(parsed_args.input, output_dir,
-                                        converter_name=parsed_args.command, options=parsed_args,
-                                        error=parsed_args.error, nan=parsed_args.nan)
-        else:
-            status = convertfromlist(parsed_args.input,
-                                     error=parsed_args.error, nan=parsed_args.nan, outputdir=output_dir,
-                                     converter_name=parsed_args.command, options=parsed_args, outputfile=output_file)
+    parsed_args.error = ErrorEstimate[parsed_args.error]
+
+    if parsed_args.many:
+        status = convertfrompattern(input_paths,
+                                    output_dir,
+                                    converter_name=parsed_args.command,
+                                    options=parsed_args,
+                                    error=parsed_args.error,
+                                    nan=parsed_args.nan)
+    else:
+        status = convertfromlist(input_paths,
+                                 error=parsed_args.error,
+                                 nan=parsed_args.nan,
+                                 outputdir=output_dir,
+                                 converter_name=parsed_args.command,
+                                 options=parsed_args,
+                                 outputfile=output_file)
 
     return status
 
 
 if __name__ == '__main__':
-    sys.exit(main(sys.argv[1:]))
+    sys.exit(main())
