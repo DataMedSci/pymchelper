@@ -370,7 +370,7 @@ class UsrbinScoring:
         if scoring in cls._dose_equivalent_scorings:
             return 'pSv', identity
         if scoring in cls._fluence_weighted_bdf_scorings:
-            return 'GeV/cm^3', identity
+            return 'MeV/cm^3', 1000
         if scoring in cls._he_tn_fluence_scorings:
             return 'cm-2', identity
         if scoring in cls._net_charge_scorings:
