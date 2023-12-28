@@ -85,8 +85,10 @@ class FlukaReader(Reader):
                 # if that is the case it means we are scoring Fluence for some particle filter
                 # we do a check by querying Flair DB is the particle name is known
                 particle_or_scoring_from_id = get_particle_from_db(detector.score)
+                rescaling_factor = 1.0
                 if particle_or_scoring_from_id:
-                    unit = UsrbinScoring.get_unit_for_scoring(particle_or_scoring_from_id.name)
+                    unit, rescaling_factor = UsrbinScoring.get_unit_and_factor_for_scoring(
+                        particle_or_scoring_from_id.name)
                     if unit:
                         # here we have the case of genuine scorer (like dose, energy, etc.)
                         page.name = particle_or_scoring_from_id.name
@@ -103,6 +105,7 @@ class FlukaReader(Reader):
                 # unpack detector data
                 # TODO cross-check if reshaping is needed
                 page.data_raw = np.array(unpackArray(usr_object.readData(det_no)))
+                page.data_raw *= rescaling_factor
                 page.error_raw = np.empty_like(page.data_raw)
 
                 estimator.add_page(page)
@@ -330,8 +333,8 @@ class UsrbinScoring:
     _net_charge_scorings = ['NET-CHRG']
 
     @classmethod
-    def get_unit_for_scoring(cls, scoring: str) -> str:
-        """Get unit for scoring name.
+    def get_unit_and_factor_for_scoring(cls, scoring: str) -> (str, float):
+        """Get unit and rescaling factor for scoring
 
         Based on:
         - (1) https://flukafiles.web.cern.ch/manual/chapters/particle_and_material_codes/particles_codes.html
@@ -340,49 +343,50 @@ class UsrbinScoring:
         :param scoring: scoring name
         :return: tuple of scoring and unit
         """
+        identity = 1.0
+
         if scoring in cls._deposition_scorings:
             if scoring == 'DPA-SCO':
-                return '/g'
+                return '/g', identity
             if 'DOSE' in scoring:
-                return 'GeV/g '
-            return 'GeV'
+                # Doses are expressed in GeV/g per unit primary weight.
+                # We are rescaling it to MeV/g
+                return 'MeV/g', 1000
+            # Energy is expressed as GeV, we are rescaling it to MeV
+            return 'MeV', 1000
         if scoring in cls._fission_density_scorings:
-            return 'fissions/cm^3'
+            return 'fissions/cm^3', identity
         if scoring in cls._neutron_balance_desnity_scorings:
-            return 'neutrons/cm^3'
+            return 'neutrons/cm^3', identity
         if scoring in cls._density_of_momentum_scorings:
-            return 'cm^-2'
+            return 'cm^-2', identity
         if scoring in cls._activity_scorings:
             # This is not totally true, see ACTIVITY and ACTOMASS from 1st link
             if scoring == 'ACTIVITY':
-                return 'Bq/cm^3'
+                return 'Bq/cm^3', identity
             if scoring == 'ACTOMASS':
-                return 'Bq/g'
-            return ''
+                return 'Bq/g', identity
+            return '', identity
         if scoring in cls._dose_equivalent_scorings:
-            return 'pSv'
+            return 'pSv', identity
         if scoring in cls._fluence_weighted_bdf_scorings:
-            return 'GeV/cm^3'
+            return 'MeV/cm^3', 1000
         if scoring in cls._he_tn_fluence_scorings:
-            return 'cm-2'
+            return 'cm-2', identity
         if scoring in cls._net_charge_scorings:
-            return 'C/cm^3'
+            return 'C/cm^3', identity
 
         # if unknown scoring, return empty string
-        return ''
+        return '', identity
 
     @staticmethod
     def get_axes_description(binning_type: int) -> AxesDescription:
         """Get axes descriptions for binning type"""
         if binning_type in (1, 11):  # cylindrical mesh
-            return AxesDescription(
-                AxisDescription("Radius (R)", "cm"),
-                AxisDescription("Angle (PHI)", "rad"),
-                AxisDescription("Position (Z)", "cm"))
+            return AxesDescription(AxisDescription("Radius (R)", "cm"), AxisDescription("Angle (PHI)", "rad"),
+                                   AxisDescription("Position (Z)", "cm"))
 
         # As a default value for not yet implemented binning types.
         # We use cartesian mesh.
-        return AxesDescription(
-            AxisDescription("Position (X)", "cm"),
-            AxisDescription("Position (Y)", "cm"),
-            AxisDescription("Position (Z)", "cm"))
+        return AxesDescription(AxisDescription("Position (X)", "cm"), AxisDescription("Position (Y)", "cm"),
+                               AxisDescription("Position (Z)", "cm"))
