@@ -133,7 +133,7 @@ def average_with_nan(estimator_list, error_estimate=ErrorEstimate.stderr):
     if not estimator_list:
         return None
     result = copy.deepcopy(estimator_list[0])
-    result.number_of_primaries = sum([estimator.number_of_primaries for estimator in estimator_list])
+    result.number_of_primaries = sum(estimator.number_of_primaries for estimator in estimator_list)
     for page_no, page in enumerate(result.pages):
         page.data_raw = np.nanmean([estimator.pages[page_no].data_raw for estimator in estimator_list], axis=0)
     result.file_counter = len(estimator_list)
