@@ -48,7 +48,7 @@ def test_call_cmd_option(option_name: str):
     with pytest.raises(SystemExit) as e:
         logger.info("Catching %s", e)
         pymchelper.utils.mcscripter.main(['--' + option_name])
-    assert e.value == 0
+    assert e.value.args[0] == 0
 
 
 def test_call_cmd_no_option():
@@ -56,7 +56,7 @@ def test_call_cmd_no_option():
     with pytest.raises(SystemExit) as e:
         logger.info("Catching %s", e)
         pymchelper.utils.mcscripter.main([])
-    assert e.value == 2
+    assert e.value.args[0] == 2
 
 
 @pytest.mark.parametrize("config_path", Configs.list(), ids=Configs.names())
