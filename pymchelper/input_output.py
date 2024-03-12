@@ -107,6 +107,8 @@ def fromfilelist(input_file_list, error: ErrorEstimate = ErrorEstimate.stderr, n
                 logger.warning("File %s could not be read", filename)
                 return None
 
+            result.number_of_primaries += current_estimator.number_of_primaries
+
             for current_page, result_page in zip(current_estimator.pages, result.pages):
                 # got a page with "concatenate normalisation"
                 if getattr(current_page, 'page_normalized', 2) == 4:
