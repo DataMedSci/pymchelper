@@ -48,7 +48,7 @@ def test_call_cmd_option(option_name: str):
     with pytest.raises(SystemExit) as e:
         logger.info("Catching {%s}", e)
         run.main([f'--{option_name}'])
-        assert e.value == 0
+    assert e.value.args[0] == 0
 
 
 @pytest.mark.smoke

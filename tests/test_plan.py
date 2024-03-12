@@ -24,7 +24,7 @@ def test_call_cmd_no_option():
     with pytest.raises(SystemExit) as e:
         logger.info("Catching: %s", e)
         pymchelper.utils.radiotherapy.plan.main([])
-        assert e.value == 2
+    assert e.value.args[0] == 2
 
 
 @pytest.mark.parametrize("option_name", ["version", "help"])
@@ -32,17 +32,15 @@ def test_call_cmd_option(option_name: str):
     """Test calling pymchelper with no options."""
     with pytest.raises(SystemExit) as e:
         logger.info("Catching: %s", e)
-        pymchelper.utils.radiotherapy.plan.main([])
-        assert e.value == 0
+        pymchelper.utils.radiotherapy.plan.main(['--' + option_name])
+    assert e.value.args[0] == 0
 
 
 @pytest.mark.parametrize("option_name", ["", "flip", "xflip", "yflip"])
 @pytest.mark.parametrize("input_file_path", input_files.values(), ids=input_files.keys())
 @pytest.mark.parametrize("beam_model_path", [beam_model_path, None], ids=[beam_model_path.stem, "no_beam_model"])
-def test_generate_plan(input_file_path: Path, beam_model_path: Union[Path, None],
-                       monkeypatch: pytest.MonkeyPatch,
-                       tmp_path: Path, capsys: pytest.CaptureFixture,
-                       option_name: str):
+def test_generate_plan(input_file_path: Path, beam_model_path: Union[Path, None], monkeypatch: pytest.MonkeyPatch,
+                       tmp_path: Path, capsys: pytest.CaptureFixture, option_name: str):
     """Test plan loading with and without beam model."""
     expected_output_file_path = Path(output_file)
 
