@@ -46,17 +46,17 @@ def default_config_path() -> Path:
 def test_call_cmd_option(option_name: str):
     """Description needed."""
     with pytest.raises(SystemExit) as e:
-        logger.info("Catching {:s}".format(str(e)))
+        logger.info("Catching %s", e)
         pymchelper.utils.mcscripter.main(['--' + option_name])
-        assert e.value == 0
+    assert e.value == 0
 
 
 def test_call_cmd_no_option():
     """Description needed."""
     with pytest.raises(SystemExit) as e:
-        logger.info("Catching {:s}".format(str(e)))
+        logger.info("Catching %s", e)
         pymchelper.utils.mcscripter.main([])
-        assert e.value == 2
+    assert e.value == 2
 
 
 @pytest.mark.parametrize("config_path", Configs.list(), ids=Configs.names())
@@ -106,8 +106,7 @@ def test_writing_template(config_path: Path, tmp_path: Path):
 
 
 @pytest.mark.parametrize("config_path", Configs.list(), ids=Configs.names())
-def test_execution(config_path: Path, monkeypatch: pytest.MonkeyPatch,
-                   tmp_path: Path):
+def test_execution(config_path: Path, monkeypatch: pytest.MonkeyPatch, tmp_path: Path):
     """Description needed."""
     logger.debug(f"current working directory {os.getcwd()}")
     full_path_to_config = config_path.resolve()
