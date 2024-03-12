@@ -32,8 +32,8 @@ def test_call_cmd_option(option_name: str):
     """Test calling pymchelper with no options."""
     with pytest.raises(SystemExit) as e:
         logger.info("Catching: %s", e)
-        pymchelper.utils.radiotherapy.plan.main([])
-    assert e.value.args[0] == 2
+        pymchelper.utils.radiotherapy.plan.main(['--' + option_name])
+    assert e.value.args[0] == 0
 
 
 @pytest.mark.parametrize("option_name", ["", "flip", "xflip", "yflip"])
