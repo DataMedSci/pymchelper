@@ -110,8 +110,31 @@ def fromfilelist(input_file_list, error: ErrorEstimate = ErrorEstimate.stderr, n
             result.number_of_primaries += current_estimator.number_of_primaries
 
             for current_page, result_page in zip(current_estimator.pages, result.pages):
+
+                # the method `fromfile` gives us pages which are already normalized 'per-primary' (if needed)
+                # for example dose and fluence are normalized per primary, while count is not
+
                 # got a page with "concatenate normalisation"
-                if getattr(current_page, 'page_normalized', 2) == 4:
+                current_page_normalisation = getattr(current_page, 'page_normalized', None)
+
+                # detectors like MATERIAL, RHO do not require averaging, we take them from the first file
+                if current_page_normalisation == 0:
+                    logger.debug("No averaging, taking first page, instead of %s", current_page.name)
+                    continue
+                # scorers like COUNT needs to be summed, not averaged
+                elif current_page_normalisation == 1:
+                    logger.debug("Summing page %s", current_page.name)
+                    result_page.data_raw += current_page.data_raw
+                # scorers like DOSE, FLUENCE NORMCOUNT (COUNT, normalized per prim particle) needs to be normalized "per-primary"
+                elif current_page_normalisation == 2:
+                    logger.debug("Per primary with %s", current_page.name)
+                    result_page.data_raw += current_page.data_raw * current_estimator.number_of_primaries
+                # scorers like LET needs to be averaged
+                elif current_page_normalisation == 3:
+                    logger.debug("Averaging with %s", current_page.name)
+                    result_page.data_raw += current_page.data_raw * current_estimator.number_of_primaries
+                # scorers with sequential data (like phasespace data) needs to be concatenated
+                elif current_page_normalisation == 4:
                     logger.debug("Concatenating page %s", current_page.name)
                     result_page.data_raw = np.concatenate((result_page.data_raw, current_page.data_raw))
                 else:
@@ -125,6 +148,11 @@ def fromfilelist(input_file_list, error: ErrorEstimate = ErrorEstimate.stderr, n
                     if error != ErrorEstimate.none:
                         # the line below is equivalent to M2 += delta * (x - mean)
                         result_page.error_raw += delta * (current_page.data_raw - result_page.data_raw)
+
+        if len(input_file_list) > 1:
+            for page in result.pages:
+                if page.page_normalized in {2, 3}:
+                    page.data_raw /= result.number_of_primaries
 
         # unbiased sample variance is stored in `__M2 / (n - 1)`
         # unbiased sample standard deviation in classical algorithm is calculated as (sqrt(1/(n-1)sum(x-<x>)**2)
