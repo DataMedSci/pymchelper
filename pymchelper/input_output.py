@@ -120,23 +120,28 @@ def fromfilelist(input_file_list, error: ErrorEstimate = ErrorEstimate.stderr, n
                 # detectors like MATERIAL, RHO do not require averaging, we take them from the first file
                 if current_page_normalisation == 0:
                     logger.debug("No averaging, taking first page, instead of %s", current_page.name)
-                    continue
                 # scorers like COUNT needs to be summed, not averaged
                 elif current_page_normalisation == 1:
                     logger.debug("Summing page %s", current_page.name)
                     result_page.data_raw += current_page.data_raw
-                # scorers like DOSE, FLUENCE NORMCOUNT (COUNT, normalized per prim particle) needs to be normalized "per-primary"
+                # scorers like DOSE, FLUENCE, NORMCOUNT needs to be normalized "per-primary"
                 elif current_page_normalisation == 2:
                     logger.debug("Per primary with %s", current_page.name)
+                    # here we get accumulate the "total dose"-like quantities, not the "per-primary"
+                    # later this will be divided by the total number of primaries, from all files
                     result_page.data_raw += current_page.data_raw * current_estimator.number_of_primaries
                 # scorers like LET needs to be averaged
                 elif current_page_normalisation == 3:
                     logger.debug("Averaging with %s", current_page.name)
+                    # here we accumulate the "LET * primaries" like contributions
+                    # that will be later divided by the total number of primaries, from all files
+                    # so we will get weighted (by number of primaries) average
                     result_page.data_raw += current_page.data_raw * current_estimator.number_of_primaries
                 # scorers with sequential data (like phasespace data) needs to be concatenated
                 elif current_page_normalisation == 4:
                     logger.debug("Concatenating page %s", current_page.name)
                     result_page.data_raw = np.concatenate((result_page.data_raw, current_page.data_raw))
+                # the else-case covers pages for which normalisation flag was not set (i.e. Fluka)
                 else:
                     logger.debug("Averaging page %s", current_page.name)
                     # Running variance algorithm based on algorithm by B. P. Welford,
@@ -149,6 +154,7 @@ def fromfilelist(input_file_list, error: ErrorEstimate = ErrorEstimate.stderr, n
                         # the line below is equivalent to M2 += delta * (x - mean)
                         result_page.error_raw += delta * (current_page.data_raw - result_page.data_raw)
 
+        # averaged or normalized quantities needs to be divided by the total number of primaries
         if len(input_file_list) > 1:
             for page in result.pages:
                 if page.page_normalized in {2, 3}:
