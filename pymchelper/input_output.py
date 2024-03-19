@@ -7,6 +7,7 @@ from typing import List, Optional
 
 import numpy as np
 
+from pymchelper.averaging import Aggregator, SumAggregator, WeightedStatsAggregator, ConcatenatingAggregator
 from pymchelper.estimator import ErrorEstimate, Estimator, average_with_nan
 from pymchelper.readers.topas import TopasReaderFactory
 from pymchelper.readers.fluka import FlukaReader, FlukaReaderFactory
@@ -66,6 +67,14 @@ def fromfile(filename: str) -> Optional[Estimator]:
     return estimator
 
 
+aggregator_type: dict[int, Aggregator] = {
+    1: SumAggregator,
+    2: WeightedStatsAggregator,
+    3: WeightedStatsAggregator,
+    4: ConcatenatingAggregator
+}
+
+
 def fromfilelist(input_file_list, error: ErrorEstimate = ErrorEstimate.stderr, nan: bool = True) -> Optional[Estimator]:
     """
     Reads all files from a given list, and returns a list of averaged estimators.
@@ -81,8 +90,6 @@ def fromfilelist(input_file_list, error: ErrorEstimate = ErrorEstimate.stderr, n
     if nan:
         estimator_list = [fromfile(filename) for filename in input_file_list]
         result = average_with_nan(estimator_list, error)
-        if not result:  # TODO check here !
-            return None
     elif len(input_file_list) == 1:
         result = fromfile(input_file_list[0])
         if not result:
@@ -92,87 +99,116 @@ def fromfilelist(input_file_list, error: ErrorEstimate = ErrorEstimate.stderr, n
         if not result:
             return None
 
-        # allocate memory for accumulator in standard deviation calculation
-        # not needed if user requested not to include errors
-        if error != ErrorEstimate.none:
-            for page in result.pages:
-                page.error_raw = np.zeros_like(page.data_raw)
+        page_aggregators = []
+        for page in result.pages:
+            # got a page with "concatenate normalisation"
+            current_page_normalisation = getattr(page, 'page_normalized', 2)
+            aggregator = aggregator_type[current_page_normalisation]()
+            aggregator.update(page.data_raw)
+            page_aggregators.append(aggregator)
 
-        # loop over all files with n running from 2
         for n, filename in enumerate(input_file_list[1:], start=2):
-            current_estimator = fromfile(filename)  # x
-            logger.info("Reading file %s (%d/%d)", filename, n, len(input_file_list))
+            current_estimator = fromfile(filename)
+            for current_page, aggregator in zip(current_estimator.pages, page_aggregators):
+                aggregator.update(current_page.data_raw)
 
-            if not current_estimator:
-                logger.warning("File %s could not be read", filename)
-                return None
+        for page, aggregator in zip(result.pages, page_aggregators):
+            page.data_raw = aggregator.data
+            page.error_raw = aggregator.error()
 
-            result.number_of_primaries += current_estimator.number_of_primaries
+        # ws_objects = [WeightedStats() for _ in result.pages]
+        # for ws, filename in zip(ws_objects, input_file_list):
+        #     estimator = fromfile(filename)
+        #     if not estimator:
+        #         return None
+        #     for page_no, page in enumerate(estimator.pages):
+        #         ws.update(page.data_raw, estimator.number_of_primaries)
+        # for ws, page in zip(ws_objects, result.pages):
+        #     page.data_raw = ws.mean
+        #     if error != ErrorEstimate.none:
+        #         page.error_raw = ws.variance_sample
 
-            for current_page, result_page in zip(current_estimator.pages, result.pages):
+        # # allocate memory for accumulator in standard deviation calculation
+        # # not needed if user requested not to include errors
+        # if error != ErrorEstimate.none:
+        #     for page in result.pages:
+        #         page.error_raw = np.zeros_like(page.data_raw)
 
-                # the method `fromfile` gives us pages which are already normalized 'per-primary' (if needed)
-                # for example dose and fluence are normalized per primary, while count is not
+        # # loop over all files with n running from 2
+        # for n, filename in enumerate(input_file_list[1:], start=2):
+        #     current_estimator = fromfile(filename)  # x
+        #     logger.info("Reading file %s (%d/%d)", filename, n, len(input_file_list))
 
-                # got a page with "concatenate normalisation"
-                current_page_normalisation = getattr(current_page, 'page_normalized', None)
+        #     if not current_estimator:
+        #         logger.warning("File %s could not be read", filename)
+        #         return None
 
-                # detectors like MATERIAL, RHO do not require averaging, we take them from the first file
-                if current_page_normalisation == 0:
-                    logger.debug("No averaging, taking first page, instead of %s", current_page.name)
-                # scorers like COUNT needs to be summed, not averaged
-                elif current_page_normalisation == 1:
-                    logger.debug("Summing page %s", current_page.name)
-                    result_page.data_raw += current_page.data_raw
-                # scorers like DOSE, FLUENCE, NORMCOUNT needs to be normalized "per-primary"
-                elif current_page_normalisation == 2:
-                    logger.debug("Per primary with %s", current_page.name)
-                    # here we get accumulate the "total dose"-like quantities, not the "per-primary"
-                    # later this will be divided by the total number of primaries, from all files
-                    result_page.data_raw += current_page.data_raw * current_estimator.number_of_primaries
-                # scorers like LET needs to be averaged
-                elif current_page_normalisation == 3:
-                    logger.debug("Averaging with %s", current_page.name)
-                    # here we accumulate the "LET * primaries" like contributions
-                    # that will be later divided by the total number of primaries, from all files
-                    # so we will get weighted (by number of primaries) average
-                    result_page.data_raw += current_page.data_raw * current_estimator.number_of_primaries
-                # scorers with sequential data (like phasespace data) needs to be concatenated
-                elif current_page_normalisation == 4:
-                    logger.debug("Concatenating page %s", current_page.name)
-                    result_page.data_raw = np.concatenate((result_page.data_raw, current_page.data_raw))
-                # the else-case covers pages for which normalisation flag was not set (i.e. Fluka)
-                else:
-                    logger.debug("Averaging page %s", current_page.name)
-                    # Running variance algorithm based on algorithm by B. P. Welford,
-                    # presented in Donald Knuth's Art of Computer Programming, Vol 2, page 232, 3rd edition.
-                    # Can be found here: http://www.johndcook.com/blog/standard_deviation/
-                    # and https://en.wikipedia.org/wiki/Algorithms_for_calculating_variance#Online_algorithm
-                    delta = current_page.data_raw - result_page.data_raw  # delta = x - mean
-                    result_page.data_raw += delta / np.float64(n)
-                    if error != ErrorEstimate.none:
-                        # the line below is equivalent to M2 += delta * (x - mean)
-                        result_page.error_raw += delta * (current_page.data_raw - result_page.data_raw)
+        #     result.number_of_primaries += current_estimator.number_of_primaries
 
-        # averaged or normalized quantities needs to be divided by the total number of primaries
-        if len(input_file_list) > 1:
-            for page in result.pages:
-                if page.page_normalized in {2, 3}:
-                    page.data_raw /= result.number_of_primaries
+        #     for current_page, result_page in zip(current_estimator.pages, result.pages):
 
-        # unbiased sample variance is stored in `__M2 / (n - 1)`
-        # unbiased sample standard deviation in classical algorithm is calculated as (sqrt(1/(n-1)sum(x-<x>)**2)
-        # here it is calculated as square root of unbiased sample variance:
-        if len(input_file_list) > 1 and error != ErrorEstimate.none:
-            for page in result.pages:
-                page.error_raw = np.sqrt(page.error_raw / (len(input_file_list) - 1.0))
+        #         # the method `fromfile` gives us pages which are already normalized 'per-primary' (if needed)
+        #         # for example dose and fluence are normalized per primary, while count is not
 
-        # if user requested standard error then we calculate it as:
-        # S = stderr = stddev / sqrt(N), or in other words,
-        # S = s/sqrt(N) where S is the corrected standard deviation of the mean.
-        if len(input_file_list) > 1 and error == ErrorEstimate.stderr:
-            for page in result.pages:
-                page.error_raw /= np.sqrt(len(input_file_list))  # np.sqrt() always returns np.float64
+        #         # got a page with "concatenate normalisation"
+        #         current_page_normalisation = getattr(current_page, 'page_normalized', None)
+
+        #         # detectors like MATERIAL, RHO do not require averaging, we take them from the first file
+        #         if current_page_normalisation == 0:
+        #             logger.debug("No averaging, taking first page, instead of %s", current_page.name)
+        #         # scorers like COUNT needs to be summed, not averaged
+        #         elif current_page_normalisation == 1:
+        #             logger.debug("Summing page %s", current_page.name)
+        #             result_page.data_raw += current_page.data_raw
+        #         # scorers like DOSE, FLUENCE, NORMCOUNT needs to be normalized "per-primary"
+        #         elif current_page_normalisation == 2:
+        #             logger.debug("Per primary with %s", current_page.name)
+        #             # here we get accumulate the "total dose"-like quantities, not the "per-primary"
+        #             # later this will be divided by the total number of primaries, from all files
+        #             result_page.data_raw += current_page.data_raw * current_estimator.number_of_primaries
+        #         # scorers like LET needs to be averaged
+        #         elif current_page_normalisation == 3:
+        #             logger.debug("Averaging with %s", current_page.name)
+        #             # here we accumulate the "LET * primaries" like contributions
+        #             # that will be later divided by the total number of primaries, from all files
+        #             # so we will get weighted (by number of primaries) average
+        #             result_page.data_raw += current_page.data_raw * current_estimator.number_of_primaries
+        #         # scorers with sequential data (like phasespace data) needs to be concatenated
+        #         elif current_page_normalisation == 4:
+        #             logger.debug("Concatenating page %s", current_page.name)
+        #             result_page.data_raw = np.concatenate((result_page.data_raw, current_page.data_raw))
+        #         # the else-case covers pages for which normalisation flag was not set (i.e. Fluka)
+        #         else:
+        #             logger.debug("Averaging page %s", current_page.name)
+        #             # Running variance algorithm based on algorithm by B. P. Welford,
+        #             # presented in Donald Knuth's Art of Computer Programming, Vol 2, page 232, 3rd edition.
+        #             # Can be found here: http://www.johndcook.com/blog/standard_deviation/
+        #             # and https://en.wikipedia.org/wiki/Algorithms_for_calculating_variance#Online_algorithm
+        #             delta = current_page.data_raw - result_page.data_raw  # delta = x - mean
+        #             result_page.data_raw += delta / np.float64(n)
+        #             if error != ErrorEstimate.none:
+        #                 # the line below is equivalent to M2 += delta * (x - mean)
+        #                 result_page.error_raw += delta * (current_page.data_raw - result_page.data_raw)
+
+        # # averaged or normalized quantities needs to be divided by the total number of primaries
+        # if len(input_file_list) > 1:
+        #     for page in result.pages:
+        #         if page.page_normalized in {2, 3}:
+        #             page.data_raw /= result.number_of_primaries
+
+        # # # unbiased sample variance is stored in `__M2 / (n - 1)`
+        # # # unbiased sample standard deviation in classical algorithm is calculated as (sqrt(1/(n-1)sum(x-<x>)**2)
+        # # # here it is calculated as square root of unbiased sample variance:
+        # # if len(input_file_list) > 1 and error != ErrorEstimate.none:
+        # #     for page in result.pages:
+        # #         page.error_raw = np.sqrt(page.error_raw / (len(input_file_list) - 1.0))
+
+        # # # if user requested standard error then we calculate it as:
+        # # # S = stderr = stddev / sqrt(N), or in other words,
+        # # # S = s/sqrt(N) where S is the corrected standard deviation of the mean.
+        # # if len(input_file_list) > 1 and error == ErrorEstimate.stderr:
+        # #     for page in result.pages:
+        # #         page.error_raw /= np.sqrt(len(input_file_list))  # np.sqrt() always returns np.float64
 
     result.file_counter = len(input_file_list)
     core_names_dict = group_input_files(input_file_list)

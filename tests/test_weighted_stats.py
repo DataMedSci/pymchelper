@@ -1,24 +1,24 @@
 import pytest
 import numpy as np
-from pymchelper.averaging import WeightedStats
+from pymchelper.averaging import WeightedStatsAggregator
 
 
 def test_initial_state():
-    ws = WeightedStats()
+    ws = WeightedStatsAggregator()
     # check if ws.mean is nan
     assert np.isnan(ws.mean)
     assert ws.total_weight == 0
 
 
 def test_single_update():
-    ws = WeightedStats()
+    ws = WeightedStatsAggregator()
     ws.update(value=10, weight=2)
     assert ws.mean == 10
     assert ws.total_weight == 2
 
 
 def test_multiple_updates():
-    ws = WeightedStats()
+    ws = WeightedStatsAggregator()
     updates = [(10, 2), (20, 3), (30, 5)]
     total_weight = sum(weight for _, weight in updates)
     weighted_sum = sum(value * weight for value, weight in updates)
@@ -32,19 +32,19 @@ def test_multiple_updates():
 
 
 def test_zero_weight():
-    ws = WeightedStats()
+    ws = WeightedStatsAggregator()
     with pytest.raises(Exception):
         ws.update(value=10, weight=0)
 
 
 def test_negative_weight():
-    ws = WeightedStats()
+    ws = WeightedStatsAggregator()
     with pytest.raises(Exception):
         ws.update(value=10, weight=-1)
 
 
 def test_update_with_1d_array():
-    ws = WeightedStats()
+    ws = WeightedStatsAggregator()
     values = np.array([10, 20, 30])
     weights = np.array([2, 3, 5])
     total_weight = weights.sum()
@@ -59,7 +59,7 @@ def test_update_with_1d_array():
 
 
 def test_update_with_flattened_array():
-    ws = WeightedStats()
+    ws = WeightedStatsAggregator()
     values = np.array([[10, 20], [30, 40]]).flatten()
     weights = np.array([[2, 3], [4, 1]]).flatten()
     total_weight = weights.sum()
@@ -85,14 +85,14 @@ def compute_expected_variance(values, weights, total_weight, is_sample=False):
 
 
 def test_variance_population_single_update():
-    ws = WeightedStats()
+    ws = WeightedStatsAggregator()
     ws.update(value=10, weight=2)
     # Variance should be 0 for a single value
     assert ws.variance_population == 0
 
 
 def test_variance_population_multiple_updates():
-    ws = WeightedStats()
+    ws = WeightedStatsAggregator()
     values = np.array([10, 20, 30])
     weights = np.array([2, 3, 5])
     total_weight = weights.sum()
@@ -105,7 +105,7 @@ def test_variance_population_multiple_updates():
 
 
 def test_variance_sample_multiple_updates():
-    ws = WeightedStats()
+    ws = WeightedStatsAggregator()
     values = np.array([10, 20, 30])
     weights = np.array([2, 3, 5])
     total_weight = weights.sum()
@@ -123,7 +123,7 @@ def test_variance_sample_multiple_updates():
 
 
 def test_variance_with_1d_array():
-    ws = WeightedStats()
+    ws = WeightedStatsAggregator()
     values = np.array([10, 20, 30])
     weights = np.array([2, 3, 5])
     total_weight = weights.sum()
