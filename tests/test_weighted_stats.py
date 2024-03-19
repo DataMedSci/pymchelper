@@ -88,7 +88,7 @@ def test_variance_population_single_update():
     ws = WeightedStats()
     ws.update(value=10, weight=2)
     # Variance should be 0 for a single value
-    assert ws.variance_population() == 0
+    assert ws.variance_population == 0
 
 
 def test_variance_population_multiple_updates():
@@ -101,7 +101,7 @@ def test_variance_population_multiple_updates():
         ws.update(value, weight)
 
     expected_variance = compute_expected_variance(values, weights, total_weight)
-    assert pytest.approx(ws.variance_population(), 0.001) == expected_variance
+    assert pytest.approx(ws.variance_population, 0.001) == expected_variance
 
 
 def test_variance_sample_multiple_updates():
@@ -116,10 +116,10 @@ def test_variance_sample_multiple_updates():
     # Sample variance calculation should only be used when there are at least two samples
     if total_weight > 1:
         expected_variance = compute_expected_variance(values, weights, total_weight, is_sample=True)
-        assert pytest.approx(ws.variance_sample(), 0.001) == expected_variance
+        assert pytest.approx(ws.variance_sample, 0.001) == expected_variance
     else:
         with pytest.raises(ZeroDivisionError):
-            _ = ws.variance_sample()
+            _ = ws.variance_sample
 
 
 def test_variance_with_1d_array():
@@ -132,8 +132,8 @@ def test_variance_with_1d_array():
         ws.update(value, weight)
 
     expected_variance_population = compute_expected_variance(values, weights, total_weight)
-    assert pytest.approx(ws.variance_population(), 0.001) == expected_variance_population
+    assert pytest.approx(ws.variance_population, 0.001) == expected_variance_population
 
     if total_weight > 1:
         expected_variance_sample = compute_expected_variance(values, weights, total_weight, is_sample=True)
-        assert pytest.approx(ws.variance_sample(), 0.001) == expected_variance_sample
+        assert pytest.approx(ws.variance_sample, 0.001) == expected_variance_sample

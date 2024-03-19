@@ -46,8 +46,10 @@ class WeightedStats:
 
         self.accumulator_S += weight * (value - self.mean) * (value - mean_old)
 
+    @property
     def variance_population(self):
         return self.accumulator_S / self.total_weight
 
+    @property
     def variance_sample(self):
         return self.accumulator_S / (self.total_weight - 1)
