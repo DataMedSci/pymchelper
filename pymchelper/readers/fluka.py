@@ -35,14 +35,14 @@ class FlukaReaderFactory(ReaderFactory):
 class FlukaReader(Reader):
 
     @property
-    def corename(self):
+    def corename(self) -> Optional[str]:
         """
         Fluka output filenames follow this pattern: corename_fort.XX.
         :return: corename part of output file or None in case filename doesn't follow Fluka naming pattern
         """
         core_name = None
-        if "_fort" in self.filename:
-            core_name = self.filename[-2:]
+        if "_fort" in self.filename.name:
+            core_name = self.filename.name[-2:]
         return core_name
 
     def parse_usrbin(self, estimator):
@@ -282,7 +282,7 @@ class FlukaReader(Reader):
             if usr_object:
                 return usr_object
 
-    def read_data(self, estimator, nscale=1):
+    def read_data(self, estimator):
         """
         TODO
         :param estimator: an Estimator object, will be modified here and filled with data
