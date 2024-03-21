@@ -27,7 +27,7 @@ The `error` property returns the spread of data for WeightedStatsAggregator, and
 The `update` method is used to update the state of the aggregator with new data from the file.
 """
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Union, Optional
 from numpy.typing import ArrayLike
 
@@ -70,11 +70,12 @@ class WeightedStatsAggregator(Aggregator):
     Communications of the ACM. 22 (9): 532-535.
     [5] https://en.wikipedia.org/wiki/Algorithms_for_calculating_variance#Weighted_incremental_algorithm
     """
+
     data: Union[float, ArrayLike] = float('nan')
-    accumulator_S: Union[float, ArrayLike] = float('nan')
-    temp: Union[float, ArrayLike] = float('nan')
+
+    _accumulator_S: Union[float, ArrayLike] = field(default=float('nan'), repr=False, init=False)
     total_weight: float = 0
-    total_weight_squared: float = 0
+    _total_weight_squared: float = 0
 
     def update(self, value: Union[float, ArrayLike], weight: float = 1.0):
         if weight < 0:
@@ -83,11 +84,11 @@ class WeightedStatsAggregator(Aggregator):
         # first pass initialization
         if self.total_weight == 0:
             self.data = value * 0
-            self.accumulator_S = value * 0
+            self._accumulator_S = value * 0
 
         # W_n = W_{n-1} + w_n
         self.total_weight += weight
-        self.total_weight_squared += weight**2
+        self._total_weight_squared += weight**2
 
         mean_old = self.data
         # # mu_n = (1 - w_n / W_n) * mu_{n-1} + (w_n / W_n) * x_n
@@ -95,7 +96,7 @@ class WeightedStatsAggregator(Aggregator):
         # second_part = (weight / self.total_weight) * value
         self.data += (weight / self.total_weight) * (value - mean_old)
 
-        self.accumulator_S += weight * (value - self.data) * (value - mean_old)
+        self._accumulator_S += weight * (value - self.data) * (value - mean_old)
 
     @property
     def mean(self):
@@ -103,11 +104,11 @@ class WeightedStatsAggregator(Aggregator):
 
     @property
     def variance_population(self):
-        return self.accumulator_S / self.total_weight
+        return self._accumulator_S / self.total_weight
 
     @property
     def variance_sample(self):
-        return self.accumulator_S / (self.total_weight - 1)
+        return self._accumulator_S / (self.total_weight - 1)
 
     def error(self, **kwargs):
         if 'error_type' in kwargs:
