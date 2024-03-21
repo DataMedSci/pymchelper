@@ -32,9 +32,6 @@ from typing import Union, Optional
 import numpy as np
 from numpy.typing import ArrayLike
 
-# resource https://en.wikipedia.org/wiki/Algorithms_for_calculating_variance
-# also
-
 
 @dataclass
 class Aggregator:
@@ -49,6 +46,9 @@ class Aggregator:
     data: Union[float, ArrayLike] = float('nan')
 
     def error(self, **kwargs):
+        """
+        Default implementation of error function, returns None.
+        """
         return None
 
 
@@ -79,6 +79,7 @@ class WeightedStatsAggregator(Aggregator):
     _total_weight_squared: float = 0
 
     def update(self, value: Union[float, ArrayLike], weight: float = 1.0):
+
         if weight < 0:
             raise ValueError("Weight must be non-negative")
 

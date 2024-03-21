@@ -15,7 +15,7 @@ jobs:
   full_test:
     strategy:
       matrix:
-        python-version: ['3.8', '3.9', '3.10', '3.11']
+        python-version: ['3.9', '3.10', '3.11']
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
@@ -32,11 +32,11 @@ jobs:
         pip install -r tests/requirements-test.txt
 
     - name: Run all test with pytest
-      run: |         
-         pytest -k "slow" tests/
-         
+      run: |
+         pytest -k "slow"
+
     - name: Check images generation for documentation
-      run: |         
+      run: |
          cd docs/images_generation && ./run.sh
 
   # test if package generation works and optional package upload to pypi (only on release)
@@ -47,24 +47,24 @@ jobs:
     - uses: actions/checkout@v4
       with:
         fetch-depth: 0
-        
+
     - name: Set up Python
       uses: actions/setup-python@v5
       with:
-        python-version: '3.10'
-        
+        python-version: '3.11'
+
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
         pip install -r requirements.txt
-        
+
     - name: Make wheel package and validate it
-      run: |         
+      run: |
         pip install wheel twine
-        
+
         # first call to version method would generate VERSION  file
         PYTHONPATH=. python pymchelper/run.py --version
-        
+
         python setup.py bdist_wheel
 
         twine check dist/*.whl
@@ -99,7 +99,7 @@ jobs:
     - name: Set up Python
       uses: actions/setup-python@v5
       with:
-        python-version: '3.10'
+        python-version: '3.11'
     - name: Build and Commit
       uses: sphinx-notes/pages@3.0
       with:
