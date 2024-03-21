@@ -1,3 +1,32 @@
+"""
+Output from the simulation running on multiple processess needs to be agregated.
+The simplest way of doing so is to calculated the average of the data.
+There are however more sophisticated cases: COUNT scorers needs to be summed up, not averaged.
+Phase space data needs to be concatenated, not averaged.
+Each of the parallel jobs can have different number of histories, so the weighted average needs to be calculated.
+Moreover, in case averaging is employed, we can estimate spread of the data as standard deviation or standard error.
+
+The binary output files from each job may be quite large (even ~GB for scoring in fine 3D mesh), to obtain good
+statistics we sometimes parallelise the simulation of hundreds or thousands of jobs (when using HPC clusters).
+In such case it's not feasible to load all the data into memory and calculate the average in one go, using standard
+functions from numpy library. Instead, we need to calculate the average in an online manner,
+i.e. by updating the state of respective aggregator object with each new binary output file read.
+
+Such approach results in a significant reduction of memory usage and is more numerically stable.
+
+This module contains several classes for aggregating data from multiple files:
+- Aggregator: base class for all other aggregators
+- WeightedStatsAggregator: for calculating weighted mean and variance
+- ConcatenatingAggregator: for concatenating data
+- SumAggregator: for calculating sum instead of variance
+
+All aggregators have `data` and `error` property, which can be used to obtain the result of the aggregation.
+The `data` property returns the result of the aggregation: mean, sum or concatenated array.
+The `error` property returns the spread of data for WeightedStatsAggregator, and `None` for other aggregators.
+
+The `update` method is used to update the state of the aggregator with new data from the file.
+"""
+
 from dataclasses import dataclass
 from typing import Union, Optional
 from numpy.typing import ArrayLike
@@ -8,28 +37,38 @@ from numpy.typing import ArrayLike
 
 @dataclass
 class Aggregator:
+    """
+    Base class for all aggregators.
+    The `data` property returns the result of the aggregation, needs to be implemented in derived classes.
+    The `error` function returns the spread of data, can be implemented in derived classes. It's a function,
+    not a property as different type of error can be calculated (standard deviation, standard error, etc.).
+    Type of errors may be then passed in optional keyword arguments `**kwargs`.
+    """
 
     data: Union[float, ArrayLike] = float('nan')
 
     def error(self, **kwargs):
-        if isinstance(self.data, float):
-            return np.nan
-        else:
-            return np.zeros_like(self.data) * np.nan
+        return None
 
 
 @dataclass
 class WeightedStatsAggregator(Aggregator):
     """
-    Class for calculating weighted mean of a sequence of numbers.
-    Accoring to https://justinwillmert.com/posts/2022/notes-on-calculating-online-statistics/
-    Heavily based on Welford's algorithm [1]
+    Calculates weighted mean and variance of a sequence of numbers or numpy arrays.
+
+    Good overview of currently known methods to calculate online weighted mean and variance can be found in [2].
+    The original method to calculate online mean and variance was proposed by Welford in [1].
+    The weighed version of this algoritm is nicely illustrated in [3].
+    Here we employ algoritm proposed by West in [4] and descibed in Wikipedia [5].
+
     [1]  Welford, B. P. (1962). "Note on a method for calculating corrected sums of squares and products".
     Technometrics. 4 (3): 419–420.
-    See also:
-    [2] Schubert, Erich, and Michael Gertz.
-    "Numerically stable parallel computation of (co-) variance."
+    [2] Schubert, Erich, and Michael Gertz. "Numerically stable parallel computation of (co-) variance."
     Proceedings of the 30th international conference on scientific and statistical database management. 2018.
+    [3] https://justinwillmert.com/posts/2022/notes-on-calculating-online-statistics/
+    [4] West, D. H. D. (1979). "Updating Mean and Variance Estimates: An Improved Method".
+    Communications of the ACM. 22 (9): 532-535.
+    [5] https://en.wikipedia.org/wiki/Algorithms_for_calculating_variance#Weighted_incremental_algorithm
     """
     data: Union[float, ArrayLike] = float('nan')
     accumulator_S: Union[float, ArrayLike] = float('nan')
@@ -76,11 +115,7 @@ class WeightedStatsAggregator(Aggregator):
                 return self.variance_population
             elif kwargs['error_type'] == 'sample':
                 return self.variance_sample
-            else:
-                if isinstance(self.data, float):
-                    return np.nan
-                else:
-                    return np.zeros_like(self.data) * np.nan
+        return None
 
 
 @dataclass
