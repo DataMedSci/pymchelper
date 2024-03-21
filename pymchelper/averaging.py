@@ -29,6 +29,7 @@ The `update` method is used to update the state of the aggregator with new data 
 
 from dataclasses import dataclass, field
 from typing import Union, Optional
+import numpy as np
 from numpy.typing import ArrayLike
 
 # resource https://en.wikipedia.org/wiki/Algorithms_for_calculating_variance
@@ -91,9 +92,9 @@ class WeightedStatsAggregator(Aggregator):
         self._total_weight_squared += weight**2
 
         mean_old = self.data
-        # # mu_n = (1 - w_n / W_n) * mu_{n-1} + (w_n / W_n) * x_n
-        # first_part = (1 - weight / self.total_weight) * self.mean
-        # second_part = (weight / self.total_weight) * value
+        # mu_n = (1 - w_n / W_n) * mu_{n-1} + (w_n / W_n) * x_n
+        # or in other words:
+        # mu_n - mu_{n-1} = (w_n / W_n) * (x_n - mu_{n-1})
         self.data += (weight / self.total_weight) * (value - mean_old)
 
         self._accumulator_S += weight * (value - self.data) * (value - mean_old)
@@ -126,7 +127,8 @@ class ConcatenatingAggregator(Aggregator):
     """
 
     def update(self, value: Union[float, ArrayLike]):
-        if np.isnan(data):
+        ""
+        if np.isnan(self.data):
             self.data = value
         else:
             self.data = np.concatenate((self.data, value))
@@ -139,7 +141,9 @@ class SumAggregator(Aggregator):
     """
 
     def update(self, value: Union[float, ArrayLike]):
+        # first value added
         if np.isnan(self.total):
             self.data = value
+        # subsequent values added
         else:
             self.data += value
