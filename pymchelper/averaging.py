@@ -19,6 +19,7 @@ This module contains several classes for aggregating data from multiple files:
 - WeightedStatsAggregator: for calculating weighted mean and variance
 - ConcatenatingAggregator: for concatenating data
 - SumAggregator: for calculating sum instead of variance
+- NoAggregator: for cases when no aggregation is required
 
 All aggregators have `data` and `error` property, which can be used to obtain the result of the aggregation.
 The `data` property returns the result of the aggregation: mean, sum or concatenated array.
@@ -28,6 +29,7 @@ The `update` method is used to update the state of the aggregator with new data 
 """
 
 from dataclasses import dataclass, field
+import logging
 from typing import Union, Optional
 import numpy as np
 from numpy.typing import ArrayLike
@@ -143,8 +145,22 @@ class SumAggregator(Aggregator):
 
     def update(self, value: Union[float, ArrayLike]):
         # first value added
-        if np.isnan(self.total):
+        if np.isnan(self.data):
             self.data = value
         # subsequent values added
         else:
             self.data += value
+
+
+@dataclass
+class NoAggregator(Aggregator):
+    """
+    Class for cases when no aggregation is required.
+    Sets the data to the first value and does not update it.
+    """
+
+    def update(self, value: Union[float, ArrayLike]):
+        # set value only on first update
+        if np.isnan(self.data):
+            logging.debug("Setting data to %s", value)
+            self.data = value

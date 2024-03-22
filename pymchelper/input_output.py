@@ -1,3 +1,4 @@
+from enum import IntEnum
 import logging
 import os
 from collections import defaultdict
@@ -7,7 +8,7 @@ from typing import List, Optional
 
 import numpy as np
 
-from pymchelper.averaging import Aggregator, SumAggregator, WeightedStatsAggregator, ConcatenatingAggregator
+from pymchelper.averaging import Aggregator, SumAggregator, WeightedStatsAggregator, ConcatenatingAggregator, NoAggregator
 from pymchelper.estimator import ErrorEstimate, Estimator, average_with_nan
 from pymchelper.readers.topas import TopasReaderFactory
 from pymchelper.readers.fluka import FlukaReader, FlukaReaderFactory
@@ -16,6 +17,26 @@ from pymchelper.readers.shieldhit.reader_base import SHReader
 from pymchelper.writers.common import Converters
 
 logger = logging.getLogger(__name__)
+
+
+class AggregationType(IntEnum):
+    """
+    Enum for different types of aggregation.
+    """
+    NoAggregation = 0
+    Sum = 1
+    AveragingCumulative = 2
+    AveragingPerPrimary = 3
+    Concatenation = 4
+
+
+_aggregator_mapping: dict[AggregationType, Aggregator] = {
+    AggregationType.NoAggregation: NoAggregator,
+    AggregationType.Sum: SumAggregator,
+    AggregationType.AveragingCumulative: WeightedStatsAggregator,
+    AggregationType.AveragingPerPrimary: WeightedStatsAggregator,
+    AggregationType.Concatenation: ConcatenatingAggregator
+}
 
 
 def guess_reader(filename):
@@ -67,14 +88,6 @@ def fromfile(filename: str) -> Optional[Estimator]:
     return estimator
 
 
-aggregator_type: dict[int, Aggregator] = {
-    1: SumAggregator,
-    2: WeightedStatsAggregator,
-    3: WeightedStatsAggregator,
-    4: ConcatenatingAggregator
-}
-
-
 def fromfilelist(input_file_list, error: ErrorEstimate = ErrorEstimate.stderr, nan: bool = True) -> Optional[Estimator]:
     """
     Reads all files from a given list, and returns a list of averaged estimators.
@@ -103,7 +116,8 @@ def fromfilelist(input_file_list, error: ErrorEstimate = ErrorEstimate.stderr, n
         for page in result.pages:
             # got a page with "concatenate normalisation"
             current_page_normalisation = getattr(page, 'page_normalized', 2)
-            aggregator = aggregator_type[current_page_normalisation]()
+            aggregator = _aggregator_mapping.get(current_page_normalisation, WeightedStatsAggregator)()
+            logger.info("Selected aggregator %s for page %s", aggregator, page.name)
             aggregator.update(page.data_raw)
             page_aggregators.append(aggregator)
 
@@ -113,6 +127,7 @@ def fromfilelist(input_file_list, error: ErrorEstimate = ErrorEstimate.stderr, n
                 aggregator.update(current_page.data_raw)
 
         for page, aggregator in zip(result.pages, page_aggregators):
+            logger.info("Extracting data from aggregator %s for page %s", aggregator, page.name)
             page.data_raw = aggregator.data
             page.error_raw = aggregator.error()
 

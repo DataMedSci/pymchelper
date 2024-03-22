@@ -1,14 +1,16 @@
 import logging
+from pymchelper.estimator import Estimator
 
 logger = logging.getLogger(__name__)
 
 
 class Inspector:
+
     def __init__(self, filename, options):
         logger.debug("Initialising Inspector writer")
         self.options = options
 
-    def write(self, estimator):
+    def write(self, estimator: Estimator):
         """Print all keys and values from estimator structure
 
         they include also a metadata read from binary output file
@@ -16,7 +18,7 @@ class Inspector:
         for name, value in sorted(estimator.__dict__.items()):
             # skip non-metadata fields
             if name not in {'data', 'data_raw', 'error', 'error_raw', 'counter', 'pages'}:
-                line = "{:24s}: '{:s}'".format(str(name), str(value))
+                line = f"{name:24s}: {value}"
                 print(line)
         # print some data-related statistics
         print(75 * "*")
@@ -26,10 +28,9 @@ class Inspector:
             for name, value in sorted(page.__dict__.items()):
                 # skip non-metadata fields
                 if name not in {'data', 'data_raw', 'error', 'error_raw'}:
-                    line = "\t{:24s}: '{:s}'".format(str(name), str(value))
+                    line = f"\t{name:24s}: {value}"
                     print(line)
-            print("Data min: {:g}, max: {:g}, mean: {:g}".format(
-                page.data_raw.min(), page.data_raw.max(), page.data_raw.mean()))
+            print(f"Data min: {page.data_raw.min():g}, max: {page.data_raw.max():g}, mean: {page.data_raw.mean():g}")
             print(75 * "-")
 
         if self.options.details:
