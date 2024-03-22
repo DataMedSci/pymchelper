@@ -14,7 +14,8 @@ from pymchelper.flair import Input
 from pymchelper.executor.options import SimulationSettings
 
 from pymchelper.simulator_type import SimulatorType
-from pymchelper.input_output import frompattern, get_topas_estimators
+from pymchelper.readers.topas import get_topas_estimators
+from pymchelper.input_output import frompattern
 
 
 class OutputDataType(IntEnum):
@@ -30,8 +31,12 @@ class Runner:
     Main class responsible for configuring and starting multiple parallel MC simulation processes
     It can be used to access combined averaged results of the simulation.
     """
-    def __init__(self, settings: SimulationSettings, jobs: int=None,
-                 keep_workspace_after_run: bool=False, output_directory: str='.'):
+
+    def __init__(self,
+                 settings: SimulationSettings,
+                 jobs: int = None,
+                 keep_workspace_after_run: bool = False,
+                 output_directory: str = '.'):
         self.settings = settings
 
         # create pool of processes, waiting to be started by run method
@@ -234,6 +239,7 @@ class WorkspaceManager:
     A workspace consists of multiple working directories (i.e. run_1, run_2),
     each per one of the parallel simulation run.
     """
+
     def __init__(self, output_directory='.', keep_workspace_after_run=False):
         self.output_dir_absolute_path = os.path.abspath(output_directory)
         self.keep_workspace_after_run = keep_workspace_after_run
