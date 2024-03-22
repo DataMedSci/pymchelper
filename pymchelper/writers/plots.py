@@ -37,7 +37,7 @@ class PlotDataWriter(Writer):
         # special case for 0-dim data
         if page.dimension == 0:
             # save two numbers to the file
-            if not page.error is None:
+            if page.error is not None:
                 np.savetxt(self.output_path, [[page.data_raw, page.error_raw]], fmt="%g %g", delimiter=' ')
             else:  # save one number to the file
                 np.savetxt(self.output_path, [page.data_raw], fmt="%g", delimiter=' ')
