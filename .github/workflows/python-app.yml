@@ -49,9 +49,9 @@ jobs:
         platform: [ubuntu-latest, macos-latest, windows-latest]
         exclude:
           - platform: macos-latest
-            python-version: '3.9'
-          - platform: macos-latest
             python-version: '3.10'
+          - platform: macos-latest
+            python-version: '3.11'
     runs-on: ${{ matrix.platform }}
     needs: [smoke_test]
     steps:
