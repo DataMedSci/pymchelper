@@ -191,7 +191,7 @@ class SHReaderBin2010(SHReader):
 
         return True
 
-    def read_data(self, estimator):
+    def read_data(self, estimator, nscale=1):
         if not self.read_header(estimator):
             logger.debug("Reading header failed")
             return None

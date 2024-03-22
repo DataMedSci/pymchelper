@@ -56,7 +56,7 @@ class PlotDataWriter(Writer):
             data_to_save = axis_data_columns_long + [page.data_raw]
 
             # if error information is present save it as additional column
-            if not np.all(np.isnan(page.error_raw)) and np.any(page.error_raw):
+            if page.error is not None:
                 fmt += " %g"
                 data_to_save += [page.error_raw]
 

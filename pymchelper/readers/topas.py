@@ -122,7 +122,7 @@ class TopasReader(Reader):
         super(TopasReader, self).__init__(filename)
         self.directory = Path(filename).parent
 
-    #skipcq: PY-R1000
+    # skipcq: PY-R1000
     def read_data(self, estimator: Estimator) -> bool:
         """
         Read the data from the file and store them in the provided estimator object.
