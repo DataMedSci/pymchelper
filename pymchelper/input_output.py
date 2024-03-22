@@ -18,9 +18,8 @@ logger = logging.getLogger(__name__)
 
 
 class AggregationType(IntEnum):
-    """
-    Enum for different types of aggregation.
-    """
+    """Enum for different types of aggregation."""
+
     NoAggregation = 0
     Sum = 1
     AveragingCumulative = 2

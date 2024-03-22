@@ -1,6 +1,8 @@
 import logging
 import numpy as np
 
+from pymchelper.estimator import Estimator
+
 logger = logging.getLogger(__name__)
 
 
@@ -17,7 +19,7 @@ class HdfWriter:
         if not self.filename.endswith(".h5"):
             self.filename += ".h5"
 
-    def write(self, estimator):
+    def write(self, estimator: Estimator):
         if len(estimator.pages) == 0:
             print("No pages in the output file, conversion to HDF5 skipped.")
             return False
@@ -42,7 +44,7 @@ class HdfWriter:
                 dset = hdf_file.create_dataset(dataset_name, data=page.data, compression="gzip", compression_opts=9)
 
                 # save error (if present)
-                if not np.all(np.isnan(page.error_raw)) and np.any(page.error_raw):
+                if page.error is not None:
                     hdf_file.create_dataset(dataset_error_name, data=page.error, compression="gzip", compression_opts=9)
 
                 # save metadata

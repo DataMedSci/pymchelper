@@ -216,7 +216,6 @@ class TopasReader(Reader):
             num_results = len(results)
             page = Page(estimator=estimator)
             set_data = False
-            set_error = False
             for column, result in enumerate(results):
                 if result not in ['Mean', 'Standard_Deviation']:
                     continue
@@ -270,7 +269,6 @@ class TopasReader(Reader):
                     set_data = True
                 elif result == 'Standard_Deviation':
                     page.error_raw = scores
-                    set_error = True
 
             # If we didn't find mean results for the scorer, we return False
             if not set_data:

@@ -49,17 +49,12 @@ class Aggregator:
     _updated: bool = field(default=False, repr=False, init=False)
 
     def error(self, **kwargs):
-        """
-        Default implementation of error function, returns None.
-        """
+        """Default implementation of error function, returns None."""
         logging.warning("Error calculation not implemented for %s", self.__class__.__name__)
-        return None
 
     @property
     def updated(self):
-        """
-        Check if the aggregator was updated.
-        """
+        """Check if the aggregator was updated."""
         if isinstance(self.data, float) and np.isnan(self.data):
             return False
         return self._updated
@@ -154,9 +149,7 @@ class WeightedStatsAggregator(Aggregator):
 
 @dataclass
 class ConcatenatingAggregator(Aggregator):
-    """
-    Class for concatenating numpy arrays
-    """
+    """Class for concatenating numpy arrays"""
 
     def update(self, value: Union[float, ArrayLike]):
         ""
@@ -169,9 +162,7 @@ class ConcatenatingAggregator(Aggregator):
 
 @dataclass
 class SumAggregator(Aggregator):
-    """
-    Class for calculating sum of a sequence of numbers.
-    """
+    """Class for calculating sum of a sequence of numbers."""
 
     def update(self, value: Union[float, ArrayLike]):
         # first value added
