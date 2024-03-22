@@ -2,8 +2,6 @@ import logging
 
 from pymchelper.estimator import Estimator
 
-import numpy as np
-
 logger = logging.getLogger(__name__)
 
 

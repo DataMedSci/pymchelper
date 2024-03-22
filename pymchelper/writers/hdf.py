@@ -1,5 +1,4 @@
 import logging
-import numpy as np
 
 from pymchelper.estimator import Estimator
 

@@ -88,7 +88,6 @@ class WeightedStatsAggregator(Aggregator):
 
     def update(self, value: Union[float, ArrayLike], weight: float = 1.0):
         """Update the state of the aggregator with new data."""
-
         if weight < 0:
             raise ValueError("Weight must be non-negative")
 
@@ -152,7 +151,7 @@ class ConcatenatingAggregator(Aggregator):
     """Class for concatenating numpy arrays"""
 
     def update(self, value: Union[float, ArrayLike]):
-        ""
+        """Update the state of the aggregator with new data."""
         if not self.updated:
             self.data = value
         else:
@@ -165,6 +164,7 @@ class SumAggregator(Aggregator):
     """Class for calculating sum of a sequence of numbers."""
 
     def update(self, value: Union[float, ArrayLike]):
+        """Update the state of the aggregator with new data."""
         # first value added
         if not self.updated:
             self.data = value
@@ -182,6 +182,7 @@ class NoAggregator(Aggregator):
     """
 
     def update(self, value: Union[float, ArrayLike]):
+        """Update the state of the aggregator with new data."""
         # set value only on first update
         if not self.updated:
             logging.debug("Setting data to %s", value)

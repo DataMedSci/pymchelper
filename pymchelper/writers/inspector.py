@@ -30,11 +30,9 @@ class Inspector:
                 if name not in {'data', 'data_raw', 'error', 'error_raw'}:
                     line = f"\t{name:24s}: {value}"
                     print(line)
-            print(f"Data min: {page.data_raw.min():g}, max: {page.data_raw.max():g}, mean: {page.data_raw.mean():g}")
-            if page.error_raw is not None:
-                print(
-                    f"Error min: {page.error_raw.min():g}, max: {page.error_raw.max():g}, mean: {page.error_raw.mean():g}"
-                )
+            print(f"Data min: {page.data.min():g}, max: {page.data.max():g}, mean: {page.data.mean():g}")
+            if page.error is not None:
+                print(f"Error min: {page.error.min():g}, max: {page.error.max():g}, mean: {page.error.mean():g}")
             else:
                 print("No error data")
             print(75 * "-")
