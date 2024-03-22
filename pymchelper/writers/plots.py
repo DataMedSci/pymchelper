@@ -37,7 +37,7 @@ class PlotDataWriter(Writer):
         # special case for 0-dim data
         if page.dimension == 0:
             # save two numbers to the file
-            if not np.all(np.isnan(page.error_raw)) and np.any(page.error_raw):
+            if not page.error is None:
                 np.savetxt(self.output_path, [[page.data_raw, page.error_raw]], fmt="%g %g", delimiter=' ')
             else:  # save one number to the file
                 np.savetxt(self.output_path, [page.data_raw], fmt="%g", delimiter=' ')
@@ -124,7 +124,7 @@ class ImageWriter:
                 ax.set_yscale('log')
 
             # add optional error area
-            if np.any(page.error):
+            if page.error is not None:
                 ax.fill_between(plot_x_axis.data, (data_raw - error_raw).clip(0.0),
                                 (data_raw + error_raw).clip(0.0, 1.05 * data_raw.max()),
                                 alpha=0.2,
