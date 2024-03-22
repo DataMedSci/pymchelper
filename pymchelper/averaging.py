@@ -46,12 +46,23 @@ class Aggregator:
     """
 
     data: Union[float, ArrayLike] = float('nan')
+    _updated: bool = False
 
     def error(self, **kwargs):
         """
         Default implementation of error function, returns None.
         """
+        logging.warning("Error calculation not implemented for %s", self.__class__.__name__)
         return None
+
+    @property
+    def updated(self):
+        """
+        Check if the aggregator was updated.
+        """
+        if isinstance(self.data, float) and np.isnan(self.data):
+            return False
+        return self._updated
 
 
 @dataclass
@@ -86,7 +97,7 @@ class WeightedStatsAggregator(Aggregator):
             raise ValueError("Weight must be non-negative")
 
         # first pass initialization
-        if self.total_weight == 0:
+        if not self.updated:
             self.data = value * 0
             self._accumulator_S = value * 0
 
@@ -101,6 +112,8 @@ class WeightedStatsAggregator(Aggregator):
         self.data += (weight / self.total_weight) * (value - mean_old)
 
         self._accumulator_S += weight * (value - self.data) * (value - mean_old)
+
+        self._updated = True
 
     @property
     def mean(self):
@@ -118,7 +131,7 @@ class WeightedStatsAggregator(Aggregator):
         if 'error_type' in kwargs:
             if kwargs['error_type'] == 'population':
                 return self.variance_population
-            elif kwargs['error_type'] == 'sample':
+            if kwargs['error_type'] == 'sample':
                 return self.variance_sample
         return None
 
@@ -131,10 +144,11 @@ class ConcatenatingAggregator(Aggregator):
 
     def update(self, value: Union[float, ArrayLike]):
         ""
-        if np.isnan(self.data):
+        if not self.updated:
             self.data = value
         else:
             self.data = np.concatenate((self.data, value))
+        self._updated = True
 
 
 @dataclass
@@ -145,11 +159,12 @@ class SumAggregator(Aggregator):
 
     def update(self, value: Union[float, ArrayLike]):
         # first value added
-        if np.isnan(self.data):
+        if not self.updated:
             self.data = value
         # subsequent values added
         else:
             self.data += value
+        self._updated = True
 
 
 @dataclass
@@ -161,6 +176,7 @@ class NoAggregator(Aggregator):
 
     def update(self, value: Union[float, ArrayLike]):
         # set value only on first update
-        if np.isnan(self.data):
+        if not self.updated:
             logging.debug("Setting data to %s", value)
             self.data = value
+        self._updated = True

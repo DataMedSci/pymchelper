@@ -112,6 +112,7 @@ def fromfilelist(input_file_list, error: ErrorEstimate = ErrorEstimate.stderr, n
         if not result:
             return None
 
+        # create aggregators for each page and fill them with data from first file
         page_aggregators = []
         for page in result.pages:
             # got a page with "concatenate normalisation"
@@ -121,11 +122,13 @@ def fromfilelist(input_file_list, error: ErrorEstimate = ErrorEstimate.stderr, n
             aggregator.update(page.data_raw)
             page_aggregators.append(aggregator)
 
-        for n, filename in enumerate(input_file_list[1:], start=2):
+        # process all other files, if there are any
+        for filename in input_file_list[1:]:
             current_estimator = fromfile(filename)
             for current_page, aggregator in zip(current_estimator.pages, page_aggregators):
                 aggregator.update(current_page.data_raw)
 
+        # extract data from aggregators and fill then into the result
         for page, aggregator in zip(result.pages, page_aggregators):
             logger.info("Extracting data from aggregator %s for page %s", aggregator, page.name)
             page.data_raw = aggregator.data

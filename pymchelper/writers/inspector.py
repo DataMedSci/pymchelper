@@ -31,6 +31,12 @@ class Inspector:
                     line = f"\t{name:24s}: {value}"
                     print(line)
             print(f"Data min: {page.data_raw.min():g}, max: {page.data_raw.max():g}, mean: {page.data_raw.mean():g}")
+            if page.error_raw is not None:
+                print(
+                    f"Error min: {page.error_raw.min():g}, max: {page.error_raw.max():g}, mean: {page.error_raw.mean():g}"
+                )
+            else:
+                print("No error data")
             print(75 * "-")
 
         if self.options.details:
