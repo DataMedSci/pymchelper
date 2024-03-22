@@ -153,5 +153,5 @@ def average_with_nan(estimator_list, error_estimate=ErrorEstimate.stderr):
                 page.error_raw /= np.sqrt(result.file_counter)  # np.sqrt() always returns np.float64
     else:
         for page in result.pages:
-            page.error_raw = np.zeros_like(page.data_raw)
+            page.error_raw = None
     return result

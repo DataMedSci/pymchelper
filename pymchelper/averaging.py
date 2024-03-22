@@ -46,7 +46,7 @@ class Aggregator:
     """
 
     data: Union[float, ArrayLike] = float('nan')
-    _updated: bool = False
+    _updated: bool = field(default=False, repr=False, init=False)
 
     def error(self, **kwargs):
         """
@@ -88,10 +88,11 @@ class WeightedStatsAggregator(Aggregator):
     data: Union[float, ArrayLike] = float('nan')
 
     _accumulator_S: Union[float, ArrayLike] = field(default=float('nan'), repr=False, init=False)
+    _total_weight_squared: float = field(default=0., repr=False, init=False)
     total_weight: float = 0
-    _total_weight_squared: float = 0
 
     def update(self, value: Union[float, ArrayLike], weight: float = 1.0):
+        """Update the state of the aggregator with new data."""
 
         if weight < 0:
             raise ValueError("Weight must be non-negative")
@@ -117,22 +118,37 @@ class WeightedStatsAggregator(Aggregator):
 
     @property
     def mean(self):
+        """Weighted mean of the sample"""
         return self.data
 
     @property
     def variance_population(self):
+        """Biased estimate of the variance"""
         return self._accumulator_S / self.total_weight
 
     @property
     def variance_sample(self):
+        """Unbiased estimate of the variance"""
         return self._accumulator_S / (self.total_weight - 1)
 
+    @property
+    def stddev(self):
+        """Standard deviation of the sample"""
+        return np.sqrt(self.variance_sample)
+
+    @property
+    def stderr(self):
+        """Standard error of the sample"""
+        return np.sqrt(self.variance_sample / self.total_weight)
+
     def error(self, **kwargs):
+        """Error calculation function, can be used to calculate standard deviation or standard error."""
+        logging.debug("Calculating error with kwargs: %s", kwargs)
         if 'error_type' in kwargs:
-            if kwargs['error_type'] == 'population':
-                return self.variance_population
-            if kwargs['error_type'] == 'sample':
-                return self.variance_sample
+            if kwargs['error_type'] == 'stddev':
+                return self.stddev
+            if kwargs['error_type'] == 'stderr':
+                return self.stderr
         return None
 
 

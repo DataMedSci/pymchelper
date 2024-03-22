@@ -275,8 +275,6 @@ class TopasReader(Reader):
             # If we didn't find mean results for the scorer, we return False
             if not set_data:
                 return False
-            if not set_error:
-                page.error_raw = np.empty_like(page.data_raw)
             estimator.add_page(page)
             return True
 

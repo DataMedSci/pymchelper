@@ -64,8 +64,9 @@ def mesh_unit_and_name(estimator, axis):
 
     unit = _geotyp_units.get(estimator.geotyp, _default_units)[axis]
 
-    if estimator.geotyp in {SHGeoType.msh, SHGeoType.dmsh, SHGeoType.voxscore, SHGeoType.geomap,
-                            SHGeoType.plane, SHGeoType.dplane}:
+    if estimator.geotyp in {
+            SHGeoType.msh, SHGeoType.dmsh, SHGeoType.voxscore, SHGeoType.geomap, SHGeoType.plane, SHGeoType.dplane
+    }:
         name = ("Position (X)", "Position (Y)", "Position (Z)")[axis]
     elif estimator.geotyp in {SHGeoType.cyl, SHGeoType.dcyl}:
         name = ("Radius (R)", "Angle (PHI)", "Position (Z)")[axis]
@@ -161,9 +162,7 @@ def read_next_token(f):
     f is an open and readable file pointer.
     returns None if no token was found / EOF
     """
-    tag = np.dtype([('pl_id', '<u8'),
-                    ('pl_type', 'S8'),
-                    ('pl_len', '<u8')])
+    tag = np.dtype([('pl_id', '<u8'), ('pl_type', 'S8'), ('pl_len', '<u8')])
 
     x1 = np.fromfile(f, dtype=tag, count=1)  # read the data into numpy
 
@@ -174,9 +173,7 @@ def read_next_token(f):
         pl_type = x1['pl_type'][0]
         pl_len = x1['pl_len'][0]
         try:
-            pl = np.fromfile(f,
-                             dtype=pl_type,
-                             count=pl_len)  # read the data into numpy
+            pl = np.fromfile(f, dtype=pl_type, count=pl_len)  # read the data into numpy
             return pl_id, pl_type, pl_len, pl
         except TypeError:
             return None
@@ -189,19 +186,16 @@ def _postprocess(estimator, nscale):
                                SHDetType.avg_energy, SHDetType.avg_beta, SHDetType.material, SHDetType.q):
             if estimator.number_of_primaries != 0:  # geotyp = GEOMAP will have 0 projectiles simulated
                 page.data_raw /= np.float64(estimator.number_of_primaries)
-                page.error_raw /= np.float64(estimator.number_of_primaries)
 
     if nscale != 1:
         # scale with number of particles given by user
         for page in estimator.pages:
             page.data_raw *= np.float64(nscale)
-            page.error_raw *= np.float64(nscale)
 
         # rescaling with particle number means also unit change for some estimators
         # from per particle to Grey - this is why we override detector type
         for page in estimator.pages:
             page.data_raw *= np.float64(nscale)
-            page.error_raw *= np.float64(nscale)
 
             if page.dettyp == SHDetType.dose:
                 page.dettyp = SHDetType.dose_gy_bdo2016
@@ -212,5 +206,4 @@ def _postprocess(estimator, nscale):
                 # 1 megaelectron volt / gram = 1.60217662 x 10-10 Gy
                 MeV_g = np.float64(1.60217662e-10)
                 page.data_raw *= MeV_g
-                page.error_raw *= MeV_g
                 page.unit, page.name = _get_detector_unit(page.dettyp, estimator.geotyp)

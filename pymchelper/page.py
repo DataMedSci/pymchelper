@@ -5,15 +5,16 @@ from pymchelper.shieldhit.detector.detector_type import SHDetType
 
 
 class Page:
+
     def __init__(self, estimator=None):
 
         self.estimator = estimator
 
         self.data_raw = np.array([float("NaN")])  # linear data storage
-        self.error_raw = np.array([float("NaN")])  # linear data storage
+        self.error_raw = None  # linear data storage
 
-        self.name : str = ""
-        self.unit : str = ""
+        self.name: str = ""
+        self.unit: str = ""
 
         self.dettyp = None  # Dose, Fluence, LET etc...
 
@@ -96,8 +97,8 @@ class Page:
             if self.dettyp == SHDetType.mcpl:
                 return self._reshape(data_1d=self.data_raw, shape=(8, -1))
             return self._reshape(data_1d=self.data_raw,
-                                 shape=(self.estimator.x.n, self.estimator.y.n, self.estimator.z.n,
-                                        self.diff_axis1.n, self.diff_axis2.n))
+                                 shape=(self.estimator.x.n, self.estimator.y.n, self.estimator.z.n, self.diff_axis1.n,
+                                        self.diff_axis2.n))
         return self.data_raw
 
     @property
@@ -110,12 +111,14 @@ class Page:
         """
         if self.estimator:
             return self._reshape(data_1d=self.error_raw,
-                                 shape=(self.estimator.x.n, self.estimator.y.n, self.estimator.z.n,
-                                        self.diff_axis1.n, self.diff_axis2.n))
+                                 shape=(self.estimator.x.n, self.estimator.y.n, self.estimator.z.n, self.diff_axis1.n,
+                                        self.diff_axis2.n))
         return self.error_raw
 
-    def _reshape(self, data_1d, shape : tuple):
+    def _reshape(self, data_1d, shape: tuple):
         # TODO check also  tests/res/shieldhit/single/ex_yzmsh.bdo as it is saved in bin2010 format
+        if data_1d is None:
+            return None
         if self.estimator:
             order = 'C'
             if self.estimator.file_format in {'bdo2016', 'bdo2019', 'fluka_binary'}:
@@ -124,7 +127,7 @@ class Page:
         else:
             return data_1d
 
-    def plot_axis(self, id : int):
+    def plot_axis(self, id: int):
         """
         Calculate new order of detector axis, axis with data (n>1) comes first
         Axes with constant value goes last.

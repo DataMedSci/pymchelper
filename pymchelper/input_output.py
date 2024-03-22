@@ -6,8 +6,6 @@ from glob import glob
 from pathlib import Path
 from typing import List, Optional
 
-import numpy as np
-
 from pymchelper.averaging import Aggregator, SumAggregator, WeightedStatsAggregator, ConcatenatingAggregator, NoAggregator
 from pymchelper.estimator import ErrorEstimate, Estimator, average_with_nan
 from pymchelper.readers.topas import TopasReaderFactory
@@ -127,42 +125,17 @@ def fromfilelist(input_file_list, error: ErrorEstimate = ErrorEstimate.stderr, n
             current_estimator = fromfile(filename)
             for current_page, aggregator in zip(current_estimator.pages, page_aggregators):
                 aggregator.update(current_page.data_raw)
+            result.number_of_primaries += current_estimator.number_of_primaries
 
         # extract data from aggregators and fill then into the result
         for page, aggregator in zip(result.pages, page_aggregators):
             logger.info("Extracting data from aggregator %s for page %s", aggregator, page.name)
             page.data_raw = aggregator.data
-            page.error_raw = aggregator.error()
-
-        # ws_objects = [WeightedStats() for _ in result.pages]
-        # for ws, filename in zip(ws_objects, input_file_list):
-        #     estimator = fromfile(filename)
-        #     if not estimator:
-        #         return None
-        #     for page_no, page in enumerate(estimator.pages):
-        #         ws.update(page.data_raw, estimator.number_of_primaries)
-        # for ws, page in zip(ws_objects, result.pages):
-        #     page.data_raw = ws.mean
-        #     if error != ErrorEstimate.none:
-        #         page.error_raw = ws.variance_sample
-
-        # # allocate memory for accumulator in standard deviation calculation
-        # # not needed if user requested not to include errors
-        # if error != ErrorEstimate.none:
-        #     for page in result.pages:
-        #         page.error_raw = np.zeros_like(page.data_raw)
+            page.error_raw = aggregator.error(error_type=error.name)
 
         # # loop over all files with n running from 2
         # for n, filename in enumerate(input_file_list[1:], start=2):
-        #     current_estimator = fromfile(filename)  # x
-        #     logger.info("Reading file %s (%d/%d)", filename, n, len(input_file_list))
-
-        #     if not current_estimator:
-        #         logger.warning("File %s could not be read", filename)
-        #         return None
-
         #     result.number_of_primaries += current_estimator.number_of_primaries
-
         #     for current_page, result_page in zip(current_estimator.pages, result.pages):
 
         #         # the method `fromfile` gives us pages which are already normalized 'per-primary' (if needed)

@@ -51,19 +51,10 @@ class SHReaderBDO2019(SHReader):
                 try:
                     token_name = SHBDOTagID(token_id).name
                     logger.debug("Read token {:s} (0x{:02x}) value {} type {:s} length {:d}".format(
-                        token_name,
-                        token_id,
-                        raw_payload,
-                        token_type.decode('ASCII'),
-                        payload_len
-                    ))
+                        token_name, token_id, raw_payload, token_type.decode('ASCII'), payload_len))
                 except ValueError:
                     logger.info("Found unknown token (0x{:02x}) value {} type {:s} length {:d}, skipping".format(
-                        token_id,
-                        raw_payload,
-                        token_type.decode('ASCII'),
-                        payload_len
-                    ))
+                        token_id, raw_payload, token_type.decode('ASCII'), payload_len))
 
                 # geometry type
                 if SHBDOTagID.geometry_type == token_id:
@@ -178,7 +169,6 @@ class SHReaderBDO2019(SHReader):
                 # normalize the detectors such as dose or fluence (tagged as SH_POSTPROC_NORM or 2)
                 if page_normalisation == 2:
                     page.data_raw /= np.float64(estimator.number_of_primaries)
-                    page.error_raw /= np.float64(estimator.number_of_primaries)
 
         estimator.file_format = 'bdo2019'
 
