@@ -40,7 +40,7 @@ _aggregator_mapping: dict[AggregationType, Aggregator] = {
 def guess_reader(filename):
     """
     Guess a reader based on file contents or extensions.
-    In some cases (i.e. binary SH12A files) access to file contents is needed.
+    In some cases (i.e. binary SHIELD-HIT12A files) access to file contents is needed.
     :param filename:
     :return: Instantiated reader object
     """
@@ -62,7 +62,7 @@ def guess_reader(filename):
 def guess_corename(filename):
     """
     Guess a reader based on file contents or extensions.
-    In some cases (i.e. binary SH12A files) access to file contents is needed.
+    In some cases (i.e. binary SHIELD-HIT12A files) access to file contents is needed.
     :param filename:
     :return: the corename of the file (i.e. the basename without the running number for averaging)
     """
@@ -73,7 +73,7 @@ def guess_corename(filename):
 
 
 def fromfile(filename: str) -> Optional[Estimator]:
-    """Read estimator data from a binary file ```filename```"""
+    """Read estimator data from a binary file `filename`"""
 
     reader = guess_reader(filename)
     if reader is None:
@@ -113,18 +113,17 @@ def fromfilelist(input_file_list, error: ErrorEstimate = ErrorEstimate.stderr, n
         # create aggregators for each page and fill them with data from first file
         page_aggregators = []
         for page in result.pages:
-            # got a page with "concatenate normalisation"
             current_page_normalisation = getattr(page, 'page_normalized', 2)
             aggregator = _aggregator_mapping.get(current_page_normalisation, WeightedStatsAggregator)()
             logger.info("Selected aggregator %s for page %s", aggregator, page.name)
-            aggregator.update(page.data_raw)
+            aggregator.update(value=page.data_raw, weight=result.number_of_primaries)
             page_aggregators.append(aggregator)
 
         # process all other files, if there are any
         for filename in input_file_list[1:]:
             current_estimator = fromfile(filename)
             for current_page, aggregator in zip(current_estimator.pages, page_aggregators):
-                aggregator.update(current_page.data_raw)
+                aggregator.update(value=current_page.data_raw, weight=current_estimator.number_of_primaries)
             result.number_of_primaries += current_estimator.number_of_primaries
 
         # extract data from aggregators and fill then into the result

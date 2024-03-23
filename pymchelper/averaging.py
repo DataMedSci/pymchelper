@@ -150,7 +150,7 @@ class WeightedStatsAggregator(Aggregator):
 class ConcatenatingAggregator(Aggregator):
     """Class for concatenating numpy arrays"""
 
-    def update(self, value: Union[float, ArrayLike]):
+    def update(self, value: Union[float, ArrayLike], **kwargs):
         """Update the state of the aggregator with new data."""
         if not self.updated:
             self.data = value
@@ -163,7 +163,7 @@ class ConcatenatingAggregator(Aggregator):
 class SumAggregator(Aggregator):
     """Class for calculating sum of a sequence of numbers."""
 
-    def update(self, value: Union[float, ArrayLike]):
+    def update(self, value: Union[float, ArrayLike], **kwargs):
         """Update the state of the aggregator with new data."""
         # first value added
         if not self.updated:
@@ -181,7 +181,7 @@ class NoAggregator(Aggregator):
     Sets the data to the first value and does not update it.
     """
 
-    def update(self, value: Union[float, ArrayLike]):
+    def update(self, value: Union[float, ArrayLike], **kwargs):
         """Update the state of the aggregator with new data."""
         # set value only on first update
         if not self.updated:
