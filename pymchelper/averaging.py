@@ -50,7 +50,7 @@ class Aggregator:
 
     def update(self, value: Union[float, ArrayLike], **kwargs):
         """Update the state of the aggregator with new data."""
-        raise NotImplementedError("Update function not implemented for %s", self.__class__.__name__)
+        raise NotImplementedError(f"Update function not implemented for {self.__class__.__name__}")
 
     def error(self, **kwargs):
         """Default implementation of error function, returns None."""
@@ -93,7 +93,7 @@ class WeightedStatsAggregator(Aggregator):
     _total_weight_squared: float = field(default=0., repr=False, init=False)
     total_weight: float = 0
 
-    def update(self, value: Union[float, ArrayLike], weight: float = 1.0):
+    def update(self, value: Union[float, ArrayLike], weight: float = 1.0, **kwargs):
         """
         Update the state of the aggregator with new data.
         Note that the weights are so called "reliability weights", not frequency weights.
