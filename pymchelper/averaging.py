@@ -16,7 +16,7 @@ Such approach results in a significant reduction of memory usage and is more num
 
 This module contains several classes for aggregating data from multiple files:
 - Aggregator: base class for all other aggregators
-- WeightedStatsAggregator: for calculating weighted mean and variance
+- WeightedStatsAggregator: for calculating weighted (using reliability, not frequency weights) mean and variance
 - ConcatenatingAggregator: for concatenating data
 - SumAggregator: for calculating sum instead of variance
 - NoAggregator: for cases when no aggregation is required
@@ -30,7 +30,7 @@ The `update` method is used to update the state of the aggregator with new data 
 
 from dataclasses import dataclass, field
 import logging
-from typing import Union, Optional
+from typing import Union
 import numpy as np
 from numpy.typing import ArrayLike
 
@@ -47,6 +47,10 @@ class Aggregator:
 
     data: Union[float, ArrayLike] = float('nan')
     _updated: bool = field(default=False, repr=False, init=False)
+
+    def update(self, value: Union[float, ArrayLike], **kwargs):
+        """Update the state of the aggregator with new data."""
+        raise NotImplementedError("Update function not implemented for %s", self.__class__.__name__)
 
     def error(self, **kwargs):
         """Default implementation of error function, returns None."""
@@ -132,7 +136,7 @@ class WeightedStatsAggregator(Aggregator):
     def variance_sample(self):
         """
         Unbiased estimate of the variance.
-        The bias of the weighted estimator if (1 - \sum_w_i^2 / W_n^2), or in other words:
+        The bias of the weighted estimator if (1 - sum w_i^2 / W_n^2), or in other words:
         1 - "sum of squares of weights" / "square of sum of weights".
         For all equal weights the bias is 1 - n * w^2/((n * w)^2) = 1 - 1/n which
         leads to the well known formula for the sample variance.
