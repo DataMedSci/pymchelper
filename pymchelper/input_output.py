@@ -86,7 +86,9 @@ def fromfile(filename: str) -> Optional[Estimator]:
     return estimator
 
 
-def fromfilelist(input_file_list, error: ErrorEstimate = ErrorEstimate.stderr, nan: bool = True) -> Optional[Estimator]:
+def fromfilelist(input_file_list,
+                 error: ErrorEstimate = ErrorEstimate.stderr,
+                 nan: bool = False) -> Optional[Estimator]:
     """
     Reads all files from a given list, and returns a list of averaged estimators.
 
@@ -115,7 +117,7 @@ def fromfilelist(input_file_list, error: ErrorEstimate = ErrorEstimate.stderr, n
         for page in result.pages:
             current_page_normalisation = getattr(page, 'page_normalized', 2)
             aggregator = _aggregator_mapping.get(current_page_normalisation, WeightedStatsAggregator)()
-            logger.info("Selected aggregator %s for page %s", aggregator, page.name)
+            logger.debug("Selected aggregator %s for page %s", aggregator, page.name)
             aggregator.update(value=page.data_raw, weight=result.number_of_primaries)
             page_aggregators.append(aggregator)
 
@@ -128,7 +130,7 @@ def fromfilelist(input_file_list, error: ErrorEstimate = ErrorEstimate.stderr, n
 
         # extract data from aggregators and fill then into the result
         for page, aggregator in zip(result.pages, page_aggregators):
-            logger.info("Extracting data from aggregator %s for page %s", aggregator, page.name)
+            logger.debug("Extracting data from aggregator %s for page %s", aggregator, page.name)
             page.data_raw = aggregator.data
             page.error_raw = aggregator.error(error_type=error.name)
 

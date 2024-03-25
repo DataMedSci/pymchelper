@@ -11,9 +11,8 @@ logger = logging.getLogger(__name__)
 
 
 @pytest.fixture(scope='module')
-def shieldhit_multiple_result_directory() -> Generator[Path, None, None]:
+def shieldhit_multiple_result_directory(main_dir) -> Generator[Path, None, None]:
     """Return path to directory with single SHIELD-HIT12A result files"""
-    main_dir = Path(__file__).resolve().parent
     yield main_dir / "res" / "shieldhit" / "generated" / "many" / "msh"
 
 

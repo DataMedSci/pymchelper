@@ -54,7 +54,7 @@ class Aggregator:
 
     def error(self, **kwargs):
         """Default implementation of error function, returns None."""
-        logging.warning("Error calculation not implemented for %s", self.__class__.__name__)
+        logging.debug("Error calculation not implemented for %s", self.__class__.__name__)
 
     @property
     def updated(self):
