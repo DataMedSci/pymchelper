@@ -57,9 +57,14 @@ def test_aggregating_equal_stats(averaging_bdos_directory, small_stat_bdo_patter
 
             if "mean" in output_type:
                 assert np.average(list_of_entries_to_aggregate) == pytest.approx(page.data)
+                assert np.std(list_of_entries_to_aggregate, ddof=1, axis=0) / np.sqrt(
+                    len(input_file_list)) == pytest.approx(page.error)
             elif "sum" in output_type:
                 assert np.sum(list_of_entries_to_aggregate) == pytest.approx(page.data)
+                assert page.error is None
             elif "none" in output_type:
                 assert list_of_entries_to_aggregate[0] == pytest.approx(page.data)
+                assert page.error is None
             elif "concat" in output_type:
                 assert np.concatenate(list_of_entries_to_aggregate, axis=1) == pytest.approx(page.data)
+                assert page.error is None
