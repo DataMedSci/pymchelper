@@ -1,0 +1,38 @@
+Geometry Mesh
+    Name MyMesh_YZ
+    X -5.0  5.0    1
+    Y -5.0  5.0    1
+    Z  16.0  16.1   1
+
+Filter
+    Name Carbon
+    Z == 6
+    A == 12
+
+Output
+    Filename normalisation-1_aggregation-none.bdo
+    Geo MyMesh_YZ
+    Quantity Material
+    Quantity Rho
+
+Output
+    Filename normalisation-2_aggregation-sum.bdo
+    Geo MyMesh_YZ
+    Quantity Count
+
+Output
+    Filename normalisation-3_aggregation-mean.bdo
+    Geo MyMesh_YZ
+    Quantity DLET
+    Quantity TLET
+
+Output
+    Filename normalisation-4_aggregation-concat.bdo
+    Geo MyMesh_YZ
+    Quantity MCPL Carbon
+
+Output
+    Filename normalisation-5_aggregation-mean.bdo
+    Geo MyMesh_YZ
+    Quantity Dose
+    Quantity Fluence
