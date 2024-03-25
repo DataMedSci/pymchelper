@@ -1,7 +1,7 @@
 #!/bin/bash
 
-rm -f *.bdo
-rm -f *.log
+rm --force ./*.bdo
+rm --force ./*.log
 
 # large statistic example which should converge to the same result
 shieldhit --nstat=1000 --seedoffset=1 --silent . 1>/dev/null &
