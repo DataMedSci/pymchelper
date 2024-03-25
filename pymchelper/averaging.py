@@ -64,6 +64,9 @@ class Aggregator:
 class WeightedStatsAggregator(Aggregator):
     """
     Calculates weighted mean and variance of a sequence of numbers or numpy arrays.
+    We do not use frequency weights (which sums up to 1), the total sum of all weights is not known as
+    we are aggregating data from multiple files with different number of histories.
+    The aggregation uses single pass loop over all files.
 
     Good overview of currently known methods to calculate online weighted mean and variance can be found in [2].
     The original method to calculate online mean and variance was proposed by Welford in [1].
@@ -87,7 +90,11 @@ class WeightedStatsAggregator(Aggregator):
     total_weight: float = 0
 
     def update(self, value: Union[float, ArrayLike], weight: float = 1.0):
-        """Update the state of the aggregator with new data."""
+        """
+        Update the state of the aggregator with new data.
+        Note that the weights are so called "reliability weights", not frequency weights.
+        If unsure put here the number of histories from the file if you are aggregating data from multiple files.
+        """
         if weight < 0:
             raise ValueError("Weight must be non-negative")
 
@@ -109,6 +116,7 @@ class WeightedStatsAggregator(Aggregator):
         self._accumulator_S += weight * (value - self.data) * (value - mean_old)
 
         self._updated = True
+        logging.debug("Updated aggregator with value %s and weight %s", value, weight)
 
     @property
     def mean(self):
@@ -122,8 +130,15 @@ class WeightedStatsAggregator(Aggregator):
 
     @property
     def variance_sample(self):
-        """Unbiased estimate of the variance"""
-        return self._accumulator_S / (self.total_weight - 1)
+        """
+        Unbiased estimate of the variance.
+        The bias of the weighted estimator if (1 - \sum_w_i^2 / W_n^2), or in other words:
+        1 - "sum of squares of weights" / "square of sum of weights".
+        For all equal weights the bias is 1 - n * w^2/((n * w)^2) = 1 - 1/n which
+        leads to the well known formula for the sample variance.
+        Here we use the weighted version of the formula.
+        """
+        return self._accumulator_S / (self.total_weight - (self._total_weight_squared / self.total_weight))
 
     @property
     def stddev(self):
