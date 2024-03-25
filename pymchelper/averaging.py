@@ -151,8 +151,13 @@ class WeightedStatsAggregator(Aggregator):
 
     @property
     def stderr(self):
-        """Standard error of the sample"""
-        return np.sqrt(self.variance_sample / self.total_weight)
+        """
+        Standard error of the sample.
+        For weighted data it is calculated as:
+        stddev * sqrt(sum w_i^2) / sum w_i
+        For equal weights it reduces via sqrt( n * w^2) / (n * w) = stddev / sqrt(n)
+        """
+        return self.stddev * np.sqrt(self._total_weight_squared) / self.total_weight
 
     def error(self, **kwargs):
         """Error calculation function, can be used to calculate standard deviation or standard error."""
