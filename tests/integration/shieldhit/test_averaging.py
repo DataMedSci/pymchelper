@@ -80,14 +80,16 @@ def test_aggregating_weighted_stats(averaging_bdos_directory, small_stat_bdo_pat
     """
     large_stat_bdo_files = list(averaging_bdos_directory.glob(f"{output_type}{large_stat_bdo_pattern}"))
     all_bdo_files = list(averaging_bdos_directory.glob(f"{output_type}{small_stat_bdo_pattern}")) + large_stat_bdo_files
+    from pymchelper.estimator import ErrorEstimate
 
-    averaged_estimators_all = fromfilelist(input_file_list=[str(path) for path in all_bdo_files])
+    averaged_estimators_all = fromfilelist(input_file_list=[str(path) for path in all_bdo_files],
+                                           error=ErrorEstimate.stddev)
     assert len(averaged_estimators_all.pages) > 0
 
-    averaged_estimators_large_stat = fromfilelist(input_file_list=[str(path) for path in large_stat_bdo_files])
+    averaged_estimators_large_stat = fromfilelist(input_file_list=[str(path) for path in large_stat_bdo_files],
+                                                  error=ErrorEstimate.stddev)
     assert len(averaged_estimators_large_stat.pages) > 0
 
     for all_stat_pages, large_stat_pages in zip(averaged_estimators_all.pages, averaged_estimators_large_stat.pages):
         # the small stats should not affect the result by more than 1%
         assert all_stat_pages.data == pytest.approx(large_stat_pages.data, rel=1e-2)
-        # assert all_stat_pages.error == pytest.approx(large_stat_pages.error, rel=1e-2)
