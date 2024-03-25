@@ -78,7 +78,7 @@ def compute_expected_variance(values, weights, total_weight, is_sample=False):
     weighted_mean = np.average(values, weights=weights)
     variance = np.sum(weights * (values - weighted_mean)**2)
     if is_sample:
-        variance /= (total_weight - 1)
+        variance /= (total_weight - (np.sum(weights**2) / total_weight))
     else:
         variance /= total_weight
     return variance
@@ -113,13 +113,8 @@ def test_variance_sample_multiple_updates():
     for value, weight in zip(values, weights):
         ws.update(value, weight)
 
-    # Sample variance calculation should only be used when there are at least two samples
-    if total_weight > 1:
-        expected_variance = compute_expected_variance(values, weights, total_weight, is_sample=True)
-        assert pytest.approx(ws.variance_sample, 0.001) == expected_variance
-    else:
-        with pytest.raises(ZeroDivisionError):
-            _ = ws.variance_sample
+    expected_variance = compute_expected_variance(values, weights, total_weight, is_sample=True)
+    assert pytest.approx(ws.variance_sample, 0.001) == expected_variance
 
 
 def test_variance_with_1d_array():
@@ -134,6 +129,5 @@ def test_variance_with_1d_array():
     expected_variance_population = compute_expected_variance(values, weights, total_weight)
     assert pytest.approx(ws.variance_population, 0.001) == expected_variance_population
 
-    if total_weight > 1:
-        expected_variance_sample = compute_expected_variance(values, weights, total_weight, is_sample=True)
-        assert pytest.approx(ws.variance_sample, 0.001) == expected_variance_sample
+    expected_variance_sample = compute_expected_variance(values, weights, total_weight, is_sample=True)
+    assert pytest.approx(ws.variance_sample, 0.001) == expected_variance_sample
