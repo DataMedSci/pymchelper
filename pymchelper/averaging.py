@@ -26,6 +26,9 @@ The `data` property returns the result of the aggregation: mean, sum or concaten
 The `error` property returns the spread of data for WeightedStatsAggregator, and `None` for other aggregators.
 
 The `update` method is used to update the state of the aggregator with new data from the file.
+
+For details on how this method is applied to average binary output of the MC codes,
+see `fromfilelist` method from `input_output.py` module.
 """
 
 from dataclasses import dataclass, field

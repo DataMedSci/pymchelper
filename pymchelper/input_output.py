@@ -20,22 +20,21 @@ logger = logging.getLogger(__name__)
 
 
 class AggregationType(IntEnum):
-    """Enum for different types of aggregation."""
+    """
+    Enum for different types of aggregation.
+    Below few examples of such aggregation types used in SHIELD-HIT12A:
+      - NoAggregation is used for density (RHO) and material scorer.
+      - Sum is used for particle counter (COUNT).
+      - AveragingCumulative is used for dose and fluence scorers.
+      - AveragingPerPrimary is used for LET scorers (TLET and DLET).
+      - Concatenation is used for phase space (MCPL) scorer.
+    """
 
     NoAggregation = 0
     Sum = 1
     AveragingCumulative = 2
     AveragingPerPrimary = 3
     Concatenation = 4
-
-
-_aggregator_mapping: dict[AggregationType, Aggregator] = {
-    AggregationType.NoAggregation: NoAggregator,
-    AggregationType.Sum: SumAggregator,
-    AggregationType.AveragingCumulative: WeightedStatsAggregator,
-    AggregationType.AveragingPerPrimary: WeightedStatsAggregator,
-    AggregationType.Concatenation: ConcatenatingAggregator
-}
 
 
 def guess_reader(filename):
@@ -98,6 +97,7 @@ def fromfilelist(input_file_list,
     :param nan: if True, NaN (not a number) are excluded when averaging data.
     :return: list of estimators
     """
+
     if not isinstance(input_file_list, list):  # probably a string instead of list
         input_file_list = [input_file_list]
 
@@ -112,6 +112,14 @@ def fromfilelist(input_file_list,
         result = fromfile(input_file_list[0])
         if not result:
             return None
+
+        _aggregator_mapping: dict[AggregationType, Aggregator] = {
+            AggregationType.NoAggregation: NoAggregator,
+            AggregationType.Sum: SumAggregator,
+            AggregationType.AveragingCumulative: WeightedStatsAggregator,
+            AggregationType.AveragingPerPrimary: WeightedStatsAggregator,
+            AggregationType.Concatenation: ConcatenatingAggregator
+        }
 
         # create aggregators for each page and fill them with data from first file
         page_aggregators = []
