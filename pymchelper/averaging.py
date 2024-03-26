@@ -16,7 +16,7 @@ Such approach results in a significant reduction of memory usage and is more num
 
 This module contains several classes for aggregating data from multiple files:
 - Aggregator: base class for all other aggregators
-- WeightedStatsAggregator: for calculating weighted (using reliability, not frequency weights) mean and variance
+- WeightedStatsAggregator: for calculating weighted (using weights which not necessarily sums up 1) mean and variance
 - ConcatenatingAggregator: for concatenating data
 - SumAggregator: for calculating sum instead of variance
 - NoAggregator: for cases when no aggregation is required
@@ -57,8 +57,14 @@ class Aggregator:
         logging.debug("Error calculation not implemented for %s", self.__class__.__name__)
 
     @property
-    def updated(self):
-        """Check if the aggregator was updated."""
+    def updated(self) -> bool:
+        """
+        Check if the aggregator was updated. The newly created aggregator is in the state of not being updated.
+        That means that no aggregation results are present via `data` or `error` properties.
+        We rely on the fact that `data` attribute is set to `nan` on creation of the aggregator object.
+        On first call to the `update` method the `data` is being filled with floating point numbers or arrays.
+        The `update` method sets also `self._updated` to True.
+        """
         if isinstance(self.data, float) and np.isnan(self.data):
             return False
         return self._updated
@@ -123,17 +129,21 @@ class WeightedStatsAggregator(Aggregator):
         logging.debug("Updated aggregator with value %s and weight %s", value, weight)
 
     @property
-    def mean(self):
+    def mean(self) -> Union[float, ArrayLike]:
         """Weighted mean of the sample"""
         return self.data
 
     @property
-    def variance_population(self):
+    def variance_population(self) -> Union[float, ArrayLike]:
         """Biased estimate of the variance"""
+        if not self.updated:
+            raise ValueError("No data to calculate variance")
+        if self.total_weight <= 0:
+            raise ValueError("Total weight must be positive")
         return self._accumulator_S / self.total_weight
 
     @property
-    def variance_sample(self):
+    def variance_sample(self) -> Union[float, ArrayLike]:
         """
         Unbiased estimate of the variance.
         The bias of the weighted estimator if (1 - sum w_i^2 / W_n^2), or in other words:
@@ -142,15 +152,19 @@ class WeightedStatsAggregator(Aggregator):
         leads to the well known formula for the sample variance.
         Here we use the weighted version of the formula.
         """
+        if not self.updated:
+            raise ValueError("No data to calculate variance")
+        if self.total_weight <= 0:
+            raise ValueError("Total weight must be positive")
         return self._accumulator_S / (self.total_weight - (self._total_weight_squared / self.total_weight))
 
     @property
-    def stddev(self):
+    def stddev(self) -> Union[float, ArrayLike]:
         """Standard deviation of the sample"""
         return np.sqrt(self.variance_sample)
 
     @property
-    def stderr(self):
+    def stderr(self) -> Union[float, ArrayLike]:
         """
         Standard error of the sample.
         For weighted data it is calculated as:
@@ -159,14 +173,19 @@ class WeightedStatsAggregator(Aggregator):
         """
         return self.stddev * np.sqrt(self._total_weight_squared) / self.total_weight
 
-    def error(self, **kwargs):
-        """Error calculation function, can be used to calculate standard deviation or standard error."""
+    def error(self, **kwargs) -> Optional[Union[float, ArrayLike]]:
+        """
+        Error calculation function, can be used to calculate standard deviation or standard error.
+        Type of error may be requested by `error_type` keyword argument with `stddev` or `stderr` values.
+        For other values or if the keyword argument is not present, None is returned.
+        """
         logging.debug("Calculating error with kwargs: %s", kwargs)
         if 'error_type' in kwargs:
             if kwargs['error_type'] == 'stddev':
                 return self.stddev
             if kwargs['error_type'] == 'stderr':
                 return self.stderr
+            return None
         return None
 
 
