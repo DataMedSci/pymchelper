@@ -188,7 +188,6 @@ class WeightedStatsAggregator(Aggregator):
                 return self.stddev
             if kwargs['error_type'] == 'stderr':
                 return self.stderr
-            return None
         return None
 
 
