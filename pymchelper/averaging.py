@@ -33,7 +33,7 @@ see `fromfilelist` method from `input_output.py` module.
 
 from dataclasses import dataclass, field
 import logging
-from typing import Union
+from typing import Union, Optional
 import numpy as np
 from numpy.typing import ArrayLike
 
