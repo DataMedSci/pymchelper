@@ -97,7 +97,6 @@ def fromfilelist(input_file_list,
     :param nan: if True, NaN (not a number) are excluded when averaging data.
     :return: list of estimators
     """
-
     if not isinstance(input_file_list, list):  # probably a string instead of list
         input_file_list = [input_file_list]
 
