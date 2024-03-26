@@ -94,6 +94,10 @@ jobs:
       pages: write
       id-token: write
     steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0 # all history needed, otherwise pymchelper version cannot be determined
     - id: deployment
       uses: sphinx-notes/pages@v3
       with:
