@@ -129,7 +129,7 @@ def fromfilelist(input_file_list,
                 aggregator.update(value=current_page.data_raw, weight=current_estimator.number_of_primaries)
 
             # force garbage collection if the estimator is too large
-            estimator_size_mbytes = sum([page.data_raw.nbytes for page in current_estimator.pages]) / 1024 / 1024
+            estimator_size_mbytes = sum(page.data_raw.nbytes for page in current_estimator.pages) / 1024 / 1024
             gc_threshold_mbytes = 100
             if estimator_size_mbytes > gc_threshold_mbytes:
                 logger.info("Large estimator (%.1f MB) detected, performing garbage collection", estimator_size_mbytes)
