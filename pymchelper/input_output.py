@@ -112,6 +112,16 @@ def fromfilelist(input_file_list,
         if not result:
             return None
 
+        # mapping from page-normalisation (from SHIELD-HIT12A) to aggregator (from pymchelper.averaging)
+        # SHIELD-HIT12A uses integers for normalisation, here we stick to corresponding enum values
+        # note that for some normalisation types, the same aggregator is used
+        # these are AveragingCumulative (like dose) and AveragingPerPrimary (like LET)
+        # small note on how SHIELD-HIT12A stores the data in the binary files in BDO format:
+        # for "cumulative-like" pages (i.e. dose, fluence) data in BDO is stored as respective quantity
+        # for all particles. In the code of pymchelper reader, once the BDO file is read, the data is
+        # then normalized by the number of primaries. Therefore the data in `estimator` object
+        # obtained via `fromfile` method is already normalized. This means we can aggreate it
+        # the same way as the "per-primary" pages (like LET).
         _aggregator_mapping: dict[AggregationType, Aggregator] = {
             AggregationType.NoAggregation: NoAggregator,
             AggregationType.Sum: SumAggregator,
@@ -123,9 +133,15 @@ def fromfilelist(input_file_list,
         # create aggregators for each page and fill them with data from first file
         page_aggregators = []
         for page in result.pages:
-            current_page_normalisation = getattr(page, 'page_normalized', 2)
+
+            # if no normalization attribute present (Fluka?) we can assume it is a cumulative-like quantity
+            current_page_normalisation = getattr(page, 'page_normalized', AggregationType.AveragingCumulative.value)
+
+            # guess the aggregator based on the normalisation type
             aggregator = _aggregator_mapping.get(current_page_normalisation, WeightedStatsAggregator)()
             logger.debug("Selected aggregator %s for page %s", aggregator, page.name)
+
+            # feed the aggregator with data from the first file
             aggregator.update(value=page.data_raw, weight=result.number_of_primaries)
             page_aggregators.append(aggregator)
 
