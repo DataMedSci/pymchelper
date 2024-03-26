@@ -1,5 +1,6 @@
 from enum import IntEnum
 import logging
+import gc
 import os
 from collections import defaultdict
 from glob import glob
@@ -126,6 +127,13 @@ def fromfilelist(input_file_list,
             current_estimator = fromfile(filename)
             for current_page, aggregator in zip(current_estimator.pages, page_aggregators):
                 aggregator.update(value=current_page.data_raw, weight=current_estimator.number_of_primaries)
+
+            # force garbage collection if the estimator is too large
+            estimator_size_mbytes = sum([page.data_raw.nbytes for page in current_estimator.pages]) / 1024 / 1024
+            gc_threshold_mbytes = 100
+            if estimator_size_mbytes > gc_threshold_mbytes:
+                logger.info("Large estimator (%.1f MB) detected, performing garbage collection", estimator_size_mbytes)
+                gc.collect()
             result.number_of_primaries += current_estimator.number_of_primaries
 
         # extract data from aggregators and fill then into the result
