@@ -169,6 +169,7 @@ class SHReaderBDO2019(SHReader):
                 # normalize the detectors such as dose or fluence (tagged as SH_POSTPROC_NORM or 2)
                 if page_normalisation == 2:
                     page.data_raw /= np.float64(estimator.number_of_primaries)
+                    page.unit += "/prim"
 
         estimator.file_format = 'bdo2019'
 
