@@ -98,17 +98,8 @@ jobs:
       uses: actions/checkout@v4
       with:
         fetch-depth: 0 # fetch all history, as by default only last 1 commit is fetched
-        fetch-tags: true
-    - name: Set up Python
-      uses: actions/setup-python@v5
-      with:
-        python-version: '3.10'
     - name: Build and Commit
       uses: sphinx-notes/pages@3.0
       with:
-        documentation_path: docs
-        requirements_path: docs/requirements.txt
         checkout: false
-    - name: List all files in the repository
-      run: |
-        ls -la docs/_build
+        python_version: '3.10'
