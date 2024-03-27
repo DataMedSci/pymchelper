@@ -108,6 +108,7 @@ jobs:
       with:
         documentation_path: docs
         requirements_path: docs/requirements.txt
+        checkout: false
     - name: List all files in the repository
       run: |
         ls -la docs/_build
