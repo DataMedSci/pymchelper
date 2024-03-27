@@ -15,7 +15,7 @@ jobs:
     if: >
       !contains(github.event.head_commit.message, '[ci skip]') &&
        !contains(github.event.head_commit.message, '[skip ci]')
-    runs-on: ubuntu-latest        
+    runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
       with:
@@ -38,9 +38,9 @@ jobs:
           flake8 --count --select=E9,F63,F7,F82 --show-source --statistics pymchelper tests examples
 
     - name: Smoke test with pytest
-      run: |         
+      run: |
          pytest -k "smoke" tests/
-         
+
   # all tests on matrix of all possible python versions and OSes
   normal_test:
     strategy:
@@ -73,6 +73,5 @@ jobs:
         pip install -r tests/requirements-test.txt
 
     - name: Test with pytest
-      run: |         
+      run: |
          pytest -k "not slow" tests/
-         
