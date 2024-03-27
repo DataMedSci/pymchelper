@@ -9,7 +9,6 @@ files to graphs, tabulated plain data and MS Excel files and other formats.
 Toolkit can also serve as a library in the Python language, which can be used by programmers and data scientists
 to process output data in Python scripts.
 
-Updated today, 2024-03-27
 
 .. toctree::
    :maxdepth: 2
