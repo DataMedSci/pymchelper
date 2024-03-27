@@ -97,7 +97,8 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v4
       with:
-        fetch-depth: 0 # otherwise, you will failed to push refs to dest repo
+        fetch-depth: 0 # fetch all history, as by default only last 1 commit is fetched
+        fetch-tags: true
     - name: Set up Python
       uses: actions/setup-python@v5
       with:
@@ -109,4 +110,4 @@ jobs:
         requirements_path: docs/requirements.txt
     - name: List all files in the repository
       run: |
-        ls -la
+        ls -la docs/_build

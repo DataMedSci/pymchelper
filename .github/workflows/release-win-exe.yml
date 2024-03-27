@@ -23,69 +23,69 @@ jobs:
         with:
           fetch-depth: 0 # Number of commits to fetch. 0 indicates all history for all branches and tags.
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: 3.10
+  #     - name: Set up Python
+  #       uses: actions/setup-python@v5
+  #       with:
+  #         python-version: 3.10
 
-      - name: Generate VERSION file
-        run: python3 setup.py --help
+  #     - name: Generate VERSION file
+  #       run: python3 setup.py --help
 
-      - name: Install pyinstaller
-        run: pip install pyinstaller         
+  #     - name: Install pyinstaller
+  #       run: pip install pyinstaller
 
-      - name: Prepare requierements
-        run: pip install -r requirements.txt
+  #     - name: Prepare requierements
+  #       run: pip install -r requirements.txt
 
-      - name: Prepare version file
-        run: cp pymchelper\VERSION .
+  #     - name: Prepare version file
+  #       run: cp pymchelper\VERSION .
 
-      - name: Generate single-file executables for mcscripter
-        run: pyinstaller --add-data 'VERSION;pymchelper' --onefile --name mcscripter pymchelper\utils\mcscripter.py
+  #     - name: Generate single-file executables for mcscripter
+  #       run: pyinstaller --add-data 'VERSION;pymchelper' --onefile --name mcscripter pymchelper\utils\mcscripter.py
 
-      - name: Generate single-file executables for plan2sobp
-        run: pyinstaller --add-data 'VERSION;pymchelper' --onefile --hiddenimport='pydicom.encoders.gdcm' --hiddenimport='pydicom.encoders.pylibjpeg' --hidden-import='scipy.spatial.transform._rotation_groups'  --name plan2sobp pymchelper\utils\radiotherapy\plan.py
+  #     - name: Generate single-file executables for plan2sobp
+  #       run: pyinstaller --add-data 'VERSION;pymchelper' --onefile --hiddenimport='pydicom.encoders.gdcm' --hiddenimport='pydicom.encoders.pylibjpeg' --hidden-import='scipy.spatial.transform._rotation_groups'  --name plan2sobp pymchelper\utils\radiotherapy\plan.py
 
-      - name: Generate single-file executables for runmc
-        run: pyinstaller --add-data 'VERSION;pymchelper' --onefile --name runmc pymchelper\utils\runmc.py
+  #     - name: Generate single-file executables for runmc
+  #       run: pyinstaller --add-data 'VERSION;pymchelper' --onefile --name runmc pymchelper\utils\runmc.py
 
-      - name: Generate single-file executables for convertmc
-        run: pyinstaller --add-data 'VERSION;pymchelper' --exclude-module scipy --onefile --name convertmc pymchelper\run.py
+  #     - name: Generate single-file executables for convertmc
+  #       run: pyinstaller --add-data 'VERSION;pymchelper' --exclude-module scipy --onefile --name convertmc pymchelper\run.py
 
-      - name: Test single-file executables
-        run: |
-          dist\mcscripter.exe --version
-          dist\plan2sobp.exe --version
-          dist\runmc.exe --version
-          dist\convertmc --version
+  #     - name: Test single-file executables
+  #       run: |
+  #         dist\mcscripter.exe --version
+  #         dist\plan2sobp.exe --version
+  #         dist\runmc.exe --version
+  #         dist\convertmc --version
 
-      - name: Archive executables as artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: executables
-          path: ./dist
+  #     - name: Archive executables as artifacts
+  #       uses: actions/upload-artifact@v4
+  #       with:
+  #         name: executables
+  #         path: ./dist
 
-  # upload of single-file executables to release assets
-  upload-executables:
-    runs-on: windows-latest
-    needs: [build-executables]
+  # # upload of single-file executables to release assets
+  # upload-executables:
+  #   runs-on: windows-latest
+  #   needs: [build-executables]
 
-    steps:
-      - name: Checkout repository with full history
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0 # Number of commits to fetch. 0 indicates all history for all branches and tags.
+  #   steps:
+  #     - name: Checkout repository with full history
+  #       uses: actions/checkout@v4
+  #       with:
+  #         fetch-depth: 0 # Number of commits to fetch. 0 indicates all history for all branches and tags.
 
-      - uses: actions/download-artifact@v4
-        with:
-          name: executables
-          path: ./dist
+  #     - uses: actions/download-artifact@v4
+  #       with:
+  #         name: executables
+  #         path: ./dist
 
-      - name: Add artifact with util files to the release
-        uses: ncipollo/release-action@v1.14.0
-        if: startsWith(github.ref, 'refs/tags/v')
-        with:
-          allowUpdates:  true
-          # An optional set of paths representing artifacts to upload to the release. This may be a single path or a comma delimited list of paths (or globs)
-          artifacts: './dist/*'
-          token:  ${{ secrets.GITHUB_TOKEN }}
+  #     - name: Add artifact with util files to the release
+  #       uses: ncipollo/release-action@v1.14.0
+  #       if: startsWith(github.ref, 'refs/tags/v')
+  #       with:
+  #         allowUpdates:  true
+  #         # An optional set of paths representing artifacts to upload to the release. This may be a single path or a comma delimited list of paths (or globs)
+  #         artifacts: './dist/*'
+  #         token:  ${{ secrets.GITHUB_TOKEN }}
