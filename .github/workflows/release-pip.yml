@@ -97,8 +97,16 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v4
       with:
-        fetch-depth: 0 # all history needed, otherwise pymchelper version cannot be determined
-    - id: deployment
-      uses: sphinx-notes/pages@v3
+        fetch-depth: 0 # otherwise, you will failed to push refs to dest repo
+    - name: Set up Python
+      uses: actions/setup-python@v5
       with:
-        python_version: '3.11'
+        python-version: '3.10'
+    - name: Build and Commit
+      uses: sphinx-notes/pages@3.0
+      with:
+        documentation_path: docs
+        requirements_path: docs/requirements.txt
+    - name: List all files in the repository
+      run: |
+        ls -la
