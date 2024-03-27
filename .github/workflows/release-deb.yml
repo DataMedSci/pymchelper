@@ -24,165 +24,165 @@ jobs:
         with:
           fetch-depth: 0 # Number of commits to fetch. 0 indicates all history for all branches and tags.
 
-  #     - name: Build Docker image with pyinstaller and pymchelper inside
-  #       run: docker build --tag pymchelper .
+      - name: Build Docker image with pyinstaller and pymchelper inside
+        run: docker build --tag pymchelper .
 
-  #     - name: Generate single-file executables for mcscripter
-  #       run: docker run --volume `pwd`/dist:/app/dist pymchelper:latest pyinstaller --add-data 'pymchelper/VERSION:pymchelper' --onefile --name mcscripter pymchelper/utils/mcscripter.py
+      - name: Generate single-file executables for mcscripter
+        run: docker run --volume `pwd`/dist:/app/dist pymchelper:latest pyinstaller --add-data 'pymchelper/VERSION:pymchelper' --onefile --name mcscripter pymchelper/utils/mcscripter.py
 
-  #     - name: Generate single-file executables for plan2sobp
-  #       run: docker run --volume `pwd`/dist:/app/dist pymchelper:latest pyinstaller --add-data 'pymchelper/VERSION:pymchelper' --onefile --hiddenimport='pydicom.encoders.gdcm' --hiddenimport='pydicom.encoders.pylibjpeg' --hidden-import='scipy.spatial.transform._rotation_groups' --name plan2sobp pymchelper/utils/radiotherapy/plan.py
+      - name: Generate single-file executables for plan2sobp
+        run: docker run --volume `pwd`/dist:/app/dist pymchelper:latest pyinstaller --add-data 'pymchelper/VERSION:pymchelper' --onefile --hiddenimport='pydicom.encoders.gdcm' --hiddenimport='pydicom.encoders.pylibjpeg' --hidden-import='scipy.spatial.transform._rotation_groups' --name plan2sobp pymchelper/utils/radiotherapy/plan.py
 
-  #     - name: Generate single-file executables for runmc
-  #       run: docker run --volume `pwd`/dist:/app/dist pymchelper:latest pyinstaller runmc.spec
+      - name: Generate single-file executables for runmc
+        run: docker run --volume `pwd`/dist:/app/dist pymchelper:latest pyinstaller runmc.spec
 
-  #     - name: Generate single-file executables for convertmc
-  #       run: docker run --volume `pwd`/dist:/app/dist pymchelper:latest pyinstaller convertmc.spec
+      - name: Generate single-file executables for convertmc
+        run: docker run --volume `pwd`/dist:/app/dist pymchelper:latest pyinstaller convertmc.spec
 
-  #     - name: Test single-file executables
-  #       run: |
-  #         ls -alh ./dist/
-  #         ./dist/mcscripter --version
-  #         ./dist/plan2sobp --version
-  #         ./dist/runmc --version
-  #         ./dist/convertmc --version
-  #         docker run  -v `pwd`/dist:/test/ ubuntu:12.04 /test/convertmc --version
-  #         docker run  -v `pwd`/dist:/test/ debian:stable /test/convertmc --version
+      - name: Test single-file executables
+        run: |
+          ls -alh ./dist/
+          ./dist/mcscripter --version
+          ./dist/plan2sobp --version
+          ./dist/runmc --version
+          ./dist/convertmc --version
+          docker run  -v `pwd`/dist:/test/ ubuntu:12.04 /test/convertmc --version
+          docker run  -v `pwd`/dist:/test/ debian:stable /test/convertmc --version
 
-  #     - name: Archive executables as artifacts
-  #       uses: actions/upload-artifact@v4
-  #       with:
-  #         name: executables
-  #         path: ./dist
+      - name: Archive executables as artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: executables
+          path: ./dist
 
-  # # upload of single-file executables to release assets
-  # upload-executables:
-  #   runs-on: ubuntu-latest
-  #   needs: [build-executables]
+  # upload of single-file executables to release assets
+  upload-executables:
+    runs-on: ubuntu-latest
+    needs: [build-executables]
 
-  #   steps:
-  #     - name: Checkout repository with full history
-  #       uses: actions/checkout@v4
-  #       with:
-  #         fetch-depth: 0 # Number of commits to fetch. 0 indicates all history for all branches and tags.
+    steps:
+      - name: Checkout repository with full history
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Number of commits to fetch. 0 indicates all history for all branches and tags.
 
-  #     - uses: actions/download-artifact@v4
-  #       with:
-  #         name: executables
-  #         path: ./dist
+      - uses: actions/download-artifact@v4
+        with:
+          name: executables
+          path: ./dist
 
-  #     - name: Add artifact with util files to the release
-  #       uses: ncipollo/release-action@v1.14.0
-  #       if: startsWith(github.ref, 'refs/tags/v')
-  #       with:
-  #         allowUpdates:  true
-  #         # An optional set of paths representing artifacts to upload to the release. This may be a single path or a comma delimited list of paths (or globs)
-  #         artifacts: './dist/*'
-  #         token:  ${{ secrets.GITHUB_TOKEN }}
+      - name: Add artifact with util files to the release
+        uses: ncipollo/release-action@v1.14.0
+        if: startsWith(github.ref, 'refs/tags/v')
+        with:
+          allowUpdates:  true
+          # An optional set of paths representing artifacts to upload to the release. This may be a single path or a comma delimited list of paths (or globs)
+          artifacts: './dist/*'
+          token:  ${{ secrets.GITHUB_TOKEN }}
 
 
-  # generate-deb-packages:
-  #   runs-on: ubuntu-latest
-  #   needs: [build-executables]
+  generate-deb-packages:
+    runs-on: ubuntu-latest
+    needs: [build-executables]
 
-  #   steps:
-  #     - name: Checkout repository with full history
-  #       uses: actions/checkout@v4
+    steps:
+      - name: Checkout repository with full history
+        uses: actions/checkout@v4
 
-  #     - uses: actions/download-artifact@v4
-  #       with:
-  #         name: executables
-  #         path: ./dist
+      - uses: actions/download-artifact@v4
+        with:
+          name: executables
+          path: ./dist
 
-  #     - name: Generate deb packages
-  #       working-directory: debian_packages
-  #       run: ./generate_deb_packages.sh convertmc runmc plan2sobp mcscripter
+      - name: Generate deb packages
+        working-directory: debian_packages
+        run: ./generate_deb_packages.sh convertmc runmc plan2sobp mcscripter
 
-  #     - name: Archive deb package as artifacts
-  #       uses: actions/upload-artifact@v4
-  #       with:
-  #         name: deb
-  #         path: 'debian_packages/*.deb'
+      - name: Archive deb package as artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: deb
+          path: 'debian_packages/*.deb'
 
-  # test_deb:
-  #   runs-on: ubuntu-latest
-  #   needs: [generate-deb-packages]
-  #   strategy:
-  #     matrix:
-  #       docker-tag: ['debian:8', 'debian:9', 'debian:10', 'debian:11', 'debian:stable', 'ubuntu:14.04', 'ubuntu:16.04', 'ubuntu:18.04', 'ubuntu:20.04', 'ubuntu:21.04', 'ubuntu:22.04']
-  #   steps:
-  #     - uses: actions/download-artifact@v4
-  #       with:
-  #         name: deb
-  #         path: ./
+  test_deb:
+    runs-on: ubuntu-latest
+    needs: [generate-deb-packages]
+    strategy:
+      matrix:
+        docker-tag: ['debian:8', 'debian:9', 'debian:10', 'debian:11', 'debian:stable', 'ubuntu:14.04', 'ubuntu:16.04', 'ubuntu:18.04', 'ubuntu:20.04', 'ubuntu:21.04', 'ubuntu:22.04']
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: deb
+          path: ./
 
-  #     - name: Inspect artifacts
-  #       run: find . -name "*.deb" -printf 'Contents of package %p\n' -exec dpkg-deb --contents {} \;
+      - name: Inspect artifacts
+        run: find . -name "*.deb" -printf 'Contents of package %p\n' -exec dpkg-deb --contents {} \;
 
-  #     - name: Test installation
-  #       run: docker run --volume `pwd`:/pkg ${{ matrix.docker-tag }} /bin/sh -c "ldd --version; dpkg --install /pkg/pymchelper-*.deb; convertmc --version; runmc --version"
+      - name: Test installation
+        run: docker run --volume `pwd`:/pkg ${{ matrix.docker-tag }} /bin/sh -c "ldd --version; dpkg --install /pkg/pymchelper-*.deb; convertmc --version; runmc --version"
 
-  # repo_prepare:
-  #     runs-on: ubuntu-latest
-  #     needs: [generate-deb-packages]
-  #     steps:
-  #     - uses: actions/checkout@v4
+  repo_prepare:
+      runs-on: ubuntu-latest
+      needs: [generate-deb-packages]
+      steps:
+      - uses: actions/checkout@v4
 
-  #     - uses: actions/download-artifact@v4
-  #       with:
-  #         name: deb
-  #         path: debian_packages/
+      - uses: actions/download-artifact@v4
+        with:
+          name: deb
+          path: debian_packages/
 
-  #     - name: Import GPG key from a secret variable
-  #       id: import_gpg
-  #       uses: crazy-max/ghaction-import-gpg@v6
-  #       with:
-  #         gpg_private_key: ${{ secrets.GPG_PRIVATE_KEY }}
+      - name: Import GPG key from a secret variable
+        id: import_gpg
+        uses: crazy-max/ghaction-import-gpg@v6
+        with:
+          gpg_private_key: ${{ secrets.GPG_PRIVATE_KEY }}
 
-  #     - name: Print GPG user IDs and save files to be included in repository
-  #       working-directory: debian_packages
-  #       run: |
-  #         echo "fingerprint: ${{ steps.import_gpg.outputs.fingerprint }}"
-  #         echo "keyid:       ${{ steps.import_gpg.outputs.keyid }}"
-  #         echo "name:        ${{ steps.import_gpg.outputs.name }}"
-  #         echo "email:       ${{ steps.import_gpg.outputs.email }}"
-  #         echo "${{ steps.import_gpg.outputs.fingerprint }}" > key_fingerprint.txt
-  #         gpg --export --armor --output public.gpg
+      - name: Print GPG user IDs and save files to be included in repository
+        working-directory: debian_packages
+        run: |
+          echo "fingerprint: ${{ steps.import_gpg.outputs.fingerprint }}"
+          echo "keyid:       ${{ steps.import_gpg.outputs.keyid }}"
+          echo "name:        ${{ steps.import_gpg.outputs.name }}"
+          echo "email:       ${{ steps.import_gpg.outputs.email }}"
+          echo "${{ steps.import_gpg.outputs.fingerprint }}" > key_fingerprint.txt
+          gpg --export --armor --output public.gpg
 
-  #     - name: Create reposity and add packages
-  #       working-directory: debian_packages
-  #       run: ./add_packages_to_repo.sh
+      - name: Create reposity and add packages
+        working-directory: debian_packages
+        run: ./add_packages_to_repo.sh
 
-  #     - name: Archive directory with repository as artifact
-  #       uses: actions/upload-artifact@v4
-  #       with:
-  #         name: repo
-  #         path: 'debian_packages/public'
+      - name: Archive directory with repository as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: repo
+          path: 'debian_packages/public'
 
-  # repo_upload:
-  #     runs-on: ubuntu-latest
-  #     needs: [repo_prepare, test_deb]
-  #     steps:
-  #     - uses: actions/checkout@v4
+  repo_upload:
+      runs-on: ubuntu-latest
+      needs: [repo_prepare, test_deb]
+      steps:
+      - uses: actions/checkout@v4
 
-  #     - uses: actions/download-artifact@v4
-  #       with:
-  #         name: repo
-  #         path: debian_packages/public
+      - uses: actions/download-artifact@v4
+        with:
+          name: repo
+          path: debian_packages/public
 
-  #     - name: Tuning
-  #       working-directory: debian_packages
-  #       run: |
-  #         mv datamedsci.list public/
-  #         touch public/.nojekyll
+      - name: Tuning
+        working-directory: debian_packages
+        run: |
+          mv datamedsci.list public/
+          touch public/.nojekyll
 
-  #     - name: Deploy to GitHub Pages
-  #       uses: JamesIves/github-pages-deploy-action@v4.5.0
-  #       if: startsWith(github.ref, 'refs/tags/v')
-  #       with:
-  #         branch: gh-pages # The branch the action should deploy to.
-  #         folder: debian_packages/public # The folder the action should deploy.
-  #         repository-name: DataMedSci/deb_package_repository
-  #         ssh-key: ${{ secrets.DEB_REPO_PRIVATE_KEY }}
-  #         clean: true
-  #         single-commit: true
+      - name: Deploy to GitHub Pages
+        uses: JamesIves/github-pages-deploy-action@v4.5.0
+        if: startsWith(github.ref, 'refs/tags/v')
+        with:
+          branch: gh-pages # The branch the action should deploy to.
+          folder: debian_packages/public # The folder the action should deploy.
+          repository-name: DataMedSci/deb_package_repository
+          ssh-key: ${{ secrets.DEB_REPO_PRIVATE_KEY }}
+          clean: true
+          single-commit: true
