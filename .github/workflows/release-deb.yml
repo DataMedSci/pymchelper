@@ -80,15 +80,15 @@ jobs:
           artifacts: './dist/*'
           token:  ${{ secrets.GITHUB_TOKEN }}
 
-  
+
   generate-deb-packages:
     runs-on: ubuntu-latest
     needs: [build-executables]
-    
+
     steps:
       - name: Checkout repository with full history
         uses: actions/checkout@v4
-      
+
       - uses: actions/download-artifact@v4
         with:
           name: executables
@@ -132,13 +132,13 @@ jobs:
         with:
           name: deb
           path: debian_packages/
-    
+
       - name: Import GPG key from a secret variable
         id: import_gpg
         uses: crazy-max/ghaction-import-gpg@v6
         with:
-          gpg_private_key: ${{ secrets.GPG_PRIVATE_KEY }}          
-      
+          gpg_private_key: ${{ secrets.GPG_PRIVATE_KEY }}
+
       - name: Print GPG user IDs and save files to be included in repository
         working-directory: debian_packages
         run: |
