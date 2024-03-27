@@ -10,6 +10,7 @@ logger = logging.getLogger(__name__)
 
 
 class SHBinaryWriter:
+
     def __init__(self, filename, options):
         self.filename = filename
 
@@ -19,6 +20,7 @@ class SHBinaryWriter:
 
 
 class TxtWriter:
+
     @staticmethod
     def _axis_name(geo_type, axis_no):
         cyl = ('R', 'PHI', 'Z')
@@ -40,11 +42,20 @@ class TxtWriter:
     def _header_first_line(estimator):
         """first line with estimator geo type"""
         result = "#   DETECTOR OUTPUT\n"
-        if estimator.geotyp in (SHGeoType.plane, SHGeoType.dplane,):
+        if estimator.geotyp in (
+                SHGeoType.plane,
+                SHGeoType.dplane,
+        ):
             result = "#             DETECTOR OUTPUT PLANE/DPLANE\n"
-        elif estimator.geotyp in (SHGeoType.zone, SHGeoType.dzone,):
+        elif estimator.geotyp in (
+                SHGeoType.zone,
+                SHGeoType.dzone,
+        ):
             result = "#             DETECTOR OUTPUT ZONE/DZONE\n"
-        elif estimator.geotyp in (SHGeoType.msh, SHGeoType.dmsh,):
+        elif estimator.geotyp in (
+                SHGeoType.msh,
+                SHGeoType.dmsh,
+        ):
             result = "#   DETECTOR OUTPUT MSH/DMSH\n"
         elif estimator.geotyp == SHGeoType.geomap:
             result = "#   DETECTOR OUTPUT GEOMAP\n"
@@ -74,7 +85,10 @@ class TxtWriter:
             result += f"#   JPART:{particle:6d} DETECTOR TYPE: {str(dettyp).ljust(10)}\n"
         else:
             det_type_name = str(dettyp)
-            if dettyp in (SHDetType.zone, SHDetType.medium,):
+            if dettyp in (
+                    SHDetType.zone,
+                    SHDetType.medium,
+            ):
                 det_type_name += "#"
             result += f"#                DETECTOR TYPE: {str(det_type_name).ljust(10)}\n"
         return result
@@ -145,8 +159,8 @@ class TxtWriter:
 
             header += self._header_geometric_info(page.estimator)
 
-            header += self._header_scored_value(
-                page.estimator.geotyp, page.dettyp, getattr(page.estimator, 'particle', None))
+            header += self._header_scored_value(page.estimator.geotyp, page.dettyp,
+                                                getattr(page.estimator, 'particle', None))
 
             header += self._header_no_of_bins_and_prim(page.estimator)
 
@@ -155,9 +169,10 @@ class TxtWriter:
             logger.info("Writing: %s", filename)
             fout.write(header)
 
-            det_error = page.error_raw.ravel()
-            if np.all(np.isnan(page.error_raw)):
+            if page.error is None:
                 det_error = [None] * page.data_raw.size
+            else:
+                det_error = page.error_raw.ravel()
             xmesh = page.axis(0)
             ymesh = page.axis(1)
             zmesh = page.axis(2)

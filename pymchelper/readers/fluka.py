@@ -106,7 +106,6 @@ class FlukaReader(Reader):
                 # TODO cross-check if reshaping is needed
                 page.data_raw = np.array(unpackArray(usr_object.readData(det_no)))
                 page.data_raw *= rescaling_factor
-                page.error_raw = np.empty_like(page.data_raw)
 
                 estimator.add_page(page)
 
@@ -180,7 +179,6 @@ class FlukaReader(Reader):
                 # unpack detector data
                 # TODO cross-check if reshaping is needed
                 page.data_raw = np.array(unpackArray(usr_object.readData(det_no)))
-                page.error_raw = np.empty_like(page.data_raw)
 
                 estimator.add_page(page)
 
@@ -241,7 +239,6 @@ class FlukaReader(Reader):
                 # unpack detector data
                 # TODO cross-check if reshaping is needed
                 page.data_raw = np.array(unpackArray(usr_object.readData(det_no)))
-                page.error_raw = np.empty_like(page.data_raw)
 
                 estimator.add_page(page)
             return usr_object
@@ -263,7 +260,6 @@ class FlukaReader(Reader):
                 # unpack detector data
                 # TODO cross-check if reshaping is needed
                 page.data_raw = np.array(unpackArray(usr_object.readData(det_no)))
-                page.error_raw = np.empty_like(page.data_raw)
 
                 estimator.add_page(page)
             return usr_object

@@ -1,12 +1,11 @@
 from abc import abstractmethod
 import logging
 
-import numpy as np
-
 logger = logging.getLogger(__name__)
 
 
 class ReaderFactory(object):
+
     def __init__(self, filename):
         self.filename = filename
 
@@ -16,6 +15,7 @@ class ReaderFactory(object):
 
 
 class Reader(object):
+
     def __init__(self, filename):
         self.filename = filename
 
@@ -24,7 +24,7 @@ class Reader(object):
         if not result:
             return False
         for page in estimator.pages:
-            page.error_raw = np.zeros_like(page.data_raw) * np.nan
+            page.error_raw = None
         return True
 
     @abstractmethod

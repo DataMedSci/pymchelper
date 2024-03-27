@@ -16,6 +16,7 @@ class SHReaderBin2010(SHReader):
     """
     Binary format reader from 0.1 <= version <= 0.6
     """
+
     def read_header(self, estimator):
         logger.info("Reading header: " + self.filename)
 
@@ -31,46 +32,50 @@ class SHReaderBin2010(SHReader):
             return None
 
         if 'VOXSCORE' in header['geotyp'][0].decode('ascii'):
-            header_dtype = np.dtype([('__fo1', '<i4'),     # 0x00
-                                     ('geotyp', 'S10'),    # 0x04
-                                     ('__fo2', '<i4'),     # 0x0E
-                                     ('__fo3', '<i4'),     # 0x12
-                                     ('nstat', '<i4'),     # 0x16 : nstat
-                                     ('__fo4', '<i4'),     # 0x1A
-                                     ('__foo1', '<i4'),    # 0x1E
-                                     ('tds', '<f4'),       # 0x22 : tripdose
-                                     ('__foo2', '<i4'),    # 0x26
-                                     ('__foo3', '<i4'),    # 0x2A
-                                     ('tnt', '<i8'),       # 0x2E : tripntot
-                                     ('__foo4', '<i4'),    # 0x36
-                                     ('__fo5', '<i4'),     # 0x3A
-                                     # DET has 8x float64
-                                     ('det', ('<f8', 8)),  # 0x3E : DET
-                                     ('__fo6', '<i4'),     # 0x7E
-                                     ('__fo7', '<i4'),     # 0x82
-                                     # IDET has 11x int32
-                                     ('idet', '<i4', 11),  # 0x86 : IDET
-                                     ('__fo8', '<i4'),     # 0xB2
-                                     ('reclen', '<i4')])   # 0xB6
+            header_dtype = np.dtype([
+                ('__fo1', '<i4'),  # 0x00
+                ('geotyp', 'S10'),  # 0x04
+                ('__fo2', '<i4'),  # 0x0E
+                ('__fo3', '<i4'),  # 0x12
+                ('nstat', '<i4'),  # 0x16 : nstat
+                ('__fo4', '<i4'),  # 0x1A
+                ('__foo1', '<i4'),  # 0x1E
+                ('tds', '<f4'),  # 0x22 : tripdose
+                ('__foo2', '<i4'),  # 0x26
+                ('__foo3', '<i4'),  # 0x2A
+                ('tnt', '<i8'),  # 0x2E : tripntot
+                ('__foo4', '<i4'),  # 0x36
+                ('__fo5', '<i4'),  # 0x3A
+                # DET has 8x float64
+                ('det', ('<f8', 8)),  # 0x3E : DET
+                ('__fo6', '<i4'),  # 0x7E
+                ('__fo7', '<i4'),  # 0x82
+                # IDET has 11x int32
+                ('idet', '<i4', 11),  # 0x86 : IDET
+                ('__fo8', '<i4'),  # 0xB2
+                ('reclen', '<i4')
+            ])  # 0xB6
             # payload starts at 0xBA (186)
             estimator.payload_offset = 186
         else:
             # first figure out the length.
-            header_dtype = np.dtype([('__fo1', '<i4'),
-                                     ('geotyp', 'S10'),
-                                     ('__fo2', '<i4'),
-                                     ('__fo3', '<i4'),
-                                     ('nstat', '<i4'),
-                                     ('__fo4', '<i4'),
-                                     ('__fo5', '<i4'),
-                                     # DET has 8x float64
-                                     ('det', ('<f8', 8)),  # DET
-                                     ('__fo6', '<i4'),
-                                     ('__fo7', '<i4'),
-                                     # IDET has 11x int32
-                                     ('idet', '<i4', 11),  # IDET
-                                     ('__fo8', '<i4'),
-                                     ('reclen', '<i4')])
+            header_dtype = np.dtype([
+                ('__fo1', '<i4'),
+                ('geotyp', 'S10'),
+                ('__fo2', '<i4'),
+                ('__fo3', '<i4'),
+                ('nstat', '<i4'),
+                ('__fo4', '<i4'),
+                ('__fo5', '<i4'),
+                # DET has 8x float64
+                ('det', ('<f8', 8)),  # DET
+                ('__fo6', '<i4'),
+                ('__fo7', '<i4'),
+                # IDET has 11x int32
+                ('idet', '<i4', 11),  # IDET
+                ('__fo8', '<i4'),
+                ('reclen', '<i4')
+            ])
             # payload starts at 0x9E (158)
             estimator.payload_offset = 158
 
@@ -97,14 +102,10 @@ class SHReaderBin2010(SHReader):
         # IDET(10): Type of differential scoring, either LET, E/amu
         #            or polar angle
         # IDET(11): Starting zone of scoring for zone scoring
-        DetectorAttributes = namedtuple('DetectorAttributes',
-                                        ['dim_1_bins', 'dim_2_bins',
-                                         'dim_3_bins',
-                                         'particle_type', 'det_type',
-                                         'particle_z', 'particle_a',
-                                         'det_material',
-                                         'diff_bins_no', 'diff_scoring_type',
-                                         'starting_zone'])
+        DetectorAttributes = namedtuple('DetectorAttributes', [
+            'dim_1_bins', 'dim_2_bins', 'dim_3_bins', 'particle_type', 'det_type', 'particle_z', 'particle_a',
+            'det_material', 'diff_bins_no', 'diff_scoring_type', 'starting_zone'
+        ])
         det_attribs = DetectorAttributes(*header['idet'][0])
 
         nx = det_attribs.dim_1_bins
@@ -179,12 +180,10 @@ class SHReaderBin2010(SHReader):
 
         # next read the data:
         offset_str = "S" + str(estimator.payload_offset)
-        record_dtype = np.dtype([('trash', offset_str),
-                                 ('bin2', '<f8', estimator.rec_size)])
+        record_dtype = np.dtype([('trash', offset_str), ('bin2', '<f8', estimator.rec_size)])
         record = np.fromfile(self.filename, record_dtype, count=-1)
         # BIN(*)  : a large array holding results. Accessed using pointers.
         estimator.pages[0].data_raw = np.array(record['bin2'][:][0])
-        estimator.pages[0].error_raw = np.empty_like(estimator.pages[0].data_raw)
 
         logger.debug("Raw data: {}".format(estimator.pages[0].data_raw))
 
@@ -192,7 +191,7 @@ class SHReaderBin2010(SHReader):
 
         return True
 
-    def read_data(self, estimator):
+    def read_data(self, estimator, nscale=1):
         if not self.read_header(estimator):
             logger.debug("Reading header failed")
             return None

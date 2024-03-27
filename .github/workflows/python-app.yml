@@ -24,7 +24,7 @@ jobs:
     - name: Set up Python
       uses: actions/setup-python@v5
       with:
-        python-version: '3.10'
+        python-version: '3.11'
 
     - name: Install dependencies
       run: |
@@ -39,17 +39,15 @@ jobs:
 
     - name: Smoke test with pytest
       run: |
-         pytest -k "smoke" tests/
+         pytest -k "smoke"
 
   # all tests on matrix of all possible python versions and OSes
   normal_test:
     strategy:
       matrix:
-        python-version: ['3.8', '3.9', '3.10', '3.11']
+        python-version: ['3.9', '3.10', '3.11']
         platform: [ubuntu-latest, macos-latest, windows-latest]
         exclude:
-          - platform: macos-latest
-            python-version: '3.8'
           - platform: macos-latest
             python-version: '3.10'
           - platform: macos-latest
@@ -74,4 +72,4 @@ jobs:
 
     - name: Test with pytest
       run: |
-         pytest -k "not slow" tests/
+         pytest -k "not slow"

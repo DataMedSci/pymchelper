@@ -19,6 +19,7 @@ logger = logging.getLogger(__name__)
 
 
 class TestSHGenerate(unittest.TestCase):
+
     def test_create(self):
         outdir = os.path.join("tests", "res", "shieldhit", "generated")
         gen.main([outdir])
@@ -103,8 +104,9 @@ class TestSHGenerated(unittest.TestCase):
                     if pattern in os.path.basename(infile):
                         will_produce_output = True
                 if will_produce_output:
-                    for options in ([], ["--colormap", "gnuplot2"],
-                                    ["--error", "stderr"], ["--error", "stddev"], ["--error", "none"]):
+                    for options in ([], ["--colormap",
+                                         "gnuplot2"], ["--error", "stderr"], ["--error", "stddev"], ["--error",
+                                                                                                     "none"]):
                         fd, outfile = tempfile.mkstemp()
                         os.close(fd)
                         os.remove(outfile)
@@ -152,7 +154,3 @@ class TestSHGenerated(unittest.TestCase):
                     self.assertEqual(estimator.number_of_primaries, 1000)
                 self.assertGreaterEqual(len(estimator.pages), 1)
                 self.assertGreaterEqual(estimator.pages[0].data_raw.size, 1)
-
-
-if __name__ == '__main__':
-    unittest.main()
