@@ -6,8 +6,10 @@ Welcome to pymchelper's documentation!
 such as FLUKA or SHIELD-HIT12A.
 It provides a command line program, called **convertmc** which simplifies process of converting binary output
 files to graphs, tabulated plain data and MS Excel files and other formats.
-Toolkit can also serve as a library in the Python language, which can be used by programmers and data scientists 
+Toolkit can also serve as a library in the Python language, which can be used by programmers and data scientists
 to process output data in Python scripts.
+
+Updated today, 2024-03-27
 
 .. toctree::
    :maxdepth: 2
@@ -16,5 +18,3 @@ to process output data in Python scripts.
    user_guide.rst
    install.rst
    developer.rst
-
-
