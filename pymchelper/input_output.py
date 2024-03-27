@@ -22,7 +22,9 @@ logger = logging.getLogger(__name__)
 class AggregationType(IntEnum):
     """
     Enum for different types of aggregation.
-    Below few examples of such aggregation types used in SHIELD-HIT12A:
+    This enum is related to integer value stored in SHIELD-HIT12A binary files,
+    which defines how the data is aggregated.
+    Below few examples of how such aggregation is used in SHIELD-HIT12A:
       - NoAggregation is used for density (RHO) and material scorer.
       - Sum is used for particle counter (COUNT).
       - AveragingCumulative is used for dose and fluence scorers.
@@ -73,7 +75,14 @@ def guess_corename(filename):
 
 
 def fromfile(filename: str) -> Optional[Estimator]:
-    """Read estimator data from a binary file `filename`"""
+    """
+    Read estimator data from a binary file `filename`
+    Note that for the in some cases the data are post-processes (i.e. normalized) after reading.
+    For example SHIELD-HIT12A saves dose and fluence data as cumulative values,
+    which are normalized by the number of primaries after by the Reader responsible for parsing binary files.
+    This way dose and fluence (and other similar quantities) are saved in Estimator as "per primary" values.
+    Fluka on the other hand saves dose and fluence as "per primary" values, so no normalization is needed.
+    """
 
     reader = guess_reader(filename)
     if reader is None:
@@ -90,7 +99,7 @@ def fromfilelist(input_file_list,
                  error: ErrorEstimate = ErrorEstimate.stderr,
                  nan: bool = False) -> Optional[Estimator]:
     """
-    Reads all files from a given list, and returns a list of averaged estimators.
+    Reads all files from a given list using `fromfile` method, and returns a list of averaged estimators.
 
     :param input_file_list: list of files to be read
     :param error: error estimation, see class ErrorEstimate class in pymchelper.estimator
@@ -112,16 +121,12 @@ def fromfilelist(input_file_list,
         if not result:
             return None
 
-        # mapping from page-normalisation (from SHIELD-HIT12A) to aggregator (from pymchelper.averaging)
-        # SHIELD-HIT12A uses integers for normalisation, here we stick to corresponding enum values
-        # note that for some normalisation types, the same aggregator is used
-        # these are AveragingCumulative (like dose) and AveragingPerPrimary (like LET)
-        # small note on how SHIELD-HIT12A stores the data in the binary files in BDO format:
-        # for "cumulative-like" pages (i.e. dose, fluence) data in BDO is stored as respective quantity
-        # for all particles. In the code of pymchelper reader, once the BDO file is read, the data is
-        # then normalized by the number of primaries. Therefore the data in `estimator` object
-        # obtained via `fromfile` method is already normalized. This means we can aggreate it
-        # the same way as the "per-primary" pages (like LET).
+        # _aggregator_mapping maps SHIELD-HIT12A normalization types (integers) to pymchelper aggregators
+        # using enums for clarity. AveragingCumulative (e.g., dose) and AveragingPerPrimary (e.g., LET)
+        # both utilize WeightedStatsAggregator. SHIELD-HIT12A stores "cumulative-like" data (e.g., dose,
+        # fluence) in BDO format as quantities for all particles. pymchelper normalizes this upon reading
+        # a BDO file by the number of primaries, making the `estimator` object data pre-normalized. Hence,
+        # aggregation for "cumulative-like" and "per-primary" data is handled uniformly in this mapping.
         _aggregator_mapping: dict[AggregationType, Aggregator] = {
             AggregationType.NoAggregation: NoAggregator,
             AggregationType.Sum: SumAggregator,
