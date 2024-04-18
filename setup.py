@@ -34,13 +34,14 @@ EXTRAS_REQUIRE = {
     'image': ['matplotlib'],
     'excel': ['xlwt'],
     'hdf': ['h5py'],
-    'dicom': ["pydicom>=2.3.1 ; python_version >= '3.11'", "pydicom ; python_version < '3.11'"],
+    'dicom': ["pydicom"],
     'pytrip': [
         'scipy',
         "pytrip98>=3.8.0,<3.9.0 ; platform_system == 'Darwin' and python_version >= '3.11'",
         "pytrip98>=3.6.1,<3.9.0 ; platform_system == 'Darwin' and (python_version >= '3.10' and python_version < '3.11')",  # noqa: E501
         "pytrip98<3.9.0 ; platform_system == 'Darwin' and (python_version >= '3.5' and python_version < '3.10')",
-        "pytrip98>=3.8.0 ; python_version >= '3.11'",
+        "pytrip98>=3.9.1 ; python_version >= '3.12'",
+        "pytrip98>=3.8.0 ; python_version >= '3.11' and python_version < '3.12'",
         "pytrip98>=3.6.1 ; python_version >= '3.10' and python_version < '3.11'",
         "pytrip98 ; python_version >= '3.5' and python_version < '3.10'"
     ]
