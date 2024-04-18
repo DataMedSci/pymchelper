@@ -79,7 +79,7 @@ EXTRAS_REQUIRE['full'].extend(["hipsterplot", "bashplotlib"])  # these are neede
 # see https://www.python.org/dev/peps/pep-0508/ for language specification
 install_requires = [
     "numpy>=1.23.3 ; python_version == '3.11'", "numpy>=1.21 ; python_version == '3.10'",
-    "numpy>=1.20,<1.26.0 ; python_version == '3.9'"
+    "numpy>=1.20,<1.27.0 ; python_version == '3.9'"
 ]
 
 setuptools.setup(
