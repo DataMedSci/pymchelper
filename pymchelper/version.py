@@ -32,8 +32,8 @@ def git_version():
             else:
                 version = '{}+rev{}'.format(tag_name, no_of_commits_since_last_tag)
         else:
-            version = "Unknown"
+            version = "0.0.0"
     except OSError:
-        version = "Unknown"
+        version = "0.0.0"
 
     return version

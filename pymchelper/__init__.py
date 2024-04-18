@@ -3,7 +3,7 @@ import importlib.util
 import os
 
 
-__version__ = 'unknown'
+__version__ = '0.0.0'
 
 # versioning of the package is based on __version__ variable, declared here in __init__.py file
 # __version__ can be either calculated based on pymchelper/VERSION file, storing version number
