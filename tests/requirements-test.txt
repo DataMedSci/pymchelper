@@ -2,7 +2,7 @@
 pytest==8.1.1
 flake8==7.0.0
 sphinx<7.2 ; python_version < '3.9'
-sphinx==7.3.6; python_version >= '3.9'
+sphinx==7.3.7; python_version >= '3.9'
 mcpl==1.6.2
 yapf==0.40.2
 requests==2.31.0
