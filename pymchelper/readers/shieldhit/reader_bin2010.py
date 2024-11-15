@@ -180,7 +180,10 @@ class SHReaderBin2010(SHReader):
 
         # next read the data:
         offset_str = "S" + str(estimator.payload_offset)
-        record_dtype = np.dtype([('trash', offset_str), ('bin2', '<f8', estimator.rec_size)])
+        if estimator.rec_size == 1:
+            record_dtype = np.dtype([('trash', offset_str), ('bin2', '<f8')])
+        else:
+            record_dtype = np.dtype([('trash', offset_str), ('bin2', '<f8', estimator.rec_size)])
         record = np.fromfile(self.filename, record_dtype, count=-1)
         # BIN(*)  : a large array holding results. Accessed using pointers.
         estimator.pages[0].data_raw = np.array(record['bin2'][:][0])
