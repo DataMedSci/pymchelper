@@ -99,7 +99,7 @@ jobs:
       with:
         fetch-depth: 0 # fetch all history, as by default only last 1 commit is fetched
     - name: Build and Commit
-      uses: sphinx-notes/pages@3.0
+      uses: sphinx-notes/pages@3.1
       with:
         checkout: false
         python_version: '3.11'
