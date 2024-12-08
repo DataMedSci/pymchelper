@@ -27,23 +27,23 @@ jobs:
       - name: Build Docker image with pyinstaller and pymchelper inside
         run: docker build --tag pymchelper .
 
-      # - name: Generate single-file executables for mcscripter
-      #   run: docker run --volume `pwd`/dist:/app/dist pymchelper:latest pyinstaller --add-data 'pymchelper/VERSION:pymchelper' --onefile --name mcscripter pymchelper/utils/mcscripter.py
+      - name: Generate single-file executables for mcscripter
+        run: docker run --volume `pwd`/dist:/app/dist pymchelper:latest pyinstaller --add-data 'pymchelper/VERSION:pymchelper' --onefile --name mcscripter pymchelper/utils/mcscripter.py
 
-      # - name: Generate single-file executables for plan2sobp
-      #   run: docker run --volume `pwd`/dist:/app/dist pymchelper:latest pyinstaller --add-data 'pymchelper/VERSION:pymchelper' --onefile --hiddenimport='pydicom.encoders.gdcm' --hiddenimport='pydicom.encoders.pylibjpeg' --hidden-import='scipy.spatial.transform._rotation_groups' --name plan2sobp pymchelper/utils/radiotherapy/plan.py
+      - name: Generate single-file executables for plan2sobp
+        run: docker run --volume `pwd`/dist:/app/dist pymchelper:latest pyinstaller --add-data 'pymchelper/VERSION:pymchelper' --onefile --hiddenimport='pydicom.encoders.gdcm' --hiddenimport='pydicom.encoders.pylibjpeg' --hidden-import='scipy.spatial.transform._rotation_groups' --name plan2sobp pymchelper/utils/radiotherapy/plan.py
 
       - name: Generate single-file executables for runmc
         run: docker run --volume `pwd`/dist:/app/dist pymchelper:latest pyinstaller runmc.spec
 
-      # - name: Generate single-file executables for convertmc
-      #   run: docker run --volume `pwd`/dist:/app/dist pymchelper:latest pyinstaller convertmc.spec
+      - name: Generate single-file executables for convertmc
+        run: docker run --volume `pwd`/dist:/app/dist pymchelper:latest pyinstaller convertmc.spec
 
       - name: Test single-file executables
         run: |
           ls -alh ./dist/
-          # ./dist/mcscripter --version
-          # ./dist/plan2sobp --version
+          ./dist/mcscripter --version
+          ./dist/plan2sobp --version
           ./dist/runmc --version
           ./dist/convertmc --version
           docker run  -v `pwd`/dist:/test/ ubuntu:12.04 /test/convertmc --version
@@ -109,7 +109,7 @@ jobs:
     needs: [generate-deb-packages]
     strategy:
       matrix:
-        docker-tag: ['debian:8', 'debian:9', 'debian:10', 'debian:11', 'debian:stable', 'ubuntu:14.04', 'ubuntu:16.04', 'ubuntu:18.04', 'ubuntu:20.04', 'ubuntu:21.04', 'ubuntu:22.04']
+        docker-tag: ['debian:9', 'debian:10', 'debian:11', 'debian:12', 'debian:stable', 'ubuntu:16.04', 'ubuntu:18.04', 'ubuntu:20.04', 'ubuntu:21.04', 'ubuntu:22.04']
     steps:
       - uses: actions/download-artifact@v4
         with:
