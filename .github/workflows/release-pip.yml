@@ -83,9 +83,9 @@ jobs:
         # Show verbose output.
         verbose: true
 
-  generate-docs:
+  generate_docs:
     runs-on: ubuntu-latest
-    needs: [smoke_test]
+    needs: [make_and_upload_package]
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -113,9 +113,9 @@ jobs:
           name: sphinx-docs
           path: docs/_build
 
-  deploy-docs:
+  deploy_docs:
     runs-on: ubuntu-latest
-    needs: [generate-docs]
+    needs: [generate_docs]
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
