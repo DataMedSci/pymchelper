@@ -133,13 +133,9 @@ _useQUA = True
 # Adjust paths for bundled execution
 if getattr(sys, 'frozen', False):  # Check if running as a bundled app
     base_path = sys._MEIPASS  # Temporary directory used by PyInstaller
+    _database = os.path.join(base_path, 'pymchelper/flair/db/card.ini')
 else:
-    base_path = os.path.dirname(__file__)
-
-card_db_path = os.path.join(base_path, 'pymchelper/flair/db/card.db')
-card_ini_path = os.path.join(base_path, 'pymchelper/flair/db/card.ini')
-_database = card_ini_path
-#_database = "db/card.ini"
+    _database = "db/card.ini"
 
 _NAMEPAT = re.compile(r"^[A-Za-z_][A-Za-z0-9_.:!\$]*$")
 _REGIONPAT = re.compile(r"^\s*([A-Za-z_][A-Za-z0-9_.:!\$]*)\s*(-?\d+)\s*(.*)$")
