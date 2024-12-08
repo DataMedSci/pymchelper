@@ -90,7 +90,6 @@
 # - def toStr(self, fmt=None)
 # - addZone(self, zone)
 
-
 import os
 import re
 import sys
@@ -98,7 +97,6 @@ import time
 import math
 import struct
 import string
-
 
 import pymchelper.flair.common.fortran as fortran
 import pymchelper.flair.common.bmath as bmath
@@ -122,10 +120,8 @@ try:
 except ImportError:
     import configparser as ConfigParser
 
-
 __author__ = "Vasilis Vlachoudis"
 __email__ = "Vasilis.Vlachoudis@cern.ch"
-
 
 __first = True
 
@@ -133,7 +129,13 @@ __first = True
 # Activate untest developer code
 _developer = False
 _useQUA = True
-_database = "db/card.ini"
+
+# Adjust paths for bundled execution
+if getattr(sys, 'frozen', False):  # Check if running as a bundled app
+    base_path = sys._MEIPASS  # Temporary directory used by PyInstaller
+    _database = os.path.join(base_path, 'pymchelper/flair/db/card.ini')
+else:
+    _database = "db/card.ini"
 
 _NAMEPAT = re.compile(r"^[A-Za-z_][A-Za-z0-9_.:!\$]*$")
 _REGIONPAT = re.compile(r"^\s*([A-Za-z_][A-Za-z0-9_.:!\$]*)\s*(-?\d+)\s*(.*)$")
@@ -391,11 +393,9 @@ class LocalDict(dict):
                 if card.ignore():
                     continue
                 if card.sdum() == name:
-                    # return card.numWhat(what)
                     val = card.what(what)
             raise Exception("No card %s with sdum=%s found\n" % (tag, name))
         else:
-            # return cards[name].numWhat(what)
             val = cards[name].what(what)
 
         # return a float or int otherwise as is
@@ -957,6 +957,7 @@ class CardInfo:
 # Logical Units
 # ===============================================================================
 class LogicalUnits:
+
     def __init__(self):
         self.reset()
 
@@ -1250,6 +1251,7 @@ class Voxel:
             materials, assignmats and corrfact
         that might be embedded in the voxel file
     """
+
     def __init__(self, filename=None):
         self.cleanup()
         if filename is not None:
@@ -1385,13 +1387,15 @@ class Voxel:
                 return False
             tag = record[:8].strip()
             sdum = record[-10:].strip()
-            what = [sdum,  # sdum
-                    record[10:20].strip(),  # what(1)
-                    record[20:30].strip(),  # what(2)
-                    record[30:40].strip(),  # what(3)
-                    record[40:50].strip(),  # what(4)
-                    record[50:60].strip(),  # what(5)
-                    record[60:70].strip()]  # what(6)
+            what = [
+                sdum,  # sdum
+                record[10:20].strip(),  # what(1)
+                record[20:30].strip(),  # what(2)
+                record[30:40].strip(),  # what(3)
+                record[40:50].strip(),  # what(4)
+                record[50:60].strip(),  # what(5)
+                record[60:70].strip()
+            ]  # what(6)
             if tag == "COMPOUND" and card.tag == tag and card.sdum() == sdum:
                 # append whats to previous card
                 card.appendWhats(what[1:])
@@ -1421,7 +1425,7 @@ class Voxel:
         if idx == 0:
             return "VOXEL"
         num = "%03d" % (idx)
-        return "%s%s" % ("VOXEL" [:(8 - len(num))], num)
+        return "%s%s" % ("VOXEL"[:(8 - len(num))], num)
 
 
 # ===============================================================================
@@ -2712,8 +2716,10 @@ class Card:
         pickler.dump(self._extra)
         pickler.dump(self._comment)
         if self.prop:  # Skip system variables
-            pickler.dump([x for x in self.prop.items()
-                          if type(x[1]) in (IntType, LongType, FloatType, BooleanType, StringType, UnicodeType)])
+            pickler.dump([
+                x for x in self.prop.items()
+                if type(x[1]) in (IntType, LongType, FloatType, BooleanType, StringType, UnicodeType)
+            ])
         else:
             pickler.dump(None)
         pickler.dump(self.enable)
@@ -2917,6 +2923,7 @@ class Card:
 
 
 class Input:
+
     def __init__(self, filename=None):
         # Input file information
         self.filename = ""  # Input Filename
@@ -6276,8 +6283,9 @@ def init(filename=None):
         CardInfo._db[tag] = cinfo
 
     # Create bodies cards
-    BODY_NOVXL_TAGS = [x.tag for x in CardInfo._db.values()
-                       if "Geometry" in x.group and len(x.tag) == 3 and x.tag != "END"]
+    BODY_NOVXL_TAGS = [
+        x.tag for x in CardInfo._db.values() if "Geometry" in x.group and len(x.tag) == 3 and x.tag != "END"
+    ]
     BODY_TAGS = BODY_NOVXL_TAGS[:]
     BODY_TAGS.append("VOXELS")
 

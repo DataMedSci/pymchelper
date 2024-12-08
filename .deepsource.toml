@@ -6,13 +6,16 @@ test_patterns = ["tests/**/test*.py"]
 name = "python"
 enabled = true
 dependency_file_paths = ["tests/requirements-test.txt"]
+exclude_patterns = [
+    "pymchelper/flair/Input.py"
+]
 
   [analyzers.meta]
   runtime_version = "3.x.x"
   max_line_length = 120
   type_checker = "mypy"
   additional_builtins = ["_", "pretty_output"]
-  
+
 [[analyzers]]
 name = "shell"
 enabled = true

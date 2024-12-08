@@ -10,7 +10,7 @@ convertmc image --many "*.bdo"
 
 <p float="left">
   <img src="/docs/default_1d.png" width="30%" />
-  <img src="/docs/default_2d.png" width="30%" /> 
+  <img src="/docs/default_2d.png" width="30%" />
 </p>
 
 This converter is capable of converting binary output to many other formats, like CSV, XLS or HDF.
@@ -33,12 +33,18 @@ To install **pymchelper** as a python package, type:
 pip install pymchelper[full]
 ```
 
-On Linux systems from Debian family **pymchelper** can be installed using `apt` package manager::
+On Linux systems from Debian family **pymchelper** can be installed using `apt` package manager with couple of commands::
 
-```
+```bash
 wget --quiet --output-document - https://datamedsci.github.io/deb_package_repository/public.gpg | sudo apt-key add -
+```
+```bash
 sudo wget --quiet --output-document /etc/apt/sources.list.d/datamedsci.list https://datamedsci.github.io/deb_package_repository/datamedsci.list
+```
+```bash
 sudo apt update
+```
+```bash
 sudo apt install pymchelper
 ```
 
