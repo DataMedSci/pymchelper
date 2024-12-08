@@ -62,8 +62,8 @@ jobs:
 
       - name: Build Sphinx documentation
         run: |
-          sphinx-apidoc -o docs/apidoc/ pymchelper
-          sphinx-build -b html docs/_build
+          sphinx-apidoc --output-dir docs/apidoc/ pymchelper
+          sphinx-build --jobs auto docs docs/_build
 
       - name: Upload documentation artifact
         uses: actions/upload-artifact@v3
