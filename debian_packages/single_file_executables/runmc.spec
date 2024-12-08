@@ -5,7 +5,11 @@ from my_pyinstaller_utils import *
 a = Analysis([os.path.join('pymchelper', 'utils', 'runmc.py')],
              pathex=['.'],
              binaries=[],
-             datas=[(os.path.join('pymchelper','VERSION'), 'pymchelper')],
+             datas=[
+                (os.path.join('pymchelper', 'VERSION'), 'pymchelper'),
+                (os.path.join('pymchelper', 'flair', 'db', 'card.db'), 'pymchelper/flair/db'),
+                (os.path.join('pymchelper', 'flair', 'db', 'card.ini'), 'pymchelper/flair/db')
+             ],
              hiddenimports=[],
              hookspath=[],
              runtime_hooks=[],

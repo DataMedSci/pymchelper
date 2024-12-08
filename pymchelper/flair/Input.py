@@ -129,7 +129,17 @@ __first = True
 # Activate untest developer code
 _developer = False
 _useQUA = True
-_database = "db/card.ini"
+
+# Adjust paths for bundled execution
+if getattr(sys, 'frozen', False):  # Check if running as a bundled app
+    base_path = sys._MEIPASS  # Temporary directory used by PyInstaller
+else:
+    base_path = os.path.dirname(__file__)
+
+card_db_path = os.path.join(base_path, 'pymchelper/flair/db/card.db')
+card_ini_path = os.path.join(base_path, 'pymchelper/flair/db/card.ini')
+_database = card_ini_path
+#_database = "db/card.ini"
 
 _NAMEPAT = re.compile(r"^[A-Za-z_][A-Za-z0-9_.:!\$]*$")
 _REGIONPAT = re.compile(r"^\s*([A-Za-z_][A-Za-z0-9_.:!\$]*)\s*(-?\d+)\s*(.*)$")
@@ -6295,7 +6305,7 @@ def init(filename=None):
     # Create flair tags
     FLAIR_TAGS = [x.tag for x in CardInfo._db.values() if "Flair" in x.group]
     FLAIR_TAGS.sort()
-    # FLAIR_TAGS.remove("!coffee")
+    FLAIR_TAGS.remove("!coffee")
 
     # Object tags = Flair tags + ROT-DEFI
     OBJECT_TAGS = FLAIR_TAGS[:]
