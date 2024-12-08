@@ -5,7 +5,7 @@ on:
     branches: [ 'release/*' ]
     tags: ['v*']
   pull_request:
-    branches: [ 'release/*' ]
+    branches: [ 'master', 'release/*' ]
   release:
     types: [published]
 
