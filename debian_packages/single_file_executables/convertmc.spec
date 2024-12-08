@@ -25,6 +25,8 @@ a = Analysis([os.path.join('pymchelper', 'run.py')],
                  (os.path.join('pymchelper','VERSION'), 'pymchelper'),
                  ('libpng16.so', '.'),  # libraries needed by Pillow
                  ('libz.so.1', '.'),
+                 (os.path.join('pymchelper', 'flair', 'db', 'card.db'), 'pymchelper/flair/db'),
+                 (os.path.join('pymchelper', 'flair', 'db', 'card.ini'), 'pymchelper/flair/db'),
                  (matplotlib.matplotlib_fname(), 'matplotlib/mpl-data')  # add matplotlibrc file
                  ],
              hiddenimports=[],
