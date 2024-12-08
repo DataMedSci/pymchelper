@@ -393,11 +393,9 @@ class LocalDict(dict):
                 if card.ignore():
                     continue
                 if card.sdum() == name:
-                    # return card.numWhat(what)
                     val = card.what(what)
             raise Exception("No card %s with sdum=%s found\n" % (tag, name))
         else:
-            # return cards[name].numWhat(what)
             val = cards[name].what(what)
 
         # return a float or int otherwise as is
