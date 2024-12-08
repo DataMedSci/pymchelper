@@ -103,12 +103,12 @@ def test_shieldhit(example_input_cfg: dict, tmp_path: Path, monkeypatch: pytest.
     settings.set_no_of_primaries(10)
 
     r = Runner(jobs=2, settings=settings, output_directory=str(tmp_path))
-    isRunOk = r.run()
-    assert isRunOk
+    is_run_ok = r.run()
+    assert is_run_ok
 
     data = r.get_data()
     assert data is not None
-    assert 'data_' in data
+    assert 'data' in data
 
 
 @pytest.mark.smoke
@@ -137,21 +137,21 @@ def test_merging(example_input_cfg: dict, tmp_path: Path, monkeypatch: pytest.Mo
 
     data = r.get_data()
     assert data is not None
-    assert len(data['data_'].pages) == 3
+    assert len(data['data'].pages) == 3
 
     # check if we get expected density
-    rho_page = data['data_'].pages[2]
+    rho_page = data['data'].pages[2]
     assert rho_page.data.shape == (1, 1, 100, 1, 1)
     assert rho_page.data[0, 0, 0, 0, 0] == 1.0
     assert np.unique(rho_page.data).size == 1
 
     # check if we get expected kinetic energy
-    ekin_page = data['data_'].pages[1]
+    ekin_page = data['data'].pages[1]
     assert ekin_page.data.shape == (1, 1, 100, 1, 1)
     assert ekin_page.data[0, 0, 0, 0, 0] > 145.0
     assert ekin_page.data[0, 0, 0, 0, 0] < 155.0
 
-    data_first_bin_dose = data['data_'].pages[0].data[0, 0, 0, 0, 0]
+    data_first_bin_dose = data['data'].pages[0].data[0, 0, 0, 0, 0]
 
     bdo_files = list(tmp_path.glob('run_*/data*.bdo'))
     assert len(bdo_files) == 3
