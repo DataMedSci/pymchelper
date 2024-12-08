@@ -1,5 +1,4 @@
 import logging
-import os
 from pathlib import Path
 
 import numpy as np
@@ -31,10 +30,19 @@ class SHReader(Reader):
     @property
     def corename(self) -> str:
         """
-        TODO
-        :return:
-        """
+        Extracts and returns the "corename" of the file, which is a base name stripped of 
+        any trailing 4-digit integers and underscores. This method is applicable to files 
+        with extensions `.bdo` or `.bdox`.
 
+        The expected file naming conventions are:
+        - `corenameABCD.bdo` or `corename_ABCD.bdo` (where `ABCD` is a 4-digit integer)
+        - `corename.bdo`
+
+        If the file does not follow these conventions or has a different extension, an 
+        empty string is returned.
+
+        :return: The corename of the file, or an empty string if the extension is invalid.
+        """
         file_path = Path(self.filename)
         if file_path.suffix not in {".bdo", ".bdox"}:
             return ""
