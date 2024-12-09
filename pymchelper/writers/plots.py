@@ -92,10 +92,10 @@ class ImageWriter:
             import matplotlib
             matplotlib.use('Agg')
             import matplotlib.pyplot as plt
-            # on some HPC system I get the error 
+            # on some HPC system I get the error
             # "findfont: Generic family 'sans-serif' not found because none of the following families were found: Arial"
             # therefore I choose a different font
-            plt.rcParams['font.sans-serif'] = ["DejaVu Sans"]
+            plt.rcParams['font.sans-serif'] = ["DejaVu Sans Mono"]
             plt.rcParams['font.family'] = "sans-serif"
             from matplotlib import colors
             # set matplotlib logging level to ERROR, in order not to pollute our log space
