@@ -249,7 +249,7 @@ def convertfrompattern(pattern, outputdir, converter_name, options, error=ErrorE
     :param nan: if True, NaN (not a number) are excluded when averaging data.
     :return:
     """
-    list_of_matching_files = glob(pattern)
+    list_of_matching_files = sorted(glob(pattern))
 
     core_names_dict = group_input_files(list_of_matching_files)
 
