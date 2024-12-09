@@ -112,7 +112,7 @@ jobs:
 
       - name: Generate deb packages
         working-directory: debian_packages
-        run: ./generate_deb_packages.sh convertmc runmc plan2sobp mcscripter
+        run: ./generate_deb_packages.sh convertmc runmc mcscripter
 
       - name: Archive deb package as artifacts
         uses: actions/upload-artifact@v4
