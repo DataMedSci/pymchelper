@@ -3,15 +3,18 @@
 # Print commands and their arguments as they are executed
 set -x
 
+./tools/aptly version
 ./tools/aptly repo create -distribution="stable" -component="main" main
 ./tools/aptly repo add main pymchelper-convertmc.deb
 ./tools/aptly repo add main pymchelper-runmc.deb
-./tools/aptly repo add main pymchelper-plan2sobp.deb
+#./tools/aptly repo add main pymchelper-plan2sobp.deb  # skipping as its exceeding the 100MB limit
 ./tools/aptly repo add main pymchelper-mcscripter.deb
 ./tools/aptly repo add main pymchelper.deb
-./tools/aptly publish repo -batch main
+gpg --list-secret-keys
+gpg --list-keys --keyid-format LONG
+./tools/aptly publish repo -batch -keyring="/home/runner/.gnupg/pubring.kbx" -secret-keyring="/home/runner/.gnupg/pubring.kbx" main
 
-ls -alh ~/.aptly/public      
+ls -alh ~/.aptly/public
 
 mv ~/.aptly/public .
 

@@ -5,7 +5,7 @@ on:
     branches: [ 'release/*' ]
     tags: ['v*']
   pull_request:
-    branches: [ 'release/*' ]
+    branches: [ 'master', 'release/*' ]
   release:
     types: [published]
 
@@ -23,6 +23,22 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0 # Number of commits to fetch. 0 indicates all history for all branches and tags.
+
+      - name: Import GPG key from a secret variable
+        id: import_gpg
+        uses: crazy-max/ghaction-import-gpg@v6
+        with:
+          gpg_private_key: ${{ secrets.GPG_PRIVATE_KEY }}
+
+      - name: Print GPG user IDs and save files to be included in repository
+        working-directory: debian_packages
+        run: |
+          echo "fingerprint: ${{ steps.import_gpg.outputs.fingerprint }}"
+          echo "keyid:       ${{ steps.import_gpg.outputs.keyid }}"
+          echo "name:        ${{ steps.import_gpg.outputs.name }}"
+          echo "email:       ${{ steps.import_gpg.outputs.email }}"
+          echo "${{ steps.import_gpg.outputs.fingerprint }}" > key_fingerprint.txt
+          gpg --export --armor --output public.gpg
 
       - name: Build Docker image with pyinstaller and pymchelper inside
         run: docker build --tag pymchelper .
@@ -96,7 +112,7 @@ jobs:
 
       - name: Generate deb packages
         working-directory: debian_packages
-        run: ./generate_deb_packages.sh convertmc runmc plan2sobp mcscripter
+        run: ./generate_deb_packages.sh convertmc runmc mcscripter
 
       - name: Archive deb package as artifacts
         uses: actions/upload-artifact@v4
@@ -178,7 +194,7 @@ jobs:
 
       - name: Deploy to GitHub Pages
         uses: JamesIves/github-pages-deploy-action@v4.7.2
-        if: startsWith(github.ref, 'refs/tags/v')
+        # if: startsWith(github.ref, 'refs/tags/v')
         with:
           branch: gh-pages # The branch the action should deploy to.
           folder: debian_packages/public # The folder the action should deploy.
