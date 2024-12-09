@@ -203,10 +203,15 @@ class ImageWriter:
                     try:
                         fig.savefig(output_path)
                     except ValueError as e:
-                        logger.error("Failed to save plot to file: %s", str(e))
+                        logger.error("Failed to save plot to file: %s", output_path)
+                        logger.error("Error: %s", e)
+                        logger.error("Trying to save plot using different font")
                         # on some HPC system I get the error
                         # "findfont: Generic family 'sans-serif' not found because none of the following families were found: Arial"
                         # therefore I choose a different font
+                        import matplotlib
+                        matplotlib.use('Agg')
+                        import matplotlib.pyplot as plt
                         plt.rcParams['font.sans-serif'] = ["DejaVu Sans Mono"]
                         plt.rcParams['font.family'] = "sans-serif"
                         fig.savefig(output_path)
