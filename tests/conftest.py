@@ -10,7 +10,7 @@ import zipfile
 import pytest
 import requests
 
-sh12a_ver = '1.0.1'
+sh12a_ver = '1.1.0'
 linux_sh12a_demo_url = f'https://shieldhit.org/download/DEMO/shield_hit12a_x86_64_demo_gfortran_v{sh12a_ver}.tar.gz'
 windows_sh12a_demo_url = f'https://shieldhit.org/download/DEMO/shield_hit12a_win64_demo_v{sh12a_ver}.zip'
 
