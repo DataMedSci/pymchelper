@@ -106,14 +106,10 @@ jobs:
           sphinx-build --jobs auto docs docs/_build
 
       - name: Upload documentation artifact
-        uses: actions/upload-artifact@v4
+        id: deployment
+        uses: actions/upload-pages-artifact@v3
         with:
-          name: sphinx-docs
           path: docs/_build
-
-      - name: Debug output directory
-        run: |
-          find docs/_build -type l
         
   deploy_docs:
     runs-on: ubuntu-latest
@@ -125,29 +121,28 @@ jobs:
       id-token: write
     steps:
 
-      - name: Download documentation artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: sphinx-docs
-          path: test
+      # - name: Download documentation artifact
+      #   uses: actions/download-artifact@v4
+      #   with:
+      #     name: sphinx-docs
+      #     path: test
 
-      - name: Inspect downloaded files
-        run: |
-          ls -l test
+      # - name: Inspect downloaded files
+      #   run: |
+      #     ls -l test
       
-      - name: Check for symlink
-        run: |
-          find test -type l
+      # - name: Check for symlink
+      #   run: |
+      #     find test -type l
       
-      - name: List recursively all files, including their permissions, including hidden files
-        run: |
-          ls -laR test
+      # - name: List recursively all files, including their permissions, including hidden files
+      #   run: |
+      #     ls -laR test
 
-      - name: List all files (recursively), which miss reading permission for others
-        run: |
-          find test -type f ! -perm /o+r
+      # - name: List all files (recursively), which miss reading permission for others
+      #   run: |
+      #     find test -type f ! -perm /o+r
 
       - name: Deploy to GitHub Pages
         uses: actions/deploy-pages@v4
-        with:
-          artifact_name: sphinx-docs
+        id: deployment
