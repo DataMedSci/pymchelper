@@ -139,9 +139,13 @@ jobs:
         run: |
           find test -type l
       
-      - name: List recursively all files, including their permissions
+      - name: List recursively all files, including their permissions, including hidden files:
         run: |
-          ls -lR test
+          ls -laR test
+
+      - name: List all files (recursively), which miss reading permission for others
+        run: |
+          find test -type f ! -perm /o+r
 
       - name: Deploy to GitHub Pages
         uses: actions/deploy-pages@v4
