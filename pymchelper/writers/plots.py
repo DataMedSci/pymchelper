@@ -193,13 +193,27 @@ class ImageWriter:
                 # for 10-99 pages the filename would look like: output_p01.png, ... output_p99.png
                 # for 100-999 pages the filename would look like: output_p001.png, ... output_p999.png
                 zero_padded_page_no = str(i + 1).zfill(len(str(len(estimator.pages))))
-                output_filename = "{}_p{}{}".format(file_base_part, zero_padded_page_no, file_ext)
+                output_filename = f"{file_base_part:s}_p{zero_padded_page_no:s}{file_ext:s}"
                 output_path = os.path.join(dir_path, output_filename)
 
                 # save the output file
                 fig = self.get_page_figure(page)
                 if fig:
-                    logger.info("Writing {}".format(output_path))
-                    fig.savefig(output_path)
+                    logger.info("Writing %s", output_path)
+                    try:
+                        fig.savefig(output_path)
+                    except ValueError as e:
+                        logger.error("Failed to save plot to file: %s", output_path)
+                        logger.error("Error: %s", e)
+                        logger.error("Trying to save plot using different font")
+                        # on some HPC system I get the error
+                        # "findfont: Generic family 'sans-serif' not found ..."
+                        # therefore I choose a different font
+                        import matplotlib
+                        matplotlib.use('Agg')
+                        import matplotlib.pyplot as plt
+                        plt.rcParams['font.sans-serif'] = ["DejaVu Sans Mono"]
+                        plt.rcParams['font.family'] = "sans-serif"
+                        fig.savefig(output_path)
 
         return 0
