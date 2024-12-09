@@ -189,7 +189,7 @@ def frompattern(pattern: str, error: ErrorEstimate = ErrorEstimate.stderr, nan: 
     """
 
     try:
-        list_of_matching_files = glob(pattern)
+        list_of_matching_files = sorted(glob(pattern))
     except TypeError as e:  # noqa: F841
         list_of_matching_files = pattern
 
