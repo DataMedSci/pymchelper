@@ -12,7 +12,7 @@ set -x
 ./tools/aptly repo add main pymchelper.deb
 gpg --list-secret-keys
 gpg --list-keys --keyid-format LONG
-./tools/aptly publish repo -batch main -keyring="/home/runner/.gnupg/pubring.kbx" -secret-keyring="/home/runner/.gnupg/pubring.kbx"
+./tools/aptly publish repo -batch -keyring="/home/runner/.gnupg/pubring.kbx" -secret-keyring="/home/runner/.gnupg/pubring.kbx" main
 
 ls -alh ~/.aptly/public
 
