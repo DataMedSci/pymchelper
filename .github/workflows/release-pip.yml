@@ -93,7 +93,7 @@ jobs:
           fetch-depth: 0 # fetch all history, as by default only last 1 commit is fetched
 
       - name: Set up Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: '3.11'
 
