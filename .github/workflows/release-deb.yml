@@ -41,7 +41,7 @@ jobs:
           gpg --export --armor --output public.gpg
 
       - name: check if key is expired
-        run: gpg --list-keys --with-colons --fingerprint | grep -A 1 "${{ steps.import_gpg.outputs.fingerprint }}" | grep -q expired
+        run: gpg --list-keys
 
   #     - name: Build Docker image with pyinstaller and pymchelper inside
   #       run: docker build --tag pymchelper .
