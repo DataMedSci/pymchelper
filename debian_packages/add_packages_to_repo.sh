@@ -3,6 +3,7 @@
 # Print commands and their arguments as they are executed
 set -x
 
+./tools/aptly version
 ./tools/aptly repo create -distribution="stable" -component="main" main
 ./tools/aptly repo add main pymchelper-convertmc.deb
 ./tools/aptly repo add main pymchelper-runmc.deb
@@ -11,7 +12,7 @@ set -x
 ./tools/aptly repo add main pymchelper.deb
 ./tools/aptly publish repo -batch main
 
-ls -alh ~/.aptly/public      
+ls -alh ~/.aptly/public
 
 mv ~/.aptly/public .
 
