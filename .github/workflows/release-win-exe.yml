@@ -28,6 +28,9 @@ jobs:
         with:
           python-version: 3.12
 
+      - name: Install setuptools and wheel
+        run: pip install setuptools wheel
+
       - name: Generate VERSION file
         run: python3 setup.py --help
 
