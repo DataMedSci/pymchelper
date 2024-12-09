@@ -103,13 +103,8 @@ html_theme = "pydata_sphinx_theme"
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the
 # documentation.
-# fix from https://github.com/pydata/pydata-sphinx-theme/issues/1094#issuecomment-1368264928
-html_theme_options = {
-    "logo": {
-        "image_light": "logo-light.png",
-        "image_dark": "logo-dark.png",
-    }
-}
+# html_theme_options = {
+# }
 
 # Add any paths that contain custom themes here, relative to this directory.
 # html_theme_path = []
