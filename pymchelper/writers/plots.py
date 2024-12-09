@@ -207,7 +207,7 @@ class ImageWriter:
                         logger.error("Error: %s", e)
                         logger.error("Trying to save plot using different font")
                         # on some HPC system I get the error
-                        # "findfont: Generic family 'sans-serif' not found because none of the following families were found: Arial"
+                        # "findfont: Generic family 'sans-serif' not found ..."
                         # therefore I choose a different font
                         import matplotlib
                         matplotlib.use('Agg')
