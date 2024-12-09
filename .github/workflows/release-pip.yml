@@ -139,7 +139,7 @@ jobs:
         run: |
           find test -type l
       
-      - name: List recursively all files, including their permissions, including hidden files:
+      - name: List recursively all files, including their permissions, including hidden files
         run: |
           ls -laR test
 
