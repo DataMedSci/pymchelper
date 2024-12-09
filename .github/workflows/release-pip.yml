@@ -5,7 +5,7 @@ on:
     branches: [ 'release/*' ]
     tags: ['v*']
   pull_request:
-    branches: [ 'release/*' ]
+    branches: [ 'master', 'release/*' ]
   release:
     types: [published]
 
@@ -76,12 +76,10 @@ jobs:
       uses: pypa/gh-action-pypi-publish@v1.12.2
       if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
       with:
-        # Password for your PyPI user or an access token
         password: ${{ secrets.TWINE_PASSWORD }}
-        # The target directory for distribution
-        packages_dir: dist/
-        # Show verbose output.
+        packages-dir: dist/
         verbose: true
+        print-hash: true
 
   generate_docs:
     runs-on: ubuntu-latest
@@ -118,7 +116,6 @@ jobs:
     needs: [generate_docs]
     environment:
       name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
     permissions:
       pages: write
       id-token: write
