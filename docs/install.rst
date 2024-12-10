@@ -28,6 +28,8 @@ In order to use all feautures (i.e. all available converters), use::
 
     pip install "pymchelper[full]"
 
+To install as well `plan2sobp` program type: ``pip install "pymchelper[dicom]"``
+
 
 Python package (Debian based Linux)
 -----------------------------------
