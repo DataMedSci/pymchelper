@@ -13,11 +13,6 @@ set -x
 gpg --list-secret-keys
 gpg --list-keys --keyid-format LONG
 
-gpg --quick-set-expire A78079C33817ABFE9513BF99C172E55F3B9F9C5B 0
-
-gpg --list-secret-keys
-gpg --list-keys --keyid-format LONG
-
 ./tools/aptly publish repo main
 
 ls -alh ~/.aptly/public
