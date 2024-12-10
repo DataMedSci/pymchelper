@@ -529,16 +529,16 @@ def load_PLD_IBA(file_pld: Path, scaling=1.0) -> Plan:
 
 def load_DICOM_VARIAN(file_dcm: Path, scaling=1.0) -> Plan:
     """Load varian type dicom plans."""
+    p = Plan()
     try:
         import pydicom as dicom
     except ImportError:
         logger.error("pydicom is not installed, cannot read DICOM files.")
         logger.error("Please install pymchelper[dicom] or pymchelper[all] to us this feature.")
-        return None
+        return p
     ds = dicom.dcmread(file_dcm)
     # Total number of energy layers used to produce SOBP
 
-    p = Plan()
     p.patient_id = ds['PatientID'].value
     p.patient_name = ds['PatientName'].value
     p.patient_initals = ""
