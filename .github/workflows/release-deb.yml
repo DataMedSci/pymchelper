@@ -169,11 +169,11 @@ jobs:
         working-directory: debian_packages
         run: ./add_packages_to_repo.sh
 
-      - name: Setup upterm session
-        uses: owenthereal/action-upterm@v1
-        with:
-          limit-access-to-actor: true # Restrict to the user who triggered the workflow
-          limit-access-to-users: grzanka
+      # - name: Setup upterm session
+      #   uses: owenthereal/action-upterm@v1
+      #   with:
+      #     limit-access-to-actor: true # Restrict to the user who triggered the workflow
+      #     limit-access-to-users: grzanka
 
       - name: Archive directory with repository as artifact
         uses: actions/upload-artifact@v4
