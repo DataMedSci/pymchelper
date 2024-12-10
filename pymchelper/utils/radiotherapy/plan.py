@@ -11,14 +11,12 @@ import logging
 import argparse
 import pymchelper
 
-import pydicom as dicom
 import numpy as np
 from pathlib import Path
 from typing import Optional
 
 from dataclasses import dataclass, field
 from math import exp, log
-from scipy.interpolate import interp1d
 
 logger = logging.getLogger(__name__)
 
@@ -83,6 +81,13 @@ class BeamModel():
         logger.debug("Number of columns in beam model: %i", cols)
 
         self.has_divergence = False
+
+        try:
+            from scipy.interpolate import interp1d
+        except ImportError:
+            logger.error("scipy is not installed, cannot interpolate beam model.")
+            logger.error("Please install pymchelper[dicom] or pymchelper[all] to us this feature.")
+            return
 
         if cols in (6, 10):
             self.f_en = interp1d(energy, data[:, 0], kind=k)  # nominal energy [MeV]
@@ -524,6 +529,12 @@ def load_PLD_IBA(file_pld: Path, scaling=1.0) -> Plan:
 
 def load_DICOM_VARIAN(file_dcm: Path, scaling=1.0) -> Plan:
     """Load varian type dicom plans."""
+    try:
+        import pydicom as dicom
+    except ImportError:
+        logger.error("pydicom is not installed, cannot read DICOM files.")
+        logger.error("Please install pymchelper[dicom] or pymchelper[all] to us this feature.")
+        return None
     ds = dicom.dcmread(file_dcm)
     # Total number of energy layers used to produce SOBP
 
@@ -617,16 +628,20 @@ def main(args=None) -> int:
                         help="optional input beam model in commasparated CSV format",
                         dest='fbm',
                         default=None)
-    parser.add_argument('-i', '--flip',
+    parser.add_argument('-i',
+                        '--flip',
                         action='store_true',
                         help="flip XY axis of input (x -> y and y -> x)",
-                        dest="flip_xy", default=False)
-    parser.add_argument('-x', '--xflip',
+                        dest="flip_xy",
+                        default=False)
+    parser.add_argument('-x',
+                        '--xflip',
                         action='store_true',
                         help="flip x axis of input (x -> -x)",
                         dest="flip_x",
                         default=False)
-    parser.add_argument('-y', '--yflip',
+    parser.add_argument('-y',
+                        '--yflip',
                         action='store_true',
                         help="flip y axis of input (y -> -y)",
                         dest="flip_y",
@@ -635,8 +650,8 @@ def main(args=None) -> int:
                         '--field',
                         type=int,
                         dest='field_nr',
-                        help="select which field to export, for dicom files holding several fields. "
-                        + "'0' will produce multiple output files with a running number.",
+                        help="select which field to export, for dicom files holding several fields. " +
+                        "'0' will produce multiple output files with a running number.",
                         default=1)
     parser.add_argument('-d',
                         '--diag',
@@ -672,10 +687,7 @@ def main(args=None) -> int:
     else:
         bm = None
 
-    pln = load(parsed_args.fin, bm, parsed_args.scale,
-               parsed_args.flip_xy,
-               parsed_args.flip_x,
-               parsed_args.flip_y)
+    pln = load(parsed_args.fin, bm, parsed_args.scale, parsed_args.flip_xy, parsed_args.flip_x, parsed_args.flip_y)
 
     if parsed_args.diag:
         pln.diagnose()
