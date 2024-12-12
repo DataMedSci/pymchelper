@@ -3,6 +3,7 @@ import os
 
 import numpy as np
 
+from pymchelper.estimator import Estimator
 from pymchelper.shieldhit.detector.detector_type import SHDetType
 from pymchelper.shieldhit.detector.estimator_type import SHGeoType
 
@@ -111,8 +112,14 @@ class TxtWriter:
 
         return header
 
-    def write(self, estimator):
+    def write(self, estimator: Estimator):
         """TODO"""
+
+        if estimator.file_format not in {'bdo2016', 'bdo2019'}:
+            logger.error("Unsupported file format: %s", estimator.file_format)
+            logger.error("This converter is designed for SHIELD-HIT12A output files only.")
+            logger.error("Please use convertmc plotdata converter instead to generate text files.")
+
         # save to single page to a file without number (i.e. output.dat)
         if len(estimator.pages) == 1:
             self.write_single_page(estimator.pages[0], self.filename)
