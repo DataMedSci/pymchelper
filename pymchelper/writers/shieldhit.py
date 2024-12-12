@@ -114,7 +114,6 @@ class TxtWriter:
 
     def write(self, estimator: Estimator):
         """TODO"""
-
         if estimator.file_format not in {'bdo2016', 'bdo2019'}:
             logger.error("Unsupported file format: %s", estimator.file_format)
             logger.error("This converter is designed for SHIELD-HIT12A output files only.")
