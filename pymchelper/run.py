@@ -67,6 +67,9 @@ def main(args=None):
                               default=ImageWriter.default_colormap,
                               type=str)
 
+    parser_plotdata = subparsers.add_parser(Converters.plotdata.name, help='converts to plot data')
+    add_default_options(parser_plotdata)
+
     parser_excel = subparsers.add_parser(Converters.excel.name, help='converts to MS Excel file')
     add_default_options(parser_excel)
 
@@ -78,9 +81,6 @@ def main(args=None):
 
     parser_json = subparsers.add_parser(Converters.json.name, help='converts to JSON file')
     add_default_options(parser_json)
-
-    parser_plotdata = subparsers.add_parser(Converters.plotdata.name, help='converts to plot data')
-    add_default_options(parser_plotdata)
 
     parser_inspect = subparsers.add_parser(Converters.inspect.name, help='prints metadata')
     add_default_options(parser_inspect)
