@@ -58,6 +58,7 @@ class FlukaReader(Reader):
             for det_no, detector in enumerate(usr_object.detector):
                 page = Page(estimator=estimator)
                 page.title = detector.name
+                page.page_number = det_no
                 # USRBIN doesn't support differential binning type, only spatial binning is allowed
 
                 axes_description = UsrbinScoring.get_axes_description(detector.type)
