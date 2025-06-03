@@ -1,5 +1,5 @@
 # micro-language and markers are described here: https://www.python.org/dev/peps/pep-0496/
-pytest==8.3.5
+pytest==8.4.0
 flake8==7.1.2
 sphinx<7.2 ; python_version < '3.9'
 sphinx==7.4.7 ; python_version == '3.9'
