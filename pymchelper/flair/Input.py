@@ -6178,8 +6178,8 @@ def init(filename=None):
     :param filename:
     :return:
     """
-    global _defaultMaterials, _defaultMatDict, _icruMaterials, _icruMatDict
-    global _neutronGroups, _lowMaterials, _usermvax
+    global _defaultMaterials, _defaultMatDict, _icruMaterials, _icruMatDict  # noqa: F824
+    global _neutronGroups, _lowMaterials, _usermvax  # noqa: F824
     global NGROUPS, BODY_TAGS, BODY_NOVXL_TAGS, FLAIR_TAGS, OBJECT_TAGS, TRANSFORM_TAGS
 
     if filename is None:
