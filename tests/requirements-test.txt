@@ -9,4 +9,4 @@ mcpl==1.6.2
 yapf==0.43.0
 requests==2.32.5
 pre-commit<3.6 ; python_version < '3.9'
-pre-commit==4.3.0; python_version >= '3.9'
+pre-commit==4.4.0; python_version >= '3.9'
