@@ -17,7 +17,7 @@ jobs:
        !contains(github.event.head_commit.message, '[skip ci]')
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v5
+    - uses: actions/checkout@v6
       with:
         fetch-depth: 0 # fetch all history, as by default only last 1 commit is fetched
 
@@ -57,7 +57,7 @@ jobs:
     runs-on: ${{ matrix.platform }}
     needs: [smoke_test]
     steps:
-    - uses: actions/checkout@v5
+    - uses: actions/checkout@v6
       with:
         fetch-depth: 0 # fetch all history, as by default only last 1 commit is fetched
 
