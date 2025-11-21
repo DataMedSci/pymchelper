@@ -18,7 +18,7 @@ jobs:
         python-version: ['3.9', '3.10', '3.11', '3.12']
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v5
+    - uses: actions/checkout@v6
 
     - name: Set up Python
       uses: actions/setup-python@v6
@@ -44,7 +44,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: [full_test]
     steps:
-    - uses: actions/checkout@v5
+    - uses: actions/checkout@v6
       with:
         fetch-depth: 0
 
@@ -86,7 +86,7 @@ jobs:
     needs: [make_and_upload_package]
     steps:
       - name: Checkout
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
         with:
           fetch-depth: 0 # fetch all history, as by default only last 1 commit is fetched
 
