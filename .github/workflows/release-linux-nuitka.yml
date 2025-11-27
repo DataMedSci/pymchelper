@@ -42,7 +42,8 @@ jobs:
           python -m nuitka \
             --standalone --onefile \
             --include-data-file=pymchelper/_version.py=pymchelper/_version.py \
-            --nofollow-imports=pytrip \
+            --nofollow-import-to=pytrip \
+            --enable-plugin=no-qt \
             --output-filename=mcscripter \
             pymchelper/utils/mcscripter.py
 
@@ -51,10 +52,11 @@ jobs:
           python -m nuitka \
             --standalone --onefile \
             --include-data-file=pymchelper/_version.py=pymchelper/_version.py \
-            --nofollow-imports=pytrip \
+            --nofollow-import-to=pytrip \
             --include-module=pydicom.encoders.gdcm \
             --include-module=pydicom.encoders.pylibjpeg \
             --include-module=scipy.spatial.transform._rotation_groups \
+            --enable-plugin=no-qt \
             --output-filename=plan2sobp \
             pymchelper/utils/radiotherapy/plan.py
 
@@ -65,7 +67,8 @@ jobs:
             --include-data-file=pymchelper/_version.py=pymchelper/_version.py \
             --include-data-file=pymchelper/flair/db/card.ini=pymchelper/flair/db/card.ini \
             --include-data-file=pymchelper/flair/db/card.db=pymchelper/flair/db/card.db \
-            --nofollow-imports=pytrip \
+            --nofollow-import-to=pytrip \
+            --enable-plugin=no-qt \
             --output-filename=runmc \
             pymchelper/utils/runmc.py
 
@@ -76,17 +79,28 @@ jobs:
             --include-data-file=pymchelper/_version.py=pymchelper/_version.py \
             --include-data-file=pymchelper/flair/db/card.ini=pymchelper/flair/db/card.ini \
             --include-data-file=pymchelper/flair/db/card.db=pymchelper/flair/db/card.db \
-            --nofollow-imports=pytrip \
-            --nofollow-imports=scipy \
+            --nofollow-import-to=pytrip \
+            --nofollow-import-to=scipy \
+            --enable-plugin=no-qt \
             --output-filename=convertmc \
             pymchelper/run.py
 
-      - name: Test executables
+      - name: List generated executables with sizes
         run: |
-          ./mcscripter --version
-          ./plan2sobp --version
-          ./runmc --version
-          ./convertmc --version
+          ls -lh mcscripter plan2sobp runmc convertmc
+          du -h mcscripter plan2sobp runmc convertmc
+
+      - name: Test mcscripter executable
+        run: ./mcscripter --version
+
+      - name: Test plan2sobp executable
+        run: ./plan2sobp --version
+
+      - name: Test runmc executable
+        run: ./runmc --version
+
+      - name: Test convertmc executable
+        run: ./convertmc --version
 
       - name: Archive executables as artifacts
         uses: actions/upload-artifact@v5
@@ -98,9 +112,43 @@ jobs:
             ./runmc
             ./convertmc
 
-  upload-nuitka-executables:
+  test-nuitka-executables:
     runs-on: ubuntu-latest
     needs: [build-nuitka]
+    strategy:
+      matrix:
+        docker-tag:
+          - 'debian:11'
+          - 'debian:12'
+          - 'debian:stable'
+          - 'ubuntu:20.04'
+          - 'ubuntu:22.04'
+          - 'ubuntu:24.04'
+          - 'fedora:39'
+          - 'fedora:40'
+          - 'fedora:41'
+
+    steps:
+      - uses: actions/download-artifact@v6
+        with:
+          name: nuitka-executables-linux
+          path: ./executables
+
+      - name: Test mcscripter on ${{ matrix.docker-tag }}
+        run: docker run --volume `pwd`/executables:/test/ ${{ matrix.docker-tag }} /test/mcscripter --version
+
+      - name: Test plan2sobp on ${{ matrix.docker-tag }}
+        run: docker run --volume `pwd`/executables:/test/ ${{ matrix.docker-tag }} /test/plan2sobp --version
+
+      - name: Test runmc on ${{ matrix.docker-tag }}
+        run: docker run --volume `pwd`/executables:/test/ ${{ matrix.docker-tag }} /test/runmc --version
+
+      - name: Test convertmc on ${{ matrix.docker-tag }}
+        run: docker run --volume `pwd`/executables:/test/ ${{ matrix.docker-tag }} /test/convertmc --version
+
+  upload-nuitka-executables:
+    runs-on: ubuntu-latest
+    needs: [build-nuitka, test-nuitka-executables]
     steps:
       - uses: actions/download-artifact@v6
         with:

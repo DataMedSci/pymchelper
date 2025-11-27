@@ -9,7 +9,7 @@ on:
 
 jobs:
 
-  # generation of single-file executables
+  # generation of single-file executables using Nuitka
   build-executables:
     runs-on: ubuntu-latest
     permissions:
@@ -22,30 +22,90 @@ jobs:
         with:
           fetch-depth: 0 # Number of commits to fetch. 0 indicates all history for all branches and tags.
 
-      - name: Build Docker image with pyinstaller and pymchelper inside (manylinux2014)
-        run: docker build --tag pymchelper .
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.11'
 
-      - name: Generate single-file executables for mcscripter
-        run: docker run --workdir /app --volume `pwd`/dist:/app/dist pymchelper:latest pyinstaller --add-data 'pymchelper/_version.py:pymchelper' --onefile --name mcscripter pymchelper/utils/mcscripter.py
-
-      - name: Generate single-file executables for plan2sobp
-        run: docker run --workdir /app --volume `pwd`/dist:/app/dist pymchelper:latest pyinstaller --add-data 'pymchelper/_version.py:pymchelper' --onefile --hiddenimport='pydicom.encoders.gdcm' --hiddenimport='pydicom.encoders.pylibjpeg' --hidden-import='scipy.spatial.transform._rotation_groups' --name plan2sobp pymchelper/utils/radiotherapy/plan.py
-
-      - name: Generate single-file executables for runmc
-        run: docker run --workdir /app --volume `pwd`/dist:/app/dist pymchelper:latest pyinstaller runmc.spec
-
-      - name: Generate single-file executables for convertmc
-        run: docker run --workdir /app --volume `pwd`/dist:/app/dist pymchelper:latest pyinstaller convertmc.spec
-
-      - name: Test single-file executables
+      - name: Install system dependencies (patchelf, libjpeg/openjpeg)
         run: |
-          ls -alh ./dist/
-          ./dist/mcscripter --version
-          ./dist/plan2sobp --version
-          ./dist/runmc --version
-          ./dist/convertmc --version
-          docker run  -v `pwd`/dist:/test/ ubuntu:22.04 /test/convertmc --version
-          docker run  -v `pwd`/dist:/test/ debian:stable /test/convertmc --version
+          sudo apt-get update
+          sudo apt-get install -y patchelf libjpeg-dev libopenjp2-7-dev zlib1g-dev ccache
+
+      - name: Install package with dependencies and Nuitka
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e .[full]
+          pip install 'nuitka==2.8' wheel
+
+      - name: Build mcscripter (onefile)
+        run: |
+          python -m nuitka \
+            --standalone --onefile \
+            --include-data-file=pymchelper/_version.py=pymchelper/_version.py \
+            --nofollow-import-to=pytrip \
+            --enable-plugin=no-qt \
+            --output-dir=dist \
+            --output-filename=mcscripter \
+            pymchelper/utils/mcscripter.py
+
+      - name: Build plan2sobp (onefile)
+        run: |
+          python -m nuitka \
+            --standalone --onefile \
+            --include-data-file=pymchelper/_version.py=pymchelper/_version.py \
+            --nofollow-import-to=pytrip \
+            --include-module=pydicom.encoders.gdcm \
+            --include-module=pydicom.encoders.pylibjpeg \
+            --include-module=scipy.spatial.transform._rotation_groups \
+            --enable-plugin=no-qt \
+            --output-dir=dist \
+            --output-filename=plan2sobp \
+            pymchelper/utils/radiotherapy/plan.py
+
+      - name: Build runmc (onefile)
+        run: |
+          python -m nuitka \
+            --standalone --onefile \
+            --include-data-file=pymchelper/_version.py=pymchelper/_version.py \
+            --include-data-file=pymchelper/flair/db/card.ini=pymchelper/flair/db/card.ini \
+            --include-data-file=pymchelper/flair/db/card.db=pymchelper/flair/db/card.db \
+            --nofollow-import-to=pytrip \
+            --enable-plugin=no-qt \
+            --output-dir=dist \
+            --output-filename=runmc \
+            pymchelper/utils/runmc.py
+
+      - name: Build convertmc (onefile)
+        run: |
+          python -m nuitka \
+            --standalone --onefile \
+            --include-data-file=pymchelper/_version.py=pymchelper/_version.py \
+            --include-data-file=pymchelper/flair/db/card.ini=pymchelper/flair/db/card.ini \
+            --include-data-file=pymchelper/flair/db/card.db=pymchelper/flair/db/card.db \
+            --nofollow-import-to=pytrip \
+            --nofollow-import-to=scipy \
+            --enable-plugin=no-qt \
+            --output-dir=dist \
+            --output-filename=convertmc \
+            pymchelper/run.py
+
+      - name: List generated executables with sizes
+        run: |
+          ls -lh ./dist/
+          du -h ./dist/*
+
+      - name: Test mcscripter executable
+        run: ./dist/mcscripter --version
+
+      - name: Test plan2sobp executable
+        run: ./dist/plan2sobp --version
+
+      - name: Test runmc executable
+        run: ./dist/runmc --version
+
+      - name: Test convertmc executable
+        run: ./dist/convertmc --version
 
       - name: Archive executables as artifacts
         uses: actions/upload-artifact@v5
@@ -53,11 +113,46 @@ jobs:
           name: executables
           path: ./dist
 
+  # test executables on multiple Linux distributions
+  test-executables:
+    runs-on: ubuntu-latest
+    needs: [build-executables]
+    strategy:
+      matrix:
+        docker-tag: 
+          - 'debian:11'
+          - 'debian:12'
+          - 'debian:stable'
+          - 'ubuntu:20.04'
+          - 'ubuntu:22.04'
+          - 'ubuntu:24.04'
+          - 'fedora:39'
+          - 'fedora:40'
+          - 'fedora:41'
+
+    steps:
+      - uses: actions/download-artifact@v6
+        with:
+          name: executables
+          path: ./dist
+
+      - name: Test mcscripter on ${{ matrix.docker-tag }}
+        run: docker run --volume `pwd`/dist:/test/ ${{ matrix.docker-tag }} /test/mcscripter --version
+
+      - name: Test plan2sobp on ${{ matrix.docker-tag }}
+        run: docker run --volume `pwd`/dist:/test/ ${{ matrix.docker-tag }} /test/plan2sobp --version
+
+      - name: Test runmc on ${{ matrix.docker-tag }}
+        run: docker run --volume `pwd`/dist:/test/ ${{ matrix.docker-tag }} /test/runmc --version
+
+      - name: Test convertmc on ${{ matrix.docker-tag }}
+        run: docker run --volume `pwd`/dist:/test/ ${{ matrix.docker-tag }} /test/convertmc --version
+
   # upload of single-file executables to release assets
   upload-executables:
     runs-on: ubuntu-latest
     if: github.event_name == 'release' && github.event.action == 'published'
-    needs: [build-executables]
+    needs: [build-executables, test-executables]
 
     steps:
       - uses: actions/download-artifact@v6
@@ -77,7 +172,7 @@ jobs:
 
   generate-deb-packages:
     runs-on: ubuntu-latest
-    needs: [build-executables]
+    needs: [build-executables, test-executables]
 
     steps:
       - name: Checkout repository with full history
