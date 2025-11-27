@@ -22,20 +22,20 @@ jobs:
         with:
           fetch-depth: 0 # Number of commits to fetch. 0 indicates all history for all branches and tags.
 
-      - name: Build Docker image with pyinstaller and pymchelper inside
+      - name: Build Docker image with pyinstaller and pymchelper inside (manylinux2014)
         run: docker build --tag pymchelper .
 
       - name: Generate single-file executables for mcscripter
-        run: docker run --volume `pwd`/dist:/app/dist pymchelper:latest pyinstaller --add-data 'pymchelper/_version.py:pymchelper' --onefile --name mcscripter pymchelper/utils/mcscripter.py
+        run: docker run --workdir /app --volume `pwd`/dist:/app/dist pymchelper:latest pyinstaller --add-data 'pymchelper/_version.py:pymchelper' --onefile --name mcscripter pymchelper/utils/mcscripter.py
 
       - name: Generate single-file executables for plan2sobp
-        run: docker run --volume `pwd`/dist:/app/dist pymchelper:latest pyinstaller --add-data 'pymchelper/_version.py:pymchelper' --onefile --hiddenimport='pydicom.encoders.gdcm' --hiddenimport='pydicom.encoders.pylibjpeg' --hidden-import='scipy.spatial.transform._rotation_groups' --name plan2sobp pymchelper/utils/radiotherapy/plan.py
+        run: docker run --workdir /app --volume `pwd`/dist:/app/dist pymchelper:latest pyinstaller --add-data 'pymchelper/_version.py:pymchelper' --onefile --hiddenimport='pydicom.encoders.gdcm' --hiddenimport='pydicom.encoders.pylibjpeg' --hidden-import='scipy.spatial.transform._rotation_groups' --name plan2sobp pymchelper/utils/radiotherapy/plan.py
 
       - name: Generate single-file executables for runmc
-        run: docker run --volume `pwd`/dist:/app/dist pymchelper:latest pyinstaller runmc.spec
+        run: docker run --workdir /app --volume `pwd`/dist:/app/dist pymchelper:latest pyinstaller runmc.spec
 
       - name: Generate single-file executables for convertmc
-        run: docker run --volume `pwd`/dist:/app/dist pymchelper:latest pyinstaller convertmc.spec
+        run: docker run --workdir /app --volume `pwd`/dist:/app/dist pymchelper:latest pyinstaller convertmc.spec
 
       - name: Test single-file executables
         run: |
@@ -44,7 +44,7 @@ jobs:
           ./dist/plan2sobp --version
           ./dist/runmc --version
           ./dist/convertmc --version
-          docker run  -v `pwd`/dist:/test/ ubuntu:12.04 /test/convertmc --version
+          docker run  -v `pwd`/dist:/test/ ubuntu:22.04 /test/convertmc --version
           docker run  -v `pwd`/dist:/test/ debian:stable /test/convertmc --version
 
       - name: Archive executables as artifacts
