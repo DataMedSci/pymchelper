@@ -1,3 +1,0 @@
-# Install pymchelper in editable mode with all optional dependencies
-# Dependencies are now defined in pyproject.toml
--e .[full]
