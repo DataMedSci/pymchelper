@@ -75,8 +75,6 @@ class BeamModel():
         else:
             energy = data[:, 1]
 
-        k = 'cubic'
-
         cols = len(data[0])
         logger.debug("Number of columns in beam model: %i", cols)
 

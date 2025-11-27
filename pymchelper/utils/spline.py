@@ -48,9 +48,8 @@ def cubic_interpolate(x0: Union[float, np.ndarray], x: np.ndarray, y: np.ndarray
 
     if np.isscalar(x0):
         return _interp_one(float(x0))
-    else:
-        x0_arr = np.asarray(x0, dtype=float)
-        return np.array([_interp_one(float(v)) for v in x0_arr])
+    x0_arr = np.asarray(x0, dtype=float)
+    return np.array([_interp_one(float(v)) for v in x0_arr])
 
 
 class CubicSpline1D:

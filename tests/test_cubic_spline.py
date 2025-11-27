@@ -6,6 +6,7 @@ from pymchelper.utils.spline import CubicSpline1D, cubic_interpolate
 
 
 def make_random_data(n=50, seed=123):
+    """Generate random sorted data for testing."""
     rng = np.random.default_rng(seed)
     x = np.sort(rng.uniform(0.0, 10.0, size=n))
     y = np.sin(x) + 0.1 * rng.normal(size=n)
@@ -14,6 +15,7 @@ def make_random_data(n=50, seed=123):
 
 @pytest.mark.parametrize("n_points", [10, 100])
 def test_cubic_spline_matches_scipy(n_points):
+    """Test that our cubic spline matches SciPy's interp1d with kind='cubic'."""
     x, y = make_random_data()
     xp = np.linspace(x[0], x[-1], n_points)
 
@@ -30,6 +32,7 @@ def test_cubic_spline_matches_scipy(n_points):
 
 
 def test_scalar_vs_vector_consistency():
+    """Test that scalar and vector inputs produce consistent results."""
     x, y = make_random_data()
     cs = CubicSpline1D(x, y)
     xv = np.linspace(x[0], x[-1], 20)
@@ -39,6 +42,7 @@ def test_scalar_vs_vector_consistency():
 
 
 def test_direct_function_matches_wrapper():
+    """Test that cubic_interpolate function matches CubicSpline1D wrapper."""
     x, y = make_random_data()
     xv = np.linspace(x[0], x[-1], 25)
     y1 = cubic_interpolate(xv, x, y)
