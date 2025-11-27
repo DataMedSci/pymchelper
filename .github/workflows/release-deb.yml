@@ -25,12 +25,13 @@ jobs:
             -v "${PWD}:/work" \
             -w /work \
             quay.io/pypa/manylinux2014_x86_64 \
-            /opt/python/cp311-cp311/bin/bash -lc '
+            /bin/bash -lc '
               set -e
-              python -m pip install --upgrade pip
-              pip install -e .[full]
-              pip install nuitka==2.8 wheel
-              python -m nuitka \
+              PYBIN=/opt/python/cp311-cp311/bin/python
+              "$PYBIN" -m pip install --upgrade pip
+              "$PYBIN" -m pip install -e .[full]
+              "$PYBIN" -m pip install nuitka==2.8 wheel
+              "$PYBIN" -m nuitka \
                 --standalone --onefile \
                 --include-data-file=pymchelper/_version.py=pymchelper/_version.py \
                 --nofollow-import-to=pytrip \
@@ -66,12 +67,13 @@ jobs:
             -v "${PWD}:/work" \
             -w /work \
             quay.io/pypa/manylinux2014_x86_64 \
-            /opt/python/cp311-cp311/bin/bash -lc '
+            /bin/bash -lc '
               set -e
-              python -m pip install --upgrade pip
-              pip install -e .[full]
-              pip install nuitka==2.8 wheel
-              python -m nuitka \
+              PYBIN=/opt/python/cp311-cp311/bin/python
+              "$PYBIN" -m pip install --upgrade pip
+              "$PYBIN" -m pip install -e .[full]
+              "$PYBIN" -m pip install nuitka==2.8 wheel
+              "$PYBIN" -m nuitka \
                 --standalone --onefile \
                 --include-data-file=pymchelper/_version.py=pymchelper/_version.py \
                 --nofollow-import-to=pytrip \
@@ -109,12 +111,13 @@ jobs:
             -v "${PWD}:/work" \
             -w /work \
             quay.io/pypa/manylinux2014_x86_64 \
-            /opt/python/cp311-cp311/bin/bash -lc '
+            /bin/bash -lc '
               set -e
-              python -m pip install --upgrade pip
-              pip install -e .[full]
-              pip install nuitka==2.8 wheel
-              python -m nuitka \
+              PYBIN=/opt/python/cp311-cp311/bin/python
+              "$PYBIN" -m pip install --upgrade pip
+              "$PYBIN" -m pip install -e .[full]
+              "$PYBIN" -m pip install nuitka==2.8 wheel
+              "$PYBIN" -m nuitka \
                 --standalone --onefile \
                 --include-data-file=pymchelper/_version.py=pymchelper/_version.py \
                 --include-data-file=pymchelper/flair/db/card.ini=pymchelper/flair/db/card.ini \

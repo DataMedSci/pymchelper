@@ -28,6 +28,7 @@ def cubic_interpolate(x0: Union[float, np.ndarray], x: np.ndarray, y: np.ndarray
         z[i] = z[i] - w[i] * z[i + 1]
 
     def _interp_one(x0_one: float) -> float:
+        """Interpolate a single value."""
         # find interval index (requires x sorted)
         index = x.searchsorted(x0_one)
         index = int(np.clip(index, 1, n - 1))
