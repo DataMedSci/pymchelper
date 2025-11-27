@@ -34,10 +34,7 @@ classifiers = [
 ]
 
 dependencies = [
-    "numpy>=1.20,<1.27.0 ; python_version == '3.9'",
-    "numpy>=1.21 ; python_version == '3.10'",
-    "numpy>=1.23.3 ; python_version == '3.11'",
-    "numpy>=1.26 ; python_version >= '3.12'",
+    "numpy",
 ]
 
 [project.optional-dependencies]
@@ -62,7 +59,7 @@ full = [
 test = [
     "pytest==8.4.2",
     "flake8==7.3.0",
-    "sphinx",
+    "sphinx>=7.0",
     "mcpl==1.6.2",
     "yapf==0.43.0",
     "requests==2.32.5",
@@ -100,21 +97,13 @@ version_scheme = "post-release"
 local_scheme = "node-and-date"
 write_to = "pymchelper/_version.py"
 
-[tool.pycodestyle]
-max-line-length = 120
-
-[tool.flake8]
-max-line-length = 120
-
 [tool.yapf]
 based_on_style = "pep8"
 column_limit = 120
 
-[tool.pytest.ini_options]
+[tool.pytest]
 testpaths = ["tests"]
-python_files = ["test_*.py"]
-python_classes = ["Test*"]
-python_functions = ["test_*"]
+addopts = ["-v", "--doctest-modules"]
 
 [tool.wheel]
 universal = false
