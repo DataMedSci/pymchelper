@@ -22,7 +22,7 @@ a = Analysis([os.path.join('pymchelper', 'run.py')],
              pathex=['.'],
              binaries=[],
              datas=[ # pair of strings: location in system now, the name of the folder to contain the files at run-time.
-                 (os.path.join('pymchelper','VERSION'), 'pymchelper'),
+                 (os.path.join('pymchelper','_version.py'), 'pymchelper'),
                  ('libpng16.so', '.'),  # libraries needed by Pillow
                  ('libz.so.1', '.'),
                  (os.path.join('pymchelper', 'flair', 'db', 'card.db'), 'pymchelper/flair/db'),

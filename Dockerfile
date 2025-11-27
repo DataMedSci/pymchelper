@@ -6,7 +6,7 @@ FROM ghcr.io/grzanka/centos6pyinstaller:main
 #
 # run docker container to generate single-file binary in `dist` directory for pymchelper/utils/mcscripter.py
 # 
-# docker run -it -v `pwd`/dist:/app/dist pymchelper:latest pyinstaller --add-data 'pymchelper/VERSION:pymchelper' --onefile pymchelper/utils/mcscripter.py
+# docker run -it -v `pwd`/dist:/app/dist pymchelper:latest pyinstaller --add-data 'pymchelper/_version.py:pymchelper' --onefile pymchelper/utils/mcscripter.py
 #
 # test if produced executable works on some old distro:
 #
@@ -15,19 +15,23 @@ FROM ghcr.io/grzanka/centos6pyinstaller:main
 # pymchelper package and deps installation
 # files and directories below are needed to install pymchelper in editable mode
 WORKDIR /app
-COPY requirements.txt .
-COPY setup.py .
+COPY pyproject.toml .
 COPY README.md .
 COPY pymchelper pymchelper
 
 # disable pip cache to save some space
 ENV PIP_NO_CACHE_DIR=1
-RUN pip install --only-binary h5py,scipy,pillow,numpy,matplotlib -r requirements.txt
 
-# generate static VERSION file
+# Install setuptools-scm and build dependencies first
+RUN pip install "setuptools>=64" "setuptools-scm>=8"
+
+# Copy git history for version detection
 COPY .git .git
 RUN ls -alh .git
-RUN python3 setup.py --help
+
+# Install pymchelper with full dependencies in editable mode
+# This will generate pymchelper/_version.py automatically via setuptools-scm
+RUN pip install --only-binary h5py,scipy,pillow,numpy,matplotlib -e .[full]
 
 # create directory for pymchelper products
 RUN mkdir dist

@@ -26,10 +26,10 @@ jobs:
         run: docker build --tag pymchelper .
 
       - name: Generate single-file executables for mcscripter
-        run: docker run --volume `pwd`/dist:/app/dist pymchelper:latest pyinstaller --add-data 'pymchelper/VERSION:pymchelper' --onefile --name mcscripter pymchelper/utils/mcscripter.py
+        run: docker run --volume `pwd`/dist:/app/dist pymchelper:latest pyinstaller --add-data 'pymchelper/_version.py:pymchelper' --onefile --name mcscripter pymchelper/utils/mcscripter.py
 
       - name: Generate single-file executables for plan2sobp
-        run: docker run --volume `pwd`/dist:/app/dist pymchelper:latest pyinstaller --add-data 'pymchelper/VERSION:pymchelper' --onefile --hiddenimport='pydicom.encoders.gdcm' --hiddenimport='pydicom.encoders.pylibjpeg' --hidden-import='scipy.spatial.transform._rotation_groups' --name plan2sobp pymchelper/utils/radiotherapy/plan.py
+        run: docker run --volume `pwd`/dist:/app/dist pymchelper:latest pyinstaller --add-data 'pymchelper/_version.py:pymchelper' --onefile --hiddenimport='pydicom.encoders.gdcm' --hiddenimport='pydicom.encoders.pylibjpeg' --hidden-import='scipy.spatial.transform._rotation_groups' --name plan2sobp pymchelper/utils/radiotherapy/plan.py
 
       - name: Generate single-file executables for runmc
         run: docker run --volume `pwd`/dist:/app/dist pymchelper:latest pyinstaller runmc.spec

@@ -6,7 +6,7 @@ a = Analysis([os.path.join('pymchelper', 'utils', 'runmc.py')],
              pathex=['.'],
              binaries=[],
              datas=[
-                (os.path.join('pymchelper', 'VERSION'), 'pymchelper'),
+                (os.path.join('pymchelper', '_version.py'), 'pymchelper'),
                 (os.path.join('pymchelper', 'flair', 'db', 'card.db'), 'pymchelper/flair/db'),
                 (os.path.join('pymchelper', 'flair', 'db', 'card.ini'), 'pymchelper/flair/db')
              ],
