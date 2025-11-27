@@ -1,30 +1,14 @@
-import glob
 import os
-import shutil
-
 import matplotlib
 
 # helper tools to print list of binary and data files sorted by their size in bytes
 from my_pyinstaller_utils import *
 
-# extract two libraries from Pillow (PIL fork) library, which is used by matplotlib to generate PNG files
-# these files may be present in the user filesystem (i.e. via `libpng16-16` package on Debian) resulting in a version conflict
-# we will copy these files to the main directory of our executable bundle, so they will take precence over system files
-
-# extract these libraries from Pillow storage
-for filename in glob.glob('/opt/python39/lib/python3.9/site-packages/Pillow.libs/*-*.so.*'):
-    if 'libpng16' in filename:
-        shutil.copy(filename, 'libpng16.so')
-    if 'libz' in filename:
-        shutil.copy(filename, 'libz.so.1')
-
 a = Analysis([os.path.join('pymchelper', 'run.py')],
              pathex=['.'],
              binaries=[],
              datas=[ # pair of strings: location in system now, the name of the folder to contain the files at run-time.
-                 (os.path.join('pymchelper','VERSION'), 'pymchelper'),
-                 ('libpng16.so', '.'),  # libraries needed by Pillow
-                 ('libz.so.1', '.'),
+                 (os.path.join('pymchelper','_version.py'), 'pymchelper'),
                  (os.path.join('pymchelper', 'flair', 'db', 'card.db'), 'pymchelper/flair/db'),
                  (os.path.join('pymchelper', 'flair', 'db', 'card.ini'), 'pymchelper/flair/db'),
                  (matplotlib.matplotlib_fname(), 'matplotlib/mpl-data')  # add matplotlibrc file

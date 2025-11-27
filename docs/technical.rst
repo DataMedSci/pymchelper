@@ -29,18 +29,62 @@ Wheel packages are automatically uploaded by github actions to `PyPI server <htt
 Preparing deb package
 ---------------------
 
-Follow these steps to generate single-file executables for Linux using pyinstaller::
+Follow these steps to generate single-file executables for Linux using Nuitka (headless matplotlib via Agg backend)::
 
-    docker build --tag pymchelper .
-    docker run --volume `pwd`/dist:/app/dist pymchelper:latest pyinstaller convertmc.spec
-    docker run --volume `pwd`/dist:/app/dist pymchelper:latest pyinstaller runmc.spec
-    docker run --volume `pwd`/dist:/app/dist pymchelper:latest pyinstaller --add-data 'pymchelper/VERSION:pymchelper' --onefile --name plan2sobp pymchelper/utils/radiotherapy/plan.py
-    docker run --volume `pwd`/dist:/app/dist pymchelper:latest pyinstaller --add-data 'pymchelper/VERSION:pymchelper' --onefile --name mcscripter pymchelper/utils/mcscripter.py
+    python -m pip install -U pip nuitka==2.8 wheel
+    pip install -e .[full]
+
+    # mcscripter
+    python -m nuitka \
+        --standalone --onefile \
+        --include-data-file=pymchelper/_version.py=pymchelper/_version.py \
+        --nofollow-import-to=pytrip \
+        --enable-plugin=no-qt \
+        --output-dir=dist \
+        --output-filename=mcscripter \
+        pymchelper/utils/mcscripter.py
+
+    # plan2sobp (only scipy.interpolate is required)
+    python -m nuitka \
+        --standalone --onefile \
+        --include-data-file=pymchelper/_version.py=pymchelper/_version.py \
+        --nofollow-import-to=pytrip \
+        --nofollow-import-to=scipy \
+        --include-module=scipy.interpolate \
+        --enable-plugin=no-qt \
+        --output-dir=dist \
+        --output-filename=plan2sobp \
+        pymchelper/utils/radiotherapy/plan.py
+
+    # runmc
+    python -m nuitka \
+        --standalone --onefile \
+        --include-data-file=pymchelper/_version.py=pymchelper/_version.py \
+        --include-data-file=pymchelper/flair/db/card.ini=pymchelper/flair/db/card.ini \
+        --include-data-file=pymchelper/flair/db/card.db=pymchelper/flair/db/card.db \
+        --nofollow-import-to=pytrip \
+        --enable-plugin=no-qt \
+        --output-dir=dist \
+        --output-filename=runmc \
+        pymchelper/utils/runmc.py
+
+    # convertmc
+    python -m nuitka \
+        --standalone --onefile \
+        --include-data-file=pymchelper/_version.py=pymchelper/_version.py \
+        --include-data-file=pymchelper/flair/db/card.ini=pymchelper/flair/db/card.ini \
+        --include-data-file=pymchelper/flair/db/card.db=pymchelper/flair/db/card.db \
+        --nofollow-import-to=pytrip \
+        --nofollow-import-to=scipy \
+        --enable-plugin=no-qt \
+        --output-dir=dist \
+        --output-filename=convertmc \
+        pymchelper/run.py
 
 Run some tests::
 
     ./dist/convertmc --version
-    docker run  -v `pwd`/dist:/test/ ubuntu:12.04 /test/convertmc --version
+    docker run -v `pwd`/dist:/test/ debian:stable /test/convertmc --version
 
 Generate debian packages for all binaries::
 
