@@ -27,6 +27,10 @@ jobs:
             quay.io/pypa/manylinux2014_x86_64 \
             /bin/bash -lc '
               set -e
+              # Provide static libpython required by Nuitka on manylinux
+              if [ -f /opt/_internal/static-libs-for-embedding-only.tar.xz ]; then
+                cd /opt/_internal && tar xf static-libs-for-embedding-only.tar.xz && cd -
+              fi
               PYBIN=/opt/python/cp311-cp311/bin/python
               "$PYBIN" -m pip install --upgrade pip
               # Prefer binary wheels globally for heavy deps, then install project deps
@@ -72,6 +76,10 @@ jobs:
             quay.io/pypa/manylinux2014_x86_64 \
             /bin/bash -lc '
               set -e
+              # Provide static libpython required by Nuitka on manylinux
+              if [ -f /opt/_internal/static-libs-for-embedding-only.tar.xz ]; then
+                cd /opt/_internal && tar xf static-libs-for-embedding-only.tar.xz && cd -
+              fi
               PYBIN=/opt/python/cp311-cp311/bin/python
               "$PYBIN" -m pip install --upgrade pip
               # Prefer binary wheels globally for heavy deps, then install project deps
@@ -119,6 +127,10 @@ jobs:
             quay.io/pypa/manylinux2014_x86_64 \
             /bin/bash -lc '
               set -e
+              # Provide static libpython required by Nuitka on manylinux
+              if [ -f /opt/_internal/static-libs-for-embedding-only.tar.xz ]; then
+                cd /opt/_internal && tar xf static-libs-for-embedding-only.tar.xz && cd -
+              fi
               PYBIN=/opt/python/cp311-cp311/bin/python
               "$PYBIN" -m pip install --upgrade pip
               # Prefer binary wheels globally for heavy deps, then install project deps
