@@ -19,7 +19,7 @@ Successfully migrated pymchelper from legacy `setup.py` to modern `pyproject.tom
 - Python 3.11: Supported
 - Python 3.12: Supported
 - Python 3.13: Supported
-- Python 3.14: Supported (excluded until official release)
+- Python 3.14: Supported (pre-release testing enabled)
 
 ### 3. Dynamic Versioning with setuptools-scm
 ✅ **Replaced** custom `pymchelper/version.py` git_version() logic
