@@ -24,7 +24,7 @@ jobs:
     - name: Set up Python
       uses: actions/setup-python@v6
       with:
-        python-version: '3.12'
+        python-version: '3.13'
 
     - name: Install dependencies
       run: |
@@ -46,11 +46,6 @@ jobs:
       matrix:
         python-version: ['3.9', '3.10', '3.11', '3.12', '3.13', '3.14']
         platform: [ubuntu-latest, macos-latest, windows-latest]
-        exclude:
-          # Exclude Python 3.14 until it's officially released (expected Oct 2025)
-          - python-version: '3.14'
-          # macos-13 is Intel-based, macos-latest is ARM-based (M1+)
-          # Keep all Python versions on macOS for broader coverage
     runs-on: ${{ matrix.platform }}
     needs: [smoke_test]
     steps:
