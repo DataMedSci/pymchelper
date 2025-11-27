@@ -1,0 +1,40 @@
+name: "Copilot Setup Steps"
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - '.github/workflows/copilot-setup-steps.yml'
+
+jobs:
+  copilot-setup-steps:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'  # Adjust to your preferred version
+
+      - name: Create virtual environment
+        run: |
+          python -m venv .venv
+          echo "VIRTUAL_ENV=.venv" >> $GITHUB_ENV
+          echo "$GITHUB_WORKSPACE/.venv/bin" >> $GITHUB_PATH
+
+      - name: Install dependencies
+        run: |
+          pip install --upgrade pip
+          # Install pytest and any other requirements
+          pip install pytest
+          # Uncomment and adjust if you have requirements.txt:
+          # pip install -r requirements.txt
+
+      - name: Verify setup
+        run: |
+          python --version
+          which python
+          pytest --version  # Verify pytest works in venv
