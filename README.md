@@ -52,6 +52,45 @@ sudo apt install pymchelper
 
 ---
 
- Full pymchelper documentation can be found here: https://datamedsci.github.io/pymchelper/index.html
+Full pymchelper documentation can be found here: https://datamedsci.github.io/pymchelper/index.html
 
 See [Getting Started](https://datamedsci.github.io/pymchelper/getting_started.html) for installation and basic information, and the [User&#39;s Guide](https://datamedsci.github.io/pymchelper/user_guide.html) for an overview of how to use the project.
+
+## Development
+
+**pymchelper** uses modern Python packaging with `pyproject.toml`. The project supports Python 3.9-3.14.
+
+### Quick Start
+
+```bash
+# Clone the repository
+git clone https://github.com/DataMedSci/pymchelper.git
+cd pymchelper
+
+# Install in editable mode with all dependencies
+pip install -e .[dev]
+
+# Run tests
+pytest
+```
+
+### Building from Source
+
+```bash
+# Install build tools
+pip install build
+
+# Build wheel and source distribution
+python -m build
+
+# Install the built package
+pip install dist/pymchelper-*.whl
+```
+
+### Version Management
+
+This project uses `setuptools-scm` for automatic versioning based on git tags:
+- Release versions are created by tagging: `git tag v1.2.3`
+- Development versions automatically append `+revN` based on commits since the last tag
+
+For more details, see [MIGRATION_GUIDE.md](MIGRATION_GUIDE.md) for the transition from `setup.py` to `pyproject.toml`.

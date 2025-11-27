@@ -1,3 +1,6 @@
+# Test dependencies are now defined in pyproject.toml under [project.optional-dependencies]
+# Install with: pip install -e .[test]
+# This file is kept for backwards compatibility
 # micro-language and markers are described here: https://www.python.org/dev/peps/pep-0496/
 pytest==8.4.2
 flake8==7.3.0

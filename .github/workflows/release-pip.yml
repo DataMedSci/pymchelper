@@ -15,21 +15,23 @@ jobs:
   full_test:
     strategy:
       matrix:
-        python-version: ['3.9', '3.10', '3.11', '3.12']
+        python-version: ['3.9', '3.10', '3.11', '3.12', '3.13']
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v6
+      with:
+        fetch-depth: 0 # fetch all history for git-based versioning
 
     - name: Set up Python
       uses: actions/setup-python@v6
       with:
         python-version: ${{ matrix.python-version }}
+        allow-prereleases: true
 
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install -r requirements.txt
-        pip install -r tests/requirements-test.txt
+        pip install -e .[full,test]
 
     - name: Run all test with pytest
       run: |
@@ -46,31 +48,29 @@ jobs:
     steps:
     - uses: actions/checkout@v6
       with:
-        fetch-depth: 0
+        fetch-depth: 0 # Required for setuptools-scm to determine version from git tags
 
     - name: Set up Python
       uses: actions/setup-python@v6
       with:
         python-version: '3.11'
 
-    - name: Install dependencies
+    - name: Install build dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install -r requirements.txt
+        pip install build twine
 
-    - name: Make wheel package and validate it
+    - name: Build wheel and source distribution
       run: |
-        pip install wheel twine
+        python -m build
 
-        # first call to version method would generate VERSION  file
-        PYTHONPATH=. python pymchelper/run.py --version
+    - name: Validate packages
+      run: |
+        twine check dist/*
 
-        python setup.py bdist_wheel
-
-        twine check dist/*.whl
-
-        # makes source package
-        python setup.py sdist
+    - name: List built packages
+      run: |
+        ls -lh dist/
 
     - name: publish package to pypi
       uses: pypa/gh-action-pypi-publish@v1.13.0

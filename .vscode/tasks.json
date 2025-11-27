@@ -1,0 +1,17 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "Run tests (pyproject.toml)",
+			"type": "shell",
+			"command": "set -e && python3 -m venv .venv && source .venv/bin/activate && python -m pip install --upgrade pip && pip install -e .[full,test] && pytest -q",
+			"group": "build"
+		},
+		{
+			"label": "Run tests (legacy)",
+			"type": "shell",
+			"command": "set -e\npython3 -m venv .venv && source .venv/bin/activate && python -m pip install --upgrade pip && pip install -r requirements.txt && pip install -r tests/requirements-test.txt && pytest -q",
+			"group": "build"
+		}
+	]
+}
