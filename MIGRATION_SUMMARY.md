@@ -33,13 +33,7 @@ Successfully migrated pymchelper from legacy `setup.py` to modern `pyproject.tom
 ✅ **Consolidated** all dependencies in pyproject.toml
 
 **Core Dependencies:**
-- numpy with Python-version specific constraints
-  - Python 3.9: `numpy>=1.20,<1.27.0`
-  - Python 3.10: `numpy>=1.21`
-  - Python 3.11: `numpy>=1.23.3`
-  - Python 3.12: `numpy>=1.26`
-  - Python 3.13: `numpy>=2.0.0`
-  - Python 3.14: `numpy>=2.2.0`
+- numpy
 
 **Optional Dependencies (extras):**
 - `[image]`: matplotlib
