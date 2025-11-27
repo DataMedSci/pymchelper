@@ -142,9 +142,9 @@ This checklist confirms all requirements from the migration have been completed.
 ## Known Limitations
 
 ### Python 3.14
-- Status: Excluded from testing until official release (October 2025)
-- Configuration: Already prepared in pyproject.toml
-- Action: Remove exclusion when Python 3.14 is released
+- Status: Included in testing as a prerelease (using `allow-prereleases: true` in CI matrix)
+- Configuration: Already prepared in pyproject.toml and CI workflows
+- Action: Confirm full support and update documentation when Python 3.14 is officially released (expected October 2025)
 
 ### macOS M1/M2 Testing
 - Currently using macos-latest (ARM-based)
