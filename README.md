@@ -33,7 +33,7 @@ To install **pymchelper** as a python package, type:
 pip install pymchelper[full]
 ```
 
-On Linux systems from Debian family **pymchelper** can be installed using `apt` package manager with couple of commands::
+On Debian-based Linux systems (Debian 8+ or Ubuntu 16.04+), **pymchelper** can be installed using `apt` package manager with couple of commands::
 
 ```bash
 wget --quiet --output-document - https://datamedsci.github.io/deb_package_repository/public.gpg | sudo apt-key add -

@@ -34,24 +34,17 @@ jobs:
           pip install -e .[full]
           pip install pyinstaller
 
-      - name: Generate VERSION file using setuptools-scm
-        run: |
-          python -c "from setuptools_scm import get_version; print(get_version())" > pymchelper\VERSION
-
-      - name: Prepare version file for bundling
-        run: cp pymchelper\VERSION .
-
       - name: Generate single-file executables for mcscripter
-        run: pyinstaller --add-data 'VERSION;pymchelper' --onefile --exclude-module pytrip --name mcscripter pymchelper\utils\mcscripter.py
+        run: pyinstaller --add-data 'pymchelper\_version.py;pymchelper' --onefile --exclude-module pytrip --name mcscripter pymchelper\utils\mcscripter.py
 
       - name: Generate single-file executables for plan2sobp
-        run: pyinstaller --add-data 'VERSION;pymchelper' --onefile --exclude-module pytrip --hiddenimport='pydicom.encoders.gdcm' --hiddenimport='pydicom.encoders.pylibjpeg' --hidden-import='scipy.spatial.transform._rotation_groups'  --name plan2sobp pymchelper\utils\radiotherapy\plan.py
+        run: pyinstaller --add-data 'pymchelper\_version.py;pymchelper' --onefile --exclude-module pytrip --hiddenimport='pydicom.encoders.gdcm' --hiddenimport='pydicom.encoders.pylibjpeg' --hidden-import='scipy.spatial.transform._rotation_groups'  --name plan2sobp pymchelper\utils\radiotherapy\plan.py
 
       - name: Generate single-file executables for runmc
-        run: pyinstaller --add-data 'VERSION;pymchelper' --add-data 'pymchelper\flair\db\card.ini;pymchelper\flair\db' --exclude-module pytrip --onefile --name runmc pymchelper\utils\runmc.py
+        run: pyinstaller --add-data 'pymchelper\_version.py;pymchelper' --add-data 'pymchelper\flair\db\card.ini;pymchelper\flair\db' --exclude-module pytrip --onefile --name runmc pymchelper\utils\runmc.py
 
       - name: Generate single-file executables for convertmc
-        run: pyinstaller --add-data 'VERSION;pymchelper' --add-data 'pymchelper\flair\db\card.ini;pymchelper\flair\db' --exclude-module pytrip --exclude-module scipy --onefile --name convertmc pymchelper\run.py
+        run: pyinstaller --add-data 'pymchelper\_version.py;pymchelper' --add-data 'pymchelper\flair\db\card.ini;pymchelper\flair\db' --exclude-module pytrip --exclude-module scipy --onefile --name convertmc pymchelper\run.py
 
       - name: Test single-file executables
         run: |
