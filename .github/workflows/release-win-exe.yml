@@ -1,11 +1,9 @@
 name: Release - executable artifacts for Windows
 
 on:
+  workflow_dispatch:
   push:
-    branches: [ 'release/*']
     tags: ['v*']
-  pull_request:
-    branches: ['release/*']
   release:
     types: [published]
 
@@ -21,46 +19,37 @@ jobs:
       - name: Checkout repository with full history
         uses: actions/checkout@v6
         with:
-          fetch-depth: 0 # Number of commits to fetch. 0 indicates all history for all branches and tags.
+          fetch-depth: 0 # Required for setuptools-scm to determine version from git tags
 
       - name: Set up Python
         uses: actions/setup-python@v6
         with:
-          python-version: 3.12
+          python-version: '3.13'
 
-      - name: Install setuptools and wheel
-        run: pip install setuptools wheel
-
-      - name: Generate VERSION file
-        run: python3 setup.py --help
-
-      - name: Install pyinstaller
-        run: pip install pyinstaller
-
-      - name: Prepare requierements
-        run: pip install -r requirements.txt
-
-      - name: Prepare version file
-        run: cp pymchelper\VERSION .
+      - name: Install package with dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e .[full]
+          pip install pyinstaller
 
       - name: Generate single-file executables for mcscripter
-        run: pyinstaller --add-data 'VERSION:pymchelper' --onefile --exclude-module pytrip --name mcscripter pymchelper\utils\mcscripter.py
+        run: pyinstaller --add-data 'pymchelper\_version.py;pymchelper' --onefile --exclude-module pytrip --name mcscripter pymchelper\utils\mcscripter.py
 
       - name: Generate single-file executables for plan2sobp
-        run: pyinstaller --add-data 'VERSION:pymchelper' --onefile --exclude-module pytrip --hiddenimport='pydicom.encoders.gdcm' --hiddenimport='pydicom.encoders.pylibjpeg' --hidden-import='scipy.spatial.transform._rotation_groups'  --name plan2sobp pymchelper\utils\radiotherapy\plan.py
+        run: pyinstaller --add-data 'pymchelper\_version.py;pymchelper' --onefile --exclude-module pytrip --hiddenimport='pydicom.encoders.gdcm' --hiddenimport='pydicom.encoders.pylibjpeg' --hidden-import='scipy.spatial.transform._rotation_groups'  --name plan2sobp pymchelper\utils\radiotherapy\plan.py
 
       - name: Generate single-file executables for runmc
-        run: pyinstaller --add-data 'VERSION:pymchelper' --add-data 'pymchelper\flair\db\card.ini:pymchelper\flair\db' --exclude-module pytrip --onefile --name runmc pymchelper\utils\runmc.py
+        run: pyinstaller --add-data 'pymchelper\_version.py;pymchelper' --add-data 'pymchelper\flair\db\card.ini;pymchelper\flair\db' --exclude-module pytrip --onefile --name runmc pymchelper\utils\runmc.py
 
       - name: Generate single-file executables for convertmc
-        run: pyinstaller --add-data 'VERSION:pymchelper' --add-data 'pymchelper\flair\db\card.ini:pymchelper\flair\db' --exclude-module pytrip --exclude-module scipy --onefile --name convertmc pymchelper\run.py
+        run: pyinstaller --add-data 'pymchelper\_version.py;pymchelper' --add-data 'pymchelper\flair\db\card.ini;pymchelper\flair\db' --exclude-module pytrip --exclude-module scipy --onefile --name convertmc pymchelper\run.py
 
       - name: Test single-file executables
         run: |
           dist\mcscripter.exe --version
           dist\plan2sobp.exe --version
           dist\runmc.exe --version
-          dist\convertmc --version
+          dist\convertmc.exe --version
 
       - name: Archive executables as artifacts
         uses: actions/upload-artifact@v5
@@ -70,15 +59,11 @@ jobs:
 
   # upload of single-file executables to release assets
   upload-executables:
-    runs-on: windows-latest
+    runs-on: ubuntu-latest
+    if: github.event_name == 'release' && github.event.action == 'published'
     needs: [build-executables]
 
     steps:
-      - name: Checkout repository with full history
-        uses: actions/checkout@v6
-        with:
-          fetch-depth: 0 # Number of commits to fetch. 0 indicates all history for all branches and tags.
-
       - uses: actions/download-artifact@v6
         with:
           name: executables

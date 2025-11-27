@@ -1,4 +1,0 @@
-# to avoid duplication and specifying dependencies both in setup.py and requirements.txt
-# we will installs dependencies from ./setup.py, and the package itself,
-# in editable mode with all optional dependencies
--e .[full]
