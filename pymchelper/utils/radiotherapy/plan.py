@@ -82,30 +82,25 @@ class BeamModel():
 
         self.has_divergence = False
 
-        try:
-            from scipy.interpolate import interp1d
-        except ImportError:
-            logger.error("scipy is not installed, cannot interpolate beam model.")
-            logger.error("Please install pymchelper[dicom] or pymchelper[all] to us this feature.")
-            return
+        from pymchelper.utils.spline import CubicSpline1D
 
         if cols in (6, 10):
-            self.f_en = interp1d(energy, data[:, 0], kind=k)  # nominal energy [MeV]
-            self.f_e = interp1d(energy, data[:, 1], kind=k)  # measured energy [MeV]
-            self.f_espread = interp1d(energy, data[:, 2], kind=k)  # energy spread 1 sigma [% of measured energy]
-            self.f_ppmu = interp1d(energy, data[:, 3], kind=k)  # 1e6 protons per MU  [1e6/MU]
-            self.f_sx = interp1d(energy, data[:, 4], kind=k)  # 1 sigma x [cm]
-            self.f_sy = interp1d(energy, data[:, 5], kind=k)  # 1 sigma y [cm]
+            self.f_en = CubicSpline1D(energy, data[:, 0])  # nominal energy [MeV]
+            self.f_e = CubicSpline1D(energy, data[:, 1])  # measured energy [MeV]
+            self.f_espread = CubicSpline1D(energy, data[:, 2])  # energy spread 1 sigma [% of measured energy]
+            self.f_ppmu = CubicSpline1D(energy, data[:, 3])  # 1e6 protons per MU  [1e6/MU]
+            self.f_sx = CubicSpline1D(energy, data[:, 4])  # 1 sigma x [cm]
+            self.f_sy = CubicSpline1D(energy, data[:, 5])  # 1 sigma y [cm]
         else:
             logger.error("invalid column count")
 
         if cols == 10:
             logger.debug("Beam model has divergence data")
             self.has_divergence = True
-            self.f_divx = interp1d(energy, data[:, 6], kind=k)  # div x [rad]
-            self.f_divy = interp1d(energy, data[:, 7], kind=k)  # div y [rad]
-            self.f_covx = interp1d(energy, data[:, 8], kind=k)  # cov (x, x') [mm]
-            self.f_covy = interp1d(energy, data[:, 9], kind=k)  # cov (y, y') [mm]
+            self.f_divx = CubicSpline1D(energy, data[:, 6])  # div x [rad]
+            self.f_divy = CubicSpline1D(energy, data[:, 7])  # div y [rad]
+            self.f_covx = CubicSpline1D(energy, data[:, 8])  # cov (x, x') [mm]
+            self.f_covy = CubicSpline1D(energy, data[:, 9])  # cov (y, y') [mm]
 
         self.data = data
 

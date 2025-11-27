@@ -82,8 +82,6 @@ jobs:
             --standalone --onefile \
             --include-data-file=pymchelper/_version.py=pymchelper/_version.py \
             --nofollow-import-to=pytrip \
-            --nofollow-import-to=scipy \
-            --include-module=scipy.interpolate \
             --enable-plugin=no-qt \
             --output-dir=dist \
             --output-filename=plan2sobp \

@@ -41,9 +41,8 @@ dependencies = [
 image = ["matplotlib"]
 excel = ["xlwt"]
 hdf = ["h5py"]
-dicom = ["pydicom", "scipy"]
+dicom = ["pydicom"]
 pytrip = [
-    "scipy",
     "pytrip98",
 ]
 full = [
@@ -51,7 +50,6 @@ full = [
     "xlwt",
     "h5py",
     "pydicom",
-    "scipy",
     "pytrip98",
     "hipsterplot",
     "bashplotlib",
@@ -63,6 +61,7 @@ test = [
     "mcpl==1.6.2",
     "yapf==0.43.0",
     "requests==2.32.5",
+    "scipy",
     "pre-commit==3.7.1 ; python_version < '3.10'",
     "pre-commit==4.5.0 ; python_version >= '3.10'",
 ]
