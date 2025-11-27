@@ -118,3 +118,34 @@ python_functions = ["test_*"]
 
 [tool.wheel]
 universal = false
+
+[tool.nuitka]
+# Nuitka 2.8 configuration for building self-contained onefile executables
+# Common flags applied via CLI; keep config minimal and portable.
+standalone = true
+onefile = true
+nofollow_imports = false
+enable_plugins = [
+    "numpy",
+    "pylibjpeg",
+    "pylibjpeg-libjpeg",
+    "pylibjpeg-openjpeg",
+    "pylibjpeg-rle",
+]
+
+# Include essential package data
+include_data_files = [
+    # bundle dynamic version file
+    ["pymchelper/_version.py", "pymchelper/_version.py"],
+    # flair db files used by convertmc/runmc
+    ["pymchelper/flair/db/card.ini", "pymchelper/flair/db/card.ini"],
+    ["pymchelper/flair/db/card.db", "pymchelper/flair/db/card.db"],
+]
+
+# On Linux, prefer using patchelf/ldconfig from runner image
+recurse_to_modules = [
+    "pymchelper",
+    "pydicom.encoders.gdcm",
+    "pydicom.encoders.pylibjpeg",
+    "scipy.spatial.transform._rotation_groups",
+]
