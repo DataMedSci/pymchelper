@@ -9,35 +9,29 @@ on:
 
 jobs:
 
-  # generation of single-file executables using Nuitka
-  build-executables:
+  # build each executable in parallel (Nuitka)
+  build-mcscripter:
     runs-on: ubuntu-latest
     permissions:
       contents: read
-      packages: write
-
     steps:
       - name: Checkout repository with full history
         uses: actions/checkout@v6
         with:
-          fetch-depth: 0 # Number of commits to fetch. 0 indicates all history for all branches and tags.
-
+          fetch-depth: 0
       - name: Set up Python
         uses: actions/setup-python@v6
         with:
           python-version: '3.11'
-
       - name: Install system dependencies (patchelf, libjpeg/openjpeg)
         run: |
           sudo apt-get update
           sudo apt-get install -y patchelf libjpeg-dev libopenjp2-7-dev zlib1g-dev ccache
-
       - name: Install package with dependencies and Nuitka
         run: |
           python -m pip install --upgrade pip
           pip install -e .[full]
           pip install 'nuitka==2.8' wheel
-
       - name: Build mcscripter (onefile)
         run: |
           python -m nuitka \
@@ -48,21 +42,86 @@ jobs:
             --output-dir=dist \
             --output-filename=mcscripter \
             pymchelper/utils/mcscripter.py
+      - name: List generated executable with size
+        run: |
+          ls -lh ./dist/mcscripter
+          du -h ./dist/mcscripter
+      - name: Test mcscripter executable
+        run: ./dist/mcscripter --version
+      - name: Upload mcscripter artifact
+        uses: actions/upload-artifact@v5
+        with:
+          name: executables-mcscripter
+          path: ./dist/mcscripter
 
+  build-plan2sobp:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout repository with full history
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.11'
+      - name: Install system dependencies (patchelf, libjpeg/openjpeg)
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y patchelf libjpeg-dev libopenjp2-7-dev zlib1g-dev ccache
+      - name: Install package with dependencies and Nuitka
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e .[full]
+          pip install 'nuitka==2.8' wheel
       - name: Build plan2sobp (onefile)
         run: |
           python -m nuitka \
             --standalone --onefile \
             --include-data-file=pymchelper/_version.py=pymchelper/_version.py \
             --nofollow-import-to=pytrip \
-            --include-module=pydicom.encoders.gdcm \
-            --include-module=pydicom.encoders.pylibjpeg \
-            --include-module=scipy.spatial.transform._rotation_groups \
+            --nofollow-import-to=scipy \
+            --include-module=scipy.interpolate \
             --enable-plugin=no-qt \
             --output-dir=dist \
             --output-filename=plan2sobp \
             pymchelper/utils/radiotherapy/plan.py
+      - name: List generated executable with size
+        run: |
+          ls -lh ./dist/plan2sobp
+          du -h ./dist/plan2sobp
+      - name: Test plan2sobp executable
+        run: ./dist/plan2sobp --version
+      - name: Upload plan2sobp artifact
+        uses: actions/upload-artifact@v5
+        with:
+          name: executables-plan2sobp
+          path: ./dist/plan2sobp
 
+  build-runmc:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout repository with full history
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.11'
+      - name: Install system dependencies (patchelf, libjpeg/openjpeg)
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y patchelf libjpeg-dev libopenjp2-7-dev zlib1g-dev ccache
+      - name: Install package with dependencies and Nuitka
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e .[full]
+          pip install 'nuitka==2.8' wheel
       - name: Build runmc (onefile)
         run: |
           python -m nuitka \
@@ -75,7 +134,40 @@ jobs:
             --output-dir=dist \
             --output-filename=runmc \
             pymchelper/utils/runmc.py
+      - name: List generated executable with size
+        run: |
+          ls -lh ./dist/runmc
+          du -h ./dist/runmc
+      - name: Test runmc executable
+        run: ./dist/runmc --version
+      - name: Upload runmc artifact
+        uses: actions/upload-artifact@v5
+        with:
+          name: executables-runmc
+          path: ./dist/runmc
 
+  build-convertmc:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout repository with full history
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.11'
+      - name: Install system dependencies (patchelf, libjpeg/openjpeg)
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y patchelf libjpeg-dev libopenjp2-7-dev zlib1g-dev ccache
+      - name: Install package with dependencies and Nuitka
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e .[full]
+          pip install 'nuitka==2.8' wheel
       - name: Build convertmc (onefile)
         run: |
           python -m nuitka \
@@ -89,34 +181,22 @@ jobs:
             --output-dir=dist \
             --output-filename=convertmc \
             pymchelper/run.py
-
-      - name: List generated executables with sizes
+      - name: List generated executable with size
         run: |
-          ls -lh ./dist/
-          du -h ./dist/*
-
-      - name: Test mcscripter executable
-        run: ./dist/mcscripter --version
-
-      - name: Test plan2sobp executable
-        run: ./dist/plan2sobp --version
-
-      - name: Test runmc executable
-        run: ./dist/runmc --version
-
+          ls -lh ./dist/convertmc
+          du -h ./dist/convertmc
       - name: Test convertmc executable
         run: ./dist/convertmc --version
-
-      - name: Archive executables as artifacts
+      - name: Upload convertmc artifact
         uses: actions/upload-artifact@v5
         with:
-          name: executables
-          path: ./dist
+          name: executables-convertmc
+          path: ./dist/convertmc
 
   # test executables on multiple Linux distributions
   test-executables:
     runs-on: ubuntu-latest
-    needs: [build-executables]
+    needs: [build-mcscripter, build-plan2sobp, build-runmc, build-convertmc]
     strategy:
       matrix:
         docker-tag: 
@@ -133,7 +213,19 @@ jobs:
     steps:
       - uses: actions/download-artifact@v6
         with:
-          name: executables
+          name: executables-mcscripter
+          path: ./dist
+      - uses: actions/download-artifact@v6
+        with:
+          name: executables-plan2sobp
+          path: ./dist
+      - uses: actions/download-artifact@v6
+        with:
+          name: executables-runmc
+          path: ./dist
+      - uses: actions/download-artifact@v6
+        with:
+          name: executables-convertmc
           path: ./dist
 
       - name: Test mcscripter on ${{ matrix.docker-tag }}
@@ -152,12 +244,24 @@ jobs:
   upload-executables:
     runs-on: ubuntu-latest
     if: github.event_name == 'release' && github.event.action == 'published'
-    needs: [build-executables, test-executables]
+    needs: [build-mcscripter, build-plan2sobp, build-runmc, build-convertmc, test-executables]
 
     steps:
       - uses: actions/download-artifact@v6
         with:
-          name: executables
+          name: executables-mcscripter
+          path: ./dist
+      - uses: actions/download-artifact@v6
+        with:
+          name: executables-plan2sobp
+          path: ./dist
+      - uses: actions/download-artifact@v6
+        with:
+          name: executables-runmc
+          path: ./dist
+      - uses: actions/download-artifact@v6
+        with:
+          name: executables-convertmc
           path: ./dist
 
       - name: Add artifact with util files to the release
@@ -172,7 +276,7 @@ jobs:
 
   generate-deb-packages:
     runs-on: ubuntu-latest
-    needs: [build-executables, test-executables]
+    needs: [build-mcscripter, build-plan2sobp, build-runmc, build-convertmc, test-executables]
 
     steps:
       - name: Checkout repository with full history
@@ -180,7 +284,19 @@ jobs:
 
       - uses: actions/download-artifact@v6
         with:
-          name: executables
+          name: executables-mcscripter
+          path: ./dist
+      - uses: actions/download-artifact@v6
+        with:
+          name: executables-plan2sobp
+          path: ./dist
+      - uses: actions/download-artifact@v6
+        with:
+          name: executables-runmc
+          path: ./dist
+      - uses: actions/download-artifact@v6
+        with:
+          name: executables-convertmc
           path: ./dist
 
       - name: Generate deb packages
