@@ -114,6 +114,8 @@ jobs:
 
   test-nuitka-executables:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     needs: [build-nuitka]
     strategy:
       matrix:
