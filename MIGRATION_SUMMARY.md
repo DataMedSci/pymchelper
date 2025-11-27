@@ -60,7 +60,7 @@ Successfully migrated pymchelper from legacy `setup.py` to modern `pyproject.tom
   - ubuntu-latest (Linux)
   - macos-latest (macOS ARM)
   - windows-latest (Windows)
-- **Total combinations**: 15 (5 Python × 3 OS)
+- **Total combinations**: 18 (6 Python × 3 OS)
 - Uses `pip install -e .[full,test]` instead of requirements.txt
 
 #### Release Workflow (release-pip.yml)
