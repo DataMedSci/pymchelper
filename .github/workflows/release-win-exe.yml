@@ -1,11 +1,9 @@
 name: Release - executable artifacts for Windows
 
 on:
+  workflow_dispatch:
   push:
-    branches: [ 'release/*']
     tags: ['v*']
-  pull_request:
-    branches: ['release/*']
   release:
     types: [published]
 
@@ -61,15 +59,11 @@ jobs:
 
   # upload of single-file executables to release assets
   upload-executables:
-    runs-on: windows-latest
+    runs-on: ubuntu-latest
+    if: github.event_name == 'release' && github.event.action == 'published'
     needs: [build-executables]
 
     steps:
-      - name: Checkout repository with full history
-        uses: actions/checkout@v6
-        with:
-          fetch-depth: 0 # Number of commits to fetch. 0 indicates all history for all branches and tags.
-
       - uses: actions/download-artifact@v6
         with:
           name: executables
