@@ -34,21 +34,32 @@ To install as well `plan2sobp` program type: ``pip install "pymchelper[dicom]"``
 Python package (Debian based Linux)
 -----------------------------------
 
-Deb packages are produced for 64-bit Debian-based Linux distributions (Debian 8/jessie or newer, Ubuntu 16.04 or newer).
+Deb packages are produced for 64-bit Debian-based Linux distributions (Debian 12 or newer, Ubuntu 20.04 or newer).
 They contain a limited set of **pymchelper** functionality, mainly only the executable files.
 The files we provide in `deb` packages have no dependency on Python interpreter, therefore can run on quite old Linux distributions.
 With binary files there is no chance to use **pymchelper** as a Python library.
 
 **Note:** The Python package (via pip) supports Linux, Windows, and macOS. Deb packages are Linux-only.
 
-We are maintaining our repository on Github Pages service. To add this repository on you system, download our GPG key and add an entry to `sources.list` directory::
+We are maintaining our repository on Github Pages service. To add this repository on your system, download our GPG key and add an entry to `sources.list` directory::
 
 
-   wget --quiet --output-document - https://datamedsci.github.io/deb_package_repository/public.gpg | sudo apt-key add -
-   sudo wget --quiet --output-document /etc/apt/sources.list.d/datamedsci.list https://datamedsci.github.io/deb_package_repository/datamedsci.list
+   wget -qO - https://datamedsci.github.io/deb_package_repository/public.gpg | sudo gpg --dearmor -o /usr/share/keyrings/datamedsci-archive-keyring.gpg
+
+
+Then add the repository to your APT sources::
+
+
+   echo "deb [signed-by=/usr/share/keyrings/datamedsci-archive-keyring.gpg] https://datamedsci.github.io/deb_package_repository/ stable main" | sudo tee /etc/apt/sources.list.d/datamedsci.list
+
 
 Finally run `apt update` and install `pymchelper` metapackage (which should install all required packages for the executables that we ship)::
 
 
    sudo apt update
+
+
+Then install pymchelper::
+
+
    sudo apt install pymchelper
