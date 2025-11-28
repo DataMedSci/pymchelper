@@ -17,7 +17,7 @@ jobs:
       - name: Setup Python
         uses: actions/setup-python@v6
         with:
-          python-version: '3.12'  # Adjust to your preferred version
+          python-version: '3.13'  # Adjust to your preferred version
 
       - name: Create virtual environment
         run: |

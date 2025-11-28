@@ -2,8 +2,6 @@ name: Release - executable artifacts and deb package
 
 on:
   workflow_dispatch:
-  push:
-    tags: ['v*']
   release:
     types: [published]
 

@@ -41,10 +41,11 @@ In order to get such plots instead of text files, replace first argument with :b
 
     convertmc image --many "*_fort*" 
 
-Two new PNG files will be created which can be directly opened, for example
+Two new PNG files will be created which can be directly opened.
 
-.. figure:: 21.txt.png
-    :alt: sample file 21.txt.png generated with image converter
+.. comment: TODO: Add sample image here
+   .. figure:: 21.txt.png
+       :alt: sample file 21.txt.png generated with image converter
 
 If you are SHIELD-HIT12A user, same effect can be achieved by processing :bash:`*.bdo` binary files. 
 
@@ -74,8 +75,3 @@ For **system-wide installation** (command-line tools only, not usable as Python 
 - **Windows users**: Use binary executables (see :doc:`Installation Guide </install>` for details)
 
 For more installation options, see the complete :doc:`Installation Guide </install>`.
-
-License
--------
-
-pymchelper is licensed under `MIT LICENCE`.

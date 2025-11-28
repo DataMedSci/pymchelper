@@ -6,90 +6,166 @@
 Installation Guide
 ==================
 
+**pymchelper** provides both command-line tools (like the ``convertmc`` converter) and can be used as a Python library 
+(you can import and use pymchelper in your own Python code).
+
 Quick Installation
 ------------------
 
-For **development or Python library usage**, we recommend using pip with a virtual environment::
+For most users, we recommend installing via pip in a virtual environment::
 
-    python3 -m venv .venv
-    source .venv/bin/activate  # On Windows: .venv\Scripts\activate
     pip install "pymchelper[full]"
 
-For **system-wide installation** (command-line tools only, not usable as Python library):
-
-- **Linux users**: Use apt packages (see `Python package (Debian based Linux)`_ section below)
-- **Windows users**: Use binary executables (see documentation for Windows installation)
+The ``[full]`` option means that pymchelper is installed with all available converters (image, Excel, HDF, etc.).
 
 
-Python package
---------------
+Installation via pip
+--------------------
 
-**pymchelper** is available on PyPi, you can install it using::
+**pymchelper** is available on PyPI and works on **all operating systems** (Linux, Windows, macOS).
+
+We **strongly recommend using virtual environments** for Python package installation. 
+Nowadays, system-wide or ``pip install --user`` installations are strongly discouraged due to potential conflicts 
+with system packages and other Python projects.
+
+Create and activate a virtual environment::
+
+    python3 -m venv .venv
+
+On Linux/macOS::
+
+    source .venv/bin/activate
+
+On Windows::
+
+    .venv\Scripts\activate
+
+Basic installation::
 
     pip install pymchelper
 
-This would install just basic capabilities of the converter program `convertmc`: conversion to text file and inspection tool.
-If you want to use more features, select a specific set of requirements:
+This installs basic capabilities: conversion to text files and the inspection tool.
 
-- to enable image converter use ``pip install "pymchelper[image]"``
-- to enable MS Excel converter use ``pip install "pymchelper[excel]"``
-- to enable HDF converter use ``pip install "pymchelper[hdf]"``
-- to enable TRiP98 converters use ``pip install "pymchelper[pytrip]"``
+For additional features, use these optional dependencies:
 
-Multiple converters can also be enabled, i.e. by using ``pip install "pymchelper[image,excel]"``
+- Image converter: ``pip install "pymchelper[image]"``
+- MS Excel converter: ``pip install "pymchelper[excel]"``
+- HDF converter: ``pip install "pymchelper[hdf]"``
+- TRiP98 converters: ``pip install "pymchelper[pytrip]"``
+- DICOM support and plan2sobp: ``pip install "pymchelper[dicom]"``
 
-In order to use all feautures (i.e. all available converters), use::
+Multiple features can be combined::
+
+    pip install "pymchelper[image,excel,hdf]"
+
+For all features::
 
     pip install "pymchelper[full]"
 
-To install as well `plan2sobp` program type: ``pip install "pymchelper[dicom]"``
+**Note:** Installing via pip provides both command-line tools and Python library access. 
+However, command-line tools are not installed system-wide and require the virtual environment to be activated. 
+If you need system-wide command-line tools without activating virtual environments, see the options below.
 
 
-Python package (Debian based Linux)
------------------------------------
+Command-line Installation for Linux (apt)
+------------------------------------------
 
-Deb packages are produced for 64-bit Debian-based Linux distributions (Debian 12 or newer, Ubuntu 20.04 or newer).
-They contain a limited set of **pymchelper** functionality, mainly only the executable files.
-The files we provide in `deb` packages have no dependency on Python interpreter, therefore can run on quite old Linux distributions.
-With binary files there is no chance to use **pymchelper** as a Python library.
+For **Debian/Ubuntu users only**, we provide APT packages for convenient system-wide installation.
 
-**Note:** The Python package (via pip) supports Linux, Windows, and macOS. Deb packages are Linux-only.
+**Supported distributions:** Debian 12+, Ubuntu 20.04+
+
+**What you get:**
+
+- Only command-line tools (``convertmc``, ``mcscripter``, ``plan2sobp``)
+- System-wide installation - no virtual environment needed
+- Automatic updates during normal system upgrades
+- No Python interpreter required to run the tools
+
+**Limitations:**
+
+- Cannot be used as a Python library
+- Only available for Debian-based distributions
+
+**Why a custom repository?**
+
+pymchelper is not included in the standard Debian/Ubuntu repositories, so you need to add our custom repository first.
 
 Prerequisites
 ~~~~~~~~~~~~~
 
-To install packages via apt, you need the following tools:
+Ensure you have ``wget`` and ``gpg`` installed (usually pre-installed)::
 
-- ``wget`` - for downloading the GPG key
-- ``gpg`` - for handling cryptographic signatures
+    sudo apt update
 
-These are usually pre-installed on most Debian-based systems. If not, install them with::
+If needed::
 
-   sudo apt update
-   sudo apt install wget gnupg
+    sudo apt install wget gnupg
 
 Adding the Repository
 ~~~~~~~~~~~~~~~~~~~~~
 
-We are maintaining our repository on Github Pages service. To add this repository on your system, download our GPG key and add an entry to `sources.list` directory::
+Download and add our GPG key::
+
+    wget -qO - https://datamedsci.github.io/deb_package_repository/public.gpg | sudo gpg --dearmor -o /usr/share/keyrings/datamedsci-archive-keyring.gpg
+
+Add the repository to your APT sources::
+
+    echo "deb [signed-by=/usr/share/keyrings/datamedsci-archive-keyring.gpg] https://datamedsci.github.io/deb_package_repository/ stable main" | sudo tee /etc/apt/sources.list.d/datamedsci.list
+
+Update package lists::
+
+    sudo apt update
+
+Install pymchelper::
+
+    sudo apt install pymchelper
+
+The tools are now available system-wide without any virtual environment activation.
 
 
-   wget -qO - https://datamedsci.github.io/deb_package_repository/public.gpg | sudo gpg --dearmor -o /usr/share/keyrings/datamedsci-archive-keyring.gpg
+Single Binary Executables (All Platforms)
+------------------------------------------
 
+We provide standalone single-file executables as release assets. These are useful for:
 
-Then add the repository to your APT sources::
+- **Linux users** on non-Debian distributions (Fedora, CentOS, Arch, etc.) where we don't provide native packages
+- **Windows users** who want simple executable files without Python installation
+- Systems where you don't have permission to install packages
 
+**Download location:**
 
-   echo "deb [signed-by=/usr/share/keyrings/datamedsci-archive-keyring.gpg] https://datamedsci.github.io/deb_package_repository/ stable main" | sudo tee /etc/apt/sources.list.d/datamedsci.list
+Visit our GitHub releases page: https://github.com/DataMedSci/pymchelper/releases/latest
 
+Alternatively, for a specific version (e.g., v2.8.3): https://github.com/DataMedSci/pymchelper/releases/tag/v2.8.3
 
-Finally run `apt update` and install `pymchelper` metapackage (which should install all required packages for the executables that we ship)::
+**Available executables:**
 
+- ``convertmc`` - Main conversion tool
+- ``mcscripter`` - Script generation tool
+- ``plan2sobp`` - Treatment planning tool
 
-   sudo apt update
+**Linux:**
 
+Download the executables and make them executable::
 
-Then install pymchelper::
+    chmod +x convertmc mcscripter plan2sobp
 
+You can place them in ``~/bin`` or ``/usr/local/bin`` for system-wide access.
 
-   sudo apt install pymchelper
+These executables are built with maximum compatibility and should work on a broader range of Linux distributions 
+compared to the apt packages, including:
+
+- Fedora
+- CentOS/RHEL
+- Arch Linux
+- openSUSE
+- And other distributions
+
+**Windows:**
+
+Download the ``.exe`` files and run them directly. No Python installation required.
+
+**Limitations:**
+
+- Only command-line tools (no Python library access)
+- Manual updates required (not automatic like apt packages)

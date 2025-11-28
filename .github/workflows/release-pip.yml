@@ -86,7 +86,7 @@ jobs:
         with:
           python-version: '3.13'
       - run: python -m pip install --upgrade pip
-      - run: pip install -r docs/requirements.txt
+      - run: pip install -e .[docs]
       - run: sphinx-apidoc --output-dir docs/apidoc/ pymchelper
       - run: sphinx-build --jobs auto docs docs/_build
       - uses: actions/upload-pages-artifact@v4
