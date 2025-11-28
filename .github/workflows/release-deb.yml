@@ -289,8 +289,10 @@ jobs:
   repo_prepare:
       runs-on: ubuntu-latest
       needs: [generate-deb-packages]
-      if: github.event_name == 'release' && github.event.action == 'published'
       steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
       - uses: actions/download-artifact@v6
         with:
           name: deb
@@ -325,8 +327,10 @@ jobs:
   repo_upload:
       runs-on: ubuntu-latest
       needs: [repo_prepare, test_deb]
-      if: github.event_name == 'release' && github.event.action == 'published'
       steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
       - uses: actions/download-artifact@v6
         with:
           name: repo
