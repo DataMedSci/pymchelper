@@ -1,7 +1,11 @@
 from abc import abstractmethod
 import logging
 from pathlib import Path
+from typing import TYPE_CHECKING
 from pymchelper.estimator import Estimator
+
+if TYPE_CHECKING:
+    from pymchelper.page import Page
 
 logger = logging.getLogger(__name__)
 
@@ -37,6 +41,6 @@ class Writer:
         return 1
 
     @abstractmethod
-    def write_single_page(self, page, output_path: Path):
+    def write_single_page(self, page: Page, output_path: Path) -> None:
         """Write a single page to a file."""
         raise NotImplementedError

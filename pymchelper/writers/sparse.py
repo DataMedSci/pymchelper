@@ -1,6 +1,10 @@
 import logging
+from typing import TYPE_CHECKING
 
 import numpy as np
+
+if TYPE_CHECKING:
+    from pymchelper.estimator import Estimator
 
 logger = logging.getLogger(__name__)
 
@@ -9,15 +13,15 @@ class SparseWriter:
     """
     Supports writing sparse matrix format
     """
-    def __init__(self, filename, options):
-        self.filename = filename
+    def __init__(self, filename: str, options: object) -> None:
+        self.filename: str = filename
         if not self.filename.endswith(".npz"):
             self.filename += ".npz"
 
         self.threshold = options.threshold
         logger.info("Sparse threshold {:g}".format(self.threshold))
 
-    def write(self, estimator):
+    def write(self, estimator: Estimator) -> int:
         if len(estimator.pages) > 1:
             print("Conversion of data with multiple pages not supported yet")
             return False

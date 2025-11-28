@@ -6,9 +6,9 @@ logger = logging.getLogger(__name__)
 
 class Inspector:
 
-    def __init__(self, filename, options):
+    def __init__(self, filename: str, options: object) -> None:
         logger.debug("Initialising Inspector writer")
-        self.options = options
+        self.options: object = options
 
     def write(self, estimator: Estimator):
         """Print all keys and values from estimator structure

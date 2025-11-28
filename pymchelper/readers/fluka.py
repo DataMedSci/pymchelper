@@ -35,7 +35,7 @@ class FlukaReaderFactory(ReaderFactory):
 class FlukaReader(Reader):
 
     @property
-    def corename(self):
+    def corename(self) -> Optional[str]:
         """
         Fluka output filenames follow this pattern: corename_fort.XX.
         :return: corename part of output file or None in case filename doesn't follow Fluka naming pattern
@@ -45,7 +45,7 @@ class FlukaReader(Reader):
             core_name = self.filename[-2:]
         return core_name
 
-    def parse_usrbin(self, estimator):
+    def parse_usrbin(self, estimator) -> Optional[Usrbin]:
         """
         USRBIN scores distribution of one of several quantities in a regular spatial
         structure (binning detector) independent from the geometry.
@@ -114,7 +114,7 @@ class FlukaReader(Reader):
         except IOError:
             return None
 
-    def parse_usrbdx(self, estimator):
+    def parse_usrbdx(self, estimator) -> Optional[Usrbdx]:
         """USRBDX defines a detector for a boundary crossing fluence or current estimator.
 
         :param estimator: an Estimator object, will be modified here and filled with data
@@ -187,7 +187,7 @@ class FlukaReader(Reader):
         except IOError:
             return None
 
-    def parse_usrtrack(self, estimator):
+    def parse_usrtrack(self, estimator) -> Optional[UsrTrack]:
         """
         :param estimator: an Estimator object, will be modified here and filled with data
         USRTRACK defines a detector for a track-length fluence estimator
@@ -246,7 +246,7 @@ class FlukaReader(Reader):
         except IOError:
             return None
 
-    def parse_resnuclei(self, estimator):
+    def parse_resnuclei(self, estimator) -> Optional[Resnuclei]:
         """
         TODO add support for resnuclei
         RESNUCLEi Scores residual nuclei produced in inelastic interactions on a region basis
@@ -267,7 +267,7 @@ class FlukaReader(Reader):
         except IOError:
             return None
 
-    def parse_data(self, estimator):
+    def parse_data(self, estimator) -> Optional[object]:
         """
         TODO
         :param estimator: an Estimator object, will be modified here and filled with data
@@ -279,7 +279,7 @@ class FlukaReader(Reader):
             if usr_object:
                 return usr_object
 
-    def read_data(self, estimator, nscale=1):
+    def read_data(self, estimator, nscale: float = 1) -> bool:
         """
         TODO
         :param estimator: an Estimator object, will be modified here and filled with data
@@ -330,7 +330,7 @@ class UsrbinScoring:
     _net_charge_scorings = ['NET-CHRG']
 
     @classmethod
-    def get_unit_and_factor_for_scoring(cls, scoring: str) -> (str, float):
+    def get_unit_and_factor_for_scoring(cls, scoring: str) -> tuple[str, float]:
         """Get unit and rescaling factor for scoring
 
         Based on:
