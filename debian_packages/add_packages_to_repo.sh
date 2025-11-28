@@ -8,7 +8,7 @@ set -x
 ./tools/aptly repo add main pymchelper-convertmc.deb
 #./tools/aptly repo add main pymchelper-runmc.deb
 #./tools/aptly repo add main pymchelper-plan2sobp.deb  # skipping as its exceeding the 100MB limit
-#./tools/aptly repo add main pymchelper-mcscripter.deb
+./tools/aptly repo add main pymchelper-mcscripter.deb
 ./tools/aptly repo add main pymchelper.deb
 gpg --list-keys --keyid-format LONG
 

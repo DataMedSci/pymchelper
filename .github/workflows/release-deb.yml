@@ -273,7 +273,7 @@ jobs:
     needs: [generate-deb-packages]
     strategy:
       matrix:
-        docker-tag: ['debian:12', 'debian:stable', 'ubuntu:18.04', 'ubuntu:20.04', 'ubuntu:21.04', 'ubuntu:22.04', 'ubuntu:23.04', 'ubuntu:24.04']
+        docker-tag: ['debian:11', 'debian:12', 'debian:13', 'debian:stable','ubuntu:20.04', 'ubuntu:22.04', 'ubuntu:24.04', 'ubuntu:25.04', 'ubuntu:25.10']
     steps:
       - uses: actions/download-artifact@v6
         with:
@@ -344,7 +344,7 @@ jobs:
 
       - name: Deploy to GitHub Pages
         uses: JamesIves/github-pages-deploy-action@v4.7.4
-        if: startsWith(github.ref, 'refs/tags/v')
+        #if: startsWith(github.ref, 'refs/tags/v')
         with:
           branch: gh-pages # The branch the action should deploy to.
           folder: debian_packages/public # The folder the action should deploy.
