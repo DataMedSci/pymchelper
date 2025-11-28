@@ -7,7 +7,6 @@ import shutil
 import sys
 import tempfile
 import unittest
-from typing import Any
 
 import numpy as np
 from numpy.typing import NDArray

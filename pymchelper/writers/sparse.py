@@ -24,7 +24,7 @@ class SparseWriter:
     def write(self, estimator: 'Estimator') -> int:
         if len(estimator.pages) > 1:
             print("Conversion of data with multiple pages not supported yet")
-            return False
+            return 1
 
         page = estimator.pages[0]
 
