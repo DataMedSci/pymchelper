@@ -4,7 +4,7 @@ Toolkit for working with particle transport codes such as [FLUKA](http://fluka.c
 
 ## Key Features
 
-- Convert binary outputs to plots and common formats (CSV, XLSX, HDF5, and more) using `convertmc`.
+- Convert binary outputs to plots and common formats (CSV, XLS, HDF5, and more) using `convertmc`.
 - Speed up simulations by splitting and merging runs with `runmc`.
 - Use as a Python library to load results into convenient objects for further analysis.
 
