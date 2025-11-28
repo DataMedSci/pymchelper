@@ -273,7 +273,7 @@ jobs:
     needs: [generate-deb-packages]
     strategy:
       matrix:
-        docker-tag: ['debian:12', 'debian:13', 'debian:stable','ubuntu:20.04', 'ubuntu:22.04', 'ubuntu:24.04', 'ubuntu:25.04', 'ubuntu:25.10']
+        docker-tag: ['debian:12', 'debian:13', 'debian:stable', 'ubuntu:20.04', 'ubuntu:22.04', 'ubuntu:24.04', 'ubuntu:25.04', 'ubuntu:25.10']
     steps:
       - uses: actions/download-artifact@v6
         with:
@@ -352,3 +352,29 @@ jobs:
           ssh-key: ${{ secrets.DEB_REPO_PRIVATE_KEY }}
           clean: true
           single-commit: true
+
+  test_apt_installation:
+    runs-on: ubuntu-latest
+    needs: [repo_upload]
+    strategy:
+      matrix:
+        docker-tag: ['debian:11', 'debian:12', 'debian:13', 'ubuntu:22.04', 'ubuntu:24.04', 'ubuntu:25.04']
+    steps:
+      - name: Wait for repository propagation
+        run: sleep 30
+
+      - name: Test apt installation on ${{ matrix.docker-tag }}
+        run: |
+          docker run --volume "${PWD}:/work" ${{ matrix.docker-tag }} /bin/sh -c "
+            set -e
+            apt-get update
+            apt-get install -y wget gpg
+            wget -qO - https://datamedsci.github.io/deb_package_repository/public.gpg | gpg --dearmor -o /usr/share/keyrings/datamedsci-archive-keyring.gpg
+            echo 'deb [signed-by=/usr/share/keyrings/datamedsci-archive-keyring.gpg] https://datamedsci.github.io/deb_package_repository/ stable main' > /etc/apt/sources.list.d/datamedsci.list
+            apt-get update
+            apt-get install -y pymchelper-convertmc pymchelper-mcscripter pymchelper-plan2sobp
+            echo 'Testing installed packages:'
+            convertmc --version
+            mcscripter --version
+            plan2sobp --version
+          "

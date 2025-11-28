@@ -41,7 +41,7 @@ With binary files there is no chance to use **pymchelper** as a Python library.
 
 **Note:** The Python package (via pip) supports Linux, Windows, and macOS. Deb packages are Linux-only.
 
-We are maintaining our repository on Github Pages service. To add this repository on you system, download our GPG key and add an entry to `sources.list` directory::
+We are maintaining our repository on Github Pages service. To add this repository on your system, download our GPG key and add an entry to `sources.list` directory::
 
 
    wget -qO - https://datamedsci.github.io/deb_package_repository/public.gpg | sudo gpg --dearmor -o /usr/share/keyrings/datamedsci-archive-keyring.gpg
