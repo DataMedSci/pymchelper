@@ -14,10 +14,18 @@ as well as `release assets <https://github.com/DataMedSci/pymchelper/releases/la
 Preparing pip package
 ---------------------
 
-Follow these steps to produce binary wheel package::
+Follow these steps to produce binary wheel package.
+
+Install build tools::
 
     python -m pip install --upgrade pip build twine
+
+Build the package::
+
     python -m build
+
+Verify the built package::
+
     twine check dist/*
 
 Wheel packages are automatically uploaded by github actions to `PyPI server <https://pypi.org/project/pymchelper/>`_
@@ -81,14 +89,24 @@ The executables are built inside a manylinux2014 Docker container to ensure maxi
           pymchelper/run.py
       '
 
-Run some tests::
+Run some tests.
+
+Test the executable directly::
 
     ./dist/convertmc --version
+
+Test in a Docker container::
+
     docker run -v `pwd`/dist:/test/ debian:stable /test/convertmc --version
 
-Generate debian packages for all binaries::
+Generate debian packages for all binaries.
+
+Navigate to the debian packages directory::
 
     cd debian_packages
+
+Run the package generation script::
+
     ./generate_deb_packages.sh convertmc mcscripter plan2sobp
     
 Deb packages are automatically uploaded to `APT repository <https://github.com/DataMedSci/deb_package_repository>`_  hosted on Github Pages.
@@ -100,13 +118,19 @@ Sphinx documentation written reStructuredText format is stored in `docs` folder.
 It is being translated to the HTML format by Sphinx tool and automatically deployed to the Github Pages instance by Github Actions.
 For details see `.github/workflows/release-pip.yml` file, in particular `generate_docs` and `deploy_docs` jobs.
 
-To generate documentation locally use these commands::
+To generate documentation locally, first install documentation dependencies::
 
     pip install -e .[docs]
+
+Generate API documentation::
+
     sphinx-apidoc --output-dir docs/apidoc/ pymchelper
+
+Build the HTML documentation::
+
     sphinx-build --jobs auto docs docs/_build
 
-To view the generated documentation in your browser, you can use Python's built-in HTTP server::
+To view the generated documentation in your browser, start a local web server::
 
     python -m http.server 8000 --directory docs/_build
 

@@ -57,17 +57,29 @@ We assume you are familiar with GIT source control system.
 2. Clone your fork locally::
 
     git clone git@github.com:your_name_here/pymchelper.git
+
+   Then navigate to the directory::
+
     cd pymchelper
 
 3. Create a branch for local development::
 
     git checkout -b feature/issue_number-name_of_your_bugfix_or_feature
 
-4. Create a dedicated virtual environment and install the package in editable mode with all dependencies::
+4. Create a dedicated virtual environment::
 
     python3 -m venv .venv
+
+   Activate it::
+
     source .venv/bin/activate
+
+   Upgrade pip and install the package in editable mode with all dependencies::
+
     pip install --upgrade pip
+
+   ::
+
     pip install -e .[full,test]
 
    On Windows, activate the virtual environment with::
@@ -96,11 +108,12 @@ We assume you are familiar with GIT source control system.
 
 8. If you're changing user-facing behavior, update the documentation in the ``docs/`` directory.
 
-9. Commit your changes with a clear commit message:
-
-   ::
+9. Stage your changes::
 
     git add .
+
+   Commit with a clear message::
+
     git commit -m "Fix issue #123: Brief description of your changes"
 
 10. Push your branch to GitHub:
@@ -183,14 +196,7 @@ Install everything for development::
 
 **Building documentation locally:**
 
-To build and view the documentation::
-
-   pip install -e .[docs]
-   sphinx-apidoc --output-dir docs/apidoc/ pymchelper
-   sphinx-build --jobs auto docs docs/_build
-   python -m http.server 8000 --directory docs/_build
-
-Then open http://localhost:8000 in your browser.
+For instructions on building and viewing documentation locally, see the :doc:`Technical Documentation </technical>` section on "Preparing sphinx documentation".
 
 .. _`bugs`: https://github.com/DataMedSci/pymchelper/issues
 .. _`features`: https://github.com/DataMedSci/pymchelper/issues
