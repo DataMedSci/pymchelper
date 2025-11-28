@@ -8,7 +8,7 @@ import pytest
 logger = logging.getLogger(__name__)
 
 
-def test_generate_shieldhit_input(tmp_path: Path, monkeypatch: pytest.MonkeyPatch):
+def test_generate_shieldhit_input(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     """Test if shieldhit input is generated correctly"""
     logging.info("Changing working directory to %s", tmp_path)
     monkeypatch.chdir(tmp_path)
@@ -22,7 +22,7 @@ def test_generate_shieldhit_input(tmp_path: Path, monkeypatch: pytest.MonkeyPatc
     assert len(list(tmp_path.glob('*'))) == 1
 
 
-def test_generate_fluka_input(tmp_path: Path, monkeypatch: pytest.MonkeyPatch):
+def test_generate_fluka_input(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     """Test if fluka input is generated correctly"""
     logging.info("Changing working directory to %s", tmp_path)
     monkeypatch.chdir(tmp_path)

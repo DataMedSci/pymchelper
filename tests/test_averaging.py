@@ -22,7 +22,7 @@ def shieldhit_multiple_result_pattern() -> Generator[str, None, None]:
     yield "aen_x_al0*.bdo"
 
 
-def test_averaging(shieldhit_multiple_result_pattern, shieldhit_multiple_result_directory):
+def test_averaging(shieldhit_multiple_result_pattern: str, shieldhit_multiple_result_directory: Path) -> None:
     """Test if averaging of multiple SHIELD-HIT12A result files works"""
     input_file_list = list(shieldhit_multiple_result_directory.glob(shieldhit_multiple_result_pattern))
     assert len(input_file_list) == 3

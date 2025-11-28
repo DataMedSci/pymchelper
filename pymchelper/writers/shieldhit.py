@@ -1,11 +1,15 @@
 import logging
 import os
+from typing import TYPE_CHECKING
 
 import numpy as np
 
 from pymchelper.estimator import Estimator
 from pymchelper.shieldhit.detector.detector_type import SHDetType
 from pymchelper.shieldhit.detector.estimator_type import SHGeoType
+
+if TYPE_CHECKING:
+    from pymchelper.page import Page
 
 logger = logging.getLogger(__name__)
 
@@ -23,24 +27,24 @@ class SHBinaryWriter:
 class TxtWriter:
 
     @staticmethod
-    def _axis_name(geo_type, axis_no):
+    def _axis_name(geo_type: SHGeoType, axis_no: int) -> str:
         cyl = ('R', 'PHI', 'Z')
         msh = ('X', 'Y', 'Z')
         if geo_type in (SHGeoType.cyl, SHGeoType.dcyl):
             return cyl[axis_no]
         return msh[axis_no]
 
-    def __init__(self, filename, options):
+    def __init__(self, filename: str, options: object) -> None:
         if filename.endswith(".txt"):
-            self.filename = filename
+            self.filename: str = filename
         else:
             self.filename = filename + ".txt"
-        self.ax = ''
-        self.ay = ''
-        self.az = ''
+        self.ax: str = ''
+        self.ay: str = ''
+        self.az: str = ''
 
     @staticmethod
-    def _header_first_line(estimator):
+    def _header_first_line(estimator: Estimator) -> str:
         """first line with estimator geo type"""
         result = "#   DETECTOR OUTPUT\n"
         if estimator.geotyp in (
@@ -62,7 +66,7 @@ class TxtWriter:
             result = "#   DETECTOR OUTPUT GEOMAP\n"
         return result
 
-    def _header_geometric_info(self, det):
+    def _header_geometric_info(self, det: Estimator) -> str:
         """next block - scoring object geometrical information"""
 
         from pymchelper.writers.fortranformatter import format_d
@@ -79,7 +83,7 @@ class TxtWriter:
         return result
 
     @staticmethod
-    def _header_scored_value(geotyp, dettyp, particle):
+    def _header_scored_value(geotyp: SHGeoType, dettyp: SHDetType, particle: object) -> str:
         """scored value and optionally particle type"""
         result = ""
         if geotyp != SHGeoType.geomap and particle:
@@ -94,7 +98,7 @@ class TxtWriter:
             result += f"#                DETECTOR TYPE: {str(det_type_name).ljust(10)}\n"
         return result
 
-    def _header_no_of_bins_and_prim(self, estimator):
+    def _header_no_of_bins_and_prim(self, estimator: Estimator) -> str:
         from pymchelper.writers.fortranformatter import format_d
 
         header = ""
@@ -146,7 +150,7 @@ class TxtWriter:
 
         return 0
 
-    def write_single_page(self, page, filename):
+    def write_single_page(self, page: 'Page', filename: str) -> int:
         """TODO"""
         logger.info("Writing: %s", filename)
 

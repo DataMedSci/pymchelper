@@ -1,10 +1,13 @@
 import copy
 from enum import IntEnum
 import logging
-from typing import Optional
+from typing import List, Optional, TYPE_CHECKING
 
 import numpy as np
 from pymchelper.axis import MeshAxis, AxisId
+
+if TYPE_CHECKING:
+    from pymchelper.page import Page
 
 logger = logging.getLogger(__name__)
 
@@ -48,7 +51,7 @@ class Estimator:
     array([0.5])
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         """
         Create dummy estimator object.
         >>> e = Estimator()
@@ -71,7 +74,7 @@ class Estimator:
 
         self.pages = ()  # empty tuple of pages at the beginning
 
-    def add_page(self, page):
+    def add_page(self, page: 'Page') -> None:
         """
         Add a page to the estimator object.
         New copy of page is made and page estimator pointer is set to the estimator object holding this page.
@@ -122,7 +125,8 @@ class Estimator:
         return 3 - (self.x.n, self.y.n, self.z.n).count(1)
 
 
-def average_with_nan(estimator_list, error_estimate=ErrorEstimate.stderr):
+def average_with_nan(estimator_list: List[Estimator],
+                     error_estimate: ErrorEstimate = ErrorEstimate.stderr) -> Optional[Estimator]:
     """
     Calculate average estimator object, excluding malformed data (NaN) from averaging.
     :param estimator_list:

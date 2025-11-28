@@ -29,7 +29,7 @@ class Converters(IntEnum):
     mcpl = 11
 
     @classmethod
-    def _converter_mapping(cls, item):
+    def _converter_mapping(cls, item) -> type:
         return {
             cls.txt: TxtWriter,
             cls.plotdata: PlotDataWriter,
@@ -45,9 +45,9 @@ class Converters(IntEnum):
         }.get(item)
 
     @classmethod
-    def fromname(cls, name):
+    def fromname(cls, name: str) -> type:
         return cls._converter_mapping(Converters[name])
 
     @classmethod
-    def fromnumber(cls, number):
+    def fromnumber(cls, number: int) -> type:
         return cls._converter_mapping[Converters(number)]

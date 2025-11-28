@@ -15,13 +15,13 @@ class JsonWriter:
     JSON format is a format accepted by yaptide project.
     """
 
-    def __init__(self, filename, options):
-        self.filename = filename
-        self.options = options
+    def __init__(self, filename: str, options: object) -> None:
+        self.filename: str = filename
+        self.options: object = options
         if not self.filename.endswith(".json"):
             self.filename += ".json"
 
-    def write(self, estimator: Estimator):
+    def write(self, estimator: Estimator) -> int:
         """Writes estimator object to json file"""
         if len(estimator.pages) == 0:
             print("No pages in the output file, conversion to JSON skipped.")

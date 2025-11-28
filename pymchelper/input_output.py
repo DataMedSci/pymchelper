@@ -5,7 +5,7 @@ import os
 from collections import defaultdict
 from glob import glob
 from pathlib import Path
-from typing import List, Optional
+from typing import Dict, List, Optional, Union
 
 from pymchelper.averaging import (Aggregator, SumAggregator, WeightedStatsAggregator, ConcatenatingAggregator,
                                   NoAggregator)
@@ -40,7 +40,7 @@ class AggregationType(IntEnum):
     Concatenation = 4
 
 
-def guess_reader(filename):
+def guess_reader(filename: str) -> Optional[object]:
     """
     Guess a reader based on file contents or extensions.
     In some cases (i.e. binary SHIELD-HIT12A files) access to file contents is needed.
@@ -62,7 +62,7 @@ def guess_reader(filename):
     return reader
 
 
-def guess_corename(filename):
+def guess_corename(filename: str) -> Optional[str]:
     """
     Guess a reader based on file contents or extensions.
     In some cases (i.e. binary SHIELD-HIT12A files) access to file contents is needed.
@@ -96,7 +96,7 @@ def fromfile(filename: str) -> Optional[Estimator]:
     return estimator
 
 
-def fromfilelist(input_file_list,
+def fromfilelist(input_file_list: Union[List[str], str],
                  error: ErrorEstimate = ErrorEstimate.stderr,
                  nan: bool = False) -> Optional[Estimator]:
     """
@@ -128,7 +128,7 @@ def fromfilelist(input_file_list,
         # fluence) in BDO format as quantities for all particles. pymchelper normalizes this upon reading
         # a BDO file by the number of primaries, making the `estimator` object data pre-normalized. Hence,
         # aggregation for "cumulative-like" and "per-primary" data is handled uniformly in this mapping.
-        _aggregator_mapping: dict[AggregationType, Aggregator] = {
+        _aggregator_mapping: Dict[AggregationType, Aggregator] = {
             AggregationType.NoAggregation: NoAggregator,
             AggregationType.Sum: SumAggregator,
             AggregationType.AveragingCumulative: WeightedStatsAggregator,
@@ -179,7 +179,9 @@ def fromfilelist(input_file_list,
     return result
 
 
-def frompattern(pattern: str, error: ErrorEstimate = ErrorEstimate.stderr, nan: bool = True):
+def frompattern(pattern: str,
+                error: ErrorEstimate = ErrorEstimate.stderr,
+                nan: bool = True) -> List[Optional[Estimator]]:
     """
     Reads all files matching pattern, e.g.: 'foobar_*.bdo', and returns a list of averaged estimators.
 
@@ -215,16 +217,20 @@ def get_topas_estimators(output_files_path: str) -> List[Estimator]:
     return estimators_list
 
 
-def convertfromlist(filelist, error, nan, outputdir, converter_name, options, outputfile=None):
-    """
-    :param filelist:
-    :param error: error estimation, see class ErrorEstimate class in pymchelper.estimator
-    :param nan: if True, NaN (not a number) are excluded when averaging data.
-    :param outputdir:
-    :param converter_name:
-    :param options:
-    :param outputfile:
-    :return:
+def convertfromlist(filelist: List[str],
+                    error: ErrorEstimate,
+                    nan: bool,
+                    outputdir: Optional[str],
+                    converter_name: str,
+                    options: dict,
+                    outputfile: Optional[str] = None) -> Optional[int]:
+    """Convert a list of input files into a single output using a chosen converter.
+
+    - Reads and optionally averages inputs (`nan` controls NaN handling).
+    - Resolves output path (`outputfile` overrides, else uses `outputdir` or corename).
+    - Writes via `converter_name` with `options`.
+
+    Returns status code from the writer, or None if reading failed.
     """
     estimator = fromfilelist(filelist, error, nan)
     if not estimator:
@@ -239,16 +245,18 @@ def convertfromlist(filelist, error, nan, outputdir, converter_name, options, ou
     return status
 
 
-def convertfrompattern(pattern, outputdir, converter_name, options, error=ErrorEstimate.stderr, nan: bool = True):
-    """
+def convertfrompattern(pattern: str,
+                       outputdir: Optional[str],
+                       converter_name: str,
+                       options: dict,
+                       error: ErrorEstimate = ErrorEstimate.stderr,
+                       nan: bool = True) -> int:
+    """Convert all files matching a glob `pattern` using the chosen converter.
 
-    :param pattern:
-    :param outputdir:
-    :param converter_name:
-    :param options:
-    :param error: error estimation, see class ErrorEstimate class in pymchelper.estimator
-    :param nan: if True, NaN (not a number) are excluded when averaging data.
-    :return:
+    - Groups matching files by corename and processes each group via `convertfromlist`.
+    - Supports NaN-aware averaging (`nan`) and error type selection (`error`).
+
+    Returns the maximum status code across processed groups.
     """
     list_of_matching_files = sorted(glob(pattern))
 
@@ -260,7 +268,7 @@ def convertfrompattern(pattern, outputdir, converter_name, options, error=ErrorE
     return max(status)
 
 
-def tofile(estimator, filename, converter_name, options):
+def tofile(estimator: Estimator, filename: str, converter_name: str, options: dict) -> int:
     """
     Save a estimator data to a ``filename`` using converter defined by ``converter_name``
     :param estimator:
@@ -276,7 +284,7 @@ def tofile(estimator, filename, converter_name, options):
     return status
 
 
-def group_input_files(input_file_list):
+def group_input_files(input_file_list: List[str]) -> Dict[Optional[str], List[str]]:
     """
     Takes set of input file names, belonging to possibly different estimators.
     Input files are grouped according to the estimators and for each group

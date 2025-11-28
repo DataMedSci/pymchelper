@@ -1,6 +1,6 @@
 from pathlib import Path
 import re
-from typing import List, Optional, Tuple
+from typing import Dict, List, Optional, Tuple
 
 import numpy as np
 from pymchelper.axis import MeshAxis
@@ -43,7 +43,7 @@ def extract_parameter_filename(header_line: str) -> Optional[str]:
     return parameter_filename
 
 
-def extract_bins_data(dimensions: List[str], header_lines: List[str]) -> Optional[dict]:
+def extract_bins_data(dimensions: List[str], header_lines: List[str]) -> Optional[Dict]:
     """
     Takes as arguments a list of dimensions (e.g. ['X', 'Y', 'Z'])
     and three consecutive lines from the output file header.
@@ -118,9 +118,9 @@ def extract_differential_axis(header_line: str) -> Optional[MeshAxis]:
 class TopasReader(Reader):
     """Reader for Topas output files"""
 
-    def __init__(self, filename):
+    def __init__(self, filename: str) -> None:
         super(TopasReader, self).__init__(filename)
-        self.directory = Path(filename).parent
+        self.directory: Path = Path(filename).parent
 
     # skipcq: PY-R1000
     def read_data(self, estimator: Estimator) -> bool:
