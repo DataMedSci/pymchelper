@@ -77,9 +77,6 @@ We assume you are familiar with GIT source control system.
    Upgrade pip and install the package in editable mode with all dependencies::
 
     pip install --upgrade pip
-
-   ::
-
     pip install -e .[full,test]
 
    On Windows, activate the virtual environment with::
