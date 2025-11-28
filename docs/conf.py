@@ -45,7 +45,7 @@ sys.path.insert(0, project_root)
 extensions = [
     'sphinx.ext.autodoc', 'sphinx.ext.autosummary', 'sphinx.ext.mathjax', 'sphinx.ext.todo', 'sphinx.ext.viewcode',
     'sphinx.ext.inheritance_diagram', 'sphinx.ext.coverage', 'sphinx.ext.graphviz', 'sphinx.ext.napoleon',
-    'sphinx.ext.githubpages'
+    'sphinx.ext.githubpages', 'sphinx_copybutton'
 ]
 
 # Add any paths that contain templates here, relative to this directory.
@@ -56,7 +56,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = 'pymchelper'
-copyright = '2022, Leszek Grzanka'
+copyright = '2025, Leszek Grzanka'
 author = 'Leszek Grzanka'
 
 # The version info for the project you're documenting, acts as replacement for

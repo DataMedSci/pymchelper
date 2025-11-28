@@ -25,6 +25,7 @@ class AggregationType(IntEnum):
     This enum is related to integer value stored in SHIELD-HIT12A binary files,
     which defines how the data is aggregated.
     Below few examples of how such aggregation is used in SHIELD-HIT12A:
+
       - NoAggregation is used for density (RHO) and material scorer.
       - Sum is used for particle counter (COUNT).
       - AveragingCumulative is used for dose and fluence scorers.

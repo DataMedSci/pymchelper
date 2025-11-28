@@ -108,8 +108,7 @@ To generate documentation locally use these commands::
 
 To view the generated documentation in your browser, you can use Python's built-in HTTP server::
 
-    cd docs/_build
-    python -m http.server 8000
+    python -m http.server 8000 --directory docs/_build
 
 Then open http://localhost:8000 in your web browser to view the documentation.
 
