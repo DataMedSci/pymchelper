@@ -217,17 +217,20 @@ def get_topas_estimators(output_files_path: str) -> List[Estimator]:
     return estimators_list
 
 
-def convertfromlist(filelist: List[str], error: ErrorEstimate, nan: bool, outputdir: Optional[str],
-                     converter_name: str, options: dict, outputfile: Optional[str] = None) -> Optional[int]:
-    """
-    :param filelist:
-    :param error: error estimation, see class ErrorEstimate class in pymchelper.estimator
-    :param nan: if True, NaN (not a number) are excluded when averaging data.
-    :param outputdir:
-    :param converter_name:
-    :param options:
-    :param outputfile:
-    :return:
+def convertfromlist(filelist: List[str],
+                    error: ErrorEstimate,
+                    nan: bool,
+                    outputdir: Optional[str],
+                    converter_name: str,
+                    options: dict,
+                    outputfile: Optional[str] = None) -> Optional[int]:
+    """Convert a list of input files into a single output using a chosen converter.
+
+    - Reads and optionally averages inputs (`nan` controls NaN handling).
+    - Resolves output path (`outputfile` overrides, else uses `outputdir` or corename).
+    - Writes via `converter_name` with `options`.
+
+    Returns status code from the writer, or None if reading failed.
     """
     estimator = fromfilelist(filelist, error, nan)
     if not estimator:
@@ -248,15 +251,12 @@ def convertfrompattern(pattern: str,
                        options: dict,
                        error: ErrorEstimate = ErrorEstimate.stderr,
                        nan: bool = True) -> int:
-    """
+    """Convert all files matching a glob `pattern` using the chosen converter.
 
-    :param pattern:
-    :param outputdir:
-    :param converter_name:
-    :param options:
-    :param error: error estimation, see class ErrorEstimate class in pymchelper.estimator
-    :param nan: if True, NaN (not a number) are excluded when averaging data.
-    :return:
+    - Groups matching files by corename and processes each group via `convertfromlist`.
+    - Supports NaN-aware averaging (`nan`) and error type selection (`error`).
+
+    Returns the maximum status code across processed groups.
     """
     list_of_matching_files = sorted(glob(pattern))
 
