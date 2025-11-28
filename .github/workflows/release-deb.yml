@@ -7,6 +7,9 @@ on:
   release:
     types: [published]
 
+permissions:
+  contents: read
+
 jobs:
 
   # build each executable in parallel (Nuitka)
@@ -327,6 +330,8 @@ jobs:
   repo_upload:
       runs-on: ubuntu-latest
       needs: [repo_prepare, test_deb]
+      permissions:
+        contents: write
       steps:
       - name: Checkout repository
         uses: actions/checkout@v6
