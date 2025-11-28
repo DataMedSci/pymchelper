@@ -75,8 +75,3 @@ For **system-wide installation** (command-line tools only, not usable as Python 
 - **Windows users**: Use binary executables (see :doc:`Installation Guide </install>` for details)
 
 For more installation options, see the complete :doc:`Installation Guide </install>`.
-
-License
--------
-
-pymchelper is licensed under `MIT LICENCE`.

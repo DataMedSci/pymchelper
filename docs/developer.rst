@@ -11,8 +11,15 @@ Developer documentation
    technical.rst
    authors.rst
 
+
+License
+-------
+
+pymchelper is licensed under the MIT License.
+
    
 Indices and tables
+------------------
 
 * :ref:`genindex`
 * :ref:`modindex`
