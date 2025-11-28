@@ -71,6 +71,12 @@ dev = [
     "build",
     "twine",
 ]
+docs = [
+    "pymchelper[full]",
+    "sphinx>=7.0",
+    "pydata-sphinx-theme==0.16.0",
+    "sphinx-copybutton",
+]
 
 [project.urls]
 Homepage = "https://github.com/DataMedSci/pymchelper"

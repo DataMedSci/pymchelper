@@ -1,2 +1,0 @@
-pydata-sphinx-theme==0.16.0
--e .[full]
