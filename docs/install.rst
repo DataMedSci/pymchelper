@@ -14,7 +14,6 @@ Quick Installation
 
 For most users, we recommend installing via pip in a virtual environment::
 
-
     pip install "pymchelper[full]"
 
 The ``[full]`` option means that pymchelper is installed with all available converters (image, Excel, HDF, etc.).
