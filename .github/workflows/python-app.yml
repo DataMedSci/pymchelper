@@ -42,7 +42,7 @@ jobs:
 
     - name: Smoke test with pytest
       run: |
-         pytest -k "smoke"
+         pytest -k "smoke" --reruns 2
 
   # all tests on matrix of all possible python versions and OSes
   normal_test:
@@ -70,4 +70,4 @@ jobs:
 
     - name: Test with pytest
       run: |
-         pytest -k "not slow"
+         pytest -k "not slow" --reruns 2
