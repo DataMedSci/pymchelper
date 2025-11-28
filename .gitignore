@@ -335,6 +335,7 @@ sobp*.dat
 # some other files
 dist-nuitka/**
 pymchelper/_version.py
+docs/apidoc/pymchelpe*.rst
 
 tests/res/shieldhit/generated/detect_*.dat
 tests/res/shieldhit/executable/**

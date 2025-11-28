@@ -1,17 +1,22 @@
+from typing import Optional, TYPE_CHECKING
 import numpy as np
+from numpy.typing import NDArray
 
 from pymchelper.axis import MeshAxis, AxisId
 from pymchelper.shieldhit.detector.detector_type import SHDetType
 
+if TYPE_CHECKING:
+    from pymchelper.estimator import Estimator
+
 
 class Page:
 
-    def __init__(self, estimator=None):
+    def __init__(self, estimator: Optional['Estimator'] = None) -> None:
 
-        self.estimator = estimator
+        self.estimator: Optional['Estimator'] = estimator
 
-        self.data_raw = np.array([float("NaN")])  # linear data storage
-        self.error_raw = None  # linear data storage
+        self.data_raw: NDArray[np.floating] = np.array([float("NaN")])  # linear data storage
+        self.error_raw: Optional[NDArray[np.floating]] = None  # linear data storage
 
         self.name: str = ""
         self.unit: str = ""
@@ -34,7 +39,7 @@ class Page:
                                    unit="",
                                    binning=MeshAxis.BinningType.linear)
 
-    def axis(self, axis_id):
+    def axis(self, axis_id: int) -> Optional[MeshAxis]:
         """
         TODO
         """
@@ -71,7 +76,7 @@ class Page:
             return 0
 
     @property
-    def data(self):
+    def data(self) -> NDArray[np.floating]:
         """
         3-D view of page data.
 
@@ -102,7 +107,7 @@ class Page:
         return self.data_raw
 
     @property
-    def error(self):
+    def error(self) -> Optional[NDArray[np.floating]]:
         """
         3-D view of page error
 
@@ -115,7 +120,7 @@ class Page:
                                         self.diff_axis2.n))
         return self.error_raw
 
-    def _reshape(self, data_1d, shape: tuple):
+    def _reshape(self, data_1d: Optional[NDArray[np.floating]], shape: tuple[int, ...]) -> Optional[NDArray[np.floating]]:
         # TODO check also  tests/res/shieldhit/single/ex_yzmsh.bdo as it is saved in bin2010 format
         if data_1d is None:
             return None
@@ -127,7 +132,7 @@ class Page:
         else:
             return data_1d
 
-    def plot_axis(self, id: int):
+    def plot_axis(self, id: int) -> Optional[MeshAxis]:
         """
         Calculate new order of detector axis, axis with data (n>1) comes first
         Axes with constant value goes last.

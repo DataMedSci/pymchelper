@@ -4,6 +4,7 @@ import argparse
 import glob
 import logging
 import sys
+from typing import Optional
 
 from pymchelper.estimator import ErrorEstimate
 from pymchelper.input_output import convertfromlist, convertfrompattern
@@ -13,7 +14,7 @@ from pymchelper.writers.plots import ImageWriter, PlotAxis
 logger = logging.getLogger(__name__)
 
 
-def add_default_options(parser):
+def add_default_options(parser: argparse.ArgumentParser) -> None:
     import pymchelper
     parser.add_argument('input', help='input filename, file list or pattern', type=str)
     parser.add_argument('output', help='output filename or directory', nargs='?')
@@ -34,7 +35,7 @@ def add_default_options(parser):
     parser.add_argument('-V', '--version', action='version', version=pymchelper.__version__)
 
 
-def main(args=None):
+def main(args: Optional[list[str]] = None) -> int:
     if args is None:
         args = sys.argv[1:]
     import os

@@ -40,7 +40,7 @@ class AggregationType(IntEnum):
     Concatenation = 4
 
 
-def guess_reader(filename):
+def guess_reader(filename: str) -> Optional[object]:
     """
     Guess a reader based on file contents or extensions.
     In some cases (i.e. binary SHIELD-HIT12A files) access to file contents is needed.
@@ -62,7 +62,7 @@ def guess_reader(filename):
     return reader
 
 
-def guess_corename(filename):
+def guess_corename(filename: str) -> Optional[str]:
     """
     Guess a reader based on file contents or extensions.
     In some cases (i.e. binary SHIELD-HIT12A files) access to file contents is needed.
@@ -96,7 +96,7 @@ def fromfile(filename: str) -> Optional[Estimator]:
     return estimator
 
 
-def fromfilelist(input_file_list,
+def fromfilelist(input_file_list: list[str] | str,
                  error: ErrorEstimate = ErrorEstimate.stderr,
                  nan: bool = False) -> Optional[Estimator]:
     """
@@ -179,7 +179,7 @@ def fromfilelist(input_file_list,
     return result
 
 
-def frompattern(pattern: str, error: ErrorEstimate = ErrorEstimate.stderr, nan: bool = True):
+def frompattern(pattern: str, error: ErrorEstimate = ErrorEstimate.stderr, nan: bool = True) -> list[Optional[Estimator]]:
     """
     Reads all files matching pattern, e.g.: 'foobar_*.bdo', and returns a list of averaged estimators.
 
@@ -215,7 +215,8 @@ def get_topas_estimators(output_files_path: str) -> List[Estimator]:
     return estimators_list
 
 
-def convertfromlist(filelist, error, nan, outputdir, converter_name, options, outputfile=None):
+def convertfromlist(filelist: list[str], error: ErrorEstimate, nan: bool, outputdir: Optional[str], 
+                     converter_name: str, options: dict, outputfile: Optional[str] = None) -> Optional[int]:
     """
     :param filelist:
     :param error: error estimation, see class ErrorEstimate class in pymchelper.estimator
@@ -239,7 +240,8 @@ def convertfromlist(filelist, error, nan, outputdir, converter_name, options, ou
     return status
 
 
-def convertfrompattern(pattern, outputdir, converter_name, options, error=ErrorEstimate.stderr, nan: bool = True):
+def convertfrompattern(pattern: str, outputdir: Optional[str], converter_name: str, options: dict, 
+                        error: ErrorEstimate = ErrorEstimate.stderr, nan: bool = True) -> int:
     """
 
     :param pattern:
@@ -260,7 +262,7 @@ def convertfrompattern(pattern, outputdir, converter_name, options, error=ErrorE
     return max(status)
 
 
-def tofile(estimator, filename, converter_name, options):
+def tofile(estimator: Estimator, filename: str, converter_name: str, options: dict) -> int:
     """
     Save a estimator data to a ``filename`` using converter defined by ``converter_name``
     :param estimator:
@@ -276,7 +278,7 @@ def tofile(estimator, filename, converter_name, options):
     return status
 
 
-def group_input_files(input_file_list):
+def group_input_files(input_file_list: list[str]) -> dict[Optional[str], list[str]]:
     """
     Takes set of input file names, belonging to possibly different estimators.
     Input files are grouped according to the estimators and for each group

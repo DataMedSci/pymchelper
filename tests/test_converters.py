@@ -7,8 +7,10 @@ import shutil
 import sys
 import tempfile
 import unittest
+from typing import Any
 
 import numpy as np
+from numpy.typing import NDArray
 import pytest
 
 import pymchelper
@@ -21,7 +23,7 @@ logger = logging.getLogger(__name__)
 @pytest.mark.smoke
 class TestTrip2Ddd(unittest.TestCase):
 
-    def test_help(self):
+    def test_help(self) -> None:
         """ Print help text and exit normally.
         """
         try:
@@ -29,7 +31,7 @@ class TestTrip2Ddd(unittest.TestCase):
         except SystemExit as e:
             self.assertEqual(e.code, 0)
 
-    def test_version(self):
+    def test_version(self) -> None:
         """ Print version and exit normally.
         """
         try:
@@ -37,7 +39,7 @@ class TestTrip2Ddd(unittest.TestCase):
         except SystemExit as e:
             self.assertEqual(e.code, 0)
 
-    def test_noarg(self):
+    def test_noarg(self) -> None:
         """ If pymchelper is called without arguments it should fail.
         """
         try:
@@ -46,7 +48,7 @@ class TestTrip2Ddd(unittest.TestCase):
             self.assertEqual(e.code, 2)
 
 
-def unpack_sparse_file(filename):
+def unpack_sparse_file(filename: str) -> NDArray[np.floating]:
     logger.info("Unpacking sparse file %s", filename)
     npzfile = np.load(filename)
     data = npzfile['data']
@@ -67,7 +69,7 @@ class TestSparseConverter(unittest.TestCase):
     main_dir = os.path.join("tests", "res", "shieldhit", "generated")
     single_dir = os.path.join(main_dir, "single")
 
-    def test_shieldhit_files(self):
+    def test_shieldhit_files(self) -> None:
         # skip tests on MacOSX, as there is no suitable bdo2txt converter available yet
         if sys.platform.endswith('arwin'):
             return

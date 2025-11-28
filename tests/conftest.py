@@ -15,7 +15,7 @@ linux_sh12a_demo_url = f'https://shieldhit.org/download/DEMO/shield_hit12a_x86_6
 windows_sh12a_demo_url = f'https://shieldhit.org/download/DEMO/shield_hit12a_win64_demo_v{sh12a_ver}.zip'
 
 
-def extract_shieldhit_from_tar_gz(archive_path: Path, unpacking_dir: Path, member_name: str, installation_dir: Path):
+def extract_shieldhit_from_tar_gz(archive_path: Path, unpacking_dir: Path, member_name: str, installation_dir: Path) -> None:
     """Extracts a single file from a tar.gz archive"""
     with tarfile.open(archive_path, "r:gz") as tar:
         # print all members
@@ -29,7 +29,7 @@ def extract_shieldhit_from_tar_gz(archive_path: Path, unpacking_dir: Path, membe
                 shutil.move(local_file, installation_dir / member_name)
 
 
-def extract_shieldhit_from_zip(archive_path: Path, unpacking_dir: Path, member_name: str, installation_dir: Path):
+def extract_shieldhit_from_zip(archive_path: Path, unpacking_dir: Path, member_name: str, installation_dir: Path) -> None:
     """Extracts a single file from a zip archive"""
     with zipfile.ZipFile(archive_path) as zip_handle:
         # print all members
@@ -47,7 +47,7 @@ def extract_shieldhit_from_zip(archive_path: Path, unpacking_dir: Path, member_n
                     shutil.move(local_file_path, destination_file_path)
 
 
-def download_shieldhit_demo_version(installation_dir):
+def download_shieldhit_demo_version(installation_dir: Path) -> None:
     """Download shieldhit demo version from shieldhit.org"""
     demo_version_url = linux_sh12a_demo_url
     # check if working on Windows
