@@ -4,7 +4,6 @@ import logging
 from typing import Optional, TYPE_CHECKING
 
 import numpy as np
-from numpy.typing import NDArray
 from pymchelper.axis import MeshAxis, AxisId
 
 if TYPE_CHECKING:

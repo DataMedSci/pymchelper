@@ -41,6 +41,6 @@ class Writer:
         return 1
 
     @abstractmethod
-    def write_single_page(self, page: Page, output_path: Path) -> None:
+    def write_single_page(self, page: 'Page', output_path: Path) -> None:
         """Write a single page to a file."""
         raise NotImplementedError

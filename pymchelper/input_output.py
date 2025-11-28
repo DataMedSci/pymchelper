@@ -215,7 +215,7 @@ def get_topas_estimators(output_files_path: str) -> List[Estimator]:
     return estimators_list
 
 
-def convertfromlist(filelist: list[str], error: ErrorEstimate, nan: bool, outputdir: Optional[str], 
+def convertfromlist(filelist: list[str], error: ErrorEstimate, nan: bool, outputdir: Optional[str],
                      converter_name: str, options: dict, outputfile: Optional[str] = None) -> Optional[int]:
     """
     :param filelist:
@@ -240,7 +240,7 @@ def convertfromlist(filelist: list[str], error: ErrorEstimate, nan: bool, output
     return status
 
 
-def convertfrompattern(pattern: str, outputdir: Optional[str], converter_name: str, options: dict, 
+def convertfrompattern(pattern: str, outputdir: Optional[str], converter_name: str, options: dict,
                         error: ErrorEstimate = ErrorEstimate.stderr, nan: bool = True) -> int:
     """
 

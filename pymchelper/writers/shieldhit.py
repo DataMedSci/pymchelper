@@ -150,7 +150,7 @@ class TxtWriter:
 
         return 0
 
-    def write_single_page(self, page: Page, filename: str) -> int:
+    def write_single_page(self, page: 'Page', filename: str) -> int:
         """TODO"""
         logger.info("Writing: %s", filename)
 

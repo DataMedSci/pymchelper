@@ -21,7 +21,7 @@ class SparseWriter:
         self.threshold = options.threshold
         logger.info("Sparse threshold {:g}".format(self.threshold))
 
-    def write(self, estimator: Estimator) -> int:
+    def write(self, estimator: 'Estimator') -> int:
         if len(estimator.pages) > 1:
             print("Conversion of data with multiple pages not supported yet")
             return False

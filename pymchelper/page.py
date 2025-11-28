@@ -120,7 +120,9 @@ class Page:
                                         self.diff_axis2.n))
         return self.error_raw
 
-    def _reshape(self, data_1d: Optional[NDArray[np.floating]], shape: tuple[int, ...]) -> Optional[NDArray[np.floating]]:
+    def _reshape(self, 
+                 data_1d: Optional[NDArray[np.floating]], 
+                 shape: tuple[int, ...]) -> Optional[NDArray[np.floating]]:
         # TODO check also  tests/res/shieldhit/single/ex_yzmsh.bdo as it is saved in bin2010 format
         if data_1d is None:
             return None

@@ -23,7 +23,7 @@ class Reader(object):
     def __init__(self, filename: str) -> None:
         self.filename: str = filename
 
-    def read(self, estimator: Estimator) -> bool:
+    def read(self, estimator: 'Estimator') -> bool:
         result = self.read_data(estimator)
         if not result:
             return False
@@ -32,7 +32,7 @@ class Reader(object):
         return True
 
     @abstractmethod
-    def read_data(self, estimator: Estimator) -> bool:
+    def read_data(self, estimator: 'Estimator') -> bool:
         pass
 
     @property
