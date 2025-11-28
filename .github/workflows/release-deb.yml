@@ -15,8 +15,6 @@ jobs:
   # build each executable in parallel (Nuitka)
   build-mcscripter:
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
     steps:
       - name: Checkout repository with full history
         uses: actions/checkout@v6
@@ -64,8 +62,6 @@ jobs:
 
   build-plan2sobp:
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
     steps:
       - name: Checkout repository with full history
         uses: actions/checkout@v6
@@ -115,8 +111,6 @@ jobs:
 
   build-convertmc:
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
     steps:
       - name: Checkout repository with full history
         uses: actions/checkout@v6
@@ -213,6 +207,8 @@ jobs:
     runs-on: ubuntu-latest
     if: github.event_name == 'release' && github.event.action == 'published'
     needs: [build-mcscripter, build-plan2sobp, build-convertmc, test-executables]
+    permissions:
+      contents: write
 
     steps:
       - uses: actions/download-artifact@v6

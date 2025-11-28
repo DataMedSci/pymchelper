@@ -6,11 +6,25 @@
 Installation Guide
 ==================
 
+Quick Installation
+------------------
+
+For **development or Python library usage**, we recommend using pip with a virtual environment::
+
+    python3 -m venv .venv
+    source .venv/bin/activate  # On Windows: .venv\Scripts\activate
+    pip install "pymchelper[full]"
+
+For **system-wide installation** (command-line tools only, not usable as Python library):
+
+- **Linux users**: Use apt packages (see `Python package (Debian based Linux)`_ section below)
+- **Windows users**: Use binary executables (see documentation for Windows installation)
+
 
 Python package
 --------------
 
-**pymchelper** is available on PyPi, you can install install it using::
+**pymchelper** is available on PyPi, you can install it using::
 
     pip install pymchelper
 
@@ -40,6 +54,22 @@ The files we provide in `deb` packages have no dependency on Python interpreter,
 With binary files there is no chance to use **pymchelper** as a Python library.
 
 **Note:** The Python package (via pip) supports Linux, Windows, and macOS. Deb packages are Linux-only.
+
+Prerequisites
+~~~~~~~~~~~~~
+
+To install packages via apt, you need the following tools:
+
+- ``wget`` - for downloading the GPG key
+- ``gpg`` - for handling cryptographic signatures
+
+These are usually pre-installed on most Debian-based systems. If not, install them with::
+
+   sudo apt update
+   sudo apt install wget gnupg
+
+Adding the Repository
+~~~~~~~~~~~~~~~~~~~~~
 
 We are maintaining our repository on Github Pages service. To add this repository on your system, download our GPG key and add an entry to `sources.list` directory::
 

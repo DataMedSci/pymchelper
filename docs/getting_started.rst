@@ -62,12 +62,18 @@ Among these features are:
 Quick Installation Guide
 ------------------------
 
-Be sure to have Python framework installed, then type::
+For **development or Python library usage**, we recommend using pip with a virtual environment::
 
-    pip install pymchelper
+    python3 -m venv .venv
+    source .venv/bin/activate  # On Windows: .venv\Scripts\activate
+    pip install "pymchelper[full]"
 
-In case you don't have administrator rights, add :bash:`--user` flag to :bash:`pip` command.
-In this situation converter will be probably installed in :bash:`~/.local/bin` directory.
+For **system-wide installation** (command-line tools only, not usable as Python library):
+
+- **Linux users**: Use apt packages (see :doc:`Installation Guide </install>` for details)
+- **Windows users**: Use binary executables (see :doc:`Installation Guide </install>` for details)
+
+For more installation options, see the complete :doc:`Installation Guide </install>`.
 
 License
 -------
