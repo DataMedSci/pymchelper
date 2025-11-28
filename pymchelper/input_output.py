@@ -5,7 +5,7 @@ import os
 from collections import defaultdict
 from glob import glob
 from pathlib import Path
-from typing import List, Optional
+from typing import Dict, List, Optional, Union
 
 from pymchelper.averaging import (Aggregator, SumAggregator, WeightedStatsAggregator, ConcatenatingAggregator,
                                   NoAggregator)
@@ -96,7 +96,7 @@ def fromfile(filename: str) -> Optional[Estimator]:
     return estimator
 
 
-def fromfilelist(input_file_list: list[str] | str,
+def fromfilelist(input_file_list: Union[List[str], str],
                  error: ErrorEstimate = ErrorEstimate.stderr,
                  nan: bool = False) -> Optional[Estimator]:
     """
@@ -128,7 +128,7 @@ def fromfilelist(input_file_list: list[str] | str,
         # fluence) in BDO format as quantities for all particles. pymchelper normalizes this upon reading
         # a BDO file by the number of primaries, making the `estimator` object data pre-normalized. Hence,
         # aggregation for "cumulative-like" and "per-primary" data is handled uniformly in this mapping.
-        _aggregator_mapping: dict[AggregationType, Aggregator] = {
+        _aggregator_mapping: Dict[AggregationType, Aggregator] = {
             AggregationType.NoAggregation: NoAggregator,
             AggregationType.Sum: SumAggregator,
             AggregationType.AveragingCumulative: WeightedStatsAggregator,
@@ -179,7 +179,9 @@ def fromfilelist(input_file_list: list[str] | str,
     return result
 
 
-def frompattern(pattern: str, error: ErrorEstimate = ErrorEstimate.stderr, nan: bool = True) -> list[Optional[Estimator]]:
+def frompattern(pattern: str,
+                error: ErrorEstimate = ErrorEstimate.stderr,
+                nan: bool = True) -> List[Optional[Estimator]]:
     """
     Reads all files matching pattern, e.g.: 'foobar_*.bdo', and returns a list of averaged estimators.
 
@@ -215,7 +217,7 @@ def get_topas_estimators(output_files_path: str) -> List[Estimator]:
     return estimators_list
 
 
-def convertfromlist(filelist: list[str], error: ErrorEstimate, nan: bool, outputdir: Optional[str],
+def convertfromlist(filelist: List[str], error: ErrorEstimate, nan: bool, outputdir: Optional[str],
                      converter_name: str, options: dict, outputfile: Optional[str] = None) -> Optional[int]:
     """
     :param filelist:
@@ -240,8 +242,12 @@ def convertfromlist(filelist: list[str], error: ErrorEstimate, nan: bool, output
     return status
 
 
-def convertfrompattern(pattern: str, outputdir: Optional[str], converter_name: str, options: dict,
-                        error: ErrorEstimate = ErrorEstimate.stderr, nan: bool = True) -> int:
+def convertfrompattern(pattern: str,
+                       outputdir: Optional[str],
+                       converter_name: str,
+                       options: dict,
+                       error: ErrorEstimate = ErrorEstimate.stderr,
+                       nan: bool = True) -> int:
     """
 
     :param pattern:
@@ -278,7 +284,7 @@ def tofile(estimator: Estimator, filename: str, converter_name: str, options: di
     return status
 
 
-def group_input_files(input_file_list: list[str]) -> dict[Optional[str], list[str]]:
+def group_input_files(input_file_list: List[str]) -> Dict[Optional[str], List[str]]:
     """
     Takes set of input file names, belonging to possibly different estimators.
     Input files are grouped according to the estimators and for each group

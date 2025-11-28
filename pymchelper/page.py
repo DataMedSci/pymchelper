@@ -1,4 +1,4 @@
-from typing import Optional, TYPE_CHECKING
+from typing import Optional, Tuple, TYPE_CHECKING
 import numpy as np
 from numpy.typing import NDArray
 
@@ -120,9 +120,9 @@ class Page:
                                         self.diff_axis2.n))
         return self.error_raw
 
-    def _reshape(self, 
-                 data_1d: Optional[NDArray[np.floating]], 
-                 shape: tuple[int, ...]) -> Optional[NDArray[np.floating]]:
+    def _reshape(self,
+                 data_1d: Optional[NDArray[np.floating]],
+                 shape: Tuple[int, ...]) -> Optional[NDArray[np.floating]]:
         # TODO check also  tests/res/shieldhit/single/ex_yzmsh.bdo as it is saved in bin2010 format
         if data_1d is None:
             return None

@@ -1,6 +1,6 @@
 from pathlib import Path
 import re
-from typing import List, Optional, Tuple
+from typing import Dict, List, Optional, Tuple
 
 import numpy as np
 from pymchelper.axis import MeshAxis
@@ -43,7 +43,7 @@ def extract_parameter_filename(header_line: str) -> Optional[str]:
     return parameter_filename
 
 
-def extract_bins_data(dimensions: List[str], header_lines: List[str]) -> Optional[dict]:
+def extract_bins_data(dimensions: List[str], header_lines: List[str]) -> Optional[Dict]:
     """
     Takes as arguments a list of dimensions (e.g. ['X', 'Y', 'Z'])
     and three consecutive lines from the output file header.

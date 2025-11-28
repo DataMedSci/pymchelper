@@ -1,7 +1,7 @@
 import copy
 from enum import IntEnum
 import logging
-from typing import Optional, TYPE_CHECKING
+from typing import List, Optional, TYPE_CHECKING
 
 import numpy as np
 from pymchelper.axis import MeshAxis, AxisId
@@ -125,7 +125,8 @@ class Estimator:
         return 3 - (self.x.n, self.y.n, self.z.n).count(1)
 
 
-def average_with_nan(estimator_list: list[Estimator], error_estimate: ErrorEstimate = ErrorEstimate.stderr) -> Optional[Estimator]:
+def average_with_nan(estimator_list: List[Estimator],
+                     error_estimate: ErrorEstimate = ErrorEstimate.stderr) -> Optional[Estimator]:
     """
     Calculate average estimator object, excluding malformed data (NaN) from averaging.
     :param estimator_list:
