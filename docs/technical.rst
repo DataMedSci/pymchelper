@@ -2,6 +2,31 @@
 Technical documentation
 =======================
 
+Installing from git
+-------------------
+
+To install pymchelper directly from git in a virtual environment on Linux, use the following commands.
+
+Create and activate a virtual environment::
+
+    python3 -m venv .venv
+
+Activate the virtual environment::
+
+    source .venv/bin/activate
+
+Install from the master branch::
+
+    pip install git+https://github.com/DataMedSci/pymchelper.git@master
+
+Install from a specific issue branch (e.g., issue 830)::
+
+    pip install git+https://github.com/DataMedSci/pymchelper.git@830-double-differential-sh12a-yields-convertmc-bug
+
+To install with additional dependencies, use the extras syntax::
+
+    pip install "git+https://github.com/DataMedSci/pymchelper.git@master#egg=pymchelper[full]"
+
 Release management
 ------------------
 
