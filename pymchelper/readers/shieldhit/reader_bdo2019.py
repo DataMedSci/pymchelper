@@ -117,28 +117,32 @@ class SHReaderBDO2019(SHReader):
             # Check if we have differential scoring, i.e. data dimension is larger than 1:
             for page in estimator.pages:
                 try:
+                    try:
+                        first_axis_unit = page.page_diff_units.split(";")[0]
+                    except IndexError:
+                        first_axis_unit = ""
                     page.diff_axis1 = MeshAxis(n=page.page_diff_size[0],
                                                min_val=page.page_diff_start[0],
                                                max_val=page.page_diff_stop[0],
                                                name="",
-                                               unit=page.page_diff_units.split(";")[0],
+                                               unit=first_axis_unit,
                                                binning=MeshAxis.BinningType.linear)
                 except AttributeError:
                     logger.debug("Lack of data for first level differential scoring")
-                except IndexError:
-                    logger.debug("Lack of units for first level differential scoring")
 
                 try:
+                    try:
+                        second_axis_unit = page.page_diff_units.split(";")[1]
+                    except IndexError:
+                        second_axis_unit = ""
                     page.diff_axis2 = MeshAxis(n=page.page_diff_size[1],
                                                min_val=page.page_diff_start[1],
                                                max_val=page.page_diff_stop[1],
                                                name="",
-                                               unit=page.page_diff_units.split(";")[1],
+                                               unit=second_axis_unit,
                                                binning=MeshAxis.BinningType.linear)
                 except AttributeError:
                     logger.debug("Lack of data for second level differential scoring")
-                except IndexError:
-                    logger.debug("Lack of units for second level differential scoring")
 
             # Special treatment for MCPL detector
             for page in estimator.pages:
