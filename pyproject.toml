@@ -93,7 +93,7 @@ plan2sobp = "pymchelper.utils.radiotherapy.plan:main"
 
 [tool.setuptools.packages.find]
 where = ["."]
-exclude = ["tests", "tests.*", "examples", "examples.*", "docs", "docs.*"]
+exclude = ["tests", "tests.*", "examples", "examples.*", "docs", "docs.*", "debian_packages", "debian_packages.*"]
 
 [tool.setuptools.package-data]
 pymchelper = ["flair/db/*"]
@@ -110,9 +110,6 @@ column_limit = 120
 [tool.pytest]
 testpaths = ["tests"]
 addopts = ["-v", "--doctest-modules"]
-
-[tool.wheel]
-universal = false
 
 [tool.nuitka]
 # Nuitka 2.8 configuration for building self-contained onefile executables
