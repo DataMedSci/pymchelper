@@ -111,9 +111,6 @@ column_limit = 120
 testpaths = ["tests"]
 addopts = ["-v", "--doctest-modules"]
 
-[tool.wheel]
-universal = false
-
 [tool.nuitka]
 # Nuitka 2.8 configuration for building self-contained onefile executables
 # Common flags applied via CLI; keep config minimal and portable.
