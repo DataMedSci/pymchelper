@@ -127,7 +127,7 @@ cd docs && make html
 ## Important Notes for Development
 
 ### File Formats and Readers
-- The package reads binary output files from FLUKA (.bdo, .lis) and SHIELD-HIT12A (.bdo)
+- The package reads binary output files from FLUKA (*_fort.* pattern) and SHIELD-HIT12A (.bdo)
 - Each simulator has its own reader in `pymchelper/readers/`
 - Test data files are stored in `tests/res/` with subdirectories for different formats
 
