@@ -70,7 +70,7 @@ pytest -m smoke
 
 **Run tests excluding slow ones:**
 ```bash
-pytest -k "not slow"
+pytest -m "not slow"
 ```
 
 **Check code quality with flake8:**
