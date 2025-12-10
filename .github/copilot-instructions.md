@@ -65,7 +65,7 @@ pytest
 
 **Run only fast tests (smoke tests):**
 ```bash
-pytest -k "smoke"
+pytest -m smoke
 ```
 
 **Run tests excluding slow ones:**
