@@ -53,7 +53,7 @@ jobs:
       - name: Test mcscripter executable
         run: ./dist/mcscripter --version
       - name: Upload mcscripter artifact
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: executables-mcscripter
           path: ./dist/mcscripter
@@ -100,7 +100,7 @@ jobs:
       - name: Test plan2sobp executable
         run: ./dist/plan2sobp --version
       - name: Upload plan2sobp artifact
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: executables-plan2sobp
           path: ./dist/plan2sobp
@@ -152,7 +152,7 @@ jobs:
       - name: Test convertmc executable
         run: ./dist/convertmc --version
       - name: Upload convertmc artifact
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: executables-convertmc
           path: ./dist/convertmc
@@ -260,7 +260,7 @@ jobs:
         run: ./generate_deb_packages.sh convertmc mcscripter plan2sobp
 
       - name: Archive deb package as artifacts
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: deb
           path: 'debian_packages/*.deb'
@@ -316,7 +316,7 @@ jobs:
         run: ./add_packages_to_repo.sh
 
       - name: Archive directory with repository as artifact
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: repo
           path: 'debian_packages/public'
