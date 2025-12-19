@@ -47,18 +47,28 @@ class PlotDataWriter(Writer):
             # each axis may have different number of points, this is what we store here:
             axis_data_columns_1d = [page.plot_axis(i).data for i in axis_numbers]
 
+            # Define ravel_order, F for fortran-style else C-style.
+            ravel_order = 'F' if page.estimator.file_format in {'bdo2016', 'bdo2019', 'fluka_binary'} else 'C'
+
             # now we calculate running index for each axis
+            # And apply ravel order
             axis_data_columns_long = [
-                np.meshgrid(*axis_data_columns_1d, indexing='ij')[i].ravel() for i in axis_numbers
+                np.meshgrid(*axis_data_columns_1d, indexing='ij')[i].ravel(order=ravel_order) for i in axis_numbers
             ]
 
+            # Ravel page data in ordered style
+            vals = page.data.ravel(order=ravel_order)
+
+            # Save the ordered data "vals" instead of the raw linear data from page.data_raw
+            data_to_save = axis_data_columns_long + [vals]
+
             fmt = "%g" + " %g" * page.dimension
-            data_to_save = axis_data_columns_long + [page.data_raw]
 
             # if error information is present save it as additional column
+            # Collect the ordered errors for data_to_save instead of linear data
             if page.error is not None:
                 fmt += " %g"
-                data_to_save += [page.error_raw]
+                data_to_save += [page.error.ravel(order=ravel_order)]
 
             # transpose from rows to columns
             data_columns = np.transpose(data_to_save)
