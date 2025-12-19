@@ -179,10 +179,6 @@ class TxtWriter:
             logger.info("Writing: %s", filename)
             fout.write(header)
 
-            if page.error is None:
-                det_error = [None] * page.data_raw.size
-            else:
-                det_error = page.error_raw.ravel()
             xmesh = page.axis(0)
             ymesh = page.axis(1)
             zmesh = page.axis(2)
@@ -197,7 +193,17 @@ class TxtWriter:
             logger.debug('ylist %s', str(ylist))
             logger.debug('zlist %s', str(zlist))
 
-            for x, y, z, v, e in zip(xlist.ravel(), ylist.ravel(), zlist.ravel(), page.data.ravel(), det_error):
+            # Define ravel_order 'F' for fortran style else C style.
+            ravel_order = 'F' if page.estimator.file_format in {'bdo2016', 'bdo2019', 'fluka_binary'} else 'C'
+            # Apply ravel_orders to lists and det_error.
+            det_error = [None] * page.data.size if page.error is None else page.error.ravel(order=ravel_order)
+            for x, y, z, v, e in zip(
+                xlist.ravel(order=ravel_order),
+                ylist.ravel(order=ravel_order),
+                zlist.ravel(order=ravel_order),
+                page.data.ravel(order=ravel_order),
+                det_error,
+            ):
                 if page.estimator.geotyp in {SHGeoType.zone, SHGeoType.dzone}:
                     x = 0.0
                 # dirty hack to be compliant with old bdo2txt and files generated in old (<0.6) BDO format
