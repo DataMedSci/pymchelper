@@ -195,7 +195,7 @@ class TxtWriter:
 
             # Define ravel_order 'F' for fortran style else C style.
             ravel_order = 'F' if page.estimator.file_format in {'bdo2016', 'bdo2019', 'fluka_binary'} else 'C'
-            # Apply ravel_orders to lists and det_error.
+            # Apply ravel_order to lists and det_error.
             det_error = [None] * page.data.size if page.error is None else page.error.ravel(order=ravel_order)
             for x, y, z, v, e in zip(
                 xlist.ravel(order=ravel_order),

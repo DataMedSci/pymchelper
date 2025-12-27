@@ -47,7 +47,7 @@ class PlotDataWriter(Writer):
             # each axis may have different number of points, this is what we store here:
             axis_data_columns_1d = [page.plot_axis(i).data for i in axis_numbers]
 
-            # Define ravel_order, F for fortran-style else C-style.
+            # Define ravel_order, F for Fortran-style else C-style.
             ravel_order = 'F' if page.estimator.file_format in {'bdo2016', 'bdo2019', 'fluka_binary'} else 'C'
 
             # now we calculate running index for each axis
