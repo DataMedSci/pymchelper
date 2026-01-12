@@ -42,29 +42,26 @@ class PlotDataWriter(Writer):
             else:  # save one number to the file
                 np.savetxt(self.output_path, [page.data_raw], fmt="%g", delimiter=' ')
         else:
+            # Create coordinate meshgrids for all dimensions
             axis_numbers = list(range(page.dimension))
-
-            # each axis may have different number of points, this is what we store here:
-            axis_data_columns_1d = [page.plot_axis(i).data for i in axis_numbers]
-
-            # now we calculate running index for each axis
-            axis_data_columns_long = [
-                np.meshgrid(*axis_data_columns_1d, indexing='ij')[i].ravel() for i in axis_numbers
-            ]
-
-            fmt = "%g" + " %g" * page.dimension
-            data_to_save = axis_data_columns_long + [page.data_raw]
-
-            # if error information is present save it as additional column
+            axis_data_arrays = [page.plot_axis(i).data for i in axis_numbers]
+            
+            # Generate meshgrids for each axis to create coordinate columns
+            coordinate_meshgrids = np.meshgrid(*axis_data_arrays, indexing='ij')
+            
+            # Flatten each coordinate grid to get 1D arrays for output columns
+            coordinate_columns = [mesh_grid.ravel() for mesh_grid in coordinate_meshgrids]
+            
+            # Flatten the data array to match coordinate columns
+            # Build list of columns to save: coordinates + data
+            columns_to_save = coordinate_columns + [page.data.ravel()]
+            
+            # Add error column if error data is available
             if page.error is not None:
-                fmt += " %g"
-                data_to_save += [page.error_raw]
-
-            # transpose from rows to columns
-            data_columns = np.transpose(data_to_save)
-
-            # save space-delimited text file
-            np.savetxt(output_path, data_columns, fmt=fmt, delimiter=' ')
+                columns_to_save.append(page.error.ravel())
+            
+            # Stack columns horizontally and save to file with space-delimited format
+            np.savetxt(output_path, np.column_stack(columns_to_save), delimiter=' ', fmt="%g")
         return
 
 
