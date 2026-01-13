@@ -50,15 +50,15 @@ class PlotDataWriter(Writer):
             coordinate_meshgrids = np.meshgrid(*axis_data_arrays, indexing='ij')
 
             # Flatten each coordinate grid to get 1D arrays for output columns
-            coordinate_columns = [mesh_grid.ravel() for mesh_grid in coordinate_meshgrids]
+            # Use Fortran order to match the way data is stored in page.data_raw and page.error_raw
+            coordinate_columns = [mesh_grid.ravel(order='F') for mesh_grid in coordinate_meshgrids]
 
             # Flatten the data array to match coordinate columns
             # Build list of columns to save: coordinates + data
-            columns_to_save = coordinate_columns + [page.data.ravel()]
-
+            columns_to_save = coordinate_columns + [page.data_raw]
             # Add error column if error data is available
             if page.error is not None:
-                columns_to_save.append(page.error.ravel())
+                columns_to_save.append(page.error_raw)
 
             # Stack columns horizontally and save to file with space-delimited format
             np.savetxt(output_path, np.column_stack(columns_to_save), delimiter=' ', fmt="%g")
