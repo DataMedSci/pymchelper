@@ -176,6 +176,7 @@ class SHReaderBDO2019(SHReader):
                     page.unit += "/prim"
 
         estimator.file_format = 'bdo2019'
+        estimator.data_order = 'F'  # Fortran column-major order
 
         logger.debug("Done reading bdo file.")
         return True

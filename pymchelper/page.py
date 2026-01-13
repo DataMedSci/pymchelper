@@ -120,19 +120,28 @@ class Page:
                                         self.diff_axis2.n))
         return self.error_raw
 
+    @property
+    def data_order(self) -> str:
+        """
+        Return the memory order of the data array.
+
+        Returns 'F' (Fortran/column-major) for formats that store data in Fortran order,
+        'C' (C/row-major) otherwise.
+
+        The order is determined by the reader that parsed the binary file.
+        """
+        if self.estimator:
+            return self.estimator.data_order
+        return 'F'
+
     def _reshape(self,
                  data_1d: Optional[NDArray[np.floating]],
                  shape: Tuple[int, ...]) -> Optional[NDArray[np.floating]]:
-        # TODO check also  tests/res/shieldhit/single/ex_yzmsh.bdo as it is saved in bin2010 format
+        """Reshape 1D data array to the appropriate multi-dimensional shape."""
+        # TODO check also tests/res/shieldhit/single/ex_yzmsh.bdo as it is saved in bin2010 format
         if data_1d is None:
             return None
-        if self.estimator:
-            order = 'C'
-            if self.estimator.file_format in {'bdo2016', 'bdo2019', 'fluka_binary'}:
-                order = 'F'
-            return data_1d.reshape(shape, order=order)
-        else:
-            return data_1d
+        return data_1d.reshape(shape, order=self.data_order)
 
     def plot_axis(self, id: int) -> Optional[MeshAxis]:
         """

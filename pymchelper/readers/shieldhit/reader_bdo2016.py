@@ -221,6 +221,7 @@ class SHReaderBDO2016(SHReader):
                                                                                   estimator.geotyp)
 
             estimator.file_format = 'bdo2016'
+            estimator.data_order = 'F'  # Fortran column-major order
 
             logger.debug("Done reading bdo file.")
             logger.debug("Detector data : " + str(estimator.pages[0].data))

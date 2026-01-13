@@ -202,5 +202,6 @@ class SHReaderBin2010(SHReader):
             logger.debug("Reading payload failed")
             return None
         estimator.file_format = 'bin2010'
+        estimator.data_order = 'C'  # C row-major order
         super(SHReaderBin2010, self).read_data(estimator)
         return True

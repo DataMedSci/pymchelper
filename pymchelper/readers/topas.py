@@ -154,6 +154,7 @@ class TopasReader(Reader):
             estimator.file_corename = Path(self.filename).name[:-4]
             estimator.number_of_primaries = num_histories
             estimator.file_format = "csv"
+            estimator.data_order = 'C'  # TOPAS CSV files use C row-major order
 
             dimensions = [['X', 'Y', 'Z'], ['R', 'Phi', 'Z'], ['R', 'Phi', 'Theta']]
 

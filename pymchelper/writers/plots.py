@@ -49,9 +49,9 @@ class PlotDataWriter(Writer):
             # Generate meshgrids for each axis to create coordinate columns
             coordinate_meshgrids = np.meshgrid(*axis_data_arrays, indexing='ij')
 
-            # Flatten each coordinate grid to get 1D arrays for output columns
-            # Use Fortran order to match the way data is stored in page.data_raw and page.error_raw
-            coordinate_columns = [mesh_grid.ravel(order='F') for mesh_grid in coordinate_meshgrids]
+            # Flatten each coordinate grid using the same order as the data
+            # This ensures coordinates match the data layout from the binary file
+            coordinate_columns = [mesh_grid.ravel(order=page.data_order) for mesh_grid in coordinate_meshgrids]
 
             # Flatten the data array to match coordinate columns
             # Build list of columns to save: coordinates + data
