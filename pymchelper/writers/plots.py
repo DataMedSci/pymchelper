@@ -45,21 +45,21 @@ class PlotDataWriter(Writer):
             # Create coordinate meshgrids for all dimensions
             axis_numbers = list(range(page.dimension))
             axis_data_arrays = [page.plot_axis(i).data for i in axis_numbers]
-            
+
             # Generate meshgrids for each axis to create coordinate columns
             coordinate_meshgrids = np.meshgrid(*axis_data_arrays, indexing='ij')
-            
+
             # Flatten each coordinate grid to get 1D arrays for output columns
             coordinate_columns = [mesh_grid.ravel() for mesh_grid in coordinate_meshgrids]
-            
+
             # Flatten the data array to match coordinate columns
             # Build list of columns to save: coordinates + data
             columns_to_save = coordinate_columns + [page.data.ravel()]
-            
+
             # Add error column if error data is available
             if page.error is not None:
                 columns_to_save.append(page.error.ravel())
-            
+
             # Stack columns horizontally and save to file with space-delimited format
             np.savetxt(output_path, np.column_stack(columns_to_save), delimiter=' ', fmt="%g")
         return
