@@ -138,7 +138,6 @@ class Page:
                  data_1d: Optional[NDArray[np.floating]],
                  shape: Tuple[int, ...]) -> Optional[NDArray[np.floating]]:
         """Reshape 1D data array to the appropriate multi-dimensional shape."""
-        # TODO check also tests/res/shieldhit/single/ex_yzmsh.bdo as it is saved in bin2010 format
         if data_1d is None:
             return None
         return data_1d.reshape(shape, order=self.data_order)
