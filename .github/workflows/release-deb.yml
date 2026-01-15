@@ -34,6 +34,7 @@ jobs:
               "$PYBIN" -m pip install --upgrade pip
               # Prefer binary wheels globally for heavy deps, then install project deps
               PIP_ONLY_BINARY=:all: "$PYBIN" -m pip install --prefer-binary numpy
+              PIP_ONLY_BINARY=:all: "$PYBIN" -m pip install --prefer-binary scipy
               PIP_ONLY_BINARY=:all: "$PYBIN" -m pip install --prefer-binary h5py
               "$PYBIN" -m pip install -e .[full]
               "$PYBIN" -m pip install nuitka==2.8 wheel
@@ -81,6 +82,7 @@ jobs:
               "$PYBIN" -m pip install --upgrade pip
               # Prefer binary wheels globally for heavy deps, then install project deps
               PIP_ONLY_BINARY=:all: "$PYBIN" -m pip install --prefer-binary numpy
+              PIP_ONLY_BINARY=:all: "$PYBIN" -m pip install --prefer-binary scipy
               PIP_ONLY_BINARY=:all: "$PYBIN" -m pip install --prefer-binary h5py
               "$PYBIN" -m pip install -e .[full]
               "$PYBIN" -m pip install nuitka==2.8 wheel
@@ -130,6 +132,7 @@ jobs:
               "$PYBIN" -m pip install --upgrade pip
               # Prefer binary wheels globally for heavy deps, then install project deps
               PIP_ONLY_BINARY=:all: "$PYBIN" -m pip install --prefer-binary numpy
+              PIP_ONLY_BINARY=:all: "$PYBIN" -m pip install --prefer-binary scipy
               PIP_ONLY_BINARY=:all: "$PYBIN" -m pip install --prefer-binary h5py
               "$PYBIN" -m pip install -e .[full]
               "$PYBIN" -m pip install nuitka==2.8 wheel
