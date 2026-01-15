@@ -76,6 +76,7 @@ The executables are built inside a manylinux2014 Docker container to ensure maxi
         "$PYBIN" -m pip install --upgrade pip
         # Prefer binary wheels globally for heavy deps, then install project deps
         PIP_ONLY_BINARY=:all: "$PYBIN" -m pip install --prefer-binary numpy
+        PIP_ONLY_BINARY=:all: "$PYBIN" -m pip install --prefer-binary scipy
         PIP_ONLY_BINARY=:all: "$PYBIN" -m pip install --prefer-binary h5py
         "$PYBIN" -m pip install -e .[full]
         "$PYBIN" -m pip install nuitka==2.8 wheel
