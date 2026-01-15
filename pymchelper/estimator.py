@@ -69,6 +69,7 @@ class Estimator:
         self.file_counter = 0  # number of files read
         self.file_corename = ""  # common core for paths of contributing files
         self.file_format = ""  # binary file format of the input files
+        self.data_order = 'F'  # memory order of data array: 'F' (Fortran/column-major) or 'C' (C/row-major)
         self.error_type = ErrorEstimate.none
         self.geotyp = None  # MSH, CYL, etc...
 
