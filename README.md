@@ -1,6 +1,6 @@
 # pymchelper
 
-Toolkit for working with particle transport codes such as [FLUKA](http://fluka.cern/) and [SHIELD-HIT12A](https://shieldhit.org/). It reads binary outputs and helps you convert, analyze, and visualize results on any platform (Linux, Windows, macOS).
+Toolkit for working with particle transport codes such as [FLUKA](https://fluka.cern/) and [SHIELD-HIT12A](https://shieldhit.org/). It reads binary outputs and helps you convert, analyze, and visualize results on any platform (Linux, Windows, macOS).
 
 ## Key Features
 
