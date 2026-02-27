@@ -176,15 +176,15 @@ jobs:
           # Fedora images temporarily excluded due to exec permission issues
 
     steps:
-      - uses: actions/download-artifact@v7
+      - uses: actions/download-artifact@v8
         with:
           name: executables-mcscripter
           path: ./dist
-      - uses: actions/download-artifact@v7
+      - uses: actions/download-artifact@v8
         with:
           name: executables-plan2sobp
           path: ./dist
-      - uses: actions/download-artifact@v7
+      - uses: actions/download-artifact@v8
         with:
           name: executables-convertmc
           path: ./dist
@@ -212,16 +212,16 @@ jobs:
       contents: write
 
     steps:
-      - uses: actions/download-artifact@v7
+      - uses: actions/download-artifact@v8
         with:
           name: executables-mcscripter
           path: ./dist
-      - uses: actions/download-artifact@v7
+      - uses: actions/download-artifact@v8
         with:
           name: executables-plan2sobp
           path: ./dist
       # runmc artifact intentionally not uploaded
-      - uses: actions/download-artifact@v7
+      - uses: actions/download-artifact@v8
         with:
           name: executables-convertmc
           path: ./dist
@@ -244,16 +244,16 @@ jobs:
       - name: Checkout repository with full history
         uses: actions/checkout@v6
 
-      - uses: actions/download-artifact@v7
+      - uses: actions/download-artifact@v8
         with:
           name: executables-mcscripter
           path: ./dist
-      - uses: actions/download-artifact@v7
+      - uses: actions/download-artifact@v8
         with:
           name: executables-plan2sobp
           path: ./dist
       # runmc artifact intentionally not downloaded
-      - uses: actions/download-artifact@v7
+      - uses: actions/download-artifact@v8
         with:
           name: executables-convertmc
           path: ./dist
@@ -275,7 +275,7 @@ jobs:
       matrix:
         docker-tag: ['debian:12', 'debian:13', 'debian:stable', 'ubuntu:20.04', 'ubuntu:22.04', 'ubuntu:24.04', 'ubuntu:25.04', 'ubuntu:25.10']
     steps:
-      - uses: actions/download-artifact@v7
+      - uses: actions/download-artifact@v8
         with:
           name: deb
           path: ./
@@ -293,7 +293,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v6
 
-      - uses: actions/download-artifact@v7
+      - uses: actions/download-artifact@v8
         with:
           name: deb
           path: debian_packages/
@@ -333,7 +333,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v6
 
-      - uses: actions/download-artifact@v7
+      - uses: actions/download-artifact@v8
         with:
           name: repo
           path: debian_packages/public
