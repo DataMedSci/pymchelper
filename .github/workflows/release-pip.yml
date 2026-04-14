@@ -89,7 +89,7 @@ jobs:
       - run: pip install -e .[docs]
       - run: sphinx-apidoc --output-dir docs/apidoc/ pymchelper
       - run: sphinx-build --jobs auto docs docs/_build
-      - uses: actions/upload-pages-artifact@v4
+      - uses: actions/upload-pages-artifact@v5
         with:
           path: docs/_build
 
