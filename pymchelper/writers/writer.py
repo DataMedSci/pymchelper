@@ -38,7 +38,7 @@ class Writer:
                 # save the output file
                 logger.info("Writing %s", page_output_path)
                 self.write_single_page(page=page, output_path=page_output_path)
-        return 1
+        return 0
 
     @abstractmethod
     def write_single_page(self, page: 'Page', output_path: Path) -> None:

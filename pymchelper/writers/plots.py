@@ -175,6 +175,8 @@ class ImageWriter:
             if fig:
                 logger.info("Writing {}".format(self.plot_filename))
                 fig.savefig(self.plot_filename)
+                import matplotlib.pyplot as plt
+                plt.close(fig)
         else:
             # split output path into directory, basename and extension
             dir_path = os.path.dirname(self.plot_filename)
@@ -212,5 +214,8 @@ class ImageWriter:
                         plt.rcParams['font.sans-serif'] = ["DejaVu Sans Mono"]
                         plt.rcParams['font.family'] = "sans-serif"
                         fig.savefig(output_path)
+                    finally:
+                        import matplotlib.pyplot as plt
+                        plt.close(fig)
 
         return 0
