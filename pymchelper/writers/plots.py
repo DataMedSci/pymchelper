@@ -174,9 +174,11 @@ class ImageWriter:
             fig = self.get_page_figure(estimator.pages[0])
             if fig:
                 logger.info("Writing {}".format(self.plot_filename))
-                fig.savefig(self.plot_filename)
                 import matplotlib.pyplot as plt
-                plt.close(fig)
+                try:
+                    fig.savefig(self.plot_filename)
+                finally:
+                    plt.close(fig)
         else:
             # split output path into directory, basename and extension
             dir_path = os.path.dirname(self.plot_filename)

@@ -66,6 +66,15 @@ def test_convert_single_to_image(shieldhit_single_result_files: Generator[Path, 
         assert is_png_file(expected_file_path)
 
 
+@pytest.mark.smoke
+def test_plotdata_many_returns_zero(shieldhit_single_result_directory: Path, tmp_path: Path,
+                                    monkeypatch: pytest.MonkeyPatch):
+    """Test that plotdata --many exits with status 0 on success (regression for always returning 1)."""
+    monkeypatch.chdir(tmp_path)
+    status = run.main(['plotdata', '--many', f'{shieldhit_single_result_directory}{os.sep}*.bdo'])
+    assert status == 0
+
+
 def test_convert_single_to_excel(shieldhit_single_result_directory: Path, tmp_path: Path,
                                  monkeypatch: pytest.MonkeyPatch):
     """Test if single BDO file is converted to Excel file"""
