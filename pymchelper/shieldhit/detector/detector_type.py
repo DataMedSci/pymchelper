@@ -92,6 +92,7 @@ class SHDetType(IntEnum):
     angle_bdo2016 = 121  # for differential scoring
     dose_gy_bdo2016 = 205
     alanine_gy_bdo2016 = 213
+    dirtydose_gy_bdo2016 = 214  # internal: dirtydose (64) after MeV/g -> Gy conversion
 
     invalid = 32767
 
