@@ -85,9 +85,9 @@ END
 
 
 @pytest.mark.smoke
-@pytest.mark.skipif(sys.platform == "darwin", reason="we don't have SHIELD-HIT12A demo binary for MacOSX")
-def test_shieldhit(example_input_cfg: dict, tmp_path: Path, monkeypatch: pytest.MonkeyPatch, shieldhit_binary_path: Path,
-                   shieldhit_demo_binary_installed):
+@pytest.mark.skip(reason="requires SHIELD-HIT12A demo binary; download removed, see #884")
+def test_shieldhit(example_input_cfg: dict, tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+                   shieldhit_binary_path: Path):
     """Test if single BDO file is converted to Excel file"""
     logging.info("Changing working directory to %s", tmp_path)
     monkeypatch.chdir(tmp_path)
@@ -112,9 +112,8 @@ def test_shieldhit(example_input_cfg: dict, tmp_path: Path, monkeypatch: pytest.
 
 
 @pytest.mark.smoke
-@pytest.mark.skipif(sys.platform == "darwin", reason="we don't have SHIELD-HIT12A demo binary for MacOSX")
-def test_merging(example_input_cfg: dict, tmp_path: Path, monkeypatch: pytest.MonkeyPatch, shieldhit_binary_path: Path,
-                 shieldhit_demo_binary_installed):
+@pytest.mark.skip(reason="requires SHIELD-HIT12A demo binary; download removed, see #884")
+def test_merging(example_input_cfg: dict, tmp_path: Path, monkeypatch: pytest.MonkeyPatch, shieldhit_binary_path: Path):
     """Test if single BDO file is converted to Excel file"""
     logging.info("Changing working directory to %s", tmp_path)
     monkeypatch.chdir(tmp_path)
