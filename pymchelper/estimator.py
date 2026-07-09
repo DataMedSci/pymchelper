@@ -1,7 +1,7 @@
 import copy
 from enum import IntEnum
 import logging
-from typing import List, Optional, TYPE_CHECKING
+from typing import List, Optional, Tuple, TYPE_CHECKING
 
 import numpy as np
 from pymchelper.axis import MeshAxis, AxisId
@@ -73,7 +73,7 @@ class Estimator:
         self.error_type = ErrorEstimate.none
         self.geotyp = None  # MSH, CYL, etc...
 
-        self.pages = ()  # empty tuple of pages at the beginning
+        self.pages: Tuple['Page', ...] = ()  # empty tuple of pages at the beginning
 
     def add_page(self, page: 'Page') -> None:
         """
