@@ -26,6 +26,7 @@ class Writer:
             self.write_single_page(page=estimator.pages[0], output_path=self.output_path)
         else:
             # loop over all pages and save an image for each of them
+            page: 'Page'
             for i, page in enumerate(estimator.pages):
 
                 # calculate output filename. it will include page number padded with zeros.
@@ -38,7 +39,7 @@ class Writer:
                 # save the output file
                 logger.info("Writing %s", page_output_path)
                 self.write_single_page(page=page, output_path=page_output_path)
-        return 1
+        return 0
 
     @abstractmethod
     def write_single_page(self, page: 'Page', output_path: Path) -> None:

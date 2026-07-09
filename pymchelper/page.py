@@ -1,4 +1,4 @@
-from typing import Optional, Tuple, TYPE_CHECKING
+from typing import List, Optional, Tuple, TYPE_CHECKING
 import numpy as np
 from numpy.typing import NDArray
 
@@ -100,10 +100,13 @@ class Page:
         if self.estimator:
             # phase space data needs to be reshaped to a 2D array
             if self.dettyp == SHDetType.mcpl:
-                return self._reshape(data_1d=self.data_raw, shape=(8, -1))
-            return self._reshape(data_1d=self.data_raw,
-                                 shape=(self.estimator.x.n, self.estimator.y.n, self.estimator.z.n, self.diff_axis1.n,
-                                        self.diff_axis2.n))
+                result = self._reshape(data_1d=self.data_raw, shape=(8, -1))
+            else:
+                result = self._reshape(data_1d=self.data_raw,
+                                       shape=(self.estimator.x.n, self.estimator.y.n, self.estimator.z.n,
+                                              self.diff_axis1.n, self.diff_axis2.n))
+            assert result is not None
+            return result
         return self.data_raw
 
     @property
@@ -172,7 +175,7 @@ class Page:
         :param id: axis number (0, 1, 2, 3 or 4)
         :return: axis object
         """
-        plotting_order = (AxisId.x, AxisId.y, AxisId.z, AxisId.diff1, AxisId.diff2)
+        plotting_order: List[AxisId] = [AxisId.x, AxisId.y, AxisId.z, AxisId.diff1, AxisId.diff2]
         variable_axes_id = [i for i in plotting_order if self.axis(i).n > 1]
         constant_axes_id = [i for i in plotting_order if self.axis(i).n == 1]
         plotting_order = variable_axes_id + constant_axes_id

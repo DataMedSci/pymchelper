@@ -37,7 +37,7 @@ class PlotDataWriter(Writer):
         # special case for 0-dim data
         if page.dimension == 0:
             # save two numbers to the file
-            if page.error is not None:
+            if page.error_raw is not None:
                 np.savetxt(self.output_path, [[page.data_raw, page.error_raw]], fmt="%g %g", delimiter=' ')
             else:  # save one number to the file
                 np.savetxt(self.output_path, [page.data_raw], fmt="%g", delimiter=' ')
@@ -57,7 +57,7 @@ class PlotDataWriter(Writer):
             # Build list of columns to save: coordinates + data
             columns_to_save = coordinate_columns + [page.data_raw]
             # Add error column if error data is available
-            if page.error is not None:
+            if page.error_raw is not None:
                 columns_to_save.append(page.error_raw)
 
             # Stack columns horizontally and save to file with space-delimited format
@@ -174,7 +174,11 @@ class ImageWriter:
             fig = self.get_page_figure(estimator.pages[0])
             if fig:
                 logger.info("Writing {}".format(self.plot_filename))
-                fig.savefig(self.plot_filename)
+                import matplotlib.pyplot as plt
+                try:
+                    fig.savefig(self.plot_filename)
+                finally:
+                    plt.close(fig)
         else:
             # split output path into directory, basename and extension
             dir_path = os.path.dirname(self.plot_filename)
@@ -212,5 +216,8 @@ class ImageWriter:
                         plt.rcParams['font.sans-serif'] = ["DejaVu Sans Mono"]
                         plt.rcParams['font.family'] = "sans-serif"
                         fig.savefig(output_path)
+                    finally:
+                        import matplotlib.pyplot as plt
+                        plt.close(fig)
 
         return 0
