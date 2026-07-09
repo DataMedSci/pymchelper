@@ -85,6 +85,9 @@ class SHDetType(IntEnum):
 
     mcpl = 63  # MC particle list, aka. phase space list
 
+    dirtydose = 64  # Dirty dose, from all ions with LET > threshold, including secondaries
+    dirtydosegy = 65  # Same as dirtydose, but in Gy
+
     let_bdo2016 = 120  # for differential scoring
     angle_bdo2016 = 121  # for differential scoring
     dose_gy_bdo2016 = 205
