@@ -21,6 +21,14 @@ class TestSHDetector(unittest.TestCase):
         self.assertEqual(d1, SHDetType.energy)
         self.assertEqual(str(d1), "ENERGY")
 
+        d64 = SHDetType(64)
+        self.assertEqual(d64, SHDetType.dirtydose)
+        self.assertEqual(str(d64), "DIRTYDOSE")
+
+        d65 = SHDetType(65)
+        self.assertEqual(d65, SHDetType.dirtydosegy)
+        self.assertEqual(str(d65), "DIRTYDOSEGY")
+
         try:
             d1 = SHDetType(-1)
         except Exception as e:

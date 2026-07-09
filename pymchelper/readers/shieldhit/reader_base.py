@@ -161,6 +161,9 @@ def _get_detector_unit(detector_type, geotyp):
         SHDetType.medium: ("(dimensionless)", "Medium#"),
         SHDetType.rho: ("g/cm^3", "Density"),
         SHDetType.kinetic_energy: ("MeV", "Kinetic energy"),
+        SHDetType.dirtydose: dose_units,
+        SHDetType.dirtydosegy: dose_gy_units,
+        SHDetType.dirtydose_gy_bdo2016: dose_gy_units,
     }
     return _detector_units.get(detector_type, ("(nil)", "(nil)"))
 
@@ -214,8 +217,10 @@ def _postprocess(estimator: Estimator, nscale: float):
                 page.dettyp = SHDetType.dose_gy_bdo2016
             if page.dettyp == SHDetType.alanine:
                 page.dettyp = SHDetType.alanine_gy_bdo2016
+            if page.dettyp == SHDetType.dirtydose:
+                page.dettyp = SHDetType.dirtydose_gy_bdo2016
             # for the same reason as above we change units
-            if page.dettyp in (SHDetType.dose_gy_bdo2016, SHDetType.alanine_gy_bdo2016):
+            if page.dettyp in (SHDetType.dose_gy_bdo2016, SHDetType.alanine_gy_bdo2016, SHDetType.dirtydose_gy_bdo2016):
                 # 1 megaelectron volt / gram = 1.60217662 x 10-10 Gy
                 MeV_g = np.float64(1.60217662e-10)
                 page.data_raw *= MeV_g
