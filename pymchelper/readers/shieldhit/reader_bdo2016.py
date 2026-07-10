@@ -231,7 +231,7 @@ class SHReaderBDO2016(SHReader):
 
                 pl_id, _pl_type, _pl_len, _pl = token
                 pl = self._decode_payload(_pl_type, _pl, _pl_len)
-                self._log_token(pl_id, _pl_type, _pl_len, _pl)
+                self._log_token(pl_id, _pl_type, _pl_len, pl)
                 self._update_estimator(estimator, pl_id, pl, geometry_data)
 
             if None in {geometry_data['nx'], geometry_data['ny'], geometry_data['nz']}:
