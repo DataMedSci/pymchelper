@@ -29,6 +29,20 @@ class TestSHDetector(unittest.TestCase):
         self.assertEqual(d65, SHDetType.dirtydosegy)
         self.assertEqual(str(d65), "DIRTYDOSEGY")
 
+        d66 = SHDetType(66)
+        self.assertEqual(d66, SHDetType.davge)
+        self.assertEqual(str(d66), "DAVGE")
+
+        d67 = SHDetType(67)
+        self.assertEqual(d67, SHDetType.dbeta)
+        self.assertEqual(str(d67), "DBETA")
+
+        # openshieldhit's TAVGE/TBETA reuse the same BDO detector IDs as the
+        # pre-existing avg_energy/avg_beta (SH12A never had a dose-averaged
+        # counterpart, so those IDs were always track-averaged)
+        self.assertIs(SHDetType.tavge, SHDetType.avg_energy)
+        self.assertIs(SHDetType.tbeta, SHDetType.avg_beta)
+
         try:
             d1 = SHDetType(-1)
         except Exception as e:

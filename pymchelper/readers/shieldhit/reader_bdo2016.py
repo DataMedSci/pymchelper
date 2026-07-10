@@ -5,10 +5,9 @@ import numpy as np
 from pymchelper.axis import MeshAxis
 from pymchelper.page import Page
 from pymchelper.readers.shieldhit.reader_base import SHReader, mesh_unit_and_name, _bintyp, _get_detector_unit, \
-    read_next_token
+    read_next_token, safe_dettyp
 from pymchelper.readers.shieldhit.binary_spec import SHBDOTagID, detector_name_from_bdotag
 from pymchelper.shieldhit.detector.estimator_type import SHGeoType
-from pymchelper.shieldhit.detector.detector_type import SHDetType
 
 logger = logging.getLogger(__name__)
 
@@ -99,7 +98,7 @@ class SHReaderBDO2016(SHReader):
 
                 # read a single detector
                 if SHBDOTagID.det_dtype == pl_id:
-                    estimator.pages[0].dettyp = SHDetType(pl[0])
+                    estimator.pages[0].dettyp = safe_dettyp(pl[0])
 
                 if SHBDOTagID.det_part == pl_id:  # particle to be scored
                     estimator.scored_particle_code = pl[0]
