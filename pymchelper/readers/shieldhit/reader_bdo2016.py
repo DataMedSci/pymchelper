@@ -33,6 +33,8 @@ class SHReaderBDO2016(SHReader):
             if not estimator.pages:
                 estimator.add_page(Page())
 
+            nx = ny = nz = None
+
             while f:
                 token = read_next_token(f)
                 if token is None:
@@ -144,6 +146,10 @@ class SHReaderBDO2016(SHReader):
 
                 if SHBDOTagID.data_block == pl_id:
                     estimator.pages[0].data_raw = np.asarray(pl)
+
+            if None in {nx, ny, nz}:
+                logger.error("Missing det_nbin tag in BDO2016 file")
+                return False
 
             # TODO: would be better to not overwrite x,y,z and make proper case for ZONE scoring later.
             if estimator.geotyp in {SHGeoType.zone, SHGeoType.dzone}:
