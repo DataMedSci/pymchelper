@@ -100,6 +100,25 @@ def mesh_unit_and_name(estimator, axis):
     return unit, name
 
 
+def safe_dettyp(value):
+    """
+    Converts a raw BDO detector-type ID into SHDetType, tolerating unknown IDs.
+
+    A newer MC engine may write detector-type IDs a given pymchelper release
+    doesn't know about yet (e.g. a scorer added after the release). Rather than
+    aborting the whole file read with an uncaught ValueError, log a warning and
+    fall back to SHDetType.invalid for that one page.
+
+    :param value: raw detector-type ID read from the BDO file
+    :return: matching SHDetType member, or SHDetType.invalid if unrecognized
+    """
+    try:
+        return SHDetType(value)
+    except ValueError:
+        logger.warning("Unknown detector type ID %s found in BDO file, treating it as invalid", value)
+        return SHDetType.invalid
+
+
 def _bintyp(n):
     """
     Calculates type of binning based on number of bins.
@@ -144,6 +163,8 @@ def _get_detector_unit(detector_type, geotyp):
         SHDetType.tlet: ("keV/um", "track-averaged LET"),
         SHDetType.avg_energy: ("MeV/nucleon", "Average kinetic energy"),
         SHDetType.avg_beta: ("(dimensionless)", "Average beta"),
+        SHDetType.davge: ("MeV/nucleon", "Dose-averaged kinetic energy"),
+        SHDetType.dbeta: ("(dimensionless)", "Dose-averaged beta"),
         SHDetType.material: ("(nil)", "Material number"),
         SHDetType.alanine: alanine_units,
         SHDetType.alanine_gy_bdo2016: alanine_gy_units,
@@ -152,6 +173,9 @@ def _get_detector_unit(detector_type, geotyp):
         SHDetType.dletg: ("keV/um", "dose-averaged LET"),
         SHDetType.tletg: ("keV/um", "track-averaged LET"),
         SHDetType.q: ("(nil)", "beam quality Q"),
+        SHDetType.q_eff: ("(nil)", "Effective Q_eff"),
+        SHDetType.dq_eff: ("(nil)", "Dose-averaged Q_eff"),
+        SHDetType.tq_eff: ("(nil)", "Track-averaged Q_eff"),
         SHDetType.flu_char: ("cm^-2/primary", "Charged particle fluence"),
         SHDetType.flu_neut: ("cm^-2/primary", "Neutral particle fluence"),
         SHDetType.flu_neqv: ("cm^-2/primary", "1 MeV eqv. neutron fluence"),
@@ -199,7 +223,8 @@ def _postprocess(estimator: Estimator, nscale: float):
     """normalize result if we need that."""
     for page in estimator.pages:
         if page.dettyp not in (SHDetType.dlet, SHDetType.tlet, SHDetType.letflu, SHDetType.dletg, SHDetType.tletg,
-                               SHDetType.avg_energy, SHDetType.avg_beta, SHDetType.material, SHDetType.q):
+                               SHDetType.avg_energy, SHDetType.avg_beta, SHDetType.davge, SHDetType.dbeta,
+                               SHDetType.dq_eff, SHDetType.tq_eff, SHDetType.material, SHDetType.q):
             if estimator.number_of_primaries != 0:  # geotyp = GEOMAP will have 0 projectiles simulated
                 page.data_raw /= np.float64(estimator.number_of_primaries)
 

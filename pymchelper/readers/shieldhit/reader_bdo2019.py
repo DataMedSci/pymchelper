@@ -6,7 +6,7 @@ from pymchelper.axis import MeshAxis
 from pymchelper.page import Page
 from pymchelper.readers.shieldhit.binary_spec import SHBDOTagID, detector_name_from_bdotag, unit_name_from_unit_id, \
     page_tags_to_save
-from pymchelper.readers.shieldhit.reader_base import SHReader, read_next_token, mesh_unit_and_name
+from pymchelper.readers.shieldhit.reader_base import SHReader, read_next_token, mesh_unit_and_name, safe_dettyp
 from pymchelper.shieldhit.detector.detector_type import SHDetType
 from pymchelper.shieldhit.detector.estimator_type import SHGeoType
 
@@ -94,8 +94,9 @@ class SHReaderBDO2019(SHReader):
                 if SHBDOTagID.detector_type == token_id:
                     # here new page is added to the estimator structure
                     estimator.add_page(Page())
-                    logger.debug("Setting page.dettyp = %s (%s)", SHDetType(payload), SHDetType(payload).name)
-                    estimator.pages[-1].dettyp = SHDetType(payload)
+                    dettyp = safe_dettyp(payload)
+                    logger.debug("Setting page.dettyp = %s (%s)", dettyp, dettyp.name)
+                    estimator.pages[-1].dettyp = dettyp
 
                 # page(detector) data is the last thing related to page that is saved in binary file
                 # at this point all other page related tags should already be processed

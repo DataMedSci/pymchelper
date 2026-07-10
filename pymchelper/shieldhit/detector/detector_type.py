@@ -16,8 +16,10 @@ class SHDetType(IntEnum):
     dose = 5
     dlet = 6
     tlet = 7
-    avg_energy = 8
-    avg_beta = 9
+    avg_energy = 8  # aka TAVGE (track-averaged kinetic energy) in openshieldhit
+    tavge = 8  # alias of avg_energy, openshieldhit's name for the same BDO detector ID
+    avg_beta = 9  # aka TBETA (track-averaged beta = v/c) in openshieldhit
+    tbeta = 9  # alias of avg_beta, openshieldhit's name for the same BDO detector ID
 
     spc = 10
     material = 11
@@ -87,6 +89,9 @@ class SHDetType(IntEnum):
 
     dirtydose = 64  # Dirty dose, from all ions with LET > threshold, including secondaries
     dirtydosegy = 65  # Same as dirtydose, but in Gy
+
+    davge = 66  # Dose-averaged kinetic energy (DAVGE), openshieldhit only, no SH12A counterpart
+    dbeta = 67  # Dose-averaged beta = v/c (DBETA), openshieldhit only, no SH12A counterpart
 
     let_bdo2016 = 120  # for differential scoring
     angle_bdo2016 = 121  # for differential scoring
