@@ -20,6 +20,7 @@ class SHReaderBDO2016(SHReader):
 
     @staticmethod
     def _decode_payload(payload_type, raw_payload, payload_len):
+        """Decode a raw BDO token payload into Python values."""
         payload = [None] * payload_len
 
         if 'S' in payload_type.decode('ASCII'):
@@ -32,6 +33,7 @@ class SHReaderBDO2016(SHReader):
 
     @staticmethod
     def _log_token(token_id, payload_type, payload_len, raw_payload):
+        """Log a decoded token when its tag is recognized, otherwise note that it is skipped."""
         try:
             token_name = SHBDOTagID(token_id).name
             logger.debug("Read token {:s} (0x{:02x}) value {} type {:s} length {:d}".format(
@@ -51,6 +53,7 @@ class SHReaderBDO2016(SHReader):
 
     @staticmethod
     def _update_differential_scoring(estimator, token_id, payload):
+        """Populate differential-scoring metadata for differential detector geometries."""
         diff_geotypes = {SHGeoType.dplane, SHGeoType.dmsh, SHGeoType.dcyl, SHGeoType.dzone}
         if not hasattr(estimator, 'geotyp') or estimator.geotyp not in diff_geotypes:
             return
@@ -69,6 +72,7 @@ class SHReaderBDO2016(SHReader):
 
     @staticmethod
     def _update_run_metadata(estimator, token_id, payload):
+        """Apply file-level and run-level metadata tokens to the estimator."""
         if SHBDOTagID.shversion == token_id:
             estimator.mc_code_version = payload[0]
             logger.debug("MC code version:" + estimator.mc_code_version)
@@ -99,6 +103,7 @@ class SHReaderBDO2016(SHReader):
 
     @staticmethod
     def _update_page_metadata(estimator, token_id, payload):
+        """Apply page-specific detector metadata and raw score data."""
         if SHBDOTagID.det_dtype == token_id:
             estimator.pages[0].dettyp = safe_dettyp(payload[0])
 
@@ -114,6 +119,7 @@ class SHReaderBDO2016(SHReader):
 
     @staticmethod
     def _update_geometry_data(estimator, token_id, payload, geometry_data):
+        """Collect geometry tokens needed to build mesh axes after parsing completes."""
         if SHBDOTagID.det_nbin == token_id:
             geometry_data['nx'] = payload[0]
             geometry_data['ny'] = payload[1]
@@ -134,6 +140,7 @@ class SHReaderBDO2016(SHReader):
 
     @staticmethod
     def _update_estimator(estimator, token_id, payload, geometry_data):
+        """Dispatch a decoded token to the relevant estimator update helpers."""
         SHReaderBDO2016._update_run_metadata(estimator, token_id, payload)
         SHReaderBDO2016._update_page_metadata(estimator, token_id, payload)
         SHReaderBDO2016._update_geometry_data(estimator, token_id, payload, geometry_data)
@@ -141,6 +148,7 @@ class SHReaderBDO2016(SHReader):
 
     @staticmethod
     def _prepare_geometry(estimator, geometry_data):
+        """Finalize axis bounds and differential-axis expansion from collected geometry metadata."""
         nx = geometry_data['nx']
         ny = geometry_data['ny']
         nz = geometry_data['nz']
