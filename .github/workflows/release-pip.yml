@@ -30,7 +30,6 @@ jobs:
       - run: python -m pip install --upgrade pip
       - run: pip install -e .[full,test]
       - run: pytest -k "slow"
-      - run: cd docs/images_generation && ./run.sh
 
   build:
     runs-on: ubuntu-latest
