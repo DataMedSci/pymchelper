@@ -55,7 +55,7 @@ full = [
     "bashplotlib",
 ]
 test = [
-    "pytest==8.4.2",
+    "pytest==9.0.3",
     "pytest-rerunfailures",
     "flake8==7.3.0",
     "sphinx>=7.0",
