@@ -7,7 +7,7 @@ name = "pymchelper"
 dynamic = ["version"]
 description = "Python toolkit for SHIELD-HIT12A and FLUKA"
 readme = "README.md"
-requires-python = ">=3.9"
+requires-python = ">=3.10"
 license = {text = "MIT"}
 authors = [
     {name = "pymchelper team", email = "leszek.grzanka@gmail.com"}
@@ -25,7 +25,6 @@ classifiers = [
     "Operating System :: MacOS",
     "License :: OSI Approved :: MIT License",
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
@@ -55,15 +54,14 @@ full = [
     "bashplotlib",
 ]
 test = [
-    "pytest==8.4.2",
+    "pytest==9.0.3",
     "pytest-rerunfailures",
     "flake8==7.3.0",
     "sphinx>=7.0",
     "mcpl==1.6.2",
     "yapf==0.43.0",
     "scipy",
-    "pre-commit==3.7.1 ; python_version < '3.10'",
-    "pre-commit==4.5.0 ; python_version >= '3.10'",
+    "pre-commit==4.5.0",
 ]
 dev = [
     "pymchelper[full,test]",
