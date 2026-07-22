@@ -11,7 +11,7 @@
 - Command-line tools: `convertmc`, `runmc`, `mcscripter`, `plan2sobp`
 
 ### Technology Stack
-- **Language**: Python 3.9-3.14
+- **Language**: Python 3.10-3.14
 - **Build System**: setuptools with setuptools-scm for versioning
 - **Key Dependencies**: numpy (core), matplotlib (imaging), h5py (HDF5), pydicom (DICOM), xlwt (Excel)
 - **Testing**: pytest with pytest-rerunfailures
@@ -144,7 +144,7 @@ cd docs && make html
 
 ### Platform Support
 - Must work on Linux, macOS, and Windows
-- CI tests on all three platforms with Python 3.9-3.14
+- CI tests on all three platforms with Python 3.10-3.14
 - Be mindful of path separators and platform-specific issues
 
 ### Dependencies Management
@@ -156,7 +156,7 @@ cd docs && make html
 ## CI/CD and Automation
 
 ### GitHub Actions
-- Tests run automatically on Python 3.9, 3.10, 3.11, 3.12, 3.13, 3.14
+- Tests run automatically on Python 3.10, 3.11, 3.12, 3.13, 3.14
 - Tests run on Linux, macOS, and Windows
 - Flake8 syntax checks run automatically
 - All checks must pass before merging

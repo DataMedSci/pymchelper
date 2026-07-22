@@ -121,7 +121,7 @@ We assume you are familiar with GIT source control system.
 
 11. Submit a pull request through the GitHub website to the ``master`` branch.
 
-12. GitHub Actions will automatically run tests on multiple Python versions (3.9-3.14) and platforms (Linux, macOS, Windows). Check the status and fix any failures by pushing additional commits to your branch.
+12. GitHub Actions will automatically run tests on multiple Python versions (3.10-3.14) and platforms (Linux, macOS, Windows). Check the status and fix any failures by pushing additional commits to your branch.
 
 
 Pull Request Guidelines
@@ -139,7 +139,7 @@ Before you submit a pull request, check that it meets these guidelines:
 
 3. **Pass CI checks**: Ensure all automated tests pass on:
    
-   - All supported Python versions (3.9, 3.10, 3.11, 3.12, 3.13, 3.14)
+   - All supported Python versions (3.10, 3.11, 3.12, 3.13, 3.14)
    - All platforms (Linux, macOS, Windows)
    - Flake8 syntax checks
 
