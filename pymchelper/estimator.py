@@ -5,6 +5,7 @@ from typing import List, Optional, Tuple, TYPE_CHECKING
 
 import numpy as np
 from pymchelper.axis import MeshAxis, AxisId
+from pymchelper.shieldhit.detector.estimator_type import SHGeoType
 
 if TYPE_CHECKING:
     from pymchelper.page import Page
@@ -71,7 +72,7 @@ class Estimator:
         self.file_format = ""  # binary file format of the input files
         self.data_order = 'F'  # memory order of data array: 'F' (Fortran/column-major) or 'C' (C/row-major)
         self.error_type = ErrorEstimate.none
-        self.geotyp = None  # MSH, CYL, etc...
+        self.geotyp: Optional[SHGeoType] = None  # MSH, CYL, etc...
 
         self.pages: Tuple['Page', ...] = ()  # empty tuple of pages at the beginning
 

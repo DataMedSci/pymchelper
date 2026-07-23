@@ -1,4 +1,5 @@
 from enum import IntEnum
+from typing import Dict
 
 
 class SHBDOTagID(IntEnum):
@@ -184,7 +185,9 @@ page_tags_to_save = (
 )
 
 # replace this dictionary with tuple estimator_tags_to_save
-detector_name_from_bdotag = {
+# keyed by the raw integer tag id (rather than SHBDOTagID) since callers look values up
+# using tag ids decoded straight from the BDO file, which may include unrecognized values
+detector_name_from_bdotag: Dict[int, str] = {
     SHBDOTagID.jpart0: 'projectile_code',
     SHBDOTagID.apro0: 'projectile_a',
     SHBDOTagID.zpro0: 'projectile_z',
