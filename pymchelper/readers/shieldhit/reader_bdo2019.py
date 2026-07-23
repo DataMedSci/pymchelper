@@ -1,8 +1,11 @@
 import logging
+from typing import List, Optional, Tuple, Union
 
 import numpy as np
+from numpy.typing import NDArray
 
 from pymchelper.axis import MeshAxis
+from pymchelper.estimator import Estimator
 from pymchelper.page import Page
 from pymchelper.readers.shieldhit.binary_spec import SHBDOTagID, detector_name_from_bdotag, unit_name_from_unit_id, \
     page_tags_to_save
@@ -12,14 +15,25 @@ from pymchelper.shieldhit.detector.estimator_type import SHGeoType
 
 logger = logging.getLogger(__name__)
 
+# A single (tag_id, numpy_dtype_string, payload_length, raw_payload) tuple as returned by
+# `read_next_token`. `raw_payload` is always a numpy array at this point (of length `payload_length`),
+# even for scalar or string tokens - it is `_decode_payload` that unwraps/decodes it into something
+# more convenient to work with.
+BDOToken = Tuple[int, np.generic, int, NDArray]
+
+# What a token payload turns into after decoding: a plain scalar, a decoded ASCII string,
+# a list (for multi-element string tokens), or a numpy array (for multi-element numeric tokens).
+BDOPayload = Union[str, float, int, List[str], NDArray]
+
 
 class SHReaderBDO2019(SHReader):
     """Experimental binary format reader version >= 0.7"""
 
-    def read_data(self, estimator, nscale=1):
+    def read_data(self, estimator: Estimator, nscale: float = 1.) -> bool:
         logger.debug("Reading: %s", self.filename)
 
         with open(self.filename, "rb") as f:
+            # fixed-size file header: magic bytes, endianness marker and a free-form version string
             d1 = np.dtype([('magic', 'S6'), ('end', 'S2'), ('vstr', 'S16')])
 
             _x = np.fromfile(f, dtype=d1, count=1)  # read the data into numpy
@@ -27,12 +41,17 @@ class SHReaderBDO2019(SHReader):
             logger.debug("Endiannes: " + _x['end'][0].decode('ASCII'))
             logger.debug("VerStr: " + _x['vstr'][0].decode('ASCII'))
 
+            # the rest of the file is a flat stream of (tag, type, length, payload) tokens;
+            # each token either updates estimator-level metadata, starts a new page (detector_type
+            # token) or fills in fields of the page currently being built
             while f:
                 token = read_next_token(f)
                 if token is None:
                     break
                 _process_token(estimator, token)
 
+            # once all tokens have been consumed, derive fields that depend on more than one
+            # token (differential axes, axis names, per-page normalisation, ...)
             _finalize_estimator(estimator)
 
         estimator.file_format = 'bdo2019'
@@ -42,11 +61,16 @@ class SHReaderBDO2019(SHReader):
         return True
 
 
-def _decode_payload(token):
-    """Decode a raw token into its final Python/numpy payload representation."""
+def _decode_payload(token: BDOToken) -> BDOPayload:
+    """
+    Decode a raw token into its final Python/numpy payload representation.
+
+    :param token: raw (tag_id, dtype, length, raw_payload) tuple, as returned by `read_next_token`
+    :return: decoded payload: a scalar, decoded ASCII string, list of strings, or numpy array
+    """
     token_id, token_type, payload_len, raw_payload = token
 
-    payload = [None] * payload_len
+    payload: List[Optional[str]] = [None] * payload_len
 
     # decode all strings (currently there will never be more than one per token)
     if 'S' in token_type.decode('ASCII'):
@@ -56,6 +80,8 @@ def _decode_payload(token):
     else:
         payload = raw_payload
 
+    # unwrap single-element payloads (the vast majority of tokens) to a plain scalar/string,
+    # so callers don't need to special-case `payload[0]` everywhere
     if payload_len == 1:
         payload = payload[0]
 
@@ -64,14 +90,22 @@ def _decode_payload(token):
         logger.debug("Read token {:s} (0x{:02x}) value {} type {:s} length {:d}".format(
             token_name, token_id, raw_payload, token_type.decode('ASCII'), payload_len))
     except ValueError:
+        # a newer MC engine may write tags a given pymchelper release doesn't know about yet;
+        # skip logging its name but still return the decoded payload so the caller can decide
+        # (via page_tags_to_save / detector_name_from_bdotag) whether to keep it
         logger.info("Found unknown token (0x{:02x}) value {} type {:s} length {:d}, skipping".format(
             token_id, raw_payload, token_type.decode('ASCII'), payload_len))
 
     return payload
 
 
-def _process_token(estimator, token):
-    """Apply a single decoded BDO token to the estimator (and its current page) being built."""
+def _process_token(estimator: Estimator, token: BDOToken) -> None:
+    """
+    Apply a single decoded BDO token to the estimator (and its current page) being built.
+
+    :param estimator: estimator under construction; mutated in place
+    :param token: raw token as returned by `read_next_token`
+    """
     token_id = token[0]
     payload = _decode_payload(token)
 
@@ -133,7 +167,7 @@ def _process_token(estimator, token):
         setattr(estimator.pages[-1], SHBDOTagID(token_id).name, payload)
 
 
-def _diff_axis_binning(diff_flag, index):
+def _diff_axis_binning(diff_flag: Optional[NDArray], index: int) -> MeshAxis.BinningType:
     """
     Determine the binning type of a differential axis from the raw page_diff_flag tag.
 
@@ -156,8 +190,17 @@ def _diff_axis_binning(diff_flag, index):
     return MeshAxis.BinningType.logarithmic if flags[index] < 0 else MeshAxis.BinningType.linear
 
 
-def _set_diff_axes(page):
-    """Populate page.diff_axis1 and page.diff_axis2, if differential scoring data is present."""
+def _set_diff_axes(page: Page) -> None:
+    """
+    Populate page.diff_axis1 and page.diff_axis2, if differential scoring data is present.
+
+    The required page_diff_* attributes are only set on the page (via `page_tags_to_save`)
+    when the corresponding BDO tags were actually written, which only happens for pages with
+    differential scoring; hence the AttributeError guards below are the expected, normal path
+    for the (much more common) non-differential pages.
+
+    :param page: page under construction; mutated in place
+    """
     diff_flag = getattr(page, 'page_diff_flag', None)
 
     try:
@@ -189,8 +232,12 @@ def _set_diff_axes(page):
         logger.debug("Lack of data for second level differential scoring")
 
 
-def _finalize_estimator(estimator):
-    """Post-process an estimator once all BDO tokens have been read."""
+def _finalize_estimator(estimator: Estimator) -> None:
+    """
+    Post-process an estimator once all BDO tokens have been read.
+
+    :param estimator: fully-populated estimator; mutated in place
+    """
     # Check if we have differential scoring, i.e. data dimension is larger than 1:
     for page in estimator.pages:
         _set_diff_axes(page)
