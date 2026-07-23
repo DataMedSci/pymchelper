@@ -1,0 +1,22 @@
+Geometry Cyl
+    Name ScoringCyl
+    R  0.0  10.0    1
+    Z  0.0  30.0    1
+
+Output
+    Filename fluence_2d_log.bdo
+    Geo ScoringCyl
+    Quantity Fluence
+    Diff1  0.01  100.0  10  log
+    Diff1Type E
+    Diff2  0.01  3.14  5  log
+    Diff2Type ANGLE
+
+Output
+    Filename fluence_2d_lin.bdo
+    Geo ScoringCyl
+    Quantity Fluence
+    Diff1  0.01  100.0  10  lin
+    Diff1Type E
+    Diff2  0.0  3.14  5  lin
+    Diff2Type ANGLE
