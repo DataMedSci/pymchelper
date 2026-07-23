@@ -1,5 +1,5 @@
 import logging
-from typing import List, Optional, Tuple, Union
+from typing import Any, Optional, Tuple
 
 import numpy as np
 from numpy.typing import NDArray
@@ -21,9 +21,12 @@ logger = logging.getLogger(__name__)
 # more convenient to work with.
 BDOToken = Tuple[int, np.generic, int, NDArray]
 
-# What a token payload turns into after decoding: a plain scalar, a decoded ASCII string,
-# a list (for multi-element string tokens), or a numpy array (for multi-element numeric tokens).
-BDOPayload = Union[str, float, int, List[str], NDArray]
+# What a token payload turns into after decoding: depending on the tag, this can be a plain
+# scalar, a decoded ASCII string, a list (for multi-element string tokens), or a numpy array
+# (for multi-element numeric tokens). Which one it is depends entirely on which SHBDOTagID the
+# token carries, so it is left as `Any` rather than a static Union: the token-dispatch functions
+# below decide, per tag, how to interpret/index it, in a way a type checker can't verify statically.
+BDOPayload = Any
 
 
 class SHReaderBDO2019(SHReader):
@@ -70,7 +73,10 @@ def _decode_payload(token: BDOToken) -> BDOPayload:
     """
     token_id, token_type, payload_len, raw_payload = token
 
-    payload: List[Optional[str]] = [None] * payload_len
+    # `payload` starts out as a list of placeholders for a string token, but is unconditionally
+    # replaced (with the numpy array, then possibly a scalar) below, so it holds several
+    # different, mutually-incompatible types over its lifetime here - see the BDOPayload comment.
+    payload: BDOPayload = [None] * payload_len
 
     # decode all strings (currently there will never be more than one per token)
     if 'S' in token_type.decode('ASCII'):
@@ -200,9 +206,9 @@ def _diff_axis_binning(diff_flag: Optional[NDArray], index: int) -> MeshAxis.Bin
     if flags[index] < 0:
         # negative flag value means log10 binning was requested for this axis
         return MeshAxis.BinningType.logarithmic
-    else:
-        # positive (or zero) flag value means linear binning
-        return MeshAxis.BinningType.linear
+
+    # positive (or zero) flag value means linear binning
+    return MeshAxis.BinningType.linear
 
 
 def _set_diff_axes(page: Page) -> None:
