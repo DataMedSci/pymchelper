@@ -1,0 +1,18 @@
+Geometry Cyl
+    Name ScoringCyl
+    R  0.0  10.0    1
+    Z  0.0  30.0    1
+
+Output
+    Filename fluence_elog.bdo
+    Geo ScoringCyl
+    Quantity Fluence
+    Diff1  0.01  100.0  10  log
+    Diff1Type E
+
+Output
+    Filename fluence_elin.bdo
+    Geo ScoringCyl
+    Quantity Fluence
+    Diff1  0.01  100.0  10  lin
+    Diff1Type E

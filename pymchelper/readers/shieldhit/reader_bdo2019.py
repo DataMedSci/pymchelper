@@ -117,17 +117,24 @@ class SHReaderBDO2019(SHReader):
             # Loop over the file is over here
             # Check if we have differential scoring, i.e. data dimension is larger than 1:
             for page in estimator.pages:
+                # page_diff_flag holds, for each differential axis, 1 if binning is linear
+                # and -1 if binning is logarithmic (i.e. log10 was requested in detect.dat)
+                diff_flag = getattr(page, 'page_diff_flag', None)
+
                 try:
                     try:
                         first_axis_unit = page.page_diff_units.split(";")[0]
                     except IndexError:
                         first_axis_unit = ""
+                    first_axis_binning = MeshAxis.BinningType.linear
+                    if diff_flag is not None and diff_flag[0] < 0:
+                        first_axis_binning = MeshAxis.BinningType.logarithmic
                     page.diff_axis1 = MeshAxis(n=page.page_diff_size[0],
                                                min_val=page.page_diff_start[0],
                                                max_val=page.page_diff_stop[0],
                                                name="",
                                                unit=first_axis_unit,
-                                               binning=MeshAxis.BinningType.linear)
+                                               binning=first_axis_binning)
                 except AttributeError:
                     logger.debug("Lack of data for first level differential scoring")
 
@@ -136,12 +143,15 @@ class SHReaderBDO2019(SHReader):
                         second_axis_unit = page.page_diff_units.split(";")[1]
                     except IndexError:
                         second_axis_unit = ""
+                    second_axis_binning = MeshAxis.BinningType.linear
+                    if diff_flag is not None and diff_flag[1] < 0:
+                        second_axis_binning = MeshAxis.BinningType.logarithmic
                     page.diff_axis2 = MeshAxis(n=page.page_diff_size[1],
                                                min_val=page.page_diff_start[1],
                                                max_val=page.page_diff_stop[1],
                                                name="",
                                                unit=second_axis_unit,
-                                               binning=MeshAxis.BinningType.linear)
+                                               binning=second_axis_binning)
                 except AttributeError:
                     logger.debug("Lack of data for second level differential scoring")
 
