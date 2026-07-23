@@ -187,7 +187,12 @@ def _diff_axis_binning(diff_flag: Optional[NDArray], index: int) -> MeshAxis.Bin
     if index >= flags.size:
         return MeshAxis.BinningType.linear
 
-    return MeshAxis.BinningType.logarithmic if flags[index] < 0 else MeshAxis.BinningType.linear
+    if flags[index] < 0:
+        # negative flag value means log10 binning was requested for this axis
+        return MeshAxis.BinningType.logarithmic
+    else:
+        # positive (or zero) flag value means linear binning
+        return MeshAxis.BinningType.linear
 
 
 def _set_diff_axes(page: Page) -> None:
