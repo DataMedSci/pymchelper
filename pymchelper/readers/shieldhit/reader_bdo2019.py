@@ -192,6 +192,8 @@ def _diff_axis_binning(diff_flag: Optional[NDArray], index: int) -> MeshAxis.Bin
     else:
         flags = [diff_flag]
 
+    # index 1 (the second differential axis) is out of range when only one flag was
+    # written (e.g. a page with just Diff1, no Diff2); default to linear in that case
     if index >= len(flags):
         return MeshAxis.BinningType.linear
 
