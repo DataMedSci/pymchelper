@@ -7,10 +7,12 @@ linear because the reader ignored the ``page_diff_flag`` tag written by SHIELD-H
 
 from pathlib import Path
 
+import numpy as np
 import pytest
 
 from pymchelper.axis import MeshAxis
 from pymchelper.input_output import fromfile
+from pymchelper.readers.shieldhit.reader_bdo2019 import _diff_axis_binning
 
 res_dir = Path("tests") / "res" / "shieldhit" / "diff_scoring"
 
@@ -63,3 +65,30 @@ def test_2d_lin_diff_axes_are_detected_as_linear():
     assert page.diff_axis2.n == 5
     assert page.diff_axis2.min_val == pytest.approx(0.0)
     assert page.diff_axis2.max_val == pytest.approx(3.14)
+
+
+@pytest.mark.smoke
+def test_diff_axis_binning_missing_flag_defaults_to_linear():
+    """No page_diff_flag tag at all (e.g. an old BDO file) should default to linear."""
+    assert _diff_axis_binning(None, 0) == MeshAxis.BinningType.linear
+
+
+@pytest.mark.smoke
+def test_diff_axis_binning_handles_scalar_flag():
+    """A single differential axis may be stored as a bare scalar rather than an array."""
+    assert _diff_axis_binning(np.int32(-1), 0) == MeshAxis.BinningType.logarithmic
+    assert _diff_axis_binning(np.int32(1), 0) == MeshAxis.BinningType.linear
+
+
+@pytest.mark.smoke
+def test_diff_axis_binning_out_of_range_index_defaults_to_linear():
+    """Asking for the second axis when only one flag was written should default to linear."""
+    assert _diff_axis_binning(np.array([-1]), 1) == MeshAxis.BinningType.linear
+
+
+@pytest.mark.smoke
+def test_diff_axis_binning_reads_correct_element_of_two_element_array():
+    """Each axis picks its own element out of a 2-element page_diff_flag array."""
+    flags = np.array([-1, 1])
+    assert _diff_axis_binning(flags, 0) == MeshAxis.BinningType.logarithmic
+    assert _diff_axis_binning(flags, 1) == MeshAxis.BinningType.linear

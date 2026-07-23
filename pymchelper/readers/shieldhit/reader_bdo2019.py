@@ -183,8 +183,16 @@ def _diff_axis_binning(diff_flag: Optional[NDArray], index: int) -> MeshAxis.Bin
     if diff_flag is None:
         return MeshAxis.BinningType.linear
 
-    flags = np.atleast_1d(diff_flag)
-    if index >= flags.size:
+    # _decode_payload() unwraps a single-element payload into a plain numpy scalar, so
+    # page_diff_flag is a bare number (not indexable) when there is only one differential
+    # axis, and a numpy array when there are two. Wrap the single-axis case in a list so
+    # both cases can be indexed the same way below.
+    if isinstance(diff_flag, np.ndarray):
+        flags = diff_flag
+    else:
+        flags = [diff_flag]
+
+    if index >= len(flags):
         return MeshAxis.BinningType.linear
 
     if flags[index] < 0:
