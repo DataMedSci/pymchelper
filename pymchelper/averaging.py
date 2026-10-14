@@ -124,7 +124,8 @@ class WeightedStatsAggregator(Aggregator):
         # mu_n = (1 - w_n / W_n) * mu_{n-1} + (w_n / W_n) * x_n
         # or in other words:
         # mu_n - mu_{n-1} = (w_n / W_n) * (x_n - mu_{n-1})
-        self.data += (weight / self.total_weight) * (value - mean_old)
+        # rebind, not +=: for arrays an in-place update would overwrite mean_old, which S needs below
+        self.data = mean_old + (weight / self.total_weight) * (value - mean_old)
 
         self._accumulator_S += weight * (value - self.data) * (value - mean_old)
 
