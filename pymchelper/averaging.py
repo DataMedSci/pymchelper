@@ -35,7 +35,7 @@ from dataclasses import dataclass, field
 import logging
 from typing import Union, Optional
 import numpy as np
-from numpy.typing import ArrayLike
+from numpy.typing import ArrayLike, NDArray
 
 
 @dataclass
@@ -96,9 +96,9 @@ class WeightedStatsAggregator(Aggregator):
     [5] https://en.wikipedia.org/wiki/Algorithms_for_calculating_variance#Weighted_incremental_algorithm
     """
 
-    data: Union[float, ArrayLike] = float('nan')
+    data: Union[float, NDArray[np.float64]] = float('nan')
 
-    _accumulator_S: Union[float, ArrayLike] = field(default=float('nan'), repr=False, init=False)
+    _accumulator_S: Union[float, NDArray[np.float64]] = field(default=float('nan'), repr=False, init=False)
     _total_weight_squared: float = field(default=0., repr=False, init=False)
     total_weight: float = 0
 
@@ -111,23 +111,27 @@ class WeightedStatsAggregator(Aggregator):
         if weight < 0:
             raise ValueError("Weight must be non-negative")
 
-        # first pass initialization
+        # first pass initialization, accumulate in float64 whatever the input dtype
         if not self.updated:
-            self.data = value * 0
-            self._accumulator_S = value * 0
+            self.data = np.zeros(np.shape(value)) if np.ndim(value) else 0.0
+            self._accumulator_S = np.zeros(np.shape(value)) if np.ndim(value) else 0.0
+        elif weight == 0:
+            return  # contributes nothing, and the S factor below divides by the weight
 
         # W_n = W_{n-1} + w_n
         self.total_weight += weight
         self._total_weight_squared += weight**2
 
-        mean_old = self.data
-        # mu_n = (1 - w_n / W_n) * mu_{n-1} + (w_n / W_n) * x_n
-        # or in other words:
-        # mu_n - mu_{n-1} = (w_n / W_n) * (x_n - mu_{n-1})
-        # rebind, not +=: for arrays an in-place update would overwrite mean_old, which S needs below
-        self.data = mean_old + (weight / self.total_weight) * (value - mean_old)
-
-        self._accumulator_S += weight * (value - self.data) * (value - mean_old)
+        # West's update, with d = x_n - mu_{n-1}:
+        # mu_n = mu_{n-1} + (w_n / W_n) * d
+        # S_n = S_{n-1} + w_n * (1 - w_n / W_n) * d^2, every term >= 0, so S never cancels or goes negative
+        # all in place on a single temporary array, scalars rebind instead
+        delta = np.subtract(value, self.data, dtype=np.float64)
+        delta *= weight / self.total_weight
+        self.data += delta
+        delta *= delta
+        delta *= self.total_weight * (self.total_weight - weight) / weight
+        self._accumulator_S += delta
 
         self._updated = True
         logging.debug("Updated aggregator with value %s and weight %s", value, weight)

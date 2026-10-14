@@ -152,3 +152,28 @@ def test_variance_with_array_updates() -> None:
         assert ws.mean[i] == pytest.approx(np.average(pages[:, i], weights=weights))
         assert ws.variance_population[i] == pytest.approx(expected_population)
         assert ws.variance_sample[i] == pytest.approx(expected_sample)
+
+
+def test_float32_arrays_with_large_offset() -> None:
+    """Accumulates in float64 and keeps the variance accurate when mean / sd is large"""
+    rng = np.random.default_rng(0)
+    pages = (1e6 + rng.standard_normal((100, 5))).astype(np.float32)
+    ws = WeightedStatsAggregator()
+
+    for page in pages:
+        ws.update(page)
+
+    reference = pages.astype(np.float64)
+    assert np.asarray(ws.mean).dtype == np.float64
+    np.testing.assert_allclose(ws.mean, reference.mean(axis=0), rtol=1e-12)
+    np.testing.assert_allclose(ws.variance_sample, reference.var(axis=0, ddof=1), rtol=1e-9)
+
+
+def test_zero_weight_after_first_update() -> None:
+    """A zero-weight update after the first one changes nothing"""
+    ws = WeightedStatsAggregator()
+    ws.update(np.array([1.0, 2.0]), 2)
+    ws.update(np.array([5.0, 9.0]), 0)
+
+    np.testing.assert_array_equal(ws.mean, [1.0, 2.0])
+    assert ws.total_weight == 2
