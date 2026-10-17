@@ -74,8 +74,10 @@ def test_update_with_flattened_array() -> None:
     assert pytest.approx(ws.mean, 0.001) == expected_mean
 
 
-def compute_expected_variance(values: NDArray[np.floating], weights: NDArray[np.floating], 
-                              total_weight: float, is_sample: bool = False) -> float:
+def compute_expected_variance(values: NDArray[np.floating],
+                              weights: NDArray[np.floating],
+                              total_weight: float,
+                              is_sample: bool = False) -> float:
     """Utility function to compute the expected variance."""
     weighted_mean = np.average(values, weights=weights)
     variance = np.sum(weights * (values - weighted_mean)**2)
@@ -133,3 +135,45 @@ def test_variance_with_1d_array() -> None:
 
     expected_variance_sample = compute_expected_variance(values, weights, total_weight, is_sample=True)
     assert pytest.approx(ws.variance_sample, 0.001) == expected_variance_sample
+
+
+def test_variance_with_array_updates() -> None:
+    """Each update is a whole array, as when aggregating pages of several files"""
+    ws = WeightedStatsAggregator()
+    pages = np.array([[0.0, 1.0, 10.0], [2.0, 4.0, 10.0], [7.0, 2.0, 40.0], [3.0, 8.0, 20.0]])
+    weights = np.array([1.0, 1.0, 1.0, 3.0])
+
+    for page, weight in zip(pages, weights):
+        ws.update(page, weight)
+
+    for i in range(pages.shape[1]):
+        expected_population = compute_expected_variance(pages[:, i], weights, weights.sum())
+        expected_sample = compute_expected_variance(pages[:, i], weights, weights.sum(), is_sample=True)
+        assert ws.mean[i] == pytest.approx(np.average(pages[:, i], weights=weights))
+        assert ws.variance_population[i] == pytest.approx(expected_population)
+        assert ws.variance_sample[i] == pytest.approx(expected_sample)
+
+
+def test_float32_arrays_with_large_offset() -> None:
+    """Accumulates in float64 and keeps the variance accurate when mean / sd is large"""
+    rng = np.random.default_rng(0)
+    pages = (1e6 + rng.standard_normal((100, 5))).astype(np.float32)
+    ws = WeightedStatsAggregator()
+
+    for page in pages:
+        ws.update(page)
+
+    reference = pages.astype(np.float64)
+    assert np.asarray(ws.mean).dtype == np.float64
+    np.testing.assert_allclose(ws.mean, reference.mean(axis=0), rtol=1e-12)
+    np.testing.assert_allclose(ws.variance_sample, reference.var(axis=0, ddof=1), rtol=1e-9)
+
+
+def test_zero_weight_after_first_update() -> None:
+    """A zero-weight update after the first one changes nothing"""
+    ws = WeightedStatsAggregator()
+    ws.update(np.array([1.0, 2.0]), 2)
+    ws.update(np.array([5.0, 9.0]), 0)
+
+    np.testing.assert_array_equal(ws.mean, [1.0, 2.0])
+    assert ws.total_weight == 2
