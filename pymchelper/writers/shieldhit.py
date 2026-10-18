@@ -168,12 +168,15 @@ class TxtWriter(Writer):
             ylist = np.full_like(ylist, (page.estimator.sy + page.estimator.ny) / 2.0)
             zlist = np.full_like(zlist, (page.estimator.sz + page.estimator.nz) / 2.0)
 
-        columns = [[_format_e_fast(14, 7, v) for v in col.tolist()] for col in (xlist, ylist, zlist)]
-        columns.append([_format_e_fast(23, 16, v) for v in page.data.ravel(order='F').tolist()])
+        columns = [(14, 7, xlist), (14, 7, ylist), (14, 7, zlist), (23, 16, page.data.ravel(order='F'))]
         if page.error is not None:
-            columns.append([_format_e_fast(23, 16, v) for v in page.error.ravel(order='F').tolist()])
+            columns.append((23, 16, page.error.ravel(order='F')))
 
         logger.info("Writing: %s", output_path)
         with open(output_path, 'w') as fout:  # skipcq: PTC-W6004
             fout.write(header)
-            fout.writelines(" ".join(row) + "\n" for row in zip(*columns))
+            chunk = 8192  # formatted rows held in memory at once
+            for start in range(0, xlist.size, chunk):
+                formatted = [[_format_e_fast(w, d, v) for v in col[start:start + chunk].tolist()]
+                             for w, d, col in columns]
+                fout.writelines(" ".join(row) + "\n" for row in zip(*formatted))
