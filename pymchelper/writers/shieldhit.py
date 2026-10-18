@@ -1,5 +1,6 @@
 import logging
-import os
+import math
+from pathlib import Path
 from typing import TYPE_CHECKING
 
 import numpy as np
@@ -7,6 +8,8 @@ import numpy as np
 from pymchelper.estimator import Estimator
 from pymchelper.shieldhit.detector.detector_type import SHDetType
 from pymchelper.shieldhit.detector.estimator_type import SHGeoType
+from pymchelper.writers.fortranformatter import format_e
+from pymchelper.writers.writer import Writer
 
 if TYPE_CHECKING:
     from pymchelper.page import Page
@@ -24,7 +27,19 @@ class SHBinaryWriter:
         pass
 
 
-class TxtWriter:
+def _format_e_fast(w: int, d: int, val: float) -> str:
+    """Same output as format_e(w, d, val), skipping its digit-by-digit composition for the common cases."""
+    if val == 0.0:
+        return f"0.{'0' * d}E+00".rjust(w)
+    if math.isfinite(val):
+        s = f"{abs(val):.{d - 1}e}"  # d.ddddddde+xx, correctly rounded as in format_e
+        ex = int(s[d + 2:]) + 1
+        if -99 <= ex <= 99:
+            return f"{'-' if val < 0 else ''}0.{s[0]}{s[2:d + 1]}E{ex:+03d}".rjust(w)
+    return format_e(w, d, val)
+
+
+class TxtWriter(Writer):
 
     @staticmethod
     def _axis_name(geo_type: SHGeoType, axis_no: int) -> str:
@@ -35,10 +50,7 @@ class TxtWriter:
         return msh[axis_no]
 
     def __init__(self, filename: str, options: object) -> None:
-        if filename.endswith(".txt"):
-            self.filename: str = filename
-        else:
-            self.filename = filename + ".txt"
+        super().__init__(filename if filename.endswith(".txt") else filename + ".txt")
         self.ax: str = ''
         self.ay: str = ''
         self.az: str = ''
@@ -116,46 +128,16 @@ class TxtWriter:
 
         return header
 
-    def write(self, estimator: Estimator):
+    def write(self, estimator: Estimator) -> int:
         """TODO"""
         if estimator.file_format not in {'bdo2016', 'bdo2019'}:
             logger.error("Unsupported file format: %s", estimator.file_format)
             logger.error("This converter is designed for SHIELD-HIT12A output files only.")
             logger.error("Please use convertmc plotdata converter instead to generate text files.")
+        return super().write(estimator)
 
-        # save to single page to a file without number (i.e. output.dat)
-        if len(estimator.pages) == 1:
-            self.write_single_page(estimator.pages[0], self.filename)
-        else:
-            # split output path into directory, basename and extension
-            dir_path = os.path.dirname(self.filename)
-            if not os.path.exists(dir_path):
-                logger.info("Creating: %s", dir_path)
-                os.makedirs(dir_path)
-            file_base_part, file_ext = os.path.splitext(os.path.basename(self.filename))
-
-            # loop over all pages and save an image for each of them
-            for i, page in enumerate(estimator.pages):
-
-                # calculate output filename. it will include page number padded with zeros.
-                # for 10-99 pages the filename would look like: output_p01.png, ... output_p99.png
-                # for 100-999 pages the filename would look like: output_p001.png, ... output_p999.png
-                zero_padded_page_no = str(i + 1).zfill(len(str(len(estimator.pages))))
-                output_filename = f"{file_base_part}_p{zero_padded_page_no}{file_ext}"
-                output_path = os.path.join(dir_path, output_filename)
-
-                # save the output file
-                logger.info("Writing: %s", output_path)
-                self.write_single_page(page, output_path)
-
-        return 0
-
-    def write_single_page(self, page: 'Page', filename: str) -> int:
+    def write_single_page(self, page: 'Page', output_path: Path) -> None:
         """TODO"""
-        logger.info("Writing: %s", filename)
-
-        from pymchelper.writers.fortranformatter import format_e
-
         self.ax = self._axis_name(page.estimator.geotyp, 0)
         self.ay = self._axis_name(page.estimator.geotyp, 1)
         self.az = self._axis_name(page.estimator.geotyp, 2)
@@ -174,52 +156,24 @@ class TxtWriter:
 
             header += self._header_no_of_bins_and_prim(page.estimator)
 
-        # dump data
-        with open(filename, 'w') as fout:  # skipcq: PTC-W6004
-            logger.info("Writing: %s", filename)
+        # rows walk the bins with x fastest, page.data is indexed (x, y, z, diff1, diff2)
+        zlist, ylist, xlist = np.meshgrid(page.axis(2).data, page.axis(1).data, page.axis(0).data, indexing='ij')
+        xlist, ylist, zlist = xlist.ravel(), ylist.ravel(), zlist.ravel()
+        if page.estimator.geotyp in {SHGeoType.zone, SHGeoType.dzone}:
+            xlist = np.zeros_like(xlist)
+        # dirty hack to be compliant with old bdo2txt and files generated in old (<0.6) BDO format
+        # this hack will be removed at some point together with bdo-style converter
+        elif not hasattr(page.estimator, "mc_code_version") and page.estimator.geotyp == SHGeoType.plane:
+            xlist = np.full_like(xlist, (page.estimator.sx + page.estimator.nx) / 2.0)
+            ylist = np.full_like(ylist, (page.estimator.sy + page.estimator.ny) / 2.0)
+            zlist = np.full_like(zlist, (page.estimator.sz + page.estimator.nz) / 2.0)
+
+        columns = [[_format_e_fast(14, 7, v) for v in col.tolist()] for col in (xlist, ylist, zlist)]
+        columns.append([_format_e_fast(23, 16, v) for v in page.data.ravel(order='F').tolist()])
+        if page.error is not None:
+            columns.append([_format_e_fast(23, 16, v) for v in page.error.ravel(order='F').tolist()])
+
+        logger.info("Writing: %s", output_path)
+        with open(output_path, 'w') as fout:  # skipcq: PTC-W6004
             fout.write(header)
-
-            if page.error is None:
-                det_error = [None] * page.data_raw.size
-            else:
-                det_error = page.error_raw.ravel()
-            xmesh = page.axis(0)
-            ymesh = page.axis(1)
-            zmesh = page.axis(2)
-
-            logger.debug('xmesh %s', str(xmesh))
-            logger.debug('ymesh %s', str(ymesh))
-            logger.debug('zmesh %s', str(zmesh))
-
-            zlist, ylist, xlist = np.meshgrid(zmesh.data, ymesh.data, xmesh.data, indexing='ij')
-
-            logger.debug('xlist %s', str(xlist))
-            logger.debug('ylist %s', str(ylist))
-            logger.debug('zlist %s', str(zlist))
-
-            for x, y, z, v, e in zip(xlist.ravel(), ylist.ravel(), zlist.ravel(), page.data.ravel(), det_error):
-                if page.estimator.geotyp in {SHGeoType.zone, SHGeoType.dzone}:
-                    x = 0.0
-                # dirty hack to be compliant with old bdo2txt and files generated in old (<0.6) BDO format
-                # this hack will be removed at some point together with bdo-style converter
-                elif not hasattr(page.estimator, "mc_code_version") and page.estimator.geotyp == SHGeoType.plane:
-                    x = (page.estimator.sx + page.estimator.nx) / 2.0
-                    y = (page.estimator.sy + page.estimator.ny) / 2.0
-                    z = (page.estimator.sz + page.estimator.nz) / 2.0
-                else:
-                    x = float('nan') if np.isnan(x) else x
-                y = float('nan') if np.isnan(y) else y
-                z = float('nan') if np.isnan(z) else z
-                v = float('nan') if np.isnan(v) else v
-                tmp = format_e(14, 7, x) + " " + format_e(14, 7, y) + " " + \
-                    format_e(14, 7, z) + " " + format_e(23, 16, v)
-
-                if e is not None:
-                    e = float('nan') if np.isnan(e) else e
-                    tmp += " " + format_e(23, 16, e)
-
-                tmp += "\n"
-
-                fout.write(tmp)
-
-        return 0
+            fout.writelines(" ".join(row) + "\n" for row in zip(*columns))
