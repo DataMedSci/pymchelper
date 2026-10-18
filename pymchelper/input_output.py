@@ -14,6 +14,7 @@ from pymchelper.readers.topas import TopasReaderFactory
 from pymchelper.readers.fluka import FlukaReader, FlukaReaderFactory
 from pymchelper.readers.shieldhit.general import SHReaderFactory
 from pymchelper.readers.shieldhit.reader_base import SHReader
+from pymchelper.shieldhit.detector.detector_type import SHDetType
 from pymchelper.writers.common import Converters
 
 logger = logging.getLogger(__name__)
@@ -75,7 +76,7 @@ def guess_corename(filename: str) -> Optional[str]:
     return corename
 
 
-def fromfile(filename: str) -> Optional[Estimator]:
+def fromfile(filename: str) -> Estimator:
     """
     Read estimator data from a binary file `filename`
     Note that for the in some cases the data are post-processes (i.e. normalized) after reading.
@@ -91,8 +92,15 @@ def fromfile(filename: str) -> Optional[Estimator]:
     estimator = Estimator()
     estimator.file_counter = 1
     if not reader.read(estimator):  # some problems occurred during read
-        logger.error("Error reading file %s", filename)
-        estimator = None
+        raise ValueError(f"Error reading file {filename}")
+    if not estimator.pages:
+        raise ValueError(f"{filename}: no pages, the file is truncated or corrupted")
+    for page in estimator.pages:
+        expected = 8 * (page.data_raw.size // 8) if page.dettyp == SHDetType.mcpl else \
+            estimator.x.n * estimator.y.n * estimator.z.n * page.diff_axis1.n * page.diff_axis2.n
+        if page.data_raw.size != expected:
+            raise ValueError(f"{filename}: page {page.name} holds {page.data_raw.size} values instead of {expected}, "
+                             "the file is truncated or corrupted")
     return estimator
 
 

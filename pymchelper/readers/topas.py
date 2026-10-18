@@ -13,9 +13,12 @@ class TopasReaderFactory(ReaderFactory):
     """Factory for TopasReader"""
 
     def get_reader(self):
-        """Return TopasReader if the file extension is .csv"""
-        if self.filename.endswith('.csv'):
-            return TopasReader
+        """Return TopasReader for .csv files written by TOPAS"""
+        if not str(self.filename).endswith('.csv'):
+            return None
+        with open(self.filename, 'rb') as f:
+            if f.read(7) == b'# TOPAS':
+                return TopasReader
         return None
 
 

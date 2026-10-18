@@ -131,6 +131,7 @@ def main(args: Optional[list[str]] = None) -> int:
         files = sorted(glob.glob(parsed_args.input))
         if not files:
             logger.error('File %s does not exist: ', parsed_args.input)
+            return 1
 
         # check if output should be interpreted as a filename
         if not parsed_args.many and len(files) == 1:

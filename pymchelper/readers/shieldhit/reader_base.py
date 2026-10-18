@@ -204,19 +204,25 @@ def read_next_token(f):
     """
     tag = np.dtype([('pl_id', '<u8'), ('pl_type', 'S8'), ('pl_len', '<u8')])
 
-    x1 = np.fromfile(f, dtype=tag, count=1)  # read the data into numpy
-
-    if x1.size == 0:
+    raw_tag = f.read(tag.itemsize)
+    if not raw_tag:
         return None
-    else:
-        pl_id = x1['pl_id'][0]
-        pl_type = x1['pl_type'][0]
-        pl_len = x1['pl_len'][0]
-        try:
-            pl = np.fromfile(f, dtype=pl_type, count=pl_len)  # read the data into numpy
-            return pl_id, pl_type, pl_len, pl
-        except TypeError:
-            return None
+    if len(raw_tag) < tag.itemsize:
+        raise ValueError(f"{f.name}: file ends inside a token header, it is truncated")
+    x1 = np.frombuffer(raw_tag, dtype=tag)
+    pl_id = x1['pl_id'][0]
+    pl_type = x1['pl_type'][0]
+    pl_len = x1['pl_len'][0]
+    try:
+        pl_dtype = np.dtype(pl_type)
+    except TypeError:
+        return None
+    pl = np.empty(int(pl_len), dtype=pl_dtype)
+    n_read = f.readinto(pl)
+    if n_read != pl.nbytes:
+        raise ValueError(f"{f.name}: file ends inside token 0x{pl_id:02x} ({n_read // pl_dtype.itemsize} of {pl_len} "
+                         "values), it is truncated")
+    return pl_id, pl_type, pl_len, pl
 
 
 def _postprocess(estimator: Estimator, nscale: float):
