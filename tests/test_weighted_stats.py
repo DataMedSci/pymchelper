@@ -177,3 +177,17 @@ def test_zero_weight_after_first_update() -> None:
 
     np.testing.assert_array_equal(ws.mean, [1.0, 2.0])
     assert ws.total_weight == 2
+
+
+@pytest.mark.parametrize("weight", [np.int32(50_000), np.int64(10_000_000)])
+def test_numpy_integer_weights(weight: np.integer) -> None:
+    """Readers return primaries as numpy ints, the weight products must not overflow"""
+    rng = np.random.default_rng(1)
+    pages = rng.normal(5.0, 1.0, size=(400, 4))
+    ws = WeightedStatsAggregator()
+
+    for page in pages:
+        ws.update(page, weight)
+
+    np.testing.assert_allclose(ws.mean, pages.mean(axis=0), rtol=1e-12)
+    np.testing.assert_allclose(ws.variance_sample, pages.var(axis=0, ddof=1), rtol=1e-9)

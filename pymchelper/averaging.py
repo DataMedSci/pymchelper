@@ -110,6 +110,7 @@ class WeightedStatsAggregator(Aggregator):
         """
         if weight < 0:
             raise ValueError("Weight must be non-negative")
+        weight = float(weight)  # readers give primaries as numpy ints, the weight products below would overflow
 
         # first pass initialization, accumulate in float64 whatever the input dtype
         if not self.updated:
@@ -220,7 +221,7 @@ class SumAggregator(Aggregator):
             self.data = value
         # subsequent values added
         else:
-            self.data += value
+            self.data = np.add(self.data, value)
         self._updated = True
 
 
