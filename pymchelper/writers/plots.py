@@ -69,7 +69,9 @@ class ImageWriter(Writer):
 
     def __init__(self, filename, options):
         logger.info("{:s} options:  {:s}".format(repr(self.__class__), repr(options)))
-        super().__init__(filename if filename.endswith(".png") else filename + ".png")
+        if not filename.endswith(".png"):
+            filename += ".png"
+        super().__init__(filename)
         self.colormap = options.colormap
         self.axis_with_logscale = {PlotAxis[name] for name in options.log}
 

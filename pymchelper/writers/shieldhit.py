@@ -28,15 +28,35 @@ class SHBinaryWriter:
 
 
 def _format_e_fast(w: int, d: int, val: float) -> str:
-    """Same output as format_e(w, d, val), skipping its digit-by-digit composition for the common cases."""
+    """
+    Fortran-style Ew.d formatting: 0.DDDDE+XX, right-justified to width w.
+
+    Gives the same output as format_e(w, d, val), but uses Python's built-in
+    (correctly rounded) formatting for common values. Falls back to
+    format_e for inf/nan and for exponents outside -99..99.
+    """
     if val == 0.0:
         return f"0.{'0' * d}E+00".rjust(w)
-    if math.isfinite(val):
-        s = f"{abs(val):.{d - 1}e}"  # d.ddddddde+xx, correctly rounded as in format_e
-        ex = int(s[d + 2:]) + 1
-        if -99 <= ex <= 99:
-            return f"{'-' if val < 0 else ''}0.{s[0]}{s[2:d + 1]}E{ex:+03d}".rjust(w)
-    return format_e(w, d, val)
+
+    if not math.isfinite(val):
+        return format_e(w, d, val)
+
+    # Python and Fortran use the same d significant digits,
+    # but Python puts the decimal point after the first digit:
+    #
+    #   val = 123.456, d = 4
+    #   Python:   1.235e+02
+    #   Fortran:  0.1235E+03   (exponent is one larger)
+    python_style = f"{abs(val):.{d - 1}e}"
+    mantissa, exponent = python_style.split("e")
+    digits = mantissa.replace(".", "")
+    exponent = int(exponent) + 1
+
+    if not -99 <= exponent <= 99:
+        return format_e(w, d, val)
+
+    sign = "-" if val < 0 else ""
+    return f"{sign}0.{digits}E{exponent:+03d}".rjust(w)
 
 
 class TxtWriter(Writer):
@@ -50,7 +70,9 @@ class TxtWriter(Writer):
         return msh[axis_no]
 
     def __init__(self, filename: str, options: object) -> None:
-        super().__init__(filename if filename.endswith(".txt") else filename + ".txt")
+        if not filename.endswith(".txt"):
+            filename += ".txt"
+        super().__init__(filename)
         self.ax: str = ''
         self.ay: str = ''
         self.az: str = ''
@@ -158,7 +180,9 @@ class TxtWriter(Writer):
 
         # rows walk the bins with x fastest, page.data is indexed (x, y, z, diff1, diff2)
         zlist, ylist, xlist = np.meshgrid(page.axis(2).data, page.axis(1).data, page.axis(0).data, indexing='ij')
-        xlist, ylist, zlist = xlist.ravel(), ylist.ravel(), zlist.ravel()
+        xlist = xlist.ravel()
+        ylist = ylist.ravel()
+        zlist = zlist.ravel()
         if page.estimator.geotyp in {SHGeoType.zone, SHGeoType.dzone}:
             xlist = np.zeros_like(xlist)
         # dirty hack to be compliant with old bdo2txt and files generated in old (<0.6) BDO format
@@ -177,6 +201,10 @@ class TxtWriter(Writer):
             fout.write(header)
             chunk = 8192  # formatted rows held in memory at once
             for start in range(0, xlist.size, chunk):
-                formatted = [[_format_e_fast(w, d, v) for v in col[start:start + chunk].tolist()]
-                             for w, d, col in columns]
-                fout.writelines(" ".join(row) + "\n" for row in zip(*formatted))
+                stop = start + chunk
+                formatted_columns = []
+                for width, digits, values in columns:
+                    formatted_values = [_format_e_fast(width, digits, value) for value in values[start:stop].tolist()]
+                    formatted_columns.append(formatted_values)
+                lines = [" ".join(row) + "\n" for row in zip(*formatted_columns)]
+                fout.writelines(lines)
