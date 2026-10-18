@@ -96,11 +96,17 @@ def fromfile(filename: str) -> Estimator:
     if not estimator.pages:
         raise ValueError(f"{filename}: no pages, the file is truncated or corrupted")
     for page in estimator.pages:
-        expected = 8 * (page.data_raw.size // 8) if page.dettyp == SHDetType.mcpl else \
-            estimator.x.n * estimator.y.n * estimator.z.n * page.diff_axis1.n * page.diff_axis2.n
-        if page.data_raw.size != expected:
-            raise ValueError(f"{filename}: page {page.name} holds {page.data_raw.size} values instead of {expected}, "
-                             "the file is truncated or corrupted")
+        if page.dettyp == SHDetType.mcpl:
+            # phase space data holds 8 values per particle
+            if page.data_raw.size % 8 != 0:
+                raise ValueError(f"{filename}: page {page.name} holds {page.data_raw.size} values, "
+                                 "not a multiple of 8, the file is truncated or corrupted")
+            continue
+
+        expected_size = estimator.x.n * estimator.y.n * estimator.z.n * page.diff_axis1.n * page.diff_axis2.n
+        if page.data_raw.size != expected_size:
+            raise ValueError(f"{filename}: page {page.name} holds {page.data_raw.size} values "
+                             f"instead of {expected_size}, the file is truncated or corrupted")
     return estimator
 
 

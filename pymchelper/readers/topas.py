@@ -17,8 +17,9 @@ class TopasReaderFactory(ReaderFactory):
         if not str(self.filename).endswith('.csv'):
             return None
         with open(self.filename, 'rb') as f:
-            if f.read(7) == b'# TOPAS':
-                return TopasReader
+            first_bytes = f.read(7)
+        if first_bytes == b'# TOPAS':
+            return TopasReader
         return None
 
 

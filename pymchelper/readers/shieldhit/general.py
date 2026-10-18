@@ -48,8 +48,18 @@ def file_has_bin2010_header(file_path: PathLike) -> bool:
     :return: True if binary file starts with such record
     """
     with open(file_path, "rb") as f:
-        head = f.read(18)
-    return len(head) == 18 and head[:4] == head[14:] == (10).to_bytes(4, "little")
+        header = f.read(18)
+    if len(header) < 18:
+        return False
+
+    # Fortran record: 4 bytes with its length, the 10 characters, the same 4 bytes again
+    record_length_before = int.from_bytes(header[0:4], "little")
+    record_length_after = int.from_bytes(header[14:18], "little")
+    if record_length_before != 10:
+        return False
+    if record_length_after != 10:
+        return False
+    return True
 
 
 def extract_sh_ver(file_path: PathLike) -> str:

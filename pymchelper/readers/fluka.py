@@ -26,9 +26,13 @@ class FlukaReaderFactory(ReaderFactory):
         :return: FlukaReader class if file is digested by Usrxxx Flair reader. None is returned otherwise
         """
         with open(self.filename, "rb") as f:
-            record_length = f.read(4)
+            first_bytes = f.read(4)
+        if len(first_bytes) < 4:
+            return None
+
         # the header record of every USRxxx file is 116, 120, 124 or 128 bytes long
-        if len(record_length) < 4 or struct.unpack("=i", record_length)[0] not in (116, 120, 124, 128):
+        header_record_length = struct.unpack("=i", first_bytes)[0]
+        if header_record_length not in (116, 120, 124, 128):
             return None
         try:
             Usrxxx(self.filename)
