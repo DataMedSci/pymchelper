@@ -33,7 +33,12 @@ class TRiP98CubeWriter:
         _creation_info = "Created with pymchelper {:s}; using PyTRiP98 {:s}".format(_pmcversion,
                                                                                     _ptversion)
 
-        if estimator.pages[0].dettyp == SHDetType.dose:
+        # data lives on the page, PyTRiP cubes are indexed (z, y, x) and page data (x, y, z)
+        page = estimator.pages[0]
+        page_data_xyz = page.data[:, :, :, 0, 0]
+        page_data_zyx = page_data_xyz.transpose()
+
+        if page.dettyp == SHDetType.dose:
 
             from pytrip import dos
 
@@ -52,10 +57,13 @@ class TRiP98CubeWriter:
             cube.num_bytes = 2
             cube.pydata_type = np.int16
 
-            cube.cube = estimator.data
+            cube.cube = page_data_zyx
 
-            if estimator.tripdose >= 0.0 and estimator.tripntot > 0:
-                cube.cube = (cube.cube * estimator.tripntot * 1.602e-10) / estimator.tripdose * 1000.0
+            # only bin2010 files carry the planned dose and number of particles, other files are scaled to the maximum
+            trip_dose = getattr(estimator, 'tripdose', 0.0)
+            trip_number_of_particles = getattr(estimator, 'tripntot', -1)
+            if trip_dose > 0.0 and trip_number_of_particles > 0:
+                cube.cube = (cube.cube * trip_number_of_particles * 1.602e-10) / trip_dose * 1000.0
             else:
                 cube.cube = (cube.cube / cube.cube.max()) * 1200.0
 
@@ -68,7 +76,7 @@ class TRiP98CubeWriter:
 
             return 0
 
-        elif estimator.pages[0].dettyp in (SHDetType.dlet, SHDetType.tlet, SHDetType.dletg, SHDetType.tletg):
+        elif page.dettyp in (SHDetType.dlet, SHDetType.tlet, SHDetType.dletg, SHDetType.tletg):
 
             from pytrip import let
 
@@ -89,8 +97,7 @@ class TRiP98CubeWriter:
             # then this should not be needed.
             cube.cube = np.ones((cube.dimz, cube.dimy, cube.dimx), dtype=cube.pydata_type)
 
-            cube.cube = estimator.data
-            cube.cube *= 0.1  # MeV/cm -> keV/um
+            cube.cube = page_data_zyx * 0.1  # MeV/cm -> keV/um
             # Save proper meta information
 
             cube.patient_name = _patient_name

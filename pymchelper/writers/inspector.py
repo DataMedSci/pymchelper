@@ -38,22 +38,24 @@ class Inspector:
             print(75 * "-")
 
         if self.options.details:
-            # print data scatter-plot if possible
-            if estimator.dimension == 1 and len(self.pages) == 1:
+            # data lives on pages, so plots are made for each page separately
+            for page_no, page in enumerate(estimator.pages):
+                # print data scatter-plot if possible
+                if page.dimension == 1:
+                    try:
+                        from hipsterplot import plot
+                        print(75 * "*")
+                        print("Page {} / {} data scatter plot".format(page_no, len(estimator.pages)))
+                        plot(page.data_raw)
+                    except ImportError:
+                        logger.warning("Detailed summary requires installation of hipsterplot package")
+                # print data histogram if possible
                 try:
-                    from hipsterplot import plot
+                    from bashplotlib.histogram import plot_hist
                     print(75 * "*")
-                    print("Data scatter plot")
-                    plot(estimator.data_raw)
+                    print("Page {} / {} data histogram".format(page_no, len(estimator.pages)))
+                    plot_hist(page.data_raw, bincount=70, xlab=False, showSummary=True)
                 except ImportError:
-                    logger.warning("Detailed summary requires installation of hipsterplot package")
-            # print data histogram if possible
-            try:
-                from bashplotlib.histogram import plot_hist
-                print(75 * "*")
-                print("Data histogram")
-                plot_hist(estimator.data_raw, bincount=70, xlab=False, showSummary=True)
-            except ImportError:
-                logger.warning("Detailed summary requires installation of bashplotlib package")
+                    logger.warning("Detailed summary requires installation of bashplotlib package")
 
         return 0

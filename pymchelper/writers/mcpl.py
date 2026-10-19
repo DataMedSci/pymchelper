@@ -55,7 +55,7 @@ class MCPLWriter(Writer):
 
             # Create a structured array with named fields, as some of the fields have different types
             dt = np.dtype([('x', np.float32), ('y', np.float32), ('z', np.float32), ('fp1', np.float32),
-                           ('fp2', np.float32), ('uz', np.float32), ('time', np.float32), ('pdg', np.uint32)])
+                           ('fp2', np.float32), ('uz', np.float32), ('time', np.float32), ('pdg', np.int32)])
             data_bytes = np.empty(page.data.shape[1], dtype=dt)
 
             # Assign values to the fields
