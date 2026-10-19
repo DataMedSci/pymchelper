@@ -1,6 +1,7 @@
 import logging
 import os
 from pathlib import Path
+import shlex
 import sys
 from typing import Optional
 
@@ -101,21 +102,44 @@ class SimulationSettings:
     def set_rng_seed(self, rng_seed):
         """
         This methods modifies command line options of the MC engine by setting (or overriding) the value of RNG seed
+        In SHIELD-HIT12A the RNG seed offset is given by -N, or by its long form --seedoffset.
         TODO this method is specific to SH12A, more general should be added
-        TODO add support for RNG seed provided as --seedofset, instead of -N
         """
         # transform option list from plain string to a list of values for easier manipulation
         options_list = self.cmdline_opts.split()
 
+        # if RNG seed is present on the option list, then we override its value
+        for option in ('-N', '--seedoffset'):
+            if option in options_list:
+                index_of_rng_opt = options_list.index(option)
+                options_list[index_of_rng_opt + 1] = str(rng_seed)  # override the value of the option
+                self.cmdline_opts = ' '.join(options_list)  # reconstruct option string
+                return
+
         # If RNG seed is missing on the option list, then the code below will set it to given value
-        if '-N' not in options_list:
-            self.cmdline_opts += " -N {:d}".format(rng_seed)
-        # if RNG is present on the option list, then we override its value
-        else:
-            # in SHIELD-HIT12A RNG seed is specified by -N option
-            index_of_rng_opt = options_list.index('-N')  # find index of '-N'
-            options_list[index_of_rng_opt + 1] = str(rng_seed)  # override the value of current -N option
-            self.cmdline_opts = ' '.join(options_list)  # reconstruct option string
+        self.cmdline_opts += " -N {:d}".format(rng_seed)
+
+    def get_rng_seed(self) -> int:
+        """
+        RNG seed offset given in the command line options (-N or --seedoffset), 0 if not given
+        TODO this method is specific to SH12A, more general should be added
+        """
+        options_list = self.cmdline_opts.split()
+        for option in ('-N', '--seedoffset'):
+            if option in options_list:
+                index_of_rng_opt = options_list.index(option)
+                return int(options_list[index_of_rng_opt + 1])
+        return 0
+
+    def command_as_list(self) -> list:
+        """
+        MC engine executable followed by its command line options, as a list for the subprocess module.
+        The executable path is one item even if it contains spaces, options are split like a shell does,
+        so a quoted value with spaces stays one item.
+        """
+        command = [os.path.abspath(self.executable_path)]
+        command += shlex.split(self.cmdline_opts)
+        return command
 
     def set_no_of_primaries(self, number_of_primaries):
         """

@@ -30,7 +30,7 @@ def set_logger_level(args):
     if args.quiet:
         if args.quiet == 1:
             level = "WARNING"
-        if args.quiet == 2:
+        elif args.quiet == 2:
             level = "ERROR"
         else:
             level = "CRITICAL"
@@ -113,17 +113,24 @@ def main(args=None):
     # create runner object based on MC options and dedicated parallel jobs number
     # note that runner object is only created here, no simulation is started at this point
     # and no directories are being created
+    # working directories (run_1, run_2, ...) go to the workspace directory (-w),
+    # merged results to the output directory (-o)
     runner_obj = Runner(settings=settings,
                         jobs=parsed_args.jobs,
                         keep_workspace_after_run=parsed_args.keep,
-                        output_directory=parsed_args.outdir)
+                        output_directory=parsed_args.workspace)
 
     # start parallel execution of MC simulation
     # temporary directories needed for parallel execution as well as the output are being saved in `outdir`
     # in case of successful execution this would return list of temporary workspaces directories
     # containing partial results from simultaneous parallel executions
     start_time = timeit.default_timer()
-    runner_obj.run()
+    try:
+        runner_obj.run()
+    except RuntimeError as error:
+        # the simulator failed, the error holds the end of its output
+        logging.error(error)
+        return 1
     elapsed = timeit.default_timer() - start_time
     print("MC simulation took {:.3f} seconds".format(elapsed))
 
@@ -136,6 +143,7 @@ def main(args=None):
     # if user requests combined results as text files, the code below is used to convert Estimator objects to them
     # note that multiple text files can be created here
     start_time = timeit.default_timer()
+    os.makedirs(parsed_args.outdir, exist_ok=True)
     if data_dict and (OutputDataType.txt.name in parsed_args.outtype):
         for core_filename in data_dict:
             logging.debug("Core filename {:s}".format(core_filename))
