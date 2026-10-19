@@ -23,6 +23,12 @@ class Page:
 
         self.dettyp = None  # Dose, Fluence, LET etc...
 
+        # spatial mesh of this page, None means the page uses the mesh of its estimator
+        # FLUKA keeps several USRBIN detectors with different meshes in one file, their pages set their own
+        self.x: Optional[MeshAxis] = None
+        self.y: Optional[MeshAxis] = None
+        self.z: Optional[MeshAxis] = None
+
         # optional first differential axis
         self.diff_axis1 = MeshAxis(n=1,
                                    min_val=float("NaN"),
@@ -47,6 +53,12 @@ class Page:
             return self.diff_axis1
         elif axis_id == AxisId.diff2:
             return self.diff_axis2
+        elif axis_id == AxisId.x and self.x is not None:
+            return self.x
+        elif axis_id == AxisId.y and self.y is not None:
+            return self.y
+        elif axis_id == AxisId.z and self.z is not None:
+            return self.z
         elif self.estimator:
             return self.estimator.axis(axis_id)
         return None
@@ -71,7 +83,9 @@ class Page:
         :return: number of page axes (including differential) which have more than one bin
         """
         if self.estimator:
-            return 2 - (self.diff_axis1.n, self.diff_axis2.n).count(1) + self.estimator.dimension
+            number_of_bins = (self.axis(AxisId.x).n, self.axis(AxisId.y).n, self.axis(AxisId.z).n, self.diff_axis1.n,
+                              self.diff_axis2.n)
+            return 5 - number_of_bins.count(1)
         else:
             return 0
 
@@ -103,7 +117,7 @@ class Page:
                 result = self._reshape(data_1d=self.data_raw, shape=(8, -1))
             else:
                 result = self._reshape(data_1d=self.data_raw,
-                                       shape=(self.estimator.x.n, self.estimator.y.n, self.estimator.z.n,
+                                       shape=(self.axis(AxisId.x).n, self.axis(AxisId.y).n, self.axis(AxisId.z).n,
                                               self.diff_axis1.n, self.diff_axis2.n))
             assert result is not None
             return result
@@ -119,8 +133,8 @@ class Page:
         """
         if self.estimator:
             return self._reshape(data_1d=self.error_raw,
-                                 shape=(self.estimator.x.n, self.estimator.y.n, self.estimator.z.n, self.diff_axis1.n,
-                                        self.diff_axis2.n))
+                                 shape=(self.axis(AxisId.x).n, self.axis(AxisId.y).n, self.axis(AxisId.z).n,
+                                        self.diff_axis1.n, self.diff_axis2.n))
         return self.error_raw
 
     @property

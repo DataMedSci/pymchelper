@@ -1,5 +1,6 @@
 import logging
 
+from pymchelper.axis import AxisId
 from pymchelper.estimator import Estimator
 
 logger = logging.getLogger(__name__)
@@ -51,20 +52,24 @@ class HdfWriter:
                 dset.attrs['unit'] = page.unit
                 dset.attrs['nstat'] = estimator.number_of_primaries
                 dset.attrs['counter'] = estimator.file_counter
-                dset.attrs['xaxis_n'] = estimator.x.n
-                dset.attrs['xaxis_min'] = estimator.x.min_val
-                dset.attrs['xaxis_max'] = estimator.x.max_val
-                dset.attrs['xaxis_name'] = estimator.x.name
-                dset.attrs['xaxis_unit'] = estimator.x.unit
-                dset.attrs['yaxis_n'] = estimator.y.n
-                dset.attrs['yaxis_min'] = estimator.y.min_val
-                dset.attrs['yaxis_max'] = estimator.y.max_val
-                dset.attrs['yaxis_name'] = estimator.y.name
-                dset.attrs['yaxis_unit'] = estimator.y.unit
-                dset.attrs['zaxis_n'] = estimator.z.n
-                dset.attrs['zaxis_min'] = estimator.z.min_val
-                dset.attrs['zaxis_max'] = estimator.z.max_val
-                dset.attrs['zaxis_name'] = estimator.z.name
-                dset.attrs['zaxis_unit'] = estimator.z.unit
+                # mesh is taken from the page, FLUKA pages in one file can have different meshes
+                x_axis = page.axis(AxisId.x)
+                y_axis = page.axis(AxisId.y)
+                z_axis = page.axis(AxisId.z)
+                dset.attrs['xaxis_n'] = x_axis.n
+                dset.attrs['xaxis_min'] = x_axis.min_val
+                dset.attrs['xaxis_max'] = x_axis.max_val
+                dset.attrs['xaxis_name'] = x_axis.name
+                dset.attrs['xaxis_unit'] = x_axis.unit
+                dset.attrs['yaxis_n'] = y_axis.n
+                dset.attrs['yaxis_min'] = y_axis.min_val
+                dset.attrs['yaxis_max'] = y_axis.max_val
+                dset.attrs['yaxis_name'] = y_axis.name
+                dset.attrs['yaxis_unit'] = y_axis.unit
+                dset.attrs['zaxis_n'] = z_axis.n
+                dset.attrs['zaxis_min'] = z_axis.min_val
+                dset.attrs['zaxis_max'] = z_axis.max_val
+                dset.attrs['zaxis_name'] = z_axis.name
+                dset.attrs['zaxis_unit'] = z_axis.unit
 
         return 0
