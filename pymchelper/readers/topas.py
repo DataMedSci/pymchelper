@@ -1,3 +1,4 @@
+import logging
 from pathlib import Path
 import re
 from typing import Dict, List, Optional, Tuple
@@ -7,6 +8,8 @@ from pymchelper.axis import MeshAxis
 from pymchelper.estimator import Estimator
 from pymchelper.page import Page
 from pymchelper.readers.common import Reader, ReaderFactory
+
+logger = logging.getLogger(__name__)
 
 
 class TopasReaderFactory(ReaderFactory):
@@ -270,7 +273,13 @@ class TopasReader(Reader):
                     page.data_raw = scores
                     set_data = True
                 elif result == 'Standard_Deviation':
-                    page.error_raw = scores
+                    # TOPAS reports the spread of values scored in single histories,
+                    # standard error of the mean is this spread divided by square root of the number of histories
+                    if estimator.number_of_primaries > 0:
+                        page.error_raw = scores / np.sqrt(estimator.number_of_primaries)
+                    else:
+                        logger.warning("Number of histories not found for %s, standard deviation is skipped",
+                                       self.filename)
 
             # If we didn't find mean results for the scorer, we return False
             if not set_data:

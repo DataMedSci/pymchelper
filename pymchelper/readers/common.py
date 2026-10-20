@@ -27,8 +27,6 @@ class Reader(object):
         result = self.read_data(estimator)
         if not result:
             return False
-        for page in estimator.pages:
-            page.error_raw = None
         return True
 
     @abstractmethod
