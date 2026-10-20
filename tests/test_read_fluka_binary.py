@@ -105,7 +105,7 @@ def test_data_block_to_array():
 
     result = data_block_to_array(data_block)
 
-    expected = np.array(struct.unpack("=%df" % values.size, data_block))
+    expected = np.array(struct.unpack(f"={values.size}f", data_block))
     np.testing.assert_array_equal(result, expected)
     assert result.dtype == np.float64
     assert result.flags.writeable
