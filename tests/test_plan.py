@@ -113,3 +113,22 @@ def test_debug_mode(input_file_path: Path, beam_model_path: Union[Path, None], m
 
     # check if output file exists
     assert not expected_output_file_path.exists()
+
+
+def test_pld_scaling():
+    """--scale multiplies the spot weights of IBA PLD plans, and the field data stays on the plan's field"""
+    import dataclasses
+    from pymchelper.utils.radiotherapy.plan import load_PLD_IBA
+
+    plan_scale_1 = load_PLD_IBA(input_files['test.pld'], scaling=1.0)
+    plan_scale_2 = load_PLD_IBA(input_files['test.pld'], scaling=2.0)
+    plan_scale_1.apply_beammodel()
+    plan_scale_2.apply_beammodel()
+
+    field_scale_2 = plan_scale_2.fields[0]
+    assert field_scale_2.scaling == 2.0
+    assert field_scale_2.n_layers == len(field_scale_2.layers)
+    assert not hasattr(dataclasses.field, 'scaling')
+
+    for layer_scale_1, layer_scale_2 in zip(plan_scale_1.fields[0].layers, field_scale_2.layers):
+        assert layer_scale_2.spots[:, 3] == pytest.approx(2.0 * layer_scale_1.spots[:, 3])
