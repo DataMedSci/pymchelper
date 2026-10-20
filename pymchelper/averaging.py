@@ -46,11 +46,11 @@ class Aggregator:
     The `error` function returns the spread of data, can be implemented in derived classes. It's a function,
     not a property as different type of error can be calculated (standard deviation, standard error, etc.).
     Type of errors may be then passed in optional keyword arguments `**kwargs`.
+    With `skip_nan` set to True, NaN values are left out bin by bin, as if that file had no value in that bin.
     """
 
-    data: Union[float, ArrayLike] = float('nan')
+    skip_nan: bool = False
     _updated: bool = field(default=False, repr=False, init=False)
-    skip_nan: bool = False  # if True, NaN values are left out, bin by bin
 
     def update(self, value: Union[float, ArrayLike], **kwargs):
         """Update the state of the aggregator with new data."""
@@ -65,12 +65,8 @@ class Aggregator:
         """
         Check if the aggregator was updated. The newly created aggregator is in the state of not being updated.
         That means that no aggregation results are present via `data` or `error` properties.
-        We rely on the fact that `data` attribute is set to `nan` on creation of the aggregator object.
-        On first call to the `update` method the `data` is being filled with floating point numbers or arrays.
-        The `update` method sets also `self._updated` to True.
+        The `update` method sets `self._updated` to True.
         """
-        if isinstance(self.data, float) and np.isnan(self.data):
-            return False
         return self._updated
 
 
@@ -97,83 +93,70 @@ class WeightedStatsAggregator(Aggregator):
     [5] https://en.wikipedia.org/wiki/Algorithms_for_calculating_variance#Weighted_incremental_algorithm
     """
 
-    data: Union[float, NDArray[np.float64]] = float('nan')
-
-    _accumulator_S: Union[float, NDArray[np.float64]] = field(default=float('nan'), repr=False, init=False)
-    _mean: Union[float, NDArray[np.float64]] = field(default=float('nan'), repr=False, init=False)  # used with skip_nan
-    # with skip_nan each bin has its own total weight, so both are arrays then
-    _total_weight_squared: Union[float, NDArray[np.float64]] = field(default=0., repr=False, init=False)
-    total_weight: Union[float, NDArray[np.float64]] = 0
+    # each bin has its own total weight: a NaN value left out with skip_nan gives weight 0 to its bin only
+    total_weight: NDArray[np.float64] = field(default_factory=lambda: np.zeros(()), init=False)
+    _total_weight_squared: NDArray[np.float64] = field(default_factory=lambda: np.zeros(()), repr=False, init=False)
+    _mean: NDArray[np.float64] = field(default_factory=lambda: np.zeros(()), repr=False, init=False)
+    _accumulator_S: NDArray[np.float64] = field(default_factory=lambda: np.zeros(()), repr=False, init=False)
 
     def update(self, value: Union[float, ArrayLike], weight: float = 1.0, **kwargs):
         """
         Update the state of the aggregator with new data.
         Note that the weights are so called "reliability weights", not frequency weights.
         If unsure put here the number of histories from the file if you are aggregating data from multiple files.
+        A bin which gets weight 0 (zero weight, or a NaN value with `skip_nan`) is left unchanged.
         """
         if weight < 0:
             raise ValueError("Weight must be non-negative")
         weight = float(weight)  # readers give primaries as numpy ints, the weight products below would overflow
 
-        if self.skip_nan:
-            self._update_skipping_nan(value, weight)
-            return
-
         # first pass initialization, accumulate in float64 whatever the input dtype
         if not self.updated:
-            self.data = np.zeros(np.shape(value)) if np.ndim(value) else 0.0
-            self._accumulator_S = np.zeros(np.shape(value)) if np.ndim(value) else 0.0
-        elif weight == 0:
-            return  # contributes nothing, and the S factor below divides by the weight
+            shape = np.shape(value)
+            self.total_weight = np.zeros(shape)
+            self._total_weight_squared = np.zeros(shape)
+            self._mean = np.zeros(shape)
+            self._accumulator_S = np.zeros(shape)
+
+        bin_weight = np.full(np.shape(value), weight)
+        if self.skip_nan:
+            bin_weight[np.isnan(value)] = 0.0
+        has_weight = bin_weight > 0
 
         # W_n = W_{n-1} + w_n
-        self.total_weight += weight
-        self._total_weight_squared += weight**2
+        self.total_weight += bin_weight
+        self._total_weight_squared += bin_weight**2
 
         # West's update, with d = x_n - mu_{n-1}:
         # mu_n = mu_{n-1} + (w_n / W_n) * d
         # S_n = S_{n-1} + w_n * (1 - w_n / W_n) * d^2, every term >= 0, so S never cancels or goes negative
-        # all in place on a single temporary array, scalars rebind instead
-        delta = np.subtract(value, self.data, dtype=np.float64)
-        delta *= weight / self.total_weight
-        self.data += delta
+        # computed as S_n = S_{n-1} + ((w_n / W_n) * d)^2 * W_n * (W_n - w_n) / w_n
+        weight_fraction = np.zeros(np.shape(value))
+        np.divide(bin_weight, self.total_weight, out=weight_fraction, where=has_weight)
+        previous_total_weight = self.total_weight - bin_weight
+        spread_numerator = self.total_weight * previous_total_weight
+        spread_factor = np.zeros(np.shape(value))
+        np.divide(spread_numerator, bin_weight, out=spread_factor, where=has_weight)
+
+        delta = np.array(value, dtype=np.float64)
+        delta -= self._mean
+        # a bin without weight must not change, also when its value is NaN
+        delta[~has_weight] = 0.0
+        delta *= weight_fraction
+        self._mean += delta
         delta *= delta
-        delta *= self.total_weight * (self.total_weight - weight) / weight
+        delta *= spread_factor
         self._accumulator_S += delta
 
         self._updated = True
         logging.debug("Updated aggregator with value %s and weight %s", value, weight)
 
-    def _update_skipping_nan(self, value: Union[float, ArrayLike], weight: float):
-        """
-        Same update as above, but each bin has its own total weight:
-        a NaN value gets weight 0 in its bin, so it changes neither the mean nor the variance there.
-        Bins which got only NaN values end up with total weight 0 and mean NaN.
-        """
-        value = np.asarray(value, dtype=np.float64)
-        weights = np.full(value.shape, weight)
-        missing = np.isnan(value)
-        weights[missing] = 0.0
-        value = np.where(missing, 0.0, value)  # any finite number works here, its weight is 0
-
+    @property
+    def data(self) -> Union[float, NDArray[np.float64]]:
+        """Weighted mean in each bin, NaN in bins with total weight 0 and before the first update"""
         if not self.updated:
-            self._mean = np.zeros(value.shape)
-            self._accumulator_S = np.zeros(value.shape)
-            self.total_weight = np.zeros(value.shape)
-            self._total_weight_squared = np.zeros(value.shape)
-
-        self.total_weight += weights
-        self._total_weight_squared += weights**2
-
-        # West's update as above, with w_n / W_n set to 0 in bins which have no weight yet
-        weight_fraction = np.zeros(value.shape)
-        np.divide(weights, self.total_weight, out=weight_fraction, where=self.total_weight > 0)
-        delta = value - self._mean
-        self._mean += weight_fraction * delta
-        self._accumulator_S += weights * (1 - weight_fraction) * delta**2
-
-        self.data = np.where(self.total_weight > 0, self._mean, np.nan)
-        self._updated = True
+            return float('nan')
+        return np.where(self.total_weight > 0, self._mean, np.nan)
 
     @property
     def mean(self) -> Union[float, ArrayLike]:
@@ -182,13 +165,10 @@ class WeightedStatsAggregator(Aggregator):
 
     @property
     def variance_population(self) -> Union[float, ArrayLike]:
-        """Biased estimate of the variance"""
+        """Biased estimate of the variance, NaN in bins with total weight 0"""
         if not self.updated:
             raise ValueError("No data to calculate variance")
-        if np.all(self.total_weight <= 0):
-            raise ValueError("Total weight must be positive")
-        with np.errstate(divide='ignore', invalid='ignore'):  # bins without weight give NaN
-            return self._accumulator_S / self.total_weight
+        return _divide_or_nan(self._accumulator_S, self.total_weight)
 
     @property
     def variance_sample(self) -> Union[float, ArrayLike]:
@@ -199,13 +179,13 @@ class WeightedStatsAggregator(Aggregator):
         For all equal weights the bias is 1 - n * w^2/((n * w)^2) = 1 - 1/n which
         leads to the well known formula for the sample variance.
         Here we use the weighted version of the formula.
+        It is NaN in bins with total weight 0 and in bins with a single weighted value.
         """
         if not self.updated:
             raise ValueError("No data to calculate variance")
-        if np.all(self.total_weight <= 0):
-            raise ValueError("Total weight must be positive")
-        with np.errstate(divide='ignore', invalid='ignore'):  # bins without weight, or with one value, give NaN
-            return self._accumulator_S / (self.total_weight - (self._total_weight_squared / self.total_weight))
+        weight_squared_fraction = _divide_or_nan(self._total_weight_squared, self.total_weight)
+        bias_corrected_weight = self.total_weight - weight_squared_fraction
+        return _divide_or_nan(self._accumulator_S, bias_corrected_weight)
 
     @property
     def stddev(self) -> Union[float, ArrayLike]:
@@ -219,9 +199,9 @@ class WeightedStatsAggregator(Aggregator):
         For weighted data it is calculated as:
         stddev * sqrt(sum w_i^2) / sum w_i
         For equal weights it reduces via sqrt( n * w^2) / (n * w) = stddev / sqrt(n)
+        NaN in bins with total weight 0.
         """
-        with np.errstate(divide='ignore', invalid='ignore'):  # bins without weight give NaN
-            return self.stddev * np.sqrt(self._total_weight_squared) / self.total_weight
+        return _divide_or_nan(self.stddev * np.sqrt(self._total_weight_squared), self.total_weight)
 
     def error(self, **kwargs) -> Optional[Union[float, ArrayLike]]:
         """
@@ -243,7 +223,7 @@ class ConcatenatingAggregator(Aggregator):
     """
     Class for concatenating numpy arrays.
     The arrays are collected in a list and joined once, when `data` is read,
-    so every value is copied once, however many files are merged.
+    so every value is copied once per read of `data`, however many files are merged.
     """
 
     _parts: list = field(default_factory=list, repr=False, init=False)
@@ -255,26 +235,17 @@ class ConcatenatingAggregator(Aggregator):
 
     @property
     def data(self) -> Union[float, ArrayLike]:
-        """All arrays collected so far, joined into one"""
-        if len(self._parts) == 0:
+        """All arrays collected so far, joined into one, NaN before the first update"""
+        if not self.updated:
             return float('nan')
-        if len(self._parts) > 1:
-            joined = np.concatenate(self._parts)
-            self._parts = [joined]
-        return self._parts[0]
-
-    @data.setter
-    def data(self, value: Union[float, ArrayLike]):
-        """Setting data replaces everything collected so far (the dataclass init sets it to NaN, i.e. nothing)"""
-        self._parts = []
-        if isinstance(value, float) and np.isnan(value):
-            return
-        self._parts.append(value)
+        return np.concatenate(self._parts)
 
 
 @dataclass
 class SumAggregator(Aggregator):
     """Class for calculating sum of a sequence of numbers."""
+
+    data: Union[float, ArrayLike] = float('nan')
 
     def update(self, value: Union[float, ArrayLike], **kwargs):
         """Update the state of the aggregator with new data."""
@@ -303,6 +274,8 @@ class NoAggregator(Aggregator):
     Sets the data to the first value and does not update it.
     """
 
+    data: Union[float, ArrayLike] = float('nan')
+
     def update(self, value: Union[float, ArrayLike], **kwargs):
         """Update the state of the aggregator with new data."""
         # set value only on first update
@@ -310,3 +283,10 @@ class NoAggregator(Aggregator):
             logging.debug("Setting data to %s", value)
             self.data = value
         self._updated = True
+
+
+def _divide_or_nan(numerator: ArrayLike, denominator: ArrayLike) -> NDArray[np.float64]:
+    """Divide bin by bin, giving NaN in bins where the denominator is not positive (or NaN)"""
+    result = np.full(np.shape(denominator), np.nan)
+    np.divide(numerator, denominator, out=result, where=denominator > 0)
+    return result

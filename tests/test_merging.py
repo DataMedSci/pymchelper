@@ -11,6 +11,7 @@ from pymchelper.averaging import ConcatenatingAggregator, SumAggregator, Weighte
 from pymchelper.readers.fluka import FlukaReader
 
 averaging_dir = Path(__file__).resolve().parent / "res" / "shieldhit" / "averaging"
+dose_files = sorted(str(path) for path in averaging_dir.glob("normalisation-5_aggregation-mean_*.bdo"))
 
 
 def merged_pages(nan: bool) -> dict:
@@ -30,32 +31,46 @@ def test_frompattern_default_follows_page_rules():
     assert default["COUNT"].item() == 19128
     assert default["MCPL"].size == 11856
     for name in ("DOSE", "FLUENCE", "DLET", "TLET"):
-        assert default[name].item() == pytest.approx(without_nan_skipping[name].item(), rel=1e-14)
+        assert default[name].item() == without_nan_skipping[name].item()
 
 
 def test_skip_nan_weighted_mean_and_variance():
     """NaN values are left out bin by bin, the rest is weighted as usual"""
     rng = np.random.default_rng(0)
-    values = rng.normal(5.0, 1.0, size=(6, 50))
-    values[rng.random(values.shape) < 0.3] = np.nan
-    values[:, 0] = np.nan  # a bin with no value at all
-    weights = np.array([10.0, 20.0, 30.0, 10.0, 50.0, 5.0])
+    files_count = 6
+    bins_count = 50
+    values = rng.normal(5.0, 1.0, size=(files_count, bins_count))
+    missing = rng.random(values.shape) < 0.3
+    values[missing] = np.nan
+    empty_bin = 0
+    values[:, empty_bin] = np.nan
+    file_weights = np.array([10.0, 20.0, 30.0, 10.0, 50.0, 5.0])
 
     aggregator = WeightedStatsAggregator(skip_nan=True)
-    for page, weight in zip(values, weights):
-        aggregator.update(page, weight)
+    for file_values, file_weight in zip(values, file_weights):
+        aggregator.update(file_values, file_weight)
 
-    # reference: the usual weighted formulas, with NaN entries masked out in each bin
-    masked = np.ma.masked_invalid(values)
-    bin_weights = np.ma.masked_array(np.broadcast_to(weights[:, None], values.shape), mask=masked.mask)
-    total_weight = bin_weights.sum(axis=0)
-    mean = (bin_weights * masked).sum(axis=0) / total_weight
-    variance_sample = (bin_weights * (masked - mean)**2).sum(axis=0) / (total_weight -
-                                                                        (bin_weights**2).sum(axis=0) / total_weight)
+    # reference: the usual weighted formulas, computed for each bin from its non-NaN values only
+    expected_mean = np.full(bins_count, np.nan)
+    expected_variance_sample = np.full(bins_count, np.nan)
+    for bin_index in range(bins_count):
+        bin_values = values[:, bin_index]
+        present = ~np.isnan(bin_values)
+        if not present.any():
+            continue
+        present_values = bin_values[present]
+        present_weights = file_weights[present]
+        total_weight = present_weights.sum()
+        mean = np.sum(present_weights * present_values) / total_weight
+        squared_deviations = np.sum(present_weights * (present_values - mean)**2)
+        bias_corrected_weight = total_weight - np.sum(present_weights**2) / total_weight
+        expected_mean[bin_index] = mean
+        expected_variance_sample[bin_index] = squared_deviations / bias_corrected_weight
 
-    assert np.isnan(aggregator.mean[0])
-    np.testing.assert_allclose(aggregator.mean[1:], mean[1:].filled(np.nan), rtol=1e-12)
-    np.testing.assert_allclose(aggregator.variance_sample[1:], variance_sample[1:].filled(np.nan), rtol=1e-9)
+    assert np.isnan(aggregator.mean[empty_bin])
+    assert np.isnan(aggregator.stderr[empty_bin])
+    np.testing.assert_allclose(aggregator.mean, expected_mean, rtol=1e-12)
+    np.testing.assert_allclose(aggregator.variance_sample, expected_variance_sample, rtol=1e-9)
 
 
 def test_skip_nan_sum():
@@ -114,8 +129,47 @@ def test_estimators_freed_while_merging(monkeypatch: pytest.MonkeyPatch):
         return estimator
 
     monkeypatch.setattr(io, "fromfile", tracked_fromfile)
-    files = sorted(str(path) for path in averaging_dir.glob("normalisation-5_aggregation-mean_*.bdo")) * 5
+    files = []
+    for _ in range(5):
+        files.extend(dose_files)
     io.fromfilelist(files)
 
     still_alive = [reference for reference in references[1:] if reference() is not None]
     assert len(still_alive) == 0
+
+
+@pytest.mark.parametrize("nan", [True, False])
+def test_page_nan_in_every_file_stays_nan(monkeypatch: pytest.MonkeyPatch, nan: bool):
+    """A page with no value in any file (e.g. LET where nothing deposited dose) is NaN, with NaN error"""
+    original_fromfile = io.fromfile
+
+    def fromfile_without_values(filename):
+        estimator = original_fromfile(filename)
+        for page in estimator.pages:
+            page.data_raw = np.full(page.data_raw.shape, np.nan)
+        return estimator
+
+    monkeypatch.setattr(io, "fromfile", fromfile_without_values)
+    estimators = io.frompattern(str(averaging_dir / "normalisation-3_aggregation-mean_*.bdo"), nan=nan)
+
+    for page in estimators[0].pages:
+        assert np.isnan(page.data_raw).all()
+        assert np.isnan(page.error_raw).all()
+
+
+@pytest.mark.parametrize("nan", [True, False])
+def test_files_without_primaries_give_nan(monkeypatch: pytest.MonkeyPatch, nan: bool):
+    """Files with 0 primaries carry no weight, so the weighted mean and its error are NaN"""
+    original_fromfile = io.fromfile
+
+    def fromfile_without_primaries(filename):
+        estimator = original_fromfile(filename)
+        estimator.number_of_primaries = 0
+        return estimator
+
+    monkeypatch.setattr(io, "fromfile", fromfile_without_primaries)
+    merged = io.fromfilelist(dose_files, nan=nan)
+
+    for page in merged.pages:
+        assert np.isnan(page.data_raw).all()
+        assert np.isnan(page.error_raw).all()
