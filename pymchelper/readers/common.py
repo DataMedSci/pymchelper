@@ -24,10 +24,7 @@ class Reader(object):
         self.filename: str = filename
 
     def read(self, estimator: 'Estimator') -> bool:
-        result = self.read_data(estimator)
-        if not result:
-            return False
-        return True
+        return self.read_data(estimator)
 
     @abstractmethod
     def read_data(self, estimator: 'Estimator') -> bool:
