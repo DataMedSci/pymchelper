@@ -8,7 +8,8 @@ import pytest
 from pymchelper.estimator import Estimator
 
 from pymchelper.input_output import fromfile
-from pymchelper.executor.options import SimulationSettings
+from pymchelper.executor import runner as runner_module
+from pymchelper.executor.options import FlukaEnvironment, SimulationSettings
 from pymchelper.executor.runner import Runner
 from pymchelper.simulator_type import SimulatorType
 
@@ -305,11 +306,11 @@ def run_shieldhit_mock(tmp_path: Path,
 @pytest.mark.skipif(sys.platform == "win32", reason="simulator mocks don't work on Windows")
 @pytest.mark.parametrize("cmdline_opts, expected_seed_options", [
     ("-n 100", ["-N 1", "-N 2"]),
-    ("-N 1000 -n 100", ["-N 1001", "-N 1002"]),
-    ("--seedoffset 5000 -n 100", ["--seedoffset 5001", "--seedoffset 5002"]),
+    ("-N 1000 -n 100", ["-N 2001", "-N 2002"]),
+    ("--seedoffset 5000 -n 100", ["-N 10001", "-N 10002"]),
 ])
 def test_shieldhit_seeds(cmdline_opts: str, expected_seed_options: list, tmp_path: Path):
-    """Each job gets the seed given by the user plus its job number"""
+    """Each job gets the seed given by the user times the number of jobs, plus its job number"""
     executable = make_mock_simulator(tmp_path / "bin" / "shieldhit", 'echo "$@" > arguments.txt\n')
     runner = run_shieldhit_mock(tmp_path, executable, jobs=2, cmdline_opts=cmdline_opts, keep_workspace_after_run=True)
 
@@ -317,6 +318,85 @@ def test_shieldhit_seeds(cmdline_opts: str, expected_seed_options: list, tmp_pat
         arguments = (Path(working_dir) / "arguments.txt").read_text()
         assert expected in arguments
         assert arguments.count("-N") + arguments.count("--seedoffset") == 1
+
+
+@pytest.mark.skipif(sys.platform == "win32", reason="simulator mocks don't work on Windows")
+def test_shieldhit_seeds_of_runs_do_not_overlap(tmp_path: Path):
+    """Runs with different user seeds and the same number of jobs share no seed"""
+    executable = make_mock_simulator(tmp_path / "bin" / "shieldhit", 'echo "$@" > arguments.txt\n')
+    seeds_of_runs = []
+    for user_seed in (1, 2):
+        runner = run_shieldhit_mock(tmp_path / f"seed_{user_seed}",
+                                    executable,
+                                    jobs=4,
+                                    cmdline_opts=f"-N {user_seed}",
+                                    keep_workspace_after_run=True)
+        seeds = set()
+        for working_dir in runner.workspace_manager.working_directories_abs_paths:
+            arguments = (Path(working_dir) / "arguments.txt").read_text().split()
+            seed = arguments[arguments.index("-N") + 1]
+            seeds.add(seed)
+        seeds_of_runs.append(seeds)
+
+    assert seeds_of_runs[0] == {"5", "6", "7", "8"}
+    assert seeds_of_runs[1] == {"9", "10", "11", "12"}
+
+
+def run_fluka_mock(tmp_path: Path, input_text: str, jobs: int, workspace: Path) -> Runner:
+    """Run a mock rfluka which does nothing, working directories kept in workspace"""
+    input_file = tmp_path / "input.inp"
+    input_file.write_text(input_text)
+    executable = make_mock_simulator(tmp_path / "bin" / "rfluka", "true\n")
+    settings = SimulationSettings(input_path=str(input_file),
+                                  simulator_type=SimulatorType.fluka,
+                                  simulator_exec_path=str(executable))
+    runner = Runner(settings=settings, jobs=jobs, keep_workspace_after_run=True, output_directory=str(workspace))
+    runner.run()
+    return runner
+
+
+@pytest.mark.skipif(sys.platform == "win32", reason="simulator mocks don't work on Windows")
+def test_fluka_seeds(tmp_path: Path):
+    """The RANDOMIZ card of each job gets WHAT(2) of the user times the number of jobs, plus the job number"""
+    runner = run_fluka_mock(tmp_path,
+                            "TITLE\nx\nRANDOMIZ          1.      777.\nSTART           100.\nSTOP\n",
+                            jobs=2,
+                            workspace=tmp_path / "ws")
+
+    seeds = []
+    for working_dir in runner.workspace_manager.working_directories_abs_paths:
+        seed = FlukaEnvironment.read_rng_seed(str(Path(working_dir) / "input.inp"))
+        seeds.append(seed)
+    assert seeds == [1555, 1556]
+
+
+@pytest.mark.skipif(sys.platform == "win32", reason="simulator mocks don't work on Windows")
+def test_fluka_seed_above_limit(tmp_path: Path):
+    """FLUKA needs WHAT(2) of RANDOMIZ below 9E8, a larger job seed is an error"""
+    with pytest.raises(ValueError, match="900000000"):
+        run_fluka_mock(tmp_path,
+                       "TITLE\nx\nRANDOMIZ          1. 450000000.\nSTART           100.\nSTOP\n",
+                       jobs=2,
+                       workspace=tmp_path / "ws")
+
+
+@pytest.mark.skipif(sys.platform == "win32", reason="simulator mocks don't work on Windows")
+def test_input_inside_working_directory_is_kept(tmp_path: Path):
+    """Input inside a working directory which would be recreated is an error, the input stays"""
+    workspace = tmp_path / "ws"
+    input_text = "TITLE\nx\nSTART           100.\nSTOP\n"
+    (workspace / "run_1").mkdir(parents=True)
+    input_file = workspace / "run_1" / "input.inp"
+    input_file.write_text(input_text)
+    executable = make_mock_simulator(tmp_path / "bin" / "rfluka", "true\n")
+    settings = SimulationSettings(input_path=str(input_file),
+                                  simulator_type=SimulatorType.fluka,
+                                  simulator_exec_path=str(executable))
+    runner = Runner(settings=settings, jobs=1, keep_workspace_after_run=True, output_directory=str(workspace))
+
+    with pytest.raises(ValueError, match="inside the working directory"):
+        runner.run()
+    assert input_file.read_text() == input_text
 
 
 @pytest.mark.skipif(sys.platform == "win32", reason="simulator mocks don't work on Windows")
@@ -334,6 +414,94 @@ def test_get_data_reads_only_last_run(tmp_path: Path):
     expected = fromfile(str(bdo_dir / "normalisation-5_aggregation-mean_0002.bdo"))
     assert estimator.file_counter == 2
     assert estimator.pages[0].data_raw == pytest.approx(expected.pages[0].data_raw)
+
+
+@pytest.mark.skipif(sys.platform == "win32", reason="simulator mocks don't work on Windows")
+def test_get_data_on_new_runner(tmp_path: Path):
+    """A Runner which did not run reads the working directories found in the workspace"""
+    bdo_file = Path(__file__).resolve().parent / "res" / "shieldhit" / "averaging" / \
+        "normalisation-5_aggregation-mean_0001.bdo"
+    executable = make_mock_simulator(tmp_path / "bin" / "shieldhit", f'cp "{bdo_file}" dose.bdo\n')
+    first_runner = run_shieldhit_mock(tmp_path, executable, jobs=2, keep_workspace_after_run=True)
+
+    new_runner = Runner(settings=first_runner.settings,
+                        jobs=2,
+                        output_directory=first_runner.workspace_manager.output_dir_absolute_path)
+
+    assert new_runner.get_data()["dose"].file_counter == 2
+
+
+@pytest.mark.parametrize("input_name, simulator_type", [
+    ("input.inp", SimulatorType.fluka),
+    ("input.txt", SimulatorType.topas),
+])
+def test_get_data_without_working_directories(input_name: str, simulator_type: SimulatorType, tmp_path: Path):
+    """No working directories in the workspace is an error"""
+    input_file = tmp_path / input_name
+    input_file.write_text("x\n")
+    settings = SimulationSettings(input_path=str(input_file),
+                                  simulator_type=simulator_type,
+                                  simulator_exec_path="simulator")
+    runner = Runner(settings=settings, jobs=2, output_directory=str(tmp_path / "ws"))
+
+    with pytest.raises(FileNotFoundError, match="run_"):
+        runner.get_data()
+
+
+@pytest.mark.skipif(sys.platform == "win32", reason="simulator mocks don't work on Windows")
+def test_topas_runs_one_process(tmp_path: Path, monkeypatch: pytest.MonkeyPatch):
+    """TOPAS parallelizes itself, so it runs as one process whatever the number of jobs"""
+    pool_sizes = []
+
+    class RecordingPool:
+        """Runs the jobs one after another and records the requested number of processes"""
+
+        def __init__(self, processes: int):
+            pool_sizes.append(processes)
+
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *exc_info):
+            return False
+
+        @staticmethod
+        def map(function, items):
+            results = []
+            for item in items:
+                results.append(function(item))
+            return results
+
+    monkeypatch.setattr(runner_module, "Pool", RecordingPool)
+    input_file = tmp_path / "input.txt"
+    input_file.write_text("i:Ts/NumberOfThreads = 1\n")
+    executable = make_mock_simulator(tmp_path / "bin" / "topas", "true\n")
+    settings = SimulationSettings(input_path=str(input_file),
+                                  simulator_type=SimulatorType.topas,
+                                  simulator_exec_path=str(executable))
+    Runner(settings=settings, jobs=4, output_directory=str(tmp_path / "ws")).run()
+
+    assert pool_sizes == [1]
+
+
+def test_settings_str_is_command(tmp_path: Path):
+    """str(settings) is the command of command_as_list, as yaptide splits it on spaces"""
+    shieldhit_settings = SimulationSettings(input_path=str(make_shieldhit_input(tmp_path / "input")),
+                                            simulator_type=SimulatorType.shieldhit,
+                                            simulator_exec_path="/opt/shieldhit",
+                                            cmdline_opts="")
+    shieldhit_settings.set_rng_seed(7)
+    assert str(shieldhit_settings) == "/opt/shieldhit -N 7"
+    assert str(shieldhit_settings).split() == shieldhit_settings.command_as_list()
+
+    fluka_input = tmp_path / "input.inp"
+    fluka_input.write_text("x\n")
+    fluka_settings = SimulationSettings(input_path=str(fluka_input),
+                                        simulator_type=SimulatorType.fluka,
+                                        simulator_exec_path="/opt/rfluka",
+                                        cmdline_opts="-N0 -M 1")
+    assert str(fluka_settings) == "/opt/rfluka -N0 -M 1"
+    assert str(fluka_settings).split() == fluka_settings.command_as_list()
 
 
 @pytest.mark.skipif(sys.platform == "win32", reason="simulator mocks don't work on Windows")
@@ -357,14 +525,16 @@ def test_executable_path_with_space(tmp_path: Path):
 @pytest.mark.parametrize("randomiz_line, expected_seed", [
     ("RANDOMIZ          1.      777.\n", 777),
     ("RANDOMIZ          1.\n", 0),
-    ("RANDOMIZ, 1., 777.\n", 777),
+    ("RANDOMIZ          1.                    5.\n", 0),
+    ("FREE\nRANDOMIZ, 1., 777.\nFIXED\n", 777),
+    ("", 0),
 ])
 def test_fluka_user_seed(randomiz_line: str, expected_seed: int, tmp_path: Path):
-    """WHAT(2) of the RANDOMIZ card is read in fixed and free format"""
+    """WHAT(2) of the RANDOMIZ card is read in fixed and free format, 0 if empty or no card"""
     input_file = tmp_path / "input.inp"
     input_file.write_text("TITLE\nx\n" + randomiz_line + "START           100.\nSTOP\n")
 
-    assert Runner._read_fluka_rng_seed(str(input_file)) == expected_seed
+    assert FlukaEnvironment.read_rng_seed(str(input_file)) == expected_seed
 
 
 def test_fluka_randomiz_added_before_start(tmp_path: Path):

@@ -1,9 +1,7 @@
-from copy import deepcopy
 from glob import glob
 import logging
 import os
 from pathlib import Path
-import re
 import shlex
 import shutil
 import subprocess
@@ -12,8 +10,7 @@ from multiprocessing import Pool
 
 from enum import IntEnum
 from typing import List, Tuple
-from pymchelper.flair import Input
-from pymchelper.executor.options import SimulationSettings
+from pymchelper.executor.options import FlukaEnvironment, SimulationSettings
 
 from pymchelper.simulator_type import SimulatorType
 from pymchelper.readers.topas import get_topas_estimators
@@ -62,42 +59,16 @@ class Runner:
         """
         start_time = timeit.default_timer()
 
-        if self.settings.simulator_type == SimulatorType.topas:
-            # For TOPAS we don't need to create multiple working directories and a pool of workers,
-            # as we can use embedded parallelization in TOPAS: one working directory, one process,
-            # and the number of threads in the input file set to the number of jobs.
-            job_numbers = [1]
-        else:
-            job_numbers = list(range(1, self.jobs + 1))
+        environment = self.settings.mc_environment
+        job_numbers = environment.job_numbers(self.jobs)
 
         # create working directories, each with its own copy of the input files
         self.workspace_manager.create_working_directories(simulation_input_path=self.settings.input_path,
                                                           job_numbers=job_numbers)
 
-        # each job gets its own RNG seed: the seed given by the user (0 if none) plus the job number,
-        # so jobs differ from each other and runs with different user seeds differ from each other
         commands_and_working_dirs = []
         for job_number, working_dir in zip(job_numbers, self.workspace_manager.working_directories_abs_paths):
-
-            if self.settings.simulator_type == SimulatorType.shieldhit:
-                job_settings = deepcopy(self.settings)  # do not modify original arguments
-                job_settings.set_rng_seed(self.settings.get_rng_seed() + job_number)
-                command = job_settings.command_as_list()
-                command.append(working_dir)
-
-            elif self.settings.simulator_type == SimulatorType.fluka:
-                input_file_copy = str(Path(working_dir) / Path(self.settings.input_path).name)
-                user_seed = self._read_fluka_rng_seed(self.settings.input_path)
-                self.__update_fluka_input_file(input_file_copy, user_seed + job_number)
-                command = self.settings.command_as_list()
-                command.append(input_file_copy)
-
-            elif self.settings.simulator_type == SimulatorType.topas:
-                # TOPAS takes the parameter file as its first argument, and the seed from i:Ts/Seed in that file
-                input_file_copy = Path(working_dir) / Path(self.settings.input_path).name
-                self._set_topas_number_of_threads(input_file_copy, self.jobs)
-                command = [os.path.abspath(self.settings.executable_path), input_file_copy.name]
-
+            command = environment.job_command(self.settings, job_number, self.jobs, working_dir)
             commands_and_working_dirs.append((command, working_dir))
 
         # create executor callable object for current run
@@ -106,7 +77,7 @@ class Runner:
         try:
             # start execution using pool of workers, mapping the executor callable object to the commands
             # leaving the `with` block terminates the pool, also when a simulator fails
-            with Pool(processes=self.jobs) as pool:
+            with Pool(processes=len(commands_and_working_dirs)) as pool:
                 pool.map(executor, commands_and_working_dirs)
         except KeyboardInterrupt:
             logging.info('Pool is terminated')
@@ -122,6 +93,7 @@ class Runner:
         """
         Takes all output files from the working directories of the last run (like run_1, run_2),
         merges their content to form pymchelper Estimator objects.
+        If `run` was not called on this Runner, all run_* directories in the workspace are read.
         For each of the output file a single Estimator objects is created, which holds numpy arrays with results.
         Return dictionary with keys being output filenames, and values being Estimator objects
         """
@@ -129,24 +101,22 @@ class Runner:
 
         # only the directories of the last run: run_* directories left by earlier runs must not be merged
         working_dirs = self.workspace_manager.working_directories_abs_paths
+        if not working_dirs:
+            # run() was not called on this Runner: read the working directories found in the workspace
+            working_dirs_pattern = os.path.join(self.workspace_manager.output_dir_absolute_path, "run_*")
+            working_dirs = sorted(glob(working_dirs_pattern))
+            if not working_dirs:
+                raise FileNotFoundError(f"No working directories {working_dirs_pattern}")
 
         estimators_dict = {}
-        estimators_list = []
 
-        if self.settings.simulator_type == SimulatorType.shieldhit:
-            output_files = []
-            for working_dir in working_dirs:
-                output_files += sorted(glob(os.path.join(working_dir, "*.bdo")))
-            logging.debug("Files to merge %s", output_files)
-            estimators_list = frompattern(output_files)
-
-        elif self.settings.simulator_type == SimulatorType.topas:
+        if self.settings.simulator_type == SimulatorType.topas:
             estimators_list = get_topas_estimators(working_dirs[0])
-
-        elif self.settings.simulator_type == SimulatorType.fluka:
+        else:
             output_files = []
             for working_dir in working_dirs:
-                output_files += sorted(glob(os.path.join(working_dir, "*_fort.*")))
+                output_files_pattern = os.path.join(working_dir, self.settings.mc_environment.output_files_pattern)
+                output_files += sorted(glob(output_files_pattern))
             logging.debug("Files to merge %s", output_files)
             estimators_list = frompattern(output_files)
 
@@ -162,81 +132,8 @@ class Runner:
         """Removes all working directories (if exists)"""
         self.workspace_manager.clean()
 
-    @staticmethod
-    def _set_topas_number_of_threads(input_file: Path, number_of_threads: int):
-        """Sets i:Ts/NumberOfThreads in the TOPAS parameter file, adding the line if it is missing"""
-        config = input_file.read_text()
-        if "i:Ts/NumberOfThreads" in config:
-            pattern = r"i:Ts/NumberOfThreads\s*=\s*\d+"
-            replacement = f"i:Ts/NumberOfThreads = {number_of_threads}"
-            config = re.sub(pattern, replacement, config)
-        else:
-            config = f"i:Ts/NumberOfThreads = {number_of_threads}\n" + config
-        input_file.write_text(config)
-
-    @staticmethod
-    def _read_fluka_rng_seed(input_file: str) -> int:
-        """
-        RNG seed set by the user in the FLUKA input: WHAT(2) of the RANDOMIZ card.
-        Returns 0 if there is no RANDOMIZ card or its WHAT(2) is empty.
-        """
-        with open(input_file, 'r') as f:
-            lines = f.readlines()
-        for line in lines:
-            if not line.startswith('RANDOMIZ'):
-                continue
-
-            # fixed format: WHAT(2) is in columns 21-30
-            what2 = line[20:30].strip()
-            try:
-                return int(float(what2))
-            except ValueError:
-                pass
-
-            # free format: keyword, WHAT(1), WHAT(2), ... separated by spaces or commas
-            fields = line.replace(",", " ").split()
-            if len(fields) < 3:
-                return 0
-            try:
-                return int(float(fields[2]))
-            except ValueError:
-                return 0
-        return 0
-
-    @staticmethod
-    def __update_fluka_input_file(destination: str, rng_seed: int):
-        """
-        Updates the FLUKA input file with the new RNG seed (WHAT(2) of the RANDOMIZ card).
-        If the file has no RANDOMIZ card, one is added before START: cards after START are read
-        only after the transport has started.
-        """
-        with open(destination, 'r') as destination_file:
-            lines = destination_file.readlines()
-
-        card = Input.Card("RANDOMIZ")
-        card.setWhat(1, 1.)
-        card.setWhat(2, rng_seed)
-        randomiz_line = card.toStr() + '\n'
-
-        has_randomize_card = False
-        for index, line in enumerate(lines):
-            if line.startswith('RANDOMIZ'):
-                lines[index] = randomiz_line
-                has_randomize_card = True
-
-        if not has_randomize_card:
-            start_index = None
-            for index, line in enumerate(lines):
-                if line.startswith('START'):
-                    start_index = index
-                    break
-            if start_index is None:
-                lines.append(randomiz_line)
-            else:
-                lines.insert(start_index, randomiz_line)
-
-        with open(destination, 'w') as destination_file:
-            destination_file.writelines(lines)
+    # yaptide calls Runner._Runner__update_fluka_input_file
+    __update_fluka_input_file = staticmethod(FlukaEnvironment.update_input_file)
 
 
 class SingleSimulationExecutor:
@@ -245,6 +142,8 @@ class SingleSimulationExecutor:
     """
 
     log_filename = "simulator.log"
+    # number of the last lines of the simulator output shown in the error when the simulator fails
+    log_lines_in_error = 20
 
     def __call__(self, command_and_working_dir: Tuple[List[str], str], **kwargs):
         """
@@ -267,7 +166,7 @@ class SingleSimulationExecutor:
 
         if completed_process.returncode != 0:
             log_lines = log_path.read_text(errors='replace').splitlines()
-            last_lines = "\n".join(log_lines[-20:])
+            last_lines = "\n".join(log_lines[-self.log_lines_in_error:])
             raise RuntimeError(f"{shlex.join(command)} exited with code {completed_process.returncode}, "
                                f"last lines of {log_path}:\n{last_lines}")
 
@@ -287,7 +186,16 @@ class WorkspaceManager:
         """
         Create working directories and fill `self.working_directories_abs_paths`.
         A directory left by an earlier run is removed first, so no old output files stay in it.
+        Raises ValueError, before anything is removed, if the input is inside one of these directories.
         """
+        input_real_path = Path(simulation_input_path).resolve()
+        for job_number in job_numbers:
+            working_dir_real_path = Path(self.output_dir_absolute_path, f'run_{job_number:d}').resolve()
+            if input_real_path.is_relative_to(working_dir_real_path):
+                raise ValueError(f"Input {simulation_input_path} is inside the working directory "
+                                 f"{working_dir_real_path}, which is removed before the run; "
+                                 "move the input or choose another workspace directory")
+
         self.working_directories_abs_paths = []
         for job_number in job_numbers:
             # set workspace to a subdirectory of the output_directory, with run_* pattern
