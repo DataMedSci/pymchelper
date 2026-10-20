@@ -65,7 +65,7 @@ class JsonWriter:
             if page.dimension == 0:
                 page_dict["data"]["values"] = [page.data_raw.tolist()]
             else:
-                page_dict["data"]["values"] = page.data.ravel(order='F').tolist()  # first axis fastest
+                page_dict["data"]["values"] = page.data_raw.tolist()
 
             for i in range(page.dimension):
                 axis: MeshAxis = page.plot_axis(i)

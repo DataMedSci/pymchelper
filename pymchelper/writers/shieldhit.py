@@ -153,7 +153,11 @@ class TxtWriter(Writer):
         return header
 
     def write(self, estimator: Estimator) -> int:
-        """TODO"""
+        """
+        Write each page to a txt file in the layout of the SHIELD-HIT12A bdo2txt converter.
+
+        Input formats other than BDO are written as well, but an error is logged first.
+        """
         if estimator.file_format not in {'bdo2016', 'bdo2019'}:
             logger.error("Unsupported file format: %s", estimator.file_format)
             logger.error("This converter is designed for SHIELD-HIT12A output files only.")
@@ -161,7 +165,18 @@ class TxtWriter(Writer):
         return super().write(estimator)
 
     def write_single_page(self, page: 'Page', output_path: Path) -> None:
-        """TODO"""
+        """
+        Write the header and one row per bin: x, y, z, value and, if the page has errors, the error.
+
+        Rows go through the bins with x fastest, then y, then z.
+        Zone scorers get x = 0 and planes from old BDO files (written before 0.6) get the plane centre
+        as coordinates of every row.
+        Pages with differential axes raise ValueError, as this layout has no columns for them.
+        """
+        if page.diff_axis1.n > 1 or page.diff_axis2.n > 1:
+            raise ValueError(f"Page {page.name} has differential axes, txt output has no columns for them. "
+                             "Please use convertmc plotdata converter instead.")
+
         self.ax = self._axis_name(page.estimator.geotyp, 0)
         self.ay = self._axis_name(page.estimator.geotyp, 1)
         self.az = self._axis_name(page.estimator.geotyp, 2)

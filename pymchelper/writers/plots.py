@@ -48,9 +48,8 @@ class PlotDataWriter(Writer):
             # Generate meshgrids for each axis to create coordinate columns
             coordinate_meshgrids = np.meshgrid(*axis_data_arrays, indexing='ij')
 
-            # Flatten each coordinate grid using the same order as the data
-            # This ensures coordinates match the data layout from the binary file
-            coordinate_columns = [mesh_grid.ravel(order=page.data_order) for mesh_grid in coordinate_meshgrids]
+            # Flatten each coordinate grid with the first axis fastest, as data_raw is stored
+            coordinate_columns = [mesh_grid.ravel(order='F') for mesh_grid in coordinate_meshgrids]
 
             # Flatten the data array to match coordinate columns
             # Build list of columns to save: coordinates + data
@@ -150,7 +149,7 @@ class ImageWriter(Writer):
 
             xspan = [plot_x_axis.min_val, plot_x_axis.max_val]
             yspan = [plot_y_axis.min_val, plot_y_axis.max_val]
-            zdata = np.squeeze(page.data).T  # (n_x, n_y) -> rows along the vertical axis
+            zdata = data_raw.reshape((plot_y_axis.n, plot_x_axis.n))
 
             plt.xlabel(x_axis_label)
             plt.ylabel(y_axis_label)
