@@ -211,6 +211,23 @@ def _diff_axis_binning(diff_flag: Optional[NDArray], index: int) -> MeshAxis.Bin
     return MeshAxis.BinningType.linear
 
 
+def _fix_swapped_unit_tags(page: Page) -> None:
+    """
+    Files from SHIELD-HIT12A v1.0.1 have the units in swapped tags: the ;-separated list (data;diff1;diff2)
+    in detector_unit and the full unit in page_diff_units. Swap them back, so both follow binary_spec.py.
+
+    :param page: page under construction; mutated in place
+    """
+    detector_unit = getattr(page, 'detector_unit', None)
+    page_diff_units = getattr(page, 'page_diff_units', None)
+    if detector_unit is None or page_diff_units is None:
+        return
+
+    if ";" in detector_unit and ";" not in page_diff_units:
+        page.detector_unit = page_diff_units
+        page.page_diff_units = detector_unit
+
+
 def _set_diff_axes(page: Page) -> None:
     """
     Populate page.diff_axis1 and page.diff_axis2, if differential scoring data is present.
@@ -224,9 +241,10 @@ def _set_diff_axes(page: Page) -> None:
     """
     diff_flag = getattr(page, 'page_diff_flag', None)
 
+    # page_diff_units holds data;diff1;diff2, position 0 is the unit of the data itself
     try:
         try:
-            first_axis_unit = page.page_diff_units.split(";")[0]
+            first_axis_unit = page.page_diff_units.split(";")[1]
         except IndexError:
             first_axis_unit = ""
         page.diff_axis1 = MeshAxis(n=page.page_diff_size[0],
@@ -240,7 +258,7 @@ def _set_diff_axes(page: Page) -> None:
 
     try:
         try:
-            second_axis_unit = page.page_diff_units.split(";")[1]
+            second_axis_unit = page.page_diff_units.split(";")[2]
         except IndexError:
             second_axis_unit = ""
         page.diff_axis2 = MeshAxis(n=page.page_diff_size[1],
@@ -261,6 +279,7 @@ def _finalize_estimator(estimator: Estimator) -> None:
     """
     # Check if we have differential scoring, i.e. data dimension is larger than 1:
     for page in estimator.pages:
+        _fix_swapped_unit_tags(page)
         _set_diff_axes(page)
 
     # Special treatment for MCPL detector
