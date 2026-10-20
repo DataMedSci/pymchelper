@@ -5,6 +5,7 @@ Tool for creating MC input files using user-specified tables and ranges.
 """
 
 import argparse
+import itertools
 import logging
 import math
 import os
@@ -29,8 +30,7 @@ class Config:
     const_dict: Dict[str, str] = field(default_factory=dict)
     # keys and values for table assignments
     table_dict: Dict[str, List[str]] = field(default_factory=dict)
-    path: Path = field(
-        default_factory=Path)  # full path to this file (may be relative)
+    path: Path = field(default_factory=Path)  # full path to this file (may be relative)
 
     # special const dict fields:
     files: List[str] = field(default_factory=list)
@@ -70,14 +70,9 @@ def read_config(path: PathLike, quiet: bool = True) -> Config:
 
     # replace string with comma-separated filenames with list of filenames
     if "FILES" in cfg.const_dict:
-        cfg.files = [
-            filename.strip() for filename in cfg.const_dict["FILES"].split(",")
-        ]
+        cfg.files = [filename.strip() for filename in cfg.const_dict["FILES"].split(",")]
     if "SYMLINKS" in cfg.const_dict:
-        cfg.symlinks = [
-            filename.strip()
-            for filename in cfg.const_dict["SYMLINKS"].split(",")
-        ]
+        cfg.symlinks = [filename.strip() for filename in cfg.const_dict["SYMLINKS"].split(",")]
     logger.debug(f"Config: {cfg}")
     if not quiet:
         print(f"Read config: {path!s}")
@@ -92,8 +87,7 @@ class McFile:
     This will be used for the template files as well as the generated output files.
     """
 
-    path: Path = field(
-        default_factory=Path)  # full path to this file (may be relative)
+    path: Path = field(default_factory=Path)  # full path to this file (may be relative)
     symlink: bool = False  # marker if file is a symlink
     lines: List[str] = field(default_factory=list)
 
@@ -138,8 +132,7 @@ class Template:
         loop_keys = []
         for key in cfg.table_dict.keys():
             if key.endswith("_MIN"):
-                # remove only the "MIN" suffix, i.e. "E_MIN" -> "E_"
-                loop_keys.append(key[:-len("MIN")])
+                loop_keys.append(key.removesuffix("MIN"))
 
         if not cfg.table_dict:
             logger.debug(f"Serving {current_dict}")
@@ -150,38 +143,28 @@ class Template:
             current_line_dict = dict(zip(cfg.table_dict.keys(), item))
             current_dict.update(current_line_dict)
 
-            if not loop_keys:
-                logger.debug(f"Serving {current_dict}")
-                yield current_dict
-
-            # now prepare the ranges for every loop_key
+            # without loop keys itertools.product yields one empty combination, so the line is served once
+            values_of_loop_keys = []
             for loop_key in loop_keys:
                 start = float(current_line_dict[loop_key + "MIN"])
                 stop = float(current_line_dict[loop_key + "MAX"])
                 step = float(current_line_dict[loop_key + "STEP"])
+                values_of_loop_keys.append(loop_values(start, stop, step))
 
-                # each value is computed from its step number, adding the step to a float would
-                # accumulate rounding errors and could drop the last value (i.e. 1.0 to 2.0 in 0.1 steps)
-                # small tolerance keeps the last value when (stop - start) / step is a whole number
-                number_of_steps = math.floor((stop - start) / step + 1e-9)
-                for step_number in range(number_of_steps + 1):
-                    loop_value = start + step_number * step
-                    # append values calculated for the loop
+            for combination in itertools.product(*values_of_loop_keys):
+                for loop_key, loop_value in zip(loop_keys, combination):
                     current_dict[loop_key] = loop_value
 
-                    # set the relative energy spread:
-                    if loop_key == 'E_' and "DE_FACTOR" in current_dict:
-                        _de = loop_value * float(current_dict["DE_FACTOR"])
-                        # HARDCODED format for DE_
-                        current_dict['DE_'] = f"{_de:.3f}"
+                # set the relative energy spread:
+                if 'E_' in loop_keys and "DE_FACTOR" in current_dict:
+                    _de = current_dict['E_'] * float(current_dict["DE_FACTOR"])
+                    # HARDCODED format for DE_
+                    current_dict['DE_'] = f"{_de:.3f}"
 
-                    logger.debug(f"Serving {current_dict}")
-                    yield current_dict
+                logger.debug(f"Serving {current_dict}")
+                yield current_dict
 
-    def write(self,
-              working_directory: PathLike,
-              cfg: Config,
-              quiet: bool = True):
+    def write(self, working_directory: PathLike, cfg: Config, quiet: bool = True):
         """Description needed."""
         if not quiet:
             print(f"Saving generated workspace to {working_directory!s}")
@@ -200,16 +183,12 @@ class Template:
                     _wd = _wd.replace(token, _s)
             work_dir = _wd
             if not work_dir:
-                print(
-                    f"Directory WDIR is not set in config file {cfg}, cannot proceed"
-                )
+                print(f"Directory WDIR is not set in config file {cfg}, cannot proceed")
 
             current_working_dir = Path(str(working_directory), work_dir)
             if current_working_dir.exists():
                 if not quiet:
-                    print(
-                        f"Workspace {current_working_dir} directory exists, cleaning ..."
-                    )
+                    print(f"Workspace {current_working_dir} directory exists, cleaning ...")
                 shutil.rmtree(current_working_dir)
                 current_working_dir.mkdir(parents=True)
 
@@ -233,15 +212,27 @@ class Template:
                     of.write()
                 else:
                     try:
-                        logger.debug(
-                            f'Creating link {output_file_path} -> {tf.path.resolve()}'
-                        )
+                        logger.debug(f'Creating link {output_file_path} -> {tf.path.resolve()}')
                         output_file_path.symlink_to(target=tf.path.resolve())
                     except OSError:
                         # try copying file in case creation of symbolic links fails
                         # this may be the case i.e. for Windows users without developer mode
                         # or without administrative rights
                         copyfile(src=tf.path, dst=output_file_path)
+
+
+def loop_values(start: float, stop: float, step: float) -> List[float]:
+    """
+    Values from start to stop (inclusive) in given steps.
+
+    Each value is computed from its step number, as adding the step repeatedly accumulates
+    float rounding errors. The stop value is kept when (stop - start) / step is a whole number.
+    """
+    number_of_steps = math.floor((stop - start) / step + 1e-9)
+    values = []
+    for step_number in range(number_of_steps + 1):
+        values.append(start + step_number * step)
+    return values
 
 
 def read_template(cfg: Config) -> Template:
@@ -300,22 +291,11 @@ def main(args=None):
                         type=Path,
                         default=Path('.').absolute() / "config.txt",
                         help="config file.")
-    parser.add_argument('-w',
-                        '--workspace',
-                        type=Path,
-                        default=Path('.').absolute(),
-                        help="workspace directory.")
-    parser.add_argument('-V',
-                        '--version',
-                        action='version',
-                        version=pymchelper.__version__)
+    parser.add_argument('-w', '--workspace', type=Path, default=Path('.').absolute(), help="workspace directory.")
+    parser.add_argument('-V', '--version', action='version', version=pymchelper.__version__)
     group = parser.add_mutually_exclusive_group()
     group.add_argument('-q', '--quiet', action="store_true", help="quiet mode")
-    group.add_argument('-v',
-                       '--verbosity',
-                       action='count',
-                       help="increase output verbosity",
-                       default=0)
+    group.add_argument('-v', '--verbosity', action='count', help="increase output verbosity", default=0)
     parsed_args = parser.parse_args(args)
 
     if parsed_args.verbosity == 1:
@@ -327,9 +307,7 @@ def main(args=None):
 
     cfg = read_config(path=parsed_args.config_path, quiet=parsed_args.quiet)
     t = read_template(cfg=cfg)
-    t.write(working_directory=parsed_args.workspace,
-            cfg=cfg,
-            quiet=parsed_args.quiet)
+    t.write(working_directory=parsed_args.workspace, cfg=cfg, quiet=parsed_args.quiet)
 
 
 if __name__ == '__main__':

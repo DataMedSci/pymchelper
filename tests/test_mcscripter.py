@@ -158,7 +158,42 @@ def test_energy_written_to_beam_file(tmp_path: Path):
     template.write(tmp_path, config)
 
     beam_file_lines = Path(tmp_path, 'wdir', '1H', '0246.000', 'beam.dat').read_text().splitlines()
-    tmax0_line = [line for line in beam_file_lines if line.startswith('TMAX0')][0]
+    tmax0_line = ''
+    for line in beam_file_lines:
+        if line.startswith('TMAX0'):
+            tmax0_line = line
     tokens = tmax0_line.split()
     assert tokens[1] == '246.000'
     assert tokens[2] == '2.460'
+
+
+def test_all_combinations_of_two_loop_keys(tmp_path: Path):
+    """Two loop keys in one table line give a directory for every combination of their values"""
+    template_directory = Path(tmp_path, 'template')
+    template_directory.mkdir()
+    Path(template_directory, 'beam.dat').write_text('TMAX0 ${E_}    ${DE_}\nNSTAT ${NSTAT_} -1\n')
+    config_path = Path(tmp_path, 'config.cfg')
+    config_path.write_text('TDIR = template\n'
+                           'WDIR = wdir/${NAME}/${E_}_${NSTAT_}\n'
+                           'FILES = beam.dat\n'
+                           'DE_FACTOR = 0.01\n'
+                           'NAME E_MIN E_MAX E_STEP NSTAT_MIN NSTAT_MAX NSTAT_STEP\n'
+                           '1H   60.0  70.0  10.0   1000      2000      1000\n')
+    config = pymchelper.utils.mcscripter.read_config(path=config_path)
+    template = pymchelper.utils.mcscripter.read_template(cfg=config)
+    template.write(tmp_path, config)
+
+    expected_beam_file_tokens = {
+        '0060.000_1000.000': ['TMAX0', '60.000', '0.600', 'NSTAT', '1000.000', '-1'],
+        '0060.000_2000.000': ['TMAX0', '60.000', '0.600', 'NSTAT', '2000.000', '-1'],
+        '0070.000_1000.000': ['TMAX0', '70.000', '0.700', 'NSTAT', '1000.000', '-1'],
+        '0070.000_2000.000': ['TMAX0', '70.000', '0.700', 'NSTAT', '2000.000', '-1'],
+    }
+    generated_directories = set()
+    for directory in Path(tmp_path, 'wdir', '1H').iterdir():
+        generated_directories.add(directory.name)
+    assert generated_directories == set(expected_beam_file_tokens)
+    for directory_name, expected_tokens in expected_beam_file_tokens.items():
+        beam_file_content = Path(tmp_path, 'wdir', '1H', directory_name, 'beam.dat').read_text()
+        assert '${' not in beam_file_content
+        assert beam_file_content.split() == expected_tokens
