@@ -33,9 +33,13 @@ def test_multiple_updates() -> None:
 
 
 def test_zero_weight() -> None:
+    """Only zero weights give no mean and no variance"""
     ws = WeightedStatsAggregator()
-    with pytest.raises(Exception):
-        ws.update(value=10, weight=0)
+    ws.update(value=10, weight=0)
+    ws.update(value=20, weight=0)
+    assert np.isnan(ws.mean)
+    assert np.isnan(ws.variance_population)
+    assert np.isnan(ws.stderr)
 
 
 def test_negative_weight() -> None:
@@ -176,7 +180,7 @@ def test_zero_weight_after_first_update() -> None:
     ws.update(np.array([5.0, 9.0]), 0)
 
     np.testing.assert_array_equal(ws.mean, [1.0, 2.0])
-    assert ws.total_weight == 2
+    np.testing.assert_array_equal(ws.total_weight, [2, 2])
 
 
 @pytest.mark.parametrize("weight", [np.int32(50_000), np.int64(10_000_000)])

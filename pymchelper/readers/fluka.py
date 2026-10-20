@@ -1,5 +1,7 @@
 from dataclasses import dataclass
 import logging
+import os
+import re
 from typing import Optional
 
 import numpy as np
@@ -40,10 +42,12 @@ class FlukaReader(Reader):
         Fluka output filenames follow this pattern: corename_fort.XX.
         :return: corename part of output file or None in case filename doesn't follow Fluka naming pattern
         """
-        core_name = None
-        if "_fort" in self.filename:
-            core_name = self.filename[-2:]
-        return core_name
+        # look only at the file name, a directory such as sim_fortran/ must not count
+        basename = os.path.basename(self.filename)
+        match = re.search(r"_fort\.(\d+)$", basename)
+        if match is None:
+            return None
+        return match.group(1)
 
     def parse_usrbin(self, estimator) -> Optional[Usrbin]:
         """
