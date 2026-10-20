@@ -12,7 +12,8 @@ import pytest
 
 from pymchelper.axis import MeshAxis
 from pymchelper.input_output import fromfile
-from pymchelper.readers.shieldhit.reader_bdo2019 import _diff_axis_binning
+from pymchelper.page import Page
+from pymchelper.readers.shieldhit.reader_bdo2019 import _diff_axis_binning, _fix_swapped_unit_tags
 
 res_dir = Path("tests") / "res" / "shieldhit" / "diff_scoring"
 
@@ -92,3 +93,44 @@ def test_diff_axis_binning_reads_correct_element_of_two_element_array():
     flags = np.array([-1, 1])
     assert _diff_axis_binning(flags, 0) == MeshAxis.BinningType.logarithmic
     assert _diff_axis_binning(flags, 1) == MeshAxis.BinningType.linear
+
+
+@pytest.mark.smoke
+@pytest.mark.parametrize("file_name, first_axis_unit, second_axis_unit", [
+    ("fluence_elin.bdo", "MeV", ""),
+    ("fluence_elog.bdo", "MeV", ""),
+    ("fluence_2d_lin.bdo", "MeV", "deg"),
+    ("fluence_2d_log.bdo", "MeV", "deg"),
+])
+def test_diff_axis_units(file_name: str, first_axis_unit: str, second_axis_unit: str):
+    """page_diff_units holds data;diff1;diff2, each differential axis gets its own unit, not the one before it."""
+    page = fromfile(res_dir / file_name).pages[0]
+
+    assert page.diff_axis1.unit == first_axis_unit
+    assert page.diff_axis2.unit == second_axis_unit
+
+
+@pytest.mark.smoke
+def test_swapped_unit_tags_from_v1_0_1():
+    """SHIELD-HIT12A v1.0.1 writes the ;-separated units into detector_unit, they are swapped back."""
+    page = Page()
+    page.detector_unit = "/cm^2;MeV"
+    page.page_diff_units = "/cm^2/MeV"
+
+    _fix_swapped_unit_tags(page)
+
+    assert page.detector_unit == "/cm^2/MeV"
+    assert page.page_diff_units == "/cm^2;MeV"
+
+
+@pytest.mark.smoke
+def test_unit_tags_without_differential_scoring_stay():
+    """Pages without differential scoring have the same unit in both tags, nothing is swapped."""
+    page = Page()
+    page.detector_unit = "MeV/g"
+    page.page_diff_units = "MeV/g"
+
+    _fix_swapped_unit_tags(page)
+
+    assert page.detector_unit == "MeV/g"
+    assert page.page_diff_units == "MeV/g"
