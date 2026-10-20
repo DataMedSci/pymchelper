@@ -76,7 +76,7 @@ class TRiP98CubeWriter:
 
             return 0
 
-        elif page.dettyp in (SHDetType.dlet, SHDetType.tlet, SHDetType.dletg, SHDetType.tletg):
+        if page.dettyp in (SHDetType.dlet, SHDetType.tlet, SHDetType.dletg, SHDetType.tletg):
 
             from pytrip import let
 
@@ -108,6 +108,5 @@ class TRiP98CubeWriter:
 
             return 0
 
-        else:
-            logger.error("Tripcube target is only allowed with dose- or LET-type detectors.")
-            raise Exception("Illegal detector for tripcube.")
+        logger.error("Tripcube target is only allowed with dose- or LET-type detectors.")
+        raise Exception("Illegal detector for tripcube.")

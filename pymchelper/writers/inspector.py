@@ -45,7 +45,7 @@ class Inspector:
                     try:
                         from hipsterplot import plot
                         print(75 * "*")
-                        print("Page {} / {} data scatter plot".format(page_no, len(estimator.pages)))
+                        print(f"Page {page_no} / {len(estimator.pages)} data scatter plot")
                         plot(page.data_raw)
                     except ImportError:
                         logger.warning("Detailed summary requires installation of hipsterplot package")
@@ -53,7 +53,7 @@ class Inspector:
                 try:
                     from bashplotlib.histogram import plot_hist
                     print(75 * "*")
-                    print("Page {} / {} data histogram".format(page_no, len(estimator.pages)))
+                    print(f"Page {page_no} / {len(estimator.pages)} data histogram")
                     plot_hist(page.data_raw, bincount=70, xlab=False, showSummary=True)
                 except ImportError:
                     logger.warning("Detailed summary requires installation of bashplotlib package")
