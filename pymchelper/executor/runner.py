@@ -254,14 +254,16 @@ class SingleSimulationExecutor:
         # we deliberately combine command and working directory in the single argument
         # as this would simplify using this class by multiprocessing module
         command, working_dir_abs_path = command_and_working_dir
-        logging.debug('working directory {:s}, command {:s}'.format(working_dir_abs_path, shlex.join(command)))
+        logging.debug('working directory %s, command %s', working_dir_abs_path, shlex.join(command))
 
         log_path = Path(working_dir_abs_path) / self.log_filename
         with open(log_path, 'w') as log_file:
+            # check=False: the return code is checked below, so the error can show the simulator output
             completed_process = subprocess.run(command,
                                                cwd=working_dir_abs_path,
                                                stdout=log_file,
-                                               stderr=subprocess.STDOUT)
+                                               stderr=subprocess.STDOUT,
+                                               check=False)
 
         if completed_process.returncode != 0:
             log_lines = log_path.read_text(errors='replace').splitlines()
@@ -290,7 +292,7 @@ class WorkspaceManager:
         for job_number in job_numbers:
             # set workspace to a subdirectory of the output_directory, with run_* pattern
             # i.e. /home/user/output/run_3
-            working_dir_abs_path = os.path.join(self.output_dir_absolute_path, 'run_{:d}'.format(job_number))
+            working_dir_abs_path = os.path.join(self.output_dir_absolute_path, f'run_{job_number:d}')
             logging.info("Workspace {:s}".format(working_dir_abs_path))
 
             if os.path.exists(working_dir_abs_path):

@@ -117,7 +117,7 @@ class SimulationSettings:
                 return
 
         # If RNG seed is missing on the option list, then the code below will set it to given value
-        self.cmdline_opts += " -N {:d}".format(rng_seed)
+        self.cmdline_opts += f" -N {rng_seed:d}"
 
     def get_rng_seed(self) -> int:
         """
