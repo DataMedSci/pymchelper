@@ -21,12 +21,21 @@ logger = logging.getLogger(__name__)
 class TestSHGenerate(unittest.TestCase):
 
     def test_create(self):
-        outdir = os.path.join("tests", "res", "shieldhit", "generated")
-        gen.main([outdir])
-        for est in ("cyl", "geomap", "msh", "plane", "zone"):
-            logger.info("Estimator: " + est)
-            outfile = os.path.join(outdir, "detect_{:s}.dat".format(est))
-            self.assertTrue(os.path.isfile(outfile))
+        # generate into a temporary directory, the committed detect_*.dat files are inputs of generate_bdo.sh
+        fixtures_dir = os.path.join("tests", "res", "shieldhit", "generated")
+        with tempfile.TemporaryDirectory() as outdir:
+            gen.main([outdir])
+            for est in ("cyl", "geomap", "msh", "plane", "zone"):
+                logger.info("Estimator: " + est)
+                outfile = os.path.join(outdir, "detect_{:s}.dat".format(est))
+                self.assertTrue(os.path.isfile(outfile))
+
+                # same detectors as in the committed file, the generator writes them in a different order
+                with open(outfile) as generated_file:
+                    generated_lines = sorted(generated_file.read().splitlines())
+                with open(os.path.join(fixtures_dir, "detect_{:s}.dat".format(est))) as fixture_file:
+                    fixture_lines = sorted(fixture_file.read().splitlines())
+                self.assertEqual(generated_lines, fixture_lines)
 
 
 class TestSHGenerated(unittest.TestCase):
