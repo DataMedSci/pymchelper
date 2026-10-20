@@ -216,7 +216,7 @@ class TxtWriter(Writer):
         logger.info("Writing: %s", output_path)
         with open(output_path, 'w') as fout:  # skipcq: PTC-W6004
             fout.write(header)
-            chunk = 8192  # formatted rows held in memory at once
+            chunk = 1024  # formatted rows held in memory at once
             for start in range(0, xlist.size, chunk):
                 stop = start + chunk
                 formatted_columns = []
