@@ -200,7 +200,8 @@ def read_next_token(f):
     2: payload number of elements
     3: payload itself
     f is an open and readable file pointer.
-    returns None if no token was found / EOF
+    returns None at the end of the file.
+    raises ValueError if the file ends inside a token or a token has an unknown payload type.
     """
     tag = np.dtype([('pl_id', '<u8'), ('pl_type', 'S8'), ('pl_len', '<u8')])
 
@@ -209,19 +210,20 @@ def read_next_token(f):
         return None
     if len(raw_tag) < tag.itemsize:
         raise ValueError(f"{f.name}: file ends inside a token header, it is truncated")
-    x1 = np.frombuffer(raw_tag, dtype=tag)
-    pl_id = x1['pl_id'][0]
-    pl_type = x1['pl_type'][0]
-    pl_len = x1['pl_len'][0]
+    token_header = np.frombuffer(raw_tag, dtype=tag)
+    pl_id = token_header['pl_id'][0]
+    pl_type = token_header['pl_type'][0]
+    pl_len = token_header['pl_len'][0]
     try:
         pl_dtype = np.dtype(pl_type)
     except TypeError:
-        return None
+        raise ValueError(f"{f.name}: token 0x{pl_id:02x} has unknown payload type {pl_type}, the file is corrupted")
     pl = np.empty(int(pl_len), dtype=pl_dtype)
     n_read = f.readinto(pl)
     if n_read != pl.nbytes:
-        raise ValueError(f"{f.name}: file ends inside token 0x{pl_id:02x} ({n_read // pl_dtype.itemsize} of {pl_len} "
-                         "values), it is truncated")
+        values_read = n_read // pl_dtype.itemsize
+        raise ValueError(f"{f.name}: file ends inside token 0x{pl_id:02x} ({values_read} of {pl_len} values), "
+                         "it is truncated")
     return pl_id, pl_type, pl_len, pl
 
 

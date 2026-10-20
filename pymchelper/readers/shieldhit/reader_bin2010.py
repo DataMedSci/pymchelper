@@ -81,7 +81,7 @@ class SHReaderBin2010(SHReader):
             estimator.payload_offset = 158
 
         header = np.fromfile(self.filename, header_dtype, count=1)
-        if not header.size:
+        if header.size == 0:
             logger.error("%s: file ends inside the header, it is truncated", self.filename)
             return None
         estimator.rec_size = header['reclen'][0] // 8
@@ -189,7 +189,7 @@ class SHReaderBin2010(SHReader):
         else:
             record_dtype = np.dtype([('trash', offset_str), ('bin2', '<f8', estimator.rec_size)])
         record = np.fromfile(self.filename, record_dtype, count=-1)
-        if not record.size:
+        if record.size == 0:
             logger.error("%s: file ends inside the data, it is truncated", self.filename)
             return None
         # BIN(*)  : a large array holding results. Accessed using pointers.

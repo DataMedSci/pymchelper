@@ -14,7 +14,6 @@ from pymchelper.readers.topas import TopasReaderFactory
 from pymchelper.readers.fluka import FlukaReader, FlukaReaderFactory
 from pymchelper.readers.shieldhit.general import SHReaderFactory
 from pymchelper.readers.shieldhit.reader_base import SHReader
-from pymchelper.shieldhit.detector.detector_type import SHDetType
 from pymchelper.writers.common import Converters
 
 logger = logging.getLogger(__name__)
@@ -84,35 +83,22 @@ def fromfile(filename: str) -> Estimator:
     which are normalized by the number of primaries after by the Reader responsible for parsing binary files.
     This way dose and fluence (and other similar quantities) are saved in Estimator as "per primary" values.
     Fluka on the other hand saves dose and fluence as "per primary" values, so no normalization is needed.
+    Raises ValueError if the file format is not recognised, or the file is truncated, corrupted or unreadable.
     """
 
     reader = guess_reader(filename)
     if reader is None:
-        raise Exception("File format not compatible", filename)
+        raise ValueError(f"File format not compatible: {filename}")
     estimator = Estimator()
     estimator.file_counter = 1
     if not reader.read(estimator):  # some problems occurred during read
         raise ValueError(f"Error reading file {filename}")
-    if not estimator.pages:
-        raise ValueError(f"{filename}: no pages, the file is truncated or corrupted")
-    for page in estimator.pages:
-        if page.dettyp == SHDetType.mcpl:
-            # phase space data holds 8 values per particle
-            if page.data_raw.size % 8 != 0:
-                raise ValueError(f"{filename}: page {page.name} holds {page.data_raw.size} values, "
-                                 "not a multiple of 8, the file is truncated or corrupted")
-            continue
-
-        expected_size = estimator.x.n * estimator.y.n * estimator.z.n * page.diff_axis1.n * page.diff_axis2.n
-        if page.data_raw.size != expected_size:
-            raise ValueError(f"{filename}: page {page.name} holds {page.data_raw.size} values "
-                             f"instead of {expected_size}, the file is truncated or corrupted")
     return estimator
 
 
 def fromfilelist(input_file_list: Union[List[str], str],
                  error: ErrorEstimate = ErrorEstimate.stderr,
-                 nan: bool = False) -> Optional[Estimator]:
+                 nan: bool = False) -> Estimator:
     """
     Reads all files from a given list using `fromfile` method, and returns a list of averaged estimators.
 
@@ -129,12 +115,8 @@ def fromfilelist(input_file_list: Union[List[str], str],
         result = average_with_nan(estimator_list, error)
     elif len(input_file_list) == 1:
         result = fromfile(input_file_list[0])
-        if not result:
-            return None
     else:
         result = fromfile(input_file_list[0])
-        if not result:
-            return None
 
         # _aggregator_mapping maps SHIELD-HIT12A normalization types (integers) to pymchelper aggregators
         # using enums for clarity. AveragingCumulative (e.g., dose) and AveragingPerPrimary (e.g., LET)
@@ -193,9 +175,7 @@ def fromfilelist(input_file_list: Union[List[str], str],
     return result
 
 
-def frompattern(pattern: str,
-                error: ErrorEstimate = ErrorEstimate.stderr,
-                nan: bool = True) -> List[Optional[Estimator]]:
+def frompattern(pattern: str, error: ErrorEstimate = ErrorEstimate.stderr, nan: bool = True) -> List[Estimator]:
     """
     Reads all files matching pattern, e.g.: 'foobar_*.bdo', and returns a list of averaged estimators.
 
@@ -237,18 +217,16 @@ def convertfromlist(filelist: List[str],
                     outputdir: Optional[str],
                     converter_name: str,
                     options: dict,
-                    outputfile: Optional[str] = None) -> Optional[int]:
+                    outputfile: Optional[str] = None) -> int:
     """Convert a list of input files into a single output using a chosen converter.
 
     - Reads and optionally averages inputs (`nan` controls NaN handling).
     - Resolves output path (`outputfile` overrides, else uses `outputdir` or corename).
     - Writes via `converter_name` with `options`.
 
-    Returns status code from the writer, or None if reading failed.
+    Returns status code from the writer. Raises ValueError if an input file can't be read.
     """
     estimator = fromfilelist(filelist, error, nan)
-    if not estimator:
-        return None
     if outputfile is not None:
         output_path = outputfile
     elif outputdir is None:
