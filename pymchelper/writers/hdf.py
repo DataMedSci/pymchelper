@@ -1,6 +1,5 @@
 import logging
 
-from pymchelper.axis import AxisId
 from pymchelper.estimator import Estimator
 
 logger = logging.getLogger(__name__)
@@ -52,24 +51,20 @@ class HdfWriter:
                 dset.attrs['unit'] = page.unit
                 dset.attrs['nstat'] = estimator.number_of_primaries
                 dset.attrs['counter'] = estimator.file_counter
-                # mesh is taken from the page, FLUKA pages in one file can have different meshes
-                x_axis = page.axis(AxisId.x)
-                y_axis = page.axis(AxisId.y)
-                z_axis = page.axis(AxisId.z)
-                dset.attrs['xaxis_n'] = x_axis.n
-                dset.attrs['xaxis_min'] = x_axis.min_val
-                dset.attrs['xaxis_max'] = x_axis.max_val
-                dset.attrs['xaxis_name'] = x_axis.name
-                dset.attrs['xaxis_unit'] = x_axis.unit
-                dset.attrs['yaxis_n'] = y_axis.n
-                dset.attrs['yaxis_min'] = y_axis.min_val
-                dset.attrs['yaxis_max'] = y_axis.max_val
-                dset.attrs['yaxis_name'] = y_axis.name
-                dset.attrs['yaxis_unit'] = y_axis.unit
-                dset.attrs['zaxis_n'] = z_axis.n
-                dset.attrs['zaxis_min'] = z_axis.min_val
-                dset.attrs['zaxis_max'] = z_axis.max_val
-                dset.attrs['zaxis_name'] = z_axis.name
-                dset.attrs['zaxis_unit'] = z_axis.unit
+                dset.attrs['xaxis_n'] = page.x.n
+                dset.attrs['xaxis_min'] = page.x.min_val
+                dset.attrs['xaxis_max'] = page.x.max_val
+                dset.attrs['xaxis_name'] = page.x.name
+                dset.attrs['xaxis_unit'] = page.x.unit
+                dset.attrs['yaxis_n'] = page.y.n
+                dset.attrs['yaxis_min'] = page.y.min_val
+                dset.attrs['yaxis_max'] = page.y.max_val
+                dset.attrs['yaxis_name'] = page.y.name
+                dset.attrs['yaxis_unit'] = page.y.unit
+                dset.attrs['zaxis_n'] = page.z.n
+                dset.attrs['zaxis_min'] = page.z.min_val
+                dset.attrs['zaxis_max'] = page.z.max_val
+                dset.attrs['zaxis_name'] = page.z.name
+                dset.attrs['zaxis_unit'] = page.z.unit
 
         return 0

@@ -58,21 +58,21 @@ def test_hdf_generation(manypage_bdo_path: Path, tmp_path: Path, monkeypatch: py
             assert hf[f"data_{page_no}"].attrs["unit"] == page.unit
             assert hf[f"data_{page_no}"].attrs["nstat"] == estimator_data.number_of_primaries
             assert hf[f"data_{page_no}"].attrs["counter"] == estimator_data.file_counter
-            assert hf[f"data_{page_no}"].attrs["xaxis_n"] == estimator_data.x.n
-            assert hf[f"data_{page_no}"].attrs["xaxis_min"] == estimator_data.x.min_val
-            assert hf[f"data_{page_no}"].attrs["xaxis_max"] == estimator_data.x.max_val
-            assert hf[f"data_{page_no}"].attrs["yaxis_n"] == estimator_data.y.n
-            assert hf[f"data_{page_no}"].attrs["yaxis_min"] == estimator_data.y.min_val
-            assert hf[f"data_{page_no}"].attrs["yaxis_max"] == estimator_data.y.max_val
-            assert hf[f"data_{page_no}"].attrs["zaxis_n"] == estimator_data.z.n
-            assert hf[f"data_{page_no}"].attrs["zaxis_min"] == estimator_data.z.min_val
-            assert hf[f"data_{page_no}"].attrs["zaxis_max"] == estimator_data.z.max_val
-            assert hf[f"data_{page_no}"].attrs["xaxis_name"] == estimator_data.x.name
-            assert hf[f"data_{page_no}"].attrs["yaxis_name"] == estimator_data.y.name
-            assert hf[f"data_{page_no}"].attrs["zaxis_name"] == estimator_data.z.name
-            assert hf[f"data_{page_no}"].attrs["xaxis_unit"] == estimator_data.x.unit
-            assert hf[f"data_{page_no}"].attrs["yaxis_unit"] == estimator_data.y.unit
-            assert hf[f"data_{page_no}"].attrs["zaxis_unit"] == estimator_data.z.unit
+            assert hf[f"data_{page_no}"].attrs["xaxis_n"] == page.x.n
+            assert hf[f"data_{page_no}"].attrs["xaxis_min"] == page.x.min_val
+            assert hf[f"data_{page_no}"].attrs["xaxis_max"] == page.x.max_val
+            assert hf[f"data_{page_no}"].attrs["yaxis_n"] == page.y.n
+            assert hf[f"data_{page_no}"].attrs["yaxis_min"] == page.y.min_val
+            assert hf[f"data_{page_no}"].attrs["yaxis_max"] == page.y.max_val
+            assert hf[f"data_{page_no}"].attrs["zaxis_n"] == page.z.n
+            assert hf[f"data_{page_no}"].attrs["zaxis_min"] == page.z.min_val
+            assert hf[f"data_{page_no}"].attrs["zaxis_max"] == page.z.max_val
+            assert hf[f"data_{page_no}"].attrs["xaxis_name"] == page.x.name
+            assert hf[f"data_{page_no}"].attrs["yaxis_name"] == page.y.name
+            assert hf[f"data_{page_no}"].attrs["zaxis_name"] == page.z.name
+            assert hf[f"data_{page_no}"].attrs["xaxis_unit"] == page.x.unit
+            assert hf[f"data_{page_no}"].attrs["yaxis_unit"] == page.y.unit
+            assert hf[f"data_{page_no}"].attrs["zaxis_unit"] == page.z.unit
             # check if data is the same
             assert hf[f"data_{page_no}"].shape == page.data.shape
             assert hf[f"data_{page_no}"][:] == pytest.approx(page.data)

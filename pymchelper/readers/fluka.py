@@ -63,7 +63,6 @@ class FlukaReader(Reader):
 
                 axes_description = UsrbinScoring.get_axes_description(detector.type)
 
-                # detectors in one file can have different meshes, so the mesh is kept on the page
                 page.x = MeshAxis(n=detector.nx,
                                   min_val=detector.xlow,
                                   max_val=detector.xhigh,
@@ -110,19 +109,6 @@ class FlukaReader(Reader):
                 page.data_raw *= rescaling_factor
 
                 estimator.add_page(page)
-
-            # the estimator gets a mesh only if all detectors in the file share it,
-            # so `estimator.x` still works for files with a single detector
-            if estimator.pages:
-                first_page = estimator.pages[0]
-                all_pages_share_mesh = True
-                for other_page in estimator.pages:
-                    if (other_page.x, other_page.y, other_page.z) != (first_page.x, first_page.y, first_page.z):
-                        all_pages_share_mesh = False
-                if all_pages_share_mesh:
-                    estimator.x = first_page.x
-                    estimator.y = first_page.y
-                    estimator.z = first_page.z
 
             return usr_object
         except IOError:

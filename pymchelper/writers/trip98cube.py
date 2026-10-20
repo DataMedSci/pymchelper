@@ -22,8 +22,9 @@ class TRiP98CubeWriter:
             logger.error("pytrip package missing, to install type `pip install pytrip98`")
             return 1
 
-        pixel_size_x = (estimator.x.max_val - estimator.x.min_val) / estimator.x.n
-        pixel_size_z = (estimator.z.max_val - estimator.z.min_val) / estimator.z.n
+        page = estimator.pages[0]
+        pixel_size_x = (page.x.max_val - page.x.min_val) / page.x.n
+        pixel_size_z = (page.z.max_val - page.z.min_val) / page.z.n
 
         logging.debug("psx: {:.6f} [cm]".format(pixel_size_x))
         logging.debug("psz: {:.6f} [cm]".format(pixel_size_z))
@@ -39,10 +40,12 @@ class TRiP98CubeWriter:
 
             cube = dos.DosCube()
             # Warning: PyTRiP cube dimensions are in [mm]
-            cube.create_empty_cube(
-                1.0, estimator.x.n, estimator.y.n, estimator.z.n,
-                pixel_size=pixel_size_x * 10.0,
-                slice_distance=pixel_size_z * 10.0)
+            cube.create_empty_cube(1.0,
+                                   page.x.n,
+                                   page.y.n,
+                                   page.z.n,
+                                   pixel_size=pixel_size_x * 10.0,
+                                   slice_distance=pixel_size_z * 10.0)
 
             # .dos dose cubes are usually in normalized integers,
             # where "1000" equals 100.0 % dose.
@@ -74,10 +77,12 @@ class TRiP98CubeWriter:
 
             cube = let.LETCube()
             # Warning: PyTRiP cube dimensions are in [mm]
-            cube.create_empty_cube(
-                1.0, estimator.x.n, estimator.y.n, estimator.z.n,
-                pixel_size=pixel_size_x * 10.0,
-                slice_distance=pixel_size_z * 10.0)
+            cube.create_empty_cube(1.0,
+                                   page.x.n,
+                                   page.y.n,
+                                   page.z.n,
+                                   pixel_size=pixel_size_x * 10.0,
+                                   slice_distance=pixel_size_z * 10.0)
 
             # .dosemlet.dos LET cubes are usually in 32 bit floats.
             cube.data_type = "float"

@@ -31,13 +31,13 @@ class JsonWriter:
             "metadata": {},
             "pages": []
         }
-        exclude = {"data_raw", "error_raw", "estimator", "diff_axis1", "diff_axis2"}
+        exclude = {"data_raw", "error_raw", "estimator", "x", "y", "z", "diff_axis1", "diff_axis2"}
         exclude |= set(estimator.__dict__.keys())
 
         # read metadata from estimator object
         for name, value in estimator.__dict__.items():
             # skip non-metadata fields
-            if name not in {"data", "data_raw", "error", "error_raw", "counter", "pages", "x", "y", "z"}:
+            if name not in {"data", "data_raw", "error", "error_raw", "counter", "pages"}:
                 # remove \" to properly generate JSON
                 est_dict["metadata"][name] = str(value).replace("\"", "")
 

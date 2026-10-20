@@ -23,11 +23,15 @@ class Page:
 
         self.dettyp = None  # Dose, Fluence, LET etc...
 
-        # spatial mesh of this page, None means the page uses the mesh of its estimator
-        # FLUKA keeps several USRBIN detectors with different meshes in one file, their pages set their own
-        self.x: Optional[MeshAxis] = None
-        self.y: Optional[MeshAxis] = None
-        self.z: Optional[MeshAxis] = None
+        # spatial scoring mesh, by default a single bin on each axis
+        self.x = MeshAxis(n=1,
+                          min_val=float("NaN"),
+                          max_val=float("NaN"),
+                          name="",
+                          unit="",
+                          binning=MeshAxis.BinningType.linear)
+        self.y = self.x
+        self.z = self.x
 
         # optional first differential axis
         self.diff_axis1 = MeshAxis(n=1,
@@ -47,34 +51,38 @@ class Page:
 
     def axis(self, axis_id: int) -> Optional[MeshAxis]:
         """
-        TODO
+        Mesh axis selector based on integer id: 0, 1, 2 for X, Y, Z and 3, 4 for differential axes.
+
+        >>> p = Page()
+        >>> p.y = MeshAxis(n=3, min_val=0.0, max_val=150.0, name="Y", unit="cm", binning=MeshAxis.BinningType.linear)
+        >>> p.axis(1)
+        MeshAxis(n=3, min_val=0.0, max_val=150.0, name='Y', unit='cm', binning=<BinningType.linear: 0>)
+
+        :param axis_id: axis id (0, 1, 2, 3 or 4)
+        :return: MeshAxis object, None for unknown id
         """
-        if axis_id == AxisId.diff1:
+        if axis_id == AxisId.x:
+            return self.x
+        elif axis_id == AxisId.y:
+            return self.y
+        elif axis_id == AxisId.z:
+            return self.z
+        elif axis_id == AxisId.diff1:
             return self.diff_axis1
         elif axis_id == AxisId.diff2:
             return self.diff_axis2
-        elif axis_id == AxisId.x and self.x is not None:
-            return self.x
-        elif axis_id == AxisId.y and self.y is not None:
-            return self.y
-        elif axis_id == AxisId.z and self.z is not None:
-            return self.z
-        elif self.estimator:
-            return self.estimator.axis(axis_id)
         return None
 
     @property
     def dimension(self) -> int:
         """
-        Let's take again detector d with YZ scoring.
-        >>> from pymchelper.estimator import Estimator
-        >>> e = Estimator()
-        >>> e.x = MeshAxis(n=1, min_val=0.0, max_val=1.0, name="X", unit="cm", binning=MeshAxis.BinningType.linear)
-        >>> e.y = MeshAxis(n=3, min_val=0.0, max_val=150.0, name="Y", unit="cm", binning=MeshAxis.BinningType.linear)
-        >>> e.z = MeshAxis(n=2, min_val=0.0, max_val=2.0, name="Z", unit="cm", binning=MeshAxis.BinningType.linear)
-        >>> e.dimension
+        Let's take a page with YZ scoring.
+        >>> p = Page()
+        >>> p.x = MeshAxis(n=1, min_val=0.0, max_val=1.0, name="X", unit="cm", binning=MeshAxis.BinningType.linear)
+        >>> p.y = MeshAxis(n=3, min_val=0.0, max_val=150.0, name="Y", unit="cm", binning=MeshAxis.BinningType.linear)
+        >>> p.z = MeshAxis(n=2, min_val=0.0, max_val=2.0, name="Z", unit="cm", binning=MeshAxis.BinningType.linear)
+        >>> p.dimension
         2
-        >>> p = Page(e)
         >>> p.diff_axis1 = MeshAxis(n=10, min_val=0.0, max_val=100.0, name="E", unit="MeV",
         ...                         binning=MeshAxis.BinningType.linear)
         >>> p.dimension
@@ -82,12 +90,11 @@ class Page:
 
         :return: number of page axes (including differential) which have more than one bin
         """
-        if self.estimator:
-            number_of_bins = (self.axis(AxisId.x).n, self.axis(AxisId.y).n, self.axis(AxisId.z).n, self.diff_axis1.n,
-                              self.diff_axis2.n)
-            return 5 - number_of_bins.count(1)
-        else:
-            return 0
+        dimension = 0
+        for axis in (self.x, self.y, self.z, self.diff_axis1, self.diff_axis2):
+            if axis.n > 1:
+                dimension += 1
+        return dimension
 
     @property
     def data(self) -> NDArray[np.floating]:
@@ -98,11 +105,10 @@ class Page:
         This property provides efficient view of data, suitable for numpy-like indexing.
 
         >>> from pymchelper.estimator import Estimator
-        >>> e = Estimator()
-        >>> e.x = MeshAxis(n=2, min_val=0.0, max_val=10.0, name="X", unit="cm", binning=MeshAxis.BinningType.linear)
-        >>> e.y = MeshAxis(n=3, min_val=0.0, max_val=150.0, name="Y", unit="cm", binning=MeshAxis.BinningType.linear)
-        >>> e.z = MeshAxis(n=1, min_val=0.0, max_val=1.0, name="Z", unit="cm", binning=MeshAxis.BinningType.linear)
-        >>> p = Page(estimator=e)
+        >>> p = Page(estimator=Estimator())
+        >>> p.x = MeshAxis(n=2, min_val=0.0, max_val=10.0, name="X", unit="cm", binning=MeshAxis.BinningType.linear)
+        >>> p.y = MeshAxis(n=3, min_val=0.0, max_val=150.0, name="Y", unit="cm", binning=MeshAxis.BinningType.linear)
+        >>> p.z = MeshAxis(n=1, min_val=0.0, max_val=1.0, name="Z", unit="cm", binning=MeshAxis.BinningType.linear)
         >>> p.data_raw = np.arange(6)
         >>> tuple(int(n) for n in p.data.shape)
         (2, 3, 1, 1, 1)
@@ -117,8 +123,7 @@ class Page:
                 result = self._reshape(data_1d=self.data_raw, shape=(8, -1))
             else:
                 result = self._reshape(data_1d=self.data_raw,
-                                       shape=(self.axis(AxisId.x).n, self.axis(AxisId.y).n, self.axis(AxisId.z).n,
-                                              self.diff_axis1.n, self.diff_axis2.n))
+                                       shape=(self.x.n, self.y.n, self.z.n, self.diff_axis1.n, self.diff_axis2.n))
             assert result is not None
             return result
         return self.data_raw
@@ -133,8 +138,7 @@ class Page:
         """
         if self.estimator:
             return self._reshape(data_1d=self.error_raw,
-                                 shape=(self.axis(AxisId.x).n, self.axis(AxisId.y).n, self.axis(AxisId.z).n,
-                                        self.diff_axis1.n, self.diff_axis2.n))
+                                 shape=(self.x.n, self.y.n, self.z.n, self.diff_axis1.n, self.diff_axis2.n))
         return self.error_raw
 
     @property
@@ -164,14 +168,11 @@ class Page:
         Calculate new order of detector axis, axis with data (n>1) comes first
         Axes with constant value goes last.
 
-        Let's take a detector d with YZ scoring.
-        >>> from pymchelper.estimator import Estimator
-        >>> e = Estimator()
-        >>> e.x = MeshAxis(n=1, min_val=0.0, max_val=1.0, name="X", unit="cm", binning=MeshAxis.BinningType.linear)
-        >>> e.y = MeshAxis(n=3, min_val=0.0, max_val=150.0, name="Y", unit="cm", binning=MeshAxis.BinningType.linear)
-        >>> e.z = MeshAxis(n=2, min_val=0.0, max_val=2.0, name="Z", unit="cm", binning=MeshAxis.BinningType.linear)
-        >>> p = Page(estimator=e)
-        >>> e.add_page(page=p)
+        Let's take a page with YZ scoring.
+        >>> p = Page()
+        >>> p.x = MeshAxis(n=1, min_val=0.0, max_val=1.0, name="X", unit="cm", binning=MeshAxis.BinningType.linear)
+        >>> p.y = MeshAxis(n=3, min_val=0.0, max_val=150.0, name="Y", unit="cm", binning=MeshAxis.BinningType.linear)
+        >>> p.z = MeshAxis(n=2, min_val=0.0, max_val=2.0, name="Z", unit="cm", binning=MeshAxis.BinningType.linear)
 
         First axis for plotting will be Y (as X axis holds only one bin):
         >>> p.plot_axis(0)

@@ -123,7 +123,7 @@ class TRiP98DDDWriter(object):
             return 1
 
         # extract data from detector data
-        data = self._extract_data(estimator, page)
+        data = self._extract_data(page)
 
         # in order to avoid fitting data to noisy region far behind Bragg peak tail,
         # find the range of z coordinate which contains (1-threshold) of the deposited energy
@@ -257,21 +257,21 @@ class TRiP98DDDWriter(object):
         return 0
 
     @classmethod
-    def _extract_data(cls, estimator, page):
-        if estimator.x.n > 1:
-            r_step_cm = estimator.x.data[1] - estimator.x.data[0]
+    def _extract_data(cls, page):
+        if page.x.n > 1:
+            r_step_cm = page.x.data[1] - page.x.data[0]
         else:
-            r_step_cm = estimator.x.max_val
+            r_step_cm = page.x.max_val
 
-        if estimator.z.n > 1:
-            z_step_cm = estimator.z.data[1] - estimator.z.data[0]
+        if page.z.n > 1:
+            z_step_cm = page.z.data[1] - page.z.data[0]
         else:
-            z_step_cm = estimator.z.max_val
+            z_step_cm = page.z.max_val
 
-        data = LateralDepthDoseProfile(r_cm_1d=estimator.x.data,
-                                       z_cm_1d=estimator.z.data,
-                                       dose_MeV_g_2d=page.data_raw.reshape((estimator.z.n, estimator.x.n)),
-                                       dose_error_MeV_g_2d=page.error_raw.reshape((estimator.z.n, estimator.x.n)),
+        data = LateralDepthDoseProfile(r_cm_1d=page.x.data,
+                                       z_cm_1d=page.z.data,
+                                       dose_MeV_g_2d=page.data_raw.reshape((page.z.n, page.x.n)),
+                                       dose_error_MeV_g_2d=page.error_raw.reshape((page.z.n, page.x.n)),
                                        r_step_cm=r_step_cm,
                                        z_step_cm=z_step_cm)
 

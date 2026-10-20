@@ -30,10 +30,12 @@ def main(args=None):
     sh12a_data = fromfile(sh12a_file_path)
 
     # printing some output on the screen
-    print("Fluka bins in X: {:d}, Y: {:d}, Z: {:d}".format(fluka_data.x.n, fluka_data.y.n, fluka_data.z.n))
+    fluka_page = fluka_data.pages[0]
+    print("Fluka bins in X: {:d}, Y: {:d}, Z: {:d}".format(fluka_page.x.n, fluka_page.y.n, fluka_page.z.n))
     print("First bin of fluka data", fluka_data.pages[0].data[0, 0, 0, 0, 0])
 
-    print("SHIELD-HIT12A bins in X: {:d}, Y: {:d}, Z: {:d}".format(sh12a_data.x.n, sh12a_data.y.n, sh12a_data.z.n))
+    sh12a_page = sh12a_data.pages[0]
+    print("SHIELD-HIT12A bins in X: {:d}, Y: {:d}, Z: {:d}".format(sh12a_page.x.n, sh12a_page.y.n, sh12a_page.z.n))
     print("First bin of SHIELD-HIT12A data", sh12a_data.pages[0].data[0, 0, 0, 0, 0])
 
     # comparing file contents
