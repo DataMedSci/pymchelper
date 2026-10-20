@@ -1,4 +1,5 @@
 import logging
+import os
 import sys
 from pathlib import Path
 from typing import Dict, Generator, Tuple
@@ -491,7 +492,8 @@ def test_settings_str_is_command(tmp_path: Path):
                                             simulator_exec_path="/opt/shieldhit",
                                             cmdline_opts="")
     shieldhit_settings.set_rng_seed(7)
-    assert str(shieldhit_settings) == "/opt/shieldhit -N 7"
+    shieldhit_path = os.path.abspath("/opt/shieldhit")
+    assert str(shieldhit_settings) == f"{shieldhit_path} -N 7"
     assert str(shieldhit_settings).split() == shieldhit_settings.command_as_list()
 
     fluka_input = tmp_path / "input.inp"
@@ -500,7 +502,8 @@ def test_settings_str_is_command(tmp_path: Path):
                                         simulator_type=SimulatorType.fluka,
                                         simulator_exec_path="/opt/rfluka",
                                         cmdline_opts="-N0 -M 1")
-    assert str(fluka_settings) == "/opt/rfluka -N0 -M 1"
+    rfluka_path = os.path.abspath("/opt/rfluka")
+    assert str(fluka_settings) == f"{rfluka_path} -N0 -M 1"
     assert str(fluka_settings).split() == fluka_settings.command_as_list()
 
 
