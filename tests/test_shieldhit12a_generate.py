@@ -27,15 +27,14 @@ class TestSHGenerate(unittest.TestCase):
             gen.main([outdir])
             for est in ("cyl", "geomap", "msh", "plane", "zone"):
                 logger.info("Estimator: " + est)
-                outfile = os.path.join(outdir, f"detect_{est:s}.dat")
+                outfile = os.path.join(outdir, f"detect_{est}.dat")
                 self.assertTrue(os.path.isfile(outfile))
 
-                # same detectors as in the committed file, the generator writes them in a different order
                 with open(outfile) as generated_file:
-                    generated_lines = sorted(generated_file.read().splitlines())
-                with open(os.path.join(fixtures_dir, f"detect_{est:s}.dat")) as fixture_file:
-                    fixture_lines = sorted(fixture_file.read().splitlines())
-                self.assertEqual(generated_lines, fixture_lines)
+                    generated_text = generated_file.read()
+                with open(os.path.join(fixtures_dir, f"detect_{est}.dat")) as fixture_file:
+                    fixture_text = fixture_file.read()
+                self.assertEqual(generated_text, fixture_text)
 
 
 class TestSHGenerated(unittest.TestCase):
