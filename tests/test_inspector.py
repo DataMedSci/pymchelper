@@ -8,13 +8,14 @@ from pymchelper import run
 shieldhit_dir = Path(__file__).resolve().parent / "res" / "shieldhit"
 
 
-@pytest.mark.parametrize("file_path", [
-    shieldhit_dir / "single" / "ex_zmsh.bdo",
-    shieldhit_dir / "single" / "ex_yzmsh.bdo",
-    shieldhit_dir / "v1.0.0" / "ex_yzmsh.bdo",
+@pytest.mark.parametrize("file_path, expected_scatter_plots, expected_histograms", [
+    (shieldhit_dir / "generated" / "many" / "cyl" / "aen_0_al0001.bdo", 0, 0),
+    (shieldhit_dir / "single" / "ex_zmsh.bdo", 1, 1),
+    (shieldhit_dir / "v1.0.0" / "ex_yzmsh.bdo", 0, 3),
 ])
-def test_inspect_details(file_path: Path, capsys: pytest.CaptureFixture):
-    """inspect --details plots every page: scatter plot for 1D pages, histogram for all"""
+def test_inspect_details(file_path: Path, expected_scatter_plots: int, expected_histograms: int,
+                         capsys: pytest.CaptureFixture):
+    """inspect --details plots every page: scatter plot for 1D pages, histogram for pages with more than one value"""
     pytest.importorskip("hipsterplot")
     pytest.importorskip("bashplotlib")
 
@@ -22,9 +23,5 @@ def test_inspect_details(file_path: Path, capsys: pytest.CaptureFixture):
 
     output = capsys.readouterr().out
     assert status == 0
-    number_of_pages = output.count("Data min:")
-    assert output.count("data histogram") == number_of_pages
-    if file_path.name == "ex_zmsh.bdo":
-        assert output.count("data scatter plot") == number_of_pages
-    else:
-        assert output.count("data scatter plot") == 0
+    assert output.count("data scatter plot") == expected_scatter_plots
+    assert output.count("data histogram") == expected_histograms

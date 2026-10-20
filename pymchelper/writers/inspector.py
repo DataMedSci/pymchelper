@@ -38,24 +38,30 @@ class Inspector:
             print(75 * "-")
 
         if self.options.details:
-            # data lives on pages, so plots are made for each page separately
+            try:
+                from hipsterplot import plot
+            except ImportError:
+                plot = None
+                logger.warning("Detailed summary requires installation of hipsterplot package")
+            try:
+                from bashplotlib.histogram import plot_hist
+            except ImportError:
+                plot_hist = None
+                logger.warning("Detailed summary requires installation of bashplotlib package")
+
             for page_no, page in enumerate(estimator.pages):
+                # a single value is already shown in the statistics above, there is nothing to plot
+                if page.data_raw.size == 1:
+                    continue
                 # print data scatter-plot if possible
-                if page.dimension == 1:
-                    try:
-                        from hipsterplot import plot
-                        print(75 * "*")
-                        print(f"Page {page_no} / {len(estimator.pages)} data scatter plot")
-                        plot(page.data_raw)
-                    except ImportError:
-                        logger.warning("Detailed summary requires installation of hipsterplot package")
+                if page.dimension == 1 and plot is not None:
+                    print(75 * "*")
+                    print(f"Page {page_no} / {len(estimator.pages)} data scatter plot")
+                    plot(page.data_raw)
                 # print data histogram if possible
-                try:
-                    from bashplotlib.histogram import plot_hist
+                if plot_hist is not None:
                     print(75 * "*")
                     print(f"Page {page_no} / {len(estimator.pages)} data histogram")
                     plot_hist(page.data_raw, bincount=70, xlab=False, showSummary=True)
-                except ImportError:
-                    logger.warning("Detailed summary requires installation of bashplotlib package")
 
         return 0
