@@ -48,15 +48,17 @@ def _format_e_fast(w: int, d: int, val: float) -> str:
     #   Python:   1.235e+02
     #   Fortran:  0.1235E+03   (exponent is one larger)
     python_style = f"{abs(val):.{d - 1}e}"
-    mantissa, exponent = python_style.split("e")
+    mantissa, python_exponent = python_style.split("e")
     digits = mantissa.replace(".", "")
-    exponent = int(exponent) + 1
+    fortran_exponent = int(python_exponent) + 1
 
-    if not -99 <= exponent <= 99:
+    if not -99 <= fortran_exponent <= 99:
         return format_e(w, d, val)
 
-    sign = "-" if val < 0 else ""
-    return f"{sign}0.{digits}E{exponent:+03d}".rjust(w)
+    sign = ""
+    if val < 0:
+        sign = "-"
+    return f"{sign}0.{digits}E{fortran_exponent:+03d}".rjust(w)
 
 
 class TxtWriter(Writer):

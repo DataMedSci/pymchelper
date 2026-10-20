@@ -5,6 +5,7 @@ from pymchelper.axis import MeshAxis
 from pymchelper.estimator import Estimator
 from pymchelper.page import Page
 
+
 logger = logging.getLogger(__name__)
 
 
@@ -26,7 +27,10 @@ class JsonWriter:
             print("No pages in the output file, conversion to JSON skipped.")
             return False
 
-        est_dict = {"metadata": {}, "pages": []}
+        est_dict = {
+            "metadata": {},
+            "pages": []
+        }
         exclude = {"data_raw", "error_raw", "estimator", "diff_axis1", "diff_axis2"}
         exclude |= set(estimator.__dict__.keys())
 
