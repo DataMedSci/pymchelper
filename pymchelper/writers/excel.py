@@ -29,7 +29,7 @@ class ExcelWriter:
 
             # save only 1-D data
             if page.dimension != 1:
-                logger.warning("page dimension {:d} != 1, XLS output not supported".format(estimator.dimension))
+                logger.warning("page dimension {:d} != 1, XLS output not supported".format(page.dimension))
                 return 1
 
             # create worksheet

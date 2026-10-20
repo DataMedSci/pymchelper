@@ -216,7 +216,7 @@ def estimated_range_cm(primary_beam_energy_MeV):
     index_of_max = np.argmax(dose_Gy)
 
     # find estimated range as the position in scoring grid which corresponds to the highest dose
-    range_cm = dose_estimator.z.data[index_of_max]
+    range_cm = dose_estimator.pages[0].z.data[index_of_max]
     print(" ... investigating energy {:3.3f} MeV, estimated range {:3.3f} cm".format(primary_beam_energy_MeV, range_cm))
     return range_cm
 

@@ -39,12 +39,12 @@ class Inspector:
 
         if self.options.details:
             # print data scatter-plot if possible
-            if estimator.dimension == 1 and len(self.pages) == 1:
+            if len(estimator.pages) == 1 and estimator.pages[0].dimension == 1:
                 try:
                     from hipsterplot import plot
                     print(75 * "*")
                     print("Data scatter plot")
-                    plot(estimator.data_raw)
+                    plot(estimator.pages[0].data_raw)
                 except ImportError:
                     logger.warning("Detailed summary requires installation of hipsterplot package")
             # print data histogram if possible

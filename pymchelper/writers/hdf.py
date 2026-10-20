@@ -51,20 +51,20 @@ class HdfWriter:
                 dset.attrs['unit'] = page.unit
                 dset.attrs['nstat'] = estimator.number_of_primaries
                 dset.attrs['counter'] = estimator.file_counter
-                dset.attrs['xaxis_n'] = estimator.x.n
-                dset.attrs['xaxis_min'] = estimator.x.min_val
-                dset.attrs['xaxis_max'] = estimator.x.max_val
-                dset.attrs['xaxis_name'] = estimator.x.name
-                dset.attrs['xaxis_unit'] = estimator.x.unit
-                dset.attrs['yaxis_n'] = estimator.y.n
-                dset.attrs['yaxis_min'] = estimator.y.min_val
-                dset.attrs['yaxis_max'] = estimator.y.max_val
-                dset.attrs['yaxis_name'] = estimator.y.name
-                dset.attrs['yaxis_unit'] = estimator.y.unit
-                dset.attrs['zaxis_n'] = estimator.z.n
-                dset.attrs['zaxis_min'] = estimator.z.min_val
-                dset.attrs['zaxis_max'] = estimator.z.max_val
-                dset.attrs['zaxis_name'] = estimator.z.name
-                dset.attrs['zaxis_unit'] = estimator.z.unit
+                dset.attrs['xaxis_n'] = page.x.n
+                dset.attrs['xaxis_min'] = page.x.min_val
+                dset.attrs['xaxis_max'] = page.x.max_val
+                dset.attrs['xaxis_name'] = page.x.name
+                dset.attrs['xaxis_unit'] = page.x.unit
+                dset.attrs['yaxis_n'] = page.y.n
+                dset.attrs['yaxis_min'] = page.y.min_val
+                dset.attrs['yaxis_max'] = page.y.max_val
+                dset.attrs['yaxis_name'] = page.y.name
+                dset.attrs['yaxis_unit'] = page.y.unit
+                dset.attrs['zaxis_n'] = page.z.n
+                dset.attrs['zaxis_min'] = page.z.min_val
+                dset.attrs['zaxis_max'] = page.z.max_val
+                dset.attrs['zaxis_name'] = page.z.name
+                dset.attrs['zaxis_unit'] = page.z.unit
 
         return 0

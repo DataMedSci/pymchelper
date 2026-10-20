@@ -1,10 +1,10 @@
 import logging
-from typing import Any, Optional, Tuple
+from typing import Any, Dict, Optional, Tuple
 
 import numpy as np
 from numpy.typing import NDArray
 
-from pymchelper.axis import MeshAxis
+from pymchelper.axis import AxisId, MeshAxis
 from pymchelper.estimator import Estimator
 from pymchelper.page import Page
 from pymchelper.readers.shieldhit.binary_spec import SHBDOTagID, detector_name_from_bdotag, unit_name_from_unit_id, \
@@ -28,6 +28,9 @@ BDOToken = Tuple[int, np.generic, int, NDArray]
 # below decide, per tag, how to interpret/index it, in a way a type checker can't verify statically.
 BDOPayload = Any
 
+# Scoring mesh of the estimator, BDO keeps one mesh for all pages
+Mesh = Dict[AxisId, MeshAxis]
+
 
 class SHReaderBDO2019(SHReader):
     """Experimental binary format reader version >= 0.7"""
@@ -44,6 +47,14 @@ class SHReaderBDO2019(SHReader):
             logger.debug("Endiannes: " + _x['end'][0].decode('ASCII'))
             logger.debug("VerStr: " + _x['vstr'][0].decode('ASCII'))
 
+            single_bin_axis = MeshAxis(n=1,
+                                       min_val=float("NaN"),
+                                       max_val=float("NaN"),
+                                       name="",
+                                       unit="",
+                                       binning=MeshAxis.BinningType.linear)
+            mesh = {AxisId.x: single_bin_axis, AxisId.y: single_bin_axis, AxisId.z: single_bin_axis}
+
             # the rest of the file is a flat stream of (tag, type, length, payload) tokens;
             # each token either updates estimator-level metadata, starts a new page (detector_type
             # token) or fills in fields of the page currently being built
@@ -51,11 +62,11 @@ class SHReaderBDO2019(SHReader):
                 token = read_next_token(f)
                 if token is None:
                     break
-                _process_token(estimator, token)
+                _process_token(estimator, mesh, token)
 
             # once all tokens have been consumed, derive fields that depend on more than one
             # token (differential axes, axis names, per-page normalisation, ...)
-            _finalize_estimator(estimator)
+            _finalize_estimator(estimator, mesh)
 
         estimator.file_format = 'bdo2019'
         estimator.data_order = 'F'  # Fortran column-major order
@@ -105,11 +116,12 @@ def _decode_payload(token: BDOToken) -> BDOPayload:
     return payload
 
 
-def _process_token(estimator: Estimator, token: BDOToken) -> None:
+def _process_token(estimator: Estimator, mesh: Mesh, token: BDOToken) -> None:
     """
     Apply a single decoded BDO token to the estimator (and its current page) being built.
 
     :param estimator: estimator under construction; mutated in place
+    :param mesh: scoring mesh under construction, copied to all pages in `_finalize_estimator`; mutated in place
     :param token: raw token as returned by `read_next_token`
     """
     token_id = token[0]
@@ -120,33 +132,33 @@ def _process_token(estimator: Estimator, token: BDOToken) -> None:
         estimator.geotyp = SHGeoType[payload.strip().lower()]
 
     if SHBDOTagID.geo_n_bins == token_id:
-        estimator.x = estimator.x._replace(n=payload[0])
-        estimator.y = estimator.y._replace(n=payload[1])
-        estimator.z = estimator.z._replace(n=payload[2])
+        mesh[AxisId.x] = mesh[AxisId.x]._replace(n=payload[0])
+        mesh[AxisId.y] = mesh[AxisId.y]._replace(n=payload[1])
+        mesh[AxisId.z] = mesh[AxisId.z]._replace(n=payload[2])
 
     if SHBDOTagID.geo_p_start == token_id:
-        estimator.x = estimator.x._replace(min_val=payload[0])
-        estimator.y = estimator.y._replace(min_val=payload[1])
-        estimator.z = estimator.z._replace(min_val=payload[2])
+        mesh[AxisId.x] = mesh[AxisId.x]._replace(min_val=payload[0])
+        mesh[AxisId.y] = mesh[AxisId.y]._replace(min_val=payload[1])
+        mesh[AxisId.z] = mesh[AxisId.z]._replace(min_val=payload[2])
 
     if SHBDOTagID.geo_q_stop == token_id:
-        estimator.x = estimator.x._replace(max_val=payload[0])
-        estimator.y = estimator.y._replace(max_val=payload[1])
-        estimator.z = estimator.z._replace(max_val=payload[2])
+        mesh[AxisId.x] = mesh[AxisId.x]._replace(max_val=payload[0])
+        mesh[AxisId.y] = mesh[AxisId.y]._replace(max_val=payload[1])
+        mesh[AxisId.z] = mesh[AxisId.z]._replace(max_val=payload[2])
 
     if SHBDOTagID.geo_unit_ids == token_id:
-        estimator.x = estimator.x._replace(unit=unit_name_from_unit_id.get(payload[0], ""))
-        estimator.y = estimator.y._replace(unit=unit_name_from_unit_id.get(payload[1], ""))
-        estimator.z = estimator.z._replace(unit=unit_name_from_unit_id.get(payload[2], ""))
+        mesh[AxisId.x] = mesh[AxisId.x]._replace(unit=unit_name_from_unit_id.get(payload[0], ""))
+        mesh[AxisId.y] = mesh[AxisId.y]._replace(unit=unit_name_from_unit_id.get(payload[1], ""))
+        mesh[AxisId.z] = mesh[AxisId.z]._replace(unit=unit_name_from_unit_id.get(payload[2], ""))
 
     # Units may also be given as pure ASCII directly from SHIELD-HIT12A new .bdo format.
     # If this is available, then use those embedded in the .bdo file, instead of pymchelper setting them.
     if SHBDOTagID.geo_units == token_id:
         _units = payload.split(";")
         if len(_units) == 3:
-            estimator.x = estimator.x._replace(unit=_units[0])
-            estimator.y = estimator.y._replace(unit=_units[1])
-            estimator.z = estimator.z._replace(unit=_units[2])
+            mesh[AxisId.x] = mesh[AxisId.x]._replace(unit=_units[0])
+            mesh[AxisId.y] = mesh[AxisId.y]._replace(unit=_units[1])
+            mesh[AxisId.z] = mesh[AxisId.z]._replace(unit=_units[2])
 
     # page(detector) type, it begins new page block
     if SHBDOTagID.detector_type == token_id:
@@ -253,11 +265,12 @@ def _set_diff_axes(page: Page) -> None:
         logger.debug("Lack of data for second level differential scoring")
 
 
-def _finalize_estimator(estimator: Estimator) -> None:
+def _finalize_estimator(estimator: Estimator, mesh: Mesh) -> None:
     """
     Post-process an estimator once all BDO tokens have been read.
 
     :param estimator: fully-populated estimator; mutated in place
+    :param mesh: scoring mesh read from the file, set on every page with axis names added
     """
     # Check if we have differential scoring, i.e. data dimension is larger than 1:
     for page in estimator.pages:
@@ -273,11 +286,15 @@ def _finalize_estimator(estimator: Estimator) -> None:
     _, xname = mesh_unit_and_name(estimator, 0)
     _, yname = mesh_unit_and_name(estimator, 1)
     _, zname = mesh_unit_and_name(estimator, 2)
-    estimator.x = estimator.x._replace(name=xname)
-    estimator.y = estimator.y._replace(name=yname)
-    estimator.z = estimator.z._replace(name=zname)
+    x_axis = mesh[AxisId.x]._replace(name=xname)
+    y_axis = mesh[AxisId.y]._replace(name=yname)
+    z_axis = mesh[AxisId.z]._replace(name=zname)
 
     for page in estimator.pages:
+        page.x = x_axis
+        page.y = y_axis
+        page.z = z_axis
+
         # Copy the SH12A specific units into the general placeholders:
         page.unit = page.detector_unit
         # in future, a user may optionally give a more specific name in SH12A detect.dat, which then

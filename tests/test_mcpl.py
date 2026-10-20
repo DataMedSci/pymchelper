@@ -46,10 +46,10 @@ def test_bdo_reading(phasespace_bdo_file_path: Path):
     estimator_data = fromfile(str(phasespace_bdo_file_path))
     assert estimator_data is not None
     assert estimator_data.pages is not None
-    assert estimator_data.dimension == 0
+    assert estimator_data.pages[0].dimension == 0
     assert estimator_data.error_type == ErrorEstimate.none
     for i in range(3):
-        axis_data = estimator_data.axis(i)
+        axis_data = estimator_data.pages[0].axis(i)
         assert axis_data is not None
         assert axis_data.n == 1
     assert len(estimator_data.pages) == 3
