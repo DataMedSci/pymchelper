@@ -180,3 +180,43 @@ def test_no_standard_error_without_histories(topas_minimal_output_path: Path, tm
 
     assert estimator.number_of_primaries == 0
     assert estimator.pages[0].error_raw is None
+
+
+@pytest.mark.parametrize(
+    "lines_before, lines_after, included_lines, expected_histories",
+    [
+        pytest.param("#i:So/Old/NumberOfHistoriesInRun = 2000\n", "", None, 20, id="commented_out_source"),
+        pytest.param("", "i:So/Second/NumberOfHistoriesInRun = 60\n", None, 60, id="largest_of_two_sources"),
+        pytest.param("",
+                     "includeFile = included.txt\n",
+                     "i:So/Demo/NumberOfHistoriesInRun = 500\ni:So/Extra/NumberOfHistoriesInRun = 70\n",
+                     70,
+                     id="included_file_overridden_by_top_file"),
+        pytest.param("", "includeFile = missing.txt\n", None, 0, id="missing_included_file"),
+        pytest.param("", "i:So/Second/NumberOfHistoriesInRun = 3 * Ts/Seed\n", None, 0, id="expression"),
+        pytest.param("", "i:Tf/NumberOfSequentialTimes = 10\n", None, 0, id="several_times"),
+        pytest.param("", 'b:Tf/RandomizeTimeDistribution = "True"\n', None, 0, id="random_time"),
+        pytest.param("", 's:So/Second/Type = "PhaseSpace"\n', None, 0, id="phase_space_source"),
+        pytest.param("",
+                     "u:Sc/FluenceBPprotonsXY/RepeatSequenceUntilRelativeStandardDeviationLessThan = 0.1\n",
+                     None,
+                     0,
+                     id="repeated_sequence"),
+    ],
+)
+def test_number_of_histories_from_parameter_file(topas_minimal_output_path: Path, tmp_path: Path, lines_before: str,
+                                                 lines_after: str, included_lines: str, expected_histories: int):
+    """Number of histories, which scales the error, follows how TOPAS reads the parameter file"""
+    parameter_text = (topas_minimal_output_path.parent / "minimal.txt").read_text()
+    (tmp_path / "minimal.txt").write_text(lines_before + parameter_text + "\n" + lines_after)
+    if included_lines is not None:
+        (tmp_path / "included.txt").write_text(included_lines)
+    output_copy_path = tmp_path / topas_minimal_output_path.name
+    output_copy_path.write_text(topas_minimal_output_path.read_text())
+
+    reader = TopasReaderFactory(str(output_copy_path)).get_reader()
+    reader = reader(str(output_copy_path))
+    estimator = Estimator()
+    reader.read(estimator)
+
+    assert estimator.number_of_primaries == expected_histories
