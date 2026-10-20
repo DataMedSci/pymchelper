@@ -9,6 +9,7 @@ import pytest
 import pymchelper.input_output as io
 from pymchelper.averaging import ConcatenatingAggregator, SumAggregator, WeightedStatsAggregator
 from pymchelper.readers.fluka import FlukaReader
+from pymchelper.readers.shieldhit.reader_bdo2019 import SHReaderBDO2019
 
 averaging_dir = Path(__file__).resolve().parent / "res" / "shieldhit" / "averaging"
 dose_files = sorted(str(path) for path in averaging_dir.glob("normalisation-5_aggregation-mean_*.bdo"))
@@ -136,6 +137,38 @@ def test_estimators_freed_while_merging(monkeypatch: pytest.MonkeyPatch):
 
     still_alive = [reference for reference in references[1:] if reference() is not None]
     assert len(still_alive) == 0
+
+
+def test_unreadable_first_file_gives_none(monkeypatch: pytest.MonkeyPatch):
+    """If the reader fails on the first file, there is nothing to merge into"""
+    monkeypatch.setattr(SHReaderBDO2019, "read_data", lambda self, estimator, nscale=1.: False)
+
+    assert io.fromfilelist(dose_files[:1]) is None
+    assert io.fromfilelist(dose_files) is None
+
+
+def test_unreadable_file_is_skipped(monkeypatch: pytest.MonkeyPatch):
+    """A file the reader fails on, after the first one, is left out of the merge"""
+    unreadable_file = dose_files[1]
+    readable_files = []
+    for filename in dose_files:
+        if filename != unreadable_file:
+            readable_files.append(filename)
+    original_read_data = SHReaderBDO2019.read_data
+
+    def failing_read_data(reader, estimator, nscale=1.):
+        if reader.filename == unreadable_file:
+            return False
+        return original_read_data(reader, estimator, nscale)
+
+    expected = io.fromfilelist(readable_files)
+    monkeypatch.setattr(SHReaderBDO2019, "read_data", failing_read_data)
+    merged = io.fromfilelist(dose_files)
+
+    assert merged.file_counter == len(readable_files)
+    assert merged.number_of_primaries == expected.number_of_primaries
+    for merged_page, expected_page in zip(merged.pages, expected.pages):
+        np.testing.assert_array_equal(merged_page.data_raw, expected_page.data_raw)
 
 
 @pytest.mark.parametrize("nan", [True, False])

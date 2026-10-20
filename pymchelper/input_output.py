@@ -102,17 +102,22 @@ def fromfilelist(input_file_list: Union[List[str], str],
     Reads all files from a given list using `fromfile` method, and returns one merged estimator.
     Each page is merged according to its normalisation type: summed, averaged with the number of primaries
     as weights, concatenated or taken from the first file, see `AggregationType`.
+    Files which can't be read are skipped, if the first one can't be read None is returned.
 
     :param input_file_list: list of files to be read
     :param error: error estimation, see class ErrorEstimate class in pymchelper.estimator
-    :param nan: if True, NaN (not a number) values are left out of the sums and averages, bin by bin
-    :return: merged estimator
+    :param nan: if True, NaN (not a number) values are left out of the sums and averages, bin by bin,
+        a bin which is NaN in every file stays NaN
+    :return: merged estimator, or None if the first file can't be read
     """
     if not isinstance(input_file_list, list):  # probably a string instead of list
         input_file_list = [input_file_list]
 
     first_file = input_file_list[0]
     result = fromfile(first_file)
+    if result is None:
+        return None
+    merged_files_count = 1
 
     if len(input_file_list) > 1:
 
@@ -149,14 +154,16 @@ def fromfilelist(input_file_list: Union[List[str], str],
         # process all other files
         for filename in input_file_list[1:]:
             current_estimator = fromfile(filename)
+            if current_estimator is None:
+                continue
             _check_same_pages(result, first_file, current_estimator, filename)
 
             for current_page, aggregator in zip(current_estimator.pages, page_aggregators):
                 aggregator.update(value=current_page.data_raw, weight=current_estimator.number_of_primaries)
             result.number_of_primaries += current_estimator.number_of_primaries
+            merged_files_count += 1
 
-            # pages and their estimator refer to each other, so without this the estimator
-            # would stay in memory until the garbage collector runs, instead of being freed now
+            # pages point back to their estimator, breaking that cycle frees the estimator now, not at the next gc run
             current_estimator.pages = ()
 
         # extract data from aggregators and fill then into the result
@@ -165,7 +172,7 @@ def fromfilelist(input_file_list: Union[List[str], str],
             page.data_raw = aggregator.data
             page.error_raw = aggregator.error(error_type=error.name)
 
-    result.file_counter = len(input_file_list)
+    result.file_counter = merged_files_count
     core_names_dict = group_input_files(input_file_list)
     if len(core_names_dict) == 1:
         result.file_corename = list(core_names_dict)[0]
@@ -205,7 +212,7 @@ def frompattern(pattern: str,
 
     :param pattern: pattern to be matched for reading.
     :param error: error estimation, see class ErrorEstimate class in pymchelper.estimator
-    :param nan: if True, NaN (not a number) are excluded when averaging data.
+    :param nan: if True, NaN (not a number) values are left out of the sums and averages, bin by bin
     :return: a list of estimators, or an empty list if no files were found.
     """
 
@@ -244,7 +251,7 @@ def convertfromlist(filelist: List[str],
                     outputfile: Optional[str] = None) -> Optional[int]:
     """Convert a list of input files into a single output using a chosen converter.
 
-    - Reads and optionally averages inputs (`nan` controls NaN handling).
+    - Reads and merges inputs, see `fromfilelist` (`nan` controls NaN handling).
     - Resolves output path (`outputfile` overrides, else uses `outputdir` or corename).
     - Writes via `converter_name` with `options`.
 
