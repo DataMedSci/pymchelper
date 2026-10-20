@@ -6,6 +6,7 @@ Tool for creating MC input files using user-specified tables and ranges.
 
 import argparse
 import logging
+import math
 import os
 import shutil
 import sys
@@ -136,8 +137,9 @@ class Template:
         # loop_keys are identified by the "_MIN" suffix:
         loop_keys = []
         for key in cfg.table_dict.keys():
-            if "_MIN" in key:
-                loop_keys.append(key.strip("_MIN") + "_")
+            if key.endswith("_MIN"):
+                # remove only the "MIN" suffix, i.e. "E_MIN" -> "E_"
+                loop_keys.append(key[:-len("MIN")])
 
         if not cfg.table_dict:
             logger.debug(f"Serving {current_dict}")
@@ -157,11 +159,15 @@ class Template:
                 start = float(current_line_dict[loop_key + "MIN"])
                 stop = float(current_line_dict[loop_key + "MAX"])
                 step = float(current_line_dict[loop_key + "STEP"])
-                loop_value = start
-                while loop_value <= stop:
+
+                # each value is computed from its step number, adding the step to a float would
+                # accumulate rounding errors and could drop the last value (i.e. 1.0 to 2.0 in 0.1 steps)
+                # small tolerance keeps the last value when (stop - start) / step is a whole number
+                number_of_steps = math.floor((stop - start) / step + 1e-9)
+                for step_number in range(number_of_steps + 1):
+                    loop_value = start + step_number * step
                     # append values calculated for the loop
                     current_dict[loop_key] = loop_value
-                    loop_value += step
 
                     # set the relative energy spread:
                     if loop_key == 'E_' and "DE_FACTOR" in current_dict:
@@ -220,7 +226,7 @@ class Template:
                             while token in line:
                                 _s = u_dict[key]
                                 if isinstance(_s, float):
-                                    _s = "{u_dict[key]:.3f}"  # HARDCODED float format for loop_keys
+                                    _s = f"{u_dict[key]:.3f}"  # HARDCODED float format for loop_keys
                                 line = lreplace(line, token, _s)
                         of.lines.append(line)
                     # end loop over t.files
