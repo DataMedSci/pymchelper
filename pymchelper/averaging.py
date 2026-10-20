@@ -101,8 +101,9 @@ class WeightedStatsAggregator(Aggregator):
 
     _accumulator_S: Union[float, NDArray[np.float64]] = field(default=float('nan'), repr=False, init=False)
     _mean: Union[float, NDArray[np.float64]] = field(default=float('nan'), repr=False, init=False)  # used with skip_nan
-    _total_weight_squared: float = field(default=0., repr=False, init=False)
-    total_weight: float = 0
+    # with skip_nan each bin has its own total weight, so both are arrays then
+    _total_weight_squared: Union[float, NDArray[np.float64]] = field(default=0., repr=False, init=False)
+    total_weight: Union[float, NDArray[np.float64]] = 0
 
     def update(self, value: Union[float, ArrayLike], weight: float = 1.0, **kwargs):
         """

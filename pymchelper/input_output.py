@@ -182,8 +182,7 @@ def _check_same_pages(first: Estimator, first_file: str, other: Estimator, other
         raise ValueError(f"{other_file} has {len(other.pages)} pages, {first_file} has {len(first.pages)}, "
                          "they come from different scorers and can't be merged")
 
-    for index in range(len(first.pages)):
-        first_page = first.pages[index]
+    for index, first_page in enumerate(first.pages):
         other_page = other.pages[index]
         page_number = index + 1
 
