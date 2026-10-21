@@ -69,6 +69,6 @@ def test_postprocess_skips_normalization_for_averaged_q_eff(dettyp):
     page.data_raw = np.array([5.0])
     estimator.add_page(page)
 
-    _postprocess(estimator, nscale=1)
+    _postprocess(estimator)
 
     np.testing.assert_array_equal(estimator.pages[0].data_raw, np.array([5.0]))
