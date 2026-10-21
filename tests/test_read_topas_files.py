@@ -65,8 +65,9 @@ def test_read(topas_minimal_output_path: Path):
                 .00475825, 0.00592593, 0., 0.00353209,
                 0.00642803, 0.00378469, 0.00628262, 0.00505895,
                 0.00353209, 0., 0., 0.]
-    assert np.allclose(estimator.pages[0].data_raw, expected_data_mean, atol=1e-5)
-    assert np.allclose(estimator.pages[0].error_raw, expected_data_std, atol=1e-5)
+    # data flattened in C order lists the bins in the order of the csv rows
+    assert np.allclose(estimator.pages[0].data.ravel(), expected_data_mean, atol=1e-5)
+    assert np.allclose(estimator.pages[0].error.ravel(), expected_data_std, atol=1e-5)
 
 
 def test_cylindrical_coordinates(topas_cylinder_output_path: Path):
@@ -105,9 +106,9 @@ def test_differential_axis(topas_binning_by_energy_output_path: Path):
     expected_data_std = [ 0.0, 0.0, 0.0, 0.0, 4.285797997168091e-10, 3.959436365570868e-10 ]
     assert estimator.pages[0].dettyp == "DoseToMedium"
     assert len(estimator.pages[0].data_raw) == 160
-    assert np.allclose(estimator.pages[0].data_raw[0:6], expected_data_mean, atol=1e-5)
+    assert np.allclose(estimator.pages[0].data.ravel()[0:6], expected_data_mean, atol=1e-5)
     assert len(estimator.pages[0].error_raw) == 160
-    assert np.allclose(estimator.pages[0].error_raw[0:6], expected_data_std, atol=1e-5)
+    assert np.allclose(estimator.pages[0].error.ravel()[0:6], expected_data_std, atol=1e-5)
 
 
 def test_sphere_bin_by_time(topas_sphere_binned_by_time_path: Path):
@@ -133,7 +134,7 @@ def test_sphere_bin_by_time(topas_sphere_binned_by_time_path: Path):
     expected_data_mean = [ 0.0, 0.1, 0.0, 0.0]
     assert estimator.pages[0].dettyp == "SurfaceTrackCount"
     assert len(estimator.pages[0].data_raw) == 40
-    assert np.allclose(estimator.pages[0].data_raw[0:4], expected_data_mean, atol=1e-5)
+    assert np.allclose(estimator.pages[0].data.ravel()[0:4], expected_data_mean, atol=1e-5)
     
 def test_no_bins(topas_no_bins_path: Path):
     """Test reading of Topas output file without any bins"""

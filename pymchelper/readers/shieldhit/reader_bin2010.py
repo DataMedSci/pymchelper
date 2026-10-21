@@ -203,6 +203,7 @@ class SHReaderBin2010(SHReader):
             logger.debug("Reading payload failed")
             return None
         estimator.file_format = 'bin2010'
-        estimator.data_order = 'C'  # C row-major order
+        for page in estimator.pages:
+            page.reorder_raw_from_c_order()
         super(SHReaderBin2010, self).read_data(estimator)
         return True
