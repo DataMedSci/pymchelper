@@ -135,7 +135,7 @@ class Template:
                 loop_keys.append(key.removesuffix("MIN"))
 
         if not cfg.table_dict:
-            logger.debug(f"Serving {current_dict}")
+            logger.debug("Serving %s", current_dict)
             yield current_dict
 
         # loop over every items corresponding to every line in table section of the config directory
@@ -152,16 +152,16 @@ class Template:
                 values_of_loop_keys.append(loop_values(start, stop, step))
 
             for combination in itertools.product(*values_of_loop_keys):
-                for loop_key, loop_value in zip(loop_keys, combination):
-                    current_dict[loop_key] = loop_value
+                loop_values_of_keys = dict(zip(loop_keys, combination))
+                current_dict.update(loop_values_of_keys)
 
                 # set the relative energy spread:
-                if 'E_' in loop_keys and "DE_FACTOR" in current_dict:
-                    _de = current_dict['E_'] * float(current_dict["DE_FACTOR"])
+                if 'E_' in loop_values_of_keys and "DE_FACTOR" in current_dict:
+                    _de = loop_values_of_keys['E_'] * float(current_dict["DE_FACTOR"])
                     # HARDCODED format for DE_
                     current_dict['DE_'] = f"{_de:.3f}"
 
-                logger.debug(f"Serving {current_dict}")
+                logger.debug("Serving %s", current_dict)
                 yield current_dict
 
     def write(self, working_directory: PathLike, cfg: Config, quiet: bool = True):
