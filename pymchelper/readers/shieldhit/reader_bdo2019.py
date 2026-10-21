@@ -32,7 +32,7 @@ BDOPayload = Any
 class SHReaderBDO2019(SHReader):
     """Experimental binary format reader version >= 0.7"""
 
-    def read_data(self, estimator: Estimator, nscale: float = 1.) -> bool:
+    def read_data(self, estimator: Estimator) -> bool:
         logger.debug("Reading: %s", self.filename)
 
         with open(self.filename, "rb") as f:
@@ -292,3 +292,4 @@ def _finalize_estimator(estimator: Estimator) -> None:
         if page_normalisation == 2:
             page.data_raw /= np.float64(estimator.number_of_primaries)
             page.unit += "/prim"
+            page.per_primary = True

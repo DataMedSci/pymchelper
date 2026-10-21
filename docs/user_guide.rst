@@ -85,13 +85,15 @@ dosimetric particle transport simulations. To report dose (or some other quantit
 of total particles in the experiment is necessary (not to be confused with number of simulated primaries).
 User can specify this number via option called :bash:`--nscale`. **convertmc** will then report dose 
 (and some other quantities) in natural units and per user-provided particle number (not per single primary).
-Let us assume that :bash:`proton0001_fort.21` file was obtained by simulation of 10000 protons. ::
+Scaling works for SHIELD-HIT12A files, only on quantities normalised per primary (dose, fluence, energy etc.),
+averaged quantities such as LET stay unchanged. Errors are scaled together with the data.
+Let us assume that :bash:`proton0001.bdo` file was obtained by simulation of 10000 protons. ::
 
-   convertmc txt proton0001_fort.21 dose_per_prim.txt
+   convertmc txt proton0001.bdo dose_per_prim.txt
    
 will save a file :bash:`dose_per_prim.txt` with dose-per-primary and MeV/g/prim units. While::
 
-   convertmc txt proton0001_fort.21 dose.txt --nscale 1e8
+   convertmc txt proton0001.bdo dose.txt --nscale 1e8
 
 will save a file :bash:`dose.txt` with rescaled dose of :math:`10^8` protons in Gy units
 

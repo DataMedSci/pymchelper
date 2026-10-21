@@ -22,6 +22,7 @@ class Page:
         self.unit: str = ""
 
         self.dettyp = None  # Dose, Fluence, LET etc...
+        self.per_primary: bool = False  # True if the reader divided data_raw by the number of primaries
 
         # optional first differential axis
         self.diff_axis1 = MeshAxis(n=1,

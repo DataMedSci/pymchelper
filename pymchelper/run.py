@@ -152,11 +152,12 @@ def main(args: Optional[list[str]] = None) -> int:
         if parsed_args.many:
             status = convertfrompattern(parsed_args.input, output_dir,
                                         converter_name=parsed_args.command, options=parsed_args,
-                                        error=parsed_args.error, nan=parsed_args.nan)
+                                        error=parsed_args.error, nan=parsed_args.nan, nscale=parsed_args.nscale)
         else:
             status = convertfromlist(parsed_args.input,
                                      error=parsed_args.error, nan=parsed_args.nan, outputdir=output_dir,
-                                     converter_name=parsed_args.command, options=parsed_args, outputfile=output_file)
+                                     converter_name=parsed_args.command, options=parsed_args, outputfile=output_file,
+                                     nscale=parsed_args.nscale)
 
     return status
 

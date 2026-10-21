@@ -13,7 +13,7 @@ from pymchelper.estimator import ErrorEstimate, Estimator, average_with_nan
 from pymchelper.readers.topas import TopasReaderFactory
 from pymchelper.readers.fluka import FlukaReader, FlukaReaderFactory
 from pymchelper.readers.shieldhit.general import SHReaderFactory
-from pymchelper.readers.shieldhit.reader_base import SHReader
+from pymchelper.readers.shieldhit.reader_base import SHReader, scale_to_particles
 from pymchelper.writers.common import Converters
 
 logger = logging.getLogger(__name__)
@@ -223,10 +223,12 @@ def convertfromlist(filelist: List[str],
                     outputdir: Optional[str],
                     converter_name: str,
                     options: dict,
-                    outputfile: Optional[str] = None) -> Optional[int]:
+                    outputfile: Optional[str] = None,
+                    nscale: float = 1) -> Optional[int]:
     """Convert a list of input files into a single output using a chosen converter.
 
     - Reads and optionally averages inputs (`nan` controls NaN handling).
+    - Scales per-primary data to `nscale` particles if `nscale` is not 1, see `scale_to_particles`.
     - Resolves output path (`outputfile` overrides, else uses `outputdir` or corename).
     - Writes via `converter_name` with `options`.
 
@@ -235,6 +237,8 @@ def convertfromlist(filelist: List[str],
     estimator = fromfilelist(filelist, error, nan)
     if not estimator:
         return None
+    if nscale != 1:
+        scale_to_particles(estimator, nscale)
     if outputfile is not None:
         output_path = outputfile
     elif outputdir is None:
@@ -250,7 +254,8 @@ def convertfrompattern(pattern: str,
                        converter_name: str,
                        options: dict,
                        error: ErrorEstimate = ErrorEstimate.stderr,
-                       nan: bool = True) -> int:
+                       nan: bool = True,
+                       nscale: float = 1) -> int:
     """Convert all files matching a glob `pattern` using the chosen converter.
 
     - Groups matching files by corename and processes each group via `convertfromlist`.
@@ -264,7 +269,7 @@ def convertfrompattern(pattern: str,
 
     status = []
     for _, filelist in core_names_dict.items():
-        status.append(convertfromlist(filelist, error, nan, outputdir, converter_name, options))
+        status.append(convertfromlist(filelist, error, nan, outputdir, converter_name, options, nscale=nscale))
     return max(status)
 
 
