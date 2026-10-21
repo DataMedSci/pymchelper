@@ -164,7 +164,7 @@ class Template:
                 logger.debug("Serving %s", current_dict)
                 yield current_dict
 
-    def write(self, working_directory: PathLike, cfg: Config, quiet: bool = True):
+    def write(self, working_directory: PathLike, cfg: Config, quiet: bool = True):  # skipcq: PY-R1000
         """Description needed."""
         if not quiet:
             print(f"Saving generated workspace to {working_directory!s}")
