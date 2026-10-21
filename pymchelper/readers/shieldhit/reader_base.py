@@ -18,9 +18,7 @@ class SHReader(Reader):
     """
 
     def read_data(self, estimator: Estimator) -> bool:
-        """
-        Normalise the data read by a subclass to values per primary.
-        """
+        """Normalise the data read by a subclass to values per primary."""
         _postprocess(estimator)
         return True
 
