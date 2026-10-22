@@ -429,14 +429,14 @@ def load_PLD_IBA(file_pld: Path, scaling=1.0) -> Plan:
 
     # currently scaling is treated equal at plan and field level. This is for future use.
     current_plan.scaling = scaling
-    field.scaling = scaling
+    myfield.scaling = scaling
 
     pldlines = file_pld.read_text().split('\n')
     pldlen = len(pldlines)
     logger.info("Read %d lines of data.", pldlen)
 
-    field.layers = []
-    field.n_layers = 0
+    myfield.layers = []
+    myfield.n_layers = 0
 
     # First line in PLD file contains both plan and field data
     tokens = pldlines[0].split(",")
@@ -446,9 +446,9 @@ def load_PLD_IBA(file_pld: Path, scaling=1.0) -> Plan:
     current_plan.patient_firstname = tokens[4].strip()
     current_plan.plan_label = tokens[5].strip()
     current_plan.beam_name = tokens[6].strip()
-    field.cmu = float(tokens[7].strip())  # total amount of MUs in this field
-    field.pld_csetweight = float(tokens[8].strip())
-    field.n_layers = int(tokens[9].strip())  # number of layers
+    myfield.cmu = float(tokens[7].strip())  # total amount of MUs in this field
+    myfield.pld_csetweight = float(tokens[8].strip())
+    myfield.n_layers = int(tokens[9].strip())  # number of layers
 
     espread = 0.0  # will be set by beam model
 
