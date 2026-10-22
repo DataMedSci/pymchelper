@@ -4,11 +4,31 @@ import os
 from pathlib import Path
 import re
 import shlex
+import subprocess
 import sys
-from typing import List, Optional
+from typing import List, Optional, Type
 
 from pymchelper.flair import Input
 from pymchelper.simulator_type import SimulatorType
+
+
+def split_options(options: str) -> List[str]:
+    """
+    Split command line options like the shell of this platform does, so a quoted value with spaces stays one item.
+    On Windows backslashes are path separators, not escape characters, so they are kept.
+    """
+    if os.name != 'nt':
+        return shlex.split(options)
+    items = shlex.split(options, posix=False)
+    # in non-POSIX mode the quotes stay in the item, remove the ones around it
+    return [item[1:-1] if len(item) > 1 and item[0] == item[-1] and item[0] in '"\'' else item for item in items]
+
+
+def join_options(options: List[str]) -> str:
+    """Join command line options into one string, which `split_options` splits back into the same items"""
+    if os.name != 'nt':
+        return shlex.join(options)
+    return subprocess.list2cmdline(options)
 
 
 def job_rng_seed(user_rng_seed: int, job_number: int, jobs: int) -> int:
@@ -16,6 +36,8 @@ def job_rng_seed(user_rng_seed: int, job_number: int, jobs: int) -> int:
     RNG seed of one of the parallel jobs: the seed given by the user times the number of jobs, plus the job number.
     Jobs of one run get different seeds, and runs with different user seeds and the same number of jobs
     share no seed, so their results can be merged.
+    Runs with different numbers of jobs may share seeds (user seed 2 with 2 jobs gives 5 and 6,
+    user seed 1 with 4 jobs gives 5 to 8), so runs to be merged must use the same number of jobs.
     """
     return user_rng_seed * jobs + job_number
 
@@ -27,10 +49,10 @@ class MCEnvironment:
     (i.e. checking if it ends with `rfluka`) we can find corresponding code type.
     They also prepare the working directory of each parallel job and the command to run in it.
     """
-    executable_filename = None
-    simulator_type = None
+    executable_filename: Optional[str] = None
+    simulator_type: Optional[SimulatorType] = None
     # files with results in the working directory, merged after the run
-    output_files_pattern = None
+    output_files_pattern: Optional[str] = None
 
     @staticmethod
     def job_numbers(jobs: int) -> List[int]:
@@ -124,9 +146,8 @@ class FlukaEnvironment(MCEnvironment):
 
 
 class SH12AEnvironment(MCEnvironment):
-    """
-    SHIELD-HIT12A Environment, common part for Linux and Windows
-    """
+    """SHIELD-HIT12A Environment, common part for Linux and Windows"""
+
     simulator_type = SimulatorType.shieldhit
     output_files_pattern = "*.bdo"
 
@@ -209,10 +230,12 @@ class SimulationSettings:
     (i.e. whether this is SHIELD-HIT12A, Fluka or TOPAS input)
     """
 
-    def __init__(self, input_path: str, simulator_type: Optional[SimulatorType]=None,
-                 simulator_exec_path: str=None, cmdline_opts: str=None):
+    def __init__(self, input_path: str, simulator_type: Optional[SimulatorType] = None,
+                 simulator_exec_path: Optional[str] = None, cmdline_opts: Optional[str] = None):
         # Input file or directory
         self.input_path = input_path
+
+        self.mc_environment: Optional[Type[MCEnvironment]] = None
 
         # Set `self.mc_environment` to the proper `MCEnvironment` subclass
         # If `simulator_type` is provided by user, then we use it to set proper `MCEnvironment` subclass
@@ -237,9 +260,8 @@ class SimulationSettings:
 
         # set `self.executable_path` to the value provided by user, or if it is missing
         # perform automatic discovery of the *location* of MC engine executable file by scanning PATH env. variable
-        self.executable_path = simulator_exec_path
-        if not self.executable_path:
-            self.executable_path = self._discover_mc_exec_location(self.mc_environment.executable_filename)
+        self.executable_path: str = simulator_exec_path or \
+            self._discover_mc_exec_location(self.mc_environment.executable_filename)
 
         # set extra options (i.e. `--time 00:15:30 -v`) for the MC engine
         self.cmdline_opts = cmdline_opts if cmdline_opts else ''  # sanity check for None value
@@ -249,28 +271,39 @@ class SimulationSettings:
             self._validate_cmdline_opt(self.cmdline_opts)
 
         # RNG seed offset of SHIELD-HIT12A (-N), None if not given; kept out of `cmdline_opts`
-        self.rng_seed = None
+        self.rng_seed: Optional[int] = None
         if self.simulator_type == SimulatorType.shieldhit:
             self._move_rng_seed_out_of_cmdline_opts()
 
     def _move_rng_seed_out_of_cmdline_opts(self):
         """
-        Moves the SHIELD-HIT12A RNG seed offset, given as -N or as its long form --seedoffset,
-        from `cmdline_opts` to `rng_seed`. If it is given more than once, the last value is used.
+        Moves the SHIELD-HIT12A RNG seed offset, given as -N or as its long form --seedoffset
+        (also as --seedoffset=VALUE), from `cmdline_opts` to `rng_seed`.
+        If it is given more than once, the last value is used.
+        Raises ValueError if the value is missing or is not an integer.
         """
-        options_list = shlex.split(self.cmdline_opts)
+        options_list = split_options(self.cmdline_opts)
         other_options = []
         index = 0
         while index < len(options_list):
             option = options_list[index]
             if option in ('-N', '--seedoffset'):
+                if index + 1 >= len(options_list):
+                    raise ValueError(f"{option} needs an integer RNG seed offset")
                 value = options_list[index + 1]
-                self.rng_seed = int(value)
                 index += 2
+            elif option.startswith('--seedoffset='):
+                option, value = option.split('=', 1)
+                index += 1
             else:
                 other_options.append(option)
                 index += 1
-        self.cmdline_opts = shlex.join(other_options)
+                continue
+            try:
+                self.rng_seed = int(value)
+            except ValueError:
+                raise ValueError(f"{option} needs an integer RNG seed offset, got {value!r}") from None
+        self.cmdline_opts = join_options(other_options)
 
     def set_rng_seed(self, rng_seed: int):
         """
@@ -287,7 +320,7 @@ class SimulationSettings:
         so a quoted value with spaces stays one item.
         """
         command = [os.path.abspath(self.executable_path)]
-        command += shlex.split(self.cmdline_opts)
+        command += split_options(self.cmdline_opts)
         if self.rng_seed is not None:
             command += ['-N', str(self.rng_seed)]
         return command
@@ -317,7 +350,7 @@ class SimulationSettings:
         TODO this method is specific to SH12A, more general should be added
         """
         # transform option list from plain string to a list of values for easier manipulation
-        options_list = cmdline_opts.split()
+        options_list = split_options(cmdline_opts)
 
         # transform option list to a set to ease finding common part of unsupported and current options
         options_set = set(options_list)

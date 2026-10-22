@@ -10,7 +10,7 @@ from pymchelper.estimator import Estimator
 
 from pymchelper.input_output import fromfile
 from pymchelper.executor import runner as runner_module
-from pymchelper.executor.options import FlukaEnvironment, SimulationSettings
+from pymchelper.executor.options import FlukaEnvironment, SimulationSettings, join_options, split_options
 from pymchelper.executor.runner import Runner
 from pymchelper.simulator_type import SimulatorType
 
@@ -468,6 +468,7 @@ def test_topas_runs_one_process(tmp_path: Path, monkeypatch: pytest.MonkeyPatch)
 
         @staticmethod
         def map(function, items):
+            """Calls the function on each item in turn, like Pool.map"""
             results = []
             for item in items:
                 results.append(function(item))
@@ -483,6 +484,66 @@ def test_topas_runs_one_process(tmp_path: Path, monkeypatch: pytest.MonkeyPatch)
     Runner(settings=settings, jobs=4, output_directory=str(tmp_path / "ws")).run()
 
     assert pool_sizes == [1]
+
+
+def test_jobs_default_when_cpu_count_unknown(tmp_path: Path, monkeypatch: pytest.MonkeyPatch):
+    """Without jobs given and with an unknown number of CPUs, one job is run"""
+    monkeypatch.setattr(os, "process_cpu_count", lambda: None, raising=False)
+    monkeypatch.setattr(os, "cpu_count", lambda: None)
+    settings = SimulationSettings(input_path=str(make_shieldhit_input(tmp_path / "input")),
+                                  simulator_type=SimulatorType.shieldhit,
+                                  simulator_exec_path="/opt/shieldhit")
+
+    assert Runner(settings=settings, output_directory=str(tmp_path / "out")).jobs == 1
+
+
+@pytest.mark.parametrize("os_name", ["posix", "nt"])
+def test_split_options_keeps_quoted_values(os_name: str, monkeypatch: pytest.MonkeyPatch):
+    """A quoted value with spaces is one item, and joining then splitting gives the same items"""
+    monkeypatch.setattr(os, "name", os_name)
+    options = ["-v", "--title", "my run", "-n", "100"]
+
+    assert split_options('-v --title "my run" -n 100') == options
+    assert split_options(join_options(options)) == options
+
+
+def test_split_options_keeps_windows_paths(monkeypatch: pytest.MonkeyPatch):
+    """On Windows a backslash is a path separator, not an escape character"""
+    monkeypatch.setattr(os, "name", "nt")
+
+    assert split_options(r'--time 00:10 --out C:\Users\me\out "C:\my sims\x"') == \
+        ["--time", "00:10", "--out", r"C:\Users\me\out", r"C:\my sims\x"]
+    assert split_options(join_options([r"C:\Users\me\out", r"C:\my sims\x"])) == \
+        [r"C:\Users\me\out", r"C:\my sims\x"]
+
+
+@pytest.mark.parametrize("cmdline_opts, expected_seed, expected_opts", [
+    ("--seedoffset=5 -n 100", 5, "-n 100"),
+    ("-N 3 --seedoffset 4", 4, ""),
+])
+def test_shieldhit_seed_option_forms(cmdline_opts: str, expected_seed: int, expected_opts: str, tmp_path: Path):
+    """-N and --seedoffset (also with =) are moved out of the options, the last one wins"""
+    settings = SimulationSettings(input_path=str(make_shieldhit_input(tmp_path / "input")),
+                                  simulator_type=SimulatorType.shieldhit,
+                                  simulator_exec_path="/opt/shieldhit",
+                                  cmdline_opts=cmdline_opts)
+
+    assert settings.rng_seed == expected_seed
+    assert settings.cmdline_opts == expected_opts
+
+
+@pytest.mark.parametrize("cmdline_opts, message", [
+    ("-v -N", "-N needs an integer"),
+    ("-N abc", "-N needs an integer RNG seed offset, got 'abc'"),
+    ("--seedoffset=1.5", "--seedoffset needs an integer"),
+])
+def test_shieldhit_seed_option_errors(cmdline_opts: str, message: str, tmp_path: Path):
+    """A missing or non-integer RNG seed offset is a clear error"""
+    with pytest.raises(ValueError, match=message):
+        SimulationSettings(input_path=str(make_shieldhit_input(tmp_path / "input")),
+                           simulator_type=SimulatorType.shieldhit,
+                           simulator_exec_path="/opt/shieldhit",
+                           cmdline_opts=cmdline_opts)
 
 
 def test_settings_str_is_command(tmp_path: Path):

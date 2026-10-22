@@ -9,7 +9,7 @@ import timeit
 from multiprocessing import Pool
 
 from enum import IntEnum
-from typing import List, Tuple
+from typing import List, Optional, Tuple
 from pymchelper.executor.options import FlukaEnvironment, SimulationSettings
 
 from pymchelper.simulator_type import SimulatorType
@@ -33,19 +33,20 @@ class Runner:
 
     def __init__(self,
                  settings: SimulationSettings,
-                 jobs: int = None,
+                 jobs: Optional[int] = None,
                  keep_workspace_after_run: bool = False,
                  output_directory: str = '.'):
         self.settings = settings
 
         # if jobs is not specified, use the same default as multiprocessing.Pool:
-        # the number of CPUs this process may use (Python >= 3.13), otherwise the number of CPUs
+        # the number of CPUs this process may use (Python >= 3.13), otherwise the number of CPUs,
+        # and 1 if the number of CPUs cannot be determined
         if jobs is None:
             if hasattr(os, "process_cpu_count"):
-                jobs = os.process_cpu_count()
+                jobs = os.process_cpu_count() or 1
             else:
-                jobs = os.cpu_count()
-        self.jobs = jobs
+                jobs = os.cpu_count() or 1
+        self.jobs: int = jobs
 
         # workspace is a collection of working directories
         # this manager is responsible for creating and cleaning working directories
@@ -56,6 +57,8 @@ class Runner:
         """
         Execute parallel simulation processes, creating workspace (and working directories) in the `output_directory`
         In case of successful execution return True, otherwise return False
+        If a simulator fails, RuntimeError is raised and the working directories are kept (also without
+        `keep_workspace_after_run`), so the simulator.log of each job can be inspected
         """
         start_time = timeit.default_timer()
 
@@ -133,7 +136,7 @@ class Runner:
         self.workspace_manager.clean()
 
     # yaptide calls Runner._Runner__update_fluka_input_file
-    __update_fluka_input_file = staticmethod(FlukaEnvironment.update_input_file)
+    __update_fluka_input_file = staticmethod(FlukaEnvironment.update_input_file)  # skipcq: PTC-W0037
 
 
 class SingleSimulationExecutor:

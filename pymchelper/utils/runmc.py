@@ -58,9 +58,12 @@ def main(args=None):
                                                    '(automatically detected if not provided)',
                         type=str, default=None)
     parser.add_argument('-j', '--jobs',
-                        help='Number of jobs to run simultaneously (default: {:d})'.format(os.cpu_count()),
+                        help='Number of jobs to run simultaneously '
+                        '(default: number of CPUs, {})'.format(os.cpu_count() or 1),
                         type=int, default=None)
-    parser.add_argument('-m', '--mc-options', help='MC simulation options (default: empty string)',
+    parser.add_argument('-m', '--mc-options', help='MC simulation options (default: empty string). '
+                        'SHIELD-HIT12A RNG seed offset -N S gives job J of the run the seed S * jobs + J, '
+                        'so runs to be merged need different -N and the same number of jobs',
                         dest='mcopt', type=str, default='')
     parser.add_argument('-o', '--output-dir', help='Output directory (default: .)',
                         dest='outdir', type=str, default='.')
@@ -130,6 +133,7 @@ def main(args=None):
     except RuntimeError as error:
         # the simulator failed, the error holds the end of its output
         logging.error(error)
+        logging.error("Working directories kept in %s for inspection", os.path.abspath(parsed_args.workspace))
         return 1
     elapsed = timeit.default_timer() - start_time
     print("MC simulation took {:.3f} seconds".format(elapsed))
