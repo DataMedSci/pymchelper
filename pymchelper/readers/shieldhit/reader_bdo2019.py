@@ -47,11 +47,17 @@ class SHReaderBDO2019(SHReader):
             # the rest of the file is a flat stream of (tag, type, length, payload) tokens;
             # each token either updates estimator-level metadata, starts a new page (detector_type
             # token) or fills in fields of the page currently being built
+            data_block_count = 0
             while f:
                 token = read_next_token(f)
                 if token is None:
                     break
+                token_id = token[0]
+                if token_id == SHBDOTagID.data_block:
+                    data_block_count += 1
                 _process_token(estimator, token)
+
+            _check_all_pages_read(estimator, data_block_count, self.filename)
 
             # once all tokens have been consumed, derive fields that depend on more than one
             # token (differential axes, axis names, per-page normalisation, ...)
@@ -171,6 +177,36 @@ def _process_token(estimator: Estimator, token: BDOToken) -> None:
     if token_id in page_tags_to_save:
         logger.debug("Setting page.%s = %s", SHBDOTagID(token_id).name, payload)
         setattr(estimator.pages[-1], SHBDOTagID(token_id).name, payload)
+
+
+def _check_all_pages_read(estimator: Estimator, data_block_count: int, filename: str) -> None:
+    """
+    Raise ValueError if the file ended before all of its pages were read.
+
+    A file cut exactly between two tokens reads without errors, so the pages are checked here.
+    There must be as many pages as the number_of_pages token says; files without that token
+    only need at least one page. Every page needs its detector_unit token and its data_block token,
+    which is the last token of a page.
+
+    :param estimator: estimator with all tokens of the file applied
+    :param data_block_count: number of data_block tokens read from the file
+    :param filename: name of the file, used in the error message
+    """
+    pages_read = len(estimator.pages)
+    if pages_read == 0:
+        raise ValueError(f"{filename}: no pages, the file is truncated")
+
+    page_count = getattr(estimator, 'page_count', None)
+    if page_count is not None:
+        if pages_read != page_count:
+            raise ValueError(f"{filename}: {pages_read} of {page_count} pages, the file is truncated")
+
+    if data_block_count != pages_read:
+        raise ValueError(f"{filename}: {data_block_count} data blocks for {pages_read} pages, the file is truncated")
+
+    for page in estimator.pages:
+        if not hasattr(page, 'detector_unit'):
+            raise ValueError(f"{filename}: page {page.dettyp} has no unit, the file is truncated or corrupted")
 
 
 def _diff_axis_binning(diff_flag: Optional[NDArray], index: int) -> MeshAxis.BinningType:

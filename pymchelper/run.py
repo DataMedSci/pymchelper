@@ -131,6 +131,7 @@ def main(args: Optional[list[str]] = None) -> int:
         files = sorted(glob.glob(parsed_args.input))
         if not files:
             logger.error('File %s does not exist: ', parsed_args.input)
+            return 1
 
         # check if output should be interpreted as a filename
         if not parsed_args.many and len(files) == 1:
@@ -149,14 +150,25 @@ def main(args: Optional[list[str]] = None) -> int:
 
         parsed_args.error = ErrorEstimate[parsed_args.error]
 
-        if parsed_args.many:
-            status = convertfrompattern(parsed_args.input, output_dir,
-                                        converter_name=parsed_args.command, options=parsed_args,
-                                        error=parsed_args.error, nan=parsed_args.nan)
-        else:
-            status = convertfromlist(parsed_args.input,
-                                     error=parsed_args.error, nan=parsed_args.nan, outputdir=output_dir,
-                                     converter_name=parsed_args.command, options=parsed_args, outputfile=output_file)
+        try:
+            if parsed_args.many:
+                status = convertfrompattern(parsed_args.input,
+                                            output_dir,
+                                            converter_name=parsed_args.command,
+                                            options=parsed_args,
+                                            error=parsed_args.error,
+                                            nan=parsed_args.nan)
+            else:
+                status = convertfromlist(parsed_args.input,
+                                         error=parsed_args.error,
+                                         nan=parsed_args.nan,
+                                         outputdir=output_dir,
+                                         converter_name=parsed_args.command,
+                                         options=parsed_args,
+                                         outputfile=output_file)
+        except ValueError as error:
+            logger.error("%s", error)
+            return 1
 
     return status
 

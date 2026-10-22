@@ -41,6 +41,27 @@ def file_has_sh_magic_number(file_path: PathLike) -> bool:
     return has_bdo_magic_number
 
 
+def file_has_bin2010_header(file_path: PathLike) -> bool:
+    """
+    BIN2010 files start with a Fortran record holding the 10-character geometry type
+    :param file_path: Binary file filename
+    :return: True if binary file starts with such record
+    """
+    with open(file_path, "rb") as f:
+        header = f.read(18)
+    if len(header) < 18:
+        return False
+
+    # Fortran record: 4 bytes with its length, the 10 characters, the same 4 bytes again
+    record_length_before = int.from_bytes(header[0:4], "little")
+    record_length_after = int.from_bytes(header[14:18], "little")
+    if record_length_before != 10:
+        return False
+    if record_length_after != 10:
+        return False
+    return True
+
+
 def extract_sh_ver(file_path: PathLike) -> str:
     """
     BDO binary files, introduced in 2016 (BDO2016 and BDO2019 formats) contain information about SH VER
@@ -149,8 +170,7 @@ class SHReaderFactory(ReaderFactory):
                 # this mean we cannot read BDO2019 files generated with SH12A built before 07.06.2019
                 logger.info("File format information missing (token)")
                 reader = SHReaderBDO2016
-        else:
-            # lack of magic number means we expect Fortran-style binary format (BIN2010)
+        elif file_has_bin2010_header(self.filename):
             reader = SHReaderBin2010
 
         # ver_short = extract_sh_ver(self.filename)
