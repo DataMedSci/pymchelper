@@ -121,74 +121,81 @@ def fromfilelist(input_file_list: Union[List[str], str],
                 return None
             estimator_list.append(estimator)
         result = average_with_nan(estimator_list, error)
-        if result is None:
-            return None
-    elif len(input_file_list) == 1:
-        result = fromfile(input_file_list[0])
-        if not result:
-            return None
     else:
-        result = fromfile(input_file_list[0])
-        if not result:
-            return None
-
-        # _aggregator_mapping maps SHIELD-HIT12A normalization types (integers) to pymchelper aggregators
-        # using enums for clarity. AveragingCumulative (e.g., dose) and AveragingPerPrimary (e.g., LET)
-        # both utilize WeightedStatsAggregator. SHIELD-HIT12A stores "cumulative-like" data (e.g., dose,
-        # fluence) in BDO format as quantities for all particles. pymchelper normalizes this upon reading
-        # a BDO file by the number of primaries, making the `estimator` object data pre-normalized. Hence,
-        # aggregation for "cumulative-like" and "per-primary" data is handled uniformly in this mapping.
-        # keys are plain integers (AggregationType is an IntEnum), as read from the binary files
-        _aggregator_mapping: Dict[int, Type[Aggregator]] = {
-            AggregationType.NoAggregation: NoAggregator,
-            AggregationType.Sum: SumAggregator,
-            AggregationType.AveragingCumulative: WeightedStatsAggregator,
-            AggregationType.AveragingPerPrimary: WeightedStatsAggregator,
-            AggregationType.Concatenation: ConcatenatingAggregator
-        }
-
-        # create aggregators for each page and fill them with data from first file
-        page_aggregators = []
-        for page in result.pages:
-
-            # if no normalization attribute present (Fluka?) we can assume it is a cumulative-like quantity
-            current_page_normalisation = getattr(page, 'page_normalized', AggregationType.AveragingCumulative.value)
-
-            # guess the aggregator based on the normalisation type
-            aggregator = _aggregator_mapping.get(current_page_normalisation, WeightedStatsAggregator)()
-            logger.debug("Selected aggregator %s for page %s", aggregator, page.name)
-
-            # feed the aggregator with data from the first file
-            aggregator.update(value=page.data_raw, weight=result.number_of_primaries)
-            page_aggregators.append(aggregator)
-
-        # process all other files, if there are any
-        for filename in input_file_list[1:]:
-            current_estimator = fromfile(filename)
-            if current_estimator is None:
-                return None
-            for current_page, aggregator in zip(current_estimator.pages, page_aggregators):
-                aggregator.update(value=current_page.data_raw, weight=current_estimator.number_of_primaries)
-
-            # force garbage collection if the estimator is too large
-            estimator_size_mbytes = sum(page.data_raw.nbytes for page in current_estimator.pages) / 1024 / 1024
-            gc_threshold_mbytes = 100
-            if estimator_size_mbytes > gc_threshold_mbytes:
-                logger.info("Large estimator (%.1f MB) detected, performing garbage collection", estimator_size_mbytes)
-                gc.collect()
-            result.number_of_primaries += current_estimator.number_of_primaries
-
-        # extract data from aggregators and fill then into the result
-        for page, aggregator in zip(result.pages, page_aggregators):
-            logger.debug("Extracting data from aggregator %s for page %s", aggregator, page.name)
-            page.data_raw = np.asarray(aggregator.data)
-            page_error = aggregator.error(error_type=error.name)
-            page.error_raw = None if page_error is None else np.asarray(page_error)
+        result = _aggregate_files(input_file_list, error)
+    if result is None:
+        return None
 
     result.file_counter = len(input_file_list)
     core_names_dict = group_input_files(input_file_list)
     if len(core_names_dict) == 1:
         result.file_corename = list(core_names_dict)[0]
+
+    return result
+
+
+def _aggregate_files(input_file_list: List[str], error: ErrorEstimate) -> Optional[Estimator]:
+    """
+    Reads the files one by one and aggregates their pages, see `pymchelper.averaging`.
+
+    :return: estimator with aggregated data, or None if any of the files could not be read
+    """
+    result = fromfile(input_file_list[0])
+    if result is None or len(input_file_list) == 1:
+        return result
+
+    # _aggregator_mapping maps SHIELD-HIT12A normalization types (integers) to pymchelper aggregators
+    # using enums for clarity. AveragingCumulative (e.g., dose) and AveragingPerPrimary (e.g., LET)
+    # both utilize WeightedStatsAggregator. SHIELD-HIT12A stores "cumulative-like" data (e.g., dose,
+    # fluence) in BDO format as quantities for all particles. pymchelper normalizes this upon reading
+    # a BDO file by the number of primaries, making the `estimator` object data pre-normalized. Hence,
+    # aggregation for "cumulative-like" and "per-primary" data is handled uniformly in this mapping.
+    # keys are plain integers (AggregationType is an IntEnum), as read from the binary files
+    _aggregator_mapping: Dict[int, Type[Aggregator]] = {
+        AggregationType.NoAggregation: NoAggregator,
+        AggregationType.Sum: SumAggregator,
+        AggregationType.AveragingCumulative: WeightedStatsAggregator,
+        AggregationType.AveragingPerPrimary: WeightedStatsAggregator,
+        AggregationType.Concatenation: ConcatenatingAggregator
+    }
+
+    # create aggregators for each page and fill them with data from first file
+    page_aggregators = []
+    for page in result.pages:
+
+        # if no normalization attribute present (Fluka?) we can assume it is a cumulative-like quantity
+        current_page_normalisation = getattr(page, 'page_normalized', AggregationType.AveragingCumulative.value)
+
+        # guess the aggregator based on the normalisation type
+        aggregator = _aggregator_mapping.get(current_page_normalisation, WeightedStatsAggregator)()
+        logger.debug("Selected aggregator %s for page %s", aggregator, page.name)
+
+        # feed the aggregator with data from the first file
+        aggregator.update(value=page.data_raw, weight=result.number_of_primaries)
+        page_aggregators.append(aggregator)
+
+    # process all other files, if there are any
+    for filename in input_file_list[1:]:
+        current_estimator = fromfile(filename)
+        if current_estimator is None:
+            return None
+        for current_page, aggregator in zip(current_estimator.pages, page_aggregators):
+            aggregator.update(value=current_page.data_raw, weight=current_estimator.number_of_primaries)
+
+        # force garbage collection if the estimator is too large
+        estimator_size_mbytes = sum(page.data_raw.nbytes for page in current_estimator.pages) / 1024 / 1024
+        gc_threshold_mbytes = 100
+        if estimator_size_mbytes > gc_threshold_mbytes:
+            logger.info("Large estimator (%.1f MB) detected, performing garbage collection", estimator_size_mbytes)
+            gc.collect()
+        result.number_of_primaries += current_estimator.number_of_primaries
+
+    # extract data from aggregators and fill then into the result
+    for page, aggregator in zip(result.pages, page_aggregators):
+        logger.debug("Extracting data from aggregator %s for page %s", aggregator, page.name)
+        page.data_raw = np.asarray(aggregator.data)
+        page_error = aggregator.error(error_type=error.name)
+        page.error_raw = None if page_error is None else np.asarray(page_error)
 
     return result
 
