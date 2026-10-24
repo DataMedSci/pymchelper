@@ -145,7 +145,7 @@ class FlukaReader(Reader):
                     energy_binning = MeshAxis.BinningType.logarithmic
                     angle_binning = MeshAxis.BinningType.logarithmic
                 else:
-                    return Exception("Invalid binning type")
+                    raise ValueError(f"Invalid USRBDX binning type {detector.nb}")
 
                 # USRBDX doesn't support spatial (XYZ) binning type
                 # USRBDX provides double differential binning, first axis is kinetic energy (in GeV)
@@ -211,7 +211,7 @@ class FlukaReader(Reader):
                 elif detector.type == -1:
                     energy_binning = MeshAxis.BinningType.logarithmic
                 else:
-                    return Exception("Invalid binning type")
+                    raise ValueError(f"Invalid USRTRACK binning type {detector.type}")
 
                 # USRTRACK provides single differential binning, with diff axis in kinetic energy (in GeV)
                 page.diff_axis1 = MeshAxis(
@@ -271,7 +271,7 @@ class FlukaReader(Reader):
         except IOError:
             return None
 
-    def parse_data(self, estimator) -> Optional[object]:
+    def parse_data(self, estimator) -> Optional[Usrxxx]:
         """
         TODO
         :param estimator: an Estimator object, will be modified here and filled with data
@@ -282,6 +282,7 @@ class FlukaReader(Reader):
             # stop on first method which return not-None results and return it back
             if usr_object:
                 return usr_object
+        return None
 
     def read_data(self, estimator, nscale: float = 1) -> bool:
         """
@@ -289,6 +290,9 @@ class FlukaReader(Reader):
         :param estimator: an Estimator object, will be modified here and filled with data
         """
         usr_object = self.parse_data(estimator)
+        if usr_object is None:
+            logger.error("No USRBIN, USRTRACK, USRBDX or RESNUCLE data in %s", self.filename)
+            return False
 
         estimator.file_counter = usr_object.nbatch
         estimator.number_of_primaries = usr_object.ncase
