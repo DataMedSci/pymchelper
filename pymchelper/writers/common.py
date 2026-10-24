@@ -42,7 +42,7 @@ class Converters(IntEnum):
             cls.hdf: HdfWriter,
             cls.json: JsonWriter,
             cls.mcpl: MCPLWriter,
-        }.get(item)
+        }[item]
 
     @classmethod
     def fromname(cls, name: str) -> type:
@@ -50,4 +50,4 @@ class Converters(IntEnum):
 
     @classmethod
     def fromnumber(cls, number: int) -> type:
-        return cls._converter_mapping[Converters(number)]
+        return cls._converter_mapping(Converters(number))

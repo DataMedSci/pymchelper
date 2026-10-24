@@ -2030,10 +2030,9 @@ if __name__ == "__main__":
         say("%02d %40s |%10s|" % (i, num, format_number(num, 10)))
 
     say(Vector.O)
-    a = 1.2345678901234567890
     w = -1e-05
     say(format_number(w, 22))
-    say(format_number(a, 22))
+    say(format_number(1.2345678901234567890, 22))
     say(Vector.Y.direction(0.0000001))
     a = Vector(range(5))
     a.norm()
