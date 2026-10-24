@@ -123,17 +123,14 @@ def read_token(file_path: PathLike, token_id):
                 logger.debug("Read token {:s} (0x{:02x}) value {} type {:s} length {:d}".format(
                     SHBDOTagID(pl_id).name, pl_id, _pl, _pl_type.decode('ASCII'), _pl_len))
 
-                pl = [None] * _pl_len
-
                 # decode all strings (currently there will never be more than one per token)
                 if 'S' in _pl_type.decode('ASCII'):
-                    for i, _j in enumerate(_pl):
-                        pl[i] = _pl[i].decode('ASCII').strip()
+                    pl = [item.decode('ASCII').strip() for item in _pl]
                 else:
                     pl = _pl
 
                 if len(pl) == 1:
-                    pl = pl[0]
+                    return pl[0]
 
                 return pl
         return None
