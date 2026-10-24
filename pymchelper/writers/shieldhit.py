@@ -1,7 +1,7 @@
 import logging
 import math
 from pathlib import Path
-from typing import TYPE_CHECKING
+from typing import Optional, TYPE_CHECKING, Union
 
 import numpy as np
 
@@ -64,7 +64,7 @@ def _format_e_fast(w: int, d: int, val: float) -> str:
 class TxtWriter(Writer):
 
     @staticmethod
-    def _axis_name(geo_type: SHGeoType, axis_no: int) -> str:
+    def _axis_name(geo_type: Optional[SHGeoType], axis_no: int) -> str:
         cyl = ('R', 'PHI', 'Z')
         msh = ('X', 'Y', 'Z')
         if geo_type in (SHGeoType.cyl, SHGeoType.dcyl):
@@ -119,7 +119,8 @@ class TxtWriter(Writer):
         return result
 
     @staticmethod
-    def _header_scored_value(geotyp: SHGeoType, dettyp: SHDetType, particle: object) -> str:
+    def _header_scored_value(geotyp: Optional[SHGeoType], dettyp: Optional[Union[SHDetType, str]],
+                             particle: object) -> str:
         """scored value and optionally particle type"""
         result = ""
         if geotyp != SHGeoType.geomap and particle:
@@ -177,37 +178,40 @@ class TxtWriter(Writer):
             raise ValueError(f"Page {page.name} has differential axes, txt output has no columns for them. "
                              "Please use convertmc plotdata converter instead.")
 
-        self.ax = self._axis_name(page.estimator.geotyp, 0)
-        self.ay = self._axis_name(page.estimator.geotyp, 1)
-        self.az = self._axis_name(page.estimator.geotyp, 2)
+        estimator = page.estimator
+        if estimator is None:
+            raise ValueError(f"Page {page.name} is not attached to an estimator")
+
+        self.ax = self._axis_name(estimator.geotyp, 0)
+        self.ay = self._axis_name(estimator.geotyp, 1)
+        self.az = self._axis_name(estimator.geotyp, 2)
 
         # original bdo2txt is not saving header data for some of cylindrical scorers, hence we do the same
-        if page.estimator.geotyp in (SHGeoType.cyl, SHGeoType.dcyl,) and \
+        if estimator.geotyp in (SHGeoType.cyl, SHGeoType.dcyl,) and \
                 page.dettyp in (SHDetType.fluence, SHDetType.avg_energy, SHDetType.avg_beta, SHDetType.energy):
             header = ""
         else:
-            header = self._header_first_line(page.estimator)
+            header = self._header_first_line(estimator)
 
-            header += self._header_geometric_info(page.estimator)
+            header += self._header_geometric_info(estimator)
 
-            header += self._header_scored_value(page.estimator.geotyp, page.dettyp,
-                                                getattr(page.estimator, 'particle', None))
+            header += self._header_scored_value(estimator.geotyp, page.dettyp, getattr(estimator, 'particle', None))
 
-            header += self._header_no_of_bins_and_prim(page.estimator)
+            header += self._header_no_of_bins_and_prim(estimator)
 
         # rows walk the bins with x fastest, page.data is indexed (x, y, z, diff1, diff2)
         zlist, ylist, xlist = np.meshgrid(page.axis(2).data, page.axis(1).data, page.axis(0).data, indexing='ij')
         xlist = xlist.ravel()
         ylist = ylist.ravel()
         zlist = zlist.ravel()
-        if page.estimator.geotyp in {SHGeoType.zone, SHGeoType.dzone}:
+        if estimator.geotyp in {SHGeoType.zone, SHGeoType.dzone}:
             xlist = np.zeros_like(xlist)
         # dirty hack to be compliant with old bdo2txt and files generated in old (<0.6) BDO format
         # this hack will be removed at some point together with bdo-style converter
-        elif not hasattr(page.estimator, "mc_code_version") and page.estimator.geotyp == SHGeoType.plane:
-            xlist = np.full_like(xlist, (page.estimator.sx + page.estimator.nx) / 2.0)
-            ylist = np.full_like(ylist, (page.estimator.sy + page.estimator.ny) / 2.0)
-            zlist = np.full_like(zlist, (page.estimator.sz + page.estimator.nz) / 2.0)
+        elif not hasattr(estimator, "mc_code_version") and estimator.geotyp == SHGeoType.plane:
+            xlist = np.full_like(xlist, (estimator.sx + estimator.nx) / 2.0)
+            ylist = np.full_like(ylist, (estimator.sy + estimator.ny) / 2.0)
+            zlist = np.full_like(zlist, (estimator.sz + estimator.nz) / 2.0)
 
         columns = [(14, 7, xlist), (14, 7, ylist), (14, 7, zlist), (23, 16, page.data.ravel(order='F'))]
         if page.error is not None:

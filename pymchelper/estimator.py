@@ -72,6 +72,8 @@ class Estimator:
         self.file_format = ""  # binary file format of the input files
         self.error_type = ErrorEstimate.none
         self.geotyp: Optional[SHGeoType] = None  # MSH, CYL, etc...
+        self.tripdose = 0.0  # planned dose for TRiP98 normalisation, only bin2010 VOXSCORE files set it
+        self.tripntot = -1  # number of primaries for TRiP98 normalisation, only bin2010 VOXSCORE files set it
 
         self.pages: Tuple['Page', ...] = ()  # empty tuple of pages at the beginning
 
