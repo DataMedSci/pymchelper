@@ -5,7 +5,9 @@ import os
 from collections import defaultdict
 from glob import glob
 from pathlib import Path
-from typing import Dict, List, Optional, Union
+from typing import Dict, List, Optional, Type, Union
+
+import numpy as np
 
 from pymchelper.averaging import (Aggregator, SumAggregator, WeightedStatsAggregator, ConcatenatingAggregator,
                                   NoAggregator)
@@ -62,7 +64,7 @@ def guess_reader(filename: str) -> Optional[object]:
     return reader
 
 
-def guess_corename(filename: str) -> Optional[str]:
+def guess_corename(filename: str) -> str:
     """
     Guess a reader based on file contents or extensions.
     In some cases (i.e. binary SHIELD-HIT12A files) access to file contents is needed.
@@ -92,7 +94,7 @@ def fromfile(filename: str) -> Optional[Estimator]:
     estimator.file_counter = 1
     if not reader.read(estimator):  # some problems occurred during read
         logger.error("Error reading file %s", filename)
-        estimator = None
+        return None
     return estimator
 
 
@@ -105,14 +107,22 @@ def fromfilelist(input_file_list: Union[List[str], str],
     :param input_file_list: list of files to be read
     :param error: error estimation, see class ErrorEstimate class in pymchelper.estimator
     :param nan: if True, NaN (not a number) are excluded when averaging data.
-    :return: list of estimators
+    :return: list of estimators, or None if any of the files could not be read
     """
     if not isinstance(input_file_list, list):  # probably a string instead of list
         input_file_list = [input_file_list]
 
+    result: Optional[Estimator]
     if nan:
-        estimator_list = [fromfile(filename) for filename in input_file_list]
+        estimator_list = []
+        for filename in input_file_list:
+            estimator = fromfile(filename)
+            if estimator is None:
+                return None
+            estimator_list.append(estimator)
         result = average_with_nan(estimator_list, error)
+        if result is None:
+            return None
     elif len(input_file_list) == 1:
         result = fromfile(input_file_list[0])
         if not result:
@@ -128,7 +138,8 @@ def fromfilelist(input_file_list: Union[List[str], str],
         # fluence) in BDO format as quantities for all particles. pymchelper normalizes this upon reading
         # a BDO file by the number of primaries, making the `estimator` object data pre-normalized. Hence,
         # aggregation for "cumulative-like" and "per-primary" data is handled uniformly in this mapping.
-        _aggregator_mapping: Dict[AggregationType, Aggregator] = {
+        # keys are plain integers (AggregationType is an IntEnum), as read from the binary files
+        _aggregator_mapping: Dict[int, Type[Aggregator]] = {
             AggregationType.NoAggregation: NoAggregator,
             AggregationType.Sum: SumAggregator,
             AggregationType.AveragingCumulative: WeightedStatsAggregator,
@@ -154,6 +165,8 @@ def fromfilelist(input_file_list: Union[List[str], str],
         # process all other files, if there are any
         for filename in input_file_list[1:]:
             current_estimator = fromfile(filename)
+            if current_estimator is None:
+                return None
             for current_page, aggregator in zip(current_estimator.pages, page_aggregators):
                 aggregator.update(value=current_page.data_raw, weight=current_estimator.number_of_primaries)
 
@@ -168,8 +181,9 @@ def fromfilelist(input_file_list: Union[List[str], str],
         # extract data from aggregators and fill then into the result
         for page, aggregator in zip(result.pages, page_aggregators):
             logger.debug("Extracting data from aggregator %s for page %s", aggregator, page.name)
-            page.data_raw = aggregator.data
-            page.error_raw = aggregator.error(error_type=error.name)
+            page.data_raw = np.asarray(aggregator.data)
+            page_error = aggregator.error(error_type=error.name)
+            page.error_raw = None if page_error is None else np.asarray(page_error)
 
     result.file_counter = len(input_file_list)
     core_names_dict = group_input_files(input_file_list)
@@ -179,21 +193,21 @@ def fromfilelist(input_file_list: Union[List[str], str],
     return result
 
 
-def frompattern(pattern: str,
+def frompattern(pattern: Union[str, List[str]],
                 error: ErrorEstimate = ErrorEstimate.stderr,
                 nan: bool = True) -> List[Optional[Estimator]]:
     """
     Reads all files matching pattern, e.g.: 'foobar_*.bdo', and returns a list of averaged estimators.
 
-    :param pattern: pattern to be matched for reading.
+    :param pattern: pattern to be matched for reading, or a list of files to read.
     :param error: error estimation, see class ErrorEstimate class in pymchelper.estimator
     :param nan: if True, NaN (not a number) are excluded when averaging data.
     :return: a list of estimators, or an empty list if no files were found.
     """
 
-    try:
+    if isinstance(pattern, str):
         list_of_matching_files = sorted(glob(pattern))
-    except TypeError as e:  # noqa: F841
+    else:
         list_of_matching_files = pattern
 
     core_names_dict = group_input_files(list_of_matching_files)
@@ -256,15 +270,19 @@ def convertfrompattern(pattern: str,
     - Groups matching files by corename and processes each group via `convertfromlist`.
     - Supports NaN-aware averaging (`nan`) and error type selection (`error`).
 
-    Returns the maximum status code across processed groups.
+    Returns the maximum status code across processed groups, 1 if no file matches or a group could not be read.
     """
     list_of_matching_files = sorted(glob(pattern))
+    if not list_of_matching_files:
+        logger.error("No files matching %s", pattern)
+        return 1
 
     core_names_dict = group_input_files(list_of_matching_files)
 
     status = []
     for _, filelist in core_names_dict.items():
-        status.append(convertfromlist(filelist, error, nan, outputdir, converter_name, options))
+        group_status = convertfromlist(filelist, error, nan, outputdir, converter_name, options)
+        status.append(1 if group_status is None else group_status)
     return max(status)
 
 
@@ -284,7 +302,7 @@ def tofile(estimator: Estimator, filename: str, converter_name: str, options: di
     return status
 
 
-def group_input_files(input_file_list: List[str]) -> Dict[Optional[str], List[str]]:
+def group_input_files(input_file_list: List[str]) -> Dict[str, List[str]]:
     """
     Takes set of input file names, belonging to possibly different estimators.
     Input files are grouped according to the estimators and for each group

@@ -96,7 +96,5 @@ class MCPLWriter(Writer):
 
             data_bytes['uz'] = sign * page.data[7]
 
-            data_bytes = data_bytes.tobytes()
-
-            output_path.write_bytes(header_bytes + data_bytes)
+            output_path.write_bytes(header_bytes + data_bytes.tobytes())
             return
