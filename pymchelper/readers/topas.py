@@ -206,16 +206,16 @@ class TopasReader(Reader):
             # (e.g. mean and standard deviation for fluence).
             # We look for mean and standard deviation and ignore the rest.
             # Then we put them in raw_data and raw_error respectively.
-            scorer, unit, results = None, None, None
+            res = None
             for line in header_lines:
                 res = extract_scorer_unit_results(line)
                 if res is not None:
-                    scorer, unit, results = res
                     break
 
             # We did not find scorer info in the output file
-            if scorer is None:
+            if res is None:
                 return False
+            scorer, unit, results = res
 
             num_results = len(results)
             set_data = False

@@ -38,22 +38,30 @@ class Inspector:
             print(75 * "-")
 
         if self.options.details:
-            # print data scatter-plot if possible
-            if len(estimator.pages) == 1 and estimator.pages[0].dimension == 1:
-                try:
-                    from hipsterplot import plot
-                    print(75 * "*")
-                    print("Data scatter plot")
-                    plot(estimator.pages[0].data_raw)
-                except ImportError:
-                    logger.warning("Detailed summary requires installation of hipsterplot package")
-            # print data histogram if possible
+            try:
+                from hipsterplot import plot
+            except ImportError:
+                plot = None
+                logger.warning("Detailed summary requires installation of hipsterplot package")
             try:
                 from bashplotlib.histogram import plot_hist
-                print(75 * "*")
-                print("Data histogram")
-                plot_hist(estimator.data_raw, bincount=70, xlab=False, showSummary=True)
             except ImportError:
+                plot_hist = None
                 logger.warning("Detailed summary requires installation of bashplotlib package")
+
+            for page_no, page in enumerate(estimator.pages):
+                # a single value is already shown in the statistics above, there is nothing to plot
+                if page.data_raw.size == 1:
+                    continue
+                # print data scatter-plot if possible
+                if page.dimension == 1 and plot is not None:
+                    print(75 * "*")
+                    print(f"Page {page_no} / {len(estimator.pages)} data scatter plot")
+                    plot(page.data_raw)
+                # print data histogram if possible
+                if plot_hist is not None:
+                    print(75 * "*")
+                    print(f"Page {page_no} / {len(estimator.pages)} data histogram")
+                    plot_hist(page.data_raw, bincount=70, xlab=False, showSummary=True)
 
         return 0

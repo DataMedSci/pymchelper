@@ -1,6 +1,6 @@
 import logging
 import os
-from typing import TYPE_CHECKING
+from typing import Iterable, Optional, TYPE_CHECKING, Union
 
 import numpy as np
 
@@ -27,7 +27,7 @@ class SHBinaryWriter:
 class TxtWriter:
 
     @staticmethod
-    def _axis_name(geo_type: SHGeoType, axis_no: int) -> str:
+    def _axis_name(geo_type: Optional[SHGeoType], axis_no: int) -> str:
         cyl = ('R', 'PHI', 'Z')
         msh = ('X', 'Y', 'Z')
         if geo_type in (SHGeoType.cyl, SHGeoType.dcyl):
@@ -66,11 +66,10 @@ class TxtWriter:
             result = "#   DETECTOR OUTPUT GEOMAP\n"
         return result
 
-    def _header_geometric_info(self, page: 'Page') -> str:
+    def _header_geometric_info(self, det: Estimator, page: 'Page') -> str:
         """next block - scoring object geometrical information"""
 
         from pymchelper.writers.fortranformatter import format_d
-        det = page.estimator
         result = ""
         if det.geotyp in {SHGeoType.plane, SHGeoType.dplane}:
             result += "#   PLANE point(X,Y,Z)         :"
@@ -84,7 +83,8 @@ class TxtWriter:
         return result
 
     @staticmethod
-    def _header_scored_value(geotyp: SHGeoType, dettyp: SHDetType, particle: object) -> str:
+    def _header_scored_value(geotyp: Optional[SHGeoType], dettyp: Optional[Union[SHDetType, str]],
+                             particle: object) -> str:
         """scored value and optionally particle type"""
         result = ""
         if geotyp != SHGeoType.geomap and particle:
@@ -99,10 +99,9 @@ class TxtWriter:
             result += f"#                DETECTOR TYPE: {str(det_type_name).ljust(10)}\n"
         return result
 
-    def _header_no_of_bins_and_prim(self, page: 'Page') -> str:
+    def _header_no_of_bins_and_prim(self, estimator: Estimator, page: 'Page') -> str:
         from pymchelper.writers.fortranformatter import format_d
 
-        estimator = page.estimator
         header = ""
         # number of bins in each dimensions
         if estimator.geotyp not in (SHGeoType.plane, SHGeoType.dplane, SHGeoType.zone, SHGeoType.dzone):
@@ -158,30 +157,34 @@ class TxtWriter:
 
         from pymchelper.writers.fortranformatter import format_e
 
-        self.ax = self._axis_name(page.estimator.geotyp, 0)
-        self.ay = self._axis_name(page.estimator.geotyp, 1)
-        self.az = self._axis_name(page.estimator.geotyp, 2)
+        estimator = page.estimator
+        if estimator is None:
+            raise ValueError(f"Page {page.name} is not attached to an estimator")
+
+        self.ax = self._axis_name(estimator.geotyp, 0)
+        self.ay = self._axis_name(estimator.geotyp, 1)
+        self.az = self._axis_name(estimator.geotyp, 2)
 
         # original bdo2txt is not saving header data for some of cylindrical scorers, hence we do the same
-        if page.estimator.geotyp in (SHGeoType.cyl, SHGeoType.dcyl,) and \
+        if estimator.geotyp in (SHGeoType.cyl, SHGeoType.dcyl,) and \
                 page.dettyp in (SHDetType.fluence, SHDetType.avg_energy, SHDetType.avg_beta, SHDetType.energy):
             header = ""
         else:
-            header = self._header_first_line(page.estimator)
+            header = self._header_first_line(estimator)
 
-            header += self._header_geometric_info(page)
+            header += self._header_geometric_info(estimator, page)
 
-            header += self._header_scored_value(page.estimator.geotyp, page.dettyp,
-                                                getattr(page.estimator, 'particle', None))
+            header += self._header_scored_value(estimator.geotyp, page.dettyp, getattr(estimator, 'particle', None))
 
-            header += self._header_no_of_bins_and_prim(page)
+            header += self._header_no_of_bins_and_prim(estimator, page)
 
         # dump data
         with open(filename, 'w') as fout:  # skipcq: PTC-W6004
             logger.info("Writing: %s", filename)
             fout.write(header)
 
-            if page.error is None:
+            det_error: Iterable[Optional[float]]
+            if page.error_raw is None:
                 det_error = [None] * page.data_raw.size
             else:
                 det_error = page.error_raw.ravel()
@@ -200,21 +203,21 @@ class TxtWriter:
             logger.debug('zlist %s', str(zlist))
 
             for x, y, z, v, e in zip(xlist.ravel(), ylist.ravel(), zlist.ravel(), page.data.ravel(), det_error):
-                if page.estimator.geotyp in {SHGeoType.zone, SHGeoType.dzone}:
+                if estimator.geotyp in {SHGeoType.zone, SHGeoType.dzone}:
                     x = 0.0
                 # dirty hack to be compliant with old bdo2txt and files generated in old (<0.6) BDO format
                 # this hack will be removed at some point together with bdo-style converter
-                elif not hasattr(page.estimator, "mc_code_version") and page.estimator.geotyp == SHGeoType.plane:
-                    x = (page.estimator.sx + page.estimator.nx) / 2.0
-                    y = (page.estimator.sy + page.estimator.ny) / 2.0
-                    z = (page.estimator.sz + page.estimator.nz) / 2.0
+                elif not hasattr(estimator, "mc_code_version") and estimator.geotyp == SHGeoType.plane:
+                    x = (estimator.sx + estimator.nx) / 2.0
+                    y = (estimator.sy + estimator.ny) / 2.0
+                    z = (estimator.sz + estimator.nz) / 2.0
                 else:
                     x = float('nan') if np.isnan(x) else x
                 y = float('nan') if np.isnan(y) else y
                 z = float('nan') if np.isnan(z) else z
-                v = float('nan') if np.isnan(v) else v
+                value = float('nan') if np.isnan(v) else v
                 tmp = format_e(14, 7, x) + " " + format_e(14, 7, y) + " " + \
-                    format_e(14, 7, z) + " " + format_e(23, 16, v)
+                    format_e(14, 7, z) + " " + format_e(23, 16, value)
 
                 if e is not None:
                     e = float('nan') if np.isnan(e) else e

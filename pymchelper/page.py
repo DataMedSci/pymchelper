@@ -1,4 +1,4 @@
-from typing import List, Optional, Tuple, TYPE_CHECKING
+from typing import List, Optional, Tuple, TYPE_CHECKING, Union
 import numpy as np
 from numpy.typing import NDArray
 
@@ -21,7 +21,7 @@ class Page:
         self.name: str = ""
         self.unit: str = ""
 
-        self.dettyp = None  # Dose, Fluence, LET etc...
+        self.dettyp: Optional[Union[SHDetType, str]] = None  # Dose, Fluence, LET etc., scorer name for TOPAS
 
         # spatial scoring mesh, by default a single bin on each axis
         self.x = MeshAxis(n=1,

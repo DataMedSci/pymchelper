@@ -138,3 +138,22 @@ def test_concatenation_of_bdo_files(phasespace_bdo_files_path: Generator[Path, N
     assert sum(data.pages[2].data.shape[1] for data in file_data.values()) == 15
     concatenated_page = np.concatenate([data.pages[0].data_raw for data in file_data.values()])
     assert np.isclose(concatenated_page, estimator_data.pages[0].data_raw).all()
+
+
+def test_negative_pdg_codes(phasespace_bdo_file_path: Path, tmp_path: Path):
+    """Antiparticles and negative mesons keep their negative PDG codes, MCPL stores them as signed int32"""
+    from pymchelper.input_output import tofile
+
+    estimator = fromfile(str(phasespace_bdo_file_path))
+    estimator.pages = estimator.pages[:1]
+    page = estimator.pages[0]
+    page.data_raw = page.data_raw.copy()
+    proton_positions = np.flatnonzero(page.data_raw == 2212)
+    page.data_raw[proton_positions[:3]] = -11  # positron
+    page.data_raw[proton_positions[3:5]] = -211  # negative pion
+
+    tofile(estimator, str(tmp_path / "phasespace"), "mcpl", None)
+
+    pdg_codes = [particle.pdgcode for particle in mcpl.MCPLFile(tmp_path / "phasespace.mcpl").particles]
+    assert pdg_codes == page.data[0].astype(int).tolist()
+    assert pdg_codes[:6] == [-11, -11, -11, -211, -211, 2212]

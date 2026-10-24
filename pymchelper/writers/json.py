@@ -1,7 +1,7 @@
 import logging
 import json
+from typing import Any, Dict
 
-from pymchelper.axis import MeshAxis
 from pymchelper.estimator import Estimator
 from pymchelper.page import Page
 
@@ -27,7 +27,7 @@ class JsonWriter:
             print("No pages in the output file, conversion to JSON skipped.")
             return False
 
-        est_dict = {
+        est_dict: Dict[str, Any] = {
             "metadata": {},
             "pages": []
         }
@@ -46,7 +46,7 @@ class JsonWriter:
             # "dimensions" indicating it is 1 dim page
             # "data" which has unit, name and list of data values
             page: Page
-            page_dict = {
+            page_dict: Dict[str, Any] = {
                 "metadata": {},
                 "dimensions": page.dimension,
                 "data": {
@@ -68,7 +68,9 @@ class JsonWriter:
                 page_dict["data"]["values"] = page.data_raw.tolist()
 
             for i in range(page.dimension):
-                axis: MeshAxis = page.plot_axis(i)
+                axis = page.plot_axis(i)
+                if axis is None:
+                    continue
                 page_dict[f"axis_dim{i+1}"] = {
                     "unit": str(axis.unit),
                     "name": str(axis.name),
