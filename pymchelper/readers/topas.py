@@ -1,3 +1,4 @@
+import logging
 from pathlib import Path
 import re
 from typing import Dict, List, Optional, Tuple
@@ -7,6 +8,8 @@ from pymchelper.axis import MeshAxis
 from pymchelper.estimator import Estimator
 from pymchelper.page import Page
 from pymchelper.readers.common import Reader, ReaderFactory
+
+logger = logging.getLogger(__name__)
 
 
 class TopasReaderFactory(ReaderFactory):
@@ -41,6 +44,89 @@ def extract_parameter_filename(header_line: str) -> Optional[str]:
     if match:
         parameter_filename = match.group(1)
     return parameter_filename
+
+
+def read_topas_parameters(parameter_file_path: Path, base_directory: Path) -> Optional[Dict[str, str]]:
+    """
+    Read parameters from a TOPAS parameter file into a dictionary.
+    Keys are lower case parameter names without the type, e.g. 'so/demo/numberofhistoriesinrun',
+    because TOPAS ignores the case of names. Values are kept as written, e.g. '20' or '"True"'.
+    Text after '#' is a comment. Lines without '=' are skipped.
+    Files listed in includeFile are read as well, paths are relative to base_directory.
+    A parameter set in the including file overrides the same parameter from an included file.
+    Returns None if the file or one of the included files does not exist.
+    """
+    if not parameter_file_path.exists():
+        return None
+
+    own_parameters = {}
+    include_file_names = []
+    with open(parameter_file_path, 'r') as parameter_file:
+        for line in parameter_file:
+            text_before_comment = line.split('#')[0]
+            if '=' not in text_before_comment:
+                continue
+            name_and_value = text_before_comment.split('=', 1)
+            type_and_name = name_and_value[0].strip()
+            value = name_and_value[1].strip()
+            if type_and_name.lower() == 'includefile':
+                include_file_names.extend(value.split())
+                continue
+            name = type_and_name.split(':')[-1]
+            own_parameters[name.lower()] = value
+
+    parameters = {}
+    for include_file_name in include_file_names:
+        included_parameters = read_topas_parameters(base_directory / include_file_name, base_directory)
+        if included_parameters is None:
+            return None
+        parameters.update(included_parameters)
+    parameters.update(own_parameters)
+    return parameters
+
+
+def read_number_of_histories(parameter_file_path: Path) -> int:
+    """
+    Read the number of histories TOPAS simulated for the given parameter file.
+    With several particle sources TOPAS runs as many histories as the source with the largest
+    NumberOfHistoriesInRun, the other sources stop generating particles when they reach their own number.
+    Returns 0 if the number can't be read from the parameters:
+    the parameter file or an included file is missing, no source sets NumberOfHistoriesInRun,
+    a source sets it with an expression instead of a plain integer,
+    a source reads particles from a phase space file,
+    or the histories are not a single run of the sources (time features with several or random times,
+    a scorer repeating the run until a statistical limit is reached, results restored from file).
+    """
+    parameters = read_topas_parameters(parameter_file_path, parameter_file_path.parent)
+    if parameters is None:
+        return 0
+
+    single_run_values = {
+        'tf/numberofsequentialtimes': '1',
+        'tf/randomizetimedistribution': '"false"',
+        'ts/restoreresultsfromfile': '"false"',
+    }
+    for name, single_run_value in single_run_values.items():
+        value = parameters.get(name, single_run_value)
+        if value.lower() != single_run_value:
+            return 0
+
+    histories_per_source = []
+    for name, value in parameters.items():
+        if '/repeatsequenceuntil' in name:
+            return 0
+        if not name.startswith('so/'):
+            continue
+        if name.endswith('/type') and value.lower().startswith('"phasespace'):
+            return 0
+        if name.endswith('/numberofhistoriesinrun'):
+            if not value.isdigit():
+                return 0
+            histories_per_source.append(int(value))
+
+    if not histories_per_source:
+        return 0
+    return max(histories_per_source)
 
 
 def extract_bins_data(dimensions: List[str], header_lines: List[str]) -> Optional[Dict]:
@@ -129,7 +215,8 @@ class TopasReader(Reader):
         TOPAS reader assumes that the input file is in the same directory as the output file
         to extract the number of histories from it.
         If the name of the input file is not found in the output file
-        or the input file is not in the same directory, the number of histories is set to 0.
+        or the number of histories can't be read from the input file (see read_number_of_histories),
+        the number of histories is set to 0 and the standard deviation is not stored.
         """
         with open(self.filename, 'r') as results_file:
             results_lines = results_file.readlines()
@@ -140,15 +227,7 @@ class TopasReader(Reader):
                 input_filename = extract_parameter_filename(line)
                 if input_filename is not None:
                     input_file_path = Path(self.directory) / input_filename
-                    if input_file_path.exists():
-                        with open(input_file_path, 'r') as input_file:
-                            pattern = r'NumberOfHistoriesInRun\s*=\s*(\d+)'
-                            input_data = input_file.read()
-                            match = re.search(pattern, input_data)
-                            if match:
-                                number_str = re.search(r'\d+', match.group())
-                                if number_str:
-                                    num_histories = int(number_str.group())
+                    num_histories = read_number_of_histories(input_file_path)
                     break
 
             estimator.file_corename = Path(self.filename).name[:-4]
@@ -270,7 +349,12 @@ class TopasReader(Reader):
                     page.data_raw = scores
                     set_data = True
                 elif result == 'Standard_Deviation':
-                    page.error_raw = scores
+                    # TOPAS reports the spread of single-history values, the error of the mean is spread / sqrt(N)
+                    if estimator.number_of_primaries > 0:
+                        page.error_raw = scores / np.sqrt(estimator.number_of_primaries)
+                    else:
+                        logger.warning("Number of histories not found for %s, standard deviation is skipped",
+                                       self.filename)
 
             # If we didn't find mean results for the scorer, we return False
             if not set_data:
