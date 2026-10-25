@@ -185,7 +185,13 @@ def _aggregate_files(input_file_list: List[str], error: ErrorEstimate) -> Estima
         logger.debug("Extracting data from aggregator %s for page %s", aggregator, page.name)
         page.data_raw = np.asarray(aggregator.data)
         page_error = aggregator.error(error_type=error.name)
-        page.error_raw = None if page_error is None else np.asarray(page_error)
+        # only WeightedStatsAggregator estimates the error, other aggregators and ErrorEstimate.none give None,
+        # which means the page has no error data
+        if page_error is None:
+            page.error_raw = None
+        else:
+            # the error may come as a plain float, while error_raw holds an array
+            page.error_raw = np.asarray(page_error)
 
     return result
 
@@ -233,7 +239,7 @@ def convertfromlist(filelist: List[str],
                     nan: bool,
                     outputdir: Optional[str],
                     converter_name: str,
-                    options: dict,
+                    options: object,
                     outputfile: Optional[str] = None) -> int:
     """Convert a list of input files into a single output using a chosen converter.
 
@@ -257,7 +263,7 @@ def convertfromlist(filelist: List[str],
 def convertfrompattern(pattern: str,
                        outputdir: Optional[str],
                        converter_name: str,
-                       options: dict,
+                       options: object,
                        error: ErrorEstimate = ErrorEstimate.stderr,
                        nan: bool = True) -> int:
     """Convert all files matching a glob `pattern` using the chosen converter.
@@ -280,7 +286,7 @@ def convertfrompattern(pattern: str,
     return max(status)
 
 
-def tofile(estimator: Estimator, filename: str, converter_name: str, options: dict) -> int:
+def tofile(estimator: Estimator, filename: str, converter_name: str, options: object) -> int:
     """
     Save a estimator data to a ``filename`` using converter defined by ``converter_name``
     :param estimator:
