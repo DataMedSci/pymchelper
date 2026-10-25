@@ -280,7 +280,7 @@ class FlukaReader(Reader):
                 return usr_object
         return None
 
-    def read_data(self, estimator, nscale: float = 1) -> bool:
+    def read_data(self, estimator) -> bool:
         """
         TODO
         :param estimator: an Estimator object, will be modified here and filled with data

@@ -170,8 +170,6 @@ class SHReaderBin2010(SHReader):
 
         return True  # reading OK
 
-    # TODO: we need an alternative list, in case things have been scaled with nscale, since then things
-    # are not "/particle" anymore.
     def read_payload(self, estimator):
         logger.info("Reading data: " + self.filename)
 
@@ -195,7 +193,7 @@ class SHReaderBin2010(SHReader):
 
         return True
 
-    def read_data(self, estimator, nscale=1):
+    def read_data(self, estimator):
         if not self.read_header(estimator):
             logger.debug("Reading header failed")
             return None

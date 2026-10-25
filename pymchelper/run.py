@@ -53,7 +53,7 @@ def convert(parsed_args: argparse.Namespace) -> int:
             os.makedirs(output_dir)
         return convertfrompattern(parsed_args.input, output_dir,
                                   converter_name=parsed_args.command, options=parsed_args,
-                                  error=parsed_args.error, nan=parsed_args.nan)
+                                  error=parsed_args.error, nan=parsed_args.nan, nscale=parsed_args.nscale)
 
     # without --many all files are merged into one output, refuse to mix files from different estimators
     corenames = sorted(group_input_files(files))
@@ -66,7 +66,7 @@ def convert(parsed_args: argparse.Namespace) -> int:
     status = convertfromlist(files,
                              error=parsed_args.error, nan=parsed_args.nan, outputdir='.',
                              converter_name=parsed_args.command, options=parsed_args,
-                             outputfile=parsed_args.output)
+                             outputfile=parsed_args.output, nscale=parsed_args.nscale)
     # convertfromlist gives None when the input files could not be read, report it as a failure
     if status is None:
         return 1
