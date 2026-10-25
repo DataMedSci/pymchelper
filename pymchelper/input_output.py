@@ -1,6 +1,5 @@
 from enum import IntEnum
 import logging
-import gc
 import os
 from collections import defaultdict
 from glob import glob
@@ -11,7 +10,7 @@ import numpy as np
 
 from pymchelper.averaging import (Aggregator, SumAggregator, WeightedStatsAggregator, ConcatenatingAggregator,
                                   NoAggregator)
-from pymchelper.estimator import ErrorEstimate, Estimator, average_with_nan
+from pymchelper.estimator import ErrorEstimate, Estimator
 from pymchelper.readers.topas import TopasReaderFactory
 from pymchelper.readers.fluka import FlukaReader, FlukaReaderFactory
 from pymchelper.readers.shieldhit.general import SHReaderFactory
@@ -102,31 +101,24 @@ def fromfilelist(input_file_list: Union[List[str], str],
                  error: ErrorEstimate = ErrorEstimate.stderr,
                  nan: bool = False) -> Optional[Estimator]:
     """
-    Reads all files from a given list using `fromfile` method, and returns a list of averaged estimators.
+    Reads all files from a given list using `fromfile` method, and returns one merged estimator.
+    Each page is merged according to its normalisation type: summed, averaged with the number of primaries
+    as weights, concatenated or taken from the first file, see `AggregationType`.
+    Files which can't be read are skipped, if the first one can't be read None is returned.
 
     :param input_file_list: list of files to be read
     :param error: error estimation, see class ErrorEstimate class in pymchelper.estimator
-    :param nan: if True, NaN (not a number) are excluded when averaging data.
-    :return: list of estimators, or None if any of the files could not be read
+    :param nan: if True, NaN (not a number) values are left out of the sums and averages, bin by bin,
+        a bin which is NaN in every file stays NaN
+    :return: merged estimator, or None if the first file can't be read
     """
     if not isinstance(input_file_list, list):  # probably a string instead of list
         input_file_list = [input_file_list]
 
-    result: Optional[Estimator]
-    if nan:
-        estimator_list = []
-        for filename in input_file_list:
-            estimator = fromfile(filename)
-            if estimator is None:
-                return None
-            estimator_list.append(estimator)
-        result = average_with_nan(estimator_list, error)
-    else:
-        result = _aggregate_files(input_file_list, error)
+    result = _aggregate_files(input_file_list, error, nan)
     if result is None:
         return None
 
-    result.file_counter = len(input_file_list)
     core_names_dict = group_input_files(input_file_list)
     if len(core_names_dict) == 1:
         result.file_corename = list(core_names_dict)[0]
@@ -134,14 +126,18 @@ def fromfilelist(input_file_list: Union[List[str], str],
     return result
 
 
-def _aggregate_files(input_file_list: List[str], error: ErrorEstimate) -> Optional[Estimator]:
+def _aggregate_files(input_file_list: List[str], error: ErrorEstimate, nan: bool) -> Optional[Estimator]:
     """
     Reads the files one by one and aggregates their pages, see `pymchelper.averaging`.
 
-    :return: estimator with aggregated data, or None if any of the files could not be read
+    :return: estimator with aggregated data, or None if the first file can't be read
     """
-    result = fromfile(input_file_list[0])
-    if result is None or len(input_file_list) == 1:
+    first_file = input_file_list[0]
+    result = fromfile(first_file)
+    if result is None:
+        return None
+    result.file_counter = 1
+    if len(input_file_list) == 1:
         return result
 
     # _aggregator_mapping maps SHIELD-HIT12A normalization types (integers) to pymchelper aggregators
@@ -167,28 +163,28 @@ def _aggregate_files(input_file_list: List[str], error: ErrorEstimate) -> Option
         current_page_normalisation = getattr(page, 'page_normalized', AggregationType.AveragingCumulative.value)
 
         # guess the aggregator based on the normalisation type
-        aggregator = _aggregator_mapping.get(current_page_normalisation, WeightedStatsAggregator)()
+        aggregator_class = _aggregator_mapping.get(current_page_normalisation, WeightedStatsAggregator)
+        aggregator = aggregator_class(skip_nan=nan)
         logger.debug("Selected aggregator %s for page %s", aggregator, page.name)
 
         # feed the aggregator with data from the first file
         aggregator.update(value=page.data_raw, weight=result.number_of_primaries)
         page_aggregators.append(aggregator)
 
-    # process all other files, if there are any
+    # process all other files
     for filename in input_file_list[1:]:
         current_estimator = fromfile(filename)
         if current_estimator is None:
-            return None
+            continue
+        _check_same_pages(result, first_file, current_estimator, filename)
+
         for current_page, aggregator in zip(current_estimator.pages, page_aggregators):
             aggregator.update(value=current_page.data_raw, weight=current_estimator.number_of_primaries)
-
-        # force garbage collection if the estimator is too large
-        estimator_size_mbytes = sum(page.data_raw.nbytes for page in current_estimator.pages) / 1024 / 1024
-        gc_threshold_mbytes = 100
-        if estimator_size_mbytes > gc_threshold_mbytes:
-            logger.info("Large estimator (%.1f MB) detected, performing garbage collection", estimator_size_mbytes)
-            gc.collect()
         result.number_of_primaries += current_estimator.number_of_primaries
+        result.file_counter += 1
+
+        # pages point back to their estimator, breaking that cycle frees the estimator now, not at the next gc run
+        current_estimator.pages = ()
 
     # extract data from aggregators and fill then into the result
     for page, aggregator in zip(result.pages, page_aggregators):
@@ -206,6 +202,30 @@ def _aggregate_files(input_file_list: List[str], error: ErrorEstimate) -> Option
     return result
 
 
+def _check_same_pages(first: Estimator, first_file: str, other: Estimator, other_file: str) -> None:
+    """
+    Raise an error if `other` doesn't hold the same pages as `first`.
+    Files are merged page by page, so their pages must come from the same scorers, in the same order.
+    """
+    if len(other.pages) != len(first.pages):
+        raise ValueError(f"{other_file} has {len(other.pages)} pages, {first_file} has {len(first.pages)}, "
+                         "they come from different scorers and can't be merged")
+
+    for index, first_page in enumerate(first.pages):
+        other_page = other.pages[index]
+        page_number = index + 1
+
+        if other_page.name != first_page.name or other_page.dettyp != first_page.dettyp:
+            raise ValueError(f"page {page_number} is {other_page.name} in {other_file} "
+                             f"and {first_page.name} in {first_file}, they can't be merged")
+
+        concatenated = getattr(first_page, 'page_normalized', None) == AggregationType.Concatenation
+        if not concatenated and other_page.data_raw.size != first_page.data_raw.size:
+            raise ValueError(f"page {page_number} ({other_page.name}) has {other_page.data_raw.size} bins "
+                             f"in {other_file} and {first_page.data_raw.size} in {first_file}, "
+                             "they can't be merged")
+
+
 def frompattern(pattern: Union[str, List[str]],
                 error: ErrorEstimate = ErrorEstimate.stderr,
                 nan: bool = True) -> List[Optional[Estimator]]:
@@ -214,7 +234,7 @@ def frompattern(pattern: Union[str, List[str]],
 
     :param pattern: pattern to be matched for reading, or a list of files to read.
     :param error: error estimation, see class ErrorEstimate class in pymchelper.estimator
-    :param nan: if True, NaN (not a number) are excluded when averaging data.
+    :param nan: if True, NaN (not a number) values are left out of the sums and averages, bin by bin
     :return: a list of estimators, or an empty list if no files were found.
     """
 
@@ -253,7 +273,7 @@ def convertfromlist(filelist: List[str],
                     outputfile: Optional[str] = None) -> Optional[int]:
     """Convert a list of input files into a single output using a chosen converter.
 
-    - Reads and optionally averages inputs (`nan` controls NaN handling).
+    - Reads and merges inputs, see `fromfilelist` (`nan` controls NaN handling).
     - Resolves output path (`outputfile` overrides, else uses `outputdir` or corename).
     - Writes via `converter_name` with `options`.
 

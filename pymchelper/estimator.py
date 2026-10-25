@@ -1,9 +1,8 @@
 import copy
 from enum import IntEnum
 import logging
-from typing import List, Optional, Tuple, TYPE_CHECKING
+from typing import Optional, Tuple, TYPE_CHECKING
 
-import numpy as np
 from pymchelper.axis import MeshAxis, AxisId
 from pymchelper.shieldhit.detector.estimator_type import SHGeoType
 
@@ -127,39 +126,3 @@ class Estimator:
         :return: number of axes (among X,Y,Z) which have more than one bin
         """
         return 3 - (self.x.n, self.y.n, self.z.n).count(1)
-
-
-def average_with_nan(estimator_list: List[Estimator],
-                     error_estimate: ErrorEstimate = ErrorEstimate.stderr) -> Optional[Estimator]:
-    """
-    Calculate average estimator object, excluding malformed data (NaN) from averaging.
-    :param estimator_list:
-    :param error_estimate:
-    :return:
-    """
-    # TODO add compatibility check
-    if not estimator_list:
-        return None
-    result = copy.deepcopy(estimator_list[0])
-    result.number_of_primaries = sum(estimator.number_of_primaries for estimator in estimator_list)
-    for page_no, page in enumerate(result.pages):
-        page.data_raw = np.nanmean([estimator.pages[page_no].data_raw for estimator in estimator_list], axis=0)
-    result.file_counter = len(estimator_list)
-    if result.file_counter > 1 and error_estimate != ErrorEstimate.none:
-        # s = stddev = sqrt(1/(n-1)sum(x-<x>)**2)
-        # s : corrected sample standard deviation
-        for page_no, page in enumerate(result.pages):
-            page.error_raw = np.nanstd([estimator.pages[page_no].data_raw for estimator in estimator_list],
-                                       axis=0,
-                                       ddof=1)
-
-        # if user requested standard error then we calculate it as:
-        # S = stderr = stddev / sqrt(n), or in other words,
-        # S = s/sqrt(N) where S is the corrected standard deviation of the mean.
-        if error_estimate == ErrorEstimate.stderr:
-            for page in result.pages:
-                page.error_raw /= np.sqrt(result.file_counter)  # np.sqrt() always returns np.float64
-    else:
-        for page in result.pages:
-            page.error_raw = None
-    return result
