@@ -3,6 +3,7 @@
 import argparse
 import glob
 import logging
+import os
 import sys
 from typing import Optional
 
@@ -35,10 +36,44 @@ def add_default_options(parser: argparse.ArgumentParser) -> None:
     parser.add_argument('-V', '--version', action='version', version=pymchelper.__version__)
 
 
+def convert(parsed_args: argparse.Namespace) -> int:
+    """Convert files matching the input pattern with the converter selected on the command line, return exit code"""
+    # TODO add filename discovery
+    files = sorted(glob.glob(parsed_args.input))
+    if not files:
+        logger.error('File %s does not exist: ', parsed_args.input)
+        return 1
+
+    parsed_args.error = ErrorEstimate[parsed_args.error]
+
+    # with --many files are grouped by estimator and output is a directory with one file per estimator
+    if parsed_args.many:
+        output_dir = parsed_args.output or '.'
+        if not os.path.exists(output_dir):
+            logger.warning("Directory %s does not exist, creating.", output_dir)
+            os.makedirs(output_dir)
+        return convertfrompattern(parsed_args.input, output_dir,
+                                  converter_name=parsed_args.command, options=parsed_args,
+                                  error=parsed_args.error, nan=parsed_args.nan)
+
+    # without --many all files are merged into one output, refuse to mix files from different estimators
+    corenames = sorted(group_input_files(files))
+    if len(corenames) > 1:
+        logger.error('Files matching %s belong to %d different estimators (%s), use --many to convert '
+                     'each of them separately', parsed_args.input, len(corenames), ', '.join(corenames))
+        return 1
+
+    # output is interpreted as a filename
+    status = convertfromlist(files,
+                             error=parsed_args.error, nan=parsed_args.nan, outputdir='.',
+                             converter_name=parsed_args.command, options=parsed_args,
+                             outputfile=parsed_args.output)
+    return 1 if status is None else status
+
+
 def main(args: Optional[list[str]] = None) -> int:
     if args is None:
         args = sys.argv[1:]
-    import os
 
     import pymchelper
 
@@ -125,51 +160,9 @@ def main(args: Optional[list[str]] = None) -> int:
     else:
         logging.basicConfig()
 
-    status = 0
-    if parsed_args.command is not None:
-        # TODO add filename discovery
-        files = sorted(glob.glob(parsed_args.input))
-        if not files:
-            logger.error('File %s does not exist: ', parsed_args.input)
-            return 1
-
-        # without --many all files are merged into one output, refuse to mix files from different estimators
-        if not parsed_args.many:
-            corenames = sorted(group_input_files(files))
-            if len(corenames) > 1:
-                logger.error('Files matching %s belong to %d different estimators (%s), use --many to convert '
-                             'each of them separately', parsed_args.input, len(corenames), ', '.join(corenames))
-                return 1
-
-        # check if output should be interpreted as a filename
-        if not parsed_args.many:
-            output_file = parsed_args.output
-        else:
-            output_file = None
-
-        if parsed_args.output is not None and output_file is None:
-            output_dir = parsed_args.output
-            # check if output directory exists
-            if output_dir and not os.path.exists(output_dir):
-                logger.warning("Directory %s does not exist, creating.", output_dir)
-                os.makedirs(output_dir)
-        else:
-            output_dir = '.'
-
-        parsed_args.error = ErrorEstimate[parsed_args.error]
-
-        if parsed_args.many:
-            status = convertfrompattern(parsed_args.input, output_dir,
-                                        converter_name=parsed_args.command, options=parsed_args,
-                                        error=parsed_args.error, nan=parsed_args.nan)
-        else:
-            list_status = convertfromlist(files,
-                                          error=parsed_args.error, nan=parsed_args.nan, outputdir=output_dir,
-                                          converter_name=parsed_args.command, options=parsed_args,
-                                          outputfile=output_file)
-            status = 1 if list_status is None else list_status
-
-    return status
+    if parsed_args.command is None:
+        return 0
+    return convert(parsed_args)
 
 
 if __name__ == '__main__':
