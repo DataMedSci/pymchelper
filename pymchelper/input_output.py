@@ -243,7 +243,7 @@ def convertfromlist(filelist: List[str],
                     nan: bool,
                     outputdir: Optional[str],
                     converter_name: str,
-                    options: dict,
+                    options: object,
                     outputfile: Optional[str] = None) -> Optional[int]:
     """Convert a list of input files into a single output using a chosen converter.
 
@@ -269,7 +269,7 @@ def convertfromlist(filelist: List[str],
 def convertfrompattern(pattern: str,
                        outputdir: Optional[str],
                        converter_name: str,
-                       options: dict,
+                       options: object,
                        error: ErrorEstimate = ErrorEstimate.stderr,
                        nan: bool = True) -> int:
     """Convert all files matching a glob `pattern` using the chosen converter.
@@ -293,7 +293,7 @@ def convertfrompattern(pattern: str,
     return max(status)
 
 
-def tofile(estimator: Estimator, filename: str, converter_name: str, options: dict) -> int:
+def tofile(estimator: Estimator, filename: str, converter_name: str, options: object) -> int:
     """
     Save a estimator data to a ``filename`` using converter defined by ``converter_name``
     :param estimator:

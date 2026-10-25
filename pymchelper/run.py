@@ -155,9 +155,11 @@ def main(args: Optional[list[str]] = None) -> int:
                                         converter_name=parsed_args.command, options=parsed_args,
                                         error=parsed_args.error, nan=parsed_args.nan)
         else:
-            status = convertfromlist(files,
-                                     error=parsed_args.error, nan=parsed_args.nan, outputdir=output_dir,
-                                     converter_name=parsed_args.command, options=parsed_args, outputfile=output_file)
+            list_status = convertfromlist(files,
+                                          error=parsed_args.error, nan=parsed_args.nan, outputdir=output_dir,
+                                          converter_name=parsed_args.command, options=parsed_args,
+                                          outputfile=output_file)
+            status = 1 if list_status is None else list_status
 
     return status
 

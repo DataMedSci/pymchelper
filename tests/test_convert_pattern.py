@@ -32,3 +32,13 @@ def test_pattern_without_matching_files_fails(tmp_path: Path):
 
     assert status_single == 1
     assert status_many == 1
+
+
+def test_pattern_without_many_unreadable_files_fail(main_dir: Path, tmp_path: Path, monkeypatch):
+    """Input files which could not be read end with exit code 1 instead of 0."""
+    monkeypatch.setattr("pymchelper.run.convertfromlist", lambda *args, **kwargs: None)
+    pattern = str(main_dir / "res" / "shieldhit" / "averaging" / "normalisation-5_aggregation-mean_000*.bdo")
+
+    status = main(["json", pattern, str(tmp_path / "out.json")])
+
+    assert status == 1
