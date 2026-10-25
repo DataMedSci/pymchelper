@@ -1,5 +1,6 @@
-from typing import Sequence, Union
+from typing import Union
 import numpy as np
+from numpy.typing import ArrayLike
 
 
 def cubic_interpolate(x0: Union[float, np.ndarray], x: np.ndarray, y: np.ndarray) -> Union[float, np.ndarray]:
@@ -30,8 +31,7 @@ def cubic_interpolate(x0: Union[float, np.ndarray], x: np.ndarray, y: np.ndarray
     def _interp_one(x0_one: float) -> float:
         """Interpolate a single value."""
         # find interval index (requires x sorted)
-        index = x.searchsorted(x0_one)
-        index = int(np.clip(index, 1, n - 1))
+        index = int(np.clip(x.searchsorted(x0_one), 1, n - 1))
 
         xi1, xi0 = x[index], x[index - 1]
         yi1, yi0 = y[index], y[index - 1]
@@ -59,7 +59,7 @@ class CubicSpline1D:
     Wraps `cubic_interpolate` to provide a SciPy-like callable.
     """
 
-    def __init__(self, x: Sequence[float], y: Sequence[float]):
+    def __init__(self, x: ArrayLike, y: ArrayLike):
         self.x = np.asarray(x, dtype=float)
         self.y = np.asarray(y, dtype=float)
 
