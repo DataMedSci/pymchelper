@@ -113,6 +113,8 @@ class TRiP98CubeWriter(Writer):
 
         # PyTRiP cube dimensions are in mm, SHIELD-HIT12A mesh in cm
         estimator = page.estimator
+        if estimator is None:
+            raise ValueError(f"Page {page.name} is not attached to an estimator")
         pixel_size = bin_width(estimator.x) * 10.0
         slice_distance = bin_width(estimator.z) * 10.0
         # TRiP98 offsets are the mesh edges for X and Y, slice positions are the slice centres

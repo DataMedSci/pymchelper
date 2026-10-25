@@ -15,6 +15,7 @@ import pytest
 import pymchelper
 from pymchelper import run
 from pymchelper.input_output import fromfile
+from pymchelper.writers.common import Converters
 
 logger = logging.getLogger(__name__)
 
@@ -107,6 +108,12 @@ class TestSparseConverter(unittest.TestCase):
 
                 logger.info("Removing directory %s", working_dir)
                 shutil.rmtree(working_dir)
+
+
+@pytest.mark.parametrize("converter", list(Converters))
+def test_fromnumber_matches_fromname(converter: Converters) -> None:
+    """Test if every converter can be looked up by its number and by its name"""
+    assert Converters.fromnumber(converter.value) is Converters.fromname(converter.name)
 
 
 if __name__ == '__main__':
