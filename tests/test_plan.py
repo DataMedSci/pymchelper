@@ -132,3 +132,13 @@ def test_pld_scaling():
 
     for layer_scale_1, layer_scale_2 in zip(plan_scale_1.fields[0].layers, field_scale_2.layers):
         assert layer_scale_2.spots[:, 3] == pytest.approx(2.0 * layer_scale_1.spots[:, 3])
+
+
+def test_layer_defaults():
+    """Layer can be created without arguments, spots and spot size are then empty arrays"""
+    from pymchelper.utils.radiotherapy.plan import Layer
+
+    layer = Layer()
+
+    assert layer.spots.size == 0
+    assert layer.spotsize.size == 0

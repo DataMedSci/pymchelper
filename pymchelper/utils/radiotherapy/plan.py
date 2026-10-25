@@ -121,8 +121,8 @@ class Layer:
     mu_to_part_coef : conversion coefficient from MU to number of particles (depends on energy)
     """
 
-    spots: np.array = field(default_factory=np.array)
-    spotsize: np.array = field(default_factory=np.array)
+    spots: np.ndarray = field(default_factory=lambda: np.array([]))
+    spotsize: np.ndarray = field(default_factory=lambda: np.array([]))
     energy_nominal: float = 100.0
     energy_measured: float = 100.0
     espread: float = 0.0
@@ -377,7 +377,8 @@ class Plan:
             fout.write_text(output)  # still in field loop, output for every field
 
 
-def load(file: Path, beam_model: BeamModel, scaling: float, flip_xy: bool, flip_x: bool, flip_y: bool) -> Plan:
+def load(file: Path, beam_model: Optional[BeamModel], scaling: float,
+         flip_xy: bool, flip_x: bool, flip_y: bool) -> Plan:
     """Load file, autodiscovery by suffix."""
     logger.debug("load() autodiscovery %s", file)
     ext = file.suffix.lower()  # extract suffix, incl. dot separator
@@ -446,7 +447,7 @@ def load_PLD_IBA(file_pld: Path, scaling=1.0) -> Plan:
     current_plan.patient_firstname = tokens[4].strip()
     current_plan.plan_label = tokens[5].strip()
     current_plan.beam_name = tokens[6].strip()
-    myfield.cmu = float(tokens[7].strip())  # total amount of MUs in this field
+    myfield.cum_mu = float(tokens[7].strip())  # total amount of MUs in this field
     myfield.pld_csetweight = float(tokens[8].strip())
     myfield.n_layers = int(tokens[9].strip())  # number of layers
 
