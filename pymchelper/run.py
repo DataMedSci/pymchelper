@@ -38,7 +38,6 @@ def add_default_options(parser: argparse.ArgumentParser) -> None:
 
 def convert(parsed_args: argparse.Namespace) -> int:
     """Convert files matching the input pattern with the converter selected on the command line, return exit code"""
-    # TODO add filename discovery
     files = sorted(glob.glob(parsed_args.input))
     if not files:
         logger.error('File %s does not exist: ', parsed_args.input)
