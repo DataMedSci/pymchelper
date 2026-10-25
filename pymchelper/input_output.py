@@ -115,6 +115,8 @@ def fromfilelist(input_file_list: Union[List[str], str],
     if nan:
         estimator_list = [fromfile(filename) for filename in input_file_list]
         result = average_with_nan(estimator_list, error)
+        if result is None:
+            raise ValueError("No input files to read")
     else:
         result = _aggregate_files(input_file_list, error)
 
