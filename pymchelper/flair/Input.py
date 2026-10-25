@@ -97,6 +97,7 @@ import time
 import math
 import struct
 import string
+from typing import Dict, List
 
 import pymchelper.flair.common.fortran as fortran
 import pymchelper.flair.common.bmath as bmath
@@ -160,14 +161,14 @@ infinite = 1.0E10
 
 # -------------------------------------------------------------------------------
 # Global variables
-_defaultMaterials = []  # Default material list (cards)
-_defaultMatDict = {}
-_icruMaterials = []  # ICRU special compounds (cards)
-_icruMatDict = {}
-_neutronGroups = {}  # Neutron energy groups as numbers
-_neutronGroupsS = {}  # Neutron energy groups as strings with units
-_lowMaterials = {}  # LOW-NEUT material cross sections
-_usermvax = {}  # Description of user routines
+_defaultMaterials: List = []  # Default material list (cards)
+_defaultMatDict: Dict = {}
+_icruMaterials: List = []  # ICRU special compounds (cards)
+_icruMatDict: Dict = {}
+_neutronGroups: Dict = {}  # Neutron energy groups as numbers
+_neutronGroupsS: Dict = {}  # Neutron energy groups as strings with units
+_lowMaterials: Dict = {}  # LOW-NEUT material cross sections
+_usermvax: Dict = {}  # Description of user routines
 
 # File formats
 FORMAT_SINGLE = 0
@@ -188,7 +189,7 @@ FLAIR_TAGS = None
 OBJECT_TAGS = None
 TRANSFORM_TAGS = None
 DETECTOR_TAGS = ("DETECT", "EVENTBIN", "RESNUCLE", "USRBDX", "USRBIN", "USRCOLL", "USRTRACK", "USRYIELD")
-NGROUPS = []
+NGROUPS: List = []
 
 # Preprocessor cards that increase or decrease the indent
 _INDENT_INC = ("#if", "#ifdef", "#ifndef", "#elif", "#else", "#include", "$start_expansion", "$start_translat",
@@ -455,8 +456,8 @@ class LowNeutMaterial:
 
 
 class CardInfo:
-    _db = {}  # Card information dictionary
-    _funcs = {}  # Caching compiled functions
+    _db: Dict = {}  # Card information dictionary
+    _funcs: Dict = {}  # Caching compiled functions
 
     def __init__(self, name, group, range_, extra, assert_, default, meaning):
         if name[0] not in ("$", "#"):
@@ -1094,13 +1095,13 @@ class LogicalUnits:
 # ===============================================================================
 class Particle:
     # Particles dictionary
-    _db = {}
-    list = []
-    beam = []
-    listAll = []
-    signedList = []
-    signedListAll = []
-    particles = []
+    _db: Dict = {}
+    list: List = []
+    beam: List = []
+    listAll: List = []
+    signedList: List = []
+    signedListAll: List = []
+    particles: List = []
 
     # ----------------------------------------------------------------------
     def __init__(self, id, name, mass=0.0, comment=None, pdg=None):
