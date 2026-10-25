@@ -42,3 +42,14 @@ def test_pattern_without_many_unreadable_files_fail(main_dir: Path, tmp_path: Pa
     status = main(["json", pattern, str(tmp_path / "out.json")])
 
     assert status == 1
+
+
+def test_pattern_without_many_different_estimators_fail(main_dir: Path, tmp_path: Path):
+    """A pattern matching files of different estimators without --many ends with exit code 1, nothing is merged."""
+    pattern = str(main_dir / "res" / "shieldhit" / "averaging" / "normalisation-*_aggregation-*_000*.bdo")
+    output_file = tmp_path / "out.json"
+
+    status = main(["json", pattern, str(output_file)])
+
+    assert status == 1
+    assert not output_file.exists()

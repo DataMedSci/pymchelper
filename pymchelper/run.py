@@ -7,7 +7,7 @@ import sys
 from typing import Optional
 
 from pymchelper.estimator import ErrorEstimate
-from pymchelper.input_output import convertfromlist, convertfrompattern
+from pymchelper.input_output import convertfromlist, convertfrompattern, group_input_files
 from pymchelper.writers.common import Converters
 from pymchelper.writers.plots import ImageWriter, PlotAxis
 
@@ -132,6 +132,14 @@ def main(args: Optional[list[str]] = None) -> int:
         if not files:
             logger.error('File %s does not exist: ', parsed_args.input)
             return 1
+
+        # without --many all files are merged into one output, refuse to mix files from different estimators
+        if not parsed_args.many:
+            corenames = sorted(group_input_files(files))
+            if len(corenames) > 1:
+                logger.error('Files matching %s belong to %d different estimators (%s), use --many to convert '
+                             'each of them separately', parsed_args.input, len(corenames), ', '.join(corenames))
+                return 1
 
         # check if output should be interpreted as a filename
         if not parsed_args.many:
