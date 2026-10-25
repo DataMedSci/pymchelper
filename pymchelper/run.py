@@ -67,9 +67,6 @@ def convert(parsed_args: argparse.Namespace) -> int:
                              error=parsed_args.error, nan=parsed_args.nan, outputdir='.',
                              converter_name=parsed_args.command, options=parsed_args,
                              outputfile=parsed_args.output)
-    # convertfromlist gives None when the input files could not be read, report it as a failure
-    if status is None:
-        return 1
     return status
 
 
@@ -164,7 +161,11 @@ def main(args: Optional[list[str]] = None) -> int:
 
     if parsed_args.command is None:
         return 0
-    return convert(parsed_args)
+    try:
+        return convert(parsed_args)
+    except ValueError as error:
+        logger.error("%s", error)
+        return 1
 
 
 if __name__ == '__main__':

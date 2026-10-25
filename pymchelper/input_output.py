@@ -77,7 +77,7 @@ def guess_corename(filename: str) -> str:
     return corename
 
 
-def fromfile(filename: str) -> Optional[Estimator]:
+def fromfile(filename: str) -> Estimator:
     """
     Read estimator data from a binary file `filename`
     Note that for the in some cases the data are post-processes (i.e. normalized) after reading.
@@ -85,46 +85,40 @@ def fromfile(filename: str) -> Optional[Estimator]:
     which are normalized by the number of primaries after by the Reader responsible for parsing binary files.
     This way dose and fluence (and other similar quantities) are saved in Estimator as "per primary" values.
     Fluka on the other hand saves dose and fluence as "per primary" values, so no normalization is needed.
+    Raises ValueError if the file format is not recognised, or the file is truncated, corrupted or unreadable.
     """
 
     reader = guess_reader(filename)
     if reader is None:
-        raise Exception("File format not compatible", filename)
+        raise ValueError(f"File format not compatible: {filename}")
     estimator = Estimator()
     estimator.file_counter = 1
     if not reader.read(estimator):  # some problems occurred during read
-        logger.error("Error reading file %s", filename)
-        return None
+        raise ValueError(f"Error reading file {filename}")
     return estimator
 
 
 def fromfilelist(input_file_list: Union[List[str], str],
                  error: ErrorEstimate = ErrorEstimate.stderr,
-                 nan: bool = False) -> Optional[Estimator]:
+                 nan: bool = False) -> Estimator:
     """
     Reads all files from a given list using `fromfile` method, and returns a list of averaged estimators.
 
     :param input_file_list: list of files to be read
     :param error: error estimation, see class ErrorEstimate class in pymchelper.estimator
     :param nan: if True, NaN (not a number) are excluded when averaging data.
-    :return: list of estimators, or None if any of the files could not be read
+    :return: list of estimators
     """
     if not isinstance(input_file_list, list):  # probably a string instead of list
         input_file_list = [input_file_list]
 
-    result: Optional[Estimator]
     if nan:
-        estimator_list = []
-        for filename in input_file_list:
-            estimator = fromfile(filename)
-            if estimator is None:
-                return None
-            estimator_list.append(estimator)
+        estimator_list = [fromfile(filename) for filename in input_file_list]
         result = average_with_nan(estimator_list, error)
+        if result is None:
+            raise ValueError("No input files to read")
     else:
         result = _aggregate_files(input_file_list, error)
-    if result is None:
-        return None
 
     result.file_counter = len(input_file_list)
     core_names_dict = group_input_files(input_file_list)
@@ -134,14 +128,14 @@ def fromfilelist(input_file_list: Union[List[str], str],
     return result
 
 
-def _aggregate_files(input_file_list: List[str], error: ErrorEstimate) -> Optional[Estimator]:
+def _aggregate_files(input_file_list: List[str], error: ErrorEstimate) -> Estimator:
     """
     Reads the files one by one and aggregates their pages, see `pymchelper.averaging`.
 
-    :return: estimator with aggregated data, or None if any of the files could not be read
+    :return: estimator with aggregated data
     """
     result = fromfile(input_file_list[0])
-    if result is None or len(input_file_list) == 1:
+    if len(input_file_list) == 1:
         return result
 
     # _aggregator_mapping maps SHIELD-HIT12A normalization types (integers) to pymchelper aggregators
@@ -177,8 +171,6 @@ def _aggregate_files(input_file_list: List[str], error: ErrorEstimate) -> Option
     # process all other files, if there are any
     for filename in input_file_list[1:]:
         current_estimator = fromfile(filename)
-        if current_estimator is None:
-            return None
         for current_page, aggregator in zip(current_estimator.pages, page_aggregators):
             aggregator.update(value=current_page.data_raw, weight=current_estimator.number_of_primaries)
 
@@ -208,7 +200,7 @@ def _aggregate_files(input_file_list: List[str], error: ErrorEstimate) -> Option
 
 def frompattern(pattern: Union[str, List[str]],
                 error: ErrorEstimate = ErrorEstimate.stderr,
-                nan: bool = True) -> List[Optional[Estimator]]:
+                nan: bool = True) -> List[Estimator]:
     """
     Reads all files matching pattern, e.g.: 'foobar_*.bdo', and returns a list of averaged estimators.
 
@@ -250,18 +242,16 @@ def convertfromlist(filelist: List[str],
                     outputdir: Optional[str],
                     converter_name: str,
                     options: object,
-                    outputfile: Optional[str] = None) -> Optional[int]:
+                    outputfile: Optional[str] = None) -> int:
     """Convert a list of input files into a single output using a chosen converter.
 
     - Reads and optionally averages inputs (`nan` controls NaN handling).
     - Resolves output path (`outputfile` overrides, else uses `outputdir` or corename).
     - Writes via `converter_name` with `options`.
 
-    Returns status code from the writer, or None if reading failed.
+    Returns status code from the writer. Raises ValueError if an input file can't be read.
     """
     estimator = fromfilelist(filelist, error, nan)
-    if not estimator:
-        return None
     if outputfile is not None:
         output_path = outputfile
     elif outputdir is None:
@@ -283,7 +273,7 @@ def convertfrompattern(pattern: str,
     - Groups matching files by corename and processes each group via `convertfromlist`.
     - Supports NaN-aware averaging (`nan`) and error type selection (`error`).
 
-    Returns the maximum status code across processed groups, 1 if no file matches or a group could not be read.
+    Returns the maximum status code across processed groups, 1 if no file matches.
     """
     list_of_matching_files = sorted(glob(pattern))
     if not list_of_matching_files:
@@ -294,12 +284,7 @@ def convertfrompattern(pattern: str,
 
     status = []
     for _, filelist in core_names_dict.items():
-        group_status = convertfromlist(filelist, error, nan, outputdir, converter_name, options)
-        # convertfromlist gives None when files of the group could not be read, count it as a failure
-        if group_status is None:
-            status.append(1)
-        else:
-            status.append(group_status)
+        status.append(convertfromlist(filelist, error, nan, outputdir, converter_name, options))
     return max(status)
 
 
