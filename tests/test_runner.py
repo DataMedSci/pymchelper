@@ -263,7 +263,8 @@ def test_fluka(fluka_path: Tuple[Path, Path], tmp_path: Path, fluka_expected_res
 def __verify_fluka_file(actual_result: Estimator, expected_result: dict) -> None:
     """Compares content of generated fluka file with expected values"""
     assert b'* Minimal fluka file with 20 particles, two results, 4x4 bins' == actual_result.title
-    assert expected_result["shape"] == [actual_result.x.n, actual_result.y.n, actual_result.z.n]
+    page = actual_result.pages[0]
+    assert expected_result["shape"] == [page.x.n, page.y.n, page.z.n]
 
     expected = list(np.around(np.array(expected_result["4x4"]).flatten(), 4))
     result = list(np.around(np.array(actual_result.pages[0].data).flatten(), 4))

@@ -66,7 +66,7 @@ class TxtWriter:
             result = "#   DETECTOR OUTPUT GEOMAP\n"
         return result
 
-    def _header_geometric_info(self, det: Estimator) -> str:
+    def _header_geometric_info(self, det: Estimator, page: 'Page') -> str:
         """next block - scoring object geometrical information"""
 
         from pymchelper.writers.fortranformatter import format_d
@@ -77,9 +77,9 @@ class TxtWriter:
             result += "#   PLANE normal vect(Vx,Vy,Vz):"
             result += f"{format_d(10, 3, det.nx)}{format_d(10, 3, det.ny)}{format_d(10, 3, det.nz)}\n"
         elif det.geotyp in {SHGeoType.zone, SHGeoType.dzone}:
-            result += f"#   ZONE START:{int(det.x.min_val):6d} ZONE END:{int(det.x.max_val):6d}\n"
+            result += f"#   ZONE START:{int(page.x.min_val):6d} ZONE END:{int(page.x.max_val):6d}\n"
         else:
-            result += f"#   {self.ax} BIN:{det.x.n:6d} {self.ay} BIN:{det.y.n:6d} {self.az} BIN:{det.z.n:6d}\n"
+            result += f"#   {self.ax} BIN:{page.x.n:6d} {self.ay} BIN:{page.y.n:6d} {self.az} BIN:{page.z.n:6d}\n"
         return result
 
     @staticmethod
@@ -99,18 +99,18 @@ class TxtWriter:
             result += f"#                DETECTOR TYPE: {str(det_type_name).ljust(10)}\n"
         return result
 
-    def _header_no_of_bins_and_prim(self, estimator: Estimator) -> str:
+    def _header_no_of_bins_and_prim(self, estimator: Estimator, page: 'Page') -> str:
         from pymchelper.writers.fortranformatter import format_d
 
         header = ""
         # number of bins in each dimensions
         if estimator.geotyp not in (SHGeoType.plane, SHGeoType.dplane, SHGeoType.zone, SHGeoType.dzone):
-            header += f"#   {self.ax} START:{format_d(10, 3, estimator.x.min_val)}"
-            header += f" {self.ay} START:{format_d(10, 3, estimator.y.min_val)}"
-            header += f" {self.az} START:{format_d(10, 3, estimator.z.min_val)}\n"
-            header += f"#   {self.ax} END  :{format_d(10, 3, estimator.x.max_val)}"
-            header += f" {self.ay} END  :{format_d(10, 3, estimator.y.max_val)}"
-            header += f" {self.az} END  :{format_d(10, 3, estimator.z.max_val)}\n"
+            header += f"#   {self.ax} START:{format_d(10, 3, page.x.min_val)}"
+            header += f" {self.ay} START:{format_d(10, 3, page.y.min_val)}"
+            header += f" {self.az} START:{format_d(10, 3, page.z.min_val)}\n"
+            header += f"#   {self.ax} END  :{format_d(10, 3, page.x.max_val)}"
+            header += f" {self.ay} END  :{format_d(10, 3, page.y.max_val)}"
+            header += f" {self.az} END  :{format_d(10, 3, page.z.max_val)}\n"
 
         # number of primaries
         header += f"#   PRIMARIES:{format_d(10, 3, estimator.number_of_primaries)}\n"
@@ -172,11 +172,11 @@ class TxtWriter:
         else:
             header = self._header_first_line(estimator)
 
-            header += self._header_geometric_info(estimator)
+            header += self._header_geometric_info(estimator, page)
 
             header += self._header_scored_value(estimator.geotyp, page.dettyp, getattr(estimator, 'particle', None))
 
-            header += self._header_no_of_bins_and_prim(estimator)
+            header += self._header_no_of_bins_and_prim(estimator, page)
 
         # dump data
         with open(filename, 'w') as fout:  # skipcq: PTC-W6004

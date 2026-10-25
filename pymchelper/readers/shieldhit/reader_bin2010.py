@@ -159,11 +159,10 @@ class SHReaderBin2010(SHReader):
         yunit, yname = mesh_unit_and_name(estimator, 1)
         zunit, zname = mesh_unit_and_name(estimator, 2)
 
-        estimator.x = MeshAxis(n=np.abs(nx), min_val=xmin, max_val=xmax, name=xname, unit=xunit, binning=_bintyp(nx))
-        estimator.y = MeshAxis(n=np.abs(ny), min_val=ymin, max_val=ymax, name=yname, unit=yunit, binning=_bintyp(ny))
-        estimator.z = MeshAxis(n=np.abs(nz), min_val=zmin, max_val=zmax, name=zname, unit=zunit, binning=_bintyp(nz))
-
         page = Page(estimator=estimator)
+        page.x = MeshAxis(n=np.abs(nx), min_val=xmin, max_val=xmax, name=xname, unit=xunit, binning=_bintyp(nx))
+        page.y = MeshAxis(n=np.abs(ny), min_val=ymin, max_val=ymax, name=yname, unit=yunit, binning=_bintyp(ny))
+        page.z = MeshAxis(n=np.abs(nz), min_val=zmin, max_val=zmax, name=zname, unit=zunit, binning=_bintyp(nz))
         page.dettyp = safe_dettyp(det_attribs.det_type)
         page.unit, page.name = _get_detector_unit(page.dettyp, estimator.geotyp)
         estimator.add_page(page)

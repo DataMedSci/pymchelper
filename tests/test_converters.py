@@ -99,9 +99,9 @@ class TestSparseConverter(unittest.TestCase):
                 reconstructed_sparse_mtx = unpack_sparse_file(pymchelper_output)
 
                 # check if unpacked shape is correct
-                self.assertEqual(reconstructed_sparse_mtx.shape[0], estimator_data.x.n)
-                self.assertEqual(reconstructed_sparse_mtx.shape[1], estimator_data.y.n)
-                self.assertEqual(reconstructed_sparse_mtx.shape[2], estimator_data.z.n)
+                self.assertEqual(reconstructed_sparse_mtx.shape[0], estimator_data.pages[0].x.n)
+                self.assertEqual(reconstructed_sparse_mtx.shape[1], estimator_data.pages[0].y.n)
+                self.assertEqual(reconstructed_sparse_mtx.shape[2], estimator_data.pages[0].z.n)
 
                 # check if unpacked data is correct
                 self.assertTrue(np.array_equal(estimator_data.pages[0].data, reconstructed_sparse_mtx))

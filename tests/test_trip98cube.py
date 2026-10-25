@@ -26,12 +26,12 @@ def mesh_estimator(page_types: list) -> Estimator:
     """
     estimator = Estimator()
     estimator.geotyp = SHGeoType.msh
-    estimator.x = mesh_axis(n=2, min_val=-0.2, max_val=0.2)
-    estimator.y = mesh_axis(n=3, min_val=-0.4, max_val=0.2)
-    estimator.z = mesh_axis(n=4, min_val=1.0, max_val=3.0)
     for page_type in page_types:
         page = Page()
         page.dettyp = page_type
+        page.x = mesh_axis(n=2, min_val=-0.2, max_val=0.2)
+        page.y = mesh_axis(n=3, min_val=-0.4, max_val=0.2)
+        page.z = mesh_axis(n=4, min_val=1.0, max_val=3.0)
         page.data_raw = np.arange(1.0, 25.0) * 0.37
         estimator.add_page(page)
     return estimator
@@ -135,7 +135,7 @@ def unequal_pixels_estimator() -> Estimator:
 def half_pixel_offset_estimator() -> Estimator:
     """DOSE page on a mesh starting half a pixel off the TRiP98 grid"""
     estimator = mesh_estimator([SHDetType.dose])
-    estimator.x = mesh_axis(n=2, min_val=-0.3, max_val=0.1)
+    estimator.pages[0].x = mesh_axis(n=2, min_val=-0.3, max_val=0.1)
     return estimator
 
 

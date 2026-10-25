@@ -41,14 +41,14 @@ def test_read(topas_minimal_output_path: Path):
     reader.read_data(estimator)
     assert estimator.number_of_primaries == 20
     assert estimator.file_corename == "fluence_bp_protons_xy"
-    assert estimator.dimension == 2
+    assert estimator.pages[0].dimension == 2
     
-    assert estimator.x.name == "X"
-    assert estimator.x.n == 4
-    assert estimator.y.name == "Y"
-    assert estimator.y.n == 4
-    assert estimator.z.name == "Z"
-    assert estimator.z.n == 1
+    assert estimator.pages[0].x.name == "X"
+    assert estimator.pages[0].x.n == 4
+    assert estimator.pages[0].y.name == "Y"
+    assert estimator.pages[0].y.n == 4
+    assert estimator.pages[0].z.name == "Z"
+    assert estimator.pages[0].z.n == 1
     
     assert estimator.pages[0].name == "FluenceBPprotonsXY"
     assert estimator.pages[0].title == "FluenceBPprotonsXY"
@@ -78,9 +78,9 @@ def test_cylindrical_coordinates(topas_cylinder_output_path: Path):
     estimator = Estimator()
     reader.read_data(estimator)
     
-    assert estimator.x.name == "R"
-    assert estimator.y.name == "Phi"
-    assert estimator.z.name == "Z"
+    assert estimator.pages[0].x.name == "R"
+    assert estimator.pages[0].y.name == "Phi"
+    assert estimator.pages[0].z.name == "Z"
     
     assert estimator.pages[0].dettyp == "SurfaceTrackCount"
 
@@ -119,9 +119,9 @@ def test_sphere_bin_by_time(topas_sphere_binned_by_time_path: Path):
     estimator = Estimator()
     reader.read_data(estimator)
 
-    assert estimator.x.name == "R"
-    assert estimator.y.name == "Phi"
-    assert estimator.z.name == "Theta"
+    assert estimator.pages[0].x.name == "R"
+    assert estimator.pages[0].y.name == "Phi"
+    assert estimator.pages[0].z.name == "Theta"
 
     assert estimator.pages[0].dimension == 3
     assert estimator.pages[0].diff_axis1.name == "time"

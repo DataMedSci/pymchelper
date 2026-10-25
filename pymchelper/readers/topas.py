@@ -156,6 +156,8 @@ class TopasReader(Reader):
             estimator.file_format = "csv"
             estimator.data_order = 'C'  # TOPAS CSV files use C row-major order
 
+            page = Page(estimator=estimator)
+
             dimensions = [['X', 'Y', 'Z'], ['R', 'Phi', 'Z'], ['R', 'Phi', 'Theta']]
 
             actual_dimensions = None
@@ -165,26 +167,26 @@ class TopasReader(Reader):
                     if bins_data is not None:
                         actual_dimensions = curr_dimensions
                         x_max = bins_data[actual_dimensions[0]]['size'] * bins_data[actual_dimensions[0]]['num']
-                        estimator.x = MeshAxis(n=bins_data[actual_dimensions[0]]['num'],
-                                               min_val=0.0,
-                                               max_val=x_max,
-                                               name=actual_dimensions[0],
-                                               unit=bins_data[actual_dimensions[0]]['unit'],
-                                               binning=MeshAxis.BinningType.linear)
+                        page.x = MeshAxis(n=bins_data[actual_dimensions[0]]['num'],
+                                          min_val=0.0,
+                                          max_val=x_max,
+                                          name=actual_dimensions[0],
+                                          unit=bins_data[actual_dimensions[0]]['unit'],
+                                          binning=MeshAxis.BinningType.linear)
                         y_max = bins_data[actual_dimensions[1]]['size'] * bins_data[actual_dimensions[1]]['num']
-                        estimator.y = MeshAxis(n=bins_data[actual_dimensions[1]]['num'],
-                                               min_val=0.0,
-                                               max_val=y_max,
-                                               name=actual_dimensions[1],
-                                               unit=bins_data[actual_dimensions[1]]['unit'],
-                                               binning=MeshAxis.BinningType.linear)
+                        page.y = MeshAxis(n=bins_data[actual_dimensions[1]]['num'],
+                                          min_val=0.0,
+                                          max_val=y_max,
+                                          name=actual_dimensions[1],
+                                          unit=bins_data[actual_dimensions[1]]['unit'],
+                                          binning=MeshAxis.BinningType.linear)
                         z_max = bins_data[actual_dimensions[2]]['size'] * bins_data[actual_dimensions[2]]['num']
-                        estimator.z = MeshAxis(n=bins_data[actual_dimensions[2]]['num'],
-                                               min_val=0.0,
-                                               max_val=z_max,
-                                               name=actual_dimensions[2],
-                                               unit=bins_data[actual_dimensions[2]]['unit'],
-                                               binning=MeshAxis.BinningType.linear)
+                        page.z = MeshAxis(n=bins_data[actual_dimensions[2]]['num'],
+                                          min_val=0.0,
+                                          max_val=z_max,
+                                          name=actual_dimensions[2],
+                                          unit=bins_data[actual_dimensions[2]]['unit'],
+                                          binning=MeshAxis.BinningType.linear)
                         no_bins = False
                         break
                 if actual_dimensions is not None:
@@ -216,7 +218,6 @@ class TopasReader(Reader):
             scorer, unit, results = res
 
             num_results = len(results)
-            page = Page(estimator=estimator)
             set_data = False
             for column, result in enumerate(results):
                 if result not in ['Mean', 'Standard_Deviation']:

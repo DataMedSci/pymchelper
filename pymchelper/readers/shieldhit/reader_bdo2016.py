@@ -244,24 +244,10 @@ class SHReaderBDO2016(SHReader):
             yunit, yname = mesh_unit_and_name(estimator, 1)
             zunit, zname = mesh_unit_and_name(estimator, 2)
 
-            estimator.x = MeshAxis(n=np.abs(nx),
-                                   min_val=xmin,
-                                   max_val=xmax,
-                                   name=xname,
-                                   unit=xunit,
-                                   binning=_bintyp(nx))
-            estimator.y = MeshAxis(n=np.abs(ny),
-                                   min_val=ymin,
-                                   max_val=ymax,
-                                   name=yname,
-                                   unit=yunit,
-                                   binning=_bintyp(ny))
-            estimator.z = MeshAxis(n=np.abs(nz),
-                                   min_val=zmin,
-                                   max_val=zmax,
-                                   name=zname,
-                                   unit=zunit,
-                                   binning=_bintyp(nz))
+            page = estimator.pages[0]
+            page.x = MeshAxis(n=np.abs(nx), min_val=xmin, max_val=xmax, name=xname, unit=xunit, binning=_bintyp(nx))
+            page.y = MeshAxis(n=np.abs(ny), min_val=ymin, max_val=ymax, name=yname, unit=yunit, binning=_bintyp(ny))
+            page.z = MeshAxis(n=np.abs(nz), min_val=zmin, max_val=zmax, name=zname, unit=zunit, binning=_bintyp(nz))
 
             estimator.pages[0].unit, estimator.pages[0].name = _get_detector_unit(estimator.pages[0].dettyp,
                                                                                   estimator.geotyp)
@@ -272,9 +258,9 @@ class SHReaderBDO2016(SHReader):
             logger.debug("Done reading bdo file.")
             logger.debug("Detector data : " + str(estimator.pages[0].data))
             logger.debug("Detector nstat: " + str(estimator.number_of_primaries))
-            logger.debug("Detector nx   : " + str(estimator.x.n))
-            logger.debug("Detector ny   : " + str(estimator.y.n))
-            logger.debug("Detector nz   : " + str(estimator.z.n))
+            logger.debug("Detector nx   : " + str(page.x.n))
+            logger.debug("Detector ny   : " + str(page.y.n))
+            logger.debug("Detector nz   : " + str(page.z.n))
             estimator.file_counter = 1
         super(SHReaderBDO2016, self).read_data(estimator)
         return True

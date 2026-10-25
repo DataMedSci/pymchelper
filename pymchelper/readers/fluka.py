@@ -8,7 +8,7 @@ from pymchelper.axis import AxisDescription, MeshAxis
 from pymchelper.flair.Input import Particle
 from pymchelper.page import Page
 from pymchelper.readers.common import ReaderFactory, Reader
-from pymchelper.flair.Data import Usrbin, UsrTrack, unpackArray, Usrbdx, Resnuclei, Usrxxx
+from pymchelper.flair.Data import Usrbin, UsrTrack, Usrbdx, Resnuclei, Usrxxx
 
 logger = logging.getLogger(__name__)
 
@@ -63,24 +63,24 @@ class FlukaReader(Reader):
 
                 axes_description = UsrbinScoring.get_axes_description(detector.type)
 
-                estimator.x = MeshAxis(n=detector.nx,
-                                       min_val=detector.xlow,
-                                       max_val=detector.xhigh,
-                                       name=axes_description.x.name,
-                                       unit=axes_description.x.unit,
-                                       binning=MeshAxis.BinningType.linear)
-                estimator.y = MeshAxis(n=detector.ny,
-                                       min_val=detector.ylow,
-                                       max_val=detector.yhigh,
-                                       name=axes_description.y.name,
-                                       unit=axes_description.y.unit,
-                                       binning=MeshAxis.BinningType.linear)
-                estimator.z = MeshAxis(n=detector.nz,
-                                       min_val=detector.zlow,
-                                       max_val=detector.zhigh,
-                                       name=axes_description.z.name,
-                                       unit=axes_description.z.unit,
-                                       binning=MeshAxis.BinningType.linear)
+                page.x = MeshAxis(n=detector.nx,
+                                  min_val=detector.xlow,
+                                  max_val=detector.xhigh,
+                                  name=axes_description.x.name,
+                                  unit=axes_description.x.unit,
+                                  binning=MeshAxis.BinningType.linear)
+                page.y = MeshAxis(n=detector.ny,
+                                  min_val=detector.ylow,
+                                  max_val=detector.yhigh,
+                                  name=axes_description.y.name,
+                                  unit=axes_description.y.unit,
+                                  binning=MeshAxis.BinningType.linear)
+                page.z = MeshAxis(n=detector.nz,
+                                  min_val=detector.zlow,
+                                  max_val=detector.zhigh,
+                                  name=axes_description.z.name,
+                                  unit=axes_description.z.unit,
+                                  binning=MeshAxis.BinningType.linear)
 
                 # lets check if the detector.score is generalized particle name.
                 # if that is the case it means we are scoring Fluence for some particle filter
@@ -105,7 +105,7 @@ class FlukaReader(Reader):
 
                 # unpack detector data
                 # TODO cross-check if reshaping is needed
-                page.data_raw = np.array(unpackArray(usr_object.readData(det_no)))
+                page.data_raw = data_block_to_array(usr_object.readData(det_no))
                 page.data_raw *= rescaling_factor
 
                 estimator.add_page(page)
@@ -179,7 +179,7 @@ class FlukaReader(Reader):
 
                 # unpack detector data
                 # TODO cross-check if reshaping is needed
-                page.data_raw = np.array(unpackArray(usr_object.readData(det_no)))
+                page.data_raw = data_block_to_array(usr_object.readData(det_no))
 
                 estimator.add_page(page)
 
@@ -239,7 +239,7 @@ class FlukaReader(Reader):
 
                 # unpack detector data
                 # TODO cross-check if reshaping is needed
-                page.data_raw = np.array(unpackArray(usr_object.readData(det_no)))
+                page.data_raw = data_block_to_array(usr_object.readData(det_no))
 
                 estimator.add_page(page)
             return usr_object
@@ -260,7 +260,7 @@ class FlukaReader(Reader):
 
                 # unpack detector data
                 # TODO cross-check if reshaping is needed
-                page.data_raw = np.array(unpackArray(usr_object.readData(det_no)))
+                page.data_raw = data_block_to_array(usr_object.readData(det_no))
 
                 estimator.add_page(page)
             return usr_object
@@ -298,6 +298,17 @@ class FlukaReader(Reader):
         estimator.file_format = 'fluka_binary'
         estimator.data_order = 'F'  # Fortran column-major order
         return True
+
+
+def data_block_to_array(data_block: bytes) -> np.ndarray:
+    """
+    Convert data block of FLUKA binary file to numpy array of float64 values.
+    The block holds float32 values in native byte order, numpy reads them directly without
+    creating Python float for each bin.
+    """
+    values_float32 = np.frombuffer(data_block, dtype=np.float32)
+    values_float64 = values_float32.astype(np.float64)
+    return values_float64
 
 
 def get_particle_from_db(particle_id: int) -> Optional[Particle]:

@@ -24,7 +24,7 @@ def bin_width(axis) -> float:
     return (axis.max_val - axis.min_val) / axis.n
 
 
-def check_mesh(estimator: Estimator) -> None:
+def check_mesh(estimator: Estimator, page: Page) -> None:
     """Raise ValueError when the scoring mesh can not be stored in a TRiP98 cube header.
 
     TRiP98 cubes are cartesian, have a single pixel size for X and Y,
@@ -34,13 +34,13 @@ def check_mesh(estimator: Estimator) -> None:
     if estimator.geotyp is not None and estimator.geotyp not in CARTESIAN_GEOMETRIES:
         raise ValueError(f"TRiP98 cubes need a cartesian mesh, got {estimator.geotyp} geometry")
 
-    x_bin_width = bin_width(estimator.x)
-    y_bin_width = bin_width(estimator.y)
+    x_bin_width = bin_width(page.x)
+    y_bin_width = bin_width(page.y)
     if not np.isclose(x_bin_width, y_bin_width):
         raise ValueError(f"TRiP98 cubes have one pixel size for X and Y, "
                          f"got X bin width {x_bin_width:g} cm and Y bin width {y_bin_width:g} cm")
 
-    for axis_name, axis in (("X", estimator.x), ("Y", estimator.y)):
+    for axis_name, axis in (("X", page.x), ("Y", page.y)):
         offset_in_pixels = axis.min_val / x_bin_width
         if not np.isclose(offset_in_pixels, np.rint(offset_in_pixels)):
             raise ValueError(f"TRiP98 cubes store the {axis_name} offset as a whole number of pixels, "
@@ -89,7 +89,9 @@ class TRiP98CubeWriter(Writer):
         if len(skip_reasons) == len(estimator.pages):
             raise ValueError("No page can be written as a TRiP98 cube; " + "; ".join(skip_reasons))
 
-        check_mesh(estimator)
+        for page in estimator.pages:
+            if page_skip_reason(page) is None:
+                check_mesh(estimator, page)
 
         return super().write(estimator)
 
@@ -115,18 +117,18 @@ class TRiP98CubeWriter(Writer):
         estimator = page.estimator
         if estimator is None:
             raise ValueError(f"Page {page.name} is not attached to an estimator")
-        pixel_size = bin_width(estimator.x) * 10.0
-        slice_distance = bin_width(estimator.z) * 10.0
+        pixel_size = bin_width(page.x) * 10.0
+        slice_distance = bin_width(page.z) * 10.0
         # TRiP98 offsets are the mesh edges for X and Y, slice positions are the slice centres
-        first_slice_position = estimator.z.min_val * 10.0 + slice_distance / 2.0
+        first_slice_position = page.z.min_val * 10.0 + slice_distance / 2.0
         cube.create_empty_cube(1.0,
-                               estimator.x.n,
-                               estimator.y.n,
-                               estimator.z.n,
+                               page.x.n,
+                               page.y.n,
+                               page.z.n,
                                pixel_size=pixel_size,
                                slice_distance=slice_distance,
-                               xoffset=estimator.x.min_val * 10.0,
-                               yoffset=estimator.y.min_val * 10.0,
+                               xoffset=page.x.min_val * 10.0,
+                               yoffset=page.y.min_val * 10.0,
                                slice_offset=first_slice_position)
         # without a z table the header has no slice positions and the Z offset is lost
         cube.z_table = True
