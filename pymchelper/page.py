@@ -123,19 +123,26 @@ class Page:
                                         self.diff_axis2.n))
         return self.error_raw
 
-    @property
-    def data_order(self) -> str:
+    def reorder_raw_from_c_order(self) -> None:
         """
-        Return the memory order of the data array.
+        Convert ``data_raw`` and ``error_raw`` from C order (last axis fastest) to Fortran order (first axis fastest).
 
-        Returns 'F' (Fortran/column-major) for formats that store data in Fortran order,
-        'C' (C/row-major) otherwise.
-
-        The order is determined by the reader that parsed the binary file.
+        All pages keep their raw data in Fortran order, as SHIELD-HIT12A BDO and FLUKA files do.
+        Readers of formats which store the bins with the last axis fastest (bin2010, TOPAS) call this once
+        after the data and all axes of the page are read.
+        Only the order of the values changes, the arrays keep their shape (a single bin may be a 0-dim array).
+        Missing ``error_raw`` is left as None.
         """
-        if self.estimator:
-            return self.estimator.data_order
-        return 'F'
+        shape = (self.estimator.x.n, self.estimator.y.n, self.estimator.z.n, self.diff_axis1.n, self.diff_axis2.n)
+
+        data_c_order = self.data_raw.reshape(shape, order='C')
+        data_fortran_order = data_c_order.ravel(order='F')
+        self.data_raw = data_fortran_order.reshape(self.data_raw.shape)
+
+        if self.error_raw is not None:
+            error_c_order = self.error_raw.reshape(shape, order='C')
+            error_fortran_order = error_c_order.ravel(order='F')
+            self.error_raw = error_fortran_order.reshape(self.error_raw.shape)
 
     def _reshape(self,
                  data_1d: Optional[NDArray[np.floating]],
@@ -143,7 +150,7 @@ class Page:
         """Reshape 1D data array to the appropriate multi-dimensional shape."""
         if data_1d is None:
             return None
-        return data_1d.reshape(shape, order=self.data_order)
+        return data_1d.reshape(shape, order='F')
 
     def plot_axis(self, id: int) -> Optional[MeshAxis]:
         """

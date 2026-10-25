@@ -296,7 +296,6 @@ class FlukaReader(Reader):
         estimator.title = usr_object.title
 
         estimator.file_format = 'fluka_binary'
-        estimator.data_order = 'F'  # Fortran column-major order
         return True
 
 

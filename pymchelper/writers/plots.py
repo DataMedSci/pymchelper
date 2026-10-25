@@ -1,5 +1,4 @@
 import logging
-import os
 from enum import IntEnum
 from pathlib import Path
 
@@ -38,9 +37,9 @@ class PlotDataWriter(Writer):
         if page.dimension == 0:
             # save two numbers to the file
             if page.error_raw is not None:
-                np.savetxt(self.output_path, [[page.data_raw, page.error_raw]], fmt="%g %g", delimiter=' ')
+                np.savetxt(output_path, [[page.data_raw, page.error_raw]], fmt="%g %g", delimiter=' ')
             else:  # save one number to the file
-                np.savetxt(self.output_path, [page.data_raw], fmt="%g", delimiter=' ')
+                np.savetxt(output_path, [page.data_raw], fmt="%g", delimiter=' ')
         else:
             # Create coordinate meshgrids for all dimensions
             axis_numbers = list(range(page.dimension))
@@ -49,9 +48,8 @@ class PlotDataWriter(Writer):
             # Generate meshgrids for each axis to create coordinate columns
             coordinate_meshgrids = np.meshgrid(*axis_data_arrays, indexing='ij')
 
-            # Flatten each coordinate grid using the same order as the data
-            # This ensures coordinates match the data layout from the binary file
-            coordinate_columns = [mesh_grid.ravel(order=page.data_order) for mesh_grid in coordinate_meshgrids]
+            # Flatten each coordinate grid with the first axis fastest, as data_raw is stored
+            coordinate_columns = [mesh_grid.ravel(order='F') for mesh_grid in coordinate_meshgrids]
 
             # Flatten the data array to match coordinate columns
             # Build list of columns to save: coordinates + data
@@ -65,14 +63,14 @@ class PlotDataWriter(Writer):
         return
 
 
-class ImageWriter:
+class ImageWriter(Writer):
     """Writer responsible for creating PNG images using matplotlib library"""
 
     def __init__(self, filename, options):
         logger.info("{:s} options:  {:s}".format(repr(self.__class__), repr(options)))
-        self.plot_filename = filename
-        if not self.plot_filename.endswith(".png"):
-            self.plot_filename += ".png"
+        if not filename.endswith(".png"):
+            filename += ".png"
+        super().__init__(filename)
         self.colormap = options.colormap
         self.axis_with_logscale = {PlotAxis[name] for name in options.log}
 
@@ -167,57 +165,23 @@ class ImageWriter:
 
         return fig
 
-    def write(self, estimator):
-        """Go through all pages in estimator and save corresponding figure to an output file"""
-        # save single page to a file without number (i.e. output.png)
-        if len(estimator.pages) == 1:
-            fig = self.get_page_figure(estimator.pages[0])
-            if fig:
-                logger.info("Writing {}".format(self.plot_filename))
-                import matplotlib.pyplot as plt
-                try:
-                    fig.savefig(self.plot_filename)
-                finally:
-                    plt.close(fig)
-        else:
-            # split output path into directory, basename and extension
-            dir_path = os.path.dirname(self.plot_filename)
-            if not os.path.exists(dir_path):
-                logger.info("Creating {}".format(dir_path))
-                os.makedirs(dir_path)
-            file_base_part, file_ext = os.path.splitext(os.path.basename(self.plot_filename))
-
-            # loop over all pages and save an image for each of them
-            for i, page in enumerate(estimator.pages):
-
-                # calculate output filename. it will include page number padded with zeros.
-                # for 10-99 pages the filename would look like: output_p01.png, ... output_p99.png
-                # for 100-999 pages the filename would look like: output_p001.png, ... output_p999.png
-                zero_padded_page_no = str(i + 1).zfill(len(str(len(estimator.pages))))
-                output_filename = f"{file_base_part:s}_p{zero_padded_page_no:s}{file_ext:s}"
-                output_path = os.path.join(dir_path, output_filename)
-
-                # save the output file
-                fig = self.get_page_figure(page)
-                if fig:
-                    logger.info("Writing %s", output_path)
-                    try:
-                        fig.savefig(output_path)
-                    except ValueError as e:
-                        logger.error("Failed to save plot to file: %s", output_path)
-                        logger.error("Error: %s", e)
-                        logger.error("Trying to save plot using different font")
-                        # on some HPC system I get the error
-                        # "findfont: Generic family 'sans-serif' not found ..."
-                        # therefore I choose a different font
-                        import matplotlib
-                        matplotlib.use('Agg')
-                        import matplotlib.pyplot as plt
-                        plt.rcParams['font.sans-serif'] = ["DejaVu Sans Mono"]
-                        plt.rcParams['font.family'] = "sans-serif"
-                        fig.savefig(output_path)
-                    finally:
-                        import matplotlib.pyplot as plt
-                        plt.close(fig)
-
-        return 0
+    def write_single_page(self, page: Page, output_path: Path) -> None:
+        """Save the figure of a single page, pages that can't be plotted are skipped"""
+        fig = self.get_page_figure(page)
+        if not fig:
+            return
+        import matplotlib.pyplot as plt
+        try:
+            fig.savefig(output_path)
+        except ValueError as e:
+            logger.error("Failed to save plot to file: %s", output_path)
+            logger.error("Error: %s", e)
+            logger.error("Trying to save plot using different font")
+            # on some HPC system I get the error
+            # "findfont: Generic family 'sans-serif' not found ..."
+            # therefore I choose a different font
+            plt.rcParams['font.sans-serif'] = ["DejaVu Sans Mono"]
+            plt.rcParams['font.family'] = "sans-serif"
+            fig.savefig(output_path)
+        finally:
+            plt.close(fig)
